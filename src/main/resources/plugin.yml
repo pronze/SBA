@@ -1,0 +1,7 @@
+name: ScreamingBedwarsAddon
+version: ${project.version}
+main: org.pronze.bwaddon.BwAddon
+api-version: 1.13
+depend: [BedWars]
+softdepend: [PlaceholderAPI]
+author: pronze
