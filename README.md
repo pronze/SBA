@@ -6,10 +6,10 @@ player behavior, events and so on. Download this plugin directly from [spigot](h
 
 ## Features:
 
-Permanent Armor like Hypixel: Replicates hypixel armor features by saving player armor stats on death and loading them in after respawn cooldown
-Auto Equips armor for you after purchase
-Gives players wooden sword at start of the game
-Permanent Sword and Armor [TEAM] Enchantments
-Prevent Player from dropping swords.
-Hypixel store like prices
-EventListeners so that Players can't unequip Armor
+-  Permanent Armor like Hypixel: Replicates hypixel armor features by saving player armor stats on death and loading them in after respawn cooldown
+-  Auto Equips armor for you after purchase
+-  Gives players wooden sword at start of the game
+-  Permanent Sword and Armor [TEAM] Enchantments
+-  Prevent Player from dropping swords.
+-  Hypixel store like prices
+-  EventListeners so that Players can't unequip Armor
