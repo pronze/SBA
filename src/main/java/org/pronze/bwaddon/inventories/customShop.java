@@ -11,7 +11,9 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.game.*;
+import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.*;
@@ -484,9 +486,9 @@ public class customShop implements Listener {
 	{
 		for (ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType().name().endsWith("SWORD")){
-                newItem.addEnchantments(item.getEnchantments());
-                if(item.getType() == Material.WOODEN_SWORD)
-                	player.getInventory().remove(Material.WOODEN_SWORD);
+                item.addEnchantments(newItem.getEnchantments());
+              //  if(item.getType() == Material.WOODEN_SWORD)
+             //   	player.getInventory().remove(Material.WOODEN_SWORD);
             }
 	}
 	}
