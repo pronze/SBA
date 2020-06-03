@@ -505,7 +505,7 @@ public class customShop implements Listener {
 		ItemStack boots = new ItemStack(mat_boots);
 		boots.addEnchantments(player.getInventory().getBoots().getEnchantments());
 		ItemStack leggings = new ItemStack(mat_leggings);
-		boots.addEnchantments(player.getInventory().getBoots().getEnchantments());
+		leggings.addEnchantments(player.getInventory().getBoots().getEnchantments());
 		player.getInventory().setLeggings(null);
 		player.getInventory().setBoots(null);
 		player.getInventory().setBoots(boots);
