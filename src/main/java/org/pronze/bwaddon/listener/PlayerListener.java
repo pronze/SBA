@@ -58,27 +58,31 @@ public class PlayerListener implements Listener{
 
 		Player player = e.getPlayer();
 		
+
+        if(!api.isPlayerPlayingAnyGame(player)) return;
+        
 		Game game = api.getGameOfPlayer(player);
 		
 		Team team = game.getTeamOfPlayer(player);
         
         
-        if(api.isPlayerPlayingAnyGame(player))
-        {
+        
         	new BukkitRunnable() {
                 
                 @Override
                 public void run() {
                 	if(player.getGameMode() == GameMode.SURVIVAL && api.isPlayerPlayingAnyGame(player)) {
-            		giveItemsToPlayer(enchant.get(player), player, team.getColor());
+            		giveItemToPlayer(enchant.get(player), player, team.getColor());
             		if(armor.containsKey(player))
             			player.getInventory().setArmorContents(armor.get(player));
                 	this.cancel();
                 	}
+                	else if(!api.isPlayerPlayingAnyGame(player))
+                		this.cancel();
                 }
                 
             }.runTaskTimer(this.plugin, 20L,20L);
-        }
+        
 		
 		
 	}
@@ -96,12 +100,12 @@ public class PlayerListener implements Listener{
 
 		Player player = e.getEntity();
         
+
+        if(!api.isPlayerPlayingAnyGame(player)) return;	
+        
         Game game = api.getGameOfPlayer(player);
         
-        if(api.isPlayerPlayingAnyGame(player))
-        {       	
-            //       armor.put(player, arcontent);
-            
+            //       armor.put(player, arcontent);  
             List<ItemStack> enList = new ArrayList<>();
             ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
             
@@ -124,7 +128,7 @@ public class PlayerListener implements Listener{
     		
     		setArmor(player);
 		
-	  }
+	  
 	}
 	
 	public static void setArmor(Player player)
@@ -142,10 +146,11 @@ public class PlayerListener implements Listener{
 		
 		enchant.put(player, item);
 	}*/
-	 public void giveItemsToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
+	 private void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
 	        for (ItemStack itemStack : itemStackList) {
 	        		        
 	        	api = BedwarsAPI.getInstance();
+	        	if(!api.isPlayerPlayingAnyGame(player)) return;
 	        	
 	        	ColorChanger colorChanger = api.getColorChanger();
 	        	
