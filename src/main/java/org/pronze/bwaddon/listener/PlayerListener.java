@@ -1,6 +1,8 @@
 package org.pronze.bwaddon.listener;
 
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.Material;
@@ -18,23 +20,29 @@ import org.bukkit.GameMode;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.*;
 import org.screamingsandals.bedwars.api.Team;
+import org.screamingsandals.bedwars.api.upgrades.Upgrade;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
 public class PlayerListener implements Listener {
     org.pronze.bwaddon.BwAddon plugin;
     private BedwarsAPI api;
     static public HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
+    static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
     static public ArrayList<Material> allowed = new ArrayList<>();
 
     public PlayerListener(org.pronze.bwaddon.BwAddon plugin) {
         this.plugin = plugin;
         Bukkit.getServer().getPluginManager().registerEvents(this, BwAddon.getInstance());
 
+        //Initalizing UpgradeKey Variables for easier handling of downgrading equipments.
+        UpgradeKeys.put("WOODEN", 1);
+        UpgradeKeys.put("STONE", 2);
+        UpgradeKeys.put("GOLDEN", 3);
+        UpgradeKeys.put("IRON", 4);
+        UpgradeKeys.put("DIAMOND", 5);
 
         for (String material : BwAddon.getConfigurator().getStringList("allowed-item-drops")) {
             Material mat;
@@ -47,6 +55,16 @@ public class PlayerListener implements Listener {
         }
 
     }
+
+    public static <K, V> K getKey(HashMap<K, V> map, V value) {
+        for (K key : map.keySet()) {
+            if (value.equals(map.get(key))) {
+                return key;
+            }
+        }
+        return null;
+    }
+
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerRespawn(PlayerRespawnEvent e) {
@@ -69,7 +87,7 @@ public class PlayerListener implements Listener {
             @Override
             public void run() {
                 if (player.getGameMode() == GameMode.SURVIVAL && api.isPlayerPlayingAnyGame(player)) {
-                    handleRespawn(player);
+                    giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
                     this.cancel();
                 } else if (!api.isPlayerPlayingAnyGame(player))
                     this.cancel();
@@ -95,33 +113,23 @@ public class PlayerListener implements Listener {
 
         List<ItemStack> items = new ArrayList<>();
         ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
-        ItemStack pickaxe = new ItemStack(Material.WOODEN_AXE);
-        ItemStack axe = new ItemStack(Material.WOODEN_PICKAXE);
 
-        boolean hasPickaxe = false, hasAxe = false;
         for (ItemStack newItem : player.getInventory().getContents()) {
-            if (newItem != null && newItem.getType().name().endsWith("SWORD")) {
-                if (newItem.getEnchantments().size() > 0)
-                    sword.addEnchantments(newItem.getEnchantments());
-            }
-                else if (newItem != null && newItem.getType().name().endsWith("AXE")) {
-                    if(newItem.getType().name().endsWith("PICKAXE")) {
-                        pickaxe.addEnchantments(newItem.getEnchantments());
-                        hasPickaxe = true;
-                    }
-                    else {
-                        axe.addEnchantments(newItem.getEnchantments());
-                        hasAxe = true;
-
-                }
+            if(newItem != null) {
+                if (newItem.getType().name().endsWith("SWORD")) {
+                    if (newItem.getEnchantments().size() > 0)
+                        sword.addEnchantments(newItem.getEnchantments());
+                } else if (newItem.getType().name().endsWith("AXE")) {
+                    newItem = checkifUpgraded(newItem);
+                    items.add(newItem);
+                } else if (newItem.getType().name().contains("LEGGINGS") ||
+                        newItem.getType().name().contains("BOOTS") ||
+                        newItem.getType().name().contains("CHESTPLATE") ||
+                        newItem.getType().name().contains("HELMET"))
+                    items.add(newItem);
             }
         }
              items.add(sword);
-            if(hasPickaxe)
-                items.add(pickaxe);
-            if(hasAxe)
-                items.add(axe);
-
             PlayerItems.put(player, items);
 
             if (e.getEntity().getKiller() != null && plugin.getConfigurator().getBoolean("give-killer-resources", true)) {
@@ -133,32 +141,20 @@ public class PlayerListener implements Listener {
                     }
                 }
             }
-
-            e.getDrops().clear();
         }
 
-        public void handleRespawn (Player player)
+        public ItemStack checkifUpgraded(ItemStack newItem)
         {
-            List<ItemStack> items = PlayerItems.get(player);
-
-            items.forEach(item -> {
-                        if (item != null) {
-                            if (item.getType().toString().contains("LEGGINGS")) {
-                                player.getInventory().setLeggings(null);
-                                player.getInventory().setLeggings(item);
-
-                            } else if (item.getType().toString().contains("BOOTS")) {
-                                player.getInventory().setBoots(null);
-                                player.getInventory().setBoots(item);
-                            }
-                            else{
-                                player.getInventory().addItem(item);
-                            }
-                        }
-                    }
-                );
-
-            PlayerItems.remove(player);
+            if(UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_") )) > UpgradeKeys.get("WOODEN"))
+            {
+                Map<Enchantment, Integer> enchant = newItem.getEnchantments();
+                Material mat = null;
+                mat =  mat.valueOf(getKey(UpgradeKeys, UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_") )) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
+                ItemStack temp  = new ItemStack(mat);
+                temp.addEnchantments(enchant);
+                return temp;
+            }
+            return newItem;
         }
 
         @EventHandler(priority = EventPriority.NORMAL)
@@ -196,7 +192,15 @@ public class PlayerListener implements Listener {
                     playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
                 } else if (materialName.contains("BOOTS")) {
                     playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
-                } else {
+                } else if (materialName.contains("PICKAXE")){
+                    playerInventory.setItem(7,  itemStack);
+                } else if (materialName.contains("AXE")){
+                    playerInventory.setItem(8,  itemStack);
+                } else if (materialName.contains("SWORD")){
+                    playerInventory.setItem(0,  itemStack);
+                }
+
+                else {
                     playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
                 }
             }
