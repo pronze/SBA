@@ -61,6 +61,7 @@ public class Configurator {
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
         checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
+        checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
 
         checkOrSetConfig(modify, "version", 1);
 
