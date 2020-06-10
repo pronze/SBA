@@ -1,6 +1,8 @@
 package org.pronze.bwaddon.inventories;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,6 +10,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.pronze.bwaddon.listener.PlayerListener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GamePlayer;
@@ -39,6 +42,7 @@ public class customShop implements Listener {
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
     org.pronze.bwaddon.BwAddon BwAddon;
+
 
     public customShop() {
         Bukkit.getServer().getPluginManager().registerEvents(this, BwAddon.getInstance());
@@ -405,36 +409,74 @@ public class customShop implements Listener {
                 }
             }
 
-            event.sellStack(materialItem);
+            boolean shouldSellStack = true;
 
             if (getNameOrCustomNameOfItem(newItem).contains("Sharpened")) {
 
-                addEnchantsToPlayerSwords(player, newItem);
-                for (Player playerCheck : game.getConnectedPlayers()) {
-                    if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player)))
-                        addEnchantsToPlayerSwords(playerCheck, newItem);
+                if(!addEnchantsToPlayerSwords(player, newItem))
+                {
+                    shouldSellStack = false;
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have a greater or equal enchantment in your sword!");
                 }
-            } else if (getNameOrCustomNameOfItem(newItem).contains("Protection")) {
-                addEnchantsToPlayerArmor(player, newItem);
+                else {
+                    for (Player playerCheck : game.getConnectedPlayers()) {
+                        if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player)))
+                        {
+                            addEnchantsToPlayerSwords(playerCheck, newItem);
+                            playerCheck.sendMessage( ChatColor.ITALIC+ "" + ChatColor.RED + playerCheck.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
+                        }
 
-                for (Player playerCheck : game.getConnectedPlayers()) {
-                    if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player)))
-                        addEnchantsToPlayerArmor(playerCheck, newItem);
-                }
-            } else if (newItem.getType() == Material.STONE_SWORD || newItem.getType() == Material.IRON_SWORD || newItem.getType() == Material.DIAMOND_SWORD) {
-
-                for (ItemStack item : player.getInventory().getContents()) {
-                    if (item != null && item.getType().name().endsWith("SWORD")) {
-                        newItem.addEnchantments(item.getEnchantments());
-                        if (item.getType() == Material.WOODEN_SWORD)
-                            player.getInventory().remove(Material.WOODEN_SWORD);
                     }
                 }
+            } else if (getNameOrCustomNameOfItem(newItem).contains("Protection")) {
 
-                event.buyStack(newItem);
+
+                if(player.getInventory().getBoots().getEnchantments().size() > 0 && player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL))
+                {
+                    shouldSellStack = false;
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have a greater or equal enchantment in your armour!");
+                }
+
+                else {
+                    addEnchantsToPlayerArmor(player, newItem);
+                    for (Player playerCheck : game.getConnectedPlayers()) {
+                        if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
+                            addEnchantsToPlayerArmor(playerCheck, newItem);
+                            playerCheck.sendMessage( ChatColor.ITALIC + "" + ChatColor.RED + playerCheck.getName() + ChatColor.YELLOW + " has upgraded team protection");
+                        }
+                    }
+                }
+            } else if (newItem.getType().name().endsWith("SWORD")) {
+
+                if(!player.getInventory().contains(newItem.getType())) {
 
 
-            } else if (newItem.getType() == Material.CHAINMAIL_BOOTS)
+                    for (ItemStack item : player.getInventory().getContents()) {
+                        if (item != null && item.getType().name().endsWith("SWORD") && item.getType() != newItem.getType()) {
+                            newItem.addEnchantments(item.getEnchantments());
+                            if (item.getType() == Material.WOODEN_SWORD)
+                                player.getInventory().remove(Material.WOODEN_SWORD);
+                            else if(BwAddon.getConfigurator().getBoolean("remove-sword-on-upgrade", true))
+                                player.getInventory().remove(item);
+                        }
+                    }
+                    event.buyStack(newItem);
+                }
+                else {
+                    shouldSellStack = false ;
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same sword!");
+                }
+
+
+
+            }
+
+            else if(newItem.getType() == player.getInventory().getBoots().getType())
+            {
+                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD  + "You've Already purchased the same armor");
+                shouldSellStack = false;
+            }
+            else if (newItem.getType() == Material.CHAINMAIL_BOOTS)
                 buyArmor(player, Material.CHAINMAIL_BOOTS, Material.CHAINMAIL_LEGGINGS);
 
             else if (newItem.getType() == Material.IRON_BOOTS)
@@ -443,9 +485,61 @@ public class customShop implements Listener {
             else if (newItem.getType() == Material.DIAMOND_BOOTS)
                 buyArmor(player, Material.DIAMOND_BOOTS, Material.DIAMOND_LEGGINGS);
 
+
+            else if(newItem.getType().name().endsWith("_AXE"))
+            {
+                String name = newItem.getType().name();
+                //    if(PlayerListener.UpgradeKeys.get(name.substring(0, name.indexOf("_") )) > PlayerListener.UpgradeKeys.get(name.substring()))
+                //       continue;
+
+                for(ItemStack p : player.getInventory().getContents())
+                {
+                    if(p!= null && p.getType().name().endsWith("_AXE") && !p.getType().name().equalsIgnoreCase(newItem.getType().name()))
+                    {
+                        player.getInventory().remove(p);
+                    }
+                }
+
+                if(!player.getInventory().contains(newItem))
+                    event.buyStack(newItem);
+                else {
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD  + "You've Already purchased the same axe!");
+                    shouldSellStack = false;
+                }
+            }
+
+            else if(newItem.getType().name().endsWith("_PICKAXE"))
+            {
+                String name = newItem.getType().name();
+                //    if(PlayerListener.UpgradeKeys.get(name.substring(0, name.indexOf("_") )) > PlayerListener.UpgradeKeys.get(name.substring()))
+                //       continue;
+
+                for(ItemStack p : player.getInventory().getContents())
+                {
+                    if(p!= null && p.getType().name().endsWith("PICKAXE") && !p.getType().name().equalsIgnoreCase(newItem.getType().name()))
+                    {
+                        player.getInventory().remove(p);
+                    }
+                }
+
+                if(!player.getInventory().contains(newItem))
+                    event.buyStack(newItem);
+                else {
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD  + "You've Already purchased the same pickaxe!");
+                    shouldSellStack = false;
+                }
+            }
+            else if(newItem.getType() == Material.GOLDEN_PICKAXE)
+            {
+                addEnchantsToPlayerPickaxes(player, newItem);
+            }
+
             else {
                 event.buyStack(newItem);
             }
+
+            if(shouldSellStack)
+                event.sellStack(materialItem);
 
 
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
@@ -462,12 +556,25 @@ public class customShop implements Listener {
         }
     }
 
-    private void addEnchantsToPlayerSwords(Player player, ItemStack newItem) {
+    private void addEnchantsToPlayerPickaxes(Player player, ItemStack newItem) {
         for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null && item.getType().name().endsWith("SWORD")) {
+            if (item != null && item.getType().name().endsWith("PICKAXE")) {
                 item.addEnchantments(newItem.getEnchantments());
             }
         }
+    }
+
+    private boolean addEnchantsToPlayerSwords(Player player, ItemStack newItem) {
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item != null && item.getType().name().endsWith("SWORD")) {
+                if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) >= newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL))
+                    return false;
+
+                item.addEnchantments(newItem.getEnchantments());
+            }
+        }
+
+        return true;
     }
 
     private void addEnchantsToPlayerArmor(Player player, ItemStack item) {
