@@ -162,7 +162,8 @@ public class PlayerListener implements Listener {
         @EventHandler(priority = EventPriority.NORMAL)
         public void onClick (InventoryClickEvent event)
         {
-
+            if(event.getCurrentItem() == null)
+                return;
             api = BedwarsAPI.getInstance();
 
             if (!(event.getWhoClicked() instanceof Player)) return;
@@ -174,11 +175,12 @@ public class PlayerListener implements Listener {
             if (event.getSlotType() == SlotType.ARMOR)
                 event.setCancelled(true);
 
+
             Inventory topSlot = event.getView().getTopInventory();
            Inventory bottomSlot = event.getView().getBottomInventory();
            if( event.getClickedInventory().equals(bottomSlot) && BwAddon.getConfigurator().getBoolean("block-players-putting-certain-items-onto-chest" , true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST ) && bottomSlot.getType() == InventoryType.PLAYER)
            {
-               if(event.getCurrentItem() != null && (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) ) {
+               if(event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                    event.setResult(Event.Result.DENY);
                    player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "You cannot put this item onto this chest.");
                }
