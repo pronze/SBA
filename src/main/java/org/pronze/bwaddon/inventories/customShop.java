@@ -428,7 +428,17 @@ public class customShop implements Listener {
 
                     }
                 }
-            } else if (getNameOrCustomNameOfItem(newItem).contains("Protection")) {
+            } else  if (getNameOrCustomNameOfItem(newItem).contains("Efficiency")) {
+
+                if(!addEnchantsToPlayerPickaxes(player, newItem))
+                {
+                    shouldSellStack = false;
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have a greater or equal enchantment in your pickaxe!");
+                }
+
+            }
+
+            else if (getNameOrCustomNameOfItem(newItem).contains("Protection")) {
 
 
                 if(player.getInventory().getBoots().getEnchantments().size() > 0 && player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL))
@@ -529,39 +539,40 @@ public class customShop implements Listener {
                     shouldSellStack = false;
                 }
             }
-            else if(newItem.getType() == Material.GOLDEN_PICKAXE)
-            {
-                addEnchantsToPlayerPickaxes(player, newItem);
-            }
 
             else {
                 event.buyStack(newItem);
             }
 
             if(shouldSellStack)
+            {
                 event.sellStack(materialItem);
-
-
-            if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                //	player.sendMessage("buy successful".replace("%item%", amount + "x " + getNameOrCustomNameOfItem(newItem))
-                //			.replace("%material%", price + " " + type.getItemName()));
+                if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW+ newItem.getI18NDisplayName());
+                }
+                Sounds.playSound(player, player.getLocation(),
+                        Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
             }
-            Sounds.playSound(player, player.getLocation(),
-                    Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
+
+
+
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                //	player.sendMessage(("Purchase Failed")//.replace("%item%", amount + "x " + getNameOrCustomNameOfItem(newItem))
-                //.replace("%material%", price + " " + type.getItemName()));
+                player.sendMessage(ChatColor.RED + "you don't have enough " + priceType);
             }
         }
     }
 
-    private void addEnchantsToPlayerPickaxes(Player player, ItemStack newItem) {
+    private boolean addEnchantsToPlayerPickaxes(Player player, ItemStack newItem) {
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType().name().endsWith("PICKAXE")) {
+                if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) >= newItem.getEnchantmentLevel(Enchantment.DIG_SPEED))
+                    return false;
+
                 item.addEnchantments(newItem.getEnchantments());
             }
         }
+        return true;
     }
 
     private boolean addEnchantsToPlayerSwords(Player player, ItemStack newItem) {
@@ -691,8 +702,7 @@ public class customShop implements Listener {
                     }
                 } else {
                     if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", true)) {
-                        //player.sendMessage(("buy_success").replace("%item%", itemName).replace("%material%",
-                        //		price + " " + itemSpawnerType.getItemName()));
+                        player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW+ event.getStack().getI18NDisplayName());
                     }
                     Sounds.playSound(player, player.getLocation(),
                             Main.getConfigurator().config.getString("sounds.on_upgrade_buy"),
@@ -701,8 +711,7 @@ public class customShop implements Listener {
             }
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(("buy failed").replace("%item%", "UPGRADE").replace("%material%",
-                        price + " " + itemSpawnerType.getItemName()));
+                player.sendMessage(ChatColor.RED + "you don't have enough " + priceType);
             }
         }
     }

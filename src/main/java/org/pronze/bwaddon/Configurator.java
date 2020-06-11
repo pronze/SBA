@@ -62,7 +62,7 @@ public class Configurator {
         checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
         checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
-
+        checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
         checkOrSetConfig(modify, "version", 1);
 
         if (modify.get()) {

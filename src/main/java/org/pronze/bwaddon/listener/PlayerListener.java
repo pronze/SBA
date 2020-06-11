@@ -1,6 +1,8 @@
 package org.pronze.bwaddon.listener;
 
+import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -171,6 +173,16 @@ public class PlayerListener implements Listener {
 
             if (event.getSlotType() == SlotType.ARMOR)
                 event.setCancelled(true);
+
+            Inventory topSlot = event.getView().getTopInventory();
+           Inventory bottomSlot = event.getView().getBottomInventory();
+           if( event.getClickedInventory().equals(bottomSlot) && BwAddon.getConfigurator().getBoolean("block-players-putting-certain-items-onto-chest" , true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST ) && bottomSlot.getType() == InventoryType.PLAYER)
+           {
+               if(event.getCurrentItem() != null && (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) ) {
+                   event.setResult(Event.Result.DENY);
+                   player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "You cannot put this item onto this chest.");
+               }
+           }
         }
 
         private void giveItemToPlayer (List < ItemStack > itemStackList, Player player, TeamColor teamColor){
