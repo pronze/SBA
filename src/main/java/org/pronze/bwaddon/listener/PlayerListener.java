@@ -117,7 +117,7 @@ public class PlayerListener implements Listener {
         ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
 
         for (ItemStack newItem : player.getInventory().getContents()) {
-            if(newItem != null) {
+            if (newItem != null) {
                 if (newItem.getType().name().endsWith("SWORD")) {
                     if (newItem.getEnchantments().size() > 0)
                         sword.addEnchantments(newItem.getEnchantments());
@@ -131,110 +131,103 @@ public class PlayerListener implements Listener {
                     items.add(newItem);
             }
         }
-             items.add(sword);
-            PlayerItems.put(player, items);
+        items.add(sword);
+        PlayerItems.put(player, items);
 
-            if (e.getEntity().getKiller() != null && plugin.getConfigurator().getBoolean("give-killer-resources", true)) {
-                Player killer = e.getEntity().getKiller();
-                for (ItemStack dropItem : player.getInventory().getContents()) {
-                    if (dropItem != null && allowed.contains(dropItem.getType()) && !dropItem.getType().toString().endsWith("WOOL")) {
-                        killer.sendMessage("You Recieved " + dropItem.getType().name() + " for killing " + player.getName());
-                        killer.getInventory().addItem(dropItem);
-                    }
+        if (e.getEntity().getKiller() != null && plugin.getConfigurator().getBoolean("give-killer-resources", true)) {
+            Player killer = e.getEntity().getKiller();
+            for (ItemStack dropItem : player.getInventory().getContents()) {
+                if (dropItem != null && allowed.contains(dropItem.getType()) && !dropItem.getType().toString().endsWith("WOOL")) {
+                    killer.sendMessage("You Recieved " + dropItem.getType().name() + " for killing " + player.getName());
+                    killer.getInventory().addItem(dropItem);
                 }
             }
-
-            e.getDrops().clear();
         }
 
-        public ItemStack checkifUpgraded(ItemStack newItem)
-        {
-            if(UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_") )) > UpgradeKeys.get("WOODEN"))
-            {
-                Map<Enchantment, Integer> enchant = newItem.getEnchantments();
-                Material mat = null;
-                mat =  mat.valueOf(getKey(UpgradeKeys, UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_") )) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
-                ItemStack temp  = new ItemStack(mat);
-                temp.addEnchantments(enchant);
-                return temp;
+        e.getDrops().clear();
+    }
+
+    public ItemStack checkifUpgraded(ItemStack newItem) {
+        if (UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > UpgradeKeys.get("WOODEN")) {
+            Map<Enchantment, Integer> enchant = newItem.getEnchantments();
+            Material mat = null;
+            mat = mat.valueOf(getKey(UpgradeKeys, UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
+            ItemStack temp = new ItemStack(mat);
+            temp.addEnchantments(enchant);
+            return temp;
+        }
+        return newItem;
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onClick(InventoryClickEvent event) {
+        if (event.getCurrentItem() == null)
+            return;
+        api = BedwarsAPI.getInstance();
+
+        if (!(event.getWhoClicked() instanceof Player)) return;
+
+        Player player = (Player) event.getWhoClicked();
+
+        if (!api.isPlayerPlayingAnyGame(player)) return;
+
+        if (event.getSlotType() == SlotType.ARMOR)
+            event.setCancelled(true);
+
+
+        Inventory topSlot = event.getView().getTopInventory();
+        Inventory bottomSlot = event.getView().getBottomInventory();
+        if (event.getClickedInventory().equals(bottomSlot) && BwAddon.getConfigurator().getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
+            if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
+                event.setResult(Event.Result.DENY);
+                player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "You cannot put this item onto this chest.");
             }
-            return newItem;
         }
+    }
 
-        @EventHandler(priority = EventPriority.NORMAL)
-        public void onClick (InventoryClickEvent event)
-        {
-            if(event.getCurrentItem() == null)
-                return;
+    private void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
+        for (ItemStack itemStack : itemStackList) {
+
             api = BedwarsAPI.getInstance();
-
-            if (!(event.getWhoClicked() instanceof Player)) return;
-
-            Player player = (Player) event.getWhoClicked();
-
             if (!api.isPlayerPlayingAnyGame(player)) return;
 
-            if (event.getSlotType() == SlotType.ARMOR)
-                event.setCancelled(true);
+            ColorChanger colorChanger = api.getColorChanger();
 
+            final String materialName = itemStack.getType().toString();
+            final PlayerInventory playerInventory = player.getInventory();
 
-            Inventory topSlot = event.getView().getTopInventory();
-           Inventory bottomSlot = event.getView().getBottomInventory();
-           if( event.getClickedInventory().equals(bottomSlot) && BwAddon.getConfigurator().getBoolean("block-players-putting-certain-items-onto-chest" , true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST ) && bottomSlot.getType() == InventoryType.PLAYER)
-           {
-               if(event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
-                   event.setResult(Event.Result.DENY);
-                   player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "You cannot put this item onto this chest.");
-               }
-           }
-        }
-
-        private void giveItemToPlayer (List < ItemStack > itemStackList, Player player, TeamColor teamColor){
-            for (ItemStack itemStack : itemStackList) {
-
-                api = BedwarsAPI.getInstance();
-                if (!api.isPlayerPlayingAnyGame(player)) return;
-
-                ColorChanger colorChanger = api.getColorChanger();
-
-                final String materialName = itemStack.getType().toString();
-                final PlayerInventory playerInventory = player.getInventory();
-
-                if (materialName.contains("HELMET")) {
-                    playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
-                } else if (materialName.contains("CHESTPLATE")) {
-                    playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
-                } else if (materialName.contains("LEGGINGS")) {
-                    playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
-                } else if (materialName.contains("BOOTS")) {
-                    playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
-                } else if (materialName.contains("PICKAXE")){
-                    playerInventory.setItem(7,  itemStack);
-                } else if (materialName.contains("AXE")){
-                    playerInventory.setItem(8,  itemStack);
-                } else if (materialName.contains("SWORD")){
-                    playerInventory.setItem(0,  itemStack);
-                }
-
-                else {
-                    playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
-                }
+            if (materialName.contains("HELMET")) {
+                playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("CHESTPLATE")) {
+                playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("LEGGINGS")) {
+                playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("BOOTS")) {
+                playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("PICKAXE")) {
+                playerInventory.setItem(7, itemStack);
+            } else if (materialName.contains("AXE")) {
+                playerInventory.setItem(8, itemStack);
+            } else if (materialName.contains("SWORD")) {
+                playerInventory.setItem(0, itemStack);
+            } else {
+                playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
             }
         }
-
-        @EventHandler
-        public void onItemDrop (PlayerDropItemEvent evt )
-        {
-            api = BedwarsAPI.getInstance();
-
-            if (!api.isPlayerPlayingAnyGame(evt.getPlayer())) return;
-
-
-            if (!allowed.contains(evt.getItemDrop().getItemStack().getType())) {
-                evt.setCancelled(true);
-                evt.getPlayer().getInventory().remove(evt.getItemDrop().getItemStack());
-            }
-        }
-
-
     }
+
+    @EventHandler
+    public void onItemDrop(PlayerDropItemEvent evt) {
+        api = BedwarsAPI.getInstance();
+
+        if (!api.isPlayerPlayingAnyGame(evt.getPlayer())) return;
+
+
+        if (!allowed.contains(evt.getItemDrop().getItemStack().getType())) {
+            evt.setCancelled(true);
+            evt.getPlayer().getInventory().remove(evt.getItemDrop().getItemStack());
+        }
+    }
+
+
+}
