@@ -143,6 +143,8 @@ public class PlayerListener implements Listener {
                     }
                 }
             }
+
+            e.getDrops().clear();
         }
 
         public ItemStack checkifUpgraded(ItemStack newItem)
