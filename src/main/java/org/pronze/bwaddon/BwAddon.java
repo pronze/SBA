@@ -30,7 +30,9 @@ public class BwAddon extends JavaPlugin {
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
-        Bukkit.getLogger().info("[BW ADDON]: Enabled Bedwars Addon v1.0.4");
+        Bukkit.getLogger().info                             (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Bukkit.getLogger().info(ChatColor.GOLD + "[BW ADDON]: Enabled Bedwars Addon v1.0.5");
+        Bukkit.getLogger().info                             (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         PluginManager pm = getServer().getPluginManager();
         new PlayerListener(this);
         InventoryListener.init(this);

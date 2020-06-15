@@ -17,8 +17,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class Configurator {
 
-    public File file;
-    public File oldfile;
+    public File file, oldfile, shopFile, upgradeShop;
     public FileConfiguration config;
 
     public final File dataFolder;
@@ -33,9 +32,8 @@ public class Configurator {
         if(!dataFolder.mkdirs())
             Bukkit.getLogger().info("Could Not Make Directory");
 
-        file = new File(dataFolder, "bwconfig.yml");
-        oldfile = new File(dataFolder, "config.yml");
-
+        file = new File(dataFolder, "bwaconfig.yml");
+        oldfile = new File(dataFolder, "bwconfig.yml");
         config = new YamlConfiguration();
 
         if (!file.exists()) {
@@ -56,13 +54,28 @@ public class Configurator {
         if (oldfile.exists())
             oldfile.delete();
 
+
+        shopFile = new File(dataFolder, "shop.yml");
+        upgradeShop = new File(dataFolder, "upgradeShop.yml");
+
+        if (!shopFile.exists()) {
+            main.saveResource("shop.yml", false);
+        }
+
+        if (!upgradeShop.exists()) {
+            main.saveResource("upgradeShop.yml", false);
+        }
+
+
         AtomicBoolean modify = new AtomicBoolean(false);
 
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
+        checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));;
         checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
         checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
+        checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", 1);
 
         if (modify.get()) {
