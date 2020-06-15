@@ -1,0 +1,301 @@
+data:
+  #-   stack:
+  #      type: GOLDEN_APPLE
+  #      amount: 1
+  #      meta:
+  #        ==: ItemMeta
+  #        meta-type: UNSPECIFIC
+  #        display-name: "Example category"
+  #        lore:
+  #        - "This is my category!"
+  #        - "Please buy things inside!"
+  #    items:
+  #    - price: 50
+  #      price-type: "bronze"
+  #      stack:
+  #        type: DIAMOND_SWORD
+  #        amount: 1
+  #        meta:
+  #          ==: ItemMeta
+  #          meta-type: UNSPECIFIC
+  #          enchants:
+  #            DAMAGE_ALL: 2
+  #          repair-cost: 1
+  #          Damage: 99
+  # Value 'applycolorbyteam' is used for automatic-coloring-in-shop.
+  # See WarpPowder for more info.
+
+  - stack: "DIAMOND_CHESTPLATE;1;Armor;Protect yourself with armor! Click here."
+    column: 3
+    items:
+      - price: 40 of iron
+        skip: 1
+        stack:
+          type: CHAINMAIL_BOOTS
+      - price: 12 of gold
+        stack:
+          type: IRON_BOOTS
+      - price: 6 of emerald
+        stack:
+          type: DIAMOND_BOOTS
+
+  - stack: "DIAMOND_SWORD;1;Swords;Click here to get sword for attacking your enemies"
+    column: 2
+    items:
+      - price: 10 of iron
+        skip: 1
+        stack:
+          type: STONE_SWORD
+      - price: 7 of iron
+        stack:
+          type: IRON_SWORD
+      - price: 4 of emerald
+        stack:
+          type: DIAMOND_SWORD
+      - price: 5 of gold
+        stack:
+          type: STICK
+          enchants:
+            KNOCKBACK: 1
+
+  - stack: "BOW;1;Bows;Enchanted Bows!"
+    column: 5
+    items:
+      - price: 12 of gold
+        skip: 1
+        stack:
+          type: BOW
+      - price: 24 of gold
+        stack:
+          type: BOW
+          enchants:
+            ARROW_DAMAGE: 1
+      - price: 6 of emerald
+        stack:
+          type: BOW
+          enchants:
+            ARROW_KNOCKBACK: 1
+            ARROW_DAMAGE: 1
+      - price: 2
+        price-type: "gold"
+        stack:
+          type: ARROW
+          amount: 8
+
+  - stack:
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: "Drinks"
+        lore:
+          - "Not enough? Use these potions and you'll feel better!"
+        potion-type: strength
+    column: 6
+    items:
+      - stack:
+          type: POTION
+          meta:
+            ==: ItemMeta
+            meta-type: POTION
+            potion-type: swiftness
+        price: 1 of emerald
+      - stack:
+          type: POTION
+          meta:
+            ==: ItemMeta
+            meta-type: POTION
+            potion-type: regeneration
+        price: 3 of emerald
+
+  - stack: "SANDSTONE;1;Blocks;Get to the others! Possible with blocks."
+    column: 1
+    items:
+      - price: 4
+        skip: 1
+        price-type: "iron"
+        properties: "applycolorbyteam"
+        stack:
+          type: WOOL
+          amount: 16
+      - CLAY;16 for 12 of iron
+      - GLASS;4 for 12 of iron
+      - END_STONE;12 for 24 of iron
+      - LADDER;16 for 4 of iron
+      - OAK_PLANKS;16 for 4 of gold
+      - OBSIDIAN;4 for 4 of emerald
+
+  - stack: "TNT;1;Useful Stuff;Looking for useful stuff? Here are some!"
+    column: 7
+    items:
+      - price: 3
+        skip: 1
+        price-type: "gold"
+        properties: "applycolorbyteam"
+        stack:
+          type: GOLDEN_APPLE
+          amount: 1
+      - TNT;1 for 4 of gold
+      - ENDER_PEARL;1 for 4 of emerald
+      - WATER_BUCKET;1 for 3 of emerald
+      - price: 3 of iron
+        properties:
+          - name: "Trap"
+            data:
+              - sound: ENTITY_SHEEP_AMBIENT
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 15
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 18
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 2
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+        stack:
+          type: STRING
+          display-name: "Trap"
+          lore:
+            - "Get informed if an enemy steps on your trap"
+            - "and your enemy won't be able to move properly."
+      - price: 120 of iron
+        properties:
+          - name: "Golem"
+            speed: 0.25
+            follow: 16.0
+        stack:
+          type: GHAST_SPAWN_EGG
+          display-name: "Golem"
+          lore:
+            - "An iron golem that will protect"
+            - "your team from the enemies."
+      - price: 40 of iron
+        properties: "ThrowableFireball"
+        stack:
+          type: FIRE_CHARGE
+          display-name: "Fireball"
+          lore:
+            - "Is it a bird? Is it a plane?"
+            - "By the time you know"
+            - "you are dead!"
+
+  - stack: "DIAMOND_PICKAXE;1;Pickaxes;Destroy others blocks?"
+    column: 4
+    row: 1
+    items:
+      - price: 20 of iron
+        skip: 1
+        stack:
+          type: SHEARS
+      - price: 10 of iron
+        stack:
+          type: WOODEN_PICKAXE
+      - price: 10 of iron
+        stack:
+          type: WOODEN_AXE
+      - price: 10 of iron
+        stack:
+          type: IRON_AXE
+      - price: 20 of iron
+        stack:
+          type: IRON_PICKAXE
+      - price: 6 of gold
+        stack:
+          type: DIAMOND_PICKAXE
+      - price: 6 of gold
+        stack:
+          type: DIAMOND_AXE
+
+  - stack: "WOOL;16;Wool;Use This to get to other islands!."
+    row: 3
+    column: 1
+    price: 4 of iron
+    properties: "applycolorbyteam"
+
+  - stack: "STONE_SWORD;1;StoneSword;Deals more damage than woodensword."
+    row: 3
+    column: 2
+    price: 10 of iron
+
+  - stack: "CHAINMAIL_BOOTS;1;Chainmail Armor;Provides more armor than leather."
+    row: 3
+    column: 3
+    price: 40 of iron
+
+  - stack: "RED_STAINED_GLASS_PANE;1;Glass;idk."
+    row: 3
+    column: 4
+    price: 10 of iron
+
+  - stack: "BOW;1;Bow;umm it's a bow.."
+    row: 3
+    column: 5
+    price: 12 of gold
+
+  - stack: "POTION;1;Increase player speed"
+    row: 3
+    column: 6
+    price: 2 of emerald
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: invisibility
+
+  - stack: "TNT;1;Auto Ignites!"
+    row: 3
+    column: 7
+    price: 4 of gold
+
+  - stack: "OAK_PLANKS;16;Oak Wood;Provides more protection than standard wool!"
+    row: 4
+    column: 1
+    price: 4 of gold
+
+  - stack: "IRON_SWORD;1;Iron Sword;Deals more damage than stone swords!"
+    row: 4
+    column: 2
+    price: 7 of gold
+
+  - stack: "IRON_BOOTS;1;Iron Armor;Provides further protection than chainmail armor!"
+    row: 4
+    column: 3
+    price: 12 of gold
+
+  - stack: "SHEARS;1;Shears;Break down wool faster!"
+    row: 4
+    column: 4
+    price: 20 of iron
+
+  - stack: "ARROW;8;Arrow;Use this with a bow."
+    row: 4
+    column: 5
+    price: 2 of gold
+
+  - stack: "POTION;1;speed"
+    row: 4
+    column: 6
+    price: 1 of emerald
+    meta:
+      ==: ItemMeta
+      meta-type: POTION
+      potion-type: swiftness
+
+  - stack: "WATER_BUCKET;1;Water Bucket"
+    row: 4
+    column: 7
+    price: 2 of emerald

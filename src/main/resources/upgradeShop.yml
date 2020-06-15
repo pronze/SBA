@@ -1,0 +1,239 @@
+data:
+  #-   stack:
+  #      type: GOLDEN_APPLE
+  #      amount: 1
+  #      meta:
+  #        ==: ItemMeta
+  #        meta-type: UNSPECIFIC
+  #        display-name: "Example category"
+  #        lore:
+  #        - "This is my category!"
+  #        - "Please buy things inside!"
+  #    items:
+  #    - price: 50
+  #      price-type: "bronze"
+  #      stack:
+  #        type: DIAMOND_SWORD
+  #        amount: 1
+  #        meta:
+  #          ==: ItemMeta
+  #          meta-type: UNSPECIFIC
+  #          enchants:
+  #            DAMAGE_ALL: 2
+  #          repair-cost: 1
+  #          Damage: 99
+  # Value 'applycolorbyteam' is used for automatic-coloring-in-shop.
+  # See WarpPowder for more info.
+
+  - stack: "DIAMOND_CHESTPLATE;1;Armor;Protect yourself with armor! Click here."
+    column: 3
+    items:
+      - price: 40 of iron
+        skip: 1
+        stack:
+          type: CHAINMAIL_BOOTS
+      - price: 12 of gold
+        stack:
+          type: IRON_BOOTS
+      - price: 6 of emerald
+        stack:
+          type: DIAMOND_BOOTS
+
+  - stack: "IRON_CHESTPLATE;1;Enchant;Click here to get more resistance to damage!"
+    column: 2
+    items:
+      - price: 4 of diamond
+        skip: 1
+        stack:
+          type: IRON_CHESTPLATE
+          display-name: "Armor Protection I"
+          lore:
+            - "Gain Permenant protection I for all armors!"
+          enchants:
+            PROTECTION_ENVIRONMENTAL: 1
+      - price: 8 of diamond
+        stack:
+          type: IRON_CHESTPLATE
+          display-name: "Armor Protection II"
+          lore:
+            - "Gain Permenant protection II for all armors!"
+          enchants:
+            PROTECTION_ENVIRONMENTAL: 2
+      - price: 12 of diamond
+        stack:
+          type: IRON_CHESTPLATE
+          display-name: "Armor Protection II"
+          lore:
+            - "Gain Permenant protection III for all armors!"
+          enchants:
+            PROTECTION_ENVIRONMENTAL: 3
+      - price: 16 of diamond
+        stack:
+          type: IRON_CHESTPLATE
+          display-name: "Armor Protection IV"
+          lore:
+            - "Gain Permenant protection IV for all armors!"
+          enchants:
+            PROTECTION_ENVIRONMENTAL: 4
+
+  - stack: "IRON_SWORD;1;Enchant;Kill players quicker!."
+    column: 1
+    items:
+      - price: 4 of diamond
+        skip: 1
+        stack:
+          type: IRON_SWORD
+          display-name: "Sharpened Swords"
+          lore:
+            - "Gain Permenant sharpness I for all swords!"
+          enchants:
+            DAMAGE_ALL: 1
+      - price: 8 of diamond
+        stack:
+          type: IRON_SWORD
+          display-name: "Sharpened Swords"
+          lore:
+            - "Gain Permenant sharpness II for all swords!"
+          enchants:
+            DAMAGE_ALL: 2
+      - price: 12 of diamond
+        stack:
+          type: IRON_SWORD
+          display-name: "Sharpened Swords"
+          lore:
+            - "Gain Permenant sharpness III for all swords!"
+          enchants:
+            DAMAGE_ALL: 3
+      - price: 16 of diamond
+        stack:
+          type: IRON_SWORD
+          display-name: "Sharpened Swords"
+          lore:
+            - "Gain Permenant sharpness IV for all swords!"
+          enchants:
+            DAMAGE_ALL: 4
+
+  - stack: "GOLDEN_PICKAXE;1;Enchant;Break Blocks quicker!."
+    column: 3
+    items:
+      - price: 4 of diamond
+        skip: 1
+        stack:
+          type: GOLDEN_PICKAXE
+          display-name: "Efficiency I"
+          lore:
+            - "Gain Permenant Efficinecy I for your pickaxe!"
+          enchants:
+            DIG_SPEED: 1
+      - price: 8 of diamond
+        stack:
+          type: GOLDEN_PICKAXE
+          display-name: "Efficiency II"
+          lore:
+            - "Gain Permenant Efficiency II for your pickaxe!"
+          enchants:
+            DIG_SPEED: 2
+
+  - price: 4
+    price-type: iron
+    upgrade:
+      entities:
+        - type: spawner
+          spawner-type: iron
+          add-levels: 0.5
+          shop-name: "Iron upgrade of the team %team%"
+          notify-team: true
+    stack:
+      ==: org.bukkit.inventory.ItemStack
+      v: 1519
+      type: FURNACE
+      amount: 1
+      meta:
+        ==: ItemMeta
+        meta-type: UNSPECIFIC
+        display-name: "Bronze upgrade of the team %team%"
+
+
+  - stack: "BEACON;1;Unconfigured"
+    column: 5
+    row: 1
+
+  - stack: "DRAGON_EGG;1;Ender Dragon;Unconfigured"
+    column: 6
+    row: 1
+
+  - stack: "LEATHER;1;TRAPS;TRAP YOUR ENEMY"
+    column: 7
+    items:
+      - price: 1 of gold
+        skip: 1
+        properties:
+          - name: "Trap"
+            data:
+              - sound: ENTITY_SHEEP_AMBIENT
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 15
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 18
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 2
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+        stack:
+          type: STRING
+          display-name: "Trap"
+          lore:
+            - "Get informed if an enemy steps on your trap"
+            - "and your enemy won't be able to move properly."
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 0
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 1
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 2
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 3
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 4
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 5
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 6
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 7
+
+  - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
+    row: 2
+    column: 8
