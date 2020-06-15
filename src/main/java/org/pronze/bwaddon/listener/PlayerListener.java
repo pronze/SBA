@@ -34,6 +34,7 @@ public class PlayerListener implements Listener {
     static public HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
     static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
     static public ArrayList<Material> allowed = new ArrayList<>();
+    static public ArrayList<Material> generatorDropItems= new ArrayList<>();
 
     public PlayerListener(org.pronze.bwaddon.BwAddon plugin) {
         this.plugin = plugin;
@@ -47,6 +48,15 @@ public class PlayerListener implements Listener {
         UpgradeKeys.put("DIAMOND", 5);
 
         for (String material : BwAddon.getConfigurator().getStringList("allowed-item-drops")) {
+            Material mat;
+            try {
+                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+            } catch (Exception ignored) {
+                continue;
+            }
+            allowed.add(mat);
+        }
+        for (String material : BwAddon.getConfigurator().getStringList("running-generator-drops")) {
             Material mat;
             try {
                 mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
@@ -137,8 +147,8 @@ public class PlayerListener implements Listener {
         if (e.getEntity().getKiller() != null && plugin.getConfigurator().getBoolean("give-killer-resources", true)) {
             Player killer = e.getEntity().getKiller();
             for (ItemStack dropItem : player.getInventory().getContents()) {
-                if (dropItem != null && allowed.contains(dropItem.getType()) && !dropItem.getType().toString().endsWith("WOOL")) {
-                    killer.sendMessage("You Recieved " + dropItem.getType().name() + " for killing " + player.getName());
+                if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
+                    killer.sendMessage( "+ " + dropItem.getAmount() +" " + dropItem.getType().name());
                     killer.getInventory().addItem(dropItem);
                 }
             }
@@ -171,9 +181,8 @@ public class PlayerListener implements Listener {
 
         if (!api.isPlayerPlayingAnyGame(player)) return;
 
-        if (event.getSlotType() == SlotType.ARMOR)
+        if (BwAddon.getConfigurator().getBoolean("disable-armor-inventory-movement", true) && event.getSlotType() == SlotType.ARMOR)
             event.setCancelled(true);
-
 
         Inventory topSlot = event.getView().getTopInventory();
         Inventory bottomSlot = event.getView().getBottomInventory();
@@ -222,8 +231,7 @@ public class PlayerListener implements Listener {
 
         if (!api.isPlayerPlayingAnyGame(evt.getPlayer())) return;
 
-
-        if (!allowed.contains(evt.getItemDrop().getItemStack().getType())) {
+        if ( !allowed.contains(evt.getItemDrop().getItemStack().getType()) && !evt.getItemDrop().getItemStack().getType().name().endsWith("WOOL")) {
             evt.setCancelled(true);
             evt.getPlayer().getInventory().remove(evt.getItemDrop().getItemStack());
         }
