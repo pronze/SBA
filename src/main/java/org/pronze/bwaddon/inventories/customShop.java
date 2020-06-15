@@ -178,7 +178,7 @@ public class customShop implements Listener {
                 shopMap.get("default").openForPlayer(player);
             }
         } catch (Throwable ignored) {
-            player.sendMessage(" Your shop.yml is invalid! Check it out or contact us on Discord.");
+            player.sendMessage(" Your shop.yml is invalid! Check it out or contact pronze on Discord");
         }
     }
 
@@ -301,10 +301,10 @@ public class customShop implements Listener {
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
-                format.loadFromDataFolder(Main.getInstance().getDataFolder(), shopFileName);
+                format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
-                format.loadFromDataFolder(Main.getInstance().getDataFolder(), fileName);
+                format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), fileName);
             }
         } catch (Exception ignored) {
             Bukkit.getLogger().severe("Wrong shop.yml configuration!");
