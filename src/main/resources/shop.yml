@@ -247,14 +247,25 @@ data:
     column: 5
     price: 12 of gold
 
-  - stack: "POTION;1;Increase player speed"
-    row: 3
-    column: 6
-    price: 2 of emerald
-    meta:
-      ==: ItemMeta
-      meta-type: POTION
-      potion-type: invisibility
+  - stack:
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: "Drinks"
+        lore:
+          - "Not enough? Use these potions and you'll feel better!"
+        potion-type: regeneration
+      row: 3
+      column: 6
+      items:
+        - stack:
+            type: POTION
+            meta:
+              ==: ItemMeta
+              meta-type: POTION
+              potion-type: regeneration
+          price: 1 of emerald
 
   - stack: "TNT;1;Auto Ignites!"
     row: 3
@@ -286,14 +297,25 @@ data:
     column: 5
     price: 2 of gold
 
-  - stack: "POTION;1;speed"
-    row: 4
-    column: 6
-    price: 1 of emerald
-    meta:
-      ==: ItemMeta
-      meta-type: POTION
-      potion-type: swiftness
+  - stack:
+      type: POTION
+      meta:
+        ==: ItemMeta
+        meta-type: POTION
+        display-name: "Poison"
+        lore:
+          - "Not enough? Use these potions and you'll feel better!"
+        potion-type: poison
+      row: 4
+      column: 6
+      items:
+        - stack:
+            type: POTION
+            meta:
+              ==: ItemMeta
+              meta-type: POTION
+              potion-type: poison
+          price: 1 of emerald
 
   - stack: "WATER_BUCKET;1;Water Bucket"
     row: 4

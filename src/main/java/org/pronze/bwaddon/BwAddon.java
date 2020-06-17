@@ -3,6 +3,7 @@ package org.pronze.bwaddon;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
+import org.pronze.bwaddon.commands.BWACommand;
 import org.pronze.bwaddon.listener.*;
 import org.screamingsandals.simpleinventories.listeners.InventoryListener;
 import org.pronze.bwaddon.inventories.customShop;
@@ -31,12 +32,14 @@ public class BwAddon extends JavaPlugin {
         configurator.loadDefaults();
 
         Bukkit.getLogger().info                             (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        Bukkit.getLogger().info(ChatColor.GOLD + "[BW ADDON]: Enabled Bedwars Addon v1.0.5");
+        Bukkit.getLogger().info(ChatColor.GOLD + "[BW ADDON]: Enabled Bedwars Addon v" + Bukkit.getServer().getPluginManager().getPlugin("ScreamingBedwarsAddon").getDescription().getVersion());
         Bukkit.getLogger().info                             (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         PluginManager pm = getServer().getPluginManager();
         new PlayerListener(this);
         InventoryListener.init(this);
         customShop shop = new customShop();
+        getCommand("bwaddon").setExecutor(new BWACommand());
+
     }
 
     public static Configurator getConfigurator() {
@@ -46,7 +49,7 @@ public class BwAddon extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        plugin = null;
+        this.getServer().getServicesManager().unregisterAll(this);
     }
 
     public static BwAddon getInstance() {

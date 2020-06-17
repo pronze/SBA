@@ -5,3 +5,8 @@ api-version: "1.13"
 depend: [BedWars]
 softdepend: [PlaceholderAPI]
 author: pronze
+
+commands:
+  bwaddon:
+    description: bwaddon
+    usage: /<command>

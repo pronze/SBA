@@ -38,6 +38,9 @@ import org.bukkit.Material;
 import java.io.File;
 import java.util.*;
 
+import static org.screamingsandals.bedwars.lib.lang.I18n.i18n;
+import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
+
 public class customShop implements Listener {
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
