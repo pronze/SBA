@@ -63,7 +63,7 @@ public class PlayerListener implements Listener {
             } catch (Exception ignored) {
                 continue;
             }
-            allowed.add(mat);
+            generatorDropItems.add(mat);
         }
 
     }
