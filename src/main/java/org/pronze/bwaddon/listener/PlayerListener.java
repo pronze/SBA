@@ -148,7 +148,7 @@ public class PlayerListener implements Listener {
             Player killer = e.getEntity().getKiller();
             for (ItemStack dropItem : player.getInventory().getContents()) {
                 if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
-                    killer.sendMessage( "+ " + dropItem.getAmount() +" " + dropItem.getType().name());
+                    killer.sendMessage( "+" + dropItem.getAmount() +" " + dropItem.getI18NDisplayName());
                     killer.getInventory().addItem(dropItem);
                 }
             }
