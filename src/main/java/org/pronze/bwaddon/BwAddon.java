@@ -20,7 +20,7 @@ public class BwAddon extends JavaPlugin {
     public void onEnable() {
         plugin = this;
 
-        new UpdateChecker(this, 12345).getVersion(version -> {
+        new UpdateChecker(this, 79505).getVersion(version -> {
             if (this.getDescription().getVersion().equalsIgnoreCase(version)) {
                 Bukkit.getLogger().info("[ScreamingBedwarsAddon] There is no new update available.");
             } else {
