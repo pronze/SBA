@@ -21,8 +21,8 @@ public class BwAddon extends JavaPlugin {
         plugin = this;
 
         new UpdateChecker(this, 79505).getVersion(version -> {
-            if (this.getDescription().getVersion().equalsIgnoreCase(version)) {
-                Bukkit.getLogger().info("[ScreamingBedwarsAddon] There is no new update available.");
+            if (this.getDescription().getVersion().contains(version)) {
+                Bukkit.getLogger().info("[ScreamingBedwarsAddon] You are using the latest version of the addon");
             } else {
                 Bukkit.getLogger().info(ChatColor.YELLOW + " " + ChatColor.BOLD + "[ScreamingBedwarsAddon]: THERE IS A NEW UPDATE AVAILABLE.");
             }
@@ -31,13 +31,12 @@ public class BwAddon extends JavaPlugin {
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
-        Bukkit.getLogger().info                             (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info(ChatColor.GOLD + "[BW ADDON]: Enabled Bedwars Addon v" + Bukkit.getServer().getPluginManager().getPlugin("ScreamingBedwarsAddon").getDescription().getVersion());
-        Bukkit.getLogger().info                             (">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        PluginManager pm = getServer().getPluginManager();
+        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         new PlayerListener(this);
         InventoryListener.init(this);
-        customShop shop = new customShop();
+        new customShop();
         getCommand("bwaddon").setExecutor(new BWACommand());
 
     }
@@ -48,9 +47,7 @@ public class BwAddon extends JavaPlugin {
 
 
     @Override
-    public void onDisable() {
-        this.getServer().getServicesManager().unregisterAll(this);
-    }
+    public void onDisable() { this.getServer().getServicesManager().unregisterAll(this); }
 
     public static BwAddon getInstance() {
         return plugin;
