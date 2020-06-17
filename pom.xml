@@ -43,21 +43,14 @@
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars</artifactId>
-            <version>0.2.10-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.screamingsandals.simpleinventories</groupId>
-            <artifactId>SimpleInventories-Core</artifactId>
-            <version>1.0.4-SNAPSHOT</version>
+            <version>0.2.11-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars-API</artifactId>
-            <version>0.2.10-SNAPSHOT</version>
+            <version>0.2.11-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -76,28 +69,6 @@
         <defaultGoal>clean install</defaultGoal>
         <finalName>ScreamingBedwarsAddon-${project.version}</finalName>
         <plugins>
-
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <relocations>
-                                <relocation>
-                                    <pattern>org.screamingsandals.simpleinventories</pattern>
-                                    <shadedPattern>org.screamingsandals.bedwars.lib.sgui</shadedPattern>
-                                </relocation>
-                            </relocations>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
 
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>

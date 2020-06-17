@@ -5,7 +5,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.pronze.bwaddon.commands.BWACommand;
 import org.pronze.bwaddon.listener.*;
-import org.screamingsandals.simpleinventories.listeners.InventoryListener;
+import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 import org.pronze.bwaddon.inventories.customShop;
 
 

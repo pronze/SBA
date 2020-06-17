@@ -25,14 +25,15 @@ import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.simpleinventories.SimpleInventories;
-import org.screamingsandals.simpleinventories.events.GenerateItemEvent;
-import org.screamingsandals.simpleinventories.events.PreActionEvent;
-import org.screamingsandals.simpleinventories.events.ShopTransactionEvent;
-import org.screamingsandals.simpleinventories.inventory.Options;
-import org.screamingsandals.simpleinventories.item.ItemProperty;
-import org.screamingsandals.simpleinventories.item.PlayerItemInfo;
-import org.screamingsandals.simpleinventories.utils.MapReader;
+
+import org.screamingsandals.bedwars.lib.sgui.SimpleInventories;
+import org.screamingsandals.bedwars.lib.sgui.events.GenerateItemEvent;
+import org.screamingsandals.bedwars.lib.sgui.events.PreActionEvent;
+import org.screamingsandals.bedwars.lib.sgui.events.ShopTransactionEvent;
+import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
+import org.screamingsandals.bedwars.lib.sgui.item.ItemProperty;
+import org.screamingsandals.bedwars.lib.sgui.item.PlayerItemInfo;
+import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 import org.bukkit.Material;
 
 import java.io.File;
