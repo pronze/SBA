@@ -423,8 +423,8 @@ public class customShop implements Listener {
                 } else {
                     for (Player playerCheck : game.getConnectedPlayers()) {
                         if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
-                            addEnchantsToPlayerTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL);
-                            playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + playerCheck.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
+                            addEnchantsToPlayerTools(playerCheck, newItem, "SWORD", Enchantment.DAMAGE_ALL);
+                            playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
                         }
                     }
                 }
@@ -445,7 +445,7 @@ public class customShop implements Listener {
                     for (Player playerCheck : game.getConnectedPlayers()) {
                         if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
                             addEnchantsToPlayerArmor(playerCheck, newItem);
-                            playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + playerCheck.getName() + ChatColor.YELLOW + " has upgraded team protection");
+                            playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team protection");
                         }
                     }
                 }
