@@ -1,6 +1,9 @@
 package org.pronze.bwaddon;
 
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.PluginManager;
 import org.pronze.bwaddon.commands.BWACommand;
@@ -11,7 +14,7 @@ import org.pronze.bwaddon.inventories.customShop;
 
 import org.bukkit.ChatColor;
 
-public class BwAddon extends JavaPlugin {
+public class BwAddon extends JavaPlugin implements Listener {
 
     private static BwAddon plugin;
     private Configurator configurator;
@@ -37,6 +40,7 @@ public class BwAddon extends JavaPlugin {
         new PlayerListener(this);
         InventoryListener.init(this);
         new customShop();
+        Bukkit.getPluginManager().registerEvents(this, this);
         getCommand("bwaddon").setExecutor(new BWACommand());
 
     }
@@ -45,14 +49,18 @@ public class BwAddon extends JavaPlugin {
         return plugin.configurator;
     }
 
-
-    @Override
-    public void onDisable() { this.getServer().getServicesManager().unregisterAll(this); }
-
     public static BwAddon getInstance() {
         return plugin;
     }
 
+    @EventHandler
+    public void onBwReload(PluginEnableEvent event) {
+        String plugin = event.getPlugin().getName();
+        if (plugin.equalsIgnoreCase("BedWars")) {
+            Bukkit.getServer().getPluginManager().disablePlugin(BwAddon.getInstance());
+            Bukkit.getServer().getPluginManager().enablePlugin(BwAddon.getInstance());
+        }
+    }
 }
 
 
