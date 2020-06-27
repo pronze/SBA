@@ -25,93 +25,13 @@ data:
   # Value 'applycolorbyteam' is used for automatic-coloring-in-shop.
   # See WarpPowder for more info.
 
-  - stack: "DIAMOND_CHESTPLATE;1;Armor;Protect yourself with armor! Click here."
-    column: 3
-    items:
-      - price: 40 of iron
-        skip: 1
-        stack:
-          type: CHAINMAIL_BOOTS
-      - price: 12 of gold
-        stack:
-          type: IRON_BOOTS
-      - price: 6 of emerald
-        stack:
-          type: DIAMOND_BOOTS
-
-  - stack: "IRON_CHESTPLATE;1;Enchant;Click here to get more resistance to damage!"
+  - stack: "IRON_CHESTPLATE;1;Protection;Click here to get more resistance to damage!"
     column: 2
-    items:
-      - price: 4 of diamond
-        skip: 1
-        stack:
-          type: IRON_CHESTPLATE
-          display-name: "Armor Protection I"
-          lore:
-            - "Gain Permenant protection I for all armors!"
-          enchants:
-            PROTECTION_ENVIRONMENTAL: 1
-      - price: 8 of diamond
-        stack:
-          type: IRON_CHESTPLATE
-          display-name: "Armor Protection II"
-          lore:
-            - "Gain Permenant protection II for all armors!"
-          enchants:
-            PROTECTION_ENVIRONMENTAL: 2
-      - price: 12 of diamond
-        stack:
-          type: IRON_CHESTPLATE
-          display-name: "Armor Protection II"
-          lore:
-            - "Gain Permenant protection III for all armors!"
-          enchants:
-            PROTECTION_ENVIRONMENTAL: 3
-      - price: 16 of diamond
-        stack:
-          type: IRON_CHESTPLATE
-          display-name: "Armor Protection IV"
-          lore:
-            - "Gain Permenant protection IV for all armors!"
-          enchants:
-            PROTECTION_ENVIRONMENTAL: 4
+    price: 4 of diamond
 
-  - stack: "IRON_SWORD;1;Enchant;Kill players quicker!."
+  - stack: "IRON_SWORD;1;Sharpness;Kill players quicker!."
     column: 1
-    items:
-      - price: 4 of diamond
-        skip: 1
-        stack:
-          type: IRON_SWORD
-          display-name: "Sharpened Swords"
-          lore:
-            - "Gain Permenant sharpness I for all swords!"
-          enchants:
-            DAMAGE_ALL: 1
-      - price: 8 of diamond
-        stack:
-          type: IRON_SWORD
-          display-name: "Sharpened Swords"
-          lore:
-            - "Gain Permenant sharpness II for all swords!"
-          enchants:
-            DAMAGE_ALL: 2
-      - price: 12 of diamond
-        stack:
-          type: IRON_SWORD
-          display-name: "Sharpened Swords"
-          lore:
-            - "Gain Permenant sharpness III for all swords!"
-          enchants:
-            DAMAGE_ALL: 3
-      - price: 16 of diamond
-        stack:
-          type: IRON_SWORD
-          display-name: "Sharpened Swords"
-          lore:
-            - "Gain Permenant sharpness IV for all swords!"
-          enchants:
-            DAMAGE_ALL: 4
+    price: 4 of diamond
 
   - stack: "GOLDEN_PICKAXE;1;Enchant;Break Blocks quicker!."
     column: 3
