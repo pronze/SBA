@@ -14,6 +14,8 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.plugin.Plugin;
+
 
 public class Configurator {
 
@@ -29,8 +31,7 @@ public class Configurator {
     }
 
     public void loadDefaults() {
-        if(!dataFolder.mkdirs())
-            Bukkit.getLogger().info("Could Not Make Directory");
+        dataFolder.mkdirs();
 
         file = new File(dataFolder, "bwaconfig.yml");
         oldfile = new File(dataFolder, "bwconfig.yml");
@@ -71,12 +72,13 @@ public class Configurator {
 
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
         checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));;
-        checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
+        checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN"));
         checkOrSetConfig(modify, "give-killer-resources", true);
         checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
-        checkOrSetConfig(modify, "version", 1);
+        checkOrSetConfig(modify, "version", BwAddon.getVersion());
+        checkOrSetConfig(modify, "autoset-bw-config", true);
 
         if (modify.get()) {
             try {
@@ -84,6 +86,36 @@ public class Configurator {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        if(config.getBoolean("autoset-bw-config") || !config.getString("version").equalsIgnoreCase(BwAddon.getVersion())){
+            shopFile.delete();
+            upgradeShop.delete();
+            config.set("version", BwAddon.getVersion());
+            config.set("autoset-bw-config", false);
+            saveConfig();
+            File file2 = new File(dataFolder, "config.yml");
+            main.saveResource("config.yml", true);
+            String pathname = Bukkit.getServer().getWorldContainer().getAbsolutePath() + "/plugins/BedWars/config.yml";
+
+            File file3 = new File(pathname);
+            file3.delete();
+            file2.renameTo(new File(pathname));
+
+            shopFile = new File(dataFolder, "shop.yml");
+            upgradeShop = new File(dataFolder, "upgradeShop.yml");
+
+            if (!shopFile.exists()) {
+                main.saveResource("shop.yml", false);
+            }
+
+            if (!upgradeShop.exists()) {
+                main.saveResource("upgradeShop.yml", false);
+            }
+
+            Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            Bukkit.getServer().getPluginManager().enablePlugin(plugin);
         }
 
 

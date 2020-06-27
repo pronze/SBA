@@ -1,15 +1,18 @@
 package org.pronze.bwaddon.listener;
 
-import org.bukkit.ChatColor;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.Material;
 import org.pronze.bwaddon.BwAddon;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.*;
 import org.bukkit.inventory.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,16 +20,17 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.screamingsandals.bedwars.api.TeamColor;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerBreakBlock;
+import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.*;
-import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.upgrades.Upgrade;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.bukkit.event.inventory.InventoryType.SlotType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ArrayList;
 
-import java.util.*;
+import org.screamingsandals.bedwars.game.CurrentTeam;
 
 public class PlayerListener implements Listener {
     org.pronze.bwaddon.BwAddon plugin;
@@ -34,7 +38,8 @@ public class PlayerListener implements Listener {
     static public HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
     static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
     static public ArrayList<Material> allowed = new ArrayList<>();
-    static public ArrayList<Material> generatorDropItems= new ArrayList<>();
+    static public ArrayList<Material> generatorDropItems = new ArrayList<>();
+    public static final String THROWABLE_FIREBALL_PREFIX = "Module:ThrowableFireball:";
 
     public PlayerListener(org.pronze.bwaddon.BwAddon plugin) {
         this.plugin = plugin;
@@ -148,7 +153,7 @@ public class PlayerListener implements Listener {
             Player killer = e.getEntity().getKiller();
             for (ItemStack dropItem : player.getInventory().getContents()) {
                 if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
-                    killer.sendMessage( "+" + dropItem.getAmount() +" " + dropItem.getI18NDisplayName());
+                    killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getI18NDisplayName());
                     killer.getInventory().addItem(dropItem);
                 }
             }
@@ -231,11 +236,10 @@ public class PlayerListener implements Listener {
 
         if (!api.isPlayerPlayingAnyGame(evt.getPlayer())) return;
 
-        if ( !allowed.contains(evt.getItemDrop().getItemStack().getType()) && !evt.getItemDrop().getItemStack().getType().name().endsWith("WOOL")) {
+        if (!allowed.contains(evt.getItemDrop().getItemStack().getType()) && !evt.getItemDrop().getItemStack().getType().name().endsWith("WOOL")) {
             evt.setCancelled(true);
             evt.getPlayer().getInventory().remove(evt.getItemDrop().getItemStack());
         }
     }
-
 
 }

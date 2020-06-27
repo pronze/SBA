@@ -10,6 +10,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.pronze.bwaddon.BwAddon;
 import org.pronze.bwaddon.listener.PlayerListener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.Game;
@@ -46,10 +47,16 @@ public class customShop implements Listener {
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
     org.pronze.bwaddon.BwAddon BwAddon;
-
+    static public HashMap<Integer, Integer> Prices= new HashMap<>();
 
     public customShop() {
         Bukkit.getServer().getPluginManager().registerEvents(this, BwAddon.getInstance());
+
+        Prices.put(0,4);
+        Prices.put(1,4);
+        Prices.put(2,8);
+        Prices.put(3,12);
+        Prices.put(4,16);
 
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         ItemMeta backItemMeta = backItem.getItemMeta();
@@ -203,11 +210,32 @@ public class customShop implements Listener {
                 return;
             }
 
+            //
             boolean enabled = Main.getConfigurator().config.getBoolean("lore.generate-automatically", true);
             enabled = reader.getBoolean("generate-lore", enabled);
 
             List<String> loreText = reader.getStringList("generated-lore-text",
                     Main.getConfigurator().config.getStringList("lore.text"));
+
+
+            String nprice = Integer.toString(price);
+            if(event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Protection") && event.getStack().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) <= 4){
+                ItemStack shop = shopEnchants(event.getStack(), event.getPlayer().getInventory().getBoots(), Enchantment.PROTECTION_ENVIRONMENTAL);
+                event.setStack(shop);
+                nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL)));
+            }
+            else if(event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Sharpness") && event.getStack().getEnchantmentLevel(Enchantment.DAMAGE_ALL) <= 4){
+                ItemStack sword = null;
+                for(ItemStack i :  player.getInventory().getContents()){
+                    if(i != null && i.getType().name().endsWith("SWORD")){
+                        sword = i;
+                        break;
+                    }
+                }
+                ItemStack shop = shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
+                event.setStack(shop);
+                nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.DAMAGE_ALL)));
+            }
 
             if (enabled) {
                 ItemStack stack = event.getStack();
@@ -217,7 +245,7 @@ public class customShop implements Listener {
                     lore = stackMeta.getLore();
                 }
                 for (String s : loreText) {
-                    s = s.replaceAll("%price%", Integer.toString(price));
+                    s = s.replaceAll("%price%", nprice);
                     s = s.replaceAll("%resource%", type.getItemName());
                     s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
                     assert lore != null;
@@ -227,6 +255,8 @@ public class customShop implements Listener {
                 stack.setItemMeta(stackMeta);
                 event.setStack(stack);
             }
+
+
             if (item.hasProperties()) {
                 for (ItemProperty property : item.getProperties()) {
                     if (property.hasName()) {
@@ -239,8 +269,24 @@ public class customShop implements Listener {
                     }
                 }
             }
-        }
 
+
+
+
+        }}
+
+    public ItemStack shopEnchants(ItemStack sh_item, ItemStack pl_Item,  Enchantment enchant)
+    {
+        int sz = pl_Item.getEnchantmentLevel(enchant);
+        if(sz >= 0 && sz  < 4){
+            sh_item.addEnchantment(enchant, sz + 1);
+        }
+        else if(sz == 4)
+        {
+            sh_item.removeEnchantment(enchant);
+            sh_item.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
+        }
+        return sh_item;
     }
 
     @EventHandler
@@ -280,6 +326,22 @@ public class customShop implements Listener {
         if (reader.containsKey("upgrade")) {
             handleUpgrade(event);
         } else {
+
+            if(event.getStack().getItemMeta().getDisplayName().contains("Protection") ){
+               ItemStack shop = shopEnchants(event.getStack(), event.getPlayer().getInventory().getBoots(), Enchantment.PROTECTION_ENVIRONMENTAL);
+                event.getStack().addEnchantments(shop.getEnchantments());
+            }
+            else if(event.getStack().getItemMeta().getDisplayName().contains("Sharpness")){
+                ItemStack sword = null;
+                for(ItemStack i :  event.getPlayer().getInventory().getContents()){
+                    if(i != null && i.getType().name().endsWith("SWORD")){
+                        sword = i;
+                        break;
+                    }
+                }
+                ItemStack shop = shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
+                event.getStack().addEnchantments(shop.getEnchantments());
+            }
             handleBuy(event);
         }
     }
@@ -305,7 +367,7 @@ public class customShop implements Listener {
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
-                format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), shopFileName);
+                    format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
                 format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), fileName);
@@ -415,11 +477,11 @@ public class customShop implements Listener {
 
             boolean shouldSellStack = true;
 
-            if (getNameOrCustomNameOfItem(newItem).contains("Sharpened")) {
+            if (getNameOrCustomNameOfItem(newItem).contains("Sharpness")) {
 
                 if (!addEnchantsToPlayerTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
                     shouldSellStack = false;
-                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have a greater or equal enchantment in your sword!");
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have the greatest enchantment");
                 } else {
                     for (Player playerCheck : game.getConnectedPlayers()) {
                         if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
@@ -436,10 +498,9 @@ public class customShop implements Listener {
                 }
 
             } else if (getNameOrCustomNameOfItem(newItem).contains("Protection")) {
-
-                if (player.getInventory().getBoots().getEnchantments().size() > 0 && player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL)) {
+                if (player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4 || (player.getInventory().getBoots().getEnchantments().size() > 0 && player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL))) {
                     shouldSellStack = false;
-                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have a greater or equal enchantment in your armour!");
+                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have the greatest enchantment.");
                 } else {
                     addEnchantsToPlayerArmor(player, newItem);
                     for (Player playerCheck : game.getConnectedPlayers()) {
@@ -502,7 +563,7 @@ public class customShop implements Listener {
             if (shouldSellStack) {
                 event.sellStack(materialItem);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + newItem.getI18NDisplayName());
+                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + newItem.getItemMeta().getDisplayName());
                 }
                 Sounds.playSound(player, player.getLocation(),
                         Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
@@ -519,7 +580,7 @@ public class customShop implements Listener {
     private boolean addEnchantsToPlayerTools(Player player, ItemStack newItem, String name, Enchantment enchantment) {
         for (ItemStack item : player.getInventory().getContents()) {
             if (item != null && item.getType().name().endsWith(name)) {
-                if (item.getEnchantmentLevel(enchantment) >= newItem.getEnchantmentLevel(enchantment))
+                if (item.getEnchantmentLevel(enchantment) >= newItem.getEnchantmentLevel(enchantment) || newItem.getEnchantmentLevel(enchantment) >= 5)
                     return false;
 
                 item.addEnchantments(newItem.getEnchantments());

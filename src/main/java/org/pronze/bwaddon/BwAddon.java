@@ -5,7 +5,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.plugin.PluginManager;
 import org.pronze.bwaddon.commands.BWACommand;
 import org.pronze.bwaddon.listener.*;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
@@ -60,6 +59,10 @@ public class BwAddon extends JavaPlugin implements Listener {
             Bukkit.getServer().getPluginManager().disablePlugin(BwAddon.getInstance());
             Bukkit.getServer().getPluginManager().enablePlugin(BwAddon.getInstance());
         }
+    }
+
+    public static String getVersion(){
+        return Bukkit.getServer().getPluginManager().getPlugin("ScreamingBedwarsAddon").getDescription().getVersion();
     }
 }
 

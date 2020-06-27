@@ -5,10 +5,10 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.bwaddon.BwAddon;
-import org.screamingsandals.bedwars.commands.BaseCommand;
 
 import java.util.Arrays;
 import java.util.List;
+
 
 public class BWACommand implements TabExecutor {
 
