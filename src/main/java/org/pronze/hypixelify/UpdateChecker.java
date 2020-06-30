@@ -1,4 +1,4 @@
-package org.pronze.bwaddon;
+package org.pronze.hypixelify;
 
 import java.io.IOException;
 import java.io.InputStream;

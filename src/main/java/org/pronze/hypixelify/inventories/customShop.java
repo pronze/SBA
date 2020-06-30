@@ -1,4 +1,4 @@
-package org.pronze.bwaddon.inventories;
+package org.pronze.hypixelify.inventories;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -10,8 +10,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.pronze.bwaddon.BwAddon;
-import org.pronze.bwaddon.listener.PlayerListener;
+import org.pronze.hypixelify.Hypixelify;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GamePlayer;
@@ -40,17 +39,13 @@ import org.bukkit.Material;
 import java.io.File;
 import java.util.*;
 
-import static org.screamingsandals.bedwars.lib.lang.I18n.i18n;
-import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
-
 public class customShop implements Listener {
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
-    org.pronze.bwaddon.BwAddon BwAddon;
     static public HashMap<Integer, Integer> Prices= new HashMap<>();
 
     public customShop() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, BwAddon.getInstance());
+        Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
 
         Prices.put(0,4);
         Prices.put(1,4);
@@ -220,7 +215,7 @@ public class customShop implements Listener {
 
             String nprice = Integer.toString(price);
             if(event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Protection") && event.getStack().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) <= 4){
-                ItemStack shop = shopEnchants(event.getStack(), event.getPlayer().getInventory().getBoots(), Enchantment.PROTECTION_ENVIRONMENTAL);
+                ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.setStack(shop);
                 nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL)));
             }
@@ -232,6 +227,7 @@ public class customShop implements Listener {
                         break;
                     }
                 }
+                assert sword != null;
                 ItemStack shop = shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
                 event.setStack(shop);
                 nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.DAMAGE_ALL)));
@@ -307,7 +303,7 @@ public class customShop implements Listener {
     @EventHandler
     public void onShopOpen(BedwarsOpenShopEvent event) {
         if (Main.getPlayerGameProfile(event.getPlayer()).isSpectator) return;
-        if (BwAddon.getInstance().getConfigurator().getBoolean("store.replace-store-with-hypixelstore", true)) {
+        if (Hypixelify.getConfigurator().getBoolean("store.replace-store-with-hypixelstore", true)) {
             event.setResult(Result.DISALLOW_THIRD_PARTY_SHOP);
             this.show(event.getPlayer(), event.getStore());
         }
@@ -320,7 +316,6 @@ public class customShop implements Listener {
         if (!shopMap.containsValue(event.getFormat()) || event.isCancelled()) {
             return;
         }
-        Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
 
         MapReader reader = event.getItem().getReader();
         if (reader.containsKey("upgrade")) {
@@ -328,7 +323,7 @@ public class customShop implements Listener {
         } else {
 
             if(event.getStack().getItemMeta().getDisplayName().contains("Protection") ){
-               ItemStack shop = shopEnchants(event.getStack(), event.getPlayer().getInventory().getBoots(), Enchantment.PROTECTION_ENVIRONMENTAL);
+               ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.getStack().addEnchantments(shop.getEnchantments());
             }
             else if(event.getStack().getItemMeta().getDisplayName().contains("Sharpness")){
@@ -339,6 +334,7 @@ public class customShop implements Listener {
                         break;
                     }
                 }
+                assert sword != null;
                 ItemStack shop = shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
                 event.getStack().addEnchantments(shop.getEnchantments());
             }
@@ -367,10 +363,10 @@ public class customShop implements Listener {
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
-                    format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), shopFileName);
+                    format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
-                format.loadFromDataFolder(BwAddon.getInstance().getDataFolder(), fileName);
+                format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), fileName);
             }
         } catch (Exception ignored) {
             Bukkit.getLogger().severe("Wrong shop.yml configuration!");
@@ -498,7 +494,7 @@ public class customShop implements Listener {
                 }
 
             } else if (getNameOrCustomNameOfItem(newItem).contains("Protection")) {
-                if (player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4 || (player.getInventory().getBoots().getEnchantments().size() > 0 && player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL))) {
+                if (Objects.requireNonNull(player.getInventory().getBoots()).getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4 || (player.getInventory().getBoots().getEnchantments().size() > 0 && player.getInventory().getBoots().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL))) {
                     shouldSellStack = false;
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have the greatest enchantment.");
                 } else {
@@ -520,7 +516,7 @@ public class customShop implements Listener {
                             newItem.addEnchantments(item.getEnchantments());
                             if (item.getType() == Material.WOODEN_SWORD)
                                 player.getInventory().remove(Material.WOODEN_SWORD);
-                            else if (BwAddon.getConfigurator().getBoolean("remove-sword-on-upgrade", true))
+                            else if (Hypixelify.getConfigurator().getBoolean("remove-sword-on-upgrade", true))
                                 player.getInventory().remove(item);
                         }
                     }

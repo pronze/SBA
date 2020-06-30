@@ -55,7 +55,7 @@ farmBlocks:
   enable: false
   blocks: []
 scoreboard:
-  enable: true
+  enable: false
   title: §a%game%§r - %time%
   bedLost: §c✘
   bedExists: §a✔
@@ -190,7 +190,7 @@ game-effects:
   beddestroy: {}
   warppowdertick: {}
 lobby-scoreboard:
-  enabled: true
+  enabled: false
   title: §eBEDWARS
   content:
     - ' '

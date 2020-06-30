@@ -1,8 +1,8 @@
-name: ScreamingBedwarsAddon
+name: SBAHypixelify
 version: ${project.version}
-main: org.pronze.bwaddon.BwAddon
+main: org.pronze.hypixelify.Hypixelify
 api-version: "1.13"
-depend: [BedWars]
+depend: [BedWars,ProtocolLib]
 softdepend: [PlaceholderAPI]
 author: pronze
 

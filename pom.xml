@@ -2,10 +2,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.pronze</groupId>
-    <artifactId>ScreamingBedwarsAddon</artifactId>
-    <version>1.0.9</version>
+    <artifactId>SBAHypixelify</artifactId>
+    <version>1.1.0</version>
 
     <repositories>
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
+        </repository>
+
         <repository>
             <id>screaming-repo</id>
             <url>https://repo.screamingsandals.org/</url>
@@ -25,6 +30,12 @@
 
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>4.5.1</version>
+        </dependency>
 
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
@@ -67,7 +78,7 @@
         </resources>
 
         <defaultGoal>clean install</defaultGoal>
-        <finalName>ScreamingBedwarsAddon-${project.version}</finalName>
+        <finalName>SBAHypixelify-${project.version}</finalName>
         <plugins>
 
             <plugin>

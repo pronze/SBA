@@ -3,8 +3,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.pronze</groupId>
-    <artifactId>ScreamingBedwarsAddon</artifactId>
-    <version>1.0.1</version>
+    <artifactId>SBAHypixelify</artifactId>
+    <version>1.1.0</version>
     <build>
         <defaultGoal>clean install</defaultGoal>
         <resources>
@@ -17,7 +17,7 @@
                 </includes>
             </resource>
         </resources>
-        <finalName>ScreamingBedwarsAddon-${project.version}</finalName>
+        <finalName>SBAHypixelify-${project.version}</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -78,13 +78,13 @@
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars</artifactId>
-            <version>0.2.10-SNAPSHOT</version>
+            <version>0.2.11-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars-API</artifactId>
-            <version>0.2.10-SNAPSHOT</version>
+            <version>0.2.11-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
