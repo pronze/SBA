@@ -93,104 +93,106 @@ public class ScoreBoard {
                 alive_players++;
         }
         for (Player player : game.getConnectedPlayers()) {
-            ChatColor chatColor = null;
-            Team playerteam = game.getTeamOfPlayer(player);
-            lines.clear();
-            String tks = "0";
-            String ks = "0";
-            String fks = "0";
-            String dis = "0";
-            String bes = "0";
-            Map<String, Integer> totalkills = this.arena.getPlayerGameStorage().getPlayerTotalKills();
-            Map<String, Integer> kills = this.arena.getPlayerGameStorage().getPlayerKills();
-            Map<String, Integer> finalkills = this.arena.getPlayerGameStorage().getPlayerFinalKills();
-            Map<String, Integer> dies = this.arena.getPlayerGameStorage().getPlayerDies();
-            Map<String, Integer> beds = this.arena.getPlayerGameStorage().getPlayerBeds();
-            tks = String.valueOf(totalkills.getOrDefault(player.getName(), 0));
-            ks = String.valueOf(kills.getOrDefault(player.getName(), 0));
-            fks = String.valueOf(finalkills.getOrDefault(player.getName(), 0));
-            dis = String.valueOf(dies.getOrDefault(player.getName(), 0));
-            bes = String.valueOf(beds.getOrDefault(player.getName(), 0));
-            String p_t_ps = "";
-            String p_t = "";
-            String p_t_b_s = "";
-            if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).countConnectedPlayers() > 0) {
-                chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(game.getTeamOfPlayer(player).getColor().name()).chatColor;
-                p_t_ps = String.valueOf(game.getTeamOfPlayer(player).getConnectedPlayers().size());
-                p_t = game.getTeamOfPlayer(player).getName();
-                p_t_b_s = getTeamBedStatus(game.getTeamOfPlayer(player));
-            }
-            for (String ls : scoreboard_lines) {
-                if (ls.contains("{team_status}")) {
-                    for (RunningTeam t : game.getRunningTeams()) {
-                        String you = "";
-                        if (game.getTeamOfPlayer(player) != null)
-                            if (game.getTeamOfPlayer(player) == t) {
-                                you = color("&7YOU");
-                            } else {
-                                you = "";
+            if (game.isPlayerInAnyTeam(player)) {
+                ChatColor chatColor = null;
+                Team playerteam = game.getTeamOfPlayer(player);
+                lines.clear();
+                String tks = "0";
+                String ks = "0";
+                String fks = "0";
+                String dis = "0";
+                String bes = "0";
+                Map<String, Integer> totalkills = this.arena.getPlayerGameStorage().getPlayerTotalKills();
+                Map<String, Integer> kills = this.arena.getPlayerGameStorage().getPlayerKills();
+                Map<String, Integer> finalkills = this.arena.getPlayerGameStorage().getPlayerFinalKills();
+                Map<String, Integer> dies = this.arena.getPlayerGameStorage().getPlayerDies();
+                Map<String, Integer> beds = this.arena.getPlayerGameStorage().getPlayerBeds();
+                tks = String.valueOf(totalkills.getOrDefault(player.getName(), 0));
+                ks = String.valueOf(kills.getOrDefault(player.getName(), 0));
+                fks = String.valueOf(finalkills.getOrDefault(player.getName(), 0));
+                dis = String.valueOf(dies.getOrDefault(player.getName(), 0));
+                bes = String.valueOf(beds.getOrDefault(player.getName(), 0));
+                String p_t_ps = "";
+                String p_t = "";
+                String p_t_b_s = "";
+                if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).countConnectedPlayers() > 0) {
+                    chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(game.getTeamOfPlayer(player).getColor().name()).chatColor;
+                    p_t_ps = String.valueOf(game.getTeamOfPlayer(player).getConnectedPlayers().size());
+                    p_t = game.getTeamOfPlayer(player).getName();
+                    p_t_b_s = getTeamBedStatus(game.getTeamOfPlayer(player));
+                }
+                for (String ls : scoreboard_lines) {
+                    if (ls.contains("{team_status}")) {
+                        for (RunningTeam t : game.getRunningTeams()) {
+                            String you = "";
+                            if (game.getTeamOfPlayer(player) != null)
+                                if (game.getTeamOfPlayer(player) == t) {
+                                    you = color("&7YOU");
+                                } else {
+                                    you = "";
+                                }
+                            if (this.teamstatus.containsKey(t.getName())) {
+                                lines.add(this.teamstatus.get(t.getName()).replace("{you}", you));
+                                continue;
                             }
-                        if (this.teamstatus.containsKey(t.getName())) {
-                            lines.add(this.teamstatus.get(t.getName()).replace("{you}", you));
-                            continue;
+                            lines.add(ls.replace("{team_status}",
+                                    getTeamStatusFormat(t).replace("{you}", you)));
                         }
-                        lines.add(ls.replace("{team_status}",
-                                getTeamStatusFormat(t).replace("{you}", you)));
+                        continue;
                     }
-                    continue;
-                }
-                String date = (new SimpleDateFormat("MM/dd/yy")).format(new Date());
+                    String date = (new SimpleDateFormat("MM/dd/yy")).format(new Date());
 
-                assert chatColor != null;
-                String addline = ls
-                        .replace("{remain_teams}", String.valueOf(rts)).replace("{alive_teams}", String.valueOf(ats))
-                        .replace("{alive_players}", String.valueOf(alive_players))
-                        .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString())
-                        .replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
-                        .replace("{team}", p_t).replace("{beds}", bes).replace("{dies}", dis)
-                        .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
-                        .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                        .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                        .replace("{game}", this.game.getName()).replace("{date}", date)
-                        .replace("{team_bed_status}", p_t_b_s);
-                for (RunningTeam t : game.getRunningTeams()) {
-                    if (addline.contains("{team_" + t.getName() + "_status}")) {
-                        String stf = getTeamStatusFormat(t);
-                        if (game.getTeamOfPlayer(player) == null) {
-                            stf = stf.replace("{you}", "");
-                        } else if (game.getTeamOfPlayer(player) == t) {
-                            stf = stf.replace("{you}", "&7YOU");
-                        } else {
-                            stf = stf.replace("{you}", "");
+                    assert chatColor != null;
+                    String addline = ls
+                            .replace("{remain_teams}", String.valueOf(rts)).replace("{alive_teams}", String.valueOf(ats))
+                            .replace("{alive_players}", String.valueOf(alive_players))
+                            .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString())
+                            .replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
+                            .replace("{team}", p_t).replace("{beds}", bes).replace("{dies}", dis)
+                            .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
+                            .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                            .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                            .replace("{game}", this.game.getName()).replace("{date}", date)
+                            .replace("{team_bed_status}", p_t_b_s);
+                    for (RunningTeam t : game.getRunningTeams()) {
+                        if (addline.contains("{team_" + t.getName() + "_status}")) {
+                            String stf = getTeamStatusFormat(t);
+                            if (game.getTeamOfPlayer(player) == null) {
+                                stf = stf.replace("{you}", "");
+                            } else if (game.getTeamOfPlayer(player) == t) {
+                                stf = stf.replace("{you}", "&7YOU");
+                            } else {
+                                stf = stf.replace("{you}", "");
+                            }
+                            addline = addline.replace("{team_" + t.getName() + "_status}", stf);
                         }
-                        addline = addline.replace("{team_" + t.getName() + "_status}", stf);
+                        if (addline.contains("{team_" + t.getName() + "_bed_status}"))
+                            addline = addline.replace("{team_" + t.getName() + "_bed_status}",
+                                    getTeamBedStatus(t));
+                        if (addline.contains("{team_" + t.getName() + "_peoples}"))
+                            addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
                     }
-                    if (addline.contains("{team_" + t.getName() + "_bed_status}"))
-                        addline = addline.replace("{team_" + t.getName() + "_bed_status}",
-                                getTeamBedStatus(t));
-                    if (addline.contains("{team_" + t.getName() + "_peoples}"))
-                        addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
+                    if (lines.contains(addline)) {
+                        lines.add(conflict(lines, addline));
+                        continue;
+                    }
+                    lines.add(addline);
                 }
-                if (lines.contains(addline)) {
-                    lines.add(conflict(lines, addline));
-                    continue;
+                String title = Title;
+                if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
+                    title = PlaceholderAPI.setPlaceholders(player, title);
+                List<String> elements = new ArrayList<>();
+                elements.add(title);
+                elements.addAll(lines);
+                if (elements.size() < 16) {
+                    int es = elements.size();
+                    for (int i = 0; i < 16 - es; i++)
+                        elements.add(1, null);
                 }
-                lines.add(addline);
+                List<String> ncelements = elementsPro(elements);
+                String[] scoreboardelements = ncelements.toArray(new String[0]);
+                ScoreboardUtil.setGameScoreboard(player, scoreboardelements, this.game);
             }
-            String title = Title;
-            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-                title = PlaceholderAPI.setPlaceholders(player, title);
-            List<String> elements = new ArrayList<>();
-            elements.add(title);
-            elements.addAll(lines);
-            if (elements.size() < 16) {
-                int es = elements.size();
-                for (int i = 0; i < 16 - es; i++)
-                    elements.add(1, null);
-            }
-            List<String> ncelements = elementsPro(elements);
-            String[] scoreboardelements = ncelements.toArray(new String[0]);
-            ScoreboardUtil.setGameScoreboard(player, scoreboardelements, this.game);
         }
     }
 
