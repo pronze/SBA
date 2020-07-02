@@ -41,7 +41,7 @@ public class Arena {
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        if (!isGamePlayer(e.getPlayer()))
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getPlayer()))
             return;
         Map<String, Integer> beds = this.playerGameStorage.getPlayerBeds();
         Player player = e.getPlayer();
@@ -53,7 +53,7 @@ public class Arena {
     }
 
     public void onDeath(Player player) {
-        if (!isGamePlayer(player))
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player))
             return;
         Map<String, Integer> dies = this.playerGameStorage.getPlayerDies();
         if (dies.containsKey(player.getName())) {
@@ -64,7 +64,7 @@ public class Arena {
     }
 
     public void onPlayerKilled(BedwarsPlayerKilledEvent e) {
-        if (!isGamePlayer(e.getPlayer()) || !isGamePlayer(e.getKiller()))
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getPlayer()) || !BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getKiller()))
             return;
         Player player = e.getPlayer();
         Player killer = e.getKiller();
@@ -145,17 +145,6 @@ public class Arena {
     }
 
 
-
-    private Boolean isGamePlayer(Player player) {
-        Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
-        if (game == null)
-            return false;
-        if (!game.getName().equals(this.game.getName()))
-            return false;
-        if (player.getGameMode().equals(GameMode.SPECTATOR))
-            return false;
-        return true;
-    }
 
 
 
