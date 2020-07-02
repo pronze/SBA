@@ -19,7 +19,7 @@ import java.util.*;
 
 public class ScoreboardUtil {
     private static Map<Player, Scoreboard> scoreboards = new HashMap<>();
-    private static Map<Player, Map<Player, Integer>> player_health = new HashMap<>();
+   // private static Map<Player, Map<Player, Integer>> player_health = new HashMap<>();
 
     private static String[] cutUnranked(String[] content) {
         String[] elements = Arrays.copyOf(content, 16);
@@ -40,7 +40,7 @@ public class ScoreboardUtil {
 
     public static void removePlayer(Player player) {
         scoreboards.remove(player);
-        player_health.remove(player);
+     //   player_health.remove(player);
     }
 
     public static void setLobbyScoreboard(Player p, String[] elements, Game game) {
@@ -119,7 +119,7 @@ public class ScoreboardUtil {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
                         packet.getIntegers().write(0, 0);
                         packet.getStrings().write(0, "bwa-game-list");
-                        packet.getStrings().write(0, "bwa-game-list");
+                       // packet.getStrings().write(0, "bwa-game-list");
                         m.sendServerPacket(p, packet);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -138,7 +138,7 @@ public class ScoreboardUtil {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
                         packet.getIntegers().write(0, 0);
                         packet.getStrings().write(0, "bwa-game-name");
-                        packet.getStrings().write(0, "bwa-game-name");
+                       // packet.getStrings().write(0, "bwa-game-name");
                         m.sendServerPacket(p, packet);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -155,7 +155,7 @@ public class ScoreboardUtil {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
                         packet.getIntegers().write(0, 2);
                         packet.getStrings().write(0, "bwa-game-name");
-                        packet.getStrings().write(0, "§c♥");
+                     //   packet.getStrings().write(0, "§c♥");
                         m.sendServerPacket(p, packet);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -191,36 +191,36 @@ public class ScoreboardUtil {
                 if (toErase)
                     scoreboard.resetScores(entry);
             }
-            if (!player_health.containsKey(p))
-                player_health.put(p, new HashMap<>());
-            Map<Player, Integer> map = player_health.get(p);
-            for (Player pl : game.getConnectedPlayers()) {
-                DecimalFormat format = new DecimalFormat("##");
-                int j = Integer.parseInt(format.format(pl.getHealth()));
-                if (map.getOrDefault(pl, 0) != j) {
-                    if (Hypixelify.getConfigurator().getBoolean("tab_health", true))
-                        try {
-                            PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
-                            packet.getIntegers().write(0, j);
-                            packet.getStrings().write(0, pl.getName());
-                            packet.getStrings().write(0, "bwa-game-list");
-                            m.sendServerPacket(p, packet);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    if (Hypixelify.getConfigurator().getBoolean("tag_health", true))
-                        try {
-                            PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
-                            packet.getIntegers().write(0, j);
-                            packet.getStrings().write(0, pl.getName());
-                            packet.getStrings().write(0, "bwa-game-name");
-                            m.sendServerPacket(p, packet);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    map.put(pl, j);
-                }
-            }
+        //    if (!player_health.containsKey(p))
+       //         player_health.put(p, new HashMap<>());
+         //   Map<Player, Integer> map = player_health.get(p);
+          //  for (Player pl : game.getConnectedPlayers()) {
+           //     DecimalFormat format = new DecimalFormat("##");
+           //     int j = Integer.parseInt(format.format(pl.getHealth()));
+            // if (map.getOrDefault(pl, 0) != j) {
+            //     if (Hypixelify.getConfigurator().getBoolean("tab_health", true))
+            //         try {
+            //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
+            //             packet.getIntegers().write(0, j);
+            //             packet.getStrings().write(0, pl.getName());
+            //             packet.getStrings().write(0, "bwa-game-list");
+            //             m.sendServerPacket(p, packet);
+            //         } catch (Exception e) {
+            //             e.printStackTrace();
+            //         }
+            //     if (Hypixelify.getConfigurator().getBoolean("tag_health", true))
+            //         try {
+            //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
+            //             packet.getIntegers().write(0, j);
+            //             packet.getStrings().write(0, pl.getName());
+            //             packet.getStrings().write(0, "bwa-game-name");
+            //             m.sendServerPacket(p, packet);
+            //         } catch (Exception e) {
+            //             e.printStackTrace();
+            //         }
+            //     map.put(pl, j);
+            // }
+         //   }
             String playertag_prefix = "{color}{team} &f| {color}";
             String playertag_suffix = "";
             RunningTeam playerteam = game.getTeamOfPlayer(p);

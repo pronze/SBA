@@ -4,6 +4,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
@@ -70,6 +71,8 @@ public class PlayerListener implements Listener {
             }
             generatorDropItems.add(mat);
         }
+
+        onPacketSending();
     }
 
     public static <K, V> K getKey(HashMap<K, V> map, V value) {
@@ -260,7 +263,7 @@ public class PlayerListener implements Listener {
             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
             packet.getIntegers().write(0, 1);
             packet.getStrings().write(0, "bwa-game-list");
-            packet.getStrings().write(0, "bwa-game-list");
+        //    packet.getStrings().write(0, "bwa-game-list");
             m.sendServerPacket(player, packet);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -269,7 +272,7 @@ public class PlayerListener implements Listener {
             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
             packet.getIntegers().write(0, 1);
             packet.getStrings().write(0, "bwa-game-name");
-            packet.getStrings().write(0, "bwa-game-name");
+          //  packet.getStrings().write(0, "bwa-game-name");
             m.sendServerPacket(player, packet);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -345,6 +348,35 @@ public class PlayerListener implements Listener {
         Game game = e.getGame();
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onOver(e);
+    }
+
+    private void onPacketSending() {
+        PacketAdapter packetAdapter = new PacketAdapter(Hypixelify.getInstance(), ListenerPriority.HIGHEST,
+                PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE,
+                PacketType.Play.Server.SCOREBOARD_OBJECTIVE, PacketType.Play.Server.SCOREBOARD_SCORE,
+                PacketType.Play.Server.SCOREBOARD_TEAM) {
+            public void onPacketSending(PacketEvent e) {
+                PacketContainer packet = e.getPacket();
+                if (e.getPacketType().equals(PacketType.Play.Server.SCOREBOARD_SCORE) && packet.getScoreboardActions().read(0).equals(EnumWrappers.ScoreboardAction.REMOVE) && getPlayer(packet.getStrings().read(0)) != null)
+                    e.setCancelled(true);
+            }
+        };
+        ProtocolLibrary.getProtocolManager().addPacketListener(packetAdapter);
+    }
+
+    private Player getPlayer(String name) {
+        if (name == null)
+            return null;
+        Player player = Bukkit.getPlayer(name);
+        if (player == null)
+            return null;
+        if (player.getName().equals(name))
+            return player;
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            if (p.getName().equals(name))
+                return player;
+        }
+        return null;
     }
 
 
