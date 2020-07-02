@@ -71,8 +71,6 @@ public class PlayerListener implements Listener {
             }
             generatorDropItems.add(mat);
         }
-
-        onPacketSending();
     }
 
     public static <K, V> K getKey(HashMap<K, V> map, V value) {
@@ -89,23 +87,18 @@ public class PlayerListener implements Listener {
     public void onPlayerRespawn(PlayerRespawnEvent e) {
 
         api = BedwarsAPI.getInstance();
-
-
         Player player = e.getPlayer();
-
 
         if (!api.isPlayerPlayingAnyGame(player)) return;
 
         Game game = api.getGameOfPlayer(player);
-
         Team team = game.getTeamOfPlayer(player);
-
 
         new BukkitRunnable() {
 
             @Override
             public void run() {
-                if (player.getGameMode() == GameMode.SURVIVAL && api.isPlayerPlayingAnyGame(player)) {
+                if (player.getGameMode().equals(GameMode.SURVIVAL) && api.isPlayerPlayingAnyGame(player)) {
                     giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
                     this.cancel();
                 } else if (!api.isPlayerPlayingAnyGame(player))
@@ -113,8 +106,6 @@ public class PlayerListener implements Listener {
             }
 
         }.runTaskTimer(this.plugin, 20L, 20L);
-
-
     }
 
 
@@ -255,27 +246,30 @@ public class PlayerListener implements Listener {
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
         Player player = e.getPlayer();
         RunningTeam team = e.getTeam();
+        Game game = e.getGame();
+
         if (team == null)
             return;
-
-        ProtocolManager m = ProtocolLibrary.getProtocolManager();
-        try {
-            PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-            packet.getIntegers().write(0, 1);
-            packet.getStrings().write(0, "bwa-game-list");
-        //    packet.getStrings().write(0, "bwa-game-list");
-            m.sendServerPacket(player, packet);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        try {
-            PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-            packet.getIntegers().write(0, 1);
-            packet.getStrings().write(0, "bwa-game-name");
-          //  packet.getStrings().write(0, "bwa-game-name");
-            m.sendServerPacket(player, packet);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (game.getStatus().equals(GameStatus.RUNNING)  && team.getConnectedPlayers().size() <= 1) {
+            ProtocolManager m = ProtocolLibrary.getProtocolManager();
+            try {
+                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+                packet.getIntegers().write(0, 1);
+                packet.getStrings().write(0, "bwa-game-list");
+                //    packet.getStrings().write(0, "bwa-game-list");
+                m.sendServerPacket(player, packet);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try {
+                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+                packet.getIntegers().write(0, 1);
+                packet.getStrings().write(0, "bwa-game-name");
+                //  packet.getStrings().write(0, "bwa-game-name");
+                m.sendServerPacket(player, packet);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
         ScoreboardUtil.removePlayer(player);
 
@@ -350,34 +344,7 @@ public class PlayerListener implements Listener {
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onOver(e);
     }
 
-    private void onPacketSending() {
-        PacketAdapter packetAdapter = new PacketAdapter(Hypixelify.getInstance(), ListenerPriority.HIGHEST,
-                PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE,
-                PacketType.Play.Server.SCOREBOARD_OBJECTIVE, PacketType.Play.Server.SCOREBOARD_SCORE,
-                PacketType.Play.Server.SCOREBOARD_TEAM) {
-            public void onPacketSending(PacketEvent e) {
-                PacketContainer packet = e.getPacket();
-                if (e.getPacketType().equals(PacketType.Play.Server.SCOREBOARD_SCORE) && packet.getScoreboardActions().read(0).equals(EnumWrappers.ScoreboardAction.REMOVE) && getPlayer(packet.getStrings().read(0)) != null)
-                    e.setCancelled(true);
-            }
-        };
-        ProtocolLibrary.getProtocolManager().addPacketListener(packetAdapter);
-    }
 
-    private Player getPlayer(String name) {
-        if (name == null)
-            return null;
-        Player player = Bukkit.getPlayer(name);
-        if (player == null)
-            return null;
-        if (player.getName().equals(name))
-            return player;
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (p.getName().equals(name))
-                return player;
-        }
-        return null;
-    }
 
 
 

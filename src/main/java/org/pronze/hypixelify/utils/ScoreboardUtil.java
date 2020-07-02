@@ -14,12 +14,10 @@ import org.pronze.hypixelify.Hypixelify;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 public class ScoreboardUtil {
     private static Map<Player, Scoreboard> scoreboards = new HashMap<>();
-   // private static Map<Player, Map<Player, Integer>> player_health = new HashMap<>();
 
     private static String[] cutUnranked(String[] content) {
         String[] elements = Arrays.copyOf(content, 16);
@@ -39,8 +37,8 @@ public class ScoreboardUtil {
     }
 
     public static void removePlayer(Player player) {
-        scoreboards.remove(player);
-     //   player_health.remove(player);
+        if(scoreboards.containsKey(player))
+            scoreboards.remove(player);
     }
 
     public static void setLobbyScoreboard(Player p, String[] elements, Game game) {
@@ -86,9 +84,9 @@ public class ScoreboardUtil {
                     scoreboard.resetScores(entry);
             }
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
-                Team team = scoreboard.getTeam(game.getName() + ":" + t.getName());
+                Team team = scoreboard.getTeam(t.getName());
                 if (team == null)
-                    team = scoreboard.registerNewTeam(game.getName() + ":" + t.getName());
+                    team = scoreboard.registerNewTeam(  t.getName());
                 team.setAllowFriendlyFire(false);
                 team.setPrefix(t.getColor().toString());
                 for (OfflinePlayer pl : t.getGame().getConnectedPlayers()) {
@@ -114,53 +112,53 @@ public class ScoreboardUtil {
             }
             ProtocolManager m = ProtocolLibrary.getProtocolManager();
             if ((p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard)) && !exist) {
-                if (Hypixelify.getConfigurator().getBoolean("tag_health", true)) {
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                        packet.getIntegers().write(0, 0);
-                        packet.getStrings().write(0, "bwa-game-list");
-                       // packet.getStrings().write(0, "bwa-game-list");
-                        m.sendServerPacket(p, packet);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE);
-                        packet.getIntegers().write(0, 0);
-                        packet.getStrings().write(0, "bwa-game-list");
-                        m.sendServerPacket(p, packet);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (Hypixelify.getConfigurator().getBoolean("tag_health", true)) {
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                        packet.getIntegers().write(0, 0);
-                        packet.getStrings().write(0, "bwa-game-name");
-                       // packet.getStrings().write(0, "bwa-game-name");
-                        m.sendServerPacket(p, packet);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE);
-                        packet.getIntegers().write(0, 2);
-                        packet.getStrings().write(0, "bwa-game-name");
-                        m.sendServerPacket(p, packet);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                        packet.getIntegers().write(0, 2);
-                        packet.getStrings().write(0, "bwa-game-name");
-                     //   packet.getStrings().write(0, "§c♥");
-                        m.sendServerPacket(p, packet);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+             // if (Hypixelify.getConfigurator().getBoolean("tag_health", true)) {
+             //     try {
+             //         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+             //         packet.getIntegers().write(0, 0);
+             //         packet.getStrings().write(0, "bwa-game-list");
+             //        // packet.getStrings().write(0, "bwa-game-list");
+             //         m.sendServerPacket(p, packet);
+             //     } catch (Exception e) {
+             //         e.printStackTrace();
+             //     }
+             //     try {
+             //         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE);
+             //         packet.getIntegers().write(0, 0);
+             //         packet.getStrings().write(0, "bwa-game-list");
+             //         m.sendServerPacket(p, packet);
+             //     } catch (Exception e) {
+             //         e.printStackTrace();
+             //     }
+             // }
+             // if (Hypixelify.getConfigurator().getBoolean("tag_health", true)) {
+             //     try {
+             //         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+             //         packet.getIntegers().write(0, 0);
+             //         packet.getStrings().write(0, "bwa-game-name");
+             //        // packet.getStrings().write(0, "bwa-game-name");
+             //         m.sendServerPacket(p, packet);
+             //     } catch (Exception e) {
+             //         e.printStackTrace();
+             //     }
+           //         try {
+           //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE);
+          //             packet.getIntegers().write(0, 2);
+           //             packet.getStrings().write(0, "bwa-game-name");
+            //            m.sendServerPacket(p, packet);
+            //       } catch (Exception e) {
+            //            e.printStackTrace();
+           //         }
+           //         try {
+           //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+          //              packet.getIntegers().write(0, 2);
+          //              packet.getStrings().write(0, "bwa-game-name");
+          //           //   packet.getStrings().write(0, "§c♥");
+           //             m.sendServerPacket(p, packet);
+          //          } catch (Exception e) {
+          //              e.printStackTrace();
+          //          }
+          //      }
             }
             Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).setDisplayName(elements[0]);
             for (int i = 1; i < elements.length; i++) {
@@ -225,9 +223,9 @@ public class ScoreboardUtil {
             String playertag_suffix = "";
             RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
-                Team team = scoreboard.getTeam(game.getName() + ":" + t.getName());
+                Team team = scoreboard.getTeam( t.getName());
                 if (team == null)
-                    team = scoreboard.registerNewTeam(game.getName() + ":" + t.getName());
+                    team = scoreboard.registerNewTeam( t.getName());
                 if (!playertag_prefix.equals(""))
                     team.setPrefix(playertag_prefix.replace("{color}", t.getColor().toString()).replace("{team}",
                             t.getName()));

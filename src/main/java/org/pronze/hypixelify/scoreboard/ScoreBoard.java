@@ -11,6 +11,7 @@ import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -88,7 +89,7 @@ public class ScoreBoard {
         }
         int alive_players = 0;
         for (Player p : game.getConnectedPlayers()) {
-            if (!p.getGameMode().equals(GameMode.SPECTATOR))
+            if (game.isPlayerInAnyTeam(p))
                 alive_players++;
         }
         for (Player player : game.getConnectedPlayers()) {
