@@ -1,16 +1,12 @@
 package org.pronze.hypixelify.utils;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.pronze.hypixelify.Hypixelify;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 
@@ -110,56 +106,6 @@ public class ScoreboardUtil {
                 scoreboard.registerNewObjective("bwa-game", "dummy", "test");
                 Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplaySlot(DisplaySlot.SIDEBAR);
             }
-            ProtocolManager m = ProtocolLibrary.getProtocolManager();
-            if ((p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard)) && !exist) {
-             // if (Hypixelify.getConfigurator().getBoolean("tag_health", true)) {
-             //     try {
-             //         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-             //         packet.getIntegers().write(0, 0);
-             //         packet.getStrings().write(0, "bwa-game-list");
-             //        // packet.getStrings().write(0, "bwa-game-list");
-             //         m.sendServerPacket(p, packet);
-             //     } catch (Exception e) {
-             //         e.printStackTrace();
-             //     }
-             //     try {
-             //         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE);
-             //         packet.getIntegers().write(0, 0);
-             //         packet.getStrings().write(0, "bwa-game-list");
-             //         m.sendServerPacket(p, packet);
-             //     } catch (Exception e) {
-             //         e.printStackTrace();
-             //     }
-             // }
-             // if (Hypixelify.getConfigurator().getBoolean("tag_health", true)) {
-             //     try {
-             //         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-             //         packet.getIntegers().write(0, 0);
-             //         packet.getStrings().write(0, "bwa-game-name");
-             //        // packet.getStrings().write(0, "bwa-game-name");
-             //         m.sendServerPacket(p, packet);
-             //     } catch (Exception e) {
-             //         e.printStackTrace();
-             //     }
-           //         try {
-           //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_DISPLAY_OBJECTIVE);
-          //             packet.getIntegers().write(0, 2);
-           //             packet.getStrings().write(0, "bwa-game-name");
-            //            m.sendServerPacket(p, packet);
-            //       } catch (Exception e) {
-            //            e.printStackTrace();
-           //         }
-           //         try {
-           //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-          //              packet.getIntegers().write(0, 2);
-          //              packet.getStrings().write(0, "bwa-game-name");
-          //           //   packet.getStrings().write(0, "§c♥");
-           //             m.sendServerPacket(p, packet);
-          //          } catch (Exception e) {
-          //              e.printStackTrace();
-          //          }
-          //      }
-            }
             Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).setDisplayName(elements[0]);
             for (int i = 1; i < elements.length; i++) {
                 if (elements[i] != null &&
@@ -189,48 +135,19 @@ public class ScoreboardUtil {
                 if (toErase)
                     scoreboard.resetScores(entry);
             }
-        //    if (!player_health.containsKey(p))
-       //         player_health.put(p, new HashMap<>());
-         //   Map<Player, Integer> map = player_health.get(p);
-          //  for (Player pl : game.getConnectedPlayers()) {
-           //     DecimalFormat format = new DecimalFormat("##");
-           //     int j = Integer.parseInt(format.format(pl.getHealth()));
-            // if (map.getOrDefault(pl, 0) != j) {
-            //     if (Hypixelify.getConfigurator().getBoolean("tab_health", true))
-            //         try {
-            //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
-            //             packet.getIntegers().write(0, j);
-            //             packet.getStrings().write(0, pl.getName());
-            //             packet.getStrings().write(0, "bwa-game-list");
-            //             m.sendServerPacket(p, packet);
-            //         } catch (Exception e) {
-            //             e.printStackTrace();
-            //         }
-            //     if (Hypixelify.getConfigurator().getBoolean("tag_health", true))
-            //         try {
-            //             PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
-            //             packet.getIntegers().write(0, j);
-            //             packet.getStrings().write(0, pl.getName());
-            //             packet.getStrings().write(0, "bwa-game-name");
-            //             m.sendServerPacket(p, packet);
-            //         } catch (Exception e) {
-            //             e.printStackTrace();
-            //         }
-            //     map.put(pl, j);
-            // }
-         //   }
-            String playertag_prefix = "{color}{team} &f| {color}";
+            String playertag_prefix = colorize("{color}{team} &f| {color}");
             String playertag_suffix = "";
             RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
+
                 Team team = scoreboard.getTeam( t.getName());
                 if (team == null)
                     team = scoreboard.registerNewTeam( t.getName());
                 if (!playertag_prefix.equals(""))
-                    team.setPrefix(playertag_prefix.replace("{color}", t.getColor().toString()).replace("{team}",
+                    team.setPrefix(playertag_prefix.replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString()).replace("{team}",
                             t.getName()));
                 if (!playertag_suffix.equals(""))
-                    team.setSuffix(playertag_suffix.replace("{color}", t.getColor().toString()).replace("{team}",
+                    team.setSuffix(playertag_suffix.replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString()).replace("{team}",
                             t.getName()));
                 team.setAllowFriendlyFire(false);
                 for (Player pl : t.getConnectedPlayers()) {
@@ -246,9 +163,10 @@ public class ScoreboardUtil {
                             prefix = (prefix == null) ? "" : prefix;
                             suffix = (suffix == null) ? "" : suffix;
                             String name = prefix + pl.getName() + suffix;
-                            if (!name.equals(listName))
+                            if (listName == null || !name.equals(listName))
                                 pl.setPlayerListName(prefix + pl.getName() + suffix);
                         }
+
                     }
                 }
             }
@@ -257,6 +175,10 @@ public class ScoreboardUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String colorize(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
     }
 
 

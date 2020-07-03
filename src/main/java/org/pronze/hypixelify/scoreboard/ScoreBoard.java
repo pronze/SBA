@@ -93,7 +93,6 @@ public class ScoreBoard {
                 alive_players++;
         }
         for (Player player : game.getConnectedPlayers()) {
-            if (game.isPlayerInAnyTeam(player)) {
                 ChatColor chatColor = null;
                 Team playerteam = game.getTeamOfPlayer(player);
                 lines.clear();
@@ -143,17 +142,20 @@ public class ScoreBoard {
                     String date = (new SimpleDateFormat("MM/dd/yy")).format(new Date());
 
                     assert chatColor != null;
-                    String addline = ls
+                        String addline = ls
                             .replace("{remain_teams}", String.valueOf(rts)).replace("{alive_teams}", String.valueOf(ats))
                             .replace("{alive_players}", String.valueOf(alive_players))
-                            .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString())
-                            .replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
                             .replace("{team}", p_t).replace("{beds}", bes).replace("{dies}", dis)
                             .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
                             .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
                             .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
                             .replace("{game}", this.game.getName()).replace("{date}", date)
                             .replace("{team_bed_status}", p_t_b_s);
+
+                    if(game.isPlayerInAnyTeam(player)){
+                        addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
+                               .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString());
+                    }
                     for (RunningTeam t : game.getRunningTeams()) {
                         if (addline.contains("{team_" + t.getName() + "_status}")) {
                             String stf = getTeamStatusFormat(t);
@@ -192,7 +194,7 @@ public class ScoreBoard {
                 List<String> ncelements = elementsPro(elements);
                 String[] scoreboardelements = ncelements.toArray(new String[0]);
                 ScoreboardUtil.setGameScoreboard(player, scoreboardelements, this.game);
-            }
+
         }
     }
 

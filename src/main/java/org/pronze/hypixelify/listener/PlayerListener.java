@@ -1,10 +1,5 @@
 package org.pronze.hypixelify.listener;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.*;
-import com.comphenix.protocol.wrappers.EnumWrappers;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
@@ -109,7 +104,7 @@ public class PlayerListener implements Listener {
     }
 
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDeath(PlayerDeathEvent e) {
 
         api = BedwarsAPI.getInstance();
@@ -146,7 +141,8 @@ public class PlayerListener implements Listener {
         items.add(sword);
         PlayerItems.put(player, items);
 
-        if (e.getEntity().getKiller() != null && Hypixelify.getConfigurator().getBoolean("give-killer-resources", true)) {
+        if (e.getEntity().getKiller() != null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getEntity().getKiller()) && e.getEntity().getKiller().getGameMode().equals(GameMode.SURVIVAL)
+                && Hypixelify.getConfigurator().config.getBoolean("give-killer-resources", true)) {
             Player killer = e.getEntity().getKiller();
             for (ItemStack dropItem : player.getInventory().getContents()) {
                 if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
@@ -155,8 +151,6 @@ public class PlayerListener implements Listener {
                 }
             }
         }
-
-        e.getDrops().clear();
 
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onDeath(player);
@@ -186,7 +180,7 @@ public class PlayerListener implements Listener {
 
         if (!api.isPlayerPlayingAnyGame(player)) return;
 
-        if (Hypixelify.getConfigurator().getBoolean("disable-armor-inventory-movement", true) && event.getSlotType() == SlotType.ARMOR)
+        if (Hypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true) && event.getSlotType() == SlotType.ARMOR)
             event.setCancelled(true);
 
         Inventory topSlot = event.getView().getTopInventory();
@@ -246,31 +240,9 @@ public class PlayerListener implements Listener {
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
         Player player = e.getPlayer();
         RunningTeam team = e.getTeam();
-        Game game = e.getGame();
 
         if (team == null)
             return;
-        if (game.getStatus().equals(GameStatus.RUNNING)  && team.getConnectedPlayers().size() <= 1) {
-            ProtocolManager m = ProtocolLibrary.getProtocolManager();
-            try {
-                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                packet.getIntegers().write(0, 1);
-                packet.getStrings().write(0, "bwa-game-list");
-                //    packet.getStrings().write(0, "bwa-game-list");
-                m.sendServerPacket(player, packet);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            try {
-                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                packet.getIntegers().write(0, 1);
-                packet.getStrings().write(0, "bwa-game-name");
-                //  packet.getStrings().write(0, "bwa-game-name");
-                m.sendServerPacket(player, packet);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
         ScoreboardUtil.removePlayer(player);
 
     }

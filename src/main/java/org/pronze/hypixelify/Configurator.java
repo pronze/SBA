@@ -83,6 +83,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "tag_health", true);
         checkOrSetConfig(modify, "tab_health", true);
+        checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "overstats.message", Arrays.asList(
                 "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
                 , "                             &e&lBEDWARS"
@@ -176,6 +177,18 @@ public class Configurator {
                     LobbyScoreboard.listcolor(config.getStringList("scoreboard.lines." + key)));
 
         overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
+
+        if(config.getBoolean("first_start")){
+            Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN +" Detected first start");
+            upgradeCustomFiles();
+            config.set("first_start", false);
+            saveConfig();
+            Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
+            assert plugin != null;
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+            Bukkit.getLogger().info("[SBAHypixelify]: " + ChatColor.GREEN +" Made changes to the config.yml file!");
+        }
     }
 
     public void upgradeCustomFiles() {

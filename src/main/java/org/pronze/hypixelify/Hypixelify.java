@@ -25,10 +25,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public void onEnable() {
         plugin = this;
         arenamanager = new ArenaManager();
-        if(Bukkit.getPluginManager().getPlugin("ProtocolLib") == null){
-            Bukkit.getLogger().warning("[SBAHypixelify]: Failed initalization, make sure ProtocolLib is installed");
-            Bukkit.getPluginManager().disablePlugin(Hypixelify.getInstance());
-        }
 
         new UpdateChecker(this, 79505).getVersion(version -> {
             if (this.getDescription().getVersion().contains(version)) {
@@ -51,8 +47,16 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
         getCommand("bwaddon").setExecutor(new BWACommand());
 
-        if(!configurator.getString("version", "1.0").contains(getVersion())){
+        if(!configurator.config.getString("version").contains(getVersion())){
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
+        }
+    }
+
+    public void onDisable(){
+        if(plugin.isEnabled()){
+            plugin.getPluginLoader().disablePlugin(plugin);
+            this.getServer().getScheduler().cancelTasks(plugin);
+            this.getServer().getServicesManager().unregisterAll(plugin);
         }
     }
 

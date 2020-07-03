@@ -68,19 +68,18 @@ public class Arena {
             return;
         Player player = e.getPlayer();
         Player killer = e.getKiller();
-        if (!game.getConnectedPlayers().contains(player) || !game.getConnectedPlayers().contains(killer) || player.getGameMode().equals(GameMode.SPECTATOR) ||
-                killer.getGameMode().equals(GameMode.SPECTATOR))
+        if (!game.getConnectedPlayers().contains(player) || !game.getConnectedPlayers().contains(killer))
             return;
         Map<String, Integer> totalkills = this.playerGameStorage.getPlayerTotalKills();
         Map<String, Integer> kills = this.playerGameStorage.getPlayerKills();
         Map<String, Integer> finalkills = this.playerGameStorage.getPlayerFinalKills();
-        if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).isAlive())
             if (kills.containsKey(killer.getName())) {
                 kills.put(killer.getName(), kills.get(killer.getName()) + 1);
             } else {
                 kills.put(killer.getName(), 1);
             }
-        if (game.getTeamOfPlayer(player).isDead())
+
+        if (!game.isPlayerInAnyTeam(player))
             if (finalkills.containsKey(killer.getName())) {
                 finalkills.put(killer.getName(), finalkills.get(killer.getName()) + 1);
             } else {

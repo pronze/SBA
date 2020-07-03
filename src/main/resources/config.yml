@@ -5,7 +5,7 @@ keep-inventory-on-death: false
 in-lobby-colored-leather-by-team: true
 jointeam-entity-show-name: true
 friendlyfire: false
-player-drops: true
+player-drops: false
 join-randomly-after-lobby-timeout: true
 prevent-killing-villagers: true
 compass-enabled: true
@@ -104,7 +104,7 @@ resources:
     material: GOLD_INGOT
     color: GOLD
     name: Gold
-    interval: 15
+    interval: 8
     translate: resource_gold
     spread: 1.0
 respawn:
