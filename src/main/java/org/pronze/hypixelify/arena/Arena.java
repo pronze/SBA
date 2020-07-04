@@ -1,26 +1,27 @@
 package org.pronze.hypixelify.arena;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
+import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.pronze.hypixelify.storage.PlayerGameStorage;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
+import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.Game;
+import sun.security.krb5.Config;
 
 public class Arena {
     private Game game;
 
     private ScoreBoard scoreBoard;
-
     private PlayerGameStorage playerGameStorage;
 
     public Game getGame() {
@@ -73,18 +74,20 @@ public class Arena {
         Map<String, Integer> totalkills = this.playerGameStorage.getPlayerTotalKills();
         Map<String, Integer> kills = this.playerGameStorage.getPlayerKills();
         Map<String, Integer> finalkills = this.playerGameStorage.getPlayerFinalKills();
+
             if (kills.containsKey(killer.getName())) {
                 kills.put(killer.getName(), kills.get(killer.getName()) + 1);
             } else {
                 kills.put(killer.getName(), 1);
             }
 
-        if (!game.isPlayerInAnyTeam(player))
+        if (!game.isPlayerInAnyTeam(player)) {
             if (finalkills.containsKey(killer.getName())) {
                 finalkills.put(killer.getName(), finalkills.get(killer.getName()) + 1);
             } else {
                 finalkills.put(killer.getName(), 1);
             }
+        }
         if (totalkills.containsKey(killer.getName())) {
             totalkills.put(killer.getName(), totalkills.get(killer.getName()) + 1);
         } else {
@@ -139,6 +142,14 @@ public class Arena {
                                 .replace("{first_1_kills}", String.valueOf(kills_1)).replace("{first_2_kills}", String.valueOf(kills_2))
                                 .replace("{first_3_kills}", String.valueOf(kills_3)));
                 }
+            }
+        }
+    }
+
+    public void onGameStarted(BedwarsGameStartedEvent e){
+        for(Player p : e.getGame().getConnectedPlayers()){
+            for(String os : Configurator.gamestart_message){
+                p.sendMessage(os);
             }
         }
     }

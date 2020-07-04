@@ -117,7 +117,8 @@ public class ScoreBoard {
                 if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).countConnectedPlayers() > 0) {
                     chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(game.getTeamOfPlayer(player).getColor().name()).chatColor;
                     p_t_ps = String.valueOf(game.getTeamOfPlayer(player).getConnectedPlayers().size());
-                    p_t = game.getTeamOfPlayer(player).getName();
+                   // p_t = game.getTeamOfPlayer(player).getName();
+                    p_t =  game.getTeamOfPlayer(player).getName();
                     p_t_b_s = getTeamBedStatus(game.getTeamOfPlayer(player));
                 }
                 for (String ls : scoreboard_lines) {
@@ -242,16 +243,17 @@ public class ScoreBoard {
     }
 
     private String getTeamStatusFormat(RunningTeam team) {
-        String alive = color("{color} {team} &a\u2714 &8(&f&l{players}&8) {you})");
-        String destroyed = color("{color} {team} &c\u2718 &8(&f&l{players}&8) {you}");
+        String alive = color("{color} {team} &a\u2714 &8{you}");
+        String destroyed = color("{color} {team} &a&f{players}&8 {you}");
         String status = team.isTargetBlockExists() ? alive : destroyed;
         if (team.isDead() && team.getConnectedPlayers().size() <= 0)
-            status = color("{color} {team} &c\u2718 &8(&f&l{players}&8) {you}");
+            status = color("{color} {team} &c\u2718 {you}");
 
-        String temp = team.isAlive() ? String.valueOf(team.getConnectedPlayers().size()) : "0";
+       String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
+                + team.getName().charAt(0);
         return status.replace("{bed_status}", getTeamBedStatus(team))
-                .replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString())
-                .replace("{team}", team.getName())
-                .replace("{players}", (new StringBuilder(temp)));
+                .replace("{color}", formattedTeam)
+                .replace("{team}", ChatColor.WHITE.toString() + team.getName() + ":")
+                .replace("{players}", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
     }
 }

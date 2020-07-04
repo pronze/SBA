@@ -21,6 +21,7 @@ public class Configurator {
     public FileConfiguration config;
     public static HashMap<String, List<String>> Scoreboard_Lines;
     public static List<String> overstats_message;
+    public static List<String> gamestart_message;
     public final File dataFolder;
     public final Hypixelify main;
 
@@ -84,6 +85,17 @@ public class Configurator {
         checkOrSetConfig(modify, "tag_health", true);
         checkOrSetConfig(modify, "tab_health", true);
         checkOrSetConfig(modify, "first_start", true);
+        checkOrSetConfig(modify, "game-start.message", Arrays.asList(
+                "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
+                , "                             &f&lBed Wars"
+                , ""
+                , "    &e&lProtect your bed and destroy the enemy beds."
+                , "     &e&lUpgrade yourself and your team by collecting"
+                , "   &e&lIron, Gold, Emerald and Diamond from generators"
+                , "            &e&lto access powerful upgrades."
+                , ""
+                , "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
+        ));
         checkOrSetConfig(modify, "overstats.message", Arrays.asList(
                 "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
                 , "                             &e&lBEDWARS"
@@ -177,6 +189,7 @@ public class Configurator {
                     LobbyScoreboard.listcolor(config.getStringList("scoreboard.lines." + key)));
 
         overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
+        gamestart_message = LobbyScoreboard.listcolor(config.getStringList("game-start.message"));
 
         if(config.getBoolean("first_start")){
             Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN +" Detected first start");

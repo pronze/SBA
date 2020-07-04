@@ -236,7 +236,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority =  EventPriority.LOWEST)
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
         Player player = e.getPlayer();
         RunningTeam team = e.getTeam();
@@ -244,7 +244,6 @@ public class PlayerListener implements Listener {
         if (team == null)
             return;
         ScoreboardUtil.removePlayer(player);
-
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -263,6 +262,8 @@ public class PlayerListener implements Listener {
                     Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
             }
         }).runTaskLater(Hypixelify.getInstance(), 2L);
+
+        Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onGameStarted(e);
     }
 
     @EventHandler

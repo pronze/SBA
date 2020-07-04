@@ -1,8 +1,11 @@
 package org.pronze.hypixelify.storage;
 
+import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerGameStorage {
@@ -17,6 +20,7 @@ public class PlayerGameStorage {
     private Map<String, Integer> dies;
 
     private Map<String, Integer> beds;
+
 
     public PlayerGameStorage(Game game) {
         this.game = game;
@@ -50,4 +54,5 @@ public class PlayerGameStorage {
     public Map<String, Integer> getPlayerBeds() {
         return this.beds;
     }
+
 }
