@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -16,7 +18,6 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.Game;
-import sun.security.krb5.Config;
 
 public class Arena {
     private Game game;
@@ -51,6 +52,10 @@ public class Arena {
         } else {
             beds.put(player.getName(), 1);
         }
+        for(Player p : e.getTeam().getConnectedPlayers()){
+            p.sendTitle("§c§lBED DESTROYED!", "You will no longer respawn!", 0, 20, 0);
+        }
+
     }
 
     public void onDeath(Player player) {

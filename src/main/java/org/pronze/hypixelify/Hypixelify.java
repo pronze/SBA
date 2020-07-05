@@ -24,6 +24,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     public void onEnable() {
         plugin = this;
+
+        if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
+        {
+            Bukkit.getLogger().warning("failed to initalize plugin make sure citizens api is installed");
+            onDisable();
+        }
         arenamanager = new ArenaManager();
 
         new UpdateChecker(this, 79505).getVersion(version -> {
@@ -43,6 +49,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         new PlayerListener(this);
         InventoryListener.init(this);
         new customShop();
+        new Shop();
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
         getCommand("bwaddon").setExecutor(new BWACommand());

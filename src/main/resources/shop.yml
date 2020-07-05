@@ -46,7 +46,7 @@ data:
         skip: 1
         stack:
           type: STONE_SWORD
-      - price: 7 of iron
+      - price: 7 of gold
         stack:
           type: IRON_SWORD
       - price: 4 of emerald

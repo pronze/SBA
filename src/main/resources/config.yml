@@ -62,7 +62,7 @@ scoreboard:
   teamTitle: '%bed%%color%%team%'
 title:
   fadeIn: 0
-  stay: 20
+  stay: 0
   fadeOut: 0
 items:
   jointeam: COMPASS
@@ -74,7 +74,7 @@ items:
   pageforward: ARROW
   team-select: WHITE_WOOL
 vault:
-  enable: true
+  enable: false
   reward:
     kill: 5
     win: 20

@@ -2,6 +2,7 @@ package org.pronze.hypixelify.inventories;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -83,11 +84,10 @@ public class customShop implements Listener {
         options.setShowPageNumber(Main.getConfigurator().config.getBoolean("shop.show-page-numbers", true));
         options.setInventoryType(InventoryType.valueOf(Main.getConfigurator().config.getString("shop.inventory-type", "CHEST")));
 
-        options.setPrefix("[BW] Shop");
+        options.setPrefix("[SBAHypixelify] Shop");
         options.setGenericShop(true);
         options.setGenericShopPriceTypeRequired(true);
         options.setAnimationsEnabled(true);
-
         options.registerPlaceholder("team", (key, player, arguments) -> {
             GamePlayer gPlayer = Main.getPlayerGameProfile(player);
             CurrentTeam team = gPlayer.getGame().getPlayerTeam(gPlayer);
@@ -481,6 +481,9 @@ public class customShop implements Listener {
                 } else {
                     for (Player playerCheck : game.getConnectedPlayers()) {
                         if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
+                            if(playerCheck.getGameMode().equals(GameMode.SPECTATOR)){
+
+                            }
                             addEnchantsToPlayerTools(playerCheck, newItem, "SWORD", Enchantment.DAMAGE_ALL);
                             playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
                         }

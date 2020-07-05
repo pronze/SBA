@@ -1,7 +1,11 @@
 package org.pronze.hypixelify.listener;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -12,6 +16,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.*;
 import org.bukkit.inventory.*;
 import org.bukkit.entity.Player;
@@ -24,6 +29,7 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.*;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.bukkit.event.inventory.InventoryType.SlotType;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -317,13 +323,41 @@ public class PlayerListener implements Listener {
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onOver(e);
     }
 
+    @EventHandler
+    public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e){
+        Player player= e.getPlayer();
+        Game game = e.getGame();
+        String message = "&eThe game starts in &c{seconds} &eseconds";
+        (new BukkitRunnable() {
+            public void run() {
+                if (player.isOnline()  && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
+                        game.getConnectedPlayers().contains(player)&&
+                        game.getStatus().equals(GameStatus.WAITING)) {
+                    if(game.getConnectedPlayers().size() >= game.getMinPlayers()) {
+                        String time = Main.getGame(game.getName()).getFormattedTimeLeft();
+                        String[] units = time.split(":");
+                        int seconds = Integer.parseInt(units[1]) + 1;
+                        if (seconds < 2) {
+                            player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds)).replace("seconds", "second")));
+                            player.sendTitle(translateColors("&c" + seconds),"",0,20,0);
+                        } else if (seconds < 6) {
+                            player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds))));
+                            player.sendTitle(translateColors("&c" + seconds),"",0,20,0);
+                        }
+                        else if(seconds < 11){
+                            player.sendMessage(translateColors(message.replace("&c{seconds}", "&6" + seconds)));
+                        }
+                    }
+                } else {
+                    this.cancel();
+                }
+            }
+        }).runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+    }
 
-
-
-
-
-
-
+    private  String translateColors(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
 
 
 }
