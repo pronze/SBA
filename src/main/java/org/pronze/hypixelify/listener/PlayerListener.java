@@ -10,6 +10,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
@@ -73,6 +74,7 @@ public class PlayerListener implements Listener {
             generatorDropItems.add(mat);
         }
     }
+
 
     public static <K, V> K getKey(HashMap<K, V> map, V value) {
         for (K key : map.keySet()) {
@@ -250,6 +252,24 @@ public class PlayerListener implements Listener {
         if (team == null)
             return;
         ScoreboardUtil.removePlayer(player);
+    }
+
+    @EventHandler
+    public void itemDamage(PlayerItemDamageEvent e){
+        Player player = e.getPlayer();
+        if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+        if(!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
+        if(Main.getPlayerGameProfile(player).isSpectator) return;
+
+        if(e.getItem().getType().toString().contains("BOOTS")
+        || e.getItem().getType().toString().contains("HELMET")
+        || e.getItem().getType().toString().contains("LEGGINGS")
+        || e.getItem().getType().toString().contains("CHESTPLATE")
+        || e.getItem().getType().toString().contains("SWORD"))
+        {
+            e.setCancelled(true);
+        }
+
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
