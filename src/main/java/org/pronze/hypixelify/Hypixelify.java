@@ -19,17 +19,14 @@ import java.util.Objects;
 public class Hypixelify extends JavaPlugin implements Listener {
 
     private static Hypixelify plugin;
+    private static customShop shop;
     private Configurator configurator;
     private ArenaManager arenamanager;
 
     public void onEnable() {
         plugin = this;
 
-        if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
-        {
-            Bukkit.getLogger().warning("failed to initalize plugin make sure citizens api is installed");
-            onDisable();
-        }
+
         arenamanager = new ArenaManager();
 
         new UpdateChecker(this, 79505).getVersion(version -> {
@@ -48,8 +45,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         new PlayerListener(this);
         InventoryListener.init(this);
-        new customShop();
-        new Shop();
+        shop = new customShop();
+
+        if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
+        {
+            Bukkit.getLogger().warning("Failed to initalize Citizens shop make sure citizens is installed");
+        }
+        else
+            new Shop();
+
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
         getCommand("bwaddon").setExecutor(new BWACommand());
@@ -84,6 +88,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
     }
 
+    public static customShop getShop(){
+        return shop;
+    }
 
     public static String getVersion(){
         return Objects.requireNonNull(Bukkit.getServer().getPluginManager().getPlugin("SBAHypixelify")).getDescription().getVersion();

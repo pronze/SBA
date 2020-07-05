@@ -4,14 +4,19 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
 import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.trait.SkinTrait;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.inventories.customShop;
@@ -22,12 +27,32 @@ import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
+import org.screamingsandals.bedwars.game.GamePlayer;
+import java.util.Objects;
 
 public class Shop implements Listener {
 
     public Shop(){
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
+        PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
     }
+
+    @EventHandler
+    public void onEntityInteract(PlayerInteractEntityEvent event) {
+        if (event.isCancelled()) {
+            return;
+        }
+
+        Player player = event.getPlayer();
+        if (Main.isPlayerInGame(player)) {
+            GamePlayer gPlayer = Main.getPlayerGameProfile(player);
+            Game game = gPlayer.getGame();
+            if (game.getStatus() == GameStatus.WAITING || gPlayer.isSpectator) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
 
     @EventHandler
     public void onGameStarted(BedwarsGameStartedEvent e){
@@ -39,6 +64,10 @@ public class Shop implements Listener {
             }
             NPC npc =  CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, store.getShopFile().replaceFirst("[.][^.]+$", ""));
             npc.spawn(store.getStoreLocation());
+            if(npc.getName().contains("upgradeShop"))
+                npc.getTrait(SkinTrait.class).setSkinName("Misat11");
+            else
+                npc.getTrait(SkinTrait.class).setSkinName("iamceph");
         }
     new BukkitRunnable() {
         public void run() {
@@ -48,7 +77,7 @@ public class Shop implements Listener {
                     if(npc.getStoredLocation().getWorld().getName().equalsIgnoreCase(e.getGame().getGameWorld().getName()))
                     {
                         if(npc.getName().contains("shop") || npc.getName().contains("upgradeShop"))
-                        npc.destroy();
+                        npc.despawn();
                     }
                 });
             }
@@ -75,7 +104,7 @@ public class Shop implements Listener {
         }
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         String shopName = "shop.yml";
-        if(!npc.getName().contains("shop") || !npc.getName().contains("upgradeShop") || !game.isPlayerInAnyTeam(player)){
+        if((!npc.getName().contains("shop") && !npc.getName().contains("upgradeShop") )|| !game.isPlayerInAnyTeam(player)){
             return false;
         }
         if(npc.getName().contains("upgradeShop")){
@@ -84,8 +113,7 @@ public class Shop implements Listener {
         GameStore store = new GameStore(null, shopName, false,  "[BW] Shop",
                 false, false);
 
-        customShop shop = new customShop();
-        shop.show(player, store);
+        Hypixelify.getInstance().getShop().show(player, store);
 
         return true;
     }
@@ -97,7 +125,7 @@ public class Shop implements Listener {
             if(npc.getStoredLocation().getWorld().getName().equalsIgnoreCase(e.getGame().getGameWorld().getName()))
             {
                 if(npc.getName().contains("shop") || npc.getName().contains("upgradeShop"))
-                    npc.destroy();
+                    npc.despawn();
             }
         });
     }
@@ -108,7 +136,7 @@ public class Shop implements Listener {
                 if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName()))
                 {
                     if(npc.getName().contains("shop") || npc.getName().contains("upgradeShop"))
-                        npc.destroy();
+                        npc.despawn();
                 }
             });
         }
