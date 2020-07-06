@@ -1,19 +1,13 @@
 package org.pronze.hypixelify.arena;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.pronze.hypixelify.storage.PlayerGameStorage;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
@@ -74,7 +68,8 @@ public class Arena {
             return;
         Player player = e.getPlayer();
         Player killer = e.getKiller();
-        if (!game.getConnectedPlayers().contains(player) || !game.getConnectedPlayers().contains(killer))
+        if (!game.getConnectedPlayers().contains(player) || !game.getConnectedPlayers().contains(killer)
+         || Main.getPlayerGameProfile(player).isSpectator || Main.getPlayerGameProfile(killer).isSpectator)
             return;
         Map<String, Integer> totalkills = this.playerGameStorage.getPlayerTotalKills();
         Map<String, Integer> kills = this.playerGameStorage.getPlayerKills();
@@ -136,6 +131,10 @@ public class Arena {
                 List<String> WinTeamPlayers = new ArrayList<>();
                 for (Player teamplayer : e.getWinningTeam().getConnectedPlayers())
                     WinTeamPlayers.add(teamplayer.getName());
+
+                for(Player pl : e.getWinningTeam().getConnectedPlayers()){
+                        pl.sendTitle("§6§lVICTORY!", "", 0, 20, 0);
+                }
                 for (Player player : game.getConnectedPlayers()) {
                     for (String os : Configurator.overstats_message)
                         player.sendMessage(os.replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
