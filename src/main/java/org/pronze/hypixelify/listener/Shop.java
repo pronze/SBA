@@ -65,7 +65,7 @@ public class Shop implements Listener {
             if(npc.getName().contains("upgradeShop"))
                 npc.getTrait(SkinTrait.class).setSkinName("Conefish");
             else
-                npc.getTrait(SkinTrait.class).setSkinName("iamceph");
+                npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
         }
 }
     @EventHandler
