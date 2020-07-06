@@ -1,5 +1,6 @@
 package org.pronze.hypixelify;
 
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -8,6 +9,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 import org.pronze.hypixelify.inventories.customShop;
 
@@ -40,19 +42,19 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
-        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info(ChatColor.GOLD + "[SBAHypixelify]: Enabled Bedwars Addon v" + Objects.requireNonNull(Bukkit.getServer().getPluginManager().getPlugin("SBAHypixelify")).getDescription().getVersion());
-        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         new PlayerListener(this);
         InventoryListener.init(this);
         shop = new customShop();
 
         if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
         {
-            Bukkit.getLogger().warning("Failed to initalize Citizens shop make sure citizens is installed");
+           Bukkit.getLogger().warning("Failed to initalize Citizens shop make sure citizens is installed");
         }
-        else
-            new Shop();
+       else
+           new Shop();
 
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
@@ -61,6 +63,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         if(!configurator.config.getString("version").contains(getVersion())){
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
+
     }
 
     public void onDisable(){
