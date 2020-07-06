@@ -29,6 +29,9 @@ import java.util.Objects;
 
 public class Shop implements Listener {
 
+    private final String ITEM_SHOP_NAME = "§bITEM SHOP";
+    private final String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
+
     public Shop(){
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
@@ -59,20 +62,29 @@ public class Shop implements Listener {
             if (villager != null) {
                 Main.unregisterGameEntity(villager);
             }
-            NPC npc =  CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, store.getShopFile().replaceFirst("[.][^.]+$", ""));
+            String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
+            if(ShopName.equalsIgnoreCase("shop")){
+                ShopName = ITEM_SHOP_NAME;
+            }
+            else
+            {
+                ShopName = UPGRADE_SHOP_NAME;
+            }
+            NPC npc =  CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
             npc.spawn(store.getStoreLocation());
             npc.getTrait(LookClose.class).lookClose(true);
-            if(npc.getName().contains("upgradeShop"))
+            if(npc.getName().contains(UPGRADE_SHOP_NAME))
                 npc.getTrait(SkinTrait.class).setSkinName("Conefish");
             else
                 npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
+
         }
 }
     @EventHandler
     public void onRebuild(BedwarsPreRebuildingEvent e){
         CitizensAPI.getNPCRegistry().forEach(npc -> {
             if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
-                if (npc.getName().contains("shop") || npc.getName().contains("upgradeShop")) {
+                if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
                     npc.despawn();
                 }
             }
@@ -99,10 +111,10 @@ public class Shop implements Listener {
         }
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         String shopName = "shop.yml";
-        if((!npc.getName().contains("shop") && !npc.getName().contains("upgradeShop") )|| !game.isPlayerInAnyTeam(player)){
+        if((!npc.getName().contains(ITEM_SHOP_NAME) && !npc.getName().contains(UPGRADE_SHOP_NAME) )|| !game.isPlayerInAnyTeam(player)){
             return false;
         }
-        if(npc.getName().contains("upgradeShop")){
+        if(npc.getName().contains(UPGRADE_SHOP_NAME)){
             shopName = "upgradeShop.yml";
         }
         GameStore store = new GameStore(null, shopName, false,  "[BW] Shop",
@@ -120,7 +132,7 @@ public class Shop implements Listener {
 
             if(npc.getStoredLocation().getWorld().getName().equalsIgnoreCase(e.getGame().getGameWorld().getName()))
             {
-                if(npc.getName().contains("shop") || npc.getName().contains("upgradeShop")) {
+                if(npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
                     npc.despawn();
                 }
             }
@@ -131,8 +143,7 @@ public class Shop implements Listener {
         if (e.getPlugin().getName().equals("BedWars")) {
           CitizensAPI.getNPCRegistry().forEach(npc -> {
               if (Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
-                  Bukkit.getLogger().info(npc.getName());
-                  if (npc.getName().contains("shop") || npc.getName().contains("upgradeShop")){
+                  if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)){
                       npc.despawn();
               }
           }

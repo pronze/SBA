@@ -133,7 +133,7 @@ public class Arena {
                     WinTeamPlayers.add(teamplayer.getName());
 
                 for(Player pl : e.getWinningTeam().getConnectedPlayers()){
-                        pl.sendTitle("§6§lVICTORY!", "", 0, 20, 0);
+                        pl.sendTitle("§6§lVICTORY!", "", 0, 60, 0);
                 }
                 for (Player player : game.getConnectedPlayers()) {
                     for (String os : Configurator.overstats_message)

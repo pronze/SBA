@@ -25,11 +25,16 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.*;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.screamingsandals.bedwars.game.CurrentTeam;
+import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.bedwars.lib.nms.title.Title;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
+import static org.screamingsandals.bedwars.lib.lang.I18n.i18n;
+import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
 
 public class PlayerListener implements Listener {
     Hypixelify plugin;
@@ -154,9 +159,32 @@ public class PlayerListener implements Listener {
                 }
             }
         }
+            final Player victim = e.getEntity();
+            GamePlayer gVictim = Main.getPlayerGameProfile(victim);
 
-        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onDeath(player);
+            CurrentTeam victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
+            if (Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled") && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) && game.getTeamOfPlayer(player).isTargetBlockExists()) {
+                int respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
+
+                new BukkitRunnable() {
+                    int livingTime = respawnTime;
+                    GamePlayer gamePlayer = gVictim;
+                    Player player = gamePlayer.player;
+
+                    @Override
+                    public void run() {
+                        if (livingTime > 0) {
+                            Title.sendTitle(player, i18nonly("respawn_cooldown_title").replace("%time%", String.valueOf(livingTime)),
+                                    "", 0,20,0);
+
+                        }
+                        livingTime--;
+                        if (livingTime == 0) {
+                            this.cancel();
+                        }
+                    }
+                }.runTaskTimer(Main.getInstance(), 20L, 20L);
+            }
     }
 
     public ItemStack checkifUpgraded(ItemStack newItem) {
