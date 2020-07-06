@@ -1,5 +1,4 @@
 package org.pronze.hypixelify.listener;
-
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.NPCLeftClickEvent;
 import net.citizensnpcs.api.event.NPCRightClickEvent;
@@ -25,6 +24,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.game.GamePlayer;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class Shop implements Listener {
@@ -82,13 +82,20 @@ public class Shop implements Listener {
 }
     @EventHandler
     public void onRebuild(BedwarsPreRebuildingEvent e){
+        ArrayList<NPC> npcs = new ArrayList<>();
+
         CitizensAPI.getNPCRegistry().forEach(npc -> {
             if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
                 if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
-                    npc.despawn();
+                    npcs.add(npc);
                 }
             }
         });
+
+        for(NPC npc : npcs){
+            npc.destroy();
+        }
+
     }
 
 
@@ -128,26 +135,34 @@ public class Shop implements Listener {
 
     @EventHandler
     public void gameOverEvent(BedwarsGameEndEvent e){
-        CitizensAPI.getNPCRegistry().forEach(npc -> {
+        ArrayList<NPC> npcs = new ArrayList<>();
 
-            if(npc.getStoredLocation().getWorld().getName().equalsIgnoreCase(e.getGame().getGameWorld().getName()))
-            {
-                if(npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
-                    npc.despawn();
+        CitizensAPI.getNPCRegistry().forEach(npc -> {
+            if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
+                if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
+                    npcs.add(npc);
                 }
             }
         });
+
+        for(NPC npc : npcs){
+            npc.destroy();
+        }
     }
     @EventHandler
     public void onDisable(PluginDisableEvent e) {
         if (e.getPlugin().getName().equals("BedWars")) {
-          CitizensAPI.getNPCRegistry().forEach(npc -> {
+            ArrayList<NPC> npcs = new ArrayList<>();
+            CitizensAPI.getNPCRegistry().forEach(npc -> {
               if (Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
                   if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)){
-                      npc.despawn();
+                      npcs.add(npc);
               }
           }
           });
+            for(NPC npc : npcs){
+                npc.destroy();
+            }
       }
     }
 }
