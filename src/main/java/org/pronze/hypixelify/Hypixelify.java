@@ -1,6 +1,5 @@
 package org.pronze.hypixelify;
 
-import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,7 +8,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 import org.pronze.hypixelify.inventories.customShop;
 
@@ -42,9 +40,30 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
-        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        Bukkit.getLogger().info(ChatColor.GOLD + "[SBAHypixelify]: Enabled Bedwars Addon v" + Objects.requireNonNull(Bukkit.getServer().getPluginManager().getPlugin("SBAHypixelify")).getDescription().getVersion());
-        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        boolean hookedWithCitizens = this.getServer().getPluginManager().getPlugin("Citizens") != null;
+        Bukkit.getLogger().info("");
+        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Bukkit.getLogger().info("<  _____ ______   ___   _   _                _             _  _   __                              >");
+        Bukkit.getLogger().info("< /  ___|| ___ \\ / _ \\ | | | |              (_)           | |(_) / _|                             >");
+        Bukkit.getLogger().info("< \\ `--. | |_/ // /_\\ \\| |_| | _   _  _ __   _ __  __ ___ | | _ | |_  _   _                       >");
+        Bukkit.getLogger().info("<  `--. \\| ___ \\|  _  ||  _  || | | || '_ \\ | |\\ \\/ // _ \\| || ||  _|| | | |                      >");
+        Bukkit.getLogger().info("< /\\__/ /| |_/ /| | | || | | || |_| || |_) || | >  <|  __/| || || |  | |_| |                      > ");
+        Bukkit.getLogger().info("< \\____/ \\____/ \\_| |_/\\_| |_/ \\__, || .__/ |_|/_/\\_\\____||_||_||_|  \\__,  |                      >");
+        Bukkit.getLogger().info("<                               __/ || |                               __/ |                      >");
+        Bukkit.getLogger().info("<                              |___/ |_|                              |___/                       >");
+        Bukkit.getLogger().info("<  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______ >");
+        Bukkit.getLogger().info("< |______||______||______||______||______||______||______||______||______||______||______||______|>");
+        Bukkit.getLogger().info("<  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______ >");
+        Bukkit.getLogger().info("< |______||______||______||______||______||______||______||______||______||______||______||______|>");
+        Bukkit.getLogger().info("<                                                                                                 >");
+        Bukkit.getLogger().info("< Status: §fEnabled                                                                                 >");
+        Bukkit.getLogger().info("< Version: §f{Version}                                                                                  >".replace("{Version}", this.getDescription().getVersion()));
+        Bukkit.getLogger().info("< Build: §6Stable                                                                               §7    >");
+        Bukkit.getLogger().info("< Hooked To Citizens: §atrue§7                                                                        >"
+                .replace("true", String.valueOf(hookedWithCitizens)));
+        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        Bukkit.getLogger().info("");
+
         new PlayerListener(this);
         InventoryListener.init(this);
         shop = new customShop();

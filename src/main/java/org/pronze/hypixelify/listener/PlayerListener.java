@@ -33,8 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ArrayList;
-import static org.screamingsandals.bedwars.lib.lang.I18n.i18n;
-import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
 
 public class PlayerListener implements Listener {
     Hypixelify plugin;
@@ -103,6 +101,7 @@ public class PlayerListener implements Listener {
             public void run() {
                 if (player.getGameMode().equals(GameMode.SURVIVAL) && api.isPlayerPlayingAnyGame(player)) {
                     giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
+                    Title.sendTitle(player, "§aRESPAWNED!", "", 5,40,5);
                     this.cancel();
                 } else if (!api.isPlayerPlayingAnyGame(player))
                     this.cancel();
@@ -174,16 +173,15 @@ public class PlayerListener implements Listener {
                     @Override
                     public void run() {
                         if (livingTime > 0) {
-                            Title.sendTitle(player, i18nonly("respawn_cooldown_title").replace("%time%", String.valueOf(livingTime)),
-                                    "", 0,20,0);
-
+                            Title.sendTitle(player, "§cYOU DIED!",
+                                    "§eYou will respawn in §c%time% §eseconds".replace("%time%", String.valueOf(livingTime)), 0,20,0);
                         }
                         livingTime--;
                         if (livingTime == 0) {
                             this.cancel();
                         }
                     }
-                }.runTaskTimer(Main.getInstance(), 20L, 20L);
+                }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
             }
     }
 

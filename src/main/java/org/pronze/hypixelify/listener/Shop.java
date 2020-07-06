@@ -93,6 +93,7 @@ public class Shop implements Listener {
         });
 
         for(NPC npc : npcs){
+            npc.despawn();
             npc.destroy();
         }
 
@@ -146,6 +147,7 @@ public class Shop implements Listener {
         });
 
         for(NPC npc : npcs){
+            npc.despawn();
             npc.destroy();
         }
     }
@@ -161,6 +163,7 @@ public class Shop implements Listener {
           }
           });
             for(NPC npc : npcs){
+                npc.despawn();
                 npc.destroy();
             }
       }

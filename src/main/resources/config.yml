@@ -61,6 +61,7 @@ scoreboard:
   bedExists: §a✔
   teamTitle: '%bed%%color%%team%'
 title:
+  enabled: false
   fadeIn: 0
   stay: 0
   fadeOut: 0

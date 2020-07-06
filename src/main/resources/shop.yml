@@ -221,7 +221,7 @@ data:
         stack:
           type: DIAMOND_AXE
 
-  - stack: "WOOL;16;Wool;Use This to get to other islands!."
+  - stack: "WOOL;16"
     row: 3
     column: 1
     price: 4 of iron

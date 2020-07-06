@@ -12,6 +12,7 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.nms.title.Title;
 
 public class Arena {
     private Game game;
@@ -47,7 +48,7 @@ public class Arena {
             beds.put(player.getName(), 1);
         }
         for(Player p : e.getTeam().getConnectedPlayers()){
-            p.sendTitle("§c§lBED DESTROYED!", "You will no longer respawn!", 0, 20, 0);
+            Title.sendTitle(p,"§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
         }
 
     }
@@ -133,7 +134,7 @@ public class Arena {
                     WinTeamPlayers.add(teamplayer.getName());
 
                 for(Player pl : e.getWinningTeam().getConnectedPlayers()){
-                        pl.sendTitle("§6§lVICTORY!", "", 0, 60, 0);
+                    Title.sendTitle(pl, "§6§lVICTORY!", "", 0, 90, 0);
                 }
                 for (Player player : game.getConnectedPlayers()) {
                     for (String os : Configurator.overstats_message)
