@@ -1,11 +1,6 @@
 package org.pronze.hypixelify.listener;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -154,7 +149,7 @@ public class PlayerListener implements Listener {
             Player killer = e.getEntity().getKiller();
             for (ItemStack dropItem : player.getInventory().getContents()) {
                 if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
-                    killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getI18NDisplayName());
+                    killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getType().name());
                     killer.getInventory().addItem(dropItem);
                 }
             }
@@ -247,10 +242,6 @@ public class PlayerListener implements Listener {
     @EventHandler(priority =  EventPriority.LOWEST)
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
         Player player = e.getPlayer();
-        RunningTeam team = e.getTeam();
-
-        if (team == null)
-            return;
         ScoreboardUtil.removePlayer(player);
     }
 

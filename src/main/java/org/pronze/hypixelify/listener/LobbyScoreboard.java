@@ -106,11 +106,13 @@ public class LobbyScoreboard implements Listener {
         int s = game.getAvailableTeams().get(1).getMaxPlayers();
         String mode = s +"v" +s +"v" + s + "v" +s;
 
-        if (game.getLobbyCountdown() != 0 && game.countConnectedPlayers() >= game.getMinPlayers()) {
+        if (game.countConnectedPlayers() >= game.getMinPlayers() && game.getStatus().equals(GameStatus.WAITING)) {
             String time = Main.getGame(game.getName()).getFormattedTimeLeft();
-            String[] units = time.split(":");
-            int seconds = Integer.parseInt(units[1]) + 1;
-            state = Hypixelify.getConfigurator().getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s").replace("{countdown}",String.valueOf(seconds));
+            if(!time.contains("0-1")) {
+                String[] units = time.split(":");
+                int seconds = Integer.parseInt(units[1]) + 1;
+                state = Hypixelify.getConfigurator().getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s").replace("{countdown}", String.valueOf(seconds));
+            }
         }
         for (String li : Hypixelify.getConfigurator().getStringList("lobby_scoreboard.lines")) {
             String l = li.replace("{date}", getDate()).replace("{state}", state).replace("{game}", game.getName())
