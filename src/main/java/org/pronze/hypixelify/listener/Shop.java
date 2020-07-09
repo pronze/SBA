@@ -17,6 +17,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -29,10 +30,16 @@ public class Shop implements Listener {
 
     private final String ITEM_SHOP_NAME = "§bITEM SHOP";
     private final String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
+    GameStore shop;
+    GameStore upgradeShop;
 
     public Shop(){
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
+        shop = new GameStore(null, "shop.yml", false,  "[BW] Shop",
+                false, false);
+        upgradeShop = new GameStore(null, "upgradeShop.yml", false,  "[BW] Team Upgrades",
+                false, false);
    }
 
 
@@ -57,8 +64,8 @@ public class Shop implements Listener {
     @EventHandler
     public void onGameStarted(BedwarsGameStartedEvent e){
         for (GameStore store : Main.getGame(e.getGame().getName()).getGameStores()) {
-            if(store.getShopFile() != null || store.getShopFile().equalsIgnoreCase("shop.yml")
-             || store.getShopFile().equalsIgnoreCase("upgradeShop.yml")) {
+            if(store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
+             || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
                 LivingEntity villager = store.kill();
                 if (villager != null) {
                     Main.unregisterGameEntity(villager);
@@ -112,22 +119,30 @@ public class Shop implements Listener {
     private Boolean onNPCClick(Player player, NPC npc) {
 
         if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
-            return false;
+            return true;
         }
+
         if(Main.getPlayerGameProfile(player).isSpectator){
-            return false;
+            return true;
         }
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
-        String shopName = "shop.yml";
+        GameStore store = null;
         if((!npc.getName().contains(ITEM_SHOP_NAME) && !npc.getName().contains(UPGRADE_SHOP_NAME) )|| !game.isPlayerInAnyTeam(player)){
             return false;
         }
         if(npc.getName().contains(UPGRADE_SHOP_NAME)){
-            shopName = "upgradeShop.yml";
+            store = upgradeShop;
         }
-        GameStore store = new GameStore(null, shopName, false,  "[BW] Shop",
-                false, false);
+        else if(npc.getName().contains(ITEM_SHOP_NAME)){
+            store = shop;
+        }
 
+        BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                player, store, null);
+        Main.getInstance().getServer().getPluginManager().callEvent(openShopEvent);
+        if (openShopEvent.getResult() != BedwarsOpenShopEvent.Result.ALLOW) {
+            return false;
+        }
         Hypixelify.getShop().show(player, store);
 
         return true;

@@ -44,16 +44,16 @@ import java.util.*;
 public class customShop implements Listener {
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
-    static public HashMap<Integer, Integer> Prices= new HashMap<>();
+    static public HashMap<Integer, Integer> Prices = new HashMap<>();
 
     public customShop() {
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
 
-        Prices.put(0,4);
-        Prices.put(1,4);
-        Prices.put(2,8);
-        Prices.put(3,12);
-        Prices.put(4,16);
+        Prices.put(0, 4);
+        Prices.put(1, 4);
+        Prices.put(2, 8);
+        Prices.put(3, 12);
+        Prices.put(4, 16);
 
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         ItemMeta backItemMeta = backItem.getItemMeta();
@@ -185,7 +185,7 @@ public class customShop implements Listener {
                 shopMap.get("default").openForPlayer(player);
             }
         } catch (Throwable ignored) {
-            player.sendMessage(" Your shop.yml is invalid! Check it out or contact pronze on Discord");
+            player.sendMessage(" Your shop.yml is invalid! Check it out or contact us on Discord");
         }
     }
 
@@ -215,15 +215,14 @@ public class customShop implements Listener {
 
 
             String nprice = Integer.toString(price);
-            if(event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Protection") && event.getStack().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) <= 4){
+            if (event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Protection") && event.getStack().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) <= 4) {
                 ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.setStack(shop);
                 nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL)));
-            }
-            else if(event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Sharpness") && event.getStack().getEnchantmentLevel(Enchantment.DAMAGE_ALL) <= 4){
+            } else if (event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Sharpness") && event.getStack().getEnchantmentLevel(Enchantment.DAMAGE_ALL) <= 4) {
                 ItemStack sword = null;
-                for(ItemStack i :  player.getInventory().getContents()){
-                    if(i != null && i.getType().name().endsWith("SWORD")){
+                for (ItemStack i : player.getInventory().getContents()) {
+                    if (i != null && i.getType().name().endsWith("SWORD")) {
                         sword = i;
                         break;
                     }
@@ -268,18 +267,14 @@ public class customShop implements Listener {
             }
 
 
-
-
-        }}
-
-    public ItemStack shopEnchants(ItemStack sh_item, ItemStack pl_Item,  Enchantment enchant)
-    {
-        int sz = pl_Item.getEnchantmentLevel(enchant);
-        if(sz >= 0 && sz  < 4){
-            sh_item.addEnchantment(enchant, sz + 1);
         }
-        else if(sz == 4)
-        {
+    }
+
+    public ItemStack shopEnchants(ItemStack sh_item, ItemStack pl_Item, Enchantment enchant) {
+        int sz = pl_Item.getEnchantmentLevel(enchant);
+        if (sz >= 0 && sz < 4) {
+            sh_item.addEnchantment(enchant, sz + 1);
+        } else if (sz == 4) {
             sh_item.removeEnchantment(enchant);
             sh_item.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
         }
@@ -323,14 +318,13 @@ public class customShop implements Listener {
             handleUpgrade(event);
         } else {
 
-            if(event.getStack().getItemMeta().getDisplayName().contains("Protection") ){
-               ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
+            if (event.getStack().getItemMeta().getDisplayName().contains("Protection")) {
+                ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.getStack().addEnchantments(shop.getEnchantments());
-            }
-            else if(event.getStack().getItemMeta().getDisplayName().contains("Sharpness")){
+            } else if (event.getStack().getItemMeta().getDisplayName().contains("Sharpness")) {
                 ItemStack sword = null;
-                for(ItemStack i :  event.getPlayer().getInventory().getContents()){
-                    if(i != null && i.getType().name().endsWith("SWORD")){
+                for (ItemStack i : event.getPlayer().getInventory().getContents()) {
+                    if (i != null && i.getType().name().endsWith("SWORD")) {
                         sword = i;
                         break;
                     }
@@ -364,7 +358,7 @@ public class customShop implements Listener {
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
-                    format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), shopFileName);
+                format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
                 format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), fileName);
@@ -510,8 +504,6 @@ public class customShop implements Listener {
             } else if (newItem.getType().name().endsWith("SWORD")) {
 
                 if (!player.getInventory().contains(newItem.getType())) {
-
-
                     for (ItemStack item : player.getInventory().getContents()) {
                         if (item != null && item.getType().name().endsWith("SWORD") && item.getType() != newItem.getType()) {
                             newItem.addEnchantments(item.getEnchantments());
@@ -529,16 +521,11 @@ public class customShop implements Listener {
             } else if (newItem.getType() == Objects.requireNonNull(player.getInventory().getBoots()).getType()) {
                 player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same armor");
                 shouldSellStack = false;
-            }
-            else if (newItem.getType().name().contains("BOOTS"))
-            {
+            } else if (newItem.getType().name().contains("BOOTS")) {
                 String matName = newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"));
                 Material leggings = Material.valueOf(matName + "_LEGGINGS");
                 buyArmor(player, newItem.getType(), leggings);
-            }
-
-
-            else if (newItem.getType().name().endsWith("AXE")) {
+            } else if (newItem.getType().name().endsWith("AXE")) {
                 String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
 
                 for (ItemStack p : player.getInventory().getContents()) {
