@@ -13,6 +13,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.plugin.Plugin;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
+import org.screamingsandals.bedwars.Main;
 
 
 public class Configurator {
@@ -22,6 +23,8 @@ public class Configurator {
     public static HashMap<String, List<String>> Scoreboard_Lines;
     public static List<String> overstats_message;
     public static List<String> gamestart_message;
+    public static HashMap<String, Integer> game_size;
+
     public final File dataFolder;
     public final Hypixelify main;
 
@@ -85,6 +88,10 @@ public class Configurator {
         checkOrSetConfig(modify, "tag_health", true);
         checkOrSetConfig(modify, "tab_health", true);
         checkOrSetConfig(modify, "first_start", true);
+        for(String game : Main.getGameNames()){
+            String str = "lobby-scoreboard.player-size.games." + game;
+            checkOrSetConfig(modify, str, 4);
+        }
         checkOrSetConfig(modify, "game-start.message", Arrays.asList(
                 "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
                 , "                             &f&lBed Wars"
@@ -187,6 +194,12 @@ public class Configurator {
         for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
             Scoreboard_Lines.put(key,
                     LobbyScoreboard.listcolor(config.getStringList("scoreboard.lines." + key)));
+
+        game_size = new HashMap<>();
+        for(String s : Main.getGameNames()){
+            int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
+            game_size.put(s, size);
+        }
 
         overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
         gamestart_message = LobbyScoreboard.listcolor(config.getStringList("game-start.message"));

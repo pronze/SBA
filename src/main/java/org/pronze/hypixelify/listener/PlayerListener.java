@@ -53,7 +53,7 @@ public class PlayerListener implements Listener {
         UpgradeKeys.put("IRON", 4);
         UpgradeKeys.put("DIAMOND", 5);
 
-        for (String material : Hypixelify.getConfigurator().getStringList("allowed-item-drops")) {
+        for (String material : Hypixelify.getConfigurator().config.getStringList("allowed-item-drops")) {
             Material mat;
             try {
                 mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
@@ -62,7 +62,7 @@ public class PlayerListener implements Listener {
             }
             allowed.add(mat);
         }
-        for (String material : Hypixelify.getConfigurator().getStringList("running-generator-drops")) {
+        for (String material : Hypixelify.getConfigurator().config.getStringList("running-generator-drops")) {
             Material mat;
             try {
                 mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
@@ -214,7 +214,7 @@ public class PlayerListener implements Listener {
 
         Inventory topSlot = event.getView().getTopInventory();
         Inventory bottomSlot = event.getView().getBottomInventory();
-        if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
+        if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
             if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
                 player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "You cannot put this item onto this chest.");

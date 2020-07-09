@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
@@ -45,10 +46,10 @@ public class LobbyScoreboard implements Listener {
             public void run() {
                i--;
                 if (i <= 0) {
-                    i = Hypixelify.getConfigurator().getInt("lobby-scoreboard.interval", 2);
-                    title = format(Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title").get(tc));
+                    i = Hypixelify.getConfigurator().config.getInt("lobby-scoreboard.interval", 2);
+                    title = format(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").get(tc));
                     tc++;
-                    if (tc >= Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title").size())
+                    if (tc >= Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").size())
                         tc = 0;
                 }
             }
@@ -57,7 +58,7 @@ public class LobbyScoreboard implements Listener {
 
     @EventHandler
     public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
-        if (!Hypixelify.getConfigurator().getBoolean("lobby-scoreboard.enabled", true))
+        if (!Hypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             return;
         final Game game = e.getGame();
         final Player player = e.getPlayer();
@@ -72,7 +73,7 @@ public class LobbyScoreboard implements Listener {
                         e.getGame().getStatus() == GameStatus.WAITING) {
                     i--;
                     if (i <= 0) {
-                        i = Hypixelify.getConfigurator().getInt("lobby-scoreboard.interval", 2);
+                        i = Hypixelify.getConfigurator().config.getInt("lobby-scoreboard.interval", 2);
                         updateScoreboard(player, game, tc);
                     }
                 } else {
@@ -99,22 +100,38 @@ public class LobbyScoreboard implements Listener {
 
     private List<String> getLine(Player player, Game game) {
         List<String> line = new ArrayList<>();
-        String state = Hypixelify.getConfigurator().getString("lobby-scoreboard.state.waiting", "§fWaiting...");
+        String state = Hypixelify.getConfigurator().config.getString("lobby-scoreboard.state.waiting", "§fWaiting...");
         String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = (needplayers < 0) ? 0 : needplayers;
-        int s = game.getAvailableTeams().get(0).getMaxPlayers();
-        String mode = s +"v" +s +"v" + s + "v" +s;
+        int s = Configurator.game_size.getOrDefault(game.getName(), 4);
+        String mode;
+        switch(s){
+            case 1:
+                mode = "Solo";
+                break;
+            case 2:
+                mode = "Double";
+                break;
+            case 3:
+                mode = "Triples";
+                break;
+            case 4:
+                mode = "Squads";
+                break;
+            default:
+                mode = s +"v" +s +"v" + s + "v" +s;
+        }
 
         if (game.countConnectedPlayers() >= game.getMinPlayers() && game.getStatus().equals(GameStatus.WAITING)) {
             String time = Main.getGame(game.getName()).getFormattedTimeLeft();
             if(!time.contains("0-1")) {
                 String[] units = time.split(":");
                 int seconds = Integer.parseInt(units[1]) + 1;
-                state = Hypixelify.getConfigurator().getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s").replace("{countdown}", String.valueOf(seconds));
+                state = Hypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s").replace("{countdown}", String.valueOf(seconds));
             }
         }
-        for (String li : Hypixelify.getConfigurator().getStringList("lobby_scoreboard.lines")) {
+        for (String li : Hypixelify.getConfigurator().config.getStringList("lobby_scoreboard.lines")) {
             String l = li.replace("{date}", getDate()).replace("{state}", state).replace("{game}", game.getName())
                     .replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
                     .replace("{maxplayers}", String.valueOf(game.getMaxPlayers()))

@@ -48,7 +48,6 @@ public class ScoreBoard {
                     } else {
                         cancel();
                     }
-                    return;
                 }
             }
         }).runTaskTimer(Hypixelify.getInstance(), 0L, 1L);
@@ -70,10 +69,10 @@ public class ScoreBoard {
         }
 
         String Title = "";
-        if (this.tc >= Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title").size())
+        if (this.tc >= Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").size())
             this.tc = 0;
         int tcs = 0;
-        for (String title : Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title")) {
+        for (String title : Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title")) {
             if (this.tc == tcs)
                 Title = title.replace("{game}", this.game.getName()).replace("{time}",
                         Main.getGame(game.getName()).getFormattedTimeLeft());

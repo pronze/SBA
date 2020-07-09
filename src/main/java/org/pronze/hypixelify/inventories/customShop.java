@@ -299,7 +299,7 @@ public class customShop implements Listener {
     @EventHandler
     public void onShopOpen(BedwarsOpenShopEvent event) {
         if (Main.getPlayerGameProfile(event.getPlayer()).isSpectator) return;
-        if (Hypixelify.getConfigurator().getBoolean("store.replace-store-with-hypixelstore", true)) {
+        if (Hypixelify.getConfigurator().config.getBoolean("store.replace-store-with-hypixelstore", true)) {
             event.setResult(Result.DISALLOW_THIRD_PARTY_SHOP);
             this.show(event.getPlayer(), event.getStore());
         }
@@ -547,7 +547,7 @@ public class customShop implements Listener {
             if (shouldSellStack) {
                 event.sellStack(materialItem);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + newItem.getItemMeta().getDisplayName());
+                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + newItem.getType().name());
                 }
                 Sounds.playSound(player, player.getLocation(),
                         Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);

@@ -141,7 +141,7 @@ public class Shop implements Listener {
                 player, store, null);
         Main.getInstance().getServer().getPluginManager().callEvent(openShopEvent);
         if (openShopEvent.getResult() != BedwarsOpenShopEvent.Result.ALLOW) {
-            return false;
+            return true;
         }
         Hypixelify.getShop().show(player, store);
 
