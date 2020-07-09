@@ -57,7 +57,8 @@ public class Shop implements Listener {
     @EventHandler
     public void onGameStarted(BedwarsGameStartedEvent e){
         for (GameStore store : Main.getGame(e.getGame().getName()).getGameStores()) {
-            if(store.getShopFile() != null) {
+            if(store.getShopFile() != null || store.getShopFile().equalsIgnoreCase("shop.yml")
+             || store.getShopFile().equalsIgnoreCase("upgradeShop.yml")) {
                 LivingEntity villager = store.kill();
                 if (villager != null) {
                     Main.unregisterGameEntity(villager);
