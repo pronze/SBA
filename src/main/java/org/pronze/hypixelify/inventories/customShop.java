@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.listener.PlayerListener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GamePlayer;
@@ -481,9 +482,6 @@ public class customShop implements Listener {
                 } else {
                     for (Player playerCheck : game.getConnectedPlayers()) {
                         if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
-                            if(playerCheck.getGameMode().equals(GameMode.SPECTATOR)){
-
-                            }
                             addEnchantsToPlayerTools(playerCheck, newItem, "SWORD", Enchantment.DAMAGE_ALL);
                             playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
                         }
@@ -590,7 +588,7 @@ public class customShop implements Listener {
 
     private void addEnchantsToPlayerArmor(Player player, ItemStack item) {
         for (ItemStack i : player.getInventory().getArmorContents()) {
-            if (i != null && i.getType() != Material.LEATHER_HELMET && i.getType() != Material.LEATHER_CHESTPLATE) {
+            if (i != null) {
                 i.addEnchantments(item.getEnchantments());
             }
         }

@@ -372,17 +372,18 @@ public class PlayerListener implements Listener {
                         game.getStatus().equals(GameStatus.WAITING)) {
                     if(game.getConnectedPlayers().size() >= game.getMinPlayers()) {
                         String time = Main.getGame(game.getName()).getFormattedTimeLeft();
-                        String[] units = time.split(":");
-                        int seconds = Integer.parseInt(units[1]) + 1;
-                        if (seconds < 2) {
-                            player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds)).replace("seconds", "second")));
-                            player.sendTitle(translateColors("&c" + seconds),"",0,20,0);
-                        } else if (seconds < 6) {
-                            player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds))));
-                            player.sendTitle(translateColors("&c" + seconds),"",0,20,0);
-                        }
-                        else if(seconds < 11){
-                            player.sendMessage(translateColors(message.replace("&c{seconds}", "&6" + seconds)));
+                        if(!time.contains("0-1")) {
+                            String[] units = time.split(":");
+                            int seconds = Integer.parseInt(units[1]) + 1;
+                            if (seconds < 2) {
+                                player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds)).replace("seconds", "second")));
+                                player.sendTitle(translateColors("&c" + seconds), "", 0, 20, 0);
+                            } else if (seconds < 6) {
+                                player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds))));
+                                player.sendTitle(translateColors("&c" + seconds), "", 0, 20, 0);
+                            } else if (seconds < 11) {
+                                player.sendMessage(translateColors(message.replace("&c{seconds}", "&6" + seconds)));
+                            }
                         }
                     }
                 } else {

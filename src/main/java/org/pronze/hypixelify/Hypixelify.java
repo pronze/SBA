@@ -22,7 +22,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static customShop shop;
     private Configurator configurator;
     private ArenaManager arenamanager;
-
     public void onEnable() {
         plugin = this;
 

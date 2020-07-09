@@ -70,7 +70,7 @@ public class Arena {
         Player player = e.getPlayer();
         Player killer = e.getKiller();
         if (!game.getConnectedPlayers().contains(player) || !game.getConnectedPlayers().contains(killer)
-         || Main.getPlayerGameProfile(player).isSpectator || Main.getPlayerGameProfile(killer).isSpectator)
+         || Main.getPlayerGameProfile(killer).isSpectator)
             return;
         Map<String, Integer> totalkills = this.playerGameStorage.getPlayerTotalKills();
         Map<String, Integer> kills = this.playerGameStorage.getPlayerKills();

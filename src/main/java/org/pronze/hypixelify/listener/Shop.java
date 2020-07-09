@@ -6,9 +6,7 @@ import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.trait.LookClose;
 import net.citizensnpcs.trait.SkinTrait;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,7 +33,8 @@ public class Shop implements Listener {
     public Shop(){
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
-    }
+   }
+
 
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
@@ -58,26 +57,26 @@ public class Shop implements Listener {
     @EventHandler
     public void onGameStarted(BedwarsGameStartedEvent e){
         for (GameStore store : Main.getGame(e.getGame().getName()).getGameStores()) {
-            LivingEntity villager = store.kill();
-            if (villager != null) {
-                Main.unregisterGameEntity(villager);
-            }
-            String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
-            if(ShopName.equalsIgnoreCase("shop")){
-                ShopName = ITEM_SHOP_NAME;
-            }
-            else
-            {
-                ShopName = UPGRADE_SHOP_NAME;
-            }
-            NPC npc =  CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
-            npc.spawn(store.getStoreLocation());
-            npc.getTrait(LookClose.class).lookClose(true);
-            if(npc.getName().contains(UPGRADE_SHOP_NAME))
-                npc.getTrait(SkinTrait.class).setSkinName("Conefish");
-            else
-                npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
+            if(store.getShopFile() != null) {
+                LivingEntity villager = store.kill();
+                if (villager != null) {
+                    Main.unregisterGameEntity(villager);
+                }
+                String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
+                if (ShopName.equalsIgnoreCase("shop")) {
+                    ShopName = ITEM_SHOP_NAME;
+                } else {
+                    ShopName = UPGRADE_SHOP_NAME;
+                }
+                NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
+                npc.spawn(store.getStoreLocation());
+                npc.getTrait(LookClose.class).lookClose(true);
+                if (npc.getName().contains(UPGRADE_SHOP_NAME))
+                    npc.getTrait(SkinTrait.class).setSkinName("Conefish");
+                else
+                    npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
 
+            }
         }
 }
     @EventHandler

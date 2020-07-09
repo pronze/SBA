@@ -103,7 +103,7 @@ public class LobbyScoreboard implements Listener {
         String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = (needplayers < 0) ? 0 : needplayers;
-        int s = game.getAvailableTeams().get(1).getMaxPlayers();
+        int s = game.getAvailableTeams().get(0).getMaxPlayers();
         String mode = s +"v" +s +"v" + s + "v" +s;
 
         if (game.countConnectedPlayers() >= game.getMinPlayers() && game.getStatus().equals(GameStatus.WAITING)) {
