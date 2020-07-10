@@ -7,12 +7,16 @@ import com.alessiodp.parties.api.interfaces.PartyPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.pronze.hypixelify.Hypixelify;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+
+import java.util.Objects;
+
 import static org.pronze.hypixelify.utils.PartyUtil.checkPartyLeader;
 
 public class PartyListener implements Listener {
@@ -28,8 +32,9 @@ public class PartyListener implements Listener {
         Game game = e.getGame();
         if(checkPartyLeader(player)) {
             Party party = api.getParty(player.getPartyName());
-            if(party == null) return;
+            if(party == null || !BedwarsAPI.getInstance().isPlayerPlayingAnyGame(Bukkit.getPlayer(player.getPlayerUUID()))) return;
 
+            game.selectPlayerRandomTeam(Bukkit.getPlayer(player.getPlayerUUID()));
             for(PartyPlayer p : party.getOnlineMembers(true)){
                 if(!p.getPlayerUUID().equals(player.getPlayerUUID())){
                     Main.getGame(game.getName()).joinToGame(Bukkit.getPlayer(p.getPlayerUUID()));
@@ -40,6 +45,24 @@ public class PartyListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent e){
+        PartiesAPI api = Parties.getApi();
+        PartyPlayer player = api.getPartyPlayer(e.getPlayer().getUniqueId());
+
+        if(player == null || player.getPartyName().isEmpty()) return;
+
+        if(checkPartyLeader(player)) {
+            for(PartyPlayer p : api.getParty(player.getPartyName()).getOnlineMembers(true)) {
+                Objects.requireNonNull(Bukkit.getPlayer(p.getPlayerUUID())).sendMessage("§cParty has been disbanded");
+            }
+            api.getParty(player.getPartyName()).delete();
+        }
+        else if(player != null && !player.getPartyName().isEmpty() && api.getParty(player.getPartyName()).getOnlineMembers(true).size() <= 2){
+            Objects.requireNonNull(Bukkit.getPlayer(Objects.requireNonNull(api.getParty(player.getPartyName()).getLeader()))).sendMessage("§cParty has been disbanded");
+            api.getParty(player.getPartyName()).delete();
+        }
+        }
     @EventHandler
     public void onBwPlayerLeave(BedwarsPlayerLeaveEvent e){
         PartiesAPI api = Parties.getApi();

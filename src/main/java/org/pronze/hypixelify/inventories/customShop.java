@@ -12,8 +12,9 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.listener.PlayerListener;
+import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.game.CurrentTeam;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.util.*;
 
 public class customShop implements Listener {
+
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
     static public HashMap<Integer, Integer> Prices = new HashMap<>();
@@ -216,7 +218,7 @@ public class customShop implements Listener {
 
             String nprice = Integer.toString(price);
             if (event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Protection") && event.getStack().getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) <= 4) {
-                ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
+                ItemStack shop = ShopUtil.shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.setStack(shop);
                 nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL)));
             } else if (event.getStack() != null && event.getStack().getItemMeta().getDisplayName().contains("Sharpness") && event.getStack().getEnchantmentLevel(Enchantment.DAMAGE_ALL) <= 4) {
@@ -228,7 +230,7 @@ public class customShop implements Listener {
                     }
                 }
                 assert sword != null;
-                ItemStack shop = shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
+                ItemStack shop = ShopUtil.shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
                 event.setStack(shop);
                 nprice = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.DAMAGE_ALL)));
             }
@@ -270,17 +272,6 @@ public class customShop implements Listener {
         }
     }
 
-    public ItemStack shopEnchants(ItemStack sh_item, ItemStack pl_Item, Enchantment enchant) {
-        int sz = pl_Item.getEnchantmentLevel(enchant);
-        if (sz >= 0 && sz < 4) {
-            sh_item.addEnchantment(enchant, sz + 1);
-        } else if (sz == 4) {
-            sh_item.removeEnchantment(enchant);
-            sh_item.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
-        }
-        return sh_item;
-    }
-
     @EventHandler
     public void onPreAction(PreActionEvent event) {
         if (!shopMap.containsValue(event.getFormat()) || event.isCancelled()) {
@@ -319,7 +310,7 @@ public class customShop implements Listener {
         } else {
 
             if (event.getStack().getItemMeta().getDisplayName().contains("Protection")) {
-                ItemStack shop = shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
+                ItemStack shop = ShopUtil.shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.getStack().addEnchantments(shop.getEnchantments());
             } else if (event.getStack().getItemMeta().getDisplayName().contains("Sharpness")) {
                 ItemStack sword = null;
@@ -330,7 +321,7 @@ public class customShop implements Listener {
                     }
                 }
                 assert sword != null;
-                ItemStack shop = shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
+                ItemStack shop = ShopUtil.shopEnchants(event.getStack(), sword, Enchantment.DAMAGE_ALL);
                 event.getStack().addEnchantments(shop.getEnchantments());
             }
             handleBuy(event);
@@ -403,6 +394,7 @@ public class customShop implements Listener {
     private void handleBuy(ShopTransactionEvent event) {
         Player player = event.getPlayer();
         Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
+        RunningTeam team = game.getTeamOfPlayer(player);
         ClickType clickType = event.getClickType();
         MapReader mapReader = event.getItem().getReader();
         String priceType = event.getType().toLowerCase();
@@ -469,21 +461,18 @@ public class customShop implements Listener {
             boolean shouldSellStack = true;
 
             if (getNameOrCustomNameOfItem(newItem).contains("Sharpness")) {
-
-                if (!addEnchantsToPlayerTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
+                if (!ShopUtil.addEnchantsToPlayerTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
                     shouldSellStack = false;
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have the greatest enchantment");
                 } else {
-                    for (Player playerCheck : game.getConnectedPlayers()) {
-                        if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
-                            addEnchantsToPlayerTools(playerCheck, newItem, "SWORD", Enchantment.DAMAGE_ALL);
-                            playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
-                        }
+                    for (Player playerCheck : team.getConnectedPlayers()) {
+                        ShopUtil.addEnchantsToPlayerTools(playerCheck, newItem, "SWORD", Enchantment.DAMAGE_ALL);
+                        playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
                     }
                 }
             } else if (getNameOrCustomNameOfItem(newItem).contains("Efficiency")) {
 
-                if (!addEnchantsToPlayerTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
+                if (!ShopUtil.addEnchantsToPlayerTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
                     shouldSellStack = false;
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have a greater or equal enchantment in your pickaxe!");
                 }
@@ -493,12 +482,10 @@ public class customShop implements Listener {
                     shouldSellStack = false;
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have the greatest enchantment.");
                 } else {
-                    addEnchantsToPlayerArmor(player, newItem);
-                    for (Player playerCheck : game.getConnectedPlayers()) {
-                        if (game.isPlayerInTeam(playerCheck, game.getTeamOfPlayer(player))) {
-                            addEnchantsToPlayerArmor(playerCheck, newItem);
+                    ShopUtil.addEnchantsToPlayerArmor(player, newItem);
+                    for (Player playerCheck : team.getConnectedPlayers()) {
+                            ShopUtil.addEnchantsToPlayerArmor(playerCheck, newItem);
                             playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team protection");
-                        }
                     }
                 }
             } else if (newItem.getType().name().endsWith("SWORD")) {
@@ -524,7 +511,7 @@ public class customShop implements Listener {
             } else if (newItem.getType().name().contains("BOOTS")) {
                 String matName = newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"));
                 Material leggings = Material.valueOf(matName + "_LEGGINGS");
-                buyArmor(player, newItem.getType(), leggings);
+                ShopUtil.buyArmor(player, newItem.getType(), leggings);
             } else if (newItem.getType().name().endsWith("AXE")) {
                 String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
 
@@ -559,37 +546,6 @@ public class customShop implements Listener {
                 player.sendMessage(ChatColor.RED + "you don't have enough " + priceType);
             }
         }
-    }
-
-    private boolean addEnchantsToPlayerTools(Player player, ItemStack newItem, String name, Enchantment enchantment) {
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null && item.getType().name().endsWith(name)) {
-                if (item.getEnchantmentLevel(enchantment) >= newItem.getEnchantmentLevel(enchantment) || newItem.getEnchantmentLevel(enchantment) >= 5)
-                    return false;
-
-                item.addEnchantments(newItem.getEnchantments());
-            }
-        }
-        return true;
-    }
-
-    private void addEnchantsToPlayerArmor(Player player, ItemStack item) {
-        for (ItemStack i : player.getInventory().getArmorContents()) {
-            if (i != null) {
-                i.addEnchantments(item.getEnchantments());
-            }
-        }
-    }
-
-    private void buyArmor(Player player, Material mat_boots, Material mat_leggings) {
-        ItemStack boots = new ItemStack(mat_boots);
-        boots.addEnchantments(Objects.requireNonNull(player.getInventory().getBoots()).getEnchantments());
-        ItemStack leggings = new ItemStack(mat_leggings);
-        leggings.addEnchantments(player.getInventory().getBoots().getEnchantments());
-        player.getInventory().setLeggings(null);
-        player.getInventory().setBoots(null);
-        player.getInventory().setBoots(boots);
-        player.getInventory().setLeggings(leggings);
     }
 
     private void handleUpgrade(ShopTransactionEvent event) {
