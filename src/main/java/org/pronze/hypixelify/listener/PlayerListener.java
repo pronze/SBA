@@ -175,10 +175,12 @@ public class PlayerListener implements Listener {
                         if (livingTime > 0) {
                             Title.sendTitle(player, "§cYOU DIED!",
                                     "§eYou will respawn in §c%time% §eseconds".replace("%time%", String.valueOf(livingTime)), 0,20,0);
+                            player.sendMessage("§eYou will respawn in §c{seconds} §eseconds".replace("{seconds}", String.valueOf(livingTime)));
                         }
                         livingTime--;
                         if (livingTime == 0) {
                             this.cancel();
+                            player.sendMessage("§eYou have respawned");
                         }
                     }
                 }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
@@ -381,7 +383,7 @@ public class PlayerListener implements Listener {
                             } else if (seconds < 6) {
                                 player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds))));
                                 player.sendTitle(translateColors("&c" + seconds), "", 0, 20, 0);
-                            } else if (seconds < 11) {
+                            } else if (seconds == 10) {
                                 player.sendMessage(translateColors(message.replace("&c{seconds}", "&6" + seconds)));
                             }
                         }

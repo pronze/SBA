@@ -1,5 +1,4 @@
 package org.pronze.hypixelify;
-
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,6 +39,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator.loadDefaults();
 
         boolean hookedWithCitizens = this.getServer().getPluginManager().getPlugin("Citizens") != null;
+        boolean hookedWithParties = this.getServer().getPluginManager().getPlugin("Parties") != null;
+
         Bukkit.getLogger().info("");
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("<  _____ ______   ___   _   _                _             _  _   __                              >");
@@ -60,6 +61,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("< Build: §6Stable                                                                               §7    >");
         Bukkit.getLogger().info("< Hooked To Citizens: §atrue§7                                                                        >"
                 .replace("true", String.valueOf(hookedWithCitizens)));
+        Bukkit.getLogger().info("< Hooked To Parties: §atrue§7                                                                        >"
+                .replace("true", String.valueOf(hookedWithParties)));
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("");
 
@@ -73,6 +76,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
        else
            new Shop();
+
+       if(hookedWithParties)
+          // new PartyListener();
 
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);

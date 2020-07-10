@@ -84,7 +84,7 @@ public class ScoreboardUtil {
                 if (team == null)
                     team = scoreboard.registerNewTeam(  t.getName());
                 team.setAllowFriendlyFire(false);
-                team.setPrefix(t.getColor().toString());
+              //  team.setPrefix(t.getColor().toString());
                 for (OfflinePlayer pl : t.getGame().getConnectedPlayers()) {
                     if (!team.hasEntry(Objects.requireNonNull(pl.getName())))
                         team.addEntry(pl.getName());

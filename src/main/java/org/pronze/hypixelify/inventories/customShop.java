@@ -547,7 +547,7 @@ public class customShop implements Listener {
             if (shouldSellStack) {
                 event.sellStack(materialItem);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + newItem.getType().name());
+                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + getNameOrCustomNameOfItem(newItem));
                 }
                 Sounds.playSound(player, player.getLocation(),
                         Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
