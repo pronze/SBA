@@ -16,8 +16,6 @@ public class PartyUtil {
                     return true;
             }
         }
-
-
         return false;
     }
 
