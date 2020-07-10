@@ -78,7 +78,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
            new Shop();
 
        if(hookedWithParties)
-          // new PartyListener();
+           new PartyListener();
 
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
