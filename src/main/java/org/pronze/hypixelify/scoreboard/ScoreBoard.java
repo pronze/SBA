@@ -1,17 +1,15 @@
 package org.pronze.hypixelify.scoreboard;
-
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
+import org.pronze.hypixelify.listener.LobbyScoreboard;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -72,7 +70,7 @@ public class ScoreBoard {
         if (this.tc >= Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").size())
             this.tc = 0;
         int tcs = 0;
-        for (String title : Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title")) {
+        for (String title : LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"))) {
             if (this.tc == tcs)
                 Title = title.replace("{game}", this.game.getName()).replace("{time}",
                         Main.getGame(game.getName()).getFormattedTimeLeft());
@@ -95,11 +93,11 @@ public class ScoreBoard {
                 ChatColor chatColor = null;
                 Team playerteam = game.getTeamOfPlayer(player);
                 lines.clear();
-                String tks = "0";
-                String ks = "0";
-                String fks = "0";
-                String dis = "0";
-                String bes = "0";
+                String tks;
+                String ks;
+                String fks;
+                String dis;
+                String bes;
                 Map<String, Integer> totalkills = this.arena.getPlayerGameStorage().getPlayerTotalKills();
                 Map<String, Integer> kills = this.arena.getPlayerGameStorage().getPlayerKills();
                 Map<String, Integer> finalkills = this.arena.getPlayerGameStorage().getPlayerFinalKills();

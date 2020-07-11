@@ -4,10 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.pronze.hypixelify.listener.PlayerListener;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class ShopUtil {

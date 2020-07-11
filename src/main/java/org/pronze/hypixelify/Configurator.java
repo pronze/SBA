@@ -82,6 +82,10 @@ public class Configurator {
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", Hypixelify.getVersion());
         checkOrSetConfig(modify, "autoset-bw-config", true);
+        checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-I", 4);
+        checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-II", 8);
+        checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-III", 12);
+        checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-IV", 16);
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");

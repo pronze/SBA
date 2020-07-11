@@ -2,7 +2,6 @@ package org.pronze.hypixelify.inventories;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -51,11 +50,11 @@ public class customShop implements Listener {
     public customShop() {
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
 
-        Prices.put(0, 4);
-        Prices.put(1, 4);
-        Prices.put(2, 8);
-        Prices.put(3, 12);
-        Prices.put(4, 16);
+        Prices.put(0, Hypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-I", 4));
+        Prices.put(1, Hypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-I", 4));
+        Prices.put(2, Hypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-II", 8));
+        Prices.put(3, Hypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-III", 12));
+        Prices.put(4, Hypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-IV", 16));
 
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         ItemMeta backItemMeta = backItem.getItemMeta();
@@ -496,7 +495,7 @@ public class customShop implements Listener {
                             newItem.addEnchantments(item.getEnchantments());
                             if (item.getType() == Material.WOODEN_SWORD)
                                 player.getInventory().remove(Material.WOODEN_SWORD);
-                            else if (Hypixelify.getConfigurator().getBoolean("remove-sword-on-upgrade", true))
+                            else if (Hypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true))
                                 player.getInventory().remove(item);
                         }
                     }
@@ -505,7 +504,7 @@ public class customShop implements Listener {
                     shouldSellStack = false;
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same sword!");
                 }
-            } else if (newItem.getType() == Objects.requireNonNull(player.getInventory().getBoots()).getType()) {
+            } else if (newItem.getType().equals(Objects.requireNonNull(player.getInventory().getBoots()).getType())) {
                 player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same armor");
                 shouldSellStack = false;
             } else if (newItem.getType().name().contains("BOOTS")) {

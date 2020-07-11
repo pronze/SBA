@@ -128,10 +128,10 @@ public class LobbyScoreboard implements Listener {
             if(!time.contains("0-1")) {
                 String[] units = time.split(":");
                 int seconds = Integer.parseInt(units[1]) + 1;
-                state = Hypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s").replace("{countdown}", String.valueOf(seconds));
+                state = format(Hypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s").replace("{countdown}", String.valueOf(seconds)));
             }
         }
-        for (String li : Hypixelify.getConfigurator().config.getStringList("lobby_scoreboard.lines")) {
+        for (String li : listcolor(Hypixelify.getConfigurator().config.getStringList("lobby_scoreboard.lines"))) {
             String l = li.replace("{date}", getDate()).replace("{state}", state).replace("{game}", game.getName())
                     .replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
                     .replace("{maxplayers}", String.valueOf(game.getMaxPlayers()))
