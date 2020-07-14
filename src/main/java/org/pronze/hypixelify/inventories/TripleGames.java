@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.listener.Shop;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -114,8 +115,8 @@ public class TripleGames implements Listener {
                 ItemStack temp = new ItemStack(Material.PAPER);
                 ItemMeta meta1 = temp.getItemMeta();
                 String name1 = ChatColor.GREEN + game.getName();
-                meta1.setLore(Arrays.asList("§8Triple", "", "§7Available Servers: §a1", "§7Status: §a{status}".replace("{status}", game.getStatus().name())
-                ,"", "§aClick to play", "§eRight click to toggle favorite!"));
+                meta1.setLore(Arrays.asList("§8Triple", "", "§7Available Servers: §a1", "§7Status: §a{status}".replace("{status}", Shop.capFirstLetter(game.getStatus().name()))
+                ,"§7Players: {players}".replace("{players}", String.valueOf(game.getConnectedPlayers().size())), "", "§aClick to play", "§eRight click to toggle favorite!"));
                 meta1.setDisplayName(name1);
                 temp.setItemMeta(meta1);
                 HashMap<String, Object> tempmappings = new HashMap<>();
@@ -180,6 +181,8 @@ public class TripleGames implements Listener {
                 repaint();
                 Players.remove(player);
                 List<Game> games = ShopUtil.getGamesWithSize(3);
+                if(games == null ||games.isEmpty())
+                    return;
                 for (Game game : games){
                     if(game.getStatus().equals(GameStatus.WAITING)) {
                         game.joinToGame(player);

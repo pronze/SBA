@@ -74,6 +74,9 @@ public class ShopUtil {
 
     public static List<Game> getGamesWithSize(int c){
         List<String> allmapnames = getAllKeysForValue(Configurator.game_size, c);
+        if(allmapnames == null || allmapnames.isEmpty())
+            return null;
+
         ArrayList<Game> listofgames = new ArrayList<>();
 
         for(String n : allmapnames){

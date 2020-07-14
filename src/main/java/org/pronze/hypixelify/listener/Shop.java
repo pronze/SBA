@@ -42,7 +42,12 @@ public class Shop implements Listener {
                 false, false);
    }
 
-
+    static public String capFirstLetter ( String str )
+    {
+        String firstLetter = str.substring(0,1).toUpperCase();
+        String restLetters = str.substring(1).toLowerCase();
+        return firstLetter + restLetters;
+    }
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
 
