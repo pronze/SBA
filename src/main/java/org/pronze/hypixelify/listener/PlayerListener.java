@@ -2,11 +2,10 @@ package org.pronze.hypixelify.listener;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
@@ -19,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.*;
@@ -187,6 +185,8 @@ public class PlayerListener implements Listener {
             }
     }
 
+
+
     public ItemStack checkifUpgraded(ItemStack newItem) {
         if (UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > UpgradeKeys.get("WOODEN")) {
             Map<Enchantment, Integer> enchant = newItem.getEnchantments();
@@ -267,7 +267,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler(priority =  EventPriority.LOWEST)
+    @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
         Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
@@ -383,7 +383,7 @@ public class PlayerListener implements Listener {
                             } else if (seconds < 6) {
                                 player.sendMessage(translateColors(message.replace("{seconds}", String.valueOf(seconds))));
                                 player.sendTitle(translateColors("&c" + seconds), "", 0, 20, 0);
-                            } else if (seconds == 10) {
+                            } else if (seconds % 10 == 0) {
                                 player.sendMessage(translateColors(message.replace("&c{seconds}", "&6" + seconds)));
                             }
                         }

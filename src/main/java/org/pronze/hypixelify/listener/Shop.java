@@ -109,7 +109,13 @@ public class Shop implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onNPCLeftClick(NPCLeftClickEvent e) {
-        e.setCancelled(onNPCClick(e.getClicker(), e.getNPC()));
+        if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getClicker()))
+            return;
+
+        if((!e.getNPC().getName().contains(ITEM_SHOP_NAME) && !e.getNPC().getName().contains(UPGRADE_SHOP_NAME)))
+            return;
+
+        e.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

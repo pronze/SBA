@@ -4,9 +4,11 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.pronze.hypixelify.Configurator;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.game.Game;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 public class ShopUtil {
 
@@ -50,5 +52,36 @@ public class ShopUtil {
             sh_item.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
         }
         return sh_item;
+    }
+
+    static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value)
+    {
+        List<K> listOfKeys = null;
+        if(mapOfWords.containsValue(value))
+        {
+            listOfKeys = new ArrayList<>();
+
+            for (Map.Entry<K, V> entry : mapOfWords.entrySet())
+            {
+                if (entry.getValue().equals(value))
+                {
+                    listOfKeys.add(entry.getKey());
+                }
+            }
+        }
+        return listOfKeys;
+    }
+
+    public static List<Game> getGamesWithSize(int c){
+        List<String> allmapnames = getAllKeysForValue(Configurator.game_size, c);
+        ArrayList<Game> listofgames = new ArrayList<>();
+
+        for(String n : allmapnames){
+            if(Main.getGameNames().contains(n)){
+                listofgames.add(Main.getGame(n));
+            }
+        }
+
+        return listofgames;
     }
 }

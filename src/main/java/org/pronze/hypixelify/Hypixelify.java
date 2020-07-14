@@ -5,10 +5,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
+import org.pronze.hypixelify.commands.GamesCommand;
+import org.pronze.hypixelify.inventories.*;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
-import org.pronze.hypixelify.inventories.customShop;
 
 
 import org.bukkit.ChatColor;
@@ -21,6 +22,27 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static customShop shop;
     private Configurator configurator;
     private ArenaManager arenamanager;
+    private SoloGames sg;
+    private DoubleGames dg;
+    private TripleGames tg;
+    private SquadGames sg2;
+
+
+    public SoloGames getSoloGameInventory(){
+        return sg;
+    }
+
+    public DoubleGames getDoubleGameInventory(){
+        return dg;
+    }
+
+    public TripleGames getTripleGameInventory(){
+        return tg;
+    }
+
+    public SquadGames getSquadGameInventory(){
+        return sg2;
+    }
     public void onEnable() {
         plugin = this;
 
@@ -66,6 +88,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("");
 
+        sg = new SoloGames();
+        dg = new DoubleGames();
+        tg = new TripleGames();
+        sg2 = new SquadGames();
+
+        new GamesCommand();
         new PlayerListener(this);
         InventoryListener.init(this);
         shop = new customShop();
@@ -80,7 +108,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
        if(hookedWithParties)
            new PartyListener();
 
-        Bukkit.getPluginManager().registerEvents(this, this);
+       Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
         getCommand("bwaddon").setExecutor(new BWACommand());
 
