@@ -15,21 +15,19 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.pronze.hypixelify.Hypixelify;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.events.BedwarsGameEndEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
+import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import java.util.ArrayList;
 import java.util.Objects;
 
 public class Shop implements Listener {
 
-    private final String ITEM_SHOP_NAME = "§bITEM SHOP";
-    private final String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
+    public static final String ITEM_SHOP_NAME = "§bITEM SHOP";
+    public static String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
     GameStore shop;
     GameStore upgradeShop;
 
@@ -65,47 +63,18 @@ public class Shop implements Listener {
         }
     }
 
-
-    @EventHandler
-    public void onGameStarted(BedwarsGameStartedEvent e){
-        for (GameStore store : Main.getGame(e.getGame().getName()).getGameStores()) {
-            if(store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
-             || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
-                LivingEntity villager = store.kill();
-                if (villager != null) {
-                    Main.unregisterGameEntity(villager);
-                }
-                String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
-                if (ShopName.equalsIgnoreCase("shop")) {
-                    ShopName = ITEM_SHOP_NAME;
-                } else {
-                    ShopName = UPGRADE_SHOP_NAME;
-                }
-                NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
-                npc.spawn(store.getStoreLocation());
-                npc.getTrait(LookClose.class).lookClose(true);
-                if (npc.getName().contains(UPGRADE_SHOP_NAME))
-                    npc.getTrait(SkinTrait.class).setSkinName("Conefish");
-                else
-                    npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
-
-            }
-        }
-}
     @EventHandler
     public void onRebuild(BedwarsPreRebuildingEvent e){
         ArrayList<NPC> npcs = new ArrayList<>();
 
         CitizensAPI.getNPCRegistry().forEach(npc -> {
             if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
-                if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
+                if(GameCreator.isInArea(npc.getStoredLocation(), e.getGame().getPos1(), e.getGame().getPos2()))
                     npcs.add(npc);
-                }
             }
         });
 
         for(NPC npc : npcs){
-            npc.despawn();
             npc.destroy();
         }
 
@@ -148,35 +117,11 @@ public class Shop implements Listener {
             store = shop;
         }
 
-        BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
-                player, store, null);
-        Main.getInstance().getServer().getPluginManager().callEvent(openShopEvent);
-        if (openShopEvent.getResult() != BedwarsOpenShopEvent.Result.ALLOW) {
-            return true;
-        }
         Hypixelify.getShop().show(player, store);
 
         return true;
     }
 
-
-    @EventHandler
-    public void gameOverEvent(BedwarsGameEndEvent e){
-        ArrayList<NPC> npcs = new ArrayList<>();
-
-        CitizensAPI.getNPCRegistry().forEach(npc -> {
-            if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
-                if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)) {
-                    npcs.add(npc);
-                }
-            }
-        });
-
-        for(NPC npc : npcs){
-            npc.despawn();
-            npc.destroy();
-        }
-    }
     @EventHandler
     public void onDisable(PluginDisableEvent e) {
         if (e.getPlugin().getName().equals("BedWars")) {
@@ -189,7 +134,6 @@ public class Shop implements Listener {
           }
           });
             for(NPC npc : npcs){
-                npc.despawn();
                 npc.destroy();
             }
       }

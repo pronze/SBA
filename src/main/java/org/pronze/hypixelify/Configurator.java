@@ -89,8 +89,6 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
-        checkOrSetConfig(modify, "tag_health", true);
-        checkOrSetConfig(modify, "tab_health", true);
         checkOrSetConfig(modify, "first_start", true);
         for(String game : Main.getGameNames()){
             String str = "lobby-scoreboard.player-size.games." + game;

@@ -71,7 +71,6 @@ public class DoubleGames implements Listener {
 
     private void createData() {
         SimpleInventories menu = new SimpleInventories(options);
-        FormatBuilder builder = new FormatBuilder();
         ItemStack category = new ItemStack(Material.valueOf("RED_BED"));
         ItemStack category2 = new ItemStack(Material.OAK_SIGN);
         ItemStack category3 = new ItemStack(Material.BARRIER);
@@ -125,19 +124,7 @@ public class DoubleGames implements Listener {
                 soloGames.add(tempmappings);
             }
         }
-        builder.add(category)
-                .set("column", 3)
-                .set("row", 1);
-        builder.add(category2)
-                .set("row", 1)
-                .set("column", 5)
-                .set("items", soloGames);
-        builder.add(category3)
-                .set("row", 3)
-                .set("column", 4);
-        builder.add(category4)
-                .set("row",3)
-                .set("column", 8);
+        FormatBuilder builder = ShopUtil.createBuilder(soloGames, category, category2, category3, category4);
 
         menu.load(builder);
         menu.generateData();

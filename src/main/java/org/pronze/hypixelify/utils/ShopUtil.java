@@ -7,6 +7,9 @@ import org.bukkit.inventory.ItemStack;
 import org.pronze.hypixelify.Configurator;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
+import org.screamingsandals.bedwars.lib.sgui.events.PostActionEvent;
 
 import java.util.*;
 
@@ -87,4 +90,27 @@ public class ShopUtil {
 
         return listofgames;
     }
+
+    public static FormatBuilder createBuilder(ArrayList<Object> games, ItemStack category, ItemStack category2, ItemStack category3,
+                                       ItemStack category4){
+        FormatBuilder builder = new FormatBuilder();
+        builder.add(category)
+                .set("column", 3)
+                .set("row", 1);
+        builder.add(category2)
+                .set("row", 1)
+                .set("column", 5)
+                .set("items", games);
+        builder.add(category3)
+                .set("row", 3)
+                .set("column", 4);
+        builder.add(category4)
+                .set("row",3)
+                .set("column", 8);
+
+        return builder;
+    }
+
+
+
 }

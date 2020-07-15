@@ -3,8 +3,16 @@ package org.pronze.hypixelify.arena;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import net.citizensnpcs.trait.LookClose;
+import net.citizensnpcs.trait.SkinTrait;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
+import org.pronze.hypixelify.listener.Shop;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.pronze.hypixelify.storage.PlayerGameStorage;
 import org.screamingsandals.bedwars.Main;
@@ -12,6 +20,7 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.lib.nms.title.Title;
 
 public class Arena {
@@ -35,6 +44,29 @@ public class Arena {
         this.game = game;
         this.playerGameStorage = new PlayerGameStorage(game);
         this.scoreBoard = new ScoreBoard(this);
+        for (GameStore store : Main.getGame(game.getName()).getGameStores()) {
+            if (store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
+                    || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
+                LivingEntity villager = store.kill();
+                if (villager != null) {
+                    Main.unregisterGameEntity(villager);
+                }
+                String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
+                if (ShopName.equalsIgnoreCase("shop")) {
+                    ShopName = Shop.ITEM_SHOP_NAME;
+                } else {
+                    ShopName = Shop.UPGRADE_SHOP_NAME;
+                }
+                NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
+
+                npc.spawn(store.getStoreLocation());
+                npc.getTrait(LookClose.class).lookClose(true);
+                if (npc.getName().contains(Shop.UPGRADE_SHOP_NAME))
+                    npc.getTrait(SkinTrait.class).setSkinName("Conefish");
+                else
+                    npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
+            }
+        }
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {

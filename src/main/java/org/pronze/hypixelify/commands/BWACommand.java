@@ -1,11 +1,18 @@
 package org.pronze.hypixelify.commands;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.game.GameCreator;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -40,15 +47,35 @@ public class BWACommand implements TabExecutor {
                 sender.sendMessage("Resetting...");
                 try{
                     Hypixelify.getConfigurator().upgradeCustomFiles();
+                    ((Player)sender).performCommand("bwaddon clearnpc");
                     sender.sendMessage("Sucessfully resetted");
                 } catch(Exception e){
                     e.printStackTrace();
                 }
+            } else if(args[0].equalsIgnoreCase("clearnpc")){
+                for(Game game: Main.getInstance().getGames()){
+                    World world = game.getGameWorld();
+                    List<NPC> npcs = new ArrayList<>();
+                    CitizensAPI.getNPCRegistry().forEach(npc -> {
+                        if(npc.getStoredLocation().getWorld().equals(world) &&
+                                GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())){
+                            npcs.add(npc);
+                        }
+                    });
+
+                    if(!npcs.isEmpty() && npcs != null){
+                        for(NPC npc : npcs){
+                            npc.destroy();
+                        }
+                    }
+                }
+                sender.sendMessage("Cleared all npcs from bedwars worlds");
             }
             else if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
                 if (args[0].equalsIgnoreCase("upgrade")) {
                     try {
                         Hypixelify.getConfigurator().upgradeCustomFiles();
+                        ((Player)sender).performCommand("bwaddon clearnpc");
                         sender.sendMessage("[SBAHypixelify]: " + ChatColor.GOLD + "Sucessfully upgraded files!");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -76,7 +103,7 @@ public class BWACommand implements TabExecutor {
             if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())){
                 return Arrays.asList("cancel","upgrade");
             }
-            return Arrays.asList("reload", "help", "reset");
+            return Arrays.asList("reload", "help", "reset", "clearnpc");
         }
 
         return null;
