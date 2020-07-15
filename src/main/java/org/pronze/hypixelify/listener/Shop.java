@@ -12,9 +12,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -26,8 +29,8 @@ import java.util.Objects;
 
 public class Shop implements Listener {
 
-    public static final String ITEM_SHOP_NAME = "§bITEM SHOP";
-    public static String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
+    private final String ITEM_SHOP_NAME = "§bITEM SHOP";
+    private final String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
     GameStore shop;
     GameStore upgradeShop;
 
@@ -45,6 +48,34 @@ public class Shop implements Listener {
         String firstLetter = str.substring(0,1).toUpperCase();
         String restLetters = str.substring(1).toLowerCase();
         return firstLetter + restLetters;
+    }
+
+    @EventHandler
+    public void onGameStart(BedwarsGameStartEvent e){
+        Game game = e.getGame();
+        for (GameStore store : Main.getGame(game.getName()).getGameStores()) {
+            if (store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
+                    || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
+                LivingEntity villager = store.kill();
+                if (villager != null) {
+                    Main.unregisterGameEntity(villager);
+                }
+                String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
+                if (ShopName.equalsIgnoreCase("shop")) {
+                    ShopName = ITEM_SHOP_NAME;
+                } else {
+                    ShopName = UPGRADE_SHOP_NAME;
+                }
+                NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
+
+                npc.spawn(store.getStoreLocation());
+                npc.getTrait(LookClose.class).lookClose(true);
+                if (npc.getName().contains(UPGRADE_SHOP_NAME))
+                    npc.getTrait(SkinTrait.class).setSkinName("Conefish");
+                else
+                    npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
+            }
+        }
     }
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
@@ -68,10 +99,8 @@ public class Shop implements Listener {
         ArrayList<NPC> npcs = new ArrayList<>();
 
         CitizensAPI.getNPCRegistry().forEach(npc -> {
-            if(Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
                 if(GameCreator.isInArea(npc.getStoredLocation(), e.getGame().getPos1(), e.getGame().getPos2()))
                     npcs.add(npc);
-            }
         });
 
         for(NPC npc : npcs){
@@ -125,17 +154,7 @@ public class Shop implements Listener {
     @EventHandler
     public void onDisable(PluginDisableEvent e) {
         if (e.getPlugin().getName().equals("BedWars")) {
-            ArrayList<NPC> npcs = new ArrayList<>();
-            CitizensAPI.getNPCRegistry().forEach(npc -> {
-              if (Main.getGameNames().contains(npc.getStoredLocation().getWorld().getName())) {
-                  if (npc.getName().contains(ITEM_SHOP_NAME) || npc.getName().contains(UPGRADE_SHOP_NAME)){
-                      npcs.add(npc);
-              }
-          }
-          });
-            for(NPC npc : npcs){
-                npc.destroy();
-            }
+            ShopUtil.destroyNPCFromGameWorlds();
       }
     }
 

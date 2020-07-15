@@ -8,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameCreator;
@@ -53,29 +54,14 @@ public class BWACommand implements TabExecutor {
                     e.printStackTrace();
                 }
             } else if(args[0].equalsIgnoreCase("clearnpc")){
-                for(Game game: Main.getInstance().getGames()){
-                    World world = game.getGameWorld();
-                    List<NPC> npcs = new ArrayList<>();
-                    CitizensAPI.getNPCRegistry().forEach(npc -> {
-                        if(npc.getStoredLocation().getWorld().equals(world) &&
-                                GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())){
-                            npcs.add(npc);
-                        }
-                    });
-
-                    if(!npcs.isEmpty() && npcs != null){
-                        for(NPC npc : npcs){
-                            npc.destroy();
-                        }
-                    }
-                }
+                ShopUtil.destroyNPCFromGameWorlds();
                 sender.sendMessage("Cleared all npcs from bedwars worlds");
             }
             else if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
                 if (args[0].equalsIgnoreCase("upgrade")) {
                     try {
                         Hypixelify.getConfigurator().upgradeCustomFiles();
-                        ((Player)sender).performCommand("bwaddon clearnpc");
+                        ShopUtil.destroyNPCFromGameWorlds();
                         sender.sendMessage("[SBAHypixelify]: " + ChatColor.GOLD + "Sucessfully upgraded files!");
                     } catch (Exception e) {
                         e.printStackTrace();

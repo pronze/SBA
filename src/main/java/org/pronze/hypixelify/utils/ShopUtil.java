@@ -1,15 +1,23 @@
 package org.pronze.hypixelify.utils;
 
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.pronze.hypixelify.Configurator;
+import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.listener.PlayerListener;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.api.utils.ColorChanger;
+import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
-import org.screamingsandals.bedwars.lib.sgui.events.PostActionEvent;
 
 import java.util.*;
 
@@ -111,6 +119,104 @@ public class ShopUtil {
         return builder;
     }
 
+    public static void destroyNPCFromGameWorlds(){
+        List<NPC> npcs = new ArrayList<>();
+        for(Game game: Main.getInstance().getGames()){
+            CitizensAPI.getNPCRegistry().forEach(npc -> {
+                if(GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())){
+                    npcs.add(npc);
+                }
+            });
+        }
+        if(!npcs.isEmpty()){
+            for(NPC npc : npcs){
+                npc.destroy();
+            }
+        }
+    }
+
+    public static <K, V> K getKey(HashMap<K, V> map, V value) {
+        for (K key : map.keySet()) {
+            if (value.equals(map.get(key))) {
+                return key;
+            }
+        }
+        return null;
+    }
+
+    public static void initalizekeys(){
+        PlayerListener.UpgradeKeys.put("WOODEN", 1);
+        PlayerListener.UpgradeKeys.put("STONE", 2);
+        PlayerListener.UpgradeKeys.put("GOLDEN", 3);
+        PlayerListener.UpgradeKeys.put("IRON", 4);
+        PlayerListener.UpgradeKeys.put("DIAMOND", 5);
+
+        for (String material : Hypixelify.getConfigurator().config.getStringList("allowed-item-drops")) {
+            Material mat;
+            try {
+                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+            } catch (Exception ignored) {
+                continue;
+            }
+            PlayerListener.allowed.add(mat);
+        }
+        for (String material : Hypixelify.getConfigurator().config.getStringList("running-generator-drops")) {
+            Material mat;
+            try {
+                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+            } catch (Exception ignored) {
+                continue;
+            }
+            PlayerListener.generatorDropItems.add(mat);
+        }
+    }
+
+    public static void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
+        for (ItemStack itemStack : itemStackList) {
+            if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+
+            ColorChanger colorChanger = BedwarsAPI.getInstance().getColorChanger();
+
+            final String materialName = itemStack.getType().toString();
+            final PlayerInventory playerInventory = player.getInventory();
+
+            if (materialName.contains("HELMET")) {
+                playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("CHESTPLATE")) {
+                playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("LEGGINGS")) {
+                playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("BOOTS")) {
+                playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
+            } else if (materialName.contains("PICKAXE")) {
+                playerInventory.setItem(7, itemStack);
+            } else if (materialName.contains("AXE")) {
+                playerInventory.setItem(8, itemStack);
+            } else if (materialName.contains("SWORD")) {
+                playerInventory.setItem(0, itemStack);
+            } else {
+                playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
+            }
+        }
+    }
+
+    public static ItemStack checkifUpgraded(ItemStack newItem) {
+        if (PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > PlayerListener.UpgradeKeys.get("WOODEN")) {
+            Map<Enchantment, Integer> enchant = newItem.getEnchantments();
+            Material mat;
+            mat = Material.valueOf(ShopUtil.getKey(PlayerListener.UpgradeKeys, PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
+            ItemStack temp = new ItemStack(mat);
+            temp.addEnchantments(enchant);
+            return temp;
+        }
+        return newItem;
+    }
+
+
+
+    public static String translateColors(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
+    }
 
 
 }

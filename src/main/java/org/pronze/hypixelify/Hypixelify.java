@@ -61,7 +61,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator.loadDefaults();
 
         boolean hookedWithCitizens = this.getServer().getPluginManager().getPlugin("Citizens") != null;
-        boolean hookedWithParties = this.getServer().getPluginManager().getPlugin("Parties") != null;
 
         Bukkit.getLogger().info("");
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -83,8 +82,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("< Build: §6Stable                                                                               §7    >");
         Bukkit.getLogger().info("< Hooked To Citizens: §atrue§7                                                                        >"
                 .replace("true", String.valueOf(hookedWithCitizens)));
-        Bukkit.getLogger().info("< Hooked To Parties: §atrue§7                                                                        >"
-                .replace("true", String.valueOf(hookedWithParties)));
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("");
 
@@ -100,13 +97,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
         {
-           Bukkit.getLogger().warning("Failed to initalize Citizens shop make sure citizens is installed");
+           Bukkit.getLogger().warning("Failed to initalize SBAHypixelify shop make sure citizens is installed");
+            onDisable();
         }
        else
            new Shop();
-
-       if(hookedWithParties)
-           new PartyListener();
 
        Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);

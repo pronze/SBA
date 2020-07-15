@@ -3,7 +3,7 @@ version: ${project.version}
 main: org.pronze.hypixelify.Hypixelify
 api-version: "1.13"
 depend: [BedWars, Citizens]
-softdepend: [PlaceholderAPI, Parties]
+softdepend: [PlaceholderAPI]
 author: pronze
 
 commands:
