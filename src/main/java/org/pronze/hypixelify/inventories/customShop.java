@@ -419,7 +419,7 @@ public class customShop implements Listener {
             newItem = changeItemType.getStack();
         }
 
-        if (clickType.isShiftClick()) {
+        if (clickType.isShiftClick()  && newItem.getMaxStackSize() > 1) {
             double priceOfOne = (double) price / amount;
             double maxStackSize;
             int finalStackSize;
@@ -430,7 +430,7 @@ public class customShop implements Listener {
                 }
             }
             if (Main.getConfigurator().config.getBoolean("sell-max-64-per-click-in-shop")) {
-                maxStackSize = Math.min(inInventory / priceOfOne, 64);
+                maxStackSize = Math.min(inInventory / priceOfOne, newItem.getMaxStackSize());
             } else {
                 maxStackSize = inInventory / priceOfOne;
             }
@@ -520,14 +520,21 @@ public class customShop implements Listener {
                     }
                 }
 
-                if (!player.getInventory().contains(newItem))
-                    event.buyStack(newItem);
+                if (!player.getInventory().contains(newItem)) {
+                    Map<Integer, ItemStack> notFit = event.buyStack(newItem);
+                    if (!notFit.isEmpty()) {
+                        notFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
+                    }
+                }
                 else {
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same " + name.substring(1));
                     shouldSellStack = false;
                 }
             } else {
-                event.buyStack(newItem);
+                Map<Integer, ItemStack> notFit = event.buyStack(newItem);
+                if (!notFit.isEmpty()) {
+                    notFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
+                }
             }
 
             if (shouldSellStack) {

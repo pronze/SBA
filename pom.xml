@@ -60,14 +60,14 @@
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars</artifactId>
-            <version>0.2.11</version>
+            <version>0.2.12-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars-API</artifactId>
-            <version>0.2.11</version>
+            <version>0.2.12-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
