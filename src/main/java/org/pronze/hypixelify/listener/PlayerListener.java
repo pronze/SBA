@@ -1,8 +1,6 @@
 package org.pronze.hypixelify.listener;
 import org.bukkit.*;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
@@ -22,7 +20,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.*;
-import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GamePlayer;

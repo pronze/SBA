@@ -15,8 +15,6 @@ public class GamesCommand extends BaseCommand {
 
     @Override
     public boolean execute(CommandSender commandSender, List<String> args) {
-        if(!commandSender.isOp())
-            return true;
 
         if(!(commandSender instanceof Player)) return true;
 
@@ -46,9 +44,6 @@ public class GamesCommand extends BaseCommand {
 
     @Override
     public void completeTab(List<String> completion, CommandSender sender, List<String> args) {
-            if(!sender.isOp()){
-                return;
-            }
             if(args.size() == 1){
                 completion.addAll(Arrays.asList("solo", "double", "triple", "squad"));
             }

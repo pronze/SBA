@@ -9,6 +9,8 @@ import org.pronze.hypixelify.commands.GamesCommand;
 import org.pronze.hypixelify.inventories.*;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
+import org.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 
 
@@ -22,11 +24,13 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static customShop shop;
     private Configurator configurator;
     private ArenaManager arenamanager;
+    private Options gamesOptions;
     private SoloGames sg;
     private DoubleGames dg;
     private TripleGames tg;
     private SquadGames sg2;
 
+    public Options getGamesOptions(){ return gamesOptions;}
 
     public SoloGames getSoloGameInventory(){
         return sg;
@@ -43,10 +47,10 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public SquadGames getSquadGameInventory(){
         return sg2;
     }
+
+
     public void onEnable() {
         plugin = this;
-
-
         arenamanager = new ArenaManager();
 
         new UpdateChecker(this, 79505).getVersion(version -> {
@@ -85,14 +89,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("");
 
+
+        new GamesCommand();
+        new PlayerListener();
+        InventoryListener.init(this);
+        gamesOptions = ShopUtil.generateOptions();
         sg = new SoloGames();
         dg = new DoubleGames();
         tg = new TripleGames();
         sg2 = new SquadGames();
-
-        new GamesCommand();
-        new PlayerListener(this);
-        InventoryListener.init(this);
         shop = new customShop();
 
         if(this.getServer().getPluginManager().getPlugin("Citizens") == null)

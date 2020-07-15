@@ -1,19 +1,10 @@
 package org.pronze.hypixelify.commands;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.World;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.GameCreator;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;

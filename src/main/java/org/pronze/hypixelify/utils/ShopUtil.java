@@ -8,9 +8,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.listener.PlayerListener;
+import org.pronze.hypixelify.listener.Shop;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
@@ -18,8 +20,11 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
+import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 
 import java.util.*;
+
+import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
 public class ShopUtil {
 
@@ -212,8 +217,107 @@ public class ShopUtil {
         return newItem;
     }
 
+    public static ArrayList<Object> createGamesGUI(int mode, List<String> lore){
+        ArrayList<Object> games = new ArrayList<>();
 
+        ItemStack air = new ItemStack(Material.AIR);
+        HashMap<String, Object> tempmappings1 = new HashMap<>();
+        tempmappings1.put("stack", air);
+        games.add(tempmappings1);
+        for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
+                .getGames()) {
+            if (Configurator.game_size.containsKey(game.getName()) && Configurator.game_size.get(game.getName()).equals(mode)) {
+                ItemStack temp = new ItemStack(Material.PAPER);
+                ItemMeta meta1 = temp.getItemMeta();
+                String name1 = ChatColor.GREEN + game.getName();
+                List<String> newLore = new ArrayList<>();
+                for (String ls : lore){
+                    ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()));
+                    ls.replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
+                    newLore.add(ls);
+                }
+                meta1.setLore(lore);
+                meta1.setDisplayName(name1);
+                temp.setItemMeta(meta1);
+                HashMap<String, Object> tempmappings = new HashMap<>();
+                tempmappings.put("stack", temp);
+                tempmappings.put("game", game);
+                games.add(tempmappings);
+            }
+        }
 
+        return games;
+    }
+
+    public static Options generateOptions(){
+        Options options = new Options(Hypixelify.getInstance());
+        options.setShowPageNumber(true);
+
+        ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
+        ItemMeta backItemMeta = backItem.getItemMeta();
+        backItemMeta.setDisplayName(i18n("shop_back", false));
+        backItem.setItemMeta(backItemMeta);
+        options.setBackItem(backItem);
+
+        ItemStack pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
+        ItemMeta pageBackItemMeta = backItem.getItemMeta();
+        pageBackItemMeta.setDisplayName(i18n("page_back", false));
+        pageBackItem.setItemMeta(pageBackItemMeta);
+        options.setPageBackItem(pageBackItem);
+
+        ItemStack pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
+        ItemMeta pageForwardItemMeta = backItem.getItemMeta();
+        pageForwardItemMeta.setDisplayName(i18n("page_forward", false));
+        pageForwardItem.setItemMeta(pageForwardItemMeta);
+        options.setPageForwardItem(pageForwardItem);
+
+        ItemStack cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
+        options.setCosmeticItem(cosmeticItem);
+        options.setRender_header_start(45);
+        options.setRender_offset(9);
+        options.setRows(4);
+        options.setRender_actual_rows(4);
+        options.setShowPageNumber(false);
+
+        return options;
+    }
+
+    public static List<ItemStack> createCategories(List<String> lore1,
+                                            String name, String name2){
+        List<ItemStack> myList = new ArrayList<>();
+        ItemStack category = new ItemStack(Material.valueOf("RED_BED"));
+        ItemStack category2 = new ItemStack(Material.OAK_SIGN);
+        ItemStack category3 = new ItemStack(Material.BARRIER);
+        ItemStack category4 = new ItemStack(Material.ENDER_PEARL);
+        ItemMeta meta = category.getItemMeta();
+        meta.setLore(lore1);
+        meta.setDisplayName(name);
+        category.setItemMeta(meta);
+
+        ItemMeta meta2 = category2.getItemMeta();
+        meta2.setLore(Arrays.asList("§7Pick which map you want to play", "§7from a list of available servers.", " "
+                , "§eClick to browse!"));
+        meta2.setDisplayName(name2);
+        category2.setItemMeta(meta2);
+
+        ItemMeta meta3 = category3.getItemMeta();
+        String name3 = "§cExit";
+        meta3.setDisplayName(name3);
+        category3.setItemMeta(meta3);
+
+        ItemMeta meta4 = category4.getItemMeta();
+        String name4 = "§cClick here to rejoin!";
+        meta4.setLore(Arrays.asList("§7Click here to rejoin the lastly joined game"));
+        meta4.setDisplayName(name4);
+        category4.setItemMeta(meta4);
+
+        myList.add(category);
+        myList.add(category2);
+        myList.add(category3);
+        myList.add(category4);
+
+        return myList;
+    }
     public static String translateColors(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
