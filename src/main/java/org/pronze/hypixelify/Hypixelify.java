@@ -24,13 +24,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static customShop shop;
     private Configurator configurator;
     private ArenaManager arenamanager;
-    private Options gamesOptions;
     private SoloGames sg;
     private DoubleGames dg;
     private TripleGames tg;
     private SquadGames sg2;
 
-    public Options getGamesOptions(){ return gamesOptions;}
 
     public SoloGames getSoloGameInventory(){
         return sg;
@@ -93,7 +91,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         new GamesCommand();
         new PlayerListener();
         InventoryListener.init(this);
-        gamesOptions = ShopUtil.generateOptions();
         sg = new SoloGames();
         dg = new DoubleGames();
         tg = new TripleGames();

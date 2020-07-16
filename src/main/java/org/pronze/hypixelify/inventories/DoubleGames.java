@@ -28,7 +28,7 @@ public class DoubleGames implements Listener {
     private List<Player> Players = new ArrayList<>();
 
     public DoubleGames() {
-        options = Hypixelify.getInstance().getGamesOptions();
+        options = ShopUtil.generateOptions();
         options.setPrefix("Bed Wars Double");
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         createData();
@@ -37,16 +37,16 @@ public class DoubleGames implements Listener {
     private void createData() {
         SimpleInventories menu = new SimpleInventories(options);
         List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars solo", " ", "§eClick to play!"),
-                "§Bed Wars (Double)","§Map Selector (Double)");
+                "§aBed Wars (Double)","§aMap Selector (Double)");
         ItemStack category = myCategories.get(0);
         ItemStack category2 = myCategories.get(1);
         ItemStack category3 = myCategories.get(2);
         ItemStack category4 = myCategories.get(3);
 
 
-        ArrayList<Object> soloGames  = ShopUtil.createGamesGUI(2, Arrays.asList("§8Doubles", "", "§7Available Servers: §a1", "§7Status: §a{status}"
-                ,"§7Players: {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
-        FormatBuilder builder = ShopUtil.createBuilder(soloGames, category, category2, category3, category4);
+        ArrayList<Object> doubleGames  = ShopUtil.createGamesGUI(2, Arrays.asList("§8Doubles", "", "§7Available Servers: §a1", "§7Status: §a{status}"
+                ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
+        FormatBuilder builder = ShopUtil.createBuilder(doubleGames, category, category2, category3, category4);
 
         menu.load(builder);
         menu.generateData();

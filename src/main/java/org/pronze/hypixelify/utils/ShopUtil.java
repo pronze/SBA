@@ -107,13 +107,19 @@ public class ShopUtil {
     public static FormatBuilder createBuilder(ArrayList<Object> games, ItemStack category, ItemStack category2, ItemStack category3,
                                        ItemStack category4){
         FormatBuilder builder = new FormatBuilder();
+        Map<String, Object> options = new HashMap<>();
+        options.put("rows", 6);
+        options.put("render_actual_rows", 6);
+
+
         builder.add(category)
                 .set("column", 3)
                 .set("row", 1);
         builder.add(category2)
                 .set("row", 1)
                 .set("column", 5)
-                .set("items", games);
+                .set("items", games)
+                .set("options", options);
         builder.add(category3)
                 .set("row", 3)
                 .set("column", 4);
@@ -232,11 +238,11 @@ public class ShopUtil {
                 String name1 = ChatColor.GREEN + game.getName();
                 List<String> newLore = new ArrayList<>();
                 for (String ls : lore){
-                    ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()));
-                    ls.replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
-                    newLore.add(ls);
+                    String l =ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
+                                .replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
+                    newLore.add(l);
                 }
-                meta1.setLore(lore);
+                meta1.setLore(newLore);
                 meta1.setDisplayName(name1);
                 temp.setItemMeta(meta1);
                 HashMap<String, Object> tempmappings = new HashMap<>();
@@ -246,12 +252,24 @@ public class ShopUtil {
             }
         }
 
+        ItemStack arrowStack = new ItemStack(Material.ARROW);
+        ItemMeta metaArrow = arrowStack.getItemMeta();
+        metaArrow.setDisplayName("§aGo Back");
+        metaArrow.setLore(Arrays.asList("§7To Play Bed Wars"));
+        arrowStack.setItemMeta(metaArrow);
+        HashMap<String, Object> arrows = new HashMap<>();
+        arrows.put("stack", arrowStack);
+        arrows.put("row", 5);
+        arrows.put("column", 4);
+        arrows.put("locate", "main");
+        games.add(arrows);
+
         return games;
     }
 
     public static Options generateOptions(){
         Options options = new Options(Hypixelify.getInstance());
-        options.setShowPageNumber(true);
+        options.setShowPageNumber(false);
 
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         ItemMeta backItemMeta = backItem.getItemMeta();
@@ -273,7 +291,8 @@ public class ShopUtil {
 
         ItemStack cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
         options.setCosmeticItem(cosmeticItem);
-        options.setRender_header_start(45);
+        options.setRender_header_start(600);
+        options.setRender_footer_start(600);
         options.setRender_offset(9);
         options.setRows(4);
         options.setRender_actual_rows(4);
@@ -309,7 +328,7 @@ public class ShopUtil {
         String name4 = "§cClick here to rejoin!";
         meta4.setLore(Arrays.asList("§7Click here to rejoin the lastly joined game"));
         meta4.setDisplayName(name4);
-        category4.setItemMeta(meta4);
+        category4.setItemMeta(meta4);;
 
         myList.add(category);
         myList.add(category2);

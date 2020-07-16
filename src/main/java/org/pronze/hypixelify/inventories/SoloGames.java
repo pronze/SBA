@@ -24,7 +24,7 @@ public class SoloGames implements Listener {
     private List<Player> Players = new ArrayList<>();
 
     public SoloGames() {
-        options = Hypixelify.getInstance().getGamesOptions();
+        options = ShopUtil.generateOptions();
         options.setPrefix("Bed Wars Solo");
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         createData();
@@ -34,7 +34,7 @@ public class SoloGames implements Listener {
     private void createData() {
         SimpleInventories menu = new SimpleInventories(options);
         List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars solo", " ", "§eClick to play!"),
-                "§Bed Wars (Solo)","§Map Selector (Solo)");
+                "§aBed Wars (Solo)","§aMap Selector (Solo)");
         ItemStack category = myCategories.get(0);
         ItemStack category2 = myCategories.get(1);
         ItemStack category3 = myCategories.get(2);
@@ -42,7 +42,7 @@ public class SoloGames implements Listener {
 
 
         ArrayList<Object> soloGames = ShopUtil.createGamesGUI(1, Arrays.asList("§8Solo", "", "§7Available Servers: §a1", "§7Status: §a{status}"
-                ,"§7Players: {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
+                ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
         FormatBuilder builder = ShopUtil.createBuilder(soloGames, category, category2, category3, category4);
 
         menu.load(builder);

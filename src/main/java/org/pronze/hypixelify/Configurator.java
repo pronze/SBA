@@ -92,6 +92,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
+        checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         for(String game : Main.getGameNames()){
             String str = "lobby-scoreboard.player-size.games." + game;
             checkOrSetConfig(modify, str, 4);

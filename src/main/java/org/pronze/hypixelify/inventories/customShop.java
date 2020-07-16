@@ -79,14 +79,15 @@ public class customShop implements Listener {
 
         options.setRows(Main.getConfigurator().config.getInt("shop.rows", 4));
         options.setRender_actual_rows(Main.getConfigurator().config.getInt("shop.render-actual-rows", 6));
-        options.setRender_offset(Main.getConfigurator().config.getInt("shop.render-offset", 9));
-        options.setRender_header_start(Main.getConfigurator().config.getInt("shop.render-header-start", 0));
-        options.setRender_footer_start(Main.getConfigurator().config.getInt("shop.render-footer-start", 45));
+        options.setRender_offset(0);
+        options.setRender_header_start(9);
+        options.setRender_footer_start(600);
         options.setItems_on_row(Main.getConfigurator().config.getInt("shop.items-on-row", 9));
         options.setShowPageNumber(Main.getConfigurator().config.getBoolean("shop.show-page-numbers", true));
         options.setInventoryType(InventoryType.valueOf(Main.getConfigurator().config.getString("shop.inventory-type", "CHEST")));
 
-        options.setPrefix("[SBAHypixelify] Shop");
+        options.setPrefix(Hypixelify.getConfigurator().config.getString("shop-name","[SBAHypixelify] Shop"));
+        options.setShowPageNumber(false);
         options.setGenericShop(true);
         options.setGenericShopPriceTypeRequired(true);
         options.setAnimationsEnabled(true);
@@ -521,20 +522,14 @@ public class customShop implements Listener {
                 }
 
                 if (!player.getInventory().contains(newItem)) {
-                    Map<Integer, ItemStack> notFit = event.buyStack(newItem);
-                    if (!notFit.isEmpty()) {
-                        notFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
-                    }
+                    event.buyStack(newItem);
                 }
                 else {
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same " + name.substring(1));
                     shouldSellStack = false;
                 }
             } else {
-                Map<Integer, ItemStack> notFit = event.buyStack(newItem);
-                if (!notFit.isEmpty()) {
-                    notFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
-                }
+                event.buyStack(newItem);
             }
 
             if (shouldSellStack) {

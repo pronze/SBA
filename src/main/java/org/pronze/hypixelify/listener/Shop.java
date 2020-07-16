@@ -18,6 +18,7 @@ import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -51,7 +52,7 @@ public class Shop implements Listener {
     }
 
     @EventHandler
-    public void onGameStart(BedwarsGameStartEvent e){
+    public void onGameStart(BedwarsGameStartedEvent e){
         Game game = e.getGame();
         for (GameStore store : Main.getGame(game.getName()).getGameStores()) {
             if (store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
