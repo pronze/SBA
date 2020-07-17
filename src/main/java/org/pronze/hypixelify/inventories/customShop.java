@@ -391,17 +391,10 @@ public class customShop implements Listener {
     }
 
     public void buystack(ItemStack newItem, ShopTransactionEvent event){
-        Player player = event.getPlayer();
-        if(Main.getVersion().contains("0.2.12-SNAPSHOT")){
-            Map<Integer, ItemStack> notFit = event.buyStack(newItem);
-            if (!notFit.isEmpty()) {
-                notFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
-            }
-        } else {
+            Player player = event.getPlayer();
             HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
             if(!noFit.isEmpty()){
                 noFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
-            }
         }
     }
 
@@ -586,7 +579,7 @@ public class customShop implements Listener {
         ItemStack materialItem = itemSpawnerType.getStack(price);
 
         if (event.hasPlayerInInventory(materialItem)) {
-            event.sellStack(materialItem);
+            sellstack(materialItem, event);
             for (MapReader mapEntity : entities) {
                 String configuredType = mapEntity.getString("type");
                 if (configuredType == null) {

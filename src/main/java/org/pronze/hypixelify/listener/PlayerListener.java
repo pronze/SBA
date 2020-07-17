@@ -1,6 +1,8 @@
 package org.pronze.hypixelify.listener;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
@@ -272,6 +274,14 @@ public class PlayerListener implements Listener {
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onOver(e);
     }
+
+    //Bedwars Does this?
+  /// @EventHandler
+  /// public void onExplosion(EntityExplodeEvent e){
+  ///     for(Block b : e.blockList()){
+  ///
+  ///     }
+  /// }
 
     @EventHandler
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e){

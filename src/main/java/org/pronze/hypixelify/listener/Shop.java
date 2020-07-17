@@ -12,20 +12,16 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.events.BedwarsGameStartEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
-import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.game.GamePlayer;
-import java.util.ArrayList;
 import java.util.Objects;
 
 public class Shop implements Listener {
@@ -54,6 +50,8 @@ public class Shop implements Listener {
     @EventHandler
     public void onGameStart(BedwarsGameStartedEvent e){
         Game game = e.getGame();
+        ShopUtil.RemoveNPCFromGame(game);
+
         for (GameStore store : Main.getGame(game.getName()).getGameStores()) {
             if (store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
                     || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
@@ -97,17 +95,7 @@ public class Shop implements Listener {
 
     @EventHandler
     public void onRebuild(BedwarsPreRebuildingEvent e){
-        ArrayList<NPC> npcs = new ArrayList<>();
-
-        CitizensAPI.getNPCRegistry().forEach(npc -> {
-                if(GameCreator.isInArea(npc.getStoredLocation(), e.getGame().getPos1(), e.getGame().getPos2()))
-                    npcs.add(npc);
-        });
-
-        for(NPC npc : npcs){
-            npc.destroy();
-        }
-
+        ShopUtil.RemoveNPCFromGame(e.getGame());
     }
 
 

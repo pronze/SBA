@@ -341,4 +341,20 @@ public class ShopUtil {
     }
 
 
+    public static void RemoveNPCFromGame(Game game){
+        ArrayList<NPC> npcs = new ArrayList<>();
+
+        CitizensAPI.getNPCRegistry().forEach(npc -> {
+            if(GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2()))
+                npcs.add(npc);
+        });
+
+        if(npcs.isEmpty())
+            return;
+
+        for(NPC npc : npcs){
+            npc.destroy();
+        }
+    }
+
 }
