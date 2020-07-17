@@ -132,7 +132,7 @@ data:
   - IRON_PICKAXE;1 for 20 of iron
   - IRON_AXE;1 for 20 of iron
   - DIAMOND_PICKAXE;1 for 12 of gold
-  - DIMAOND_AXE;1 for 12 of gold
+  - DIAMOND_AXE;1 for 12 of gold
 
 - write: false
   stack: 'STONE'

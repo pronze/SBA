@@ -44,7 +44,7 @@ public class SquadGames implements Listener {
 
     private void createData() {
         SimpleInventories menu = new SimpleInventories(options);
-        List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars solo", " ", "§eClick to play!"),
+        List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars squads", " ", "§eClick to play!"),
                 "§aBed Wars (Squad)","§aMap Selector (Squad)");
         ItemStack category = myCategories.get(0);
         ItemStack category2 = myCategories.get(1);

@@ -303,7 +303,7 @@ public class PlayerListener implements Listener {
                     this.cancel();
                 }
             }
-        }).runTaskTimer(Hypixelify.getInstance(), 20L, 20L);
+        }).runTaskTimer(Hypixelify.getInstance(), 40L, 20L);
     }
 
 

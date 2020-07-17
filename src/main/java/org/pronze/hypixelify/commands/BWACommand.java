@@ -5,6 +5,8 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.commands.BaseCommand;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +19,7 @@ public class BWACommand implements TabExecutor {
 
         if (args.length >= 1) {
             if(sender instanceof  Player) {
-                if (!sender.isOp()) {
+                if (!sender.hasPermission(BaseCommand.ADMIN_PERMISSION)) {
                     sender.sendMessage(ChatColor.RED + "You Don't have permissions to do this command");
                     return true;
                 }
@@ -76,6 +78,8 @@ public class BWACommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        if(!commandSender.hasPermission(BaseCommand.ADMIN_PERMISSION))
+            return null;
         if (strings.length == 1) {
             if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())){
                 return Arrays.asList("cancel","upgrade");

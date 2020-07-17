@@ -36,7 +36,7 @@ public class DoubleGames implements Listener {
 
     private void createData() {
         SimpleInventories menu = new SimpleInventories(options);
-        List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars solo", " ", "§eClick to play!"),
+        List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars doubles", " ", "§eClick to play!"),
                 "§aBed Wars (Double)","§aMap Selector (Double)");
         ItemStack category = myCategories.get(0);
         ItemStack category2 = myCategories.get(1);

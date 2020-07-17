@@ -77,17 +77,16 @@ public class customShop implements Listener {
         ItemStack cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
         options.setCosmeticItem(cosmeticItem);
 
-        options.setRows(Main.getConfigurator().config.getInt("shop.rows", 4));
-        options.setRender_actual_rows(Main.getConfigurator().config.getInt("shop.render-actual-rows", 6));
+        options.setRows(6);
+        options.setRender_actual_rows(6);
         options.setRender_offset(0);
         options.setRender_header_start(9);
         options.setRender_footer_start(600);
-        options.setItems_on_row(Main.getConfigurator().config.getInt("shop.items-on-row", 9));
-        options.setShowPageNumber(Main.getConfigurator().config.getBoolean("shop.show-page-numbers", true));
+        options.setItems_on_row(9);
+        options.setShowPageNumber(false);
         options.setInventoryType(InventoryType.valueOf(Main.getConfigurator().config.getString("shop.inventory-type", "CHEST")));
 
         options.setPrefix(Hypixelify.getConfigurator().config.getString("shop-name","[SBAHypixelify] Shop"));
-        options.setShowPageNumber(false);
         options.setGenericShop(true);
         options.setGenericShopPriceTypeRequired(true);
         options.setAnimationsEnabled(true);
@@ -391,6 +390,27 @@ public class customShop implements Listener {
         return stringBuilder.toString().trim();
     }
 
+    public void buystack(ItemStack newItem, ShopTransactionEvent event){
+        Player player = event.getPlayer();
+        if(Main.getVersion().contains("0.2.12-SNAPSHOT")){
+            Map<Integer, ItemStack> notFit = event.buyStack(newItem);
+            if (!notFit.isEmpty()) {
+                notFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
+            }
+        } else {
+            HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
+            if(!noFit.isEmpty()){
+                noFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
+            }
+        }
+    }
+
+    public void sellstack(ItemStack newItem, ShopTransactionEvent event){
+        Player player = event.getPlayer();
+        player.getInventory().removeItem(newItem);
+    }
+
+
     private void handleBuy(ShopTransactionEvent event) {
         Player player = event.getPlayer();
         Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
@@ -500,7 +520,7 @@ public class customShop implements Listener {
                                 player.getInventory().remove(item);
                         }
                     }
-                    event.buyStack(newItem);
+                    buystack(newItem, event);
                 } else {
                     shouldSellStack = false;
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same sword!");
@@ -522,18 +542,18 @@ public class customShop implements Listener {
                 }
 
                 if (!player.getInventory().contains(newItem)) {
-                    event.buyStack(newItem);
+                    buystack(newItem, event);
                 }
                 else {
                     player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same " + name.substring(1));
                     shouldSellStack = false;
                 }
             } else {
-                event.buyStack(newItem);
+                buystack(newItem, event);
             }
 
             if (shouldSellStack) {
-                event.sellStack(materialItem);
+                sellstack(materialItem, event);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
                     player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + getNameOrCustomNameOfItem(newItem));
                 }

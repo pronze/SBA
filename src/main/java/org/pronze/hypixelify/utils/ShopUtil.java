@@ -263,7 +263,6 @@ public class ShopUtil {
         arrows.put("column", 4);
         arrows.put("locate", "main");
         games.add(arrows);
-
         return games;
     }
 
