@@ -473,6 +473,9 @@ public class customShop implements Listener {
 
             boolean shouldSellStack = true;
 
+
+
+
             if (getNameOrCustomNameOfItem(newItem).contains("Sharpness")) {
                 if (!ShopUtil.addEnchantsToPlayerTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
                     shouldSellStack = false;

@@ -94,7 +94,9 @@ public class TripleGames implements Listener {
             if(event.getItem().getStack().getType().equals(Material.BARRIER)) {
                 Players.remove(player);
                 player.closeInventory();
-            } else if(event.getItem().getStack().getType().equals(Material.RED_BED)){
+            } else if(event.getItem().getStack().getType().equals(Material.RED_BED)
+                    || event.getItem().getStack().getType().equals(Material.FIREWORK_ROCKET)
+                    || event.getItem().getStack().getType().equals(Material.DIAMOND)){
                 player.closeInventory();
                 repaint();
                 Players.remove(player);

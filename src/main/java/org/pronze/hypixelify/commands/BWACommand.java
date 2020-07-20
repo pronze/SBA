@@ -19,7 +19,7 @@ public class BWACommand implements TabExecutor {
 
         if (args.length >= 1) {
             if(sender instanceof  Player) {
-                if (!sender.hasPermission(BaseCommand.ADMIN_PERMISSION)) {
+                if (!sender.hasPermission("misat11.bw.admin")) {
                     sender.sendMessage(ChatColor.RED + "You Don't have permissions to do this command");
                     return true;
                 }
@@ -78,7 +78,7 @@ public class BWACommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        if(!commandSender.hasPermission(BaseCommand.ADMIN_PERMISSION))
+        if(!commandSender.hasPermission("misat11.bw.admin"))
             return null;
         if (strings.length == 1) {
             if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())){

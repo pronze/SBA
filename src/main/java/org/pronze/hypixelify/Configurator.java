@@ -183,11 +183,33 @@ public class Configurator {
                 , ""
                 , "{state}"
                 , ""
-                , "&fMode: &a4v4v4v4"
+                , "&fMode: &a{mode}"
                 , "&fVersion: &7v1.1"
                 , ""
                 , "&ewww.sample.net"
         ));
+
+        checkOrSetConfig(modify, "party.enabled", true);
+        checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou cannot invite this player to your party!",
+                "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.alreadyInvited", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cThis player has already had pending invites!",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.invite", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "{player}&e has invited you to join their party!",
+                "&6Type /party accept to join. You have 60 seconds to accept.",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.accepted", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "{player} &ajoined the party!",
+                "&6-----------------------------------------------------"));
+
         if (modify.get()) {
             try {
                 config.save(file);

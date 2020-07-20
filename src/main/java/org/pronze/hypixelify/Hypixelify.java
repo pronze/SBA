@@ -6,17 +6,18 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.GamesCommand;
+import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.*;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
-import org.pronze.hypixelify.utils.ShopUtil;
-import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 
 
 import org.bukkit.ChatColor;
 
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Hypixelify extends JavaPlugin implements Listener {
 
@@ -28,7 +29,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private DoubleGames dg;
     private TripleGames tg;
     private SquadGames sg2;
-
+    public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
 
     public SoloGames getSoloGameInventory(){
         return sg;

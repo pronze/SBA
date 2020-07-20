@@ -10,7 +10,7 @@ import java.util.List;
 public class GamesCommand extends BaseCommand {
 
     public GamesCommand() {
-        super("gamesinv", null, true);
+        super("gamesinv", null, false, true);
     }
 
     @Override

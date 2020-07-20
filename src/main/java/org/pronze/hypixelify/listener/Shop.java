@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -78,7 +79,7 @@ public class Shop implements Listener {
     }
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
-
+        Player p = event.getPlayer();
         if (event.isCancelled()) {
             return;
         }

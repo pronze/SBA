@@ -10,6 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
+import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -239,8 +240,16 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent e){
+        Player player = e.getPlayer();
+        Hypixelify.getInstance().playerData.remove(player.getUniqueId());
+    }
+
+    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
+        Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
+
         if(!p.isOp())
             return;
 
@@ -274,14 +283,6 @@ public class PlayerListener implements Listener {
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onOver(e);
     }
-
-    //Bedwars Does this?
-  /// @EventHandler
-  /// public void onExplosion(EntityExplodeEvent e){
-  ///     for(Block b : e.blockList()){
-  ///
-  ///     }
-  /// }
 
     @EventHandler
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e){

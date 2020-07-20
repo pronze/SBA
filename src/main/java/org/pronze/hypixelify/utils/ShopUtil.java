@@ -1,9 +1,10 @@
 package org.pronze.hypixelify.utils;
-
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -28,6 +29,26 @@ import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
 public class ShopUtil {
 
+    public static ItemStack Diamond, FireWorks, Arrow;
+    
+    private static void InitalizeStacks() {
+        Arrow = new ItemStack(Material.ARROW);
+        ItemMeta metaArrow = Arrow.getItemMeta();
+        metaArrow.setDisplayName("§aGo Back");
+        metaArrow.setLore(Arrays.asList("§7To Play Bed Wars"));
+        Arrow.setItemMeta(metaArrow);
+
+        FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
+        ItemMeta fireMeta = FireWorks.getItemMeta();
+        fireMeta.setDisplayName("§aRandom Map");
+        FireWorks.setItemMeta(fireMeta);
+
+        Diamond = new ItemStack(Material.DIAMOND);
+        ItemMeta diamondMeta = Diamond.getItemMeta();
+        diamondMeta.setDisplayName("§aRandom Favorite");
+        Diamond.setItemMeta(diamondMeta);
+    }
+    
     public static void addEnchantsToPlayerArmor(Player player, ItemStack item) {
         for (ItemStack i : player.getInventory().getArmorContents()) {
             if (i != null) {
@@ -224,46 +245,67 @@ public class ShopUtil {
     }
 
     public static ArrayList<Object> createGamesGUI(int mode, List<String> lore){
+        if(Arrow == null)
+            InitalizeStacks();
+        
         ArrayList<Object> games = new ArrayList<>();
-
-        ItemStack air = new ItemStack(Material.AIR);
-        HashMap<String, Object> tempmappings1 = new HashMap<>();
-        tempmappings1.put("stack", air);
-        games.add(tempmappings1);
+        int items = 0;
         for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
                 .getGames()) {
-            if (Configurator.game_size.containsKey(game.getName()) && Configurator.game_size.get(game.getName()).equals(mode)) {
-                ItemStack temp = new ItemStack(Material.PAPER);
-                ItemMeta meta1 = temp.getItemMeta();
-                String name1 = ChatColor.GREEN + game.getName();
-                List<String> newLore = new ArrayList<>();
-                for (String ls : lore){
-                    String l =ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
-                                .replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
-                    newLore.add(l);
+            if (Configurator.game_size.containsKey(game.getName()) &&
+                    Configurator.game_size.get(game.getName()).equals(mode) && items < 28){
+                     ItemStack temp = new ItemStack(Material.PAPER);
+                     ItemMeta meta1 = temp.getItemMeta();
+                     String name1 = ChatColor.GREEN + game.getName();
+                     List<String> newLore = new ArrayList<>();
+                     for (String ls : lore){
+                        String l =ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
+                                    .replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
+                        newLore.add(l);
+                    }
+                    meta1.setLore(newLore);
+                    meta1.setDisplayName(name1);
+                    temp.setItemMeta(meta1);
+                    HashMap<String, Object> gameStack = new HashMap<>();
+                    gameStack.put("stack", temp);
+                    gameStack.put("game", game);
+                    games.add(gameStack);
+                    items++;
                 }
-                meta1.setLore(newLore);
-                meta1.setDisplayName(name1);
-                temp.setItemMeta(meta1);
-                HashMap<String, Object> tempmappings = new HashMap<>();
-                tempmappings.put("stack", temp);
-                tempmappings.put("game", game);
-                games.add(tempmappings);
             }
-        }
-
-        ItemStack arrowStack = new ItemStack(Material.ARROW);
-        ItemMeta metaArrow = arrowStack.getItemMeta();
-        metaArrow.setDisplayName("§aGo Back");
-        metaArrow.setLore(Arrays.asList("§7To Play Bed Wars"));
-        arrowStack.setItemMeta(metaArrow);
+        
+        ItemStack arrowStack = Arrow;
         HashMap<String, Object> arrows = new HashMap<>();
         arrows.put("stack", arrowStack);
         arrows.put("row", 5);
         arrows.put("column", 4);
         arrows.put("locate", "main");
+
+        ItemStack fs = FireWorks;
+        String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(getGamesWithSize(mode).size());
+
+        FireWorks.setLore(Arrays.asList("§8{mode}".replace("{mode}",getModeFromInt(mode)), "", "§7Map Selections: §a{games}".replace("{games}",
+                size), "", "§aClick to Play"));
+        HashMap<String, Object> fireworks = new HashMap<>();
+        fireworks.put("stack", fs);
+        fireworks.put("row", 4);
+        fireworks.put("column", 3);
+
+        ItemStack Dia = Diamond;
+        Dia.setLore(FireWorks.getLore());
+        HashMap<String, Object> diamond = new HashMap<>();
+        diamond.put("stack", Dia);
+        diamond.put("row", 4);
+        diamond.put("column", 5);
+
         games.add(arrows);
+        games.add(fireworks);
+        games.add(diamond);
         return games;
+    }
+
+    public static String getModeFromInt(int mode){
+        return mode == 1 ? "Solo" : mode == 2 ? "Double" : mode == 3 ?"Triples" : "Squads";
     }
 
     public static Options generateOptions(){
@@ -296,7 +338,6 @@ public class ShopUtil {
         options.setRows(4);
         options.setRender_actual_rows(4);
         options.setShowPageNumber(false);
-
         return options;
     }
 
@@ -356,5 +397,4 @@ public class ShopUtil {
             npc.destroy();
         }
     }
-
 }
