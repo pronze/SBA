@@ -27,6 +27,11 @@ public class PartyCommand implements TabExecutor {
         }
         Player player = (Player) sender;
 
+        if(args.length > 2){
+            sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /party help for more.");
+            return true;
+        }
+
         if(args[0].equalsIgnoreCase("invite")){
             if (args.length == 2){
                 Player invited = Bukkit.getPlayerExact(args[1]);
@@ -97,6 +102,7 @@ public class PartyCommand implements TabExecutor {
                     if(p != null && p.equals(player))
                         continue;
                     for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.accepted")) {
+                        assert p != null;
                         p.sendMessage(ShopUtil.translateColors(message).replace("{player}", player.getDisplayName()));
                     }
                 }

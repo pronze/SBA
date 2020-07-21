@@ -240,14 +240,10 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent e){
-        Player player = e.getPlayer();
-    }
-
-    @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
-        Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
+        if(Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
+            Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
 
         if(!p.isOp())
             return;

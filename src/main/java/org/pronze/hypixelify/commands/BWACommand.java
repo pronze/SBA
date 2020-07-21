@@ -5,7 +5,6 @@ import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
-import org.screamingsandals.bedwars.commands.BaseCommand;
 
 import java.util.Arrays;
 import java.util.List;

@@ -6,8 +6,6 @@ import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.Party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
-
-import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerDatabase {
@@ -21,6 +19,7 @@ public class PlayerDatabase {
     private int timeout = 60;
     private String name;
     private Player pInstance;
+
 
     public PlayerDatabase(Player player){
         init();
@@ -79,21 +78,12 @@ public class PlayerDatabase {
     }
 
     public void updateDatabase(){
-        if(isInParty && getParty().getPlayers().size() < 1 && party.getInvitedMembers().size() < 1
-        && getParty().getLeader().getUniqueId().equals(player)){
-                for (Player pl : party.getAllPlayers()) {
-                    if(pl != null && pl.isOnline()) {
-                        for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
-                            pl.sendMessage(ShopUtil.translateColors(st));
-                        }
-                    }
-                    party.removeMember(pl);
-                    if(Hypixelify.getInstance().playerData.get(pl.getUniqueId()) != null) {
-                        Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setIsInParty(false);
-                        Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setParty(null);
-                    }P
+        if(isInParty && getParty().getPlayers().size() <= 1 && party.getInvitedMembers().size() < 1){
+            if(pInstance != null && pInstance.isOnline()) {
+                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
+                    pInstance.sendMessage(ShopUtil.translateColors(st));
                 }
-
+            }
                 setParty(null);
                 setIsInParty(false);
         }
@@ -122,14 +112,20 @@ public class PlayerDatabase {
                         }
                     }
                 } if (isInvited()){
-                    getInvitedParty().removeInvitedMember(pInstance);
+                    if(getInvitedParty().getLeader() != null) {
+                        UUID uuidLeader = getInvitedParty().getLeader().getUniqueId();
+                        Hypixelify.getInstance().playerData.get(uuidLeader).getParty().removeInvitedMember(pInstance);
+                    }
                     setInvitedParty(null);
                     setInvited(false);
                 }
-                Hypixelify.getInstance().playerData.remove(player);
+                    Hypixelify.getInstance().playerData.remove(player);
             }
+        } else if(timeout < 60){
+            timeout = 60;
         }
     }
+
 
     public boolean isInParty(){
         return isInParty;
