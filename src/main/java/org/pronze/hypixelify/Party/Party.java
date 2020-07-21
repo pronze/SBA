@@ -1,18 +1,24 @@
 package org.pronze.hypixelify.Party;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Party {
 
-    private int member_size;
-    private List<Player> players;
+    private int member_size = 0;
+    private List<Player> players = new ArrayList<>();
+    private List<Player> invitedMembers = new ArrayList<>();
+
     private Player leader;
-    private boolean anyoneCanInvite;
+    private boolean anyoneCanInvite = true;
 
     public Party(Player leader){
         setLeader(leader);
+        addMember(leader);
     }
 
     public void setLeader(Player player){
@@ -23,9 +29,25 @@ public class Party {
         return leader;
     }
 
+    public void addInvitedMember(Player pl){
+        if(!players.contains(pl))
+            invitedMembers.add(pl);
+    }
+
+    public List<Player> getInvitedMembers(){
+        return invitedMembers;
+    }
+
+    public void removeInvitedMember(Player pl){
+        if(!players.contains(pl))
+            invitedMembers.remove(pl);
+    }
+
     public void addMember(Player player){
-        if(!players.contains(player))
+        if(!players.contains(player)) {
             players.add(player);
+            member_size++;
+        }
     }
 
     public int getSize(){
@@ -56,6 +78,18 @@ public class Party {
 
 
     public void removeMember(Player player){
+        if(player.equals(leader)){
+            for(Player pl : players){
+                if(Bukkit.getPlayer(pl.getUniqueId()) != null && !pl.equals(leader)){
+                    for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")){
+                        pl.sendMessage(ShopUtil.translateColors(st));
+                    }
+                }
+            }
+            players.clear();
+            leader = null;
+            return;
+        }
         players.remove(player);
     }
 

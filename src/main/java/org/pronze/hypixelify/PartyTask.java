@@ -1,5 +1,4 @@
 package org.pronze.hypixelify;
-
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.database.PlayerDatabase;
 
@@ -17,4 +16,5 @@ public class PartyTask extends BukkitRunnable {
             }
         }
     }
+
 }

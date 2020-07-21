@@ -242,7 +242,6 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
         Player player = e.getPlayer();
-        Hypixelify.getInstance().playerData.remove(player.getUniqueId());
     }
 
     @EventHandler

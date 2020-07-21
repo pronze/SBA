@@ -6,6 +6,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.GamesCommand;
+import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.*;
 import org.pronze.hypixelify.listener.*;
@@ -30,6 +31,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private TripleGames tg;
     private SquadGames sg2;
     public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
+    public PartyTask partyTask;
 
     public SoloGames getSoloGameInventory(){
         return sg;
@@ -106,9 +108,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
        else
            new Shop();
 
+       partyTask = new PartyTask();
+
        Bukkit.getPluginManager().registerEvents(this, this);
-        Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
-        getCommand("bwaddon").setExecutor(new BWACommand());
+       Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
+       getCommand("bwaddon").setExecutor(new BWACommand());
+       getCommand("party").setExecutor(new PartyCommand());
 
         if(!configurator.config.getString("version").contains(getVersion())){
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
