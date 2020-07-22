@@ -218,14 +218,15 @@ public class PartyCommand implements TabExecutor {
                 for (Player pl : Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()).getAllPlayers()) {
                     if(pl != null && pl.isOnline()) {
                             for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.kicked")) {
-                                pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
+                                pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", invited.getDisplayName()));
                             }
                         }
                     }
-                }
-                Database.get(player.getUniqueId()).setIsInParty(false);
-                Database.get(player.getUniqueId()).setPartyLeader(null);
+
+                Database.get(invited.getUniqueId()).setIsInParty(false);
+                Database.get(invited.getUniqueId()).setPartyLeader(null);
                 return true;
+                }
         }
 
         return true;

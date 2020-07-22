@@ -21,6 +21,9 @@ public class PlayerDatabase {
     private Player partyLeader;
 
 
+    public String getName(){
+        return name;
+    }
     public PlayerDatabase(Player player){
         init();
         this.player = player.getUniqueId();
