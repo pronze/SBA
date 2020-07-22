@@ -34,9 +34,9 @@ public class GamesInventory implements Listener {
         option.put(1, options);
         options.setPrefix("Bed Wars Doubles");
         option.put(2, options);
-        options.setPrefix("Bed Wars Solo");
+        options.setPrefix("Bed Wars Triples");
         option.put(3, options);
-        options.setPrefix("Bed Wars Solo");
+        options.setPrefix("Bed Wars Squads");
         option.put(4, options);
 
         labels.put(1, "Solo");
@@ -115,23 +115,30 @@ public class GamesInventory implements Listener {
 
     @EventHandler
     public void onPostAction(PostActionEvent event) {
-        if (event.getFormat() != menu) {
+        if (    event.getFormat() != menu.get(1) ||
+                event.getFormat() != menu.get(2) ||
+                event.getFormat() != menu.get(3) ||
+                event.getFormat() != menu.get(4)) {
             return;
         }
+
+        int mode = event.getFormat() == menu.get(1) ? 1 : event.getFormat() == menu.get(2) ? 2 : event.getFormat() == menu.get(3) ? 3:
+                event.getFormat() == menu.get(4) ? 4 : 1;
+
 
         Player player = event.getPlayer();
         if(event.getItem().getStack() != null)
         {
             if(event.getItem().getStack().getType().equals(Material.BARRIER)) {
-                //Players.remove(player);
+                players.get(mode).remove(player);
                 player.closeInventory();
             } else if(event.getItem().getStack().getType().equals(Material.RED_BED)
                     || event.getItem().getStack().getType().equals(Material.FIREWORK_ROCKET)
                     || event.getItem().getStack().getType().equals(Material.DIAMOND)){
                 player.closeInventory();
-                //repaint();
-                //Players.remove(player);
-                List<Game> games = ShopUtil.getGamesWithSize(1);
+                repaint(mode);
+                players.get(mode).remove(player);
+                List<Game> games = ShopUtil.getGamesWithSize(mode);
                 if(games == null || games.isEmpty())
                     return;
                 for (Game game : games){
@@ -142,8 +149,8 @@ public class GamesInventory implements Listener {
                 }
             } else  if(event.getItem().getStack().getType().equals(Material.ENDER_PEARL)){
                 player.closeInventory();
-             //   repaint();
-            //    Players.remove(player);
+                repaint(mode);
+                players.get(mode).remove(player);
                 player.performCommand("bw rejoin");
             }
         }
@@ -154,8 +161,8 @@ public class GamesInventory implements Listener {
             Main.getGame(game.getName()).joinToGame(player);
             player.closeInventory();
 
-           // repaint();
-            //Players.remove(player);
+             repaint(mode);
+             players.get(mode).remove(player);
         }
     }
 
