@@ -45,7 +45,7 @@ public class PartyCommand implements TabExecutor {
 
                 if(Database.get(player.getUniqueId()) != null){
                     PlayerDatabase data = Database.get(player.getUniqueId());
-                    if( data.isInParty() && Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()).getAllPlayers().size() >= 4){
+                    if(data.isInParty() && Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()) != null && Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()).getAllPlayers().size() >= 4){
                         player.sendMessage("§cParty has reached maximum Size.");
                         return true;
                     }
@@ -238,6 +238,10 @@ public class PartyCommand implements TabExecutor {
                     return true;
                }
 
+                if(!player.isOnline()){
+                    return true;
+                }
+
                 if(!Hypixelify.getInstance().partyManager.isInParty(player)){
                     player.sendMessage("§cYou have to be in a party to use this command!");
                     return true;
@@ -257,6 +261,9 @@ public class PartyCommand implements TabExecutor {
                                 player.sendMessage("§cYou cannot do this command while the game is running!");
                                 return true;
                             } else{
+                                for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.warping")){
+                                    player.sendMessage(ShopUtil.translateColors(st));
+                                }
                                 for(Player pl : Hypixelify.getInstance().partyManager.getParty(player).getPlayers()) {
                                     if (pl != null && pl.isOnline()) {
                                         if(game.getConnectedPlayers().size() >= game.getMaxPlayers()){
@@ -272,6 +279,18 @@ public class PartyCommand implements TabExecutor {
                                         }
 
                                         game.joinToGame(pl);
+                                    }
+                                }
+                            }
+                        } else {
+                            for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.warping")){
+                                player.sendMessage(ShopUtil.translateColors(st));
+                            }
+                            for(Player pl : Hypixelify.getInstance().partyManager.getParty(player).getPlayers()){
+                                if(pl != null && pl.isOnline() && player.isOnline()){
+                                    pl.teleport(player.getLocation());
+                                    for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.warp")) {
+                                        pl.sendMessage(ShopUtil.translateColors(st));
                                     }
                                 }
                             }

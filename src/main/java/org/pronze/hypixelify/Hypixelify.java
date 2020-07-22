@@ -5,6 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.GamesCommand;
 import org.pronze.hypixelify.commands.PartyCommand;
@@ -124,15 +125,21 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
 
         for(Player player : Bukkit.getOnlinePlayers()){
-            if(Hypixelify.getInstance().playerData.get(player.getUniqueId()) == null){
-                Hypixelify.getInstance().playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+            if(player == null) continue;
+            if(playerData.get(player.getUniqueId()) == null){
+                playerData.put(player.getUniqueId(), new PlayerDatabase(player));
             }
         }
-
     }
 
     public void onDisable(){
         if(plugin.isEnabled()){
+            partyTask.cancel();
+            partyManager.parties.clear();
+            partyManager.parties = null;
+            partyManager = null;
+            playerData.clear();
+            playerData = null;
             plugin.getPluginLoader().disablePlugin(plugin);
             this.getServer().getScheduler().cancelTasks(plugin);
             this.getServer().getServicesManager().unregisterAll(plugin);

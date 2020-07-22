@@ -25,6 +25,8 @@ public class BWACommand implements TabExecutor {
                 }
             }
             if (args[0].equalsIgnoreCase("reload")) {
+                Hypixelify.getInstance().partyManager.parties.clear();
+                Hypixelify.getInstance().playerData.clear();
                 Bukkit.getServer().getPluginManager().disablePlugin(Hypixelify.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
                 sender.sendMessage("Plugin reloaded!");

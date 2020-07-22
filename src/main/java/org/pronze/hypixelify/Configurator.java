@@ -224,7 +224,12 @@ public class Configurator {
 
         checkOrSetConfig(modify, "party.message.warp", Arrays.asList(
                 "&6-----------------------------------------------------",
-                "&cYou have been warped by the leader",
+                "&eYou have been warped by the leader",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.warping", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&eWarping players..",
                 "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "party.message.invite", Arrays.asList(
