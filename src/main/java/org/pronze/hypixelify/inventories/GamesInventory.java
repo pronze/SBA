@@ -17,27 +17,27 @@ import org.screamingsandals.bedwars.lib.sgui.inventory.GuiHolder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GamesInventory implements Listener {
-    private Map<Integer, SimpleInventories> menu;
-    private Map<Integer, Options> option;
-    private Map<Integer, List<Player>> players;
-    private Map<Integer, String> labels;
+    private final HashMap<Integer, SimpleInventories> menu = new HashMap<>();
+    private final HashMap<Integer, Options> option = new HashMap<>();
+    private final HashMap<Integer, List<Player>> players = new HashMap<>();
+    private final HashMap<Integer, String> labels = new HashMap<>();
 
     public GamesInventory() {
-        Options options = ShopUtil.generateOptions();
-        options.setPrefix("Bed Wars Solo");
-        option.put(1, options);
-        options.setPrefix("Bed Wars Doubles");
-        option.put(2, options);
-        options.setPrefix("Bed Wars Triples");
-        option.put(3, options);
-        options.setPrefix("Bed Wars Squads");
-        option.put(4, options);
+        Options option1 = ShopUtil.generateOptions();
+        option1.setPrefix("Bed Wars Solo");
+        option.put(1, option1);
+        Options option2 = ShopUtil.generateOptions();
+        option2.setPrefix("Bed Wars Doubles");
+        option.put(2, option2);
+        Options option3 = ShopUtil.generateOptions();
+        option3.setPrefix("Bed Wars Triples");
+        option.put(3, option3);
+        Options option4 = ShopUtil.generateOptions();
+        option4.setPrefix("Bed Wars Squads");
+        option.put(4, option4);
 
         labels.put(1, "Solo");
         labels.put(2, "Double");
@@ -54,7 +54,7 @@ public class GamesInventory implements Listener {
         SimpleInventories tripleMenu = new SimpleInventories(option.get(3));
         SimpleInventories squadMenu = new SimpleInventories(option.get(4));
 
-        for(int i = 1; i < 5; i++){
+        for(int i = 1; i <= 4; i++){
             List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars {mode}".replace("{mode}", labels.get(i)), " ", "§eClick to play!"),
                     "§aBed Wars ({mode})".replace("{mode}", labels.get(i)),"§aMap Selector ({mode})".replace("{mode}", labels.get(i)));
             ItemStack category = myCategories.get(0);
@@ -62,7 +62,7 @@ public class GamesInventory implements Listener {
             ItemStack category3 = myCategories.get(2);
             ItemStack category4 = myCategories.get(3);
 
-            ArrayList<Object> Games = ShopUtil.createGamesGUI(1, Arrays.asList("§8{mode}".replace("{mode}", labels.get(i)), "", "§7Available Servers: §a1", "§7Status: §a{status}"
+            ArrayList<Object> Games = ShopUtil.createGamesGUI(i, Arrays.asList("§8{mode}".replace("{mode}", labels.get(i)), "", "§7Available Servers: §a1", "§7Status: §a{status}"
                     ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
             FormatBuilder builder = ShopUtil.createBuilder(Games, category, category2, category3, category4);
             switch(i){
@@ -96,7 +96,10 @@ public class GamesInventory implements Listener {
 
     public void openForPlayer(Player player, int mode) {
         createData();
+        if(menu.get(mode) == null)
+            return;
         menu.get(mode).openForPlayer(player);
+        players.computeIfAbsent(mode, k -> new ArrayList<>());
         players.get(mode).add(player);
     }
 

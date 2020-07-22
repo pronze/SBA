@@ -15,6 +15,9 @@ public class PartyTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        if(isCancelled())
+            this.cancel();
+
         List<PlayerDatabase> toBeRemoved = null;
         if( Hypixelify.getInstance().playerData == null || Hypixelify.getInstance().playerData.isEmpty() ) return;
 
