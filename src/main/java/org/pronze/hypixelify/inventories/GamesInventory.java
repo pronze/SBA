@@ -132,12 +132,12 @@ public class GamesInventory implements Listener {
         Player player = event.getPlayer();
         if(event.getItem().getStack() != null)
         {
-            if(event.getItem().getStack().equals(new ItemStack(Material.BARRIER))) {
+            if(event.getItem().getStack().getType().equals(new ItemStack(Material.BARRIER).getType())) {
                 players.get(mode).remove(player);
                 player.closeInventory();
-            } else if(event.getItem().getStack().equals(new ItemStack(Material.RED_BED))
-                    || event.getItem().getStack().equals(new ItemStack(Material.FIREWORK_ROCKET))
-                    || event.getItem().getStack().equals(new ItemStack(Material.DIAMOND))){
+            } else if(event.getItem().getStack().getType().equals(new ItemStack(Material.RED_BED).getType())
+                    || event.getItem().getStack().getType().equals(new ItemStack(Material.FIREWORK_ROCKET).getType())
+                    || event.getItem().getStack().getType().equals(new ItemStack(Material.DIAMOND).getType())){
                 player.closeInventory();
                 repaint(mode);
                 players.get(mode).remove(player);
@@ -150,7 +150,7 @@ public class GamesInventory implements Listener {
                         break;
                     }
                 }
-            } else if(event.getItem().getStack().equals(new ItemStack(Material.ENDER_PEARL))){
+            } else if(event.getItem().getStack().getType().equals(new ItemStack(Material.ENDER_PEARL).getType())){
                 player.closeInventory();
                 repaint(mode);
                 players.get(mode).remove(player);

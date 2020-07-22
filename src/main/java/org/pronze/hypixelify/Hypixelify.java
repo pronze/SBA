@@ -93,6 +93,10 @@ public class Hypixelify extends JavaPlugin implements Listener {
        else
            new Shop();
 
+       if(playerData == null){
+           playerData = new HashMap<>();
+       }
+
        partyManager = new PartyManager();
        partyTask = new PartyTask();
 
