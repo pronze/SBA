@@ -29,30 +29,14 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static customShop shop;
     private Configurator configurator;
     private ArenaManager arenamanager;
-    private SoloGames sg;
-    private DoubleGames dg;
-    private TripleGames tg;
-    private SquadGames sg2;
+    private GamesInventory gamesInventory;
     public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
     public PartyTask partyTask;
     public PartyManager partyManager;
 
-    public SoloGames getSoloGameInventory(){
-        return sg;
+    public GamesInventory getGamesInventory(){
+        return gamesInventory;
     }
-
-    public DoubleGames getDoubleGameInventory(){
-        return dg;
-    }
-
-    public TripleGames getTripleGameInventory(){
-        return tg;
-    }
-
-    public SquadGames getSquadGameInventory(){
-        return sg2;
-    }
-
 
     public void onEnable() {
         plugin = this;
@@ -98,12 +82,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
         new GamesCommand();
         new PlayerListener();
         InventoryListener.init(this);
-        sg = new SoloGames();
-        dg = new DoubleGames();
-        tg = new TripleGames();
-        sg2 = new SquadGames();
-        shop = new customShop();
 
+        shop = new customShop();
+        gamesInventory = new GamesInventory();
         if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
         {
            Bukkit.getLogger().warning("Failed to initalize SBAHypixelify shop make sure citizens is installed");

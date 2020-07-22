@@ -27,13 +27,13 @@ public class GamesCommand extends BaseCommand {
                 return true;
             }
             if(args.get(0).equalsIgnoreCase("solo")) {
-                Hypixelify.getInstance().getSoloGameInventory().openForPlayer(player);
+                Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 1);
             } else if(args.get(0).equalsIgnoreCase("double")){
-                Hypixelify.getInstance().getDoubleGameInventory().openForPlayer(player);
+                Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 2);
             } else if(args.get(0).equalsIgnoreCase("triple")){
-                Hypixelify.getInstance().getTripleGameInventory().openForPlayer(player);
+                Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 3);
             } else if(args.get(0).equalsIgnoreCase("squad")){
-                Hypixelify.getInstance().getSquadGameInventory().openForPlayer(player);
+                Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 4);
             }
             else
                 commandSender.sendMessage("§c[BW] Invalid command");
