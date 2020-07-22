@@ -106,12 +106,31 @@ public class PlayerDatabase {
             if(timeout ==0){
                 if(isInParty && partyLeader != null) {
                     Hypixelify.getInstance().partyManager.parties.get(partyLeader).removeMember(pInstance);
-                    for (Player pl : Hypixelify.getInstance().partyManager.parties.get(partyLeader).getAllPlayers()) {
-                        if (!player.equals(pl.getUniqueId())) {
-                            for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
-                                pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", name));
+                    if(!partyLeader.getUniqueId().equals(player)) {
+                        for (Player pl : Hypixelify.getInstance().partyManager.parties.get(partyLeader).getAllPlayers()) {
+                            if (!player.equals(pl.getUniqueId())) {
+                                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
+                                    pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", name));
+                                }
                             }
                         }
+                    } else if(Hypixelify.getInstance().partyManager.parties.get(pInstance) != null) {
+                        Party party = Hypixelify.getInstance().partyManager.parties.get(pInstance);
+                        for(Player pl : party.getAllPlayers()) {
+                            if (pl != null) {
+                                if(pl.isOnline()) {
+                                    for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.disband")) {
+                                        pl.sendMessage(ShopUtil.translateColors(str));
+                                    }
+                                }
+                                if(Hypixelify.getInstance().playerData.get(pl.getUniqueId()) != null){
+                                    Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setIsInParty(false);
+                                    Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setPartyLeader(null);
+                                }
+                            }
+                        }
+                        Hypixelify.getInstance().partyManager.parties.get(partyLeader).disband();
+                        Hypixelify.getInstance().partyManager.parties.remove(partyLeader);
                     }
                 } if (isInvited()){
                     if(getInvitedParty().getLeader() != null) {
