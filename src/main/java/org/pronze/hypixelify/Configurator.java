@@ -196,6 +196,10 @@ public class Configurator {
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
                 "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.expired", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cThe party invite has been expired",
+                "&6-----------------------------------------------------"));
         checkOrSetConfig(modify, "party.message.invalid-command", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cInvalid Command!",
@@ -218,10 +222,15 @@ public class Configurator {
                 "&cThis player has already had pending invites!",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.warp", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou have been warped by the leader",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.invite", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "{player}&e has invited you to join their party!",
-                "&6Type /party accept to join. You have 60 seconds to accept.",
+                "&eType /party accept to join. You have 60 seconds to accept.",
                 "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "party.message.accepted", Arrays.asList(

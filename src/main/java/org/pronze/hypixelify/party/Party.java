@@ -1,4 +1,4 @@
-package org.pronze.hypixelify.Party;
+package org.pronze.hypixelify.party;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;

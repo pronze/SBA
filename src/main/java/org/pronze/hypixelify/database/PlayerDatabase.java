@@ -3,7 +3,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.Party.Party;
+import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import java.util.UUID;
@@ -97,8 +97,14 @@ public class PlayerDatabase {
             if(expiredTime == 0){
                 expiredTime = 60;
                 isInvited = false;
-                if(partyLeader != null && Hypixelify.getInstance().partyManager.parties.get(partyLeader) != null) {
-                    Hypixelify.getInstance().partyManager.parties.get(partyLeader).removeInvitedMember(pInstance);
+                if(invitedParty.getLeader() != null && Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()) != null) {
+                    Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()).removeInvitedMember(pInstance);
+                    for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.expired")){
+                        if(invitedParty.getLeader().isOnline())
+                            invitedParty.getLeader().sendMessage(ShopUtil.translateColors(st));
+                        if(pInstance != null && pInstance.isOnline())
+                            pInstance.sendMessage(ShopUtil.translateColors(st));
+                    }
                 }
                 setInvitedParty(null);
             }
@@ -134,7 +140,7 @@ public class PlayerDatabase {
                         for(Player pl : party.getAllPlayers()) {
                             if (pl != null && !pl.equals(partyLeader)) {
                                 if(pl.isOnline()) {
-                                    for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.disband")) {
+                                    for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
                                         pl.sendMessage(ShopUtil.translateColors(str));
                                     }
                                 }

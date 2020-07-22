@@ -2,14 +2,19 @@ package org.pronze.hypixelify.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.Party.Party;
+import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -226,6 +231,62 @@ public class PartyCommand implements TabExecutor {
                 Database.get(invited.getUniqueId()).setPartyLeader(null);
                 return true;
                 }
+        }   else if(args[0].equalsIgnoreCase("warp")){
+
+                if(args.length != 1){
+                    sender.sendMessage("§cInvalid command");
+                    return true;
+               }
+
+                if(!Hypixelify.getInstance().partyManager.isInParty(player)){
+                    player.sendMessage("§cYou have to be in a party to use this command!");
+                    return true;
+                }
+
+                if(Hypixelify.getInstance().partyManager.getParty(player) != null){
+                    PlayerDatabase database = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+                    if(database != null && database.getPartyLeader() != null){
+                        if(!database.getPartyLeader().equals(player)){
+                            player.sendMessage("§cYou have to be a party leader to use this command!");
+                            return true;
+                         }
+
+                        if(BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
+                            Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+                            if(!game.getStatus().equals(GameStatus.WAITING)){
+                                player.sendMessage("§cYou cannot do this command while the game is running!");
+                                return true;
+                            } else{
+                                for(Player pl : Hypixelify.getInstance().partyManager.getParty(player).getPlayers()) {
+                                    if (pl != null && pl.isOnline()) {
+                                        if(game.getConnectedPlayers().size() >= game.getMaxPlayers()){
+                                            pl.sendMessage("§cYou could not be warped to game");
+                                            continue;
+                                        }
+                                        for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.warp")) {
+                                            pl.sendMessage(ShopUtil.translateColors(st));
+                                        }
+                                        if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) {
+                                            Game g = BedwarsAPI.getInstance().getGameOfPlayer(pl);
+                                            g.leaveFromGame(pl);
+                                        }
+
+                                        game.joinToGame(pl);
+                                    }
+                                }
+                            }
+                        }
+
+                        } else{
+                        player.sendMessage("§cSomething went wrong, reload Addon or BedWars to fix this issue");
+                        return true;
+                    }
+                }
+
+        }
+
+        else{
+            sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /party help for more.");
         }
 
         return true;
@@ -243,7 +304,7 @@ public class PartyCommand implements TabExecutor {
         if(strings.length == 1){
             if(Hypixelify.getInstance().playerData.get(player.getUniqueId()) != null && Hypixelify.getInstance().playerData.get(player.getUniqueId()).isInParty()
             && Hypixelify.getInstance().playerData.get(player.getUniqueId()).getPartyLeader().equals(player))
-                return Arrays.asList("invite", "list", "disband", "kick");
+                return Arrays.asList("invite", "list", "disband", "kick", "warp");
 
 
             return Arrays.asList("invite", "list");

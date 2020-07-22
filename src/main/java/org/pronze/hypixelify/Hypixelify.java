@@ -5,7 +5,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pronze.hypixelify.Party.Party;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.GamesCommand;
 import org.pronze.hypixelify.commands.PartyCommand;
