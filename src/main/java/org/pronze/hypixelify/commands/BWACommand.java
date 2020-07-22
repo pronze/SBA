@@ -4,6 +4,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.Arrays;
@@ -26,6 +27,11 @@ public class BWACommand implements TabExecutor {
             if (args[0].equalsIgnoreCase("reload")) {
                 Bukkit.getServer().getPluginManager().disablePlugin(Hypixelify.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
+                for(Player player : Bukkit.getOnlinePlayers()){
+                    if(Hypixelify.getInstance().playerData.get(player.getUniqueId()) == null){
+                        Hypixelify.getInstance().playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+                    }
+                }
                 sender.sendMessage("Plugin reloaded!");
             }
             else if (args[0].equalsIgnoreCase("help"))

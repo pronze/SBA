@@ -1,9 +1,11 @@
 package org.pronze.hypixelify;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.pronze.hypixelify.Party.Party;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.GamesCommand;
 import org.pronze.hypixelify.commands.PartyCommand;
@@ -11,6 +13,7 @@ import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.*;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
+import org.pronze.hypixelify.manager.PartyManager;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 
 
@@ -32,6 +35,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private SquadGames sg2;
     public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
     public PartyTask partyTask;
+    public PartyManager partyManager;
 
     public SoloGames getSoloGameInventory(){
         return sg;
@@ -108,6 +112,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
        else
            new Shop();
 
+       partyManager = new PartyManager();
        partyTask = new PartyTask();
 
        Bukkit.getPluginManager().registerEvents(this, this);

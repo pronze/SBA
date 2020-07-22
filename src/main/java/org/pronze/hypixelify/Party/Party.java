@@ -16,6 +16,14 @@ public class Party {
     private Player leader;
     private boolean anyoneCanInvite = true;
 
+    public void disband(){
+        players.clear();
+        invitedMembers.clear();
+        invitedMembers = null;
+        players = null;
+        setLeader(null);
+    }
+
     public Party(Player leader){
         setLeader(leader);
         addMember(leader);
@@ -30,7 +38,7 @@ public class Party {
     }
 
     public void addInvitedMember(Player pl){
-        if(!players.contains(pl))
+        if(!invitedMembers.contains(pl))
             invitedMembers.add(pl);
     }
 
@@ -39,8 +47,7 @@ public class Party {
     }
 
     public void removeInvitedMember(Player pl){
-        if(!players.contains(pl))
-            invitedMembers.remove(pl);
+        invitedMembers.remove(pl);
     }
 
     public void addMember(Player player){
@@ -75,6 +82,7 @@ public class Party {
         list.remove(leader);
         return list;
     }
+
 
 
     public void removeMember(Player player){

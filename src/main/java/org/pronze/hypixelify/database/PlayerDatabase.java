@@ -13,12 +13,12 @@ public class PlayerDatabase {
     private UUID player;
     private boolean isInParty = false;
     private boolean isInvited = false;
-    private Party party;
     private int expiredTime = 60;
     private Party invitedParty;
     private int timeout = 60;
     private String name;
     private Player pInstance;
+    private Player partyLeader;
 
 
     public PlayerDatabase(Player player){
@@ -42,6 +42,14 @@ public class PlayerDatabase {
 
     public void setPlayer(Player player){
         this.player = player.getUniqueId();
+    }
+
+    public void setPartyLeader(Player player){
+        partyLeader = player;
+    }
+
+    public Player getPartyLeader(){
+        return partyLeader;
     }
 
     public UUID getPlayer(){
@@ -78,33 +86,37 @@ public class PlayerDatabase {
     }
 
     public void updateDatabase(){
-        if(isInParty && getParty().getPlayers().size() <= 1 && party.getInvitedMembers().size() < 1){
-            if(pInstance != null && pInstance.isOnline()) {
-                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
-                    pInstance.sendMessage(ShopUtil.translateColors(st));
-                }
-            }
-                setParty(null);
-                setIsInParty(false);
-        }
-
         if(isInvited){
             expiredTime--;
             if(expiredTime == 0){
                 expiredTime = 60;
                 isInvited = false;
-                if(getInvitedParty().getLeader() != null) {
-                    UUID uuidLeader = getInvitedParty().getLeader().getUniqueId();
-                    Hypixelify.getInstance().playerData.get(uuidLeader).getParty().removeInvitedMember(pInstance);
+                if(partyLeader != null) {
+                    Hypixelify.getInstance().partyManager.parties.get(partyLeader).removeInvitedMember(pInstance);
                 }
                 setInvitedParty(null);
             }
-        } if(Bukkit.getPlayer(player) == null){
+        }
+
+        if(isInParty && partyLeader!=null && Hypixelify.getInstance().partyManager.parties.get(partyLeader).getAllPlayers().size() <= 1 &&
+                Hypixelify.getInstance().partyManager.parties.get(partyLeader).getInvitedMembers().size() < 1){
+            if(pInstance != null && pInstance.isOnline()) {
+                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
+                    pInstance.sendMessage(ShopUtil.translateColors(st));
+                }
+            }
+                setIsInParty(false);
+                Hypixelify.getInstance().partyManager.parties.get(partyLeader).disband();
+                Hypixelify.getInstance().partyManager.parties.remove(partyLeader);
+                setPartyLeader(null);
+        }
+
+         if(Bukkit.getPlayer(player) == null){
             timeout--;
             if(timeout ==0){
-                if(isInParty) {
-                    Hypixelify.getInstance().playerData.get(player).getParty().removeMember(pInstance);
-                    for (Player pl : Hypixelify.getInstance().playerData.get(player).getParty().getAllPlayers()) {
+                if(isInParty && partyLeader != null) {
+                    Hypixelify.getInstance().partyManager.parties.get(partyLeader).removeMember(pInstance);
+                    for (Player pl : Hypixelify.getInstance().partyManager.parties.get(partyLeader).getAllPlayers()) {
                         if (!player.equals(pl.getUniqueId())) {
                             for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
                                 pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", name));
@@ -113,11 +125,11 @@ public class PlayerDatabase {
                     }
                 } if (isInvited()){
                     if(getInvitedParty().getLeader() != null) {
-                        UUID uuidLeader = getInvitedParty().getLeader().getUniqueId();
-                        Hypixelify.getInstance().playerData.get(uuidLeader).getParty().removeInvitedMember(pInstance);
+                        Hypixelify.getInstance().partyManager.parties.get(partyLeader).removeInvitedMember(pInstance);
                     }
                     setInvitedParty(null);
                     setInvited(false);
+                    setPartyLeader(null);
                 }
                     Hypixelify.getInstance().playerData.remove(player);
             }
@@ -125,7 +137,6 @@ public class PlayerDatabase {
             timeout = 60;
         }
     }
-
 
     public boolean isInParty(){
         return isInParty;
@@ -139,14 +150,11 @@ public class PlayerDatabase {
         isInvited = bool;
     }
 
-    public Party getParty(){
-        if(!isInParty)
-            return null;
+  // public Party getParty(){
+  //     if(!isInParty)
+  //         return null;
 
-        return party;
-    }
+  //     return Hypixelify.getInstance().partyManager.parties.get(partyLeader);
+  // }
 
-    public void setParty(Party party){
-        this.party = party;
-    }
 }

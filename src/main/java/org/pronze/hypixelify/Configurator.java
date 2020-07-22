@@ -194,6 +194,10 @@ public class Configurator {
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
                 "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.notinparty", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou are currently not in a party!",
+                "&6-----------------------------------------------------"));
         checkOrSetConfig(modify, "party.message.invited", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&eYou have invited {player}&e to your party!",
@@ -223,6 +227,11 @@ public class Configurator {
         checkOrSetConfig(modify, "party.message.disband-inactivity", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&aParty has been disbanded due to inactivity",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.disband", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&aParty has been disbanded by the leader",
                 "&6-----------------------------------------------------"));
 
         if (modify.get()) {
