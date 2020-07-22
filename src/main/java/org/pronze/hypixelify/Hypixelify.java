@@ -124,6 +124,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
 
+        for(Player player : Bukkit.getOnlinePlayers()){
+            if(Hypixelify.getInstance().playerData.get(player.getUniqueId()) == null){
+                Hypixelify.getInstance().playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+            }
+        }
+
     }
 
     public void onDisable(){

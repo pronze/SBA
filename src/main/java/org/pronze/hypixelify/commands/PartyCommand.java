@@ -28,7 +28,7 @@ public class PartyCommand implements TabExecutor {
         }
         Player player = (Player) sender;
 
-        if(args.length > 2){
+        if(args == null || args.length == 0 || args.length > 2){
             sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /party help for more.");
             return true;
         }
@@ -49,6 +49,11 @@ public class PartyCommand implements TabExecutor {
                 Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
                 if (invited == null) {
                     player.sendMessage("§cCould not find player!, check the username and make sure he's online!");
+                    return true;
+                }
+
+                if(invited.getUniqueId().equals(player.getUniqueId())){
+                    player.sendMessage("§cInviting yourself isn't possible");
                     return true;
                 }
 
@@ -156,24 +161,71 @@ public class PartyCommand implements TabExecutor {
                 for(Player pl : party.getAllPlayers()) {
                     if (pl != null) {
                         if(pl.isOnline()) {
-                            if (pl.equals(player)) {
-                                pl.sendMessage("§cParty has been disbanded");
-                                continue;
-                            }
                             for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.disband")) {
                                 pl.sendMessage(ShopUtil.translateColors(str));
                             }
                         }
                         if(Hypixelify.getInstance().playerData.get(pl.getUniqueId()) != null){
                             Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setIsInParty(false);
-                            Hypixelify.getInstance().partyManager.parties.get(pl).setLeader(null);
+                            Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setPartyLeader(null);
                         }
                     }
                 }
                 Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(false);
                 Hypixelify.getInstance().partyManager.parties.get(player).disband();
                 Hypixelify.getInstance().partyManager.parties.remove(player);
+                return true;
             }
+        } else if(args[0].equalsIgnoreCase("kick")){
+            PlayerDatabase data = Database.get(player.getUniqueId());
+            if(!data.isInParty() || data.getPartyLeader() == null){
+                for(String str : Hypixelify.getConfigurator().config.getStringList("party.message.notinparty")){
+                    player.sendMessage(ShopUtil.translateColors(str));
+                }
+                return true;
+            }
+
+           else if(!data.getPartyLeader().equals(player)){
+                for(String str : Hypixelify.getConfigurator().config.getStringList("party.message.access-denied")){
+                    player.sendMessage(ShopUtil.translateColors(str));
+                }
+                return true;
+            } else{
+                if(args.length != 2){
+                    for(String str : Hypixelify.getConfigurator().config.getStringList("party.message.invalid-command")){
+                        player.sendMessage(ShopUtil.translateColors(str));
+                    }
+                    return true;
+                }
+
+                Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
+                if (invited == null) {
+                    player.sendMessage("§cCould not find player!, check the username and make sure he's online!");
+                    return true;
+                }
+
+                if(invited.equals(player)){
+                    player.sendMessage("§cYou cannot kick yourself");
+                    return true;
+                }
+
+                if(!Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()).getAllPlayers().contains(player)){
+                    player.sendMessage("§cPlayer isn't in your party currently.");
+                    return true;
+                }
+
+                Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()).removeMember(invited);
+                for (Player pl : Hypixelify.getInstance().partyManager.parties.get(data.getPartyLeader()).getAllPlayers()) {
+                    if(pl != null && pl.isOnline()) {
+                            for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.kicked")) {
+                                pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
+                            }
+                        }
+                    }
+                }
+                Database.get(player.getUniqueId()).setIsInParty(false);
+                Database.get(player.getUniqueId()).setPartyLeader(null);
+                return true;
         }
 
         return true;

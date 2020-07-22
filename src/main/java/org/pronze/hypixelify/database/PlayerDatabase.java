@@ -98,20 +98,7 @@ public class PlayerDatabase {
             }
         }
 
-        if(isInParty && partyLeader!=null && Hypixelify.getInstance().partyManager.parties.get(partyLeader).getAllPlayers().size() <= 1 &&
-                Hypixelify.getInstance().partyManager.parties.get(partyLeader).getInvitedMembers().size() < 1){
-            if(pInstance != null && pInstance.isOnline()) {
-                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
-                    pInstance.sendMessage(ShopUtil.translateColors(st));
-                }
-            }
-                setIsInParty(false);
-                Hypixelify.getInstance().partyManager.parties.get(partyLeader).disband();
-                Hypixelify.getInstance().partyManager.parties.remove(partyLeader);
-                setPartyLeader(null);
-        }
-
-         if(Bukkit.getPlayer(player) == null){
+        if(Bukkit.getPlayer(player) == null){
             timeout--;
             if(timeout ==0){
                 if(isInParty && partyLeader != null) {
@@ -131,11 +118,27 @@ public class PlayerDatabase {
                     setInvited(false);
                     setPartyLeader(null);
                 }
-                    Hypixelify.getInstance().playerData.remove(player);
+                Hypixelify.getInstance().playerData.remove(player);
+                return;
             }
         } else if(timeout < 60){
             timeout = 60;
         }
+
+        if(isInParty && partyLeader!=null && Hypixelify.getInstance().partyManager.parties.get(partyLeader).getAllPlayers().size() <= 1 &&
+                Hypixelify.getInstance().partyManager.parties.get(partyLeader).getInvitedMembers().size() < 1 && Hypixelify.getInstance().partyManager.parties.get(partyLeader).getOfflinePlayers() == null){
+            if(pInstance != null && pInstance.isOnline()) {
+                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
+                    pInstance.sendMessage(ShopUtil.translateColors(st));
+                }
+            }
+                setIsInParty(false);
+                Hypixelify.getInstance().partyManager.parties.get(partyLeader).disband();
+                Hypixelify.getInstance().partyManager.parties.remove(partyLeader);
+                setPartyLeader(null);
+        }
+
+
     }
 
     public boolean isInParty(){

@@ -16,6 +16,22 @@ public class Party {
     private Player leader;
     private boolean anyoneCanInvite = true;
 
+    public List<Player> getOfflinePlayers(){
+        List<Player> offlinePlayers = new ArrayList<>();
+
+        for(Player player : players){
+            if(player != null){
+                if(Bukkit.getPlayer(player.getUniqueId()) == null){
+                    offlinePlayers.add(player);
+                }
+            }
+        }
+
+        if(offlinePlayers.isEmpty()) return null;
+
+        return offlinePlayers;
+    }
+
     public void disband(){
         players.clear();
         invitedMembers.clear();
