@@ -1,8 +1,12 @@
 package org.pronze.hypixelify;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Party.Party;
 import org.pronze.hypixelify.database.PlayerDatabase;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PartyTask extends BukkitRunnable {
 
@@ -12,20 +16,37 @@ public class PartyTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        List<PlayerDatabase> toBeRemoved = null;
         for(PlayerDatabase playerDatabase : Hypixelify.getInstance().playerData.values()){
             if(playerDatabase != null){
                 playerDatabase.updateDatabase();
-                Bukkit.getLogger().info("Player: " + playerDatabase.getName());
-                Bukkit.getLogger().info("Leader: " + playerDatabase.getPartyLeader());
-                Bukkit.getLogger().info("IsInParty: " + playerDatabase.isInParty());
+                if(playerDatabase.toBeRemoved()){
+                    toBeRemoved = new ArrayList<>();
+                    toBeRemoved.add(playerDatabase);
+                }
+                if(Hypixelify.getConfigurator().config.getBoolean("party.enabled", false)) {
+                    Bukkit.getLogger().info("Player: " + playerDatabase.getName());
+                    Bukkit.getLogger().info("Leader: " + playerDatabase.getPartyLeader());
+                    Bukkit.getLogger().info("IsInParty: " + playerDatabase.isInParty());
+                }
             }
 
         }
 
+        if(toBeRemoved != null && !toBeRemoved.isEmpty()){
+            for(PlayerDatabase db : toBeRemoved){
+                if(db != null){
+                    Hypixelify.getInstance().playerData.remove(db.getPlayerUUID());
+                }
+            }
+        }
+
         //more debug info
-        for(Party party : Hypixelify.getInstance().partyManager.parties.values()){
-            if(party != null){
-                Bukkit.getLogger().info("Party: " + party.getLeader().getName());
+        if(Hypixelify.getConfigurator().config.getBoolean("party.enabled", false)) {
+            for (Party party : Hypixelify.getInstance().partyManager.parties.values()) {
+                if (party != null) {
+                    Bukkit.getLogger().info("Party: " + party.getLeader().getName());
+                }
             }
         }
     }

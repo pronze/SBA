@@ -190,6 +190,8 @@ public class Configurator {
         ));
 
         checkOrSetConfig(modify, "party.enabled", true);
+        checkOrSetConfig(modify, "party.debug", false);
+
         checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",

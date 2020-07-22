@@ -125,7 +125,6 @@ public class PartyCommand implements TabExecutor {
 
                 for(Player p : Hypixelify.getInstance().partyManager.parties.get(leader).getAllPlayers()) {
                     if(p == null) continue;
-                    if(p.equals(player)) continue;
                     for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.accepted")) {
                         p.sendMessage(ShopUtil.translateColors(message).replace("{player}", player.getDisplayName()));
                     }
