@@ -24,7 +24,7 @@ public class PartyTask extends BukkitRunnable {
                     toBeRemoved = new ArrayList<>();
                     toBeRemoved.add(playerDatabase);
                 }
-                if(Hypixelify.getConfigurator().config.getBoolean("party.enabled", false)) {
+                if(Hypixelify.getConfigurator().config.getBoolean("party.debug", false)) {
                     Bukkit.getLogger().info("Player: " + playerDatabase.getName());
                     Bukkit.getLogger().info("Leader: " + playerDatabase.getPartyLeader());
                     Bukkit.getLogger().info("IsInParty: " + playerDatabase.isInParty());
@@ -42,7 +42,7 @@ public class PartyTask extends BukkitRunnable {
         }
 
         //more debug info
-        if(Hypixelify.getConfigurator().config.getBoolean("party.enabled", false)) {
+        if(Hypixelify.getConfigurator().config.getBoolean("party.debug", false)) {
             for (Party party : Hypixelify.getInstance().partyManager.parties.values()) {
                 if (party != null) {
                     Bukkit.getLogger().info("Party: " + party.getLeader().getName());
