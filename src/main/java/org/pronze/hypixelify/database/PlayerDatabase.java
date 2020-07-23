@@ -20,7 +20,7 @@ public class PlayerDatabase {
     private Player pInstance;
     private Player partyLeader;
     private boolean clearData = false;
- /*
+
     public String getName(){
         return name;
     }
@@ -38,7 +38,10 @@ public class PlayerDatabase {
     public void setInvitedParty(Party party){
         invitedParty = party;
     }
-
+    public boolean isPartyLeader(){
+        if(partyLeader == null) return false;
+        return player.equals(partyLeader.getUniqueId());
+    }
     public Party getInvitedParty(){
         return invitedParty;
     }
@@ -110,7 +113,7 @@ public class PlayerDatabase {
             }
         }
 
-        //Handle when player goes offline, decrement timeout after every 20 seconds delay
+        //Handle when player goes offline, decrement timeout after every 20 ticks delay
         if(Bukkit.getPlayer(player) == null){
             timeout--;
             if(timeout ==0){
@@ -200,5 +203,5 @@ public class PlayerDatabase {
         isInvited = bool;
     }
 
-   */
+
 }

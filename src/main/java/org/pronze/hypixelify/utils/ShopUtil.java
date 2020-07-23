@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.utils;
+
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
@@ -28,7 +29,7 @@ import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 public class ShopUtil {
 
     public static ItemStack Diamond, FireWorks, Arrow;
-    
+
     private static void InitalizeStacks() {
         Arrow = new ItemStack(Material.ARROW);
         ItemMeta metaArrow = Arrow.getItemMeta();
@@ -46,7 +47,7 @@ public class ShopUtil {
         diamondMeta.setDisplayName("§aRandom Favorite");
         Diamond.setItemMeta(diamondMeta);
     }
-    
+
     public static void addEnchantsToPlayerArmor(Player player, ItemStack item) {
         for (ItemStack i : player.getInventory().getArmorContents()) {
             if (i != null) {
@@ -89,17 +90,13 @@ public class ShopUtil {
         return sh_item;
     }
 
-    static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value)
-    {
+    static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
         List<K> listOfKeys = null;
-        if(mapOfWords.containsValue(value))
-        {
+        if (mapOfWords.containsValue(value)) {
             listOfKeys = new ArrayList<>();
 
-            for (Map.Entry<K, V> entry : mapOfWords.entrySet())
-            {
-                if (entry.getValue().equals(value))
-                {
+            for (Map.Entry<K, V> entry : mapOfWords.entrySet()) {
+                if (entry.getValue().equals(value)) {
                     listOfKeys.add(entry.getKey());
                 }
             }
@@ -107,15 +104,15 @@ public class ShopUtil {
         return listOfKeys;
     }
 
-    public static List<Game> getGamesWithSize(int c){
+    public static List<Game> getGamesWithSize(int c) {
         List<String> allmapnames = getAllKeysForValue(Configurator.game_size, c);
-        if(allmapnames == null || allmapnames.isEmpty())
+        if (allmapnames == null || allmapnames.isEmpty())
             return null;
 
         ArrayList<Game> listofgames = new ArrayList<>();
 
-        for(String n : allmapnames){
-            if(Main.getGameNames().contains(n)){
+        for (String n : allmapnames) {
+            if (Main.getGameNames().contains(n)) {
                 listofgames.add(Main.getGame(n));
             }
         }
@@ -124,7 +121,7 @@ public class ShopUtil {
     }
 
     public static FormatBuilder createBuilder(ArrayList<Object> games, ItemStack category, ItemStack category2, ItemStack category3,
-                                       ItemStack category4){
+                                              ItemStack category4) {
         FormatBuilder builder = new FormatBuilder();
         Map<String, Object> options = new HashMap<>();
         options.put("rows", 6);
@@ -143,23 +140,23 @@ public class ShopUtil {
                 .set("row", 3)
                 .set("column", 4);
         builder.add(category4)
-                .set("row",3)
+                .set("row", 3)
                 .set("column", 8);
 
         return builder;
     }
 
-    public static void destroyNPCFromGameWorlds(){
+    public static void destroyNPCFromGameWorlds() {
         List<NPC> npcs = new ArrayList<>();
-        for(Game game: Main.getInstance().getGames()){
+        for (Game game : Main.getInstance().getGames()) {
             CitizensAPI.getNPCRegistry().forEach(npc -> {
-                if(GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())){
+                if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())) {
                     npcs.add(npc);
                 }
             });
         }
-        if(!npcs.isEmpty()){
-            for(NPC npc : npcs){
+        if (!npcs.isEmpty()) {
+            for (NPC npc : npcs) {
                 npc.destroy();
             }
         }
@@ -174,7 +171,7 @@ public class ShopUtil {
         return null;
     }
 
-    public static void initalizekeys(){
+    public static void initalizekeys() {
         PlayerListener.UpgradeKeys.put("WOODEN", 1);
         PlayerListener.UpgradeKeys.put("STONE", 2);
         PlayerListener.UpgradeKeys.put("GOLDEN", 3);
@@ -242,36 +239,36 @@ public class ShopUtil {
         return newItem;
     }
 
-    public static ArrayList<Object> createGamesGUI(int mode, List<String> lore){
-        if(Arrow == null)
+    public static ArrayList<Object> createGamesGUI(int mode, List<String> lore) {
+        if (Arrow == null)
             InitalizeStacks();
-        
+
         ArrayList<Object> games = new ArrayList<>();
         int items = 0;
         for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
                 .getGames()) {
             if (Configurator.game_size.containsKey(game.getName()) &&
-                    Configurator.game_size.get(game.getName()).equals(mode) && items < 28){
-                     ItemStack temp = new ItemStack(Material.valueOf(Hypixelify.getConfigurator().config.getString("games-inventory.stack-material")));
-                     ItemMeta meta1 = temp.getItemMeta();
-                     String name1 = ChatColor.GREEN + game.getName();
-                     List<String> newLore = new ArrayList<>();
-                     for (String ls : lore){
-                        String l =ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
-                                    .replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
-                        newLore.add(l);
-                    }
-                    meta1.setLore(newLore);
-                    meta1.setDisplayName(name1);
-                    temp.setItemMeta(meta1);
-                    HashMap<String, Object> gameStack = new HashMap<>();
-                    gameStack.put("stack", temp);
-                    gameStack.put("game", game);
-                    games.add(gameStack);
-                    items++;
+                    Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
+                ItemStack temp = new ItemStack(Material.valueOf(Hypixelify.getConfigurator().config.getString("games-inventory.stack-material", "PAPER")));
+                ItemMeta meta1 = temp.getItemMeta();
+                String name1 = ChatColor.GREEN + game.getName();
+                List<String> newLore = new ArrayList<>();
+                for (String ls : lore) {
+                    String l = ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
+                            .replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
+                    newLore.add(l);
                 }
+                meta1.setLore(newLore);
+                meta1.setDisplayName(name1);
+                temp.setItemMeta(meta1);
+                HashMap<String, Object> gameStack = new HashMap<>();
+                gameStack.put("stack", temp);
+                gameStack.put("game", game);
+                games.add(gameStack);
+                items++;
             }
-        
+        }
+
         ItemStack arrowStack = Arrow;
         HashMap<String, Object> arrows = new HashMap<>();
         arrows.put("stack", arrowStack);
@@ -283,7 +280,7 @@ public class ShopUtil {
         ItemMeta fsMeta = fs.getItemMeta();
         String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(getGamesWithSize(mode).size());
 
-        fsMeta.setLore(Arrays.asList("§8{mode}".replace("{mode}",getModeFromInt(mode)), "", "§7Map Selections: §a{games}".replace("{games}",
+        fsMeta.setLore(Arrays.asList("§8{mode}".replace("{mode}", getModeFromInt(mode)), "", "§7Map Selections: §a{games}".replace("{games}",
                 size), "", "§aClick to Play"));
         fs.setItemMeta(fsMeta);
         HashMap<String, Object> fireworks = new HashMap<>();
@@ -306,11 +303,11 @@ public class ShopUtil {
         return games;
     }
 
-    public static String getModeFromInt(int mode){
-        return mode == 1 ? "Solo" : mode == 2 ? "Double" : mode == 3 ?"Triples" : "Squads";
+    public static String getModeFromInt(int mode) {
+        return mode == 1 ? "Solo" : mode == 2 ? "Double" : mode == 3 ? "Triples" : "Squads";
     }
 
-    public static Options generateOptions(){
+    public static Options generateOptions() {
         Options options = new Options(Hypixelify.getInstance());
         options.setShowPageNumber(false);
 
@@ -344,7 +341,7 @@ public class ShopUtil {
     }
 
     public static List<ItemStack> createCategories(List<String> lore1,
-                                            String name, String name2){
+                                                   String name, String name2) {
         List<ItemStack> myList = new ArrayList<>();
         ItemStack category = new ItemStack(Material.valueOf("RED_BED"));
         ItemStack category2 = new ItemStack(Material.OAK_SIGN);
@@ -370,7 +367,7 @@ public class ShopUtil {
         String name4 = "§cClick here to rejoin!";
         meta4.setLore(Arrays.asList("§7Click here to rejoin the lastly joined game"));
         meta4.setDisplayName(name4);
-        category4.setItemMeta(meta4);;
+        category4.setItemMeta(meta4);
 
         myList.add(category);
         myList.add(category2);
@@ -379,23 +376,24 @@ public class ShopUtil {
 
         return myList;
     }
+
     public static String translateColors(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
 
-    public static void RemoveNPCFromGame(Game game){
+    public static void RemoveNPCFromGame(Game game) {
         ArrayList<NPC> npcs = new ArrayList<>();
 
         CitizensAPI.getNPCRegistry().forEach(npc -> {
-            if(GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2()))
+            if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2()))
                 npcs.add(npc);
         });
 
-        if(npcs.isEmpty())
+        if (npcs.isEmpty())
             return;
 
-        for(NPC npc : npcs){
+        for (NPC npc : npcs) {
             npc.destroy();
         }
     }

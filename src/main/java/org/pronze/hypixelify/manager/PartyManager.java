@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class PartyManager {
 
-    /*
+
     public HashMap<Player, Party> parties = new HashMap<>();
 
 
@@ -37,5 +37,5 @@ public class PartyManager {
 
         return null;
     }
-   */
+
 }

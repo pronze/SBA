@@ -128,7 +128,7 @@ public class PlayerListener implements Listener {
                         if (livingTime > 0) {
                             Title.sendTitle(player, Hypixelify.getConfigurator().config.getString("message.respawn-title"),
                                     Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)), 0,20,0);
-                            player.sendMessage("§eYou will respawn in §c{seconds} §eseconds".replace("{seconds}", String.valueOf(livingTime)));
+                            player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)));
                         }
                         livingTime--;
                         if (livingTime == 0) {
@@ -163,7 +163,7 @@ public class PlayerListener implements Listener {
         if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
             if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + "You cannot put this item onto this chest.");
+                player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + Hypixelify.getConfigurator().config.getString("message.cannot=put-item-on-chest"));
             }
         }
     }
@@ -242,8 +242,8 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
-      //  if(Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
-      //      Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
+       if(Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
+           Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
 
         if(!p.isOp())
             return;

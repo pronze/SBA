@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.party;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
@@ -14,25 +15,30 @@ public class Party {
     private List<Player> invitedMembers = new ArrayList<>();
 
     private Player leader;
-    private boolean anyoneCanInvite = true;
+    private final boolean anyoneCanInvite = true;
 
-    public List<Player> getOfflinePlayers(){
+    public Party(Player leader) {
+        setLeader(leader);
+        addMember(leader);
+    }
+
+    public List<Player> getOfflinePlayers() {
         List<Player> offlinePlayers = new ArrayList<>();
 
-        for(Player player : players){
-            if(player != null){
-                if(Bukkit.getPlayer(player.getUniqueId()) == null){
+        for (Player player : players) {
+            if (player != null) {
+                if (Bukkit.getPlayer(player.getUniqueId()) == null) {
                     offlinePlayers.add(player);
                 }
             }
         }
 
-        if(offlinePlayers.isEmpty()) return null;
+        if (offlinePlayers.isEmpty()) return null;
 
         return offlinePlayers;
     }
 
-    public void disband(){
+    public void disband() {
         players.clear();
         invitedMembers.clear();
         invitedMembers = null;
@@ -40,47 +46,42 @@ public class Party {
         setLeader(null);
     }
 
-    public Party(Player leader){
-        setLeader(leader);
-        addMember(leader);
-    }
-
-    public void setLeader(Player player){
-        leader = player;
-    }
-
-    public Player getLeader(){
+    public Player getLeader() {
         return leader;
     }
 
-    public void addInvitedMember(Player pl){
-        if(!invitedMembers.contains(pl))
+    public void setLeader(Player player) {
+        leader = player;
+    }
+
+    public void addInvitedMember(Player pl) {
+        if (!invitedMembers.contains(pl))
             invitedMembers.add(pl);
     }
 
-    public List<Player> getInvitedMembers(){
+    public List<Player> getInvitedMembers() {
         return invitedMembers;
     }
 
-    public void removeInvitedMember(Player pl){
+    public void removeInvitedMember(Player pl) {
         invitedMembers.remove(pl);
     }
 
-    public void addMember(Player player){
-        if(!players.contains(player)) {
+    public void addMember(Player player) {
+        if (!players.contains(player)) {
             players.add(player);
             member_size++;
         }
     }
 
-    public int getSize(){
+    public int getSize() {
         return member_size;
     }
 
-    public List<Player> getAllPlayers(){
+    public List<Player> getAllPlayers() {
         List<Player> newPlayerList = new ArrayList<>();
         for (Player player : players) {
-            if(player == null || !player.isOnline())
+            if (player == null || !player.isOnline())
                 continue;
 
             newPlayerList.add(player);
@@ -89,23 +90,22 @@ public class Party {
         return newPlayerList;
     }
 
-    public List<Player> getPlayers(){
-        if(leader == null)
+    public List<Player> getPlayers() {
+        if (leader == null)
             return null;
         List<Player> list = getAllPlayers();
-        if(list == null)
+        if (list == null)
             return null;
         list.remove(leader);
         return list;
     }
 
 
-
-    public void removeMember(Player player){
-        if(player.equals(leader)){
-            for(Player pl : players){
-                if(Bukkit.getPlayer(pl.getUniqueId()) != null && !pl.equals(leader)){
-                    for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")){
+    public void removeMember(Player player) {
+        if (player.equals(leader)) {
+            for (Player pl : players) {
+                if (Bukkit.getPlayer(pl.getUniqueId()) != null && !pl.equals(leader)) {
+                    for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
                         pl.sendMessage(ShopUtil.translateColors(st));
                     }
                 }
@@ -117,7 +117,7 @@ public class Party {
         players.remove(player);
     }
 
-    public boolean canAnyoneInvite(){
+    public boolean canAnyoneInvite() {
         return anyoneCanInvite;
     }
 }

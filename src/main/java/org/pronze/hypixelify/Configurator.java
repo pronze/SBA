@@ -1,40 +1,46 @@
 package org.pronze.hypixelify;
 
-import java.io.File;
-import java.util.*;
-import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.commons.lang.ObjectUtils;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.plugin.Plugin;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class Configurator {
 
-    public File file, oldfile, shopFile, upgradeShop;
-    public FileConfiguration config;
     public static HashMap<String, List<String>> Scoreboard_Lines;
     public static List<String> overstats_message;
     public static List<String> gamestart_message;
     public static HashMap<String, Integer> game_size;
-
     public final File dataFolder;
     public final Hypixelify main;
+    public File file, oldfile, shopFile, upgradeShop;
+    public FileConfiguration config;
 
     public Configurator(Hypixelify main) {
         this.dataFolder = main.getDataFolder();
         this.main = main;
+    }
+
+    private static void checkOrSet(AtomicBoolean modify, FileConfiguration config, String path, Object value) {
+        if (!config.isSet(path)) {
+            if (value instanceof Map) {
+                config.createSection(path, (Map<?, ?>) value);
+            } else {
+                config.set(path, value);
+            }
+            modify.set(true);
+        }
     }
 
     public void loadDefaults() {
@@ -98,12 +104,13 @@ public class Configurator {
         checkOrSetConfig(modify, "message.respawn-title", "§cYOU DIED!");
         checkOrSetConfig(modify, "message.respawn-subtitle", "§eYou will respawn in §c%time% §eseconds");
         checkOrSetConfig(modify, "message.respawned-title", "§eYou have respawned");
+        checkOrSetConfig(modify, "message.cannot=put-item-on-chest", "You cannot put this item onto this chest.");
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         checkOrSetConfig(modify, "games-inventory.enabled", true);
         checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
 
-        for(String game : Main.getGameNames()){
+        for (String game : Main.getGameNames()) {
             String str = "lobby-scoreboard.player-size.games." + game;
             checkOrSetConfig(modify, str, 4);
         }
@@ -201,10 +208,14 @@ public class Configurator {
 
         checkOrSetConfig(modify, "party.enabled", true);
         checkOrSetConfig(modify, "party.debug", false);
-
+        checkOrSetConfig(modify, "party.leader-autojoin-autoleave", true);
         checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
+                "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.leader-join-leave", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou have been teleported by the party leader",
                 "&6-----------------------------------------------------"));
         checkOrSetConfig(modify, "party.message.expired", Arrays.asList(
                 "&6-----------------------------------------------------",
@@ -280,16 +291,15 @@ public class Configurator {
             }
         }
 
-        try{
+        try {
             String str = config.getString("games-inventory.stack-material");
-            if(str.toLowerCase().contains("bed") || str.toLowerCase().contains("rocket") || str.toLowerCase().contains("sign")
-            || str.toLowerCase().contains("pearl"))
-            {
+            if (str.toLowerCase().contains("bed") || str.toLowerCase().contains("rocket") || str.toLowerCase().contains("sign")
+                    || str.toLowerCase().contains("pearl")) {
                 config.set("games-inventory.stack-material", "PAPER");
                 saveConfig();
             }
             Material mat = Material.valueOf(config.getString("games-inventory.stack-material"));
-        } catch(Exception ignored){
+        } catch (Exception ignored) {
             config.set("games-inventory.stack-material", "PAPER");
             saveConfig();
         }
@@ -300,7 +310,7 @@ public class Configurator {
                     LobbyScoreboard.listcolor(config.getStringList("scoreboard.lines." + key)));
 
         game_size = new HashMap<>();
-        for(String s : Main.getGameNames()){
+        for (String s : Main.getGameNames()) {
             int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
             game_size.put(s, size);
         }
@@ -308,8 +318,8 @@ public class Configurator {
         overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
         gamestart_message = LobbyScoreboard.listcolor(config.getStringList("game-start.message"));
 
-        if(config.getBoolean("first_start")){
-            Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN +" Detected first start");
+        if (config.getBoolean("first_start")) {
+            Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
             saveConfig();
@@ -317,7 +327,7 @@ public class Configurator {
             assert plugin != null;
             Bukkit.getServer().getPluginManager().disablePlugin(plugin);
             Bukkit.getServer().getPluginManager().enablePlugin(plugin);
-            Bukkit.getLogger().info("[SBAHypixelify]: " + ChatColor.GREEN +" Made changes to the config.yml file!");
+            Bukkit.getLogger().info("[SBAHypixelify]: " + ChatColor.GREEN + " Made changes to the config.yml file!");
         }
     }
 
@@ -352,7 +362,6 @@ public class Configurator {
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
     }
 
-
     public void saveConfig() {
         try {
             config.save(file);
@@ -360,7 +369,6 @@ public class Configurator {
             e.printStackTrace();
         }
     }
-
 
     public String getString(String string, String defaultString) {
         if (config.getConfigurationSection(string) == null) {
@@ -397,19 +405,7 @@ public class Configurator {
         return Objects.requireNonNull(config.getConfigurationSection(string)).getKeys(true);
     }
 
-
     private void checkOrSetConfig(AtomicBoolean modify, String path, Object value) {
         checkOrSet(modify, this.config, path, value);
-    }
-
-    private static void checkOrSet(AtomicBoolean modify, FileConfiguration config, String path, Object value) {
-        if (!config.isSet(path)) {
-            if (value instanceof Map) {
-                config.createSection(path, (Map<?, ?>) value);
-            } else {
-                config.set(path, value);
-            }
-            modify.set(true);
-        }
     }
 }

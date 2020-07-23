@@ -79,7 +79,6 @@ public class Shop implements Listener {
     }
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {
-        Player p = event.getPlayer();
         if (event.isCancelled()) {
             return;
         }

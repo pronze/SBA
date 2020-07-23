@@ -1,7 +1,10 @@
 package org.pronze.hypixelify.commands;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -18,85 +21,84 @@ public class BWACommand implements TabExecutor {
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
 
         if (args.length >= 1) {
-            if(sender instanceof  Player) {
+            if (sender instanceof Player) {
                 if (!sender.hasPermission("misat11.bw.admin") && !args[0].equalsIgnoreCase("gamesinv")) {
                     sender.sendMessage(ChatColor.RED + "You Don't have permissions to do this command");
                     return true;
                 }
             }
             if (args[0].equalsIgnoreCase("reload")) {
-             // Hypixelify.getInstance().partyTask.cancel();
-             // Hypixelify.getInstance().partyManager.parties.clear();
-             // Hypixelify.getInstance().playerData.clear();
-             // Hypixelify.getInstance().partyManager = null;
-             // Hypixelify.getInstance().playerData = null;
+                if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
+                    Hypixelify.getInstance().partyTask.cancel();
+                    Hypixelify.getInstance().partyManager.parties.clear();
+                    Hypixelify.getInstance().playerData.clear();
+                    Hypixelify.getInstance().partyManager = null;
+                    Hypixelify.getInstance().playerData = null;
+                }
                 Bukkit.getServer().getPluginManager().disablePlugin(Hypixelify.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
                 sender.sendMessage("Plugin reloaded!");
                 return true;
-            }
-            else if (args[0].equalsIgnoreCase("help"))
-            {
+            } else if (args[0].equalsIgnoreCase("help")) {
                 sender.sendMessage(ChatColor.RED + "SBAHypixelify");
                 sender.sendMessage("Available commands:");
                 sender.sendMessage("/bwaddon reload - Reload the addon");
                 sender.sendMessage("/bwaddon help - Show available list of commands");
                 sender.sendMessage("/bwaddon reset - resets all configs related to addon");
                 return true;
-            }
-            else if(args[0].equalsIgnoreCase("reset")){
+            } else if (args[0].equalsIgnoreCase("reset")) {
                 sender.sendMessage("Resetting...");
-                try{
+                try {
                     Hypixelify.getConfigurator().upgradeCustomFiles();
-                    ((Player)sender).performCommand("bwaddon clearnpc");
+                    ((Player) sender).performCommand("bwaddon clearnpc");
                     sender.sendMessage("Sucessfully resetted");
-                } catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
 
                 return true;
-            } else if(args[0].equalsIgnoreCase("clearnpc")){
-                if(!Hypixelify.getConfigurator().config.getBoolean("citizens-shop")){
+            } else if (args[0].equalsIgnoreCase("clearnpc")) {
+                if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop")) {
                     return true;
                 }
                 ShopUtil.destroyNPCFromGameWorlds();
                 sender.sendMessage("Cleared all npcs from bedwars worlds");
                 return true;
-            } else if(args[0].equalsIgnoreCase("gamesinv")){
-                if(args.length != 2){
+            } else if (args[0].equalsIgnoreCase("gamesinv")) {
+                if (args.length != 2) {
                     sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
                     return true;
                 }
 
-                if(!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled")){
+                if (!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled")) {
                     sender.sendMessage("§cGames inventory has been disabled, Contact the server owner to enable it.");
                     return true;
                 }
-                if(!(sender instanceof Player)){
+                if (!(sender instanceof Player)) {
                     sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + " You cannot do this command in the console");
                     return true;
                 }
 
                 Player player = (Player) sender;
-                if(args[1].equalsIgnoreCase("solo")){
+                if (args[1].equalsIgnoreCase("solo")) {
                     Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 1);
-                } else if(args[1].equalsIgnoreCase("double")){
+                } else if (args[1].equalsIgnoreCase("double")) {
                     Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 2);
-                } else if(args[1].equalsIgnoreCase("triple")){
+                } else if (args[1].equalsIgnoreCase("triple")) {
                     Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 3);
-                }  else if(args[1].equalsIgnoreCase("squad")){
+                } else if (args[1].equalsIgnoreCase("squad")) {
                     Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 4);
-                } else{
+                } else {
                     sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
                 }
 
                 return true;
-            }
-            else if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
+            } else if (!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
                 if (args[0].equalsIgnoreCase("upgrade")) {
                     try {
                         Hypixelify.getConfigurator().upgradeCustomFiles();
-                        ShopUtil.destroyNPCFromGameWorlds();
+                        if (Hypixelify.getConfigurator().config.getBoolean("citizens-shop"))
+                            ShopUtil.destroyNPCFromGameWorlds();
                         sender.sendMessage("[SBAHypixelify]: " + ChatColor.GOLD + "Sucessfully upgraded files!");
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -108,13 +110,11 @@ public class BWACommand implements TabExecutor {
                     sender.sendMessage("[SBAHypixelify]: Cancelled shop and upgradeShop changes");
                     return true;
                 }
-            }
-            else {
+            } else {
                 sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
                 return true;
             }
-        }
-        else {
+        } else {
             sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
             return true;
         }
@@ -125,18 +125,28 @@ public class BWACommand implements TabExecutor {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        if(!commandSender.hasPermission("misat11.bw.admin"))
+        if (!commandSender.hasPermission("misat11.bw.admin"))
             return null;
         if (strings.length == 1) {
-            if(!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())){
-                return Arrays.asList("cancel","upgrade");
+            if (!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())) {
+                return Arrays.asList("cancel", "upgrade");
             }
-            List<String> Commands = Arrays.asList("reload", "help", "reset", "clearnpc", "gamesinv");
-            if(!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
+            List<String> Commands = new ArrayList<>();
+            Commands.add("reload");
+            Commands.add("help");
+            Commands.add("reset");
+            Commands.add("clearnpc");
+            Commands.add("gamesinv");
+            if (!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
                 Commands.remove("gamesinv");
+            if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
+                Commands.remove("clearnpc");
+
             return Commands;
         }
-        if(strings.length == 2 && strings[0].equalsIgnoreCase("gamesinv")){
+        if (strings.length == 2 && strings[0].equalsIgnoreCase("gamesinv")) {
+            if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
+                return null;
             return Arrays.asList("solo", "double", "triple", "squad");
         }
 
