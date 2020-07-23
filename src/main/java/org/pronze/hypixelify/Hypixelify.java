@@ -75,7 +75,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
         InventoryListener.init(this);
 
         shop = new customShop();
-        gamesInventory = new GamesInventory();
+        if(Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
+            gamesInventory = new GamesInventory();
+
         if(this.getServer().getPluginManager().getPlugin("Citizens") == null ||
         !Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
         {

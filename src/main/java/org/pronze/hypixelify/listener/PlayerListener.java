@@ -60,7 +60,6 @@ public class PlayerListener implements Listener {
             public void run() {
                 if (player.getGameMode().equals(GameMode.SURVIVAL) && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) {
                     ShopUtil.giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
-                    Title.sendTitle(player, "§aRESPAWNED!", "", 5,40,5);
                     this.cancel();
                 } else if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player))
                     this.cancel();
@@ -127,14 +126,14 @@ public class PlayerListener implements Listener {
                     @Override
                     public void run() {
                         if (livingTime > 0) {
-                            Title.sendTitle(player, "§cYOU DIED!",
-                                    "§eYou will respawn in §c%time% §eseconds".replace("%time%", String.valueOf(livingTime)), 0,20,0);
+                            Title.sendTitle(player, Hypixelify.getConfigurator().config.getString("message.respawn-title"),
+                                    Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)), 0,20,0);
                             player.sendMessage("§eYou will respawn in §c{seconds} §eseconds".replace("{seconds}", String.valueOf(livingTime)));
                         }
                         livingTime--;
                         if (livingTime == 0) {
+                            player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawned-title"));
                             this.cancel();
-                            player.sendMessage("§eYou have respawned");
                         }
                     }
                 }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
@@ -194,6 +193,7 @@ public class PlayerListener implements Listener {
         if(!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
         if(Main.getPlayerGameProfile(player).isSpectator) return;
 
+        if(!Hypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true)) return;
         if(e.getItem().getType().toString().contains("BOOTS")
         || e.getItem().getType().toString().contains("HELMET")
         || e.getItem().getType().toString().contains("LEGGINGS")

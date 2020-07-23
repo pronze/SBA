@@ -1,10 +1,8 @@
 package org.pronze.hypixelify.utils;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -254,7 +252,7 @@ public class ShopUtil {
                 .getGames()) {
             if (Configurator.game_size.containsKey(game.getName()) &&
                     Configurator.game_size.get(game.getName()).equals(mode) && items < 28){
-                     ItemStack temp = new ItemStack(Material.PAPER);
+                     ItemStack temp = new ItemStack(Material.valueOf(Hypixelify.getConfigurator().config.getString("games-inventory.stack-material")));
                      ItemMeta meta1 = temp.getItemMeta();
                      String name1 = ChatColor.GREEN + game.getName();
                      List<String> newLore = new ArrayList<>();

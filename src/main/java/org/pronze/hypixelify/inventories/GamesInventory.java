@@ -95,7 +95,7 @@ public class GamesInventory implements Listener {
     }
 
     public void openForPlayer(Player player, int mode) {
-        //createData();
+        createData();
         if(menu.get(mode) == null)
             return;
         menu.get(mode).openForPlayer(player);

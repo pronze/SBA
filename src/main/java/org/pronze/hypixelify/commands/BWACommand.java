@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +56,9 @@ public class BWACommand implements TabExecutor {
 
                 return true;
             } else if(args[0].equalsIgnoreCase("clearnpc")){
+                if(!Hypixelify.getConfigurator().config.getBoolean("citizens-shop")){
+                    return true;
+                }
                 ShopUtil.destroyNPCFromGameWorlds();
                 sender.sendMessage("Cleared all npcs from bedwars worlds");
                 return true;
@@ -64,6 +68,10 @@ public class BWACommand implements TabExecutor {
                     return true;
                 }
 
+                if(!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled")){
+                    sender.sendMessage("§cGames inventory has been disabled, Contact the server owner to enable it.");
+                    return true;
+                }
                 if(!(sender instanceof Player)){
                     sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + " You cannot do this command in the console");
                     return true;
@@ -120,10 +128,13 @@ public class BWACommand implements TabExecutor {
         if(!commandSender.hasPermission("misat11.bw.admin"))
             return null;
         if (strings.length == 1) {
-            if(!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())){
+            if(!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())){
                 return Arrays.asList("cancel","upgrade");
             }
-            return Arrays.asList("reload", "help", "reset", "clearnpc", "gamesinv");
+            List<String> Commands = Arrays.asList("reload", "help", "reset", "clearnpc", "gamesinv");
+            if(!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
+                Commands.remove("gamesinv");
+            return Commands;
         }
         if(strings.length == 2 && strings[0].equalsIgnoreCase("gamesinv")){
             return Arrays.asList("solo", "double", "triple", "squad");

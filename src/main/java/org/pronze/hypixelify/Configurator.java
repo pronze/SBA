@@ -5,7 +5,9 @@ import java.util.*;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -93,8 +95,14 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "citizens-shop", true);
-
+        checkOrSetConfig(modify, "message.respawn-title", "§cYOU DIED!");
+        checkOrSetConfig(modify, "message.respawn-subtitle", "§eYou will respawn in §c%time% §eseconds");
+        checkOrSetConfig(modify, "message.respawned-title", "§eYou have respawned");
+        checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
+        checkOrSetConfig(modify, "games-inventory.enabled", true);
+        checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
+
         for(String game : Main.getGameNames()){
             String str = "lobby-scoreboard.player-size.games." + game;
             checkOrSetConfig(modify, str, 4);
@@ -271,6 +279,21 @@ public class Configurator {
                 e.printStackTrace();
             }
         }
+
+        try{
+            String str = config.getString("games-inventory.stack-material");
+            if(str.toLowerCase().contains("bed") || str.toLowerCase().contains("rocket") || str.toLowerCase().contains("sign")
+            || str.toLowerCase().contains("pearl"))
+            {
+                config.set("games-inventory.stack-material", "PAPER");
+                saveConfig();
+            }
+            Material mat = Material.valueOf(config.getString("games-inventory.stack-material"));
+        } catch(Exception ignored){
+            config.set("games-inventory.stack-material", "PAPER");
+            saveConfig();
+        }
+
         Scoreboard_Lines = new HashMap<>();
         for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
             Scoreboard_Lines.put(key,
