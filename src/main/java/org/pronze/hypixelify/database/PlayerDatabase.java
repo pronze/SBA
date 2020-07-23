@@ -39,7 +39,13 @@ public class PlayerDatabase {
         invitedParty = party;
     }
     public boolean isPartyLeader(){
-        if(partyLeader == null) return false;
+        if(partyLeader == null && isInParty()) {
+            if(Hypixelify.getInstance().partyManager.getParty(pInstance).getLeader() != null){
+                return player.equals(Hypixelify.getInstance().partyManager.getParty(pInstance).getLeader().getUniqueId());
+            } else{
+                return false;
+            }
+        }
         return player.equals(partyLeader.getUniqueId());
     }
     public Party getInvitedParty(){
@@ -82,6 +88,9 @@ public class PlayerDatabase {
                 Main.getPlayerStatisticsManager().getStatistic(Bukkit.getPlayer(player)).getCurrentDestroyedBeds();
     }
 
+    public void setExpiredTimeTimeout(int timeout){
+        expiredTime = timeout;
+    }
     public void init(){
         new BukkitRunnable(){
             @Override
@@ -103,7 +112,7 @@ public class PlayerDatabase {
                 if(invitedParty.getLeader() != null && Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()) != null) {
                     Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()).removeInvitedMember(pInstance);
                     for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.expired")){
-                        if(invitedParty.getLeader().isOnline())
+                        if(invitedParty.getLeader() != null && invitedParty.getLeader().isOnline())
                             invitedParty.getLeader().sendMessage(ShopUtil.translateColors(st));
                         if(pInstance != null && pInstance.isOnline())
                             pInstance.sendMessage(ShopUtil.translateColors(st));

@@ -10,7 +10,7 @@ import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -22,7 +22,7 @@ public class PartyListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBWJoin(BedwarsPlayerJoinEvent e) {
+    public void onBWJoin(BedwarsPlayerJoinedEvent e) {
         Game game = e.getGame();
         Player player = e.getPlayer();
         PlayerDatabase data = Hypixelify.getInstance().playerData.get(player.getUniqueId());
@@ -40,6 +40,7 @@ public class PartyListener implements Listener {
                 }
                 for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
                     pl.sendMessage(ShopUtil.translateColors(st));
+                    game.joinToGame(pl);
                 }
 
             }
@@ -63,8 +64,12 @@ public class PartyListener implements Listener {
 
             if (BedwarsAPI.getInstance().getGameOfPlayer(pl).equals(game)) return;
 
-            if (BedwarsAPI.getInstance().getGameOfPlayer(pl).getStatus().equals(GameStatus.RUNNING))
+            if (BedwarsAPI.getInstance().getGameOfPlayer(pl).getStatus().equals(GameStatus.RUNNING)) {
                 BedwarsAPI.getInstance().getGameOfPlayer(pl).leaveFromGame(pl);
+                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
+                    pl.sendMessage(ShopUtil.translateColors(st));
+                }
+            }
         }
     }
 }

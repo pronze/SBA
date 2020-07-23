@@ -13,7 +13,7 @@ public class PartyTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        /*
+
         List<PlayerDatabase> toBeRemoved = null;
         if( Hypixelify.getInstance().playerData == null || Hypixelify.getInstance().playerData.isEmpty() ) return;
 
@@ -35,7 +35,7 @@ public class PartyTask extends BukkitRunnable {
                 }
             }
         }
-   */
+
     }
 
 }

@@ -125,7 +125,7 @@ public class PartyCommand implements TabExecutor {
                 Database.get(player.getUniqueId()).setInvited(false);
                 Database.get(player.getUniqueId()).setIsInParty(true);
                 Database.get(player.getUniqueId()).setInvitedParty(null);
-
+                Database.get(player.getUniqueId()).setExpiredTimeTimeout(60);
                 for (Player p : Hypixelify.getInstance().partyManager.parties.get(leader).getAllPlayers()) {
                     if (p == null) continue;
                     for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.accepted")) {
