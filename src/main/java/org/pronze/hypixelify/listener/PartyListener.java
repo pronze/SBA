@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.party.Party;
@@ -32,19 +33,18 @@ public class PartyListener implements Listener {
         if (!data.isPartyLeader()) return;
         if (party.getPlayers() == null) return;
         if (game.getStatus().equals(GameStatus.WAITING) && game.getConnectedPlayers().size() < game.getMaxPlayers()) {
-            for (Player pl : party.getPlayers()) {
-                if (pl == null) return;
-                if (!pl.isOnline()) return;
-                if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) {
-                    BedwarsAPI.getInstance().getGameOfPlayer(pl).leaveFromGame(pl);
+                    for (Player pl : party.getPlayers()) {
+                        if (pl == null) return;
+                        if (!pl.isOnline()) return;
+                        if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) {
+                            BedwarsAPI.getInstance().getGameOfPlayer(pl).leaveFromGame(pl);
+                        }
+                        for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
+                            pl.sendMessage(ShopUtil.translateColors(st));
+                        }
+                        game.joinToGame(pl);
+                    }
                 }
-                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
-                    pl.sendMessage(ShopUtil.translateColors(st));
-                    game.joinToGame(pl);
-                }
-
-            }
-        }
 
     }
 

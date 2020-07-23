@@ -133,6 +133,7 @@ public class PlayerListener implements Listener {
                         livingTime--;
                         if (livingTime == 0) {
                             player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawned-title"));
+                            Title.sendTitle(player, "§aRESPAWNED!", "", 5,40,5);
                             this.cancel();
                         }
                     }

@@ -13,3 +13,4 @@ commands:
   party:
     description: party system
     usage: /<command>
+    aliases: [p]

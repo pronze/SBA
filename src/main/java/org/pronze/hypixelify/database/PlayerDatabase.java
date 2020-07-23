@@ -20,10 +20,11 @@ public class PlayerDatabase {
     private Player pInstance;
     private Player partyLeader;
     private boolean clearData = false;
-
+    
     public String getName(){
         return name;
     }
+
     public PlayerDatabase(Player player){
         this.player = player.getUniqueId();
         name = player.getDisplayName();
@@ -109,7 +110,7 @@ public class PlayerDatabase {
             if(expiredTime == 0){
                 expiredTime = 60;
                 isInvited = false;
-                if(invitedParty.getLeader() != null && Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()) != null) {
+                if(invitedParty != null && invitedParty.getLeader() != null && Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()) != null) {
                     Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()).removeInvitedMember(pInstance);
                     for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.expired")){
                         if(invitedParty.getLeader() != null && invitedParty.getLeader().isOnline())

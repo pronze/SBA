@@ -86,7 +86,8 @@ public class Party {
 
             newPlayerList.add(player);
         }
-
+        if(newPlayerList.isEmpty())
+            return null;
         return newPlayerList;
     }
 
@@ -97,6 +98,8 @@ public class Party {
         if (list == null)
             return null;
         list.remove(leader);
+        if(list.isEmpty())
+            return null;
         return list;
     }
 
@@ -117,6 +120,12 @@ public class Party {
         players.remove(player);
     }
 
+    public int getCompleteSize(){
+        if( players == null || invitedMembers == null) return 0;
+
+
+        return players.size() + invitedMembers.size();
+    }
     public boolean canAnyoneInvite() {
         return anyoneCanInvite;
     }

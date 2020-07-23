@@ -209,10 +209,16 @@ public class Configurator {
         checkOrSetConfig(modify, "party.enabled", true);
         checkOrSetConfig(modify, "party.debug", false);
         checkOrSetConfig(modify, "party.leader-autojoin-autoleave", true);
+        checkOrSetConfig(modify, "party.size", 4);
         checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
                 "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.no-other-commands", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou cannot do other commands now",
+                "&6-----------------------------------------------------"
+        ));
         checkOrSetConfig(modify, "party.message.leader-join-leave", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou have been teleported by the party leader",
@@ -269,6 +275,16 @@ public class Configurator {
                 "{player} &aleft the party due to inactivity",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.offline-quit", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "{player} &cleft the party",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.declined", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "{player} &chas declined this party invite",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.kicked", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "{player} &cHas been kicked from party",
@@ -281,6 +297,14 @@ public class Configurator {
         checkOrSetConfig(modify, "party.message.disband", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cParty has been disbanded by the leader.",
+                "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.player-not-found", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cCould not find Player!",
+                "&6-----------------------------------------------------"));
+        checkOrSetConfig(modify, "party.message.cannot-blank-yourself", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou can't {blank} yourself.",
                 "&6-----------------------------------------------------"));
 
         if (modify.get()) {

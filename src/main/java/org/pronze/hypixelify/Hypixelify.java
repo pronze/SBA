@@ -12,10 +12,7 @@ import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.inventories.customShop;
-import org.pronze.hypixelify.listener.LobbyScoreboard;
-import org.pronze.hypixelify.listener.PartyListener;
-import org.pronze.hypixelify.listener.PlayerListener;
-import org.pronze.hypixelify.listener.Shop;
+import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.screamingsandals.bedwars.Main;
@@ -134,7 +131,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
             }
             Objects.requireNonNull(getCommand("party")).setExecutor(new PartyCommand());
         }
-
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(), this);
         Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());
