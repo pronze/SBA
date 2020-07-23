@@ -2,8 +2,8 @@ name: SBAHypixelify
 version: ${project.version}
 main: org.pronze.hypixelify.Hypixelify
 api-version: "1.13"
-depend: [BedWars, Citizens]
-softdepend: [PlaceholderAPI]
+depend: [BedWars]
+softdepend: [PlaceholderAPI, Citizens]
 author: pronze
 
 commands:

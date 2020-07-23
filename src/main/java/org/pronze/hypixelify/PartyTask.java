@@ -1,7 +1,5 @@
 package org.pronze.hypixelify;
-import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.database.PlayerDatabase;
 
 import java.util.ArrayList;
@@ -15,6 +13,7 @@ public class PartyTask extends BukkitRunnable {
 
     @Override
     public void run() {
+        /*
         List<PlayerDatabase> toBeRemoved = null;
         if( Hypixelify.getInstance().playerData == null || Hypixelify.getInstance().playerData.isEmpty() ) return;
 
@@ -24,11 +23,6 @@ public class PartyTask extends BukkitRunnable {
                 if(playerDatabase.toBeRemoved()){
                     toBeRemoved = new ArrayList<>();
                     toBeRemoved.add(playerDatabase);
-                }
-                if(Hypixelify.getConfigurator().config.getBoolean("party.debug", false)) {
-                    Bukkit.getLogger().info("Player: " + playerDatabase.getName());
-                    Bukkit.getLogger().info("Leader: " + playerDatabase.getPartyLeader());
-                    Bukkit.getLogger().info("IsInParty: " + playerDatabase.isInParty());
                 }
             }
 
@@ -41,15 +35,7 @@ public class PartyTask extends BukkitRunnable {
                 }
             }
         }
-
-        //more debug info
-        if(Hypixelify.getConfigurator().config.getBoolean("party.debug", false)) {
-            for (Party party : Hypixelify.getInstance().partyManager.parties.values()) {
-                if (party != null) {
-                    Bukkit.getLogger().info("Party: " + party.getLeader().getName());
-                }
-            }
-        }
+   */
     }
 
 }

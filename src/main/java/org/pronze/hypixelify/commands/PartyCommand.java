@@ -23,6 +23,8 @@ import java.util.UUID;
 public class PartyCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+
+        /*
         if(!(sender instanceof Player)){
             sender.sendMessage("Only players can access this command");
             return true;
@@ -307,12 +309,13 @@ public class PartyCommand implements TabExecutor {
         else{
             sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /party help for more.");
         }
-
+    */
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        /*
         if(!(commandSender instanceof Player))
             return null;
         Player player = (Player) commandSender;
@@ -328,7 +331,7 @@ public class PartyCommand implements TabExecutor {
 
             return Arrays.asList("invite", "list");
         }
-
+     */
         return null;
     }
 }

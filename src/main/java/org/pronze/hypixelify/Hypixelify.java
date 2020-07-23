@@ -1,27 +1,20 @@
 package org.pronze.hypixelify;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.commands.BWACommand;
-import org.pronze.hypixelify.commands.GamesCommand;
-import org.pronze.hypixelify.commands.PartyCommand;
-import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.*;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
-import org.pronze.hypixelify.manager.PartyManager;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.sgui.listeners.*;
 
 
 import org.bukkit.ChatColor;
 
-import java.util.HashMap;
 import java.util.Objects;
-import java.util.UUID;
 
 public class Hypixelify extends JavaPlugin implements Listener {
 
@@ -30,9 +23,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private Configurator configurator;
     private ArenaManager arenamanager;
     private GamesInventory gamesInventory;
-    public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
-    public PartyTask partyTask;
-    public PartyManager partyManager;
+    //public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
+   //  public PartyTask partyTask;
+   // public PartyManager partyManager;
 
     public GamesInventory getGamesInventory(){
         return gamesInventory;
@@ -78,53 +71,53 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("");
 
-
-        new GamesCommand();
         new PlayerListener();
         InventoryListener.init(this);
 
         shop = new customShop();
         gamesInventory = new GamesInventory();
-        if(this.getServer().getPluginManager().getPlugin("Citizens") == null)
+        if(this.getServer().getPluginManager().getPlugin("Citizens") == null ||
+        !Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
         {
-           Bukkit.getLogger().warning("Failed to initalize SBAHypixelify shop make sure citizens is installed");
-            onDisable();
+           Bukkit.getLogger().warning("Failed to initalize Citizens shop reverting to normal shops...");
+           Main.getConfigurator().config.set("shop.citizens-enabled", false);
         }
-       else
-           new Shop();
+       else{
+            new Shop();
+        //    if(playerData == null){
+       //         playerData = new HashMap<>();
+        }
 
-       if(playerData == null){
-           playerData = new HashMap<>();
-       }
 
-       partyManager = new PartyManager();
-       partyTask = new PartyTask();
+
+      // partyManager = new PartyManager();
+     //  partyTask = new PartyTask();
 
        Bukkit.getPluginManager().registerEvents(this, this);
        Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(),this);
        getCommand("bwaddon").setExecutor(new BWACommand());
-       getCommand("party").setExecutor(new PartyCommand());
+     //  getCommand("party").setExecutor(new PartyCommand());
 
         if(!configurator.config.getString("version").contains(getVersion())){
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
 
-        for(Player player : Bukkit.getOnlinePlayers()){
-            if(player == null) continue;
-            if(playerData.get(player.getUniqueId()) == null){
-                playerData.put(player.getUniqueId(), new PlayerDatabase(player));
-            }
-        }
+       //for(Player player : Bukkit.getOnlinePlayers()){
+       //    if(player == null) continue;
+       //    if(playerData.get(player.getUniqueId()) == null){
+       //        playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+       //    }
+       //}
     }
 
     public void onDisable(){
         if(plugin.isEnabled()){
-            partyTask.cancel();
-            partyManager.parties.clear();
-            partyManager.parties = null;
-            partyManager = null;
-            playerData.clear();
-            playerData = null;
+          //partyTask.cancel();
+          //partyManager.parties.clear();
+          //partyManager.parties = null;
+          //partyManager = null;
+          //playerData.clear();
+          //playerData = null;
             plugin.getPluginLoader().disablePlugin(plugin);
             this.getServer().getScheduler().cancelTasks(plugin);
             this.getServer().getServicesManager().unregisterAll(plugin);

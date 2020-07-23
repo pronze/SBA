@@ -20,7 +20,7 @@ public class PlayerDatabase {
     private Player pInstance;
     private Player partyLeader;
     private boolean clearData = false;
-
+ /*
     public String getName(){
         return name;
     }
@@ -200,5 +200,5 @@ public class PlayerDatabase {
         isInvited = bool;
     }
 
-
+   */
 }
