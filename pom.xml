@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.pronze</groupId>
     <artifactId>SBAHypixelify</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
 
     <repositories>
         <repository>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>com.destroystokyo.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.15.2-R0.1-SNAPSHOT</version>
+            <version>1.16.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 

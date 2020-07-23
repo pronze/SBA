@@ -282,17 +282,21 @@ public class ShopUtil {
         arrows.put("locate", "main");
 
         ItemStack fs = FireWorks;
+        ItemMeta fsMeta = fs.getItemMeta();
         String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(getGamesWithSize(mode).size());
 
-        FireWorks.setLore(Arrays.asList("§8{mode}".replace("{mode}",getModeFromInt(mode)), "", "§7Map Selections: §a{games}".replace("{games}",
+        fsMeta.setLore(Arrays.asList("§8{mode}".replace("{mode}",getModeFromInt(mode)), "", "§7Map Selections: §a{games}".replace("{games}",
                 size), "", "§aClick to Play"));
+        fs.setItemMeta(fsMeta);
         HashMap<String, Object> fireworks = new HashMap<>();
         fireworks.put("stack", fs);
         fireworks.put("row", 4);
         fireworks.put("column", 3);
 
         ItemStack Dia = Diamond;
-        Dia.setLore(FireWorks.getLore());
+        ItemMeta diaMeta = Dia.getItemMeta();
+        diaMeta.setLore(fsMeta.getLore());
+        Dia.setItemMeta(diaMeta);
         HashMap<String, Object> diamond = new HashMap<>();
         diamond.put("stack", Dia);
         diamond.put("row", 4);
