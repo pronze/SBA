@@ -229,7 +229,7 @@ public class Configurator {
                 "&6-----------------------------------------------------"));
         checkOrSetConfig(modify, "party.message.invalid-command", Arrays.asList(
                 "&6-----------------------------------------------------",
-                "&cInvalid Command!",
+                "&cInvalid command, do /p help for more.",
                 "&6-----------------------------------------------------"));
         checkOrSetConfig(modify, "party.message.access-denied", Arrays.asList(
                 "&6-----------------------------------------------------",
@@ -311,6 +311,30 @@ public class Configurator {
                 "&6-----------------------------------------------------",
                 "&cYou are not invited to any party",
                 "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.got-kicked", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou have been kicked from party",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.decline-inc", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cTo invite, you must decline current invites.",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.declined-user", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou declined the invite!",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.help", Arrays.asList(
+                "&1-----------------------------------------------------",
+                "&6Party commands",
+                "&e/p accept <player>&7 - Accept a party invite from a player",
+                "&e/p invite <player>&7 - Invite another player to your party",
+                "&e/p list&7 - Lists the players in your current party",
+                "&e/p leave&7 - Leaves your current party",
+                "&1-----------------------------------------------------"));
 
         if (modify.get()) {
             try {

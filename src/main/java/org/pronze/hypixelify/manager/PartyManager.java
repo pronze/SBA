@@ -97,19 +97,28 @@ public class PartyManager {
 
 
     public void kickFromParty(Player player){
-        PlayerDatabase data = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        if(getParty(player) == null || player == null) return;
+        PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        Player leader = db.getPartyLeader();
 
-        if(getParty(player) == null) return;
+        if(leader == null || parties.get(leader) == null) return;
+        if(db == null || db.getPartyLeader() == null) return;
+        parties.get(db.getPartyLeader()).removeMember(player);
 
-        parties.get(getParty(player).getLeader()).removeMember(player);
-        for (Player pl : parties.get(player).getAllPlayers()) {
-            if (pl != null && pl.isOnline()) {
-                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.kicked")) {
-                    pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
+        if(player.isOnline()) {
+            for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.got-kicked")) {
+                player.sendMessage(ShopUtil.translateColors(st));
+            }
+        }
+        if(parties.get(leader).getPlayers() != null) {
+            for (Player pl : parties.get(leader).getAllPlayers()) {
+                if (pl != null && pl.isOnline()) {
+                    for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.kicked")) {
+                        pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
+                    }
                 }
             }
         }
-
         Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(false);
         Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(null);
     }

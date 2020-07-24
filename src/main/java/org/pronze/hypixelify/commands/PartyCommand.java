@@ -40,8 +40,19 @@ public class PartyCommand implements TabExecutor {
 
         final HashMap<UUID, PlayerDatabase> Database = Hypixelify.getInstance().playerData;
 
+        if(args[0].equalsIgnoreCase("help")){
+            if(args.length != 1){
+                sender.sendMessage("Invalid amount of arguments!");
+                return true;
+            }
 
-        if (args[0].equalsIgnoreCase("invite")) {
+            for(String st :Hypixelify.getConfigurator().config.getStringList("party.message.help")){
+                player.sendMessage(ShopUtil.translateColors(st));
+            }
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("invite")) {
             if (args.length == 2) {
 
                 if (Database.get(player.getUniqueId()) != null) {
@@ -76,22 +87,34 @@ public class PartyCommand implements TabExecutor {
                 if (invitedData == null)
                     Hypixelify.getInstance().playerData.put(invited.getUniqueId(), new PlayerDatabase(invited));
 
-                Party party = Hypixelify.getInstance().partyManager.parties.get(player);
-                if (party == null) {
-                    party = new Party(player);
-                    Hypixelify.getInstance().partyManager.parties.put(player, party);
-                    Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(true);
-                    Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(player);
+                if(Database.get(player.getUniqueId()).isInvited()){
+                    for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.decline-inc")) {
+                        player.sendMessage(ShopUtil.translateColors(message));
+                    }
+                    return true;
                 }
 
-                if (invitedData.isInParty() || (!party.canAnyoneInvite() && !player.equals(party.getLeader()))) {
+                Party party;
+                if(!Database.get(player.getUniqueId()).isInParty()) {
+                     party = Hypixelify.getInstance().partyManager.parties.get(player);
+                    if (party == null) {
+                        party = new Party(player);
+                        Hypixelify.getInstance().partyManager.parties.put(player, party);
+                        Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(true);
+                        Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(player);
+                    }
+                } else{
+                    party = Hypixelify.getInstance().partyManager.parties.get(Database.get(player.getUniqueId()).getPartyLeader());
+                }
+
+                if (Database.get(invited.getUniqueId()).isInParty()) {
                     for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.cannotinvite")) {
                         player.sendMessage(ShopUtil.translateColors(message));
                     }
                     return true;
                 }
 
-                if (invitedData.isInvited()) {
+                if (Database.get(invited.getUniqueId()).isInvited()) {
                     for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.alreadyInvited")) {
                         player.sendMessage(ShopUtil.translateColors(message));
                     }
@@ -194,10 +217,14 @@ public class PartyCommand implements TabExecutor {
 
             Hypixelify.getInstance().partyManager.parties.get(invitedParty.getLeader()).removeInvitedMember(player);
 
+            for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.declined-user")){
+                player.sendMessage(ShopUtil.translateColors(st));
+            }
+
             for (Player pl : invitedParty.getAllPlayers()) {
                 if (pl != null && pl.isOnline()) {
                     for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.declined")) {
-                        pl.sendMessage(ShopUtil.translateColors(st));
+                        pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
                     }
                 }
             }
@@ -205,6 +232,7 @@ public class PartyCommand implements TabExecutor {
             Database.get(player.getUniqueId()).setExpiredTimeTimeout(60);
             Database.get(player.getUniqueId()).setInvitedParty(null);
             return true;
+
         } else if (args[0].equalsIgnoreCase("list")) {
 
             if (Database.get(player.getUniqueId()) != null && Database.get(player.getUniqueId()).isInParty()) {
@@ -340,7 +368,7 @@ public class PartyCommand implements TabExecutor {
                                         pl.sendMessage(ShopUtil.translateColors(st));
                                     }
                                     if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) {
-                                        if(BedwarsAPI.getInstance().getGameOfPlayer(pl).equals(game))
+                                        if (BedwarsAPI.getInstance().getGameOfPlayer(pl).equals(game))
                                             continue;
 
                                         Game g = BedwarsAPI.getInstance().getGameOfPlayer(pl);
@@ -395,7 +423,7 @@ public class PartyCommand implements TabExecutor {
                 return Arrays.asList("invite", "list", "disband", "kick", "warp");
 
 
-            return Arrays.asList("invite", "list");
+            return Arrays.asList("invite", "list", "help");
         }
 
         return null;
