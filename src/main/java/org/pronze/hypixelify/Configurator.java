@@ -307,6 +307,11 @@ public class Configurator {
                 "&cYou can't {blank} yourself.",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.not-invited", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou are not invited to any party",
+                "&6-----------------------------------------------------"));
+
         if (modify.get()) {
             try {
                 config.save(file);

@@ -60,6 +60,8 @@ public class Party {
     }
 
     public List<Player> getInvitedMembers() {
+        if(invitedMembers == null || invitedMembers.isEmpty()) return null;
+
         return invitedMembers;
     }
 
