@@ -179,7 +179,7 @@ public class PlayerDatabase {
         if(isInParty && isPartyLeader()
                 && Hypixelify.getInstance().partyManager.parties.get(partyLeader) != null &&
                 Hypixelify.getInstance().partyManager.parties.get(partyLeader).getPlayers() == null &&
-                Hypixelify.getInstance().partyManager.parties.get(partyLeader).getInvitedMembers() == null && Hypixelify.getInstance().partyManager.parties.get(pInstance).getOfflinePlayers() == null){
+                Hypixelify.getInstance().partyManager.parties.get(partyLeader).getInvitedMembers() == null && Hypixelify.getInstance().partyManager.parties.get(partyLeader).getOfflinePlayers() == null){
             if(pInstance != null) {
                 if(pInstance.isOnline()) {
                     for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {

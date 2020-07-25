@@ -31,18 +31,18 @@ public class ScoreBoard {
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
-        this.game = arena.getGame();
-        this.teamstatus = new HashMap<>();
+        game = arena.getGame();
+        teamstatus = new HashMap<>();
 
         (new BukkitRunnable() {
             int i = 2;
 
             public void run() {
-                this.i--;
-                if (this.i <= 0) {
-                    this.i = 2;
-                    if (ScoreBoard.this.game.getStatus() != GameStatus.WAITING && ScoreBoard.this.game.getStatus() == GameStatus.RUNNING) {
-                        ScoreBoard.this.updateScoreboard();
+                i--;
+                if (i <= 0) {
+                    i = 2;
+                    if (game.getStatus() != GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
+                        updateScoreboard();
                     } else {
                         cancel();
                     }

@@ -2,10 +2,13 @@ package org.pronze.hypixelify.listener;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
@@ -140,9 +143,6 @@ public class PlayerListener implements Listener {
                 }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
             }
     }
-
-
-
 
 
     @EventHandler(priority = EventPriority.NORMAL)

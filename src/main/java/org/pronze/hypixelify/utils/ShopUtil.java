@@ -150,8 +150,10 @@ public class ShopUtil {
         List<NPC> npcs = new ArrayList<>();
         for (Game game : Main.getInstance().getGames()) {
             CitizensAPI.getNPCRegistry().forEach(npc -> {
-                if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())) {
-                    npcs.add(npc);
+                if(npc != null) {
+                    if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())) {
+                        npcs.add(npc);
+                    }
                 }
             });
         }
@@ -386,8 +388,11 @@ public class ShopUtil {
         ArrayList<NPC> npcs = new ArrayList<>();
 
         CitizensAPI.getNPCRegistry().forEach(npc -> {
-            if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2()))
-                npcs.add(npc);
+
+            if(npc != null) {
+                if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2()))
+                    npcs.add(npc);
+            }
         });
 
         if (npcs.isEmpty())
