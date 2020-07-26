@@ -115,6 +115,10 @@ public class Configurator {
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         checkOrSetConfig(modify, "games-inventory.enabled", true);
         checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
+        checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
+        checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
+        checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
+        checkOrSetConfig(modify, "games-inventory.gui.squad-prefix", "Bed Wars Squads");
 
         for (String game : Main.getGameNames()) {
             String str = "lobby-scoreboard.player-size.games." + game;

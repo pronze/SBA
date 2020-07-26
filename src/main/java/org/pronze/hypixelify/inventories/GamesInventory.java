@@ -26,17 +26,25 @@ public class GamesInventory implements Listener {
     private final HashMap<Integer, String> labels = new HashMap<>();
 
     public GamesInventory() {
+
+        String soloprefix, doubleprefix, tripleprefix,squadprefix;
+
+        soloprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.solo-prefix");
+        doubleprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.double-prefix");
+        tripleprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.triple-prefix");
+        squadprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.squad-prefix");
+
         Options option1 = ShopUtil.generateOptions();
-        option1.setPrefix("Bed Wars Solo");
+        option1.setPrefix(soloprefix);
         option.put(1, option1);
         Options option2 = ShopUtil.generateOptions();
-        option2.setPrefix("Bed Wars Doubles");
+        option2.setPrefix(doubleprefix);
         option.put(2, option2);
         Options option3 = ShopUtil.generateOptions();
-        option3.setPrefix("Bed Wars Triples");
+        option3.setPrefix(tripleprefix);
         option.put(3, option3);
         Options option4 = ShopUtil.generateOptions();
-        option4.setPrefix("Bed Wars Squads");
+        option4.setPrefix(squadprefix);
         option.put(4, option4);
 
         labels.put(1, "Solo");

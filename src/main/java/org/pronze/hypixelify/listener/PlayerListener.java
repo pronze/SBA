@@ -60,6 +60,7 @@ public class PlayerListener implements Listener {
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+        if(!game.isPlayerInAnyTeam(player)) return;
         Team team = game.getTeamOfPlayer(player);
 
         new BukkitRunnable() {
@@ -215,10 +216,12 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onStarted(BedwarsGameStartedEvent e) {
         final Game game = e.getGame();
-        Map<Player, Scoreboard> scoreboards = ScoreboardUtil.getScoreboards();
-        for (Player player : game.getConnectedPlayers()) {
-            if (scoreboards.containsKey(player))
-                ScoreboardUtil.removePlayer(player);
+        if(!Main.isLegacy()) {
+            Map<Player, Scoreboard> scoreboards = ScoreboardUtil.getScoreboards();
+            for (Player player : game.getConnectedPlayers()) {
+                if (scoreboards.containsKey(player))
+                    ScoreboardUtil.removePlayer(player);
+            }
         }
         Arena arena = new Arena(game);
         Hypixelify.getInstance().getArenaManager().addArena(game.getName(), arena);

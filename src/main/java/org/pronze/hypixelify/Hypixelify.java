@@ -111,7 +111,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         if (this.getServer().getPluginManager().getPlugin("Citizens") == null ||
                 !Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)) {
+
             Bukkit.getLogger().warning("Failed to initalize Citizens shop reverting to normal shops...");
+
             if (Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)) {
                 Main.getConfigurator().config.set("shop.citizens-enabled", false);
                 Main.getConfigurator().saveConfig();
@@ -119,12 +121,14 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
             }
         } else {
+
             if (!Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)) {
                 Main.getConfigurator().config.set("shop.citizens-enabled", true);
                 Main.getConfigurator().saveConfig();
                 Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
             }
+
             new Shop();
         }
 
@@ -190,6 +194,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
+            Bukkit.getLogger().info("[SBAHypixelify]: Shutting down party tasks...");
             partyTask.cancel();
             if (partyManager != null && partyManager.parties != null) {
                 partyManager.parties.clear();
@@ -202,10 +207,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 playerData = null;
             }
         }
+        Bukkit.getLogger().info("[SBAHypixelify]: Cancelling current tasks....");
+        this.getServer().getScheduler().cancelTasks(plugin);
+        this.getServer().getServicesManager().unregisterAll(plugin);
         if (plugin.isEnabled()) {
             plugin.getPluginLoader().disablePlugin(plugin);
-            this.getServer().getScheduler().cancelTasks(plugin);
-            this.getServer().getServicesManager().unregisterAll(plugin);
         }
     }
 
