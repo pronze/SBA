@@ -1,11 +1,7 @@
 package org.pronze.hypixelify.storage;
 
-import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.game.Game;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class PlayerGameStorage {
@@ -24,35 +20,35 @@ public class PlayerGameStorage {
 
     public PlayerGameStorage(Game game) {
         this.game = game;
-        this.totalkills = new HashMap<>();
-        this.kills = new HashMap<>();
-        this.finalkills = new HashMap<>();
-        this.dies = new HashMap<>();
-        this.beds = new HashMap<>();
+        totalkills = new HashMap<>();
+        kills = new HashMap<>();
+        finalkills = new HashMap<>();
+        dies = new HashMap<>();
+        beds = new HashMap<>();
     }
 
     public Game getGame() {
-        return this.game;
+        return game;
     }
 
     public Map<String, Integer> getPlayerTotalKills() {
-        return this.totalkills;
+        return totalkills;
     }
 
     public Map<String, Integer> getPlayerKills() {
-        return this.kills;
+        return kills;
     }
 
     public Map<String, Integer> getPlayerFinalKills() {
-        return this.finalkills;
+        return finalkills;
     }
 
     public Map<String, Integer> getPlayerDies() {
-        return this.dies;
+        return dies;
     }
 
     public Map<String, Integer> getPlayerBeds() {
-        return this.beds;
+        return beds;
     }
 
 }

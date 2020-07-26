@@ -24,7 +24,7 @@ public class Configurator {
     public static HashMap<String, Integer> game_size;
     public final File dataFolder;
     public final Hypixelify main;
-    public File file, oldfile, shopFile, upgradeShop;
+    public File file, oldfile, shopFile, upgradeShop, legacyShop;
     public FileConfiguration config;
 
     public Configurator(Hypixelify main) {
@@ -71,6 +71,7 @@ public class Configurator {
 
         shopFile = new File(dataFolder, "shop.yml");
         upgradeShop = new File(dataFolder, "upgradeShop.yml");
+        legacyShop = new File(dataFolder, "legacy-shop.yml");
 
         if (!shopFile.exists()) {
             main.saveResource("shop.yml", false);
@@ -80,10 +81,15 @@ public class Configurator {
             main.saveResource("upgradeShop.yml", false);
         }
 
+        if(!legacyShop.exists()){
+            main.saveResource("legacy-shop.yml", false);
+        }
+
 
         AtomicBoolean modify = new AtomicBoolean(false);
 
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
+        checkOrSetConfig(modify, "legacy-mode", false);
         checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN", "TNT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
@@ -387,6 +393,7 @@ public class Configurator {
     public void upgradeCustomFiles() {
         shopFile.delete();
         upgradeShop.delete();
+        legacyShop.delete();
         config.set("version", Hypixelify.getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
@@ -400,6 +407,7 @@ public class Configurator {
 
         shopFile = new File(dataFolder, "shop.yml");
         upgradeShop = new File(dataFolder, "upgradeShop.yml");
+        legacyShop = new File(dataFolder, "legacy-shop.yml");
 
         if (!shopFile.exists()) {
             main.saveResource("shop.yml", false);
@@ -409,10 +417,16 @@ public class Configurator {
             main.saveResource("upgradeShop.yml", false);
         }
 
+        if(!legacyShop.exists()){
+            main.saveResource("legacy-shop.yml", false);
+        }
+
+
         Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
-        assert plugin != null;
-        Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-        Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+        if(plugin != null) {
+            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+            Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+        }
     }
 
     public void saveConfig() {

@@ -1,14 +1,24 @@
 package org.pronze.hypixelify.listener;
-import org.bukkit.*;
-import org.bukkit.block.Block;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.*;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
@@ -17,24 +27,19 @@ import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.*;
-import org.bukkit.inventory.*;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
-import org.screamingsandals.bedwars.api.game.*;
-import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.lib.nms.title.Title;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 
 public class PlayerListener implements Listener {
     static public HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
@@ -114,34 +119,34 @@ public class PlayerListener implements Listener {
                 }
             }
         }
-            final Player victim = e.getEntity();
-            GamePlayer gVictim = Main.getPlayerGameProfile(victim);
+        final Player victim = e.getEntity();
+        GamePlayer gVictim = Main.getPlayerGameProfile(victim);
 
-            CurrentTeam victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
-            if (Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled") && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) && game.getTeamOfPlayer(player).isTargetBlockExists()) {
-                int respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
+        CurrentTeam victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
+        if (Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled") && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) && game.getTeamOfPlayer(player).isTargetBlockExists()) {
+            int respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
 
-                new BukkitRunnable() {
-                    int livingTime = respawnTime;
-                    GamePlayer gamePlayer = gVictim;
-                    Player player = gamePlayer.player;
+            new BukkitRunnable() {
+                int livingTime = respawnTime;
+                final GamePlayer gamePlayer = gVictim;
+                final Player player = gamePlayer.player;
 
-                    @Override
-                    public void run() {
-                        if (livingTime > 0) {
-                            Title.sendTitle(player, Hypixelify.getConfigurator().config.getString("message.respawn-title"),
-                                    Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)), 0,20,0);
-                            player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)));
-                        }
-                        livingTime--;
-                        if (livingTime == 0) {
-                            player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawned-title"));
-                            Title.sendTitle(player, "§aRESPAWNED!", "", 5,40,5);
-                            this.cancel();
-                        }
+                @Override
+                public void run() {
+                    if (livingTime > 0) {
+                        Title.sendTitle(player, Hypixelify.getConfigurator().config.getString("message.respawn-title"),
+                                Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
+                        player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)));
                     }
-                }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
-            }
+                    livingTime--;
+                    if (livingTime == 0) {
+                        player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawned-title"));
+                        Title.sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+        }
     }
 
 
@@ -170,7 +175,6 @@ public class PlayerListener implements Listener {
     }
 
 
-
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(evt.getPlayer())) return;
@@ -182,25 +186,27 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
+    public void onPlayerLeave(BedwarsPlayerLeaveEvent e) {
+        if (Main.isLegacy())
+            return;
+
         Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
     }
 
     @EventHandler
-    public void itemDamage(PlayerItemDamageEvent e){
+    public void itemDamage(PlayerItemDamageEvent e) {
         Player player = e.getPlayer();
-        if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
-        if(!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
-        if(Main.getPlayerGameProfile(player).isSpectator) return;
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+        if (!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
+        if (Main.getPlayerGameProfile(player).isSpectator) return;
 
-        if(!Hypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true)) return;
-        if(e.getItem().getType().toString().contains("BOOTS")
-        || e.getItem().getType().toString().contains("HELMET")
-        || e.getItem().getType().toString().contains("LEGGINGS")
-        || e.getItem().getType().toString().contains("CHESTPLATE")
-        || e.getItem().getType().toString().contains("SWORD"))
-        {
+        if (!Hypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true)) return;
+        if (e.getItem().getType().toString().contains("BOOTS")
+                || e.getItem().getType().toString().contains("HELMET")
+                || e.getItem().getType().toString().contains("LEGGINGS")
+                || e.getItem().getType().toString().contains("CHESTPLATE")
+                || e.getItem().getType().toString().contains("SWORD")) {
             e.setCancelled(true);
         }
 
@@ -241,20 +247,20 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent e){
+    public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-       if(Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
-           Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
+        if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true) && Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
+            Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
 
-        if(!p.isOp())
+        if (!p.isOp())
             return;
 
-        if(!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())){
-            new BukkitRunnable(){
+        if (!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())) {
+            new BukkitRunnable() {
                 @Override
                 public void run() {
                     p.sendMessage(ChatColor.GOLD + "[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
-                    p.sendMessage( "Type /bwaddon upgrade to upgrade file");
+                    p.sendMessage("Type /bwaddon upgrade to upgrade file");
                     p.sendMessage(ChatColor.RED + "if you want to cancel the upgrade files do /bwaddon cancel");
                 }
             }.runTaskLater(Hypixelify.getInstance(), 40L);
@@ -273,6 +279,7 @@ public class PlayerListener implements Listener {
         Game game = e.getGame();
         Hypixelify.getInstance().getArenaManager().removeArena(game.getName());
     }
+
     @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
         Game game = e.getGame();
@@ -281,18 +288,18 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e){
-        Player player= e.getPlayer();
+    public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
+        Player player = e.getPlayer();
         Game game = e.getGame();
         String message = "&eThe game starts in &c{seconds} &eseconds";
         (new BukkitRunnable() {
             public void run() {
-                if (player.isOnline()  && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
-                        game.getConnectedPlayers().contains(player)&&
+                if (player.isOnline() && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
+                        game.getConnectedPlayers().contains(player) &&
                         game.getStatus().equals(GameStatus.WAITING)) {
-                    if(game.getConnectedPlayers().size() >= game.getMinPlayers()) {
+                    if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
                         String time = Main.getGame(game.getName()).getFormattedTimeLeft();
-                        if(!time.contains("0-1")) {
+                        if (!time.contains("0-1")) {
                             String[] units = time.split(":");
                             int seconds = Integer.parseInt(units[1]) + 1;
                             if (seconds < 2) {

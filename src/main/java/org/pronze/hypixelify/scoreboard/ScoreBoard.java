@@ -34,7 +34,7 @@ public class ScoreBoard {
         game = arena.getGame();
         teamstatus = new HashMap<>();
 
-        (new BukkitRunnable() {
+        new BukkitRunnable() {
             int i = 2;
 
             public void run() {
@@ -48,13 +48,13 @@ public class ScoreBoard {
                     }
                 }
             }
-        }).runTaskTimer(Hypixelify.getInstance(), 0L, 1L);
+        }.runTaskTimer(Hypixelify.getInstance(), 0L, 1L);
     }
 
 
     public void updateScoreboard() {
         List<String> scoreboard_lines;
-        this.tc++;
+        tc++;
         List<String> lines = new ArrayList<>();
 
         int ats = 0;
@@ -67,12 +67,12 @@ public class ScoreBoard {
         }
 
         String Title = "";
-        if (this.tc >= Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").size())
-            this.tc = 0;
+        if (tc >= Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").size())
+            tc = 0;
         int tcs = 0;
         for (String title : LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"))) {
-            if (this.tc == tcs)
-                Title = title.replace("{game}", this.game.getName()).replace("{time}",
+            if (tc == tcs)
+                Title = title.replace("{game}", game.getName()).replace("{time}",
                         Main.getGame(game.getName()).getFormattedTimeLeft());
             tcs++;
         }
@@ -98,11 +98,11 @@ public class ScoreBoard {
                 String fks;
                 String dis;
                 String bes;
-                Map<String, Integer> totalkills = this.arena.getPlayerGameStorage().getPlayerTotalKills();
-                Map<String, Integer> kills = this.arena.getPlayerGameStorage().getPlayerKills();
-                Map<String, Integer> finalkills = this.arena.getPlayerGameStorage().getPlayerFinalKills();
-                Map<String, Integer> dies = this.arena.getPlayerGameStorage().getPlayerDies();
-                Map<String, Integer> beds = this.arena.getPlayerGameStorage().getPlayerBeds();
+                Map<String, Integer> totalkills = arena.getPlayerGameStorage().getPlayerTotalKills();
+                Map<String, Integer> kills = arena.getPlayerGameStorage().getPlayerKills();
+                Map<String, Integer> finalkills = arena.getPlayerGameStorage().getPlayerFinalKills();
+                Map<String, Integer> dies = arena.getPlayerGameStorage().getPlayerDies();
+                Map<String, Integer> beds = arena.getPlayerGameStorage().getPlayerBeds();
                 tks = String.valueOf(totalkills.getOrDefault(player.getName(), 0));
                 ks = String.valueOf(kills.getOrDefault(player.getName(), 0));
                 fks = String.valueOf(finalkills.getOrDefault(player.getName(), 0));
@@ -114,7 +114,6 @@ public class ScoreBoard {
                 if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).countConnectedPlayers() > 0) {
                     chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(game.getTeamOfPlayer(player).getColor().name()).chatColor;
                     p_t_ps = String.valueOf(game.getTeamOfPlayer(player).getConnectedPlayers().size());
-                   // p_t = game.getTeamOfPlayer(player).getName();
                     p_t =  game.getTeamOfPlayer(player).getName();
                     p_t_b_s = getTeamBedStatus(game.getTeamOfPlayer(player));
                 }
@@ -147,7 +146,7 @@ public class ScoreBoard {
                             .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
                             .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
                             .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                            .replace("{game}", this.game.getName()).replace("{date}", date)
+                            .replace("{game}", game.getName()).replace("{date}", date)
                             .replace("{team_bed_status}", p_t_b_s);
 
                     if(game.isPlayerInAnyTeam(player)){

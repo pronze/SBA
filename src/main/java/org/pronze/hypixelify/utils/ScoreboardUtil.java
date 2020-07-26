@@ -33,8 +33,7 @@ public class ScoreboardUtil {
     }
 
     public static void removePlayer(Player player) {
-        if(scoreboards.containsKey(player))
-            scoreboards.remove(player);
+        scoreboards.remove(player);
     }
 
     public static void setLobbyScoreboard(Player p, String[] elements, Game game) {

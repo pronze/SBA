@@ -33,8 +33,9 @@ public class Arena {
 
     public Arena(Game game) {
         this.game = game;
-        this.playerGameStorage = new PlayerGameStorage(game);
-        this.scoreBoard = new ScoreBoard(this);
+        playerGameStorage = new PlayerGameStorage(game);
+        if(!Main.isLegacy())
+            scoreBoard = new ScoreBoard(this);
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
@@ -43,7 +44,7 @@ public class Arena {
         Map<String, Integer> beds = this.playerGameStorage.getPlayerBeds();
         Player player = e.getPlayer();
         if (beds.containsKey(player.getName())) {
-            beds.put(player.getName(), beds.get(player.getName()).intValue() + 1);
+            beds.put(player.getName(), beds.get(player.getName()) + 1);
         } else {
             beds.put(player.getName(), 1);
         }
@@ -58,7 +59,7 @@ public class Arena {
             return;
         Map<String, Integer> dies = this.playerGameStorage.getPlayerDies();
         if (dies.containsKey(player.getName())) {
-            dies.put(player.getName(), dies.get(player.getName()).intValue() + 1);
+            dies.put(player.getName(), dies.get(player.getName()) + 1);
         } else {
             dies.put(player.getName(), 1);
         }

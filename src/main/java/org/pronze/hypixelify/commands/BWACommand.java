@@ -28,13 +28,6 @@ public class BWACommand implements TabExecutor {
                 }
             }
             if (args[0].equalsIgnoreCase("reload")) {
-                if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
-                    Hypixelify.getInstance().partyTask.cancel();
-                    Hypixelify.getInstance().partyManager.parties.clear();
-                    Hypixelify.getInstance().playerData.clear();
-                    Hypixelify.getInstance().partyManager = null;
-                    Hypixelify.getInstance().playerData = null;
-                }
                 Bukkit.getServer().getPluginManager().disablePlugin(Hypixelify.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
                 sender.sendMessage("Plugin reloaded!");

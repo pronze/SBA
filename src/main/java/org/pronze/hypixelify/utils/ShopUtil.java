@@ -37,7 +37,11 @@ public class ShopUtil {
         metaArrow.setLore(Arrays.asList("§7To Play Bed Wars"));
         Arrow.setItemMeta(metaArrow);
 
-        FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
+        if(Main.isLegacy())
+            FireWorks = new ItemStack(Material.valueOf("FIREWORK"));
+        else
+            FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
+
         ItemMeta fireMeta = FireWorks.getItemMeta();
         fireMeta.setDisplayName("§aRandom Map");
         FireWorks.setItemMeta(fireMeta);
@@ -345,8 +349,17 @@ public class ShopUtil {
     public static List<ItemStack> createCategories(List<String> lore1,
                                                    String name, String name2) {
         List<ItemStack> myList = new ArrayList<>();
-        ItemStack category = new ItemStack(Material.valueOf("RED_BED"));
-        ItemStack category2 = new ItemStack(Material.OAK_SIGN);
+
+        ItemStack category;
+        ItemStack category2;
+        if(Main.isLegacy()){
+            category = new ItemStack(Material.valueOf("BED"));
+            category2 = new ItemStack(Material.valueOf("SIGN"));
+        } else{
+            category = new ItemStack(Material.valueOf("RED_BED"));
+            category2 = new ItemStack(Material.valueOf("OAK_SIGN"));
+        }
+
         ItemStack category3 = new ItemStack(Material.BARRIER);
         ItemStack category4 = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = category.getItemMeta();

@@ -345,12 +345,18 @@ public class customShop implements Listener {
         try {
             if (useParent) {
                 String shopFileName = "shop.yml";
+                if(Main.isLegacy()){
+                    shopFileName = "legacy-shop.yml";
+                }
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
                 format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
+                if(fileName.equalsIgnoreCase("shop.yml") && Main.isLegacy())
+                    fileName = "legacy-shop.yml";
+
                 format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), fileName);
             }
         } catch (Exception ignored) {
@@ -472,8 +478,6 @@ public class customShop implements Listener {
             }
 
             boolean shouldSellStack = true;
-
-
 
 
             if (getNameOrCustomNameOfItem(newItem).contains("Sharpness")) {
