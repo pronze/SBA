@@ -337,6 +337,11 @@ public class Configurator {
                 "&cYou declined the invite!",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.chat-enable-disabled", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&aParty chat has been {mode}",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.help", Arrays.asList(
                 "&1-----------------------------------------------------",
                 "&6Party commands",

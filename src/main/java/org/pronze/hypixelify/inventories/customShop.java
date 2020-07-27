@@ -307,7 +307,6 @@ public class customShop implements Listener {
         if (reader.containsKey("upgrade")) {
             handleUpgrade(event);
         } else {
-
             if (event.getStack().getItemMeta().getDisplayName().contains("Protection")) {
                 ItemStack shop = ShopUtil.shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
                 event.getStack().addEnchantments(shop.getEnchantments());

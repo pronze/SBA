@@ -110,13 +110,15 @@ public class PlayerListener implements Listener {
         items.add(sword);
         PlayerItems.put(player, items);
 
-        if (e.getEntity().getKiller() != null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getEntity().getKiller()) && e.getEntity().getKiller().getGameMode().equals(GameMode.SURVIVAL)
-                && Hypixelify.getConfigurator().config.getBoolean("give-killer-resources", true)) {
+        if(Hypixelify.getConfigurator().config.getBoolean("give-killer-resources", true)) {
             Player killer = e.getEntity().getKiller();
-            for (ItemStack dropItem : player.getInventory().getContents()) {
-                if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
-                    killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getType().name());
-                    killer.getInventory().addItem(dropItem);
+
+            if (killer!= null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
+                for (ItemStack dropItem : player.getInventory().getContents()) {
+                    if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
+                        killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getType().name());
+                        killer.getInventory().addItem(dropItem);
+                    }
                 }
             }
         }

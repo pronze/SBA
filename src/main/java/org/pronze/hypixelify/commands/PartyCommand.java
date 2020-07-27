@@ -399,7 +399,39 @@ public class PartyCommand implements TabExecutor {
                 }
             }
 
-        } else {
+        } else if(args[0].equalsIgnoreCase("chat")){
+            PlayerDatabase db = Database.get(player.getUniqueId());
+            if(db == null) return true;
+
+            if(!db.isInParty()){
+                for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.notinparty")) {
+                    player.sendMessage(ShopUtil.translateColors(str));
+                }
+                return true;
+            }
+
+            if(args.length != 2 || (!args[1].equalsIgnoreCase("on") && !args[1].equalsIgnoreCase("off"))){
+                for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.invalid-command")) {
+                    player.sendMessage(ShopUtil.translateColors(str));
+                }
+                return true;
+            }
+
+            if(args[1].equalsIgnoreCase("on"))
+                Database.get(player.getUniqueId()).setPartyChatEnabled(true);
+            else
+                Database.get(player.getUniqueId()).setPartyChatEnabled(false);
+
+            String mode = args[1].equals("on") ? "enabled" : "disabled";
+
+            for(String st : Hypixelify.getConfigurator().config.getStringList("party.message.chat-enable-disabled")){
+                player.sendMessage(ShopUtil.translateColors(st).replace("{mode}", mode));
+            }
+            return true;
+
+        }
+
+        else {
             for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.invalid-command")) {
                 player.sendMessage(ShopUtil.translateColors(str));
             }
@@ -423,7 +455,11 @@ public class PartyCommand implements TabExecutor {
                 return Arrays.asList("invite", "list", "disband", "kick", "warp");
 
 
-            return Arrays.asList("invite", "list", "help");
+            return Arrays.asList("invite", "list", "help", "chat");
+        }
+
+        if(strings.length == 2 && strings[0].equalsIgnoreCase("chat")){
+            return Arrays.asList("on", "off");
         }
 
         return null;

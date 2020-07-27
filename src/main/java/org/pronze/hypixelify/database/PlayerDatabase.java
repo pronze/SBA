@@ -20,7 +20,15 @@ public class PlayerDatabase {
     private Player pInstance;
     private Player partyLeader;
     private boolean clearData = false;
+    private boolean partyChat = false;
 
+    public void setPartyChatEnabled(Boolean b){
+        partyChat = b;
+    }
+
+    public boolean getPartyChatEnabled(){
+        return partyChat;
+    }
     public String getName(){
         return name;
     }

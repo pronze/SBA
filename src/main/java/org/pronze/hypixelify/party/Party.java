@@ -1,6 +1,7 @@
 package org.pronze.hypixelify.party;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -20,6 +21,16 @@ public class Party {
     public Party(Player leader) {
         setLeader(leader);
         addMember(leader);
+    }
+
+    public void sendMessage(String msg) {
+        for(Player p : getAllPlayers())   {
+            p.sendMessage(msg);
+        }
+    }
+    public void sendChat(Player sender, String msg) {
+        msg = ChatColor.GREEN +"Party>> " + sender.getName() + ChatColor.WHITE + " : " + ChatColor.ITALIC + msg;
+        sendMessage(msg);
     }
 
     public List<Player> getOfflinePlayers() {
