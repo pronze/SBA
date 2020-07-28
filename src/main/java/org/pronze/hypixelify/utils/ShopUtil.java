@@ -415,4 +415,10 @@ public class ShopUtil {
             npc.destroy();
         }
     }
+
+    public static void sendMessage(Player player, List<String> message){
+        for(String st : message){
+            player.sendMessage(translateColors(st));
+        }
+    }
 }

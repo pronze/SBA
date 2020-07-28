@@ -12,12 +12,10 @@ import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.inventories.customShop;
-import org.pronze.hypixelify.listener.LobbyScoreboard;
-import org.pronze.hypixelify.listener.PartyListener;
-import org.pronze.hypixelify.listener.PlayerListener;
-import org.pronze.hypixelify.listener.Shop;
+import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.PartyManager;
+import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 
@@ -36,6 +34,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private Configurator configurator;
     private ArenaManager arenamanager;
     private GamesInventory gamesInventory;
+    private Messages messages;
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
@@ -103,6 +102,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("");
 
         new PlayerListener();
+        new ChatListener();
+        if(messages == null) {
+            messages = new Messages();
+            messages.loadConfig();
+        }
         InventoryListener.init(this);
         shop = new customShop();
 

@@ -317,6 +317,11 @@ public class Configurator {
                 "&cYou can't {blank} yourself.",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.cannot-invite-yourself", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou can't invite yourself.",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.not-invited", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou are not invited to any party",
