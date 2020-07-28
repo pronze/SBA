@@ -20,7 +20,8 @@ public class Party {
 
     public Party(Player leader) {
         setLeader(leader);
-        addMember(leader);
+        if(players.contains(leader)) return;
+        players.add(leader);
     }
 
     public void sendMessage(String msg) {
@@ -49,6 +50,10 @@ public class Party {
         return offlinePlayers;
     }
 
+    public boolean shouldDisband(){
+        return getPlayers() == null && getInvitedMembers() == null && getOfflinePlayers() == null;
+    }
+
     public void disband() {
         players.clear();
         invitedMembers.clear();
@@ -65,10 +70,13 @@ public class Party {
         leader = player;
     }
 
-    public void addInvitedMember(Player pl) {
-        if (!invitedMembers.contains(pl))
-            invitedMembers.add(pl);
-    }
+   public void addInvitedMember(Player pl) {
+       if (!invitedMembers.contains(pl)) {
+           invitedMembers.add(pl);
+           Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setInvited(true);
+           Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setInvitedParty(this);
+       }
+   }
 
     public List<Player> getInvitedMembers() {
         if(invitedMembers == null || invitedMembers.isEmpty()) return null;
@@ -80,12 +88,12 @@ public class Party {
         invitedMembers.remove(pl);
     }
 
-    public void addMember(Player player) {
-        if (!players.contains(player)) {
-            players.add(player);
-            member_size++;
-        }
-    }
+   public void addMember(Player player) {
+       if (!players.contains(player)) {
+           players.add(player);
+           member_size++;
+       }
+   }
 
     public int getSize() {
         return member_size;
