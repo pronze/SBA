@@ -1,11 +1,8 @@
 package org.pronze.hypixelify.listener;
-
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.event.HandlerList;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.party.Party;
@@ -16,11 +13,8 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
-public class PartyListener implements Listener {
+public class PartyListener extends AbstractListener{
 
-    public PartyListener() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
-    }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBWJoin(BedwarsPlayerJoinedEvent e) {
@@ -71,5 +65,10 @@ public class PartyListener implements Listener {
                 }
             }
         }
+    }
+
+    @Override
+    public void onDisable() {
+        HandlerList.unregisterAll(this);
     }
 }

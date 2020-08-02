@@ -40,7 +40,6 @@ public class Arena {
         for(Player p : e.getTeam().getConnectedPlayers()){
             Title.sendTitle(p,"§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
         }
-
     }
 
 
@@ -48,6 +47,7 @@ public class Arena {
 
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {
+            scoreBoard.updateScoreboard();
             if (e.getWinningTeam() != null) {
                 Team winner = e.getWinningTeam();
                 Map<String, Integer> dataKills = new HashMap<>();

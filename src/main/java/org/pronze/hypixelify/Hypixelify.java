@@ -36,6 +36,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private ArenaManager arenamanager;
     private GamesInventory gamesInventory;
     private Messages messages;
+    private ListenerManager listenerManager;
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
@@ -102,8 +103,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
         Bukkit.getLogger().info("");
 
-        new PlayerListener();
-        new ChatListener();
+        listenerManager = new ListenerManager();
+
         if(messages == null) {
             messages = new Messages();
             messages.loadConfig();
@@ -126,24 +127,17 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
             }
         } else {
-
             if (!Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)) {
                 Main.getConfigurator().config.set("shop.citizens-enabled", true);
                 Main.getConfigurator().saveConfig();
                 Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
             }
-
-            new Shop();
         }
 
         if (configurator.config.getBoolean("party.enabled", true)) {
-            if (configurator.config.getBoolean("party.leader-autojoin-autoleave", true)) {
-                new PartyListener();
-            }
             if (playerData == null)
                 playerData = new HashMap<>();
-
 
             partyManager = new PartyManager();
             partyTask = new PartyTask();
@@ -160,7 +154,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
             Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(), this);
 
 
-        if (!configurator.config.getString("version").contains(getVersion())) {
+        if (!configurator.config.getString("version").contains(version)) {
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
 
@@ -185,15 +179,14 @@ public class Hypixelify extends JavaPlugin implements Listener {
             if (doneChanges) {
                 Bukkit.getLogger().info("[SBAHypixelify]: Making legacy changes");
                 Main.getConfigurator().saveConfig();
-                Bukkit.getServer().getPluginManager().disablePlugin(getInstance());
-                Bukkit.getServer().getPluginManager().enablePlugin(getInstance());
+                Bukkit.getServer().getPluginManager().disablePlugin(this);
+                Bukkit.getServer().getPluginManager().enablePlugin(this);
             }
 
         }
 
         Bukkit.getPluginManager().registerEvents(this, this);
         Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());
-
     }
 
     @Override
@@ -212,7 +205,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 playerData = null;
             }
         }
+        Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");
+        listenerManager.unregisterAll();
+        listenerManager = null;
         Bukkit.getLogger().info("[SBAHypixelify]: Cancelling current tasks....");
+        configurator = null;
+        messages = null;
+        arenamanager = null;
+        gamesInventory = null;
+        shop = null;
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
         if (plugin.isEnabled()) {

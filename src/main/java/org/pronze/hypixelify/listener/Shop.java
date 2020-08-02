@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -24,21 +25,27 @@ import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import java.util.Objects;
 
-public class Shop implements Listener {
+public class Shop extends AbstractListener {
 
     private final String ITEM_SHOP_NAME = "§bITEM SHOP";
     private final String UPGRADE_SHOP_NAME = "§6TEAM UPGRADES";
-    GameStore shop;
-    GameStore upgradeShop;
+    private GameStore shop;
+    private GameStore upgradeShop;
 
     public Shop(){
-        Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
         shop = new GameStore(null, "shop.yml", false,  "[BW] Shop",
                 false, false);
         upgradeShop = new GameStore(null, "upgradeShop.yml", false,  "[BW] Team Upgrades",
                 false, false);
    }
+
+    @Override
+    public void onDisable() {
+        shop = null;
+        upgradeShop = null;
+        HandlerList.unregisterAll(this);
+    }
 
     static public String capFirstLetter ( String str )
     {

@@ -31,7 +31,6 @@ public class ScoreBoard {
 
     private Map<String, String> teamstatus;
     private List<String> m_title;
-    private int ticks = 0;
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
@@ -41,15 +40,8 @@ public class ScoreBoard {
         new BukkitRunnable() {
 
             public void run() {
-                    ticks += 2;
-                    if (ticks == 15000)
-                        ticks = 0;
                     if (game.getStatus()!= GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
-                        //update title animation every 2 ticks
                         updateTitle();
-                        //update scoreboard every 1 second
-                        if(ticks % 20 == 0)
-                            updateScoreboard();
                     } else {
                         cancel();
                     }

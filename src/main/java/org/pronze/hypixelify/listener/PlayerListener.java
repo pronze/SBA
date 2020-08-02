@@ -1,22 +1,14 @@
 package org.pronze.hypixelify.listener;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,20 +28,34 @@ import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.lib.nms.title.Title;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-public class PlayerListener implements Listener {
+public class PlayerListener extends AbstractListener {
     static public HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
     static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
     static public ArrayList<Material> allowed = new ArrayList<>();
     static public ArrayList<Material> generatorDropItems = new ArrayList<>();
 
     public PlayerListener() {
-        Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
         ShopUtil.initalizekeys();
+    }
+
+    @Override
+    public void onDisable() {
+        PlayerItems = null;
+        UpgradeKeys = null;
+        allowed = null;
+        generatorDropItems = null;
+        HandlerList.unregisterAll(this);
+    }
+
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent e){
+        Player player = e.getPlayer();
+        HashMap<UUID, PlayerDatabase> database = Hypixelify.getInstance().playerData;
+        if(database.get(player.getUniqueId()) == null) return;
+
+        database.get(player.getUniqueId()).handleOffline();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -147,6 +153,9 @@ public class PlayerListener implements Listener {
                 }
             }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
         }
+
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
+            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
     }
 
 
@@ -166,6 +175,7 @@ public class PlayerListener implements Listener {
 
         Inventory topSlot = event.getView().getTopInventory();
         Inventory bottomSlot = event.getView().getBottomInventory();
+        if(event.getClickedInventory() == null) return;
         if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
             if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
@@ -192,6 +202,9 @@ public class PlayerListener implements Listener {
 
         Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
+        Game game = e.getGame();
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
+            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
     }
 
     @EventHandler
@@ -224,12 +237,12 @@ public class PlayerListener implements Listener {
         }
         Arena arena = new Arena(game);
         Hypixelify.getInstance().getArenaManager().addArena(game.getName(), arena);
-        (new BukkitRunnable() {
+        new BukkitRunnable() {
             public void run() {
                 if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
                     Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
             }
-        }).runTaskLater(Hypixelify.getInstance(), 2L);
+        }.runTaskLater(Hypixelify.getInstance(), 2L);
 
         Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onGameStarted(e);
     }
@@ -239,12 +252,12 @@ public class PlayerListener implements Listener {
         final Game game = e.getGame();
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onTargetBlockDestroyed(e);
-            (new BukkitRunnable() {
+            new BukkitRunnable() {
                 public void run() {
                     if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-                        (Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName())).getScoreBoard().updateScoreboard();
+                        Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
                 }
-            }).runTaskLater(Hypixelify.getInstance(), 1L);
+            }.runTaskLater(Hypixelify.getInstance(), 1L);
         }
     }
 

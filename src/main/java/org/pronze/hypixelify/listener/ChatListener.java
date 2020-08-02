@@ -1,18 +1,17 @@
 package org.pronze.hypixelify.listener;
-
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.party.Party;
 
-public class ChatListener implements Listener {
+public class ChatListener extends AbstractListener {
 
-    public ChatListener(){
-        Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
+    @Override
+    public void onDisable() {
+        HandlerList.unregisterAll(this);
     }
 
     @EventHandler
