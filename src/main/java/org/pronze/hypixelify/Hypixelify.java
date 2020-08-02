@@ -16,6 +16,7 @@ import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.party.PartyTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 

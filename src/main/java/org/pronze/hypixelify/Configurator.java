@@ -155,7 +155,7 @@ public class Configurator {
                 , "{team_status}"
                 , ""
                 , "&fKills: &a{kills}"
-                , "&fFinal Kills: &a{finalkills}"
+                , "&fTotal Kills: &a{totalkills}"
                 , "&fBed Broken: &a{beds}"
                 , ""
                 , "&ewww.minecraft.net"
@@ -390,7 +390,6 @@ public class Configurator {
 
         overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
         gamestart_message = LobbyScoreboard.listcolor(config.getStringList("game-start.message"));
-
         if (config.getBoolean("first_start")) {
             Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
             upgradeCustomFiles();
@@ -405,9 +404,27 @@ public class Configurator {
     }
 
     public void upgradeCustomFiles() {
-        shopFile.delete();
-        upgradeShop.delete();
-        legacyShop.delete();
+        try {
+            shopFile.delete();
+            upgradeShop.delete();
+            legacyShop.delete();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        if(Hypixelify.getVersion().contains("1.2.8")){
+            config.set("scoreboard.lines.default", Arrays.asList(
+                    "&7{date}"
+                    , ""
+                    , ""
+                    , "{team_status}"
+                    , ""
+                    , "&fKills: &a{kills}"
+                    , "&fTotal Kills: &a{totalkills}"
+                    , "&fBed Broken: &a{beds}"
+                    , ""
+                    , "&ewww.minecraft.net"
+            ));
+        }
         config.set("version", Hypixelify.getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();

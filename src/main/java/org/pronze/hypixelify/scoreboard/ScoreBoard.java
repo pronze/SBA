@@ -14,6 +14,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -41,7 +42,7 @@ public class ScoreBoard {
                 i--;
                 if (i <= 0) {
                     i = 2;
-                    if (game.getStatus() != GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
+                    if (game.getStatus()!= GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
                         updateScoreboard();
                     } else {
                         cancel();
@@ -91,30 +92,36 @@ public class ScoreBoard {
         }
         for (Player player : game.getConnectedPlayers()) {
                 ChatColor chatColor = null;
-                Team playerteam = game.getTeamOfPlayer(player);
+                Team playerTeam = game.getTeamOfPlayer(player);
                 lines.clear();
                 String tks;
                 String ks;
                 String fks;
                 String dis;
                 String bes;
-                Map<String, Integer> totalkills = arena.getPlayerGameStorage().getPlayerTotalKills();
-                Map<String, Integer> kills = arena.getPlayerGameStorage().getPlayerKills();
-                Map<String, Integer> finalkills = arena.getPlayerGameStorage().getPlayerFinalKills();
-                Map<String, Integer> dies = arena.getPlayerGameStorage().getPlayerDies();
-                Map<String, Integer> beds = arena.getPlayerGameStorage().getPlayerBeds();
-                tks = String.valueOf(totalkills.getOrDefault(player.getName(), 0));
-                ks = String.valueOf(kills.getOrDefault(player.getName(), 0));
-                fks = String.valueOf(finalkills.getOrDefault(player.getName(), 0));
-                dis = String.valueOf(dies.getOrDefault(player.getName(), 0));
-                bes = String.valueOf(beds.getOrDefault(player.getName(), 0));
+
+                PlayerStatistic statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+                try {
+                    tks = String.valueOf(statistic.getCurrentKills() + statistic.getKills());
+                    ks = String.valueOf(statistic.getCurrentKills());
+                    fks = String.valueOf(statistic.getKills());
+                    dis = String.valueOf(statistic.getCurrentDeaths());
+                    bes = String.valueOf(statistic.getCurrentDestroyedBeds());
+                } catch (Exception e){
+                    String nullscore = "0";
+                    tks = nullscore;
+                    ks = nullscore;
+                    fks = nullscore;
+                    dis = nullscore;
+                    bes = nullscore;
+                }
                 String p_t_ps = "";
                 String p_t = "";
                 String p_t_b_s = "";
                 if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).countConnectedPlayers() > 0) {
                     chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(game.getTeamOfPlayer(player).getColor().name()).chatColor;
                     p_t_ps = String.valueOf(game.getTeamOfPlayer(player).getConnectedPlayers().size());
-                    p_t =  game.getTeamOfPlayer(player).getName();
+                    p_t =  playerTeam.getName();
                     p_t_b_s = getTeamBedStatus(game.getTeamOfPlayer(player));
                 }
                 for (String ls : scoreboard_lines) {

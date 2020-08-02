@@ -86,9 +86,6 @@ public class PlayerListener implements Listener {
 
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
 
-        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            (Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName())).onDeath(player);
-
         List<ItemStack> items = new ArrayList<>();
         ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
 
@@ -270,13 +267,6 @@ public class PlayerListener implements Listener {
                 }
             }.runTaskLater(Hypixelify.getInstance(), 40L);
         }
-    }
-
-    @EventHandler
-    public void onPlayerKilled(BedwarsPlayerKilledEvent e) {
-        Game game = e.getGame();
-        if (game != null && Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onPlayerKilled(e);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
