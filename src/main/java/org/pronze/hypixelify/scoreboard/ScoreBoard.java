@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
@@ -28,34 +30,59 @@ public class ScoreBoard {
     private int tc = 0;
 
     private Map<String, String> teamstatus;
-
+    private List<String> m_title;
+    private int ticks = 0;
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
         game = arena.getGame();
         teamstatus = new HashMap<>();
-
+        m_title = LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
         new BukkitRunnable() {
-            int i = 2;
 
             public void run() {
-                i--;
-                if (i <= 0) {
-                    i = 2;
+                    ticks += 2;
+                    if (ticks == 15000)
+                        ticks = 0;
                     if (game.getStatus()!= GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
-                        updateScoreboard();
+                        //update title animation every 2 ticks
+                        updateTitle();
+                        //update scoreboard every 1 second
+                        if(ticks % 20 == 0)
+                            updateScoreboard();
                     } else {
                         cancel();
                     }
-                }
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 1L);
+        }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
     }
 
+    public void updateTitle(){
+        tc++;
+        String Title = "";
+        if (tc >= m_title.size())
+            tc = 0;
+        int tcs = 0;
+        for (String title : m_title) {
+            if (tc == tcs)
+                Title = title.replace("{game}", game.getName()).replace("{time}",
+                        Main.getGame(game.getName()).getFormattedTimeLeft());
+            tcs++;
+        }
+        if(game.getConnectedPlayers() == null || game.getConnectedPlayers().isEmpty()) return;
+        for(Player p : game.getConnectedPlayers()){
+            try{
+                if(p.getScoreboard().getObjective("bwa-game") == null) continue;
+                Scoreboard scoreboard = p.getScoreboard();
+                Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).setDisplayName(Title);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
 
     public void updateScoreboard() {
         List<String> scoreboard_lines;
-        tc++;
         List<String> lines = new ArrayList<>();
 
         int ats = 0;
@@ -67,16 +94,7 @@ public class ScoreBoard {
                 rts++;
         }
 
-        String Title = "";
-        if (tc >= Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title").size())
-            tc = 0;
-        int tcs = 0;
-        for (String title : LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"))) {
-            if (tc == tcs)
-                Title = title.replace("{game}", game.getName()).replace("{time}",
-                        Main.getGame(game.getName()).getFormattedTimeLeft());
-            tcs++;
-        }
+
         String teams = String.valueOf(game.getRunningTeams().size());
         if (Configurator.Scoreboard_Lines.containsKey(teams)) {
             scoreboard_lines = Configurator.Scoreboard_Lines.get(teams);
@@ -184,7 +202,7 @@ public class ScoreBoard {
                     }
                     lines.add(addline);
                 }
-                String title = Title;
+                String title = "";
                 if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
                     title = PlaceholderAPI.setPlaceholders(player, title);
                 List<String> elements = new ArrayList<>();

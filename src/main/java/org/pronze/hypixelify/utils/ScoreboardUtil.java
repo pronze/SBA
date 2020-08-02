@@ -36,6 +36,7 @@ public class ScoreboardUtil {
         scoreboards.remove(player);
     }
 
+
     public static void setLobbyScoreboard(Player p, String[] elements, Game game) {
         elements = cutUnranked(elements);
         Scoreboard scoreboard = p.getScoreboard();
@@ -105,7 +106,6 @@ public class ScoreboardUtil {
                 scoreboard.registerNewObjective("bwa-game", "dummy", "test");
                 Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplaySlot(DisplaySlot.SIDEBAR);
             }
-            Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).setDisplayName(elements[0]);
             for (int i = 1; i < elements.length; i++) {
                 if (elements[i] != null &&
                         Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).getScore(elements[i]).getScore() != 16 - i) {
@@ -135,7 +135,6 @@ public class ScoreboardUtil {
                     scoreboard.resetScores(entry);
             }
             String playertag_prefix = colorize("{color}{team} &f| {color}");
-            String playertag_suffix = "";
             RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
 
@@ -144,9 +143,6 @@ public class ScoreboardUtil {
                     team = scoreboard.registerNewTeam( t.getName());
                 if (!playertag_prefix.equals(""))
                     team.setPrefix(playertag_prefix.replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString()).replace("{team}",
-                            t.getName()));
-                if (!playertag_suffix.equals(""))
-                    team.setSuffix(playertag_suffix.replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString()).replace("{team}",
                             t.getName()));
                 team.setAllowFriendlyFire(false);
                 for (Player pl : t.getConnectedPlayers()) {
