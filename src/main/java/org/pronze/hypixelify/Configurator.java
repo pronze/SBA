@@ -490,13 +490,12 @@ public class Configurator {
     }
 
     public List<String> getStringList(String string) {
-        if (Objects.requireNonNull(config.getConfigurationSection("")).getStringList(string).size() == 0) {
-            for (String l : Objects.requireNonNull(config.getConfigurationSection("")).getStringList(string)) {
-                ChatColor.translateAlternateColorCodes('&', l);
-            }
+        List<String> list = new ArrayList<>();
+        for (String s : config.getStringList(string)) {
+            s = ChatColor.translateAlternateColorCodes('&', s);
+            list.add(s);
         }
-        return Objects.requireNonNull(config.getConfigurationSection("")).getStringList(string);
-
+        return list;
     }
 
     public Set<String> getStringKeys(String string) {

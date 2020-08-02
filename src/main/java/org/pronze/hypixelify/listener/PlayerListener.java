@@ -42,10 +42,10 @@ public class PlayerListener extends AbstractListener {
 
     @Override
     public void onDisable() {
-        PlayerItems = null;
-        UpgradeKeys = null;
-        allowed = null;
-        generatorDropItems = null;
+        PlayerItems.clear();
+        UpgradeKeys.clear();
+        allowed.clear();
+        generatorDropItems.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -91,7 +91,14 @@ public class PlayerListener extends AbstractListener {
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
-
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+            new BukkitRunnable() {
+                public void run() {
+                    if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
+                        Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                }
+            }.runTaskLater(Hypixelify.getInstance(), 1L);
+        }
         List<ItemStack> items = new ArrayList<>();
         ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
 
@@ -154,8 +161,7 @@ public class PlayerListener extends AbstractListener {
             }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
         }
 
-        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+
     }
 
 

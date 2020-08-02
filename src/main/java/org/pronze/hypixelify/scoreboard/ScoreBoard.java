@@ -17,7 +17,6 @@ import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -38,7 +37,6 @@ public class ScoreBoard {
         teamstatus = new HashMap<>();
         m_title = LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
         new BukkitRunnable() {
-
             public void run() {
                     if (game.getStatus()!= GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
                         updateTitle();

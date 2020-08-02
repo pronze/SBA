@@ -151,9 +151,8 @@ public class PlayerDatabase {
             }
         }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
     }
-    //First time leaving comments cuz this it's already hard xd
-    public void updateDatabase() {
 
+    public void updateDatabase() {
         //check if player is in party, and make sure that party size and offline players are 0. If so disband the party.
         if (isInParty && isPartyLeader() && Hypixelify.getInstance().partyManager.parties.get(partyLeader) != null &&
                 Hypixelify.getInstance().partyManager.parties.get(partyLeader).shouldDisband()) {
@@ -200,7 +199,7 @@ public class PlayerDatabase {
                         }
                         setInvitedParty(null);
                         this.cancel();
-                    } else {
+                    } else if(!isInvited){
                         expiredTime = 60;
                         this.cancel();
                     }
