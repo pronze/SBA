@@ -31,22 +31,16 @@ public class UpgradeTask extends BukkitRunnable {
         Tiers.put(6, "Emerald-III");
         Tiers.put(7, "Diamond-IV");
         Tiers.put(8, "Emerald-IV");
-        tier_timer.put(1, 30);
-        tier_timer.put(2, 60);
-        tier_timer.put(3, 90);
-        tier_timer.put(4, 90);
-        tier_timer.put(5, 120);
-        tier_timer.put(6, 200);
-        tier_timer.put(7, 300);
-        tier_timer.put(8, 500);
+        for(int i = 1; i < 9; i ++){
+            tier_timer.put(i, Hypixelify.getConfigurator().config.getInt(Tiers.get(i)));
+        }
         Tiers.put(9, "Game End");
         tier_timer.put(9, game.getGameTime());
-        runTaskTimer(Hypixelify.getInstance(), 20L, 20L);
+        runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
     }
 
     @Override
     public void run() {
-        time++;
         if(game.getStatus() != GameStatus.RUNNING){
             cancel();
         }
@@ -62,15 +56,14 @@ public class UpgradeTask extends BukkitRunnable {
                             itemSpawner.addToCurrentLevel(0.5);
                     }
                 });
-                String MatName = tier % 2 == 0 ? "§bDiamond§f" : "§aEmerald§f";
-                game.getConnectedPlayers().forEach(player -> player.sendMessage("{MatName} have been upgraded" +
-                        " to tier ".replace("{MatName}" , MatName) + tier));
+                String MatName = tier % 2 == 0 ? "§aEmerald§6" : "§bDiamond§6";
+                game.getConnectedPlayers().forEach(player -> player.sendMessage("{MatName} generator has been upgraded to "
+                        .replace("{MatName}" , MatName) + Tiers.get(tier)));
                 tier++;
             }
         }
 
-
-
+        time++;
     }
 
     public void cancelProcess(){

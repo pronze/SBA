@@ -102,6 +102,16 @@ public class Configurator {
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-II", 8);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-III", 12);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-IV", 16);
+        checkOrSetConfig(modify, "upgrades.time.Diamond-I", 120);
+        checkOrSetConfig(modify, "upgrades.time.Emerald-I", 200);
+        checkOrSetConfig(modify, "upgrades.time.Diamond-II", 400);
+        checkOrSetConfig(modify, "upgrades.time.Emerald-II", 520);
+        checkOrSetConfig(modify, "upgrades.time.Diamond-III", 700);
+        checkOrSetConfig(modify, "upgrades.time.Emerald-III", 900);
+        checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100 );
+        checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200 );
+
+
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
@@ -151,18 +161,21 @@ public class Configurator {
         checkOrSetConfig(modify, "scoreboard.lines.default", Arrays.asList(
                 "&7{date}"
                 , ""
+                , "{tier}"
+                , "{tiertime}"
                 , ""
                 , "{team_status}"
                 , ""
                 , "&fKills: &a{kills}"
-                , "&fTotal Kills: &a{totalkills}"
                 , "&fBed Broken: &a{beds}"
                 , ""
                 , "&ewww.minecraft.net"
         ));
-        checkOrSetConfig(modify, "scoreboard.lines.8", Arrays.asList(
+        checkOrSetConfig(modify, "scoreboard.lines.5", Arrays.asList(
                 "&7{date}"
                 , ""
+                , "{tier}"
+                , "{tiertime}"
                 , ""
                 , "{team_status}"
                 , ""
@@ -415,6 +428,8 @@ public class Configurator {
             config.set("scoreboard.lines.default", Arrays.asList(
                     "&7{date}"
                     , ""
+                    , "{tier}"
+                    , "{tiertime}"
                     , ""
                     , "{team_status}"
                     , ""

@@ -90,13 +90,12 @@ public class ScoreBoard {
                 rts++;
         }
 
-
-        String teams = String.valueOf(game.getRunningTeams().size());
-        if (Configurator.Scoreboard_Lines.containsKey(teams)) {
-            scoreboard_lines = Configurator.Scoreboard_Lines.get(teams);
-        } else if (Configurator.Scoreboard_Lines.containsKey("default")) {
+        if (game.countRunningTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
+            scoreboard_lines = Configurator.Scoreboard_Lines.get("5");
+        }
+        else if (Configurator.Scoreboard_Lines.containsKey("default")) {
             scoreboard_lines = Configurator.Scoreboard_Lines.get("default");
-        } else {
+        } else  {
             scoreboard_lines = Arrays.asList("", "{team_status}", "");
         }
         int alive_players = 0;
