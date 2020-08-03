@@ -15,7 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
-import org.pronze.hypixelify.database.PlayerDatabase;
+import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -51,8 +51,9 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
+        if(!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) return;
         Player player = e.getPlayer();
-        HashMap<UUID, PlayerDatabase> database = Hypixelify.getInstance().playerData;
+        final HashMap<UUID, PlayerDatabase> database = Hypixelify.getInstance().playerData;
         if(database.get(player.getUniqueId()) == null) return;
 
         database.get(player.getUniqueId()).handleOffline();
@@ -271,7 +272,7 @@ public class PlayerListener extends AbstractListener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true) && Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
-            Hypixelify.getInstance().playerData.put(p.getUniqueId(), new PlayerDatabase(p));
+            Hypixelify.createDatabase(p);
 
         if (!p.isOp())
             return;

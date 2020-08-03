@@ -29,6 +29,8 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
             p.sendMessage(msg);
         }
     }
+
+    @Override
     public void sendChat(Player sender, String msg) {
         msg = ChatColor.GREEN +"Party>> " + sender.getName() + ChatColor.WHITE + " : " + ChatColor.ITALIC + msg;
         sendMessage(msg);
@@ -50,6 +52,7 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
         return offlinePlayers;
     }
 
+    @Override
     public boolean shouldDisband(){
         return getPlayers() == null && getInvitedMembers() == null && getOfflinePlayers() == null;
     }

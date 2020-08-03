@@ -8,7 +8,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.party.PartyManager;
-import org.pronze.hypixelify.database.PlayerDatabase;
+import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -80,11 +80,11 @@ public class PartyCommand implements TabExecutor {
             }
 
             if (playerDatabase == null)
-                Hypixelify.getInstance().playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+                Hypixelify.createDatabase(player);
 
             PlayerDatabase invitedData = Database.get(invited.getUniqueId());
             if (invitedData == null)
-                Hypixelify.getInstance().playerData.put(invited.getUniqueId(), new PlayerDatabase(invited));
+                Hypixelify.createDatabase(invited);
 
             if (Database.get(player.getUniqueId()).isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_decline_inc);

@@ -28,5 +28,9 @@ public interface Party {
 
     boolean canAnyoneInvite();
 
+    boolean shouldDisband();
+
+    void sendChat(Player sender, String message);
+
 
 }

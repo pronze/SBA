@@ -2,7 +2,7 @@ package org.pronze.hypixelify.manager;
 
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.database.PlayerDatabase;
+import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -38,9 +38,10 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
                         pl.sendMessage(ShopUtil.translateColors(str));
                     }
                 }
-                if (Hypixelify.getInstance().playerData.get(pl.getUniqueId()) != null) {
-                    Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setIsInParty(false);
-                    Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setPartyLeader(null);
+                final PlayerDatabase plDatabase = Hypixelify.getInstance().playerData.get(pl.getUniqueId());
+                if (plDatabase != null) {
+                    plDatabase.setIsInParty(false);
+                    plDatabase.setPartyLeader(null);
                 }
             }
         }
@@ -71,13 +72,13 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
         parties.get(leader).addMember(player);
         parties.get(leader).removeInvitedMember(player);
+        final PlayerDatabase playerDatabase = Database.get(player.getUniqueId());
 
-
-        Database.get(player.getUniqueId()).setPartyLeader(leader);
-        Database.get(player.getUniqueId()).setInvited(false);
-        Database.get(player.getUniqueId()).setIsInParty(true);
-        Database.get(player.getUniqueId()).setInvitedParty(null);
-        Database.get(player.getUniqueId()).setExpiredTimeTimeout(60);
+        playerDatabase.setPartyLeader(leader);
+        playerDatabase.setInvited(false);
+        playerDatabase.setIsInParty(true);
+        playerDatabase.setInvitedParty(null);
+        playerDatabase.setExpiredTimeTimeout(60);
 
         for (Player p : parties.get(leader).getAllPlayers()) {
             if (p == null) continue;
@@ -90,7 +91,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
     @Override
     public void removeFromParty(Player player, org.pronze.hypixelify.api.party.Party party) {
-        PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
 
         if (db == null || party == null || party.getLeader() == null)
             return;
@@ -105,14 +106,14 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
             }
         }
 
-        Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(false);
-        Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(null);
+        db.setIsInParty(false);
+        db.setPartyLeader(null);
     }
 
     @Override
     public void kickFromParty(Player player) {
         if (getParty(player) == null || player == null) return;
-        PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
         if (db == null || db.getPartyLeader() == null) return;
         Player leader = db.getPartyLeader();
         if (leader == null || parties.get(leader) == null) return;
@@ -132,15 +133,15 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
                 }
             }
         }
-        Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(false);
-        Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(null);
+        db.setIsInParty(false);
+        db.setPartyLeader(null);
     }
 
     @Override
     public Party getParty(Player player) {
         if (!isInParty(player)) return null;
 
-        PlayerDatabase database = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase database = Hypixelify.getInstance().playerData.get(player.getUniqueId());
         if (database == null) return null;
         if (database.getPartyLeader() != null && isInParty(database.getPartyLeader())) {
             return parties.get(database.getPartyLeader());
@@ -148,6 +149,8 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
         return null;
     }
+
+
 
     @Override
     public void warpPlayersToLeader(Player leader) {
@@ -186,9 +189,15 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
     @Override
     public Party createParty(Player player){
+        if(parties.containsKey(player)) return null;
         Party party = new Party(player);
         parties.put(player, party);
         return party;
+    }
+
+    @Override
+    public void removeParty(Player leader) {
+        parties.remove(leader);
     }
 
 

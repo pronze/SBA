@@ -29,7 +29,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static Hypixelify plugin;
     private static CustomShop shop;
     private static String version;
-    public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
+    public HashMap<UUID, org.pronze.hypixelify.api.database.PlayerDatabase> playerData = new HashMap<>();
     public PartyTask partyTask;
     private PartyManager partyManager;
     private Configurator configurator;
@@ -60,6 +60,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     public GamesInventory getGamesInventory() {
         return gamesInventory;
+    }
+
+    public static void createDatabase(Player player){
+        if(!plugin.playerData.containsKey(player.getUniqueId())){
+            plugin.playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+        }
     }
 
     public void onEnable() {
