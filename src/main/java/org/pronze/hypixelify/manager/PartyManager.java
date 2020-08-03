@@ -21,7 +21,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
     @Override
     public List<org.pronze.hypixelify.api.party.Party> getParties(){
-        return new ArrayList<>(Hypixelify.getInstance().partyManager.parties.values());
+        return new ArrayList<>(parties.values());
     }
 
     @Override

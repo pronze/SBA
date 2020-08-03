@@ -31,7 +31,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static String version;
     public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
     public PartyTask partyTask;
-    public PartyManager partyManager;
+    private PartyManager partyManager;
     private Configurator configurator;
     private ArenaManager arenamanager;
     private GamesInventory gamesInventory;
