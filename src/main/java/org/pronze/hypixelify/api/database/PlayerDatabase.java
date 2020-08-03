@@ -3,6 +3,8 @@ package org.pronze.hypixelify.api.database;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.api.party.Party;
 
+import java.util.UUID;
+
 public interface PlayerDatabase {
 
 
@@ -39,6 +41,8 @@ public interface PlayerDatabase {
     String getName();
 
     Party getInvitedParty();
+
+    UUID getPlayerUUID();
 
 
 

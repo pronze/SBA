@@ -1,7 +1,7 @@
 package org.pronze.hypixelify.party;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.database.PlayerDatabase;
+import org.pronze.hypixelify.api.database.PlayerDatabase;
 
 import java.util.ArrayList;
 import java.util.List;

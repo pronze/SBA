@@ -85,7 +85,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         partyLeader = player;
     }
 
-
+    @Override
     public UUID getPlayerUUID() {
         return player;
     }
