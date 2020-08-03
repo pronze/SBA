@@ -32,7 +32,7 @@ public class UpgradeTask extends BukkitRunnable {
         Tiers.put(7, "Diamond-IV");
         Tiers.put(8, "Emerald-IV");
         for(int i = 1; i < 9; i ++){
-            tier_timer.put(i, Hypixelify.getConfigurator().config.getInt(Tiers.get(i)));
+            tier_timer.put(i, Hypixelify.getConfigurator().config.getInt("upgrades.time." + Tiers.get(i)));
         }
         Tiers.put(9, "Game End");
         tier_timer.put(9, game.getGameTime());
