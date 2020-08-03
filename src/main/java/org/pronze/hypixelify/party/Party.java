@@ -9,7 +9,7 @@ import org.pronze.hypixelify.utils.ShopUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Party {
+public class Party implements org.pronze.hypixelify.api.party.Party {
 
     private int member_size = 0;
     private List<Player> players = new ArrayList<>();
@@ -54,16 +54,13 @@ public class Party {
         return getPlayers() == null && getInvitedMembers() == null && getOfflinePlayers() == null;
     }
 
+    @Override
     public void disband() {
         players.clear();
         invitedMembers.clear();
         invitedMembers = null;
         players = null;
         setLeader(null);
-    }
-
-    public Player getLeader() {
-        return leader;
     }
 
     public void setLeader(Player player) {
@@ -78,16 +75,19 @@ public class Party {
        }
    }
 
+    @Override
     public List<Player> getInvitedMembers() {
         if(invitedMembers == null || invitedMembers.isEmpty()) return null;
 
         return invitedMembers;
     }
 
+    @Override
     public void removeInvitedMember(Player pl) {
         invitedMembers.remove(pl);
     }
 
+    @Override
    public void addMember(Player player) {
        if (!players.contains(player)) {
            players.add(player);
@@ -95,23 +95,12 @@ public class Party {
        }
    }
 
+    @Override
     public int getSize() {
         return member_size;
     }
 
-    public List<Player> getAllPlayers() {
-        List<Player> newPlayerList = new ArrayList<>();
-        for (Player player : players) {
-            if (player == null || !player.isOnline())
-                continue;
-
-            newPlayerList.add(player);
-        }
-        if(newPlayerList.isEmpty())
-            return null;
-        return newPlayerList;
-    }
-
+    @Override
     public List<Player> getPlayers() {
         if (leader == null)
             return null;
@@ -124,7 +113,7 @@ public class Party {
         return list;
     }
 
-
+    @Override
     public void removeMember(Player player) {
         if (player.equals(leader)) {
             for (Player pl : players) {
@@ -141,13 +130,35 @@ public class Party {
         players.remove(player);
     }
 
+    @Override
     public int getCompleteSize(){
         if( players == null || invitedMembers == null) return 0;
 
 
         return players.size() + invitedMembers.size();
     }
+
+    @Override
     public boolean canAnyoneInvite() {
         return anyoneCanInvite;
+    }
+
+    @Override
+    public Player getLeader(){
+        return leader;
+    }
+
+    @Override
+    public List<Player> getAllPlayers(){
+        List<Player> newPlayerList = new ArrayList<>();
+        for (Player player : players) {
+            if (player == null || !player.isOnline())
+                continue;
+
+            newPlayerList.add(player);
+        }
+        if(newPlayerList.isEmpty())
+            return null;
+        return newPlayerList;
     }
 }

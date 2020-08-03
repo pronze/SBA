@@ -41,13 +41,13 @@ import org.bukkit.Material;
 import java.io.File;
 import java.util.*;
 
-public class customShop implements Listener {
+public class CustomShop implements Listener {
 
     private Map<String, SimpleInventories> shopMap = new HashMap<>();
     private Options options = new Options(Main.getInstance());
     static public HashMap<Integer, Integer> Prices = new HashMap<>();
 
-    public customShop() {
+    public CustomShop() {
         Bukkit.getServer().getPluginManager().registerEvents(this, Hypixelify.getInstance());
 
         Prices.put(0, Hypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-I", 4));
@@ -583,6 +583,7 @@ public class customShop implements Listener {
         boolean sendToAll = false;
         boolean isUpgrade = true;
         ItemStack materialItem = itemSpawnerType.getStack(price);
+
 
         if (event.hasPlayerInInventory(materialItem)) {
             sellstack(materialItem, event);

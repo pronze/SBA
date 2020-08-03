@@ -9,7 +9,8 @@ import java.util.List;
 public class PartyTask extends BukkitRunnable {
 
     private List<PlayerDatabase> toBeRemoved = new ArrayList<>();
-    public PartyTask(){
+    public PartyTask()
+    {
         runTaskTimer(Hypixelify.getInstance(), 20L, 20L);
     }
 

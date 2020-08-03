@@ -9,15 +9,22 @@ import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
-public class PartyManager {
+public class PartyManager implements org.pronze.hypixelify.api.party.PartyManager{
 
 
     public HashMap<Player, Party> parties = new HashMap<>();
 
+    @Override
+    public List<org.pronze.hypixelify.api.party.Party> getParties(){
+        return new ArrayList<>(Hypixelify.getInstance().partyManager.parties.values());
+    }
 
+    @Override
     public void disband(Player leader) {
         Party party = parties.get(leader);
 
@@ -44,6 +51,7 @@ public class PartyManager {
         parties.remove(leader);
     }
 
+    @Override
     public boolean isInParty(Player player) {
         if (Hypixelify.getInstance().playerData.get(player.getUniqueId()) != null)
             return Hypixelify.getInstance().playerData.get(player.getUniqueId()).isInParty();
@@ -51,7 +59,8 @@ public class PartyManager {
         return false;
     }
 
-    public void addToParty(Player player, Party party) {
+    @Override
+    public void addToParty(Player player, org.pronze.hypixelify.api.party.Party party) {
         final HashMap<UUID, PlayerDatabase> Database = Hypixelify.getInstance().playerData;
 
         Player leader = party.getLeader();
@@ -79,7 +88,8 @@ public class PartyManager {
         }
     }
 
-    public void removeFromParty(Player player, Party party) {
+    @Override
+    public void removeFromParty(Player player, org.pronze.hypixelify.api.party.Party party) {
         PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
 
         if (db == null || party == null || party.getLeader() == null)
@@ -99,7 +109,7 @@ public class PartyManager {
         Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(null);
     }
 
-
+    @Override
     public void kickFromParty(Player player) {
         if (getParty(player) == null || player == null) return;
         PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
@@ -126,6 +136,7 @@ public class PartyManager {
         Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(null);
     }
 
+    @Override
     public Party getParty(Player player) {
         if (!isInParty(player)) return null;
 
@@ -138,6 +149,7 @@ public class PartyManager {
         return null;
     }
 
+    @Override
     public void warpPlayersToLeader(Player leader) {
         if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(leader)) {
             Game game = BedwarsAPI.getInstance().getGameOfPlayer(leader);
@@ -171,4 +183,13 @@ public class PartyManager {
             }
         }
     }
+
+    @Override
+    public Party createParty(Player player){
+        Party party = new Party(player);
+        parties.put(player, party);
+        return party;
+    }
+
+
 }

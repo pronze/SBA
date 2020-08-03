@@ -7,7 +7,6 @@ import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
-
 import java.util.UUID;
 
 public class PlayerDatabase {

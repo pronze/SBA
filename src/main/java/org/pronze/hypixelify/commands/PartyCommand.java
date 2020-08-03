@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
-import org.pronze.hypixelify.party.Party;
+import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.Arrays;
@@ -53,6 +53,8 @@ public class PartyCommand implements TabExecutor {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
                 return true;
             }
+
+            //Party size limit
             if (Database.get(player.getUniqueId()) != null) {
                 PlayerDatabase data = Database.get(player.getUniqueId());
                 int max_sz = Hypixelify.getConfigurator().config.getInt("party.size", 4);
@@ -62,11 +64,13 @@ public class PartyCommand implements TabExecutor {
                 }
             }
 
+            //check if player argument is online
             Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
             if (invited == null) {
                 ShopUtil.sendMessage(player, Messages.message_player_not_found);
                 return true;
             }
+
 
             if (invited.getUniqueId().equals(player.getUniqueId())) {
                 ShopUtil.sendMessage(player, Messages.message_cannot_invite_yourself);
@@ -90,13 +94,12 @@ public class PartyCommand implements TabExecutor {
             if (!Database.get(player.getUniqueId()).isInParty()) {
                 party = Hypixelify.getInstance().partyManager.parties.get(player);
                 if (party == null) {
-                    party = new Party(player);
-                    Hypixelify.getInstance().partyManager.parties.put(player, party);
-                    Hypixelify.getInstance().playerData.get(player.getUniqueId()).setIsInParty(true);
-                    Hypixelify.getInstance().playerData.get(player.getUniqueId()).setPartyLeader(player);
+                    party = Hypixelify.getPartyManager().createParty(player);
+                    Database.get(player.getUniqueId()).setIsInParty(true);
+                    Database.get(player.getUniqueId()).setPartyLeader(player);
                 }
             } else {
-                party = Hypixelify.getInstance().partyManager.parties.get(Database.get(player.getUniqueId()).getPartyLeader());
+                party = Hypixelify.getPartyManager().getParty(player);
             }
 
             if (Database.get(invited.getUniqueId()).isInParty()) {

@@ -27,19 +27,25 @@ public class ScoreBoard {
     private Arena arena;
 
     private int tc = 0;
+    String date;
 
+    private int ticks = 0;
     private Map<String, String> teamstatus;
     private List<String> m_title;
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
+        date = new SimpleDateFormat("MM/dd/yy").format(new Date());
         game = arena.getGame();
         teamstatus = new HashMap<>();
         m_title = LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
         new BukkitRunnable() {
             public void run() {
                     if (game.getStatus()!= GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
+                        ticks += 2;
                         updateTitle();
+                        if(ticks % 20 == 0)
+                            updateScoreboard();
                     } else {
                         cancel();
                     }
@@ -151,18 +157,19 @@ public class ScoreBoard {
                         }
                         continue;
                     }
-                    String date = (new SimpleDateFormat("MM/dd/yy")).format(new Date());
 
                     assert chatColor != null;
                         String addline = ls
-                            .replace("{remain_teams}", String.valueOf(rts)).replace("{alive_teams}", String.valueOf(ats))
-                            .replace("{alive_players}", String.valueOf(alive_players))
-                            .replace("{team}", p_t).replace("{beds}", bes).replace("{dies}", dis)
-                            .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
-                            .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                            .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                            .replace("{game}", game.getName()).replace("{date}", date)
-                            .replace("{team_bed_status}", p_t_b_s);
+                            .   replace("{remain_teams}", String.valueOf(rts)).replace("{alive_teams}", String.valueOf(ats))
+                                .replace("{alive_players}", String.valueOf(alive_players))
+                                .replace("{team}", p_t).replace("{beds}", bes).replace("{dies}", dis)
+                                .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
+                                .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                                .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                                .replace("{game}", game.getName()).replace("{date}", date)
+                                .replace("{team_bed_status}", p_t_b_s)
+                                .replace("{tier}",   arena.upgradeTask.getTier() + " Upgrade:")
+                                .replace("{tiertime}", ChatColor.GREEN + arena.upgradeTask.getFormattedTimeLeft());
 
                     if(game.isPlayerInAnyTeam(player)){
                         addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())

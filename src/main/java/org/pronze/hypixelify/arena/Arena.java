@@ -18,6 +18,7 @@ import org.screamingsandals.bedwars.lib.nms.title.Title;
 public class Arena {
     private Game game;
     private ScoreBoard scoreBoard;
+    public UpgradeTask upgradeTask;
 
     public Game getGame() {
         return this.game;
@@ -31,6 +32,8 @@ public class Arena {
         this.game = game;
         if(!Main.isLegacy())
             scoreBoard = new ScoreBoard(this);
+
+        upgradeTask = new UpgradeTask(game);
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
@@ -41,8 +44,6 @@ public class Arena {
             Title.sendTitle(p,"§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
         }
     }
-
-
 
 
     public void onOver(BedwarsGameEndingEvent e) {

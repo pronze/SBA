@@ -11,7 +11,7 @@ import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.GamesInventory;
-import org.pronze.hypixelify.inventories.customShop;
+import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.PartyManager;
@@ -27,7 +27,7 @@ import java.util.UUID;
 public class Hypixelify extends JavaPlugin implements Listener {
 
     private static Hypixelify plugin;
-    private static customShop shop;
+    private static CustomShop shop;
     private static String version;
     public HashMap<UUID, PlayerDatabase> playerData = new HashMap<>();
     public PartyTask partyTask;
@@ -42,11 +42,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.configurator;
     }
 
+    public static org.pronze.hypixelify.api.party.PartyManager getPartyManager(){
+        return plugin.partyManager;
+    }
+
     public static Hypixelify getInstance() {
         return plugin;
     }
 
-    public static customShop getShop() {
+    public static CustomShop getShop() {
         return shop;
     }
 
@@ -110,7 +114,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
             messages.loadConfig();
         }
         InventoryListener.init(this);
-        shop = new customShop();
+        shop = new CustomShop();
 
         if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
@@ -212,6 +216,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator = null;
         messages = null;
         arenamanager = null;
+        gamesInventory.destroy();
         gamesInventory = null;
         shop = null;
         this.getServer().getScheduler().cancelTasks(plugin);

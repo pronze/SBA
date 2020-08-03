@@ -306,7 +306,7 @@ public class PlayerListener extends AbstractListener {
         Player player = e.getPlayer();
         Game game = e.getGame();
         String message = "&eThe game starts in &c{seconds} &eseconds";
-        (new BukkitRunnable() {
+        new BukkitRunnable() {
             public void run() {
                 if (player.isOnline() && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
                         game.getConnectedPlayers().contains(player) &&
@@ -331,7 +331,7 @@ public class PlayerListener extends AbstractListener {
                     this.cancel();
                 }
             }
-        }).runTaskTimer(Hypixelify.getInstance(), 40L, 20L);
+        }.runTaskTimer(Hypixelify.getInstance(), 40L, 20L);
     }
 
 

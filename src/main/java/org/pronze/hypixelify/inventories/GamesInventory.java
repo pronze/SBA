@@ -3,9 +3,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.api.events.GameSelectorOpenEvent;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -102,7 +104,18 @@ public class GamesInventory implements Listener {
 
     }
 
+    public void destroy(){
+        players.clear();
+        HandlerList.unregisterAll(this);
+    }
     public void openForPlayer(Player player, int mode) {
+        GameSelectorOpenEvent event = new GameSelectorOpenEvent(player, mode);
+        Bukkit.getServer().getPluginManager().callEvent(event);
+
+        if(event.isCancelled()){
+            return;
+        }
+
         createData();
         if(menu.get(mode) == null)
             return;
@@ -170,7 +183,7 @@ public class GamesInventory implements Listener {
         if (reader.containsKey("game")) {
             Game game = (Game) reader.get("game");
             Main.getGame(game.getName()).joinToGame(player);
-            player.closeInventory();
+             player.closeInventory();
              repaint(mode);
              players.get(mode).remove(player);
         }
