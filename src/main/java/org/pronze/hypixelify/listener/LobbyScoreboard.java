@@ -26,7 +26,7 @@ public class LobbyScoreboard implements Listener {
 
     private String getDate() {
         Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy");
+        SimpleDateFormat format = new SimpleDateFormat(Configurator.date);
         return format.format(date);
     }
 
@@ -66,7 +66,6 @@ public class LobbyScoreboard implements Listener {
             return;
         final Game game = e.getGame();
         final Player player = e.getPlayer();
-     //   Hypixelify.getInstance().getConfig().set("lobby-scoreboard.content", getLine(player, game));
         final int tc = 0;
 
         new BukkitRunnable() {
@@ -85,7 +84,6 @@ public class LobbyScoreboard implements Listener {
     private void updateScoreboard(Player player, Game game, int tc) {
         List<String> ncelements = new ArrayList<>();
         ncelements.add(title.replace("{game}", game.getName()));
-       // Hypixelify.getInstance().getConfig().set("lobby-scoreboard.title", title);
         ncelements.addAll(getLine(player, game));
         ncelements = elementsPro(ncelements);
         if (ncelements.size() < 16) {

@@ -16,6 +16,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -35,9 +36,20 @@ public class PlayerListener extends AbstractListener {
     static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
     static public ArrayList<Material> allowed = new ArrayList<>();
     static public ArrayList<Material> generatorDropItems = new ArrayList<>();
+    private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
+    disableArmorDamage;
+
+    private final int respawnTime;
+
 
     public PlayerListener() {
         ShopUtil.initalizekeys();
+        partyEnabled = Hypixelify.getConfigurator().config.getBoolean("party.enabled", true);
+        giveKillerResources = Hypixelify.getConfigurator().config.getBoolean("give-killer-resources", true);
+        respawnCooldown = Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled");
+        respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
+        disableArmorInventoryMovement = Hypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true);
+        disableArmorDamage = Hypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true);
     }
 
     @Override
@@ -51,7 +63,7 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
-        if(!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) return;
+        if(!partyEnabled) return;
         Player player = e.getPlayer();
         final HashMap<UUID, PlayerDatabase> database = Hypixelify.getInstance().playerData;
         if(database.get(player.getUniqueId()) == null) return;
@@ -64,7 +76,7 @@ public class PlayerListener extends AbstractListener {
 
         Player player = e.getPlayer();
 
-        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+        if (!isInGame(player)) return;
 
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         if(!game.isPlayerInAnyTeam(player)) return;
@@ -74,7 +86,7 @@ public class PlayerListener extends AbstractListener {
 
             @Override
             public void run() {
-                if (player.getGameMode().equals(GameMode.SURVIVAL) && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) {
+                if (player.getGameMode().equals(GameMode.SURVIVAL) && isInGame(player)) {
                     ShopUtil.giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
                     this.cancel();
                 } else if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player))
@@ -121,10 +133,10 @@ public class PlayerListener extends AbstractListener {
         items.add(sword);
         PlayerItems.put(player, items);
 
-        if(Hypixelify.getConfigurator().config.getBoolean("give-killer-resources", true)) {
+        if(giveKillerResources) {
             Player killer = e.getEntity().getKiller();
 
-            if (killer!= null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
+            if (killer!= null && isInGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
                 for (ItemStack dropItem : player.getInventory().getContents()) {
                     if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
                         killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getType().name());
@@ -137,8 +149,7 @@ public class PlayerListener extends AbstractListener {
         GamePlayer gVictim = Main.getPlayerGameProfile(victim);
 
         CurrentTeam victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
-        if (Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled") && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) && game.getTeamOfPlayer(player).isTargetBlockExists()) {
-            int respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
+        if (respawnCooldown && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) && game.getTeamOfPlayer(player).isTargetBlockExists()) {
 
             new BukkitRunnable() {
                 int livingTime = respawnTime;
@@ -148,13 +159,13 @@ public class PlayerListener extends AbstractListener {
                 @Override
                 public void run() {
                     if (livingTime > 0) {
-                        Title.sendTitle(player, Hypixelify.getConfigurator().config.getString("message.respawn-title"),
-                                Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
-                        player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawn-subtitle").replace("%time%", String.valueOf(livingTime)));
+                        Title.sendTitle(player, Messages.message_respawn_title,
+                                Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
+                        player.sendMessage(Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)));
                     }
                     livingTime--;
                     if (livingTime == 0) {
-                        player.sendMessage(Hypixelify.getConfigurator().config.getString("message.respawned-title"));
+                        player.sendMessage(Messages.message_respawned_title);
                         Title.sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                         this.cancel();
                     }
@@ -175,9 +186,9 @@ public class PlayerListener extends AbstractListener {
 
         Player player = (Player) event.getWhoClicked();
 
-        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+        if (!isInGame(player)) return;
 
-        if (Hypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true) && event.getSlotType() == SlotType.ARMOR)
+        if (disableArmorInventoryMovement && event.getSlotType() == SlotType.ARMOR)
             event.setCancelled(true);
 
         Inventory topSlot = event.getView().getTopInventory();
@@ -194,7 +205,7 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
-        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(evt.getPlayer())) return;
+        if (!isInGame(evt.getPlayer())) return;
 
         if (!allowed.contains(evt.getItemDrop().getItemStack().getType()) && !evt.getItemDrop().getItemStack().getType().name().endsWith("WOOL")) {
             evt.setCancelled(true);
@@ -217,11 +228,11 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void itemDamage(PlayerItemDamageEvent e) {
         Player player = e.getPlayer();
-        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+        if (!isInGame(player)) return;
         if (!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
         if (Main.getPlayerGameProfile(player).isSpectator) return;
 
-        if (!Hypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true)) return;
+        if (!disableArmorDamage) return;
         if (e.getItem().getType().toString().contains("BOOTS")
                 || e.getItem().getType().toString().contains("HELMET")
                 || e.getItem().getType().toString().contains("LEGGINGS")
@@ -271,7 +282,7 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true) && Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
+        if (partyEnabled && Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
             Hypixelify.createDatabase(p);
 
         if (!p.isOp())

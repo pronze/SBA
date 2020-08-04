@@ -26,6 +26,7 @@ public class Configurator {
     public final Hypixelify main;
     public File file, oldfile, shopFile, upgradeShop, legacyShop;
     public FileConfiguration config;
+    public static String date;
 
     public Configurator(Hypixelify main) {
         this.dataFolder = main.getDataFolder();
@@ -110,7 +111,7 @@ public class Configurator {
         checkOrSetConfig(modify, "upgrades.time.Emerald-III", 900);
         checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100 );
         checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200 );
-
+        checkOrSetConfig(modify, "date.format", "MM/dd/yy");
 
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
@@ -125,11 +126,32 @@ public class Configurator {
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         checkOrSetConfig(modify, "games-inventory.enabled", true);
         checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
+        checkOrSetConfig(modify, "games-inventory.stack-lore",
+                Arrays.asList("§8{mode}", "", "§7Available Servers: §a1", "§7Status: §a{status}"
+                ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
+
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
         checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
         checkOrSetConfig(modify, "games-inventory.gui.squad-prefix", "Bed Wars Squads");
+        checkOrSetConfig(modify, "games-inventory.back-item.name", "§aGo Back");
+        checkOrSetConfig(modify, "games-inventory.back-item.lore", Arrays.asList("§7To Play Bed Wars"));
+        checkOrSetConfig(modify, "games-inventory.firework-name", "§aRandom Map");
+        checkOrSetConfig(modify, "games-inventory.firework-lore", Arrays.asList("§8{mode}", "", "§7Map Selections: §a{games}", "", "§aClick to Play"));
 
+        checkOrSetConfig(modify, "games-inventory.diamond-name", "§aRandom Favorite");
+        checkOrSetConfig(modify, "games-inventory.oak_sign-name", "§aMap Selector ({mode})");
+        checkOrSetConfig(modify, "games-inventory.oak_sign-lore", Arrays.asList(
+                "§7Pick which map you want to play"
+                , "§7from a list of available servers."
+                , " "
+                , "§eClick to browse!"));
+        checkOrSetConfig(modify, "games-inventory.barrier-name", "§cExit");
+        checkOrSetConfig(modify, "games-inventory.ender_pearl-name", "§cClick here to rejoin!");
+        checkOrSetConfig(modify, "games-inventory.ender_pearl-lore", Arrays.asList("§7Click here to rejoin the lastly joined game"));
+
+        checkOrSetConfig(modify, "games-inventory.bed-name", "§aBed Wars ({mode})");
+        checkOrSetConfig(modify, "games-inventory.bed-lore",Arrays.asList("§7Play Bed Wars {mode}", " ", "§eClick to play!") );
         for (String game : Main.getGameNames()) {
             String str = "lobby-scoreboard.player-size.games." + game;
             checkOrSetConfig(modify, str, 4);
@@ -158,6 +180,7 @@ public class Configurator {
                 , ""
                 , "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
         ));
+        checkOrSetConfig(modify, "scoreboard.you", "§7YOU");
         checkOrSetConfig(modify, "scoreboard.lines.default", Arrays.asList(
                 "&7{date}"
                 , ""
@@ -374,6 +397,8 @@ public class Configurator {
                 "&e/p leave&7 - Leaves your current party",
                 "&1-----------------------------------------------------"));
 
+
+
         if (modify.get()) {
             try {
                 config.save(file);
@@ -395,6 +420,7 @@ public class Configurator {
             saveConfig();
         }
 
+        date = config.getString("date.format");
         Scoreboard_Lines = new HashMap<>();
         for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
             Scoreboard_Lines.put(key,

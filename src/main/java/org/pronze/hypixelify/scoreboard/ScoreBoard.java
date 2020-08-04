@@ -32,10 +32,13 @@ public class ScoreBoard {
     private int ticks = 0;
     private Map<String, String> teamstatus;
     private List<String> m_title;
+    private String YOU;
+
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
-        date = new SimpleDateFormat("MM/dd/yy").format(new Date());
+        date = new SimpleDateFormat(Configurator.date).format(new Date());
+        YOU = Hypixelify.getConfigurator().config.getString("scoreboard.you", "§7YOU");
         game = arena.getGame();
         teamstatus = new HashMap<>();
         m_title = LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
@@ -143,7 +146,7 @@ public class ScoreBoard {
                             String you = "";
                             if (game.getTeamOfPlayer(player) != null)
                                 if (game.getTeamOfPlayer(player) == t) {
-                                    you = color("&7YOU");
+                                    you = YOU;
                                 } else {
                                     you = "";
                                 }
@@ -157,7 +160,6 @@ public class ScoreBoard {
                         continue;
                     }
 
-                    assert chatColor != null;
                         String addline = ls
                             .   replace("{remain_teams}", String.valueOf(rts)).replace("{alive_teams}", String.valueOf(ats))
                                 .replace("{alive_players}", String.valueOf(alive_players))
@@ -170,8 +172,8 @@ public class ScoreBoard {
                                 .replace("{tier}",   arena.upgradeTask.getTier() + " Upgrade:")
                                 .replace("{tiertime}", ChatColor.GREEN + arena.upgradeTask.getFormattedTimeLeft());
 
-                    if(game.isPlayerInAnyTeam(player)){
-                        addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
+                    if(game.isPlayerInAnyTeam(player) && chatColor != null){
+                        addline = addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
                                .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString());
                     }
                     for (RunningTeam t : game.getRunningTeams()) {
@@ -180,7 +182,7 @@ public class ScoreBoard {
                             if (game.getTeamOfPlayer(player) == null) {
                                 stf = stf.replace("{you}", "");
                             } else if (game.getTeamOfPlayer(player) == t) {
-                                stf = stf.replace("{you}", "&7YOU");
+                                stf = stf.replace("{you}", YOU);
                             } else {
                                 stf = stf.replace("{you}", "");
                             }
@@ -217,54 +219,51 @@ public class ScoreBoard {
     }
 
 
-    private List<String> elementsPro(List<String> lines) {
-        ArrayList<String> nclines = new ArrayList<>();
-        for (String ls : lines) {
-            String l = ls;
-            if (l != null) {
-                if (nclines.contains(l)) {
-                    for (int i = 0; i == 0; ) {
-                        l = l + "§r";
-                        if (!nclines.contains(l)) {
-                            nclines.add(l);
-                            break;
-                        }
-                    }
-                    continue;
-                }
-                nclines.add(l);
-                continue;
-            }
-            nclines.add(l);
-        }
-        return nclines;
-    }
+  private List<String> elementsPro(List<String> lines) {
+      ArrayList<String> nclines = new ArrayList<>();
+      for (String ls : lines) {
+          String l = ls;
+          if (l != null) {
+              if (nclines.contains(l)) {
+                  for (int i = 0; i == 0; ) {
+                      l = l + "§r";
+                      if (!nclines.contains(l)) {
+                          nclines.add(l);
+                          break;
+                      }
+                  }
+                  continue;
+              }
+              nclines.add(l);
+              continue;
+          }
+          nclines.add(l);
+      }
+      return nclines;
+  }
 
-    private String conflict(List<String> lines, String line) {
-        String l = line;
-        for (int i = 0; i == 0; ) {
-            l = l + "§r";
-            if (!lines.contains(l))
-                return l;
-        }
-        return l;
-    }
+  private String conflict(List<String> lines, String line) {
+      String l = line;
+      for (int i = 0; i == 0; ) {
+          l = l + "§r";
+          if (!lines.contains(l))
+              return l;
+      }
+      return l;
+  }
 
-    public static String color(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s);
-    }
 
     private String getTeamBedStatus(RunningTeam team) {
-        return team.isDead() ? color("&c\u2718") :
-                color("&a\u2714");
+        return team.isDead() ? "§c\u2718" :
+                "&§\u2714";
     }
 
     private String getTeamStatusFormat(RunningTeam team) {
-        String alive = color("{color} {team} &a\u2714 &8{you}");
-        String destroyed = color("{color} {team} &a&f{players}&8 {you}");
+        String alive = "{color} {team} §a\u2714 §8{you}";
+        String destroyed = "{color} {team} §a§f{players}§8 {you}";
         String status = team.isTargetBlockExists() ? alive : destroyed;
         if (team.isDead() && team.getConnectedPlayers().size() <= 0)
-            status = color("{color} {team} &c\u2718 {you}");
+            status = "{color} {team} §c\u2718 {you}";
 
        String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
                 + team.getName().charAt(0);

@@ -1,7 +1,5 @@
 package org.pronze.hypixelify.utils;
-
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -89,7 +87,6 @@ public class ScoreboardUtil {
                 if (team == null)
                     team = scoreboard.registerNewTeam(  t.getName());
                 team.setAllowFriendlyFire(false);
-              //  team.setPrefix(t.getColor().toString());
                 for (OfflinePlayer pl : t.getGame().getConnectedPlayers()) {
                     if (!team.hasEntry(Objects.requireNonNull(pl.getName())))
                         team.addEntry(pl.getName());
@@ -101,8 +98,7 @@ public class ScoreboardUtil {
     }
 
     public static void setGameScoreboard(Player p, String[] elements, Game game) {
-        boolean exist = scoreboards.containsKey(p);
-        if (!exist)
+        if (!scoreboards.containsKey(p))
             scoreboards.put(p, Bukkit.getScoreboardManager().getNewScoreboard());
         elements = cutUnranked(elements);
         Scoreboard scoreboard = scoreboards.get(p);
@@ -143,7 +139,7 @@ public class ScoreboardUtil {
                 if (toErase)
                     scoreboard.resetScores(entry);
             }
-            String playertag_prefix = colorize("{color}{team} &f| {color}");
+            String playertag_prefix = "{color}{team} §f| {color}";
             RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
 
@@ -161,13 +157,11 @@ public class ScoreboardUtil {
                             continue;
                         }
                         String listName = pl.getPlayerListName();
-                        if (listName == null || listName.equals(pl.getName())) {
+                        if (listName.equals(pl.getName())) {
                             String prefix = team.getPrefix();
                             String suffix = team.getSuffix();
-                            prefix = (prefix == null) ? "" : prefix;
-                            suffix = (suffix == null) ? "" : suffix;
                             String name = prefix + pl.getName() + suffix;
-                            if (listName == null || !name.equals(listName))
+                            if (!name.equals(listName))
                                 pl.setPlayerListName(prefix + pl.getName() + suffix);
                         }
 
@@ -181,9 +175,6 @@ public class ScoreboardUtil {
         }
     }
 
-    private static String colorize(String s) {
-        return ChatColor.translateAlternateColorCodes('&', s);
-    }
 
 
 }

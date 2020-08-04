@@ -35,12 +35,16 @@ public class Messages {
     public static List<String> message_party_help;
     public static List<String> message_cannot_invite_yourself;
     public static List<String> message_party_left;
+    public static String message_respawn_title, message_respawn_subtitle, message_respawned_title;
 
     public Messages(){
 
     }
 
     public void loadConfig(){
+        message_respawned_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
+        message_respawn_subtitle = Hypixelify.getConfigurator().config.getString("message.respawn-subtitle");
+        message_respawn_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
         message_party_left = Hypixelify.getConfigurator().config.getStringList("party.message.left");
         message_cannot_invite = Hypixelify.getConfigurator().config.getStringList("party.message.cannotinvite");
         message_no_other_commands = Hypixelify.getConfigurator().config.getStringList("party.message.no-other-commands");

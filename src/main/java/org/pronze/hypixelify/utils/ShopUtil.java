@@ -33,8 +33,10 @@ public class ShopUtil {
     private static void InitalizeStacks() {
         Arrow = new ItemStack(Material.ARROW);
         ItemMeta metaArrow = Arrow.getItemMeta();
-        metaArrow.setDisplayName("§aGo Back");
-        metaArrow.setLore(Arrays.asList("§7To Play Bed Wars"));
+
+        metaArrow.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.back-item.name", "§aGo Back"));
+        List<String> arrowLore = Hypixelify.getConfigurator().config.getStringList("games-inventory.back-item.lore");
+        metaArrow.setLore(arrowLore);
         Arrow.setItemMeta(metaArrow);
 
         if(Main.isLegacy())
@@ -43,12 +45,12 @@ public class ShopUtil {
             FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
 
         ItemMeta fireMeta = FireWorks.getItemMeta();
-        fireMeta.setDisplayName("§aRandom Map");
+        fireMeta.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Map"));
         FireWorks.setItemMeta(fireMeta);
 
         Diamond = new ItemStack(Material.DIAMOND);
         ItemMeta diamondMeta = Diamond.getItemMeta();
-        diamondMeta.setDisplayName("§aRandom Favorite");
+        diamondMeta.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Favorite"));
         Diamond.setItemMeta(diamondMeta);
     }
 
@@ -152,6 +154,8 @@ public class ShopUtil {
 
     public static void destroyNPCFromGameWorlds() {
         List<NPC> npcs = new ArrayList<>();
+        if(CitizensAPI.getNPCRegistry() == null) return;
+
         for (Game game : Main.getInstance().getGames()) {
             CitizensAPI.getNPCRegistry().forEach(npc -> {
                 if(npc != null) {
@@ -286,8 +290,18 @@ public class ShopUtil {
         ItemMeta fsMeta = fs.getItemMeta();
         String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(getGamesWithSize(mode).size());
 
-        fsMeta.setLore(Arrays.asList("§8{mode}".replace("{mode}", getModeFromInt(mode)), "", "§7Map Selections: §a{games}".replace("{games}",
-                size), "", "§aClick to Play"));
+        List<String> fsMetaLore = Hypixelify.getConfigurator().config.getStringList("games-inventory.fireworks-lore");
+        List<String> tempList = new ArrayList<>();
+        for(String st : fsMetaLore){
+            st = st
+                    .replace("{mode}", getModeFromInt(mode))
+                    .replace("{games}", size);
+            tempList.add(st);
+        }
+
+        fsMeta.setLore(tempList);
+
+
         fs.setItemMeta(fsMeta);
         HashMap<String, Object> fireworks = new HashMap<>();
         fireworks.put("stack", fs);
@@ -368,19 +382,20 @@ public class ShopUtil {
         category.setItemMeta(meta);
 
         ItemMeta meta2 = category2.getItemMeta();
-        meta2.setLore(Arrays.asList("§7Pick which map you want to play", "§7from a list of available servers.", " "
-                , "§eClick to browse!"));
+        meta2.setLore(Hypixelify.getConfigurator().config.getStringList("games-inventory.oak_sign-lore"));
         meta2.setDisplayName(name2);
         category2.setItemMeta(meta2);
 
         ItemMeta meta3 = category3.getItemMeta();
-        String name3 = "§cExit";
+        String name3 = Hypixelify.getConfigurator().config.getString("games-inventory.barrier-name","§cExit");
         meta3.setDisplayName(name3);
         category3.setItemMeta(meta3);
 
         ItemMeta meta4 = category4.getItemMeta();
-        String name4 = "§cClick here to rejoin!";
-        meta4.setLore(Arrays.asList("§7Click here to rejoin the lastly joined game"));
+        String name4 = Hypixelify.getConfigurator().config.getString("games-inventory.ender_pearl-name"
+                ,"§cClick here to rejoin!");
+
+        meta4.setLore(Hypixelify.getConfigurator().config.getStringList("games-inventory.ender_pearl-lore"));
         meta4.setDisplayName(name4);
         category4.setItemMeta(meta4);
 
@@ -400,6 +415,7 @@ public class ShopUtil {
     public static void RemoveNPCFromGame(Game game) {
         ArrayList<NPC> npcs = new ArrayList<>();
 
+        if(CitizensAPI.getNPCRegistry() == null) return;
         CitizensAPI.getNPCRegistry().forEach(npc -> {
 
             if(npc != null) {

@@ -26,9 +26,14 @@ public class GamesInventory implements Listener {
     private final HashMap<Integer, Options> option = new HashMap<>();
     private final HashMap<Integer, List<Player>> players = new HashMap<>();
     private final HashMap<Integer, String> labels = new HashMap<>();
+    private final String bed_name, oak_name;
+    private final List<String> bed_lore, stack_lore;
 
     public GamesInventory() {
-
+        stack_lore = Hypixelify.getConfigurator().config.getStringList("games-inventory.stack-lore");
+        bed_lore = Hypixelify.getConfigurator().config.getStringList("games-inventory.bed-lore");
+        bed_name = Hypixelify.getConfigurator().config.getString("games-inventory.bed-name", "§aBed Wars ({mode})");
+        oak_name = Hypixelify.getConfigurator().config.getString("games-inventory.oak_sign-name", "§aMap Selector ({mode})");
         String soloprefix, doubleprefix, tripleprefix,squadprefix;
 
         soloprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.solo-prefix");
@@ -64,16 +69,32 @@ public class GamesInventory implements Listener {
         SimpleInventories tripleMenu = new SimpleInventories(option.get(3));
         SimpleInventories squadMenu = new SimpleInventories(option.get(4));
 
+
+
+
         for(int i = 1; i <= 4; i++){
-            List<ItemStack> myCategories = ShopUtil.createCategories(Arrays.asList("§7Play Bed Wars {mode}".replace("{mode}", labels.get(i)), " ", "§eClick to play!"),
-                    "§aBed Wars ({mode})".replace("{mode}", labels.get(i)),"§aMap Selector ({mode})".replace("{mode}", labels.get(i)));
+
+            List<String> bLore = new ArrayList<>();
+            for(String st : bed_lore){
+                st = st
+                        .replace("{mode}", labels.get(i));
+                bLore.add(st);
+            }
+
+            List<String> sLore = new ArrayList<>();
+            for(String st : stack_lore){
+                st = st.replace("{mode}", labels.get(i));
+                sLore.add(st);
+            }
+
+            List<ItemStack> myCategories = ShopUtil.createCategories(bLore,
+                    bed_name.replace("{mode}", labels.get(i)),oak_name.replace("{mode}", labels.get(i)));
             ItemStack category = myCategories.get(0);
             ItemStack category2 = myCategories.get(1);
             ItemStack category3 = myCategories.get(2);
             ItemStack category4 = myCategories.get(3);
 
-            ArrayList<Object> Games = ShopUtil.createGamesGUI(i, Arrays.asList("§8{mode}".replace("{mode}", labels.get(i)), "", "§7Available Servers: §a1", "§7Status: §a{status}"
-                    ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
+            ArrayList<Object> Games = ShopUtil.createGamesGUI(i, sLore);
             FormatBuilder builder = ShopUtil.createBuilder(Games, category, category2, category3, category4);
             switch(i){
                 case 1:
