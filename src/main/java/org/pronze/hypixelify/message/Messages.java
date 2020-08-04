@@ -36,12 +36,13 @@ public class Messages {
     public static List<String> message_cannot_invite_yourself;
     public static List<String> message_party_left;
     public static String message_respawn_title, message_respawn_subtitle, message_respawned_title;
-
+    public static String upgrade_Keyword;
     public Messages(){
 
     }
 
     public void loadConfig(){
+        upgrade_Keyword = Hypixelify.getConfigurator().config.getString("message.upgrade", "Upgrade: ");
         message_respawned_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
         message_respawn_subtitle = Hypixelify.getConfigurator().config.getString("message.respawn-subtitle");
         message_respawn_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");

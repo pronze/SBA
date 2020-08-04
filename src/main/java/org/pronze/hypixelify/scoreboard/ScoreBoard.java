@@ -10,6 +10,7 @@ import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
+import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -39,6 +40,7 @@ public class ScoreBoard {
         this.arena = arena;
         date = new SimpleDateFormat(Configurator.date).format(new Date());
         YOU = Hypixelify.getConfigurator().config.getString("scoreboard.you", "§7YOU");
+
         game = arena.getGame();
         teamstatus = new HashMap<>();
         m_title = LobbyScoreboard.listcolor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
@@ -169,7 +171,7 @@ public class ScoreBoard {
                                 .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
                                 .replace("{game}", game.getName()).replace("{date}", date)
                                 .replace("{team_bed_status}", p_t_b_s)
-                                .replace("{tier}",   arena.upgradeTask.getTier() + " Upgrade:")
+                                .replace("{tier}",   arena.upgradeTask.getTier() + " " + Messages.upgrade_Keyword)
                                 .replace("{tiertime}", ChatColor.GREEN + arena.upgradeTask.getFormattedTimeLeft());
 
                     if(game.isPlayerInAnyTeam(player) && chatColor != null){

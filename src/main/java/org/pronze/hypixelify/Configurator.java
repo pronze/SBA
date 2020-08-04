@@ -129,7 +129,7 @@ public class Configurator {
         checkOrSetConfig(modify, "games-inventory.stack-lore",
                 Arrays.asList("§8{mode}", "", "§7Available Servers: §a1", "§7Status: §a{status}"
                 ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
-
+        checkOrSetConfig(modify, "message.upgrade", "Upgrade: ");
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
         checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
