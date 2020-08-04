@@ -20,6 +20,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScoreBoard {
 
@@ -91,7 +92,7 @@ public class ScoreBoard {
                 rts++;
         }
 
-        if (game.countRunningTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
+        if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines = Configurator.Scoreboard_Lines.get("5");
         }
         else if (Configurator.Scoreboard_Lines.containsKey("default")) {
@@ -132,6 +133,7 @@ public class ScoreBoard {
                 String p_t_ps = "";
                 String p_t = "";
                 String p_t_b_s = "";
+
                 if (game.getTeamOfPlayer(player) != null && game.getTeamOfPlayer(player).countConnectedPlayers() > 0) {
                     chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(game.getTeamOfPlayer(player).getColor().name()).chatColor;
                     p_t_ps = String.valueOf(game.getTeamOfPlayer(player).getConnectedPlayers().size());
@@ -140,7 +142,7 @@ public class ScoreBoard {
                 }
                 for (String ls : scoreboard_lines) {
                     if (ls.contains("{team_status}")) {
-                        for (RunningTeam t : game.getRunningTeams()) {
+                        for(Team t : game.getAvailableTeams()){
                             String you = "";
                             if (game.getTeamOfPlayer(player) != null)
                                 if (game.getTeamOfPlayer(player) == t) {
@@ -154,6 +156,7 @@ public class ScoreBoard {
                             }
                             lines.add(ls.replace("{team_status}",
                                     getTeamStatusFormat(t).replace("{you}", you)));
+                              //    getTeamStatusFormat(t).replace("{you}", you)));
                         }
                         continue;
                     }
@@ -167,8 +170,8 @@ public class ScoreBoard {
                                 .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
                                 .replace("{game}", game.getName()).replace("{date}", date)
                                 .replace("{team_bed_status}", p_t_b_s)
-                                .replace("{tier}",   arena.upgradeTask.getTier() + " " + Messages.upgrade_Keyword)
-                                .replace("{tiertime}", ChatColor.GREEN + arena.upgradeTask.getFormattedTimeLeft());
+                                .replace("{tier}",   arena.upgradeTask.getTier().replace("-", " ")
+                                        + " in " + ChatColor.GREEN + arena.upgradeTask.getFormattedTimeLeft());
 
                     if(game.isPlayerInAnyTeam(player) && chatColor != null){
                         addline = addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())
@@ -259,7 +262,9 @@ public class ScoreBoard {
     private String getTeamStatusFormat(RunningTeam team) {
         String alive = "{color} {team} §a\u2714 §8{you}";
         String destroyed = "{color} {team} §a§f{players}§8 {you}";
+
         String status = team.isTargetBlockExists() ? alive : destroyed;
+
         if (team.isDead() && team.getConnectedPlayers().size() <= 0)
             status = "{color} {team} §c\u2718 {you}";
 
@@ -269,5 +274,31 @@ public class ScoreBoard {
                 .replace("{color}", formattedTeam)
                 .replace("{team}", ChatColor.WHITE.toString() + team.getName() + ":")
                 .replace("{players}", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
+    }
+
+    private String getTeamStatusFormat(Team team) {
+        boolean alive = false;
+        RunningTeam rt = null;
+        
+        for(RunningTeam t : game.getRunningTeams()){
+            if(t.getName().equalsIgnoreCase(team.getName())){
+                alive = true;
+                rt = t;
+            }
+        }
+
+        if(alive){
+            return getTeamStatusFormat(rt);
+        }
+
+        String destroyed = "{color} {team} §c\u2718 {you}";
+
+
+        String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
+                + team.getName().charAt(0);
+
+        return destroyed.replace("{bed_status}", "§c\u2718")
+                .replace("{color}", formattedTeam)
+                .replace("{team}", ChatColor.WHITE.toString() + team.getName() + ":");
     }
 }

@@ -455,12 +455,11 @@ public class Configurator {
         } catch (Exception e){
             e.printStackTrace();
         }
-        if(Hypixelify.getVersion().contains("1.2.8")){
+        if(Hypixelify.getVersion().contains("1.2.9")){
             config.set("scoreboard.lines.default", Arrays.asList(
                     "&7{date}"
                     , ""
                     , "{tier}"
-                    , "{tiertime}"
                     , ""
                     , "{team_status}"
                     , ""

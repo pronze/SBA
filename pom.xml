@@ -84,6 +84,7 @@
         </resources>
 
         <defaultGoal>clean install</defaultGoal>
+        <!--suppress UnresolvedMavenProperty -->
         <finalName>SBAHypixelify-${project.version}-${BUILD_NUMBER}</finalName>
         <plugins>
 

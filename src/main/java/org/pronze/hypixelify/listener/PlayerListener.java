@@ -221,6 +221,7 @@ public class PlayerListener extends AbstractListener {
         Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
         Game game = e.getGame();
+        if(game.getStatus() != GameStatus.RUNNING) return;
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
     }

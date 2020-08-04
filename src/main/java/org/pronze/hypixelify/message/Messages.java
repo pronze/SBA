@@ -49,7 +49,7 @@ public class Messages {
         upgrade_Keyword = Hypixelify.getConfigurator().config.getString("message.upgrade", "Upgrade: ");
         message_respawned_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
         message_respawn_subtitle = Hypixelify.getConfigurator().config.getString("message.respawn-subtitle");
-        message_respawn_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
+        message_respawn_title = Hypixelify.getConfigurator().config.getString("message.respawn-title");
         message_party_left = Hypixelify.getConfigurator().config.getStringList("party.message.left");
         message_cannot_invite = Hypixelify.getConfigurator().config.getStringList("party.message.cannotinvite");
         message_no_other_commands = Hypixelify.getConfigurator().config.getStringList("party.message.no-other-commands");
