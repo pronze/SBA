@@ -13,6 +13,7 @@ import org.pronze.hypixelify.listener.LobbyScoreboard;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -20,7 +21,6 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ScoreBoard {
 
@@ -31,8 +31,6 @@ public class ScoreBoard {
     private int ticks = 0;
     private Map<String, String> teamstatus;
     private List<String> m_title;
-
-
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
@@ -109,26 +107,28 @@ public class ScoreBoard {
                 ChatColor chatColor = null;
                 Team playerTeam = game.getTeamOfPlayer(player);
                 lines.clear();
-                String tks;
-                String ks;
-                String fks;
-                String dis;
-                String bes;
+                String tks = "0";
+                String ks = "0";
+                String fks = "0";
+                String dis = "0";
+                String bes = "0";
 
-                PlayerStatistic statistic = Main.getPlayerStatisticsManager().getStatistic(player);
-                try {
-                    tks = String.valueOf(statistic.getCurrentKills() + statistic.getKills());
-                    ks = String.valueOf(statistic.getCurrentKills());
-                    fks = String.valueOf(statistic.getKills());
-                    dis = String.valueOf(statistic.getCurrentDeaths());
-                    bes = String.valueOf(statistic.getCurrentDestroyedBeds());
-                } catch (Exception e){
-                    String nullscore = "0";
-                    tks = nullscore;
-                    ks = nullscore;
-                    fks = nullscore;
-                    dis = nullscore;
-                    bes = nullscore;
+                if(game.countAvailableTeams() < 5) {
+                    PlayerStatistic statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+                    try {
+                        tks = String.valueOf(statistic.getCurrentKills() + statistic.getKills());
+                        ks = String.valueOf(statistic.getCurrentKills());
+                        fks = String.valueOf(statistic.getKills());
+                        dis = String.valueOf(statistic.getCurrentDeaths());
+                        bes = String.valueOf(statistic.getCurrentDestroyedBeds());
+                    } catch (Exception e) {
+                        String nullscore = "0";
+                        tks = nullscore;
+                        ks = nullscore;
+                        fks = nullscore;
+                        dis = nullscore;
+                        bes = nullscore;
+                    }
                 }
                 String p_t_ps = "";
                 String p_t = "";
@@ -140,12 +140,14 @@ public class ScoreBoard {
                     p_t =  playerTeam.getName();
                     p_t_b_s = getTeamBedStatus(game.getTeamOfPlayer(player));
                 }
+
+
                 for (String ls : scoreboard_lines) {
                     if (ls.contains("{team_status}")) {
                         for(Team t : game.getAvailableTeams()){
                             String you = "";
                             if (game.getTeamOfPlayer(player) != null)
-                                if (game.getTeamOfPlayer(player) == t) {
+                                if (game.getTeamOfPlayer(player).getName().equals(t.getName())) {
                                     you = Messages.message_you;
                                 } else {
                                     you = "";
@@ -156,7 +158,6 @@ public class ScoreBoard {
                             }
                             lines.add(ls.replace("{team_status}",
                                     getTeamStatusFormat(t).replace("{you}", you)));
-                              //    getTeamStatusFormat(t).replace("{you}", you)));
                         }
                         continue;
                     }

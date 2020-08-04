@@ -88,6 +88,8 @@ public class PlayerListener extends AbstractListener {
             public void run() {
                 if (player.getGameMode().equals(GameMode.SURVIVAL) && isInGame(player)) {
                     ShopUtil.giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
+                    player.sendMessage(Messages.message_respawned_title);
+                    Title.sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                     this.cancel();
                 } else if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player))
                     this.cancel();
@@ -104,11 +106,16 @@ public class PlayerListener extends AbstractListener {
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+        if(game.getStatus() != GameStatus.RUNNING) return;
+
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
             new BukkitRunnable() {
                 public void run() {
-                    if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-                        Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                    if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+                        if(Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
+                            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                        }
+                    }
                 }
             }.runTaskLater(Hypixelify.getInstance(), 1L);
         }
@@ -165,8 +172,6 @@ public class PlayerListener extends AbstractListener {
                     }
                     livingTime--;
                     if (livingTime == 0) {
-                        player.sendMessage(Messages.message_respawned_title);
-                        Title.sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                         this.cancel();
                     }
                 }
@@ -222,8 +227,11 @@ public class PlayerListener extends AbstractListener {
         ScoreboardUtil.removePlayer(player);
         Game game = e.getGame();
         if(game.getStatus() != GameStatus.RUNNING) return;
-        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+            if(Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
+                Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+            }
+        }
     }
 
     @EventHandler
@@ -273,8 +281,11 @@ public class PlayerListener extends AbstractListener {
             Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).onTargetBlockDestroyed(e);
             new BukkitRunnable() {
                 public void run() {
-                    if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-                        Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                    if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+                        if(Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
+                            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                        }
+                    }
                 }
             }.runTaskLater(Hypixelify.getInstance(), 1L);
         }

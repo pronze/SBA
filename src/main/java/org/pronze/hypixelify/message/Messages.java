@@ -45,7 +45,6 @@ public class Messages {
 
     public void loadConfig(){
         message_you = Hypixelify.getConfigurator().config.getString("scoreboard.you", "§7YOU");
-
         upgrade_Keyword = Hypixelify.getConfigurator().config.getString("message.upgrade", "Upgrade: ");
         message_respawned_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
         message_respawn_subtitle = Hypixelify.getConfigurator().config.getString("message.respawn-subtitle");
