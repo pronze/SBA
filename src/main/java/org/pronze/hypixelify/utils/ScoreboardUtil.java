@@ -108,7 +108,11 @@ public class ScoreboardUtil {
         Scoreboard scoreboard = scoreboards.get(p);
         try {
             if (scoreboard.getObjective("bwa-game") == null) {
-                scoreboard.registerNewObjective("bwa-game", "dummy", "test");
+                try {
+                    scoreboard.registerNewObjective("bwa-game", "dummy", "test");
+                } catch(Exception e){
+                    scoreboard.registerNewObjective("bwa-game", "dummy");
+                }
                 Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplaySlot(DisplaySlot.SIDEBAR);
             }
             for (int i = 1; i < elements.length; i++) {
