@@ -12,7 +12,6 @@ import java.util.Map;
 
 public class UpgradeTask extends BukkitRunnable {
 
-    private BukkitTask task;
     private int time;
     private Game game;
     private Map<Integer, String> Tiers = new HashMap<>();
@@ -64,10 +63,6 @@ public class UpgradeTask extends BukkitRunnable {
         }
 
         time++;
-    }
-
-    public void cancelProcess(){
-        task.cancel();
     }
 
     public int getTime(){

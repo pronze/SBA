@@ -34,12 +34,14 @@ public class Messages {
     public static List<String> message_p_chat_enabled_disabled;
     public static List<String> message_party_help;
     public static List<String> message_cannot_invite_yourself;
+    public static List<String> message_party_left;
 
     public Messages(){
 
     }
 
     public void loadConfig(){
+        message_party_left = Hypixelify.getConfigurator().config.getStringList("party.message.left");
         message_cannot_invite = Hypixelify.getConfigurator().config.getStringList("party.message.cannotinvite");
         message_no_other_commands = Hypixelify.getConfigurator().config.getStringList("party.message.no-other-commands");
         message_leader_join_leave =  Hypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave");

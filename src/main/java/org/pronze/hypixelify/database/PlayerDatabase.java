@@ -185,7 +185,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                 }
             }
             setIsInParty(false);
-            partyManager.getParty(partyLeader).disband();
+            party.disband();
             partyManager.removeParty(partyLeader);
             setPartyLeader(null);
         }

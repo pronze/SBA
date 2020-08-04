@@ -180,9 +180,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 doneChanges = true;
             }
 
-            if(!Main.getConfigurator().config.getBoolean("scoreboard.enable", true)){
-                Main.getConfigurator().config.set("scoreboard.enable", true);
-                Main.getConfigurator().config.set("lobby-scoreboard.enabled", true);
+            if(Main.getConfigurator().config.getBoolean("scoreboard.enable", true)){
+                Main.getConfigurator().config.set("scoreboard.enable", false);
+                Main.getConfigurator().config.set("lobby-scoreboard.enabled", false);
                 doneChanges = true;
             }
 

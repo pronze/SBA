@@ -164,6 +164,8 @@ public class PartyCommand implements TabExecutor {
                 return true;
             }
 
+            if(playerDatabase == null) return true;
+
             if (!playerDatabase.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return true;
@@ -179,7 +181,7 @@ public class PartyCommand implements TabExecutor {
             Party party = partyManager.getParty(playerDatabase.getPartyLeader());
             if (party == null) return true;
             partyManager.removeFromParty(player, party);
-
+            ShopUtil.sendMessage(player, Messages.message_party_left);
         }
 
         else if (args[0].equalsIgnoreCase("decline")) {
@@ -201,7 +203,9 @@ public class PartyCommand implements TabExecutor {
 
             for (Player pl : invitedParty.getAllPlayers()) {
                 if (pl != null && pl.isOnline()) {
-                    ShopUtil.sendMessage(pl, Messages.message_declined);
+                    for(String st : Messages.message_declined){
+                        pl.sendMessage(ShopUtil.translateColors(st.replace("{player}", player.getDisplayName())));
+                    }
                 }
             }
             playerDatabase.setInvited(false);

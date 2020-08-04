@@ -30,8 +30,7 @@ public class Arena {
 
     public Arena(Game game) {
         this.game = game;
-        if(!Main.isLegacy())
-            scoreBoard = new ScoreBoard(this);
+        scoreBoard = new ScoreBoard(this);
 
         upgradeTask = new UpgradeTask(game);
     }
@@ -49,6 +48,10 @@ public class Arena {
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {
             scoreBoard.updateScoreboard();
+            if(upgradeTask != null && !upgradeTask.isCancelled()) {
+                upgradeTask.cancel();
+                upgradeTask = null;
+            }
             if (e.getWinningTeam() != null) {
                 Team winner = e.getWinningTeam();
                 Map<String, Integer> dataKills = new HashMap<>();

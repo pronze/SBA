@@ -47,7 +47,12 @@ public class ScoreboardUtil {
                 scoreboard = p.getScoreboard();
             }
             if (scoreboard.getObjective("bwa-lobby") == null) {
-                scoreboard.registerNewObjective("bwa-lobby", "dummy", "Test");
+                try {
+                    scoreboard.registerNewObjective("bwa-lobby", "dummy", "Test");
+                }
+                catch(Exception e){
+                    scoreboard.registerNewObjective("bwa-lobby", "dummy");
+                }
                 scoreboard.getObjective("bwa-lobby").setDisplaySlot(DisplaySlot.SIDEBAR);
             }
             scoreboard.getObjective(DisplaySlot.SIDEBAR).setDisplayName(elements[0]);

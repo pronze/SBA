@@ -298,6 +298,11 @@ public class Configurator {
                 "{player} &aleft the party due to inactivity",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.left", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou left the party!",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.offline-quit", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "{player} &cleft the party",
