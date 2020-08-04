@@ -24,22 +24,18 @@ import java.util.*;
 public class ScoreBoard {
 
     private Game game;
-
     private Arena arena;
-
     private int tc = 0;
     String date;
-
     private int ticks = 0;
     private Map<String, String> teamstatus;
     private List<String> m_title;
-    private String YOU;
+
 
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
         date = new SimpleDateFormat(Configurator.date).format(new Date());
-        YOU = Hypixelify.getConfigurator().config.getString("scoreboard.you", "§7YOU");
 
         game = arena.getGame();
         teamstatus = new HashMap<>();
@@ -148,7 +144,7 @@ public class ScoreBoard {
                             String you = "";
                             if (game.getTeamOfPlayer(player) != null)
                                 if (game.getTeamOfPlayer(player) == t) {
-                                    you = YOU;
+                                    you = Messages.message_you;
                                 } else {
                                     you = "";
                                 }
@@ -184,7 +180,7 @@ public class ScoreBoard {
                             if (game.getTeamOfPlayer(player) == null) {
                                 stf = stf.replace("{you}", "");
                             } else if (game.getTeamOfPlayer(player) == t) {
-                                stf = stf.replace("{you}", YOU);
+                                stf = stf.replace("{you}", Messages.message_you);
                             } else {
                                 stf = stf.replace("{you}", "");
                             }
