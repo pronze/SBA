@@ -27,6 +27,7 @@ public class Configurator {
     public File file, oldfile, shopFile, upgradeShop, legacyShop;
     public FileConfiguration config;
     public static String date;
+    public static boolean tag_health;
 
     public Configurator(Hypixelify main) {
         this.dataFolder = main.getDataFolder();
@@ -112,7 +113,7 @@ public class Configurator {
         checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100 );
         checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200 );
         checkOrSetConfig(modify, "date.format", "MM/dd/yy");
-
+        checkOrSetConfig(modify, "tag_health", false);
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
@@ -185,7 +186,6 @@ public class Configurator {
                 "&7{date}"
                 , ""
                 , "{tier}"
-                , "{tiertime}"
                 , ""
                 , "{team_status}"
                 , ""
@@ -198,7 +198,6 @@ public class Configurator {
                 "&7{date}"
                 , ""
                 , "{tier}"
-                , "{tiertime}"
                 , ""
                 , "{team_status}"
                 , ""
@@ -431,7 +430,7 @@ public class Configurator {
             int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
             game_size.put(s, size);
         }
-
+        tag_health = Hypixelify.getConfigurator().config.getBoolean("tag_health");
         overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
         gamestart_message = LobbyScoreboard.listcolor(config.getStringList("game-start.message"));
         if (config.getBoolean("first_start")) {
@@ -466,6 +465,16 @@ public class Configurator {
                     , "&fKills: &a{kills}"
                     , "&fTotal Kills: &a{totalkills}"
                     , "&fBed Broken: &a{beds}"
+                    , ""
+                    , "&ewww.minecraft.net"
+            ));
+
+            config.set("scoreboard.lines.5", Arrays.asList(
+                    "&7{date}"
+                    , ""
+                    , "{tier}"
+                    , ""
+                    , "{team_status}"
                     , ""
                     , "&ewww.minecraft.net"
             ));

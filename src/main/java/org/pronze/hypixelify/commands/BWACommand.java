@@ -101,14 +101,18 @@ public class BWACommand implements TabExecutor {
                     return true;
                 } else if (args[0].equalsIgnoreCase("cancel")) {
                     Hypixelify.getConfigurator().config.set("version", Hypixelify.getVersion());
+                    Hypixelify.getConfigurator().saveConfig();
                     sender.sendMessage("[SBAHypixelify]: Cancelled shop and upgradeShop changes");
                     return true;
                 }
-            } else {
+            }
+            else {
                 sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
                 return true;
             }
-        } else {
+        }
+
+        else {
             sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
             return true;
         }

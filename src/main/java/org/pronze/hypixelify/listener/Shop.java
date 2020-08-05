@@ -71,13 +71,13 @@ public class Shop extends AbstractListener {
                 } else {
                     ShopName = UPGRADE_SHOP_NAME;
                 }
-                NPC npc = CitizensAPI.getNPCRegistry().createNPC(EntityType.PLAYER, ShopName);
+
+                EntityType type = ShopName.equals(UPGRADE_SHOP_NAME) ? EntityType.BLAZE : EntityType.PLAYER;
+                NPC npc = CitizensAPI.getNPCRegistry().createNPC(type, ShopName);
 
                 npc.spawn(store.getStoreLocation());
                 npc.getTrait(LookClose.class).lookClose(true);
-                if (npc.getName().contains(UPGRADE_SHOP_NAME))
-                    npc.getTrait(SkinTrait.class).setSkinName("Conefish");
-                else
+                if (npc.getName().contains(ITEM_SHOP_NAME))
                     npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
             }
         }

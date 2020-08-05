@@ -10,12 +10,6 @@
             <id>everything</id>
             <url>https://repo.citizensnpcs.co/</url>
         </repository>
-
-        <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
-        </repository>
-
         <repository>
             <id>screaming-repo</id>
             <url>https://repo.screamingsandals.org/</url>
@@ -30,6 +24,8 @@
             <id>papermc</id>
             <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
+
+
 
     </repositories>
 
@@ -63,7 +59,6 @@
             <version>0.2.12-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.screamingsandals.bedwars</groupId>
             <artifactId>BedWars-API</artifactId>

@@ -28,16 +28,19 @@ data:
   - stack: "IRON_CHESTPLATE;1;Protection;Click here to get more resistance to damage!"
     column: 2
     price: 4 of diamond
+    properties: protection
 
   - stack: "IRON_SWORD;1;Sharpness;Kill players quicker!."
     column: 1
     price: 4 of diamond
+    properties: sharpness
 
   - stack: "GOLDEN_PICKAXE;1;Enchant;Break Blocks quicker!."
     column: 3
     items:
       - price: 4 of diamond
         skip: 1
+        properties: efficiency
         stack:
           type: GOLDEN_PICKAXE
           display-name: "Efficiency I"
@@ -46,6 +49,7 @@ data:
           enchants:
             DIG_SPEED: 1
       - price: 8 of diamond
+        properties: efficiency
         stack:
           type: GOLDEN_PICKAXE
           display-name: "Efficiency II"

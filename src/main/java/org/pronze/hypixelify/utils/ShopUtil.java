@@ -2,19 +2,23 @@ package org.pronze.hypixelify.utils;
 
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
 import org.pronze.hypixelify.listener.PlayerListener;
 import org.pronze.hypixelify.listener.Shop;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
@@ -62,7 +66,9 @@ public class ShopUtil {
         }
     }
 
-    public static void buyArmor(Player player, Material mat_boots, Material mat_leggings) {
+    public static void buyArmor(Player player, Material mat_boots, String name) {
+        String matName  = name.substring(0, name.indexOf("_"));
+        Material mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         ItemStack boots = new ItemStack(mat_boots);
         boots.addEnchantments(Objects.requireNonNull(player.getInventory().getBoots()).getEnchantments());
         ItemStack leggings = new ItemStack(mat_leggings);
@@ -73,8 +79,8 @@ public class ShopUtil {
         player.getInventory().setLeggings(leggings);
     }
 
-    public static boolean addEnchantsToPlayerTools(Player player, ItemStack newItem, String name, Enchantment enchantment) {
-        for (ItemStack item : player.getInventory().getContents()) {
+    public static boolean addEnchantsToPlayerTools(Player buyer, ItemStack newItem, String name, Enchantment enchantment) {
+        for (ItemStack item : buyer.getInventory().getContents()) {
             if (item != null && item.getType().name().endsWith(name)) {
                 if (item.getEnchantmentLevel(enchantment) >= newItem.getEnchantmentLevel(enchantment) || newItem.getEnchantmentLevel(enchantment) >= 5)
                     return false;
@@ -82,6 +88,21 @@ public class ShopUtil {
                 item.addEnchantments(newItem.getEnchantments());
             }
         }
+
+        return true;
+    }
+
+    public static boolean addEnchantsToTeamTools(Player buyer, ItemStack stack, String name,  Enchantment enchantment){
+        RunningTeam team = BedwarsAPI.getInstance().getGameOfPlayer(buyer).getTeamOfPlayer(buyer);
+
+        if(!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name,enchantment)) return false;
+
+        for (Player player : team.getConnectedPlayers()) {
+            player.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + buyer.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
+            if(player == buyer) continue;
+            ShopUtil.addEnchantsToPlayerTools(player, stack, name,enchantment);
+        }
+
         return true;
     }
 
@@ -92,6 +113,7 @@ public class ShopUtil {
         } else if (sz == 4) {
             sh_item.removeEnchantment(enchant);
             sh_item.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
+            sh_item.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         }
         return sh_item;
     }
@@ -437,4 +459,17 @@ public class ShopUtil {
             player.sendMessage(translateColors(st));
         }
     }
+
+    public static void upgradeSwordOnPurchase(Player player ,ItemStack newItem){
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (item != null && item.getType().name().endsWith("SWORD") && item.getType() != newItem.getType()) {
+                newItem.addEnchantments(item.getEnchantments());
+                if (item.getType() == Material.WOODEN_SWORD)
+                    player.getInventory().remove(Material.WOODEN_SWORD);
+                else if (Hypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true))
+                    player.getInventory().remove(item);
+            }
+        }
+    }
+
 }

@@ -1,10 +1,9 @@
 package org.pronze.hypixelify.utils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.*;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 
@@ -12,6 +11,7 @@ import java.util.*;
 
 public class ScoreboardUtil {
     private static Map<Player, Scoreboard> scoreboards = new HashMap<>();
+
 
     private static String[] cutUnranked(String[] content) {
         String[] elements = Arrays.copyOf(content, 16);
@@ -111,6 +111,7 @@ public class ScoreboardUtil {
                 }
                 Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplaySlot(DisplaySlot.SIDEBAR);
             }
+
             for (int i = 1; i < elements.length; i++) {
                 if (elements[i] != null &&
                         Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).getScore(elements[i]).getScore() != 16 - i) {
@@ -139,16 +140,17 @@ public class ScoreboardUtil {
                 if (toErase)
                     scoreboard.resetScores(entry);
             }
-            String playertag_prefix = "{color}{team} §f| {color}";
+
+            String playertag_prefix = "{color}{team} ";
             RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
-
-                Team team = scoreboard.getTeam( t.getName());
+                String cl = org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString();
+                Team team = scoreboard.getTeam(t.getName());
                 if (team == null)
-                    team = scoreboard.registerNewTeam( t.getName());
+                    team = scoreboard.registerNewTeam(t.getName());
                 if (!playertag_prefix.equals(""))
-                    team.setPrefix(playertag_prefix.replace("{color}", org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString()).replace("{team}",
-                            t.getName()));
+                    team.setPrefix(playertag_prefix.replace("{color}", cl).replace("{team}", ChatColor.BOLD +
+                            String.valueOf(t.getName().charAt(0))) + cl);
                 team.setAllowFriendlyFire(false);
                 for (Player pl : t.getConnectedPlayers()) {
                     if (!team.hasEntry(pl.getName())) {
@@ -167,6 +169,7 @@ public class ScoreboardUtil {
 
                     }
                 }
+
             }
             if (p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard))
                 p.setScoreboard(scoreboard);
@@ -174,6 +177,7 @@ public class ScoreboardUtil {
             e.printStackTrace();
         }
     }
+
 
 
 
