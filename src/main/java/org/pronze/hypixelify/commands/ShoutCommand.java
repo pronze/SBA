@@ -5,6 +5,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -42,6 +44,19 @@ public class ShoutCommand implements TabExecutor {
             return true;
         }
 
+        final PlayerDatabase playerDatabase = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        boolean cancelShout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0;
+
+        if(!cancelShout) {
+            if (!playerDatabase.canShout()) {
+                String shout = String.valueOf(playerDatabase.getShoutTimeOut());
+                for (String st : Messages.message_shout_wait) {
+                    player.sendMessage(ShopUtil.translateColors(st.replace("{seconds}", shout)));
+                }
+                return true;
+            }
+        }
+
         RunningTeam team = game.getTeamOfPlayer(player);
         String color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
 
@@ -49,11 +64,14 @@ public class ShoutCommand implements TabExecutor {
                 .replace("{color}", color)
                 .replace("{team}", team.getName())
                 .replace("{player}", player.getName())
-                .replace("{message}", Arrays.toString(args));
+                .replace("{message}", Arrays.toString(args).replaceAll("\\[|\\]|,|\\s", ""));
 
         for(Player pl : game.getConnectedPlayers()){
             pl.sendMessage(st);
         }
+
+        if(!cancelShout)
+            playerDatabase.shout();
 
         return true;
     }

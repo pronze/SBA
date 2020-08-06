@@ -44,7 +44,11 @@ public interface PlayerDatabase {
 
     UUID getPlayerUUID();
 
+    boolean canShout();
 
+    void shout();
+
+    int getShoutTimeOut();
 
 
 }

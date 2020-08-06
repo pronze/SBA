@@ -203,7 +203,7 @@ public class PlayerListener extends AbstractListener {
         if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
             if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + Hypixelify.getConfigurator().config.getString("message.cannot=put-item-on-chest"));
+                player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + Hypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
             }
         }
     }

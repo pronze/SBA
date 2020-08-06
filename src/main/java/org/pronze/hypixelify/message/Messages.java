@@ -40,13 +40,16 @@ public class Messages {
     public static String message_you;
     public static List<String> message_not_in_game;
     public static String shoutFormat;
+    public static List<String> message_shout_wait;
+
 
     public Messages(){
 
     }
 
     public void loadConfig(){
-        shoutFormat = "§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}";
+        message_shout_wait = Hypixelify.getConfigurator().config.getStringList("message.shout-wait");
+        shoutFormat = Hypixelify.getConfigurator().config.getString("message.shout-format","§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}");
         message_not_in_game = Hypixelify.getConfigurator().config.getStringList("message.not-in-game");
         message_you = Hypixelify.getConfigurator().config.getString("scoreboard.you", "§7YOU");
         upgrade_Keyword = Hypixelify.getConfigurator().config.getString("message.upgrade", "Upgrade: ");

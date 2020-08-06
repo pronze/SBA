@@ -24,13 +24,44 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     private Party invitedParty;
     private int timeout = 60;
     private Player partyLeader;
+    private int shout;
+    private boolean shouted = false;
 
     public PlayerDatabase(Player player) {
         this.player = player.getUniqueId();
         name = player.getDisplayName();
         pInstance = player;
+        shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         init();
         Hypixelify.getInstance().playerData.put(player.getUniqueId(), this);
+    }
+
+    @Override
+    public int getShoutTimeOut(){
+        return shout;
+    }
+
+    @Override
+    public void shout(){
+        if(!shouted){
+            shouted = true;
+            new BukkitRunnable(){
+                @Override
+                public void run() {
+                    shout--;
+                    if(shout == 0){
+                        shouted = false;
+                        shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+        }
+    }
+
+    @Override
+    public boolean canShout(){
+        return !shouted;
     }
 
     @Override
