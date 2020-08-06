@@ -393,7 +393,7 @@ public class Configurator {
 
         checkOrSetConfig(modify, "message.shout-wait", Arrays.asList(
                 "&6-----------------------------------------------------",
-                "&cYou have to wait {seconds}seconds before doing this command!",
+                "&cYou have to wait {seconds} seconds before doing this command!",
                 "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "party.message.chat-enable-disabled", Arrays.asList(

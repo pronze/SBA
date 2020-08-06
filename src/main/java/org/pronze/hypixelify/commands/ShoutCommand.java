@@ -14,6 +14,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -60,11 +61,18 @@ public class ShoutCommand implements TabExecutor {
         RunningTeam team = game.getTeamOfPlayer(player);
         String color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
 
+        StringBuilder builder = new StringBuilder();
+
+        for(String st : args){
+            builder.append(st).append(" ");
+        }
+
+
         String st = Messages.shoutFormat
                 .replace("{color}", color)
                 .replace("{team}", team.getName())
                 .replace("{player}", player.getName())
-                .replace("{message}", Arrays.toString(args).replaceAll("\\[|\\]|,|\\s", ""));
+                .replace("{message}", builder.toString());
 
         for(Player pl : game.getConnectedPlayers()){
             pl.sendMessage(st);

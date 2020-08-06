@@ -21,8 +21,8 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     private boolean clearData = false;
     private boolean partyChat = false;
     private int expiredTime = 60;
-    private Party invitedParty;
     private int timeout = 60;
+    private Party invitedParty;
     private Player partyLeader;
     private int shout;
     private boolean shouted = false;
