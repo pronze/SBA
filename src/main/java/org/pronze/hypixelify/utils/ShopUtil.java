@@ -472,4 +472,14 @@ public class ShopUtil {
         }
     }
 
+    public static void removeAxeOrPickaxe(Player player, ItemStack newItem){
+        String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
+
+        for (ItemStack p : player.getInventory().getContents()) {
+            if (p != null && p.getType().name().endsWith(name) && !p.getType().name().equalsIgnoreCase(newItem.getType().name())) {
+                player.getInventory().remove(p);
+            }
+        }
+    }
+
 }

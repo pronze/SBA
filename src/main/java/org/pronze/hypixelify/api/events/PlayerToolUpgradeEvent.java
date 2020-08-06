@@ -14,7 +14,6 @@ public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     private boolean isCancelled = false;
     private ItemStack stack;
     private String name;
-    private boolean shouldSell = true;
     private  RunningTeam team;
 
 
@@ -28,13 +27,7 @@ public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     public RunningTeam getTeam(){
         return team;
     }
-    public void setShouldSell(boolean b){
-        shouldSell = b;
-    }
 
-    public boolean shouldSellStack(){
-        return shouldSell;
-    }
 
     public String getName(){
         return name;

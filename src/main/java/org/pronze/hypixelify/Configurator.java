@@ -119,6 +119,8 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "citizens-shop", true);
+        checkOrSetConfig(modify, "message.cannot-buy", "§cYou don't have enough {price}");
+        checkOrSetConfig(modify, "message.purchase", "§aYou purchased &e{item}");
         checkOrSetConfig(modify, "message.respawn-title", "§cYOU DIED!");
         checkOrSetConfig(modify, "message.respawn-subtitle", "§eYou will respawn in §c%time% §eseconds");
         checkOrSetConfig(modify, "message.respawned-title", "§eYou have respawned");
@@ -380,6 +382,11 @@ public class Configurator {
         checkOrSetConfig(modify, "party.message.declined-user", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou declined the invite!",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "message.not-in-game", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou are not in a game to do this command!",
                 "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "party.message.chat-enable-disabled", Arrays.asList(

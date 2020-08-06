@@ -9,6 +9,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
+import org.pronze.hypixelify.commands.ShoutCommand;
 import org.pronze.hypixelify.database.PlayerDatabase;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.inventories.CustomShop;
@@ -197,6 +198,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         Bukkit.getPluginManager().registerEvents(this, this);
         Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());
+        Objects.requireNonNull(getCommand("shout")).setExecutor(new ShoutCommand());
     }
 
     @Override

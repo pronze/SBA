@@ -3,7 +3,7 @@ version: ${project.version}
 main: org.pronze.hypixelify.Hypixelify
 api-version: "1.13"
 depend: [BedWars]
-softdepend: [PlaceholderAPI, Citizens, ProtocolLib]
+softdepend: [PlaceholderAPI, Citizens]
 author: pronze
 
 commands:
@@ -14,3 +14,6 @@ commands:
     description: party system
     usage: /<command>
     aliases: [p]
+  shout:
+    description: shout command
+    usage: /<command>
