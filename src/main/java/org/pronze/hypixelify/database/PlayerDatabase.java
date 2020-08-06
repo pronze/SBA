@@ -144,6 +144,12 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
+    public int getWins(){
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getWins() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentWins();
+    }
+
+    @Override
     public int getBedDestroys(){
         return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentDestroyedBeds() +
                 Main.getPlayerStatisticsManager().getStatistic(pInstance).getDestroyedBeds();

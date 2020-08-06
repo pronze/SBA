@@ -27,7 +27,7 @@ import java.util.List;
 
 public class LobbyBoard extends AbstractListener {
 
-    public static List<Player> players = new ArrayList<>();
+    public static List<Player> players;
     private Location location;
     private final List<String> lobby_scoreboard_lines;
     private int count = 0;
@@ -36,6 +36,7 @@ public class LobbyBoard extends AbstractListener {
     private BukkitTask task;
 
     public LobbyBoard() {
+        players = new ArrayList<>();
         board_body = Hypixelify.getConfigurator().config.getStringList("main-lobby.lines");
         formatter = new SimpleDateFormat(Configurator.date);
         lobby_scoreboard_lines = Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
@@ -68,6 +69,8 @@ public class LobbyBoard extends AbstractListener {
 
         new BukkitRunnable() {
             public void run() {
+                if(players == null)
+                    this.cancel();
                 if (!players.isEmpty()) {
                     updateScoreboard();
                 }
@@ -84,10 +87,11 @@ public class LobbyBoard extends AbstractListener {
                 player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
             }
         }
+        players.clear();
+        players = null;
         if(task != null && !task.isCancelled())
             task.cancel();
 
-        players.clear();
         HandlerList.unregisterAll(this);
 
     }
@@ -172,12 +176,13 @@ public class LobbyBoard extends AbstractListener {
 
                 s = s
                         .replace("{date}", "§7" + getDate())
-                        .replace("{totalkills}", String.valueOf(playerData.getKills()))
+                        .replace("{kills}", String.valueOf(playerData.getKills()))
                         .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))
                         .replace("{deaths}", String.valueOf(playerData.getDeaths()))
                         .replace("{level}", "§7" + playerData.getLevel()+ "✫")
                         .replace("{progress}", playerData.getProgress())
                         .replace("{bar}", bar)
+                        .replace("{wins}", String.valueOf(playerData.getWins()))
                         .replace("{k/d}", String.valueOf(playerData.getKD()));
 
                 scoreboard.getObjective("bwa-mainlobby").getScore(s).setScore(i);

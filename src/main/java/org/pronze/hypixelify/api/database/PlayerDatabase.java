@@ -62,6 +62,8 @@ public interface PlayerDatabase {
 
     int getLevel();
 
+    int getWins();
+
     String getProgress();
 
     String getCompletedBoxes();
