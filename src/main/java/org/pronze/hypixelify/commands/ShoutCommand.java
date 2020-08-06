@@ -67,7 +67,6 @@ public class ShoutCommand implements TabExecutor {
             builder.append(st).append(" ");
         }
 
-
         String st = Messages.shoutFormat
                 .replace("{color}", color)
                 .replace("{team}", team.getName())
