@@ -38,6 +38,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private GamesInventory gamesInventory;
     private Messages messages;
     private ListenerManager listenerManager;
+    public boolean papiEnabled;
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
@@ -67,6 +68,10 @@ public class Hypixelify extends JavaPlugin implements Listener {
         if(!plugin.playerData.containsKey(player.getUniqueId())){
             plugin.playerData.put(player.getUniqueId(), new PlayerDatabase(player));
         }
+    }
+
+    public static boolean isPapiEnabled(){
+        return plugin.papiEnabled;
     }
 
     public void onEnable() {
@@ -195,6 +200,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
             }
 
         }
+
+        papiEnabled = Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
 
         Bukkit.getPluginManager().registerEvents(this, this);
         Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());

@@ -1,5 +1,6 @@
 package org.pronze.hypixelify.database;
 
+import com.google.common.base.Strings;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -8,6 +9,7 @@ import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.Main;
 
 import java.util.UUID;
 
@@ -133,6 +135,85 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                 updateDatabase();
             }
         }.runTaskLater(Hypixelify.getInstance(), 1L);
+    }
+
+    @Override
+    public int getKills(){
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getKills();
+    }
+
+    @Override
+    public int getBedDestroys(){
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentDestroyedBeds() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getDestroyedBeds();
+    }
+
+    @Override
+    public int getDeaths(){
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getDeaths() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills();
+    }
+
+    @Override
+    public int getXP(){
+        int total;
+        try {
+            total = (getBedDestroys() * 5) + (getKills() * 2);
+        }  catch(Exception e){
+            return 1;
+        }
+        return total;
+    }
+
+    @Override
+    public int getLevel(){
+        try {
+            int xp = getXP();
+
+            if (xp < 50)
+                return 1;
+        } catch(Exception e){
+            return 1;
+        }
+
+        return getXP() / 50;
+    }
+
+    @Override
+    public String getProgress(){
+        String p = "§b{p}§7/§a50";
+        int progress;
+        try {
+            progress = getXP() - (getLevel() * 50);
+        } catch(Exception e){
+            progress = 1;
+        }
+        return p
+                .replace("{p}", String.valueOf(progress));
+    }
+
+    @Override
+    public String getCompletedBoxes(){
+        int progress;
+        try {
+            progress = (getXP() - (getLevel() * 50)) * 2;
+        } catch(Exception e){
+            progress = 1;
+        }
+        char i;
+        i = String.valueOf(Math.abs((long)progress)).charAt(0);
+        if(progress < 10) {
+            i = '1';
+        }
+        return "§b" + Strings.repeat("■", Integer.parseInt(String.valueOf(i)))
+                + "§7" +  Strings.repeat("■", 10 - Integer.parseInt(String.valueOf(i)));
+    }
+
+
+    @Override
+    public double getKD(){
+        return  Main.getPlayerStatisticsManager().getStatistic(pInstance).getKD();
     }
 
     @Override

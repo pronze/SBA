@@ -2,6 +2,7 @@ package org.pronze.hypixelify.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -33,7 +34,25 @@ public class BWACommand implements TabExecutor {
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
                 sender.sendMessage("Plugin reloaded!");
                 return true;
-            } else if (args[0].equalsIgnoreCase("help")) {
+            } else if(args[0].equalsIgnoreCase("setlobby")){
+                if(!(sender instanceof Player)) return true;
+
+                Player player = (Player) sender;
+                Location location = player.getLocation();
+
+                Hypixelify.getConfigurator().config.set("main-lobby.enabled", true);
+                Hypixelify.getConfigurator().config.set("main-lobby.world", location.getWorld().getName());
+                Hypixelify.getConfigurator().config.set("main-lobby.x", location.getX());
+                Hypixelify.getConfigurator().config.set("main-lobby.y", location.getY());
+                Hypixelify.getConfigurator().config.set("main-lobby.z", location.getZ());
+                Hypixelify.getConfigurator().config.set("main-lobby.yaw", location.getYaw());
+                Hypixelify.getConfigurator().config.set("main-lobby.pitch", location.getPitch());
+                Hypixelify.getConfigurator().saveConfig();
+                player.sendMessage("Sucessfully set Lobby location!");
+                return true;
+            }
+
+            else if (args[0].equalsIgnoreCase("help")) {
                 sender.sendMessage(ChatColor.RED + "SBAHypixelify");
                 sender.sendMessage("Available commands:");
                 sender.sendMessage("/bwaddon reload - Reload the addon");
@@ -135,6 +154,7 @@ public class BWACommand implements TabExecutor {
             Commands.add("reset");
             Commands.add("clearnpc");
             Commands.add("gamesinv");
+            Commands.add("setlobby");
             if (!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
                 Commands.remove("gamesinv");
             if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))

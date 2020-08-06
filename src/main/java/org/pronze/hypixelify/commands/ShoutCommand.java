@@ -14,8 +14,6 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ShoutCommand implements TabExecutor {

@@ -409,7 +409,22 @@ public class Configurator {
                 "&e/p list&7 - Lists the players in your current party",
                 "&e/p leave&7 - Leaves your current party",
                 "&1-----------------------------------------------------"));
-
+        checkOrSetConfig(modify, "main-lobby.enabled", false);
+        checkOrSetConfig(modify, "main-lobby.lines", Arrays.asList(
+                "{date}",
+                "",
+                "Your Level: §a{level}",
+                "",
+                "Progress: {progress}",
+                "{bar}",
+                "",
+                "Total Kills: §a{totalkills}",
+                "Bed Destroyed: §a{beddestroys}",
+                "Deaths: §a{deaths}",
+                "K/D ratio: §a{k/d}",
+                "",
+                "§ewww.minecraft.net"
+        ));
 
 
         if (modify.get()) {

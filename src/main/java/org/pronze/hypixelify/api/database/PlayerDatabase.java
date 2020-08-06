@@ -50,5 +50,19 @@ public interface PlayerDatabase {
 
     int getShoutTimeOut();
 
+    int getKills();
 
+    int getBedDestroys();
+
+    int getDeaths();
+
+    double getKD();
+
+    int getXP();
+
+    int getLevel();
+
+    String getProgress();
+
+    String getCompletedBoxes();
 }

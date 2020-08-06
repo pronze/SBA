@@ -19,6 +19,9 @@ public class ListenerManager {
         if(Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)){
             listeners.add(new Shop());
         }
+        if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
+            listeners.add(new LobbyBoard());
+        }
     }
 
     public void unregisterAll(){
