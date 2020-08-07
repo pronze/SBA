@@ -1,5 +1,6 @@
 package org.pronze.hypixelify.listener;
 
+import org.bukkit.Bukkit;
 import org.pronze.hypixelify.Hypixelify;
 
 import java.util.ArrayList;
@@ -16,8 +17,9 @@ public class ListenerManager {
             if(Hypixelify.getConfigurator().config.getBoolean("party.leader-autojoin-autoleave", true))
                 listeners.add(new PartyListener());
         }
-        if(Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)){
-            listeners.add(new Shop());
+        if(Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)
+        && Bukkit.getServer().getPluginManager().getPlugin("Citizens") != null){
+                listeners.add(new Shop());
         }
         if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
             listeners.add(new LobbyBoard());

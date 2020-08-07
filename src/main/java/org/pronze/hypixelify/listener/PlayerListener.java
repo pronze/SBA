@@ -4,6 +4,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -357,6 +358,5 @@ public class PlayerListener extends AbstractListener {
             }
         }.runTaskTimer(Hypixelify.getInstance(), 40L, 20L);
     }
-
 
 }

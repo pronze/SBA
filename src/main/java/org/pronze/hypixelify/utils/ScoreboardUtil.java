@@ -102,7 +102,9 @@ public class ScoreboardUtil {
             scoreboards.put(p, Bukkit.getScoreboardManager().getNewScoreboard());
         elements = cutUnranked(elements);
         Scoreboard scoreboard = scoreboards.get(p);
+
         try {
+
             if (scoreboard.getObjective("bwa-game") == null) {
                 try {
                     scoreboard.registerNewObjective("bwa-game", "dummy", "test");
@@ -123,6 +125,7 @@ public class ScoreboardUtil {
                     }
                 }
             }
+
             for (String entry : scoreboard.getEntries()) {
                 boolean toErase = true;
                 byte b;

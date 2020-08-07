@@ -26,7 +26,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private static Hypixelify plugin;
     private CustomShop shop;
     private String version;
-  //  public HashMap<UUID, org.pronze.hypixelify.api.database.PlayerDatabase> playerData = new HashMap<>();
     private DatabaseManager databaseManager;
 
     private PartyManager partyManager;
@@ -85,7 +84,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator.loadDefaults();
 
 
-        boolean hookedWithCitizens = this.getServer().getPluginManager().getPlugin("Citizens") != null;
+        boolean hookedWithCitizens = SafeShop.canInstantiate();
         boolean isLegacy = Main.isLegacy();
 
         Bukkit.getLogger().info("");
@@ -125,14 +124,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
         if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
 
-        if (this.getServer().getPluginManager().getPlugin("Citizens") == null ||
-                !Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)) {
+        if (!configurator.config.getBoolean("citizens-shop", true) || !hookedWithCitizens) {
 
             Bukkit.getLogger().warning("Failed to initalize Citizens shop reverting to normal shops...");
 
             if (Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)
             || configurator.config.getBoolean("citizens-shop", true)) {
-
                 configurator.config.set("citizens-shop", false);
                 configurator.saveConfig();
                 Main.getConfigurator().config.set("shop.citizens-enabled", false);
@@ -203,6 +200,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());
         Objects.requireNonNull(getCommand("shout")).setExecutor(new ShoutCommand());
+
     }
 
     @Override

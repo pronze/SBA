@@ -29,6 +29,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
         if (party == null || party.getLeader() == null || !party.getLeader().equals(leader))
             return;
 
+
         for (Player pl : party.getAllPlayers()) {
             if (pl != null) {
                 if (pl.isOnline()) {
@@ -157,6 +158,8 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
     @Override
     public void warpPlayersToLeader(Player leader) {
+        if(getParty(leader).getPlayers() == null || getParty(leader).getPlayers().isEmpty()) return;
+
         if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(leader)) {
             Game game = BedwarsAPI.getInstance().getGameOfPlayer(leader);
             ShopUtil.sendMessage(leader, Messages.message_warping);

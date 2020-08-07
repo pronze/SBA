@@ -33,6 +33,8 @@ public class Shop extends AbstractListener {
     private GameStore upgradeShop;
 
     public Shop(){
+
+
         PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
         shop = new GameStore(null, "shop.yml", false,  "[BW] Shop",
                 false, false);
@@ -59,29 +61,31 @@ public class Shop extends AbstractListener {
         Game game = e.getGame();
         ShopUtil.RemoveNPCFromGame(game);
 
+
         for (GameStore store : Main.getGame(game.getName()).getGameStores()) {
-            if (store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
-                    || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
-                LivingEntity villager = store.kill();
-                if (villager != null) {
-                    Main.unregisterGameEntity(villager);
-                }
-                String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
-                if (ShopName.equalsIgnoreCase("shop")) {
-                    ShopName = ITEM_SHOP_NAME;
-                } else {
-                    ShopName = UPGRADE_SHOP_NAME;
-                }
+                if (store.getShopFile() != null && (store.getShopFile().equalsIgnoreCase("shop.yml")
+                        || store.getShopFile().equalsIgnoreCase("upgradeShop.yml"))) {
+                    LivingEntity villager = store.kill();
+                    if (villager != null) {
+                        Main.unregisterGameEntity(villager);
+                    }
+                    String ShopName = store.getShopFile().replaceFirst("[.][^.]+$", "");
+                    if (ShopName.equalsIgnoreCase("shop")) {
+                        ShopName = ITEM_SHOP_NAME;
+                    } else {
+                        ShopName = UPGRADE_SHOP_NAME;
+                    }
 
-                EntityType type = ShopName.equals(UPGRADE_SHOP_NAME) ? EntityType.BLAZE : EntityType.PLAYER;
-                NPC npc = CitizensAPI.getNPCRegistry().createNPC(type, ShopName);
+                    EntityType type = ShopName.equals(UPGRADE_SHOP_NAME) ? EntityType.BLAZE : EntityType.PLAYER;
+                    NPC npc = CitizensAPI.getNPCRegistry().createNPC(type, ShopName);
 
-                npc.spawn(store.getStoreLocation());
-                npc.getTrait(LookClose.class).lookClose(true);
-                if (npc.getName().contains(ITEM_SHOP_NAME))
-                    npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
-            }
+                    npc.spawn(store.getStoreLocation());
+                    npc.getTrait(LookClose.class).lookClose(true);
+                    if (npc.getName().contains(ITEM_SHOP_NAME))
+                        npc.getTrait(SkinTrait.class).setSkinName("daddieskitten");
+                }
         }
+
     }
     @EventHandler
     public void onEntityInteract(PlayerInteractEntityEvent event) {

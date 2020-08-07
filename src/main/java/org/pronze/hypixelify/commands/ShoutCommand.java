@@ -17,6 +17,11 @@ import org.screamingsandals.bedwars.api.game.Game;
 import java.util.List;
 
 public class ShoutCommand implements TabExecutor {
+
+    public boolean hasPermission(Player player){
+        return player.hasPermission("bwaddon.shout") || player.isOp();
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(!(sender instanceof Player)){
@@ -46,7 +51,7 @@ public class ShoutCommand implements TabExecutor {
         final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
         boolean cancelShout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0;
 
-        if(!cancelShout) {
+        if(!cancelShout && !hasPermission(player)) {
             if (!playerDatabase.canShout()) {
                 String shout = String.valueOf(playerDatabase.getShoutTimeOut());
                 for (String st : Messages.message_shout_wait) {
@@ -75,7 +80,7 @@ public class ShoutCommand implements TabExecutor {
             pl.sendMessage(st);
         }
 
-        if(!cancelShout)
+        if(!cancelShout && !hasPermission(player))
             playerDatabase.shout();
 
         return true;
