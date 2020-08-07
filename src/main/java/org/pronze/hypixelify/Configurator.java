@@ -411,7 +411,6 @@ public class Configurator {
                 "&1-----------------------------------------------------"));
         checkOrSetConfig(modify, "main-lobby.enabled", false);
         checkOrSetConfig(modify, "main-lobby.lines", Arrays.asList(
-                "{date}",
                 "",
                 "Your Level: §a{level}",
                 "",
@@ -454,16 +453,19 @@ public class Configurator {
         Scoreboard_Lines = new HashMap<>();
         for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
             Scoreboard_Lines.put(key,
-                    LobbyScoreboard.listcolor(config.getStringList("scoreboard.lines." + key)));
+                    LobbyScoreboard.listColor(config.getStringList("scoreboard.lines." + key)));
 
         game_size = new HashMap<>();
         for (String s : Main.getGameNames()) {
             int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
             game_size.put(s, size);
         }
+
         tag_health = Hypixelify.getConfigurator().config.getBoolean("tag_health");
-        overstats_message = LobbyScoreboard.listcolor(config.getStringList("overstats.message"));
-        gamestart_message = LobbyScoreboard.listcolor(config.getStringList("game-start.message"));
+        overstats_message = LobbyScoreboard.listColor(config.getStringList("overstats.message"));
+        gamestart_message = LobbyScoreboard.listColor(config.getStringList("game-start.message"));
+
+
         if (config.getBoolean("first_start")) {
             Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
             upgradeCustomFiles();
@@ -553,26 +555,6 @@ public class Configurator {
         }
     }
 
-    public String getString(String string, String defaultString) {
-        if (config.getConfigurationSection(string) == null) {
-            return ChatColor.translateAlternateColorCodes('&', defaultString);
-        }
-        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(config.getString(string)));
-    }
-
-    public boolean getBoolean(String string, boolean defaultBoolean) {
-        if (config.getConfigurationSection(string) == null) {
-            return defaultBoolean;
-        }
-        return config.getBoolean(string);
-    }
-
-    public int getInt(String string, int defaultInt) {
-        if (config.getConfigurationSection(string) == null) {
-            return defaultInt;
-        }
-        return config.getInt(string);
-    }
 
     public List<String> getStringList(String string) {
         List<String> list = new ArrayList<>();
@@ -581,10 +563,6 @@ public class Configurator {
             list.add(s);
         }
         return list;
-    }
-
-    public Set<String> getStringKeys(String string) {
-        return Objects.requireNonNull(config.getConfigurationSection(string)).getKeys(true);
     }
 
     private void checkOrSetConfig(AtomicBoolean modify, String path, Object value) {

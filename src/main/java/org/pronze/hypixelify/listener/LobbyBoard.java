@@ -15,13 +15,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
-import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
@@ -32,13 +28,11 @@ public class LobbyBoard extends AbstractListener {
     private final List<String> lobby_scoreboard_lines;
     private int count = 0;
     private final List<String> board_body;
-    private final SimpleDateFormat formatter;
     private BukkitTask task;
 
     public LobbyBoard() {
         players = new ArrayList<>();
         board_body = Hypixelify.getConfigurator().config.getStringList("main-lobby.lines");
-        formatter = new SimpleDateFormat(Configurator.date);
         lobby_scoreboard_lines = Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
         try {
             location = new Location(Bukkit.getWorld(Hypixelify.getConfigurator().config.getString("main-lobby.world")),
@@ -67,7 +61,7 @@ public class LobbyBoard extends AbstractListener {
             }.runTaskLater(Hypixelify.getInstance(), 40L);
         }
 
-        new BukkitRunnable() {
+        task =  new BukkitRunnable() {
             public void run() {
                 if(players == null)
                     this.cancel();
@@ -100,7 +94,7 @@ public class LobbyBoard extends AbstractListener {
     public void onPlayerJoin(PlayerJoinEvent e){
         Player player = e.getPlayer();
 
-        task = new BukkitRunnable(){
+      new BukkitRunnable(){
             @Override
             public void run() {
                 if(player.getScoreboard().getObjective("bwa-mainlobby") != null) return;
@@ -134,18 +128,13 @@ public class LobbyBoard extends AbstractListener {
         players.remove(e.getPlayer());
     }
 
-    public String getDate() {
-        Date date = new Date();
-        return formatter.format(date);
-    }
-
 
     public void createBoard(Player player) {
         if(players.contains(player)) return;
 
-        if(Hypixelify.getInstance().playerData == null) return;
+        if(Hypixelify.getDatabaseManager().getDatabase(player) == null) return;
 
-        final PlayerDatabase  playerData = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase  playerData = Hypixelify.getDatabaseManager().getDatabase(player);
         if(playerData == null) return;
 
         Scoreboard scoreboard = player.getScoreboard();
@@ -175,7 +164,6 @@ public class LobbyBoard extends AbstractListener {
 
 
                 s = s
-                        .replace("{date}", "§7" + getDate())
                         .replace("{kills}", String.valueOf(playerData.getKills()))
                         .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))
                         .replace("{deaths}", String.valueOf(playerData.getDeaths()))

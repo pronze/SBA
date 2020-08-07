@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.database.DatabaseManager;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.ArrayList;
@@ -73,8 +74,8 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
    public void addInvitedMember(Player pl) {
        if (!invitedMembers.contains(pl)) {
            invitedMembers.add(pl);
-           Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setInvited(true);
-           Hypixelify.getInstance().playerData.get(pl.getUniqueId()).setInvitedParty(this);
+           Hypixelify.getDatabaseManager().getDatabase(pl).setInvited(true);
+           Hypixelify.getDatabaseManager().getDatabase(pl).setInvitedParty(this);
        }
    }
 

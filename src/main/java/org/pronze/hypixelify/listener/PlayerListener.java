@@ -17,6 +17,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.database.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -66,10 +67,10 @@ public class PlayerListener extends AbstractListener {
     public void onPlayerLeave(PlayerQuitEvent e){
         if(!partyEnabled) return;
         Player player = e.getPlayer();
-        final HashMap<UUID, PlayerDatabase> database = Hypixelify.getInstance().playerData;
-        if(database.get(player.getUniqueId()) == null) return;
+        final DatabaseManager dbManager = Hypixelify.getDatabaseManager();
+        if(dbManager.getDatabase(player) == null) return;
 
-        database.get(player.getUniqueId()).handleOffline();
+        dbManager.getDatabase(player).handleOffline();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -295,8 +296,8 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (partyEnabled && Hypixelify.getInstance().playerData.get(p.getUniqueId()) == null)
-            Hypixelify.createDatabase(p);
+        if (partyEnabled && Hypixelify.getDatabaseManager().getDatabase(p) == null)
+            Hypixelify.getDatabaseManager().createDatabase(p);
 
         if (!p.isOp())
             return;

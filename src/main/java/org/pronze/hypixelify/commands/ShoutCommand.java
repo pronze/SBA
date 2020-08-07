@@ -43,7 +43,7 @@ public class ShoutCommand implements TabExecutor {
             return true;
         }
 
-        final PlayerDatabase playerDatabase = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
         boolean cancelShout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0;
 
         if(!cancelShout) {

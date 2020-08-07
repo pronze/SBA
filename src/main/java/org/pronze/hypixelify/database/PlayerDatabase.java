@@ -20,7 +20,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     private UUID player;
     private boolean isInParty = false;
     private boolean isInvited = false;
-    private boolean clearData = false;
     private boolean partyChat = false;
     private int expiredTime = 60;
     private int timeout = 60;
@@ -35,7 +34,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         pInstance = player;
         shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         init();
-        Hypixelify.getInstance().playerData.put(player.getUniqueId(), this);
     }
 
     @Override
@@ -118,10 +116,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         partyLeader = player;
     }
 
-    @Override
-    public UUID getPlayerUUID() {
-        return player;
-    }
 
     @Override
     public void setExpiredTimeTimeout(int timeout) {
@@ -261,7 +255,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                             if (pl.isOnline()) {
                                                 ShopUtil.sendMessage(pl, Messages.message_disband_inactivity);
                                             }
-                                            org.pronze.hypixelify.api.database.PlayerDatabase plDatabase = Hypixelify.getInstance().playerData.get(pl.getUniqueId());
+                                            org.pronze.hypixelify.api.database.PlayerDatabase plDatabase = Hypixelify.getDatabaseManager().getDatabase(pl);
                                             if (plDatabase != null) {
                                                 plDatabase.setIsInParty(false);
                                                 plDatabase.setPartyLeader(null);
@@ -275,7 +269,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 setPartyLeader(null);
                             }
                         }
-                        clearData = true;
+                        updateDatabase();
                         cancel();
                     }
                 }
@@ -290,10 +284,8 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
 
     @Override
     public void updateDatabase() {
-
-        final PartyManager partyManager = Hypixelify.getPartyManager();
         if (!isInParty || !isPartyLeader()) return;
-
+        final PartyManager partyManager = Hypixelify.getPartyManager();
         final Party party = partyManager.getParty(partyLeader);
         if (party == null) return;
         if (party.shouldDisband()) {
@@ -307,11 +299,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
             partyManager.removeParty(partyLeader);
             setPartyLeader(null);
         }
-    }
-
-    @Override
-    public boolean toBeRemoved() {
-        return clearData;
     }
 
     @Override
@@ -347,8 +334,10 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 ShopUtil.sendMessage(pInstance, Messages.message_invite_expired);
                         }
                         setInvitedParty(null);
+                        updateDatabase();
                         this.cancel();
                     } else if (!isInvited) {
+                        updateDatabase();
                         expiredTime = 60;
                         this.cancel();
                     }

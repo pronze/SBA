@@ -20,7 +20,7 @@ public class PartyListener extends AbstractListener{
     public void onBWJoin(BedwarsPlayerJoinedEvent e) {
         Game game = e.getGame();
         Player player = e.getPlayer();
-        final PlayerDatabase data = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase data = Hypixelify.getDatabaseManager().getDatabase(player);
         final Party party = Hypixelify.getPartyManager().getParty(player);
         if (data == null || party == null) return;
         if (!data.isInParty() || data.getPartyLeader() == null) return;
@@ -48,7 +48,7 @@ public class PartyListener extends AbstractListener{
         Game game = e.getGame();
         if (player == null) return;
         if (!player.isOnline()) return;
-        final PlayerDatabase data = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase data = Hypixelify.getDatabaseManager().getDatabase(player);
         final Party party = Hypixelify.getPartyManager().getParty(player);
         if (data == null || party == null) return;
         if (!data.isInParty() || !data.isPartyLeader()) return;

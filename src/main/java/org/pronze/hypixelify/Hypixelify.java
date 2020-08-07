@@ -10,28 +10,25 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.commands.ShoutCommand;
-import org.pronze.hypixelify.database.PlayerDatabase;
+import org.pronze.hypixelify.database.DatabaseManager;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.listener.*;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
-import org.pronze.hypixelify.party.PartyTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
-
-import java.util.HashMap;
 import java.util.Objects;
-import java.util.UUID;
 
 public class Hypixelify extends JavaPlugin implements Listener {
 
     private static Hypixelify plugin;
-    private static CustomShop shop;
-    private static String version;
-    public HashMap<UUID, org.pronze.hypixelify.api.database.PlayerDatabase> playerData = new HashMap<>();
-    public PartyTask partyTask;
+    private CustomShop shop;
+    private String version;
+  //  public HashMap<UUID, org.pronze.hypixelify.api.database.PlayerDatabase> playerData = new HashMap<>();
+    private DatabaseManager databaseManager;
+
     private PartyManager partyManager;
     private Configurator configurator;
     private ArenaManager arenamanager;
@@ -53,23 +50,20 @@ public class Hypixelify extends JavaPlugin implements Listener {
     }
 
     public static CustomShop getShop() {
-        return shop;
+        return plugin.shop;
     }
 
     public static String getVersion() {
-        return version;
+        return plugin.version;
     }
 
-    public GamesInventory getGamesInventory() {
-        return gamesInventory;
+    public static GamesInventory getGamesInventory() {
+        return plugin.gamesInventory;
     }
 
-    public static void createDatabase(Player player){
-        if(!plugin.playerData.containsKey(player.getUniqueId())){
-            plugin.playerData.put(player.getUniqueId(), new PlayerDatabase(player));
-        }
+    public static DatabaseManager getDatabaseManager(){
+        return plugin.databaseManager;
     }
-
     public static boolean isPapiEnabled(){
         return plugin.papiEnabled;
     }
@@ -152,15 +146,14 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
 
         if (configurator.config.getBoolean("party.enabled", true)) {
-            if (playerData == null)
-                playerData = new HashMap<>();
+            if (databaseManager == null)
+                databaseManager = new DatabaseManager();
 
             partyManager = new PartyManager();
-            partyTask = new PartyTask();
             for (Player player : Bukkit.getOnlinePlayers()) {
                 if (player == null) continue;
-                if (playerData.get(player.getUniqueId()) == null) {
-                    playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+                if (databaseManager.getDatabase(player) == null) {
+                    databaseManager.createDatabase(player);
                 }
             }
             Objects.requireNonNull(getCommand("party")).setExecutor(new PartyCommand());
@@ -212,16 +205,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public void onDisable() {
         if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
             Bukkit.getLogger().info("[SBAHypixelify]: Shutting down party tasks...");
-            partyTask.cancel();
             if (partyManager != null && partyManager.parties != null) {
                 partyManager.parties.clear();
                 partyManager.parties = null;
                 partyManager = null;
             }
 
-            if (playerData != null) {
-                playerData.clear();
-                playerData = null;
+            if (databaseManager != null) {
+                databaseManager.destroy();
+                databaseManager = null;
             }
         }
         Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");

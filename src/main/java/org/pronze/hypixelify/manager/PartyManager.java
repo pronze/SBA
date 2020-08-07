@@ -8,11 +8,9 @@ import org.pronze.hypixelify.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public class PartyManager implements org.pronze.hypixelify.api.party.PartyManager{
 
@@ -38,7 +36,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
                         pl.sendMessage(ShopUtil.translateColors(str));
                     }
                 }
-                final PlayerDatabase plDatabase = Hypixelify.getInstance().playerData.get(pl.getUniqueId());
+                final PlayerDatabase plDatabase = Hypixelify.getDatabaseManager().getDatabase(pl);
                 if (plDatabase != null) {
                     plDatabase.setIsInParty(false);
                     plDatabase.setPartyLeader(null);
@@ -46,7 +44,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
             }
         }
 
-        Hypixelify.getInstance().playerData.get(leader.getUniqueId()).setIsInParty(false);
+        Hypixelify.getDatabaseManager().getDatabase(leader).setIsInParty(false);
 
         parties.get(leader).disband();
         parties.remove(leader);
@@ -54,15 +52,14 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
     @Override
     public boolean isInParty(Player player) {
-        if (Hypixelify.getInstance().playerData.get(player.getUniqueId()) != null)
-            return Hypixelify.getInstance().playerData.get(player.getUniqueId()).isInParty();
+        if (Hypixelify.getDatabaseManager().getDatabase(player) != null)
+            return Hypixelify.getDatabaseManager().getDatabase(player).isInParty();
 
         return false;
     }
 
     @Override
     public void addToParty(Player player, org.pronze.hypixelify.api.party.Party party) {
-        final HashMap<UUID, PlayerDatabase> Database = Hypixelify.getInstance().playerData;
 
         Player leader = party.getLeader();
         if (leader == null) return;
@@ -72,8 +69,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
         parties.get(leader).addMember(player);
         parties.get(leader).removeInvitedMember(player);
-        final PlayerDatabase playerDatabase = Database.get(player.getUniqueId());
-
+        final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
         playerDatabase.setPartyLeader(leader);
         playerDatabase.setInvited(false);
         playerDatabase.setIsInParty(true);
@@ -91,7 +87,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
     @Override
     public void removeFromParty(Player player, org.pronze.hypixelify.api.party.Party party) {
-        final PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
 
         if (db == null || party == null || party.getLeader() == null)
             return;
@@ -113,7 +109,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
     @Override
     public void kickFromParty(Player player) {
         if (getParty(player) == null || player == null) return;
-        final PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
         if (db == null || db.getPartyLeader() == null) return;
         Player leader = db.getPartyLeader();
         if (leader == null || parties.get(leader) == null) return;
@@ -141,7 +137,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
     public Party getParty(Player player) {
         if (!isInParty(player)) return null;
 
-        final PlayerDatabase database = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        final PlayerDatabase database = Hypixelify.getDatabaseManager().getDatabase(player);
         if (database == null) return null;
         if (database.getPartyLeader() != null && isInParty(database.getPartyLeader())) {
             return parties.get(database.getPartyLeader());
@@ -199,6 +195,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
     public void removeParty(Player leader) {
         parties.remove(leader);
     }
+
 
 
 }

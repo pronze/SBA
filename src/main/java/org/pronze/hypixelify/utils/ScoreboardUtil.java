@@ -10,7 +10,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import java.util.*;
 
 public class ScoreboardUtil {
-    private static Map<Player, Scoreboard> scoreboards = new HashMap<>();
+    private static final Map<Player, Scoreboard> scoreboards = new HashMap<>();
 
 
     private static String[] cutUnranked(String[] content) {
@@ -51,9 +51,9 @@ public class ScoreboardUtil {
                 catch(Exception e){
                     scoreboard.registerNewObjective("bwa-lobby", "dummy");
                 }
-                scoreboard.getObjective("bwa-lobby").setDisplaySlot(DisplaySlot.SIDEBAR);
+                Objects.requireNonNull(scoreboard.getObjective("bwa-lobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             }
-            scoreboard.getObjective(DisplaySlot.SIDEBAR).setDisplayName(elements[0]);
+            Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).setDisplayName(elements[0]);
             for (int i = 1; i < elements.length; i++) {
                 if (elements[i] != null &&
                         Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).getScore(elements[i]).getScore() != 16 - i) {
@@ -148,9 +148,8 @@ public class ScoreboardUtil {
                 Team team = scoreboard.getTeam(t.getName());
                 if (team == null)
                     team = scoreboard.registerNewTeam(t.getName());
-                if (!playertag_prefix.equals(""))
-                    team.setPrefix(playertag_prefix.replace("{color}", cl).replace("{team}", ChatColor.BOLD +
-                            String.valueOf(t.getName().charAt(0))) + cl);
+                team.setPrefix(playertag_prefix.replace("{color}", cl).replace("{team}", ChatColor.BOLD +
+                        String.valueOf(t.getName().charAt(0))) + cl);
                 team.setAllowFriendlyFire(false);
                 for (Player pl : t.getConnectedPlayers()) {
                     if (!team.hasEntry(pl.getName())) {

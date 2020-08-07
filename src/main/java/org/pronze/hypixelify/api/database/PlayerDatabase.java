@@ -1,9 +1,6 @@
 package org.pronze.hypixelify.api.database;
-
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.api.party.Party;
-
-import java.util.UUID;
 
 public interface PlayerDatabase {
 
@@ -12,7 +9,6 @@ public interface PlayerDatabase {
 
     boolean isPartyLeader();
 
-    boolean toBeRemoved();
 
     boolean isInParty();
 
@@ -41,8 +37,6 @@ public interface PlayerDatabase {
     String getName();
 
     Party getInvitedParty();
-
-    UUID getPlayerUUID();
 
     boolean canShout();
 

@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.database.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -38,8 +39,8 @@ public class PartyCommand implements TabExecutor {
             return true;
         }
 
-        final HashMap<UUID, PlayerDatabase> Database = Hypixelify.getInstance().playerData;
-        final PlayerDatabase playerDatabase = Database.get(player.getUniqueId());
+        final DatabaseManager databaseManager = Hypixelify.getDatabaseManager();
+        final PlayerDatabase playerDatabase = databaseManager.getDatabase(player);
         final PartyManager partyManager = Hypixelify.getPartyManager();
 
         if (args[0].equalsIgnoreCase("help")) {
@@ -80,13 +81,13 @@ public class PartyCommand implements TabExecutor {
             }
 
             if (playerDatabase == null)
-                Hypixelify.createDatabase(player);
+                Hypixelify.getDatabaseManager().createDatabase(player);
 
-            PlayerDatabase invitedData = Database.get(invited.getUniqueId());
+            PlayerDatabase invitedData = databaseManager.getDatabase(invited);
             if (invitedData == null)
-                Hypixelify.createDatabase(invited);
+                databaseManager.createDatabase(invited);
 
-            if (Database.get(player.getUniqueId()).isInvited()) {
+            if (databaseManager.getDatabase(player).isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_decline_inc);
                 return true;
             }
@@ -355,12 +356,14 @@ public class PartyCommand implements TabExecutor {
             return null;
         Player player = (Player) commandSender;
 
-        if (Hypixelify.getInstance().playerData.get(player.getUniqueId()) != null && Hypixelify.getInstance().playerData.get(player.getUniqueId()).isInvited()) {
+        final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
+
+        if (playerDatabase!= null && playerDatabase.isInvited()) {
             return Arrays.asList("accept", "decline");
         }
         if (strings.length == 1) {
-            if (Hypixelify.getInstance().playerData.get(player.getUniqueId()) != null && Hypixelify.getInstance().playerData.get(player.getUniqueId()).isInParty()
-                    && Hypixelify.getInstance().playerData.get(player.getUniqueId()).getPartyLeader().equals(player))
+            if (playerDatabase != null && playerDatabase.isInParty()
+                    && playerDatabase.getPartyLeader().equals(player))
                 return Arrays.asList("invite", "list", "disband", "kick", "warp");
 
 

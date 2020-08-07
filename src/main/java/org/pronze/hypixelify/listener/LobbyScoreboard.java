@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.listener;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,29 +19,24 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 
 public class LobbyScoreboard implements Listener {
     private String title = "";
-    private String countdown_message;
-    private boolean isEnabled;
-    private  List<String> lobby_scoreboard_lines;
-
-    private String getDate() {
-        Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat(Configurator.date);
-        return format.format(date);
-    }
+    private final String countdown_message;
+    private final boolean isEnabled;
+    private final List<String> lobby_scoreboard_lines;
+    private final String date;
 
     public static String format(String format){
         return ChatColor.translateAlternateColorCodes('&', format);
     }
 
-    public static List<String> listcolor(List<String> list) {
-        List<String> clist = new ArrayList<>();
+    public static List<String> listColor(List<String> list) {
+        List<String> cList = new ArrayList<>();
         for (String l : list)
-            clist.add(ChatColor.translateAlternateColorCodes('&', l));
-        return clist;
+            cList.add(ChatColor.translateAlternateColorCodes('&', l));
+        return cList;
     }
 
     public LobbyScoreboard() {
-
+        date = new SimpleDateFormat(Configurator.date).format(new Date());
         List<String> lobby_scoreboard = Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
         lobby_scoreboard_lines = Hypixelify.getConfigurator().getStringList("lobby_scoreboard.lines");
 
@@ -66,14 +60,13 @@ public class LobbyScoreboard implements Listener {
             return;
         final Game game = e.getGame();
         final Player player = e.getPlayer();
-        final int tc = 0;
 
         new BukkitRunnable() {
 
             public void run() {
                 if (player.isOnline()  && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
                         e.getGame().getStatus() == GameStatus.WAITING) {
-                        updateScoreboard(player, game, tc);
+                        updateScoreboard(player, game);
                 } else {
                     this.cancel();
                 }
@@ -81,7 +74,7 @@ public class LobbyScoreboard implements Listener {
         }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
     }
 
-    private void updateScoreboard(Player player, Game game, int tc) {
+    private void updateScoreboard(Player player, Game game) {
         List<String> ncelements = new ArrayList<>();
         ncelements.add(title.replace("{game}", game.getName()));
         ncelements.addAll(getLine(player, game));
@@ -128,8 +121,10 @@ public class LobbyScoreboard implements Listener {
                 state = countdown_message.replace("{countdown}", String.valueOf(seconds));
             }
         }
+
         for (String li : lobby_scoreboard_lines) {
-            String l = li.replace("{date}", getDate()).replace("{state}", state).replace("{game}", game.getName())
+            String l = li
+                    .replace("{date}", date).replace("{state}", state).replace("{game}", game.getName())
                     .replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
                     .replace("{maxplayers}", String.valueOf(game.getMaxPlayers()))
                     .replace("{minplayers}", String.valueOf(game.getMinPlayers())).replace("{needplayers}", String.valueOf(needplayers))
@@ -142,26 +137,28 @@ public class LobbyScoreboard implements Listener {
         return line;
     }
 
-    private List<String> elementsPro(List<String> lines) {
-        ArrayList<String> nclines = new ArrayList<>();
-        for (String ls : lines) {
-            String l = ls;
-            if (l != null) {
-                if (nclines.contains(l)) {
-                    for (int i = 0; i == 0; ) {
-                        l = l + "§r";
-                        if (!nclines.contains(l)) {
-                            nclines.add(l);
-                            break;
-                        }
-                    }
-                    continue;
-                }
-                nclines.add(l);
-                continue;
-            }
-            nclines.add(l);
-        }
-        return nclines;
-    }
+
+
+  private List<String> elementsPro(List<String> lines) {
+      ArrayList<String> nclines = new ArrayList<>();
+      for (String ls : lines) {
+          String l = ls;
+          if (l != null) {
+              if (nclines.contains(l)) {
+                  for (int i = 0; i == 0; ) {
+                      l = l + "§r";
+                      if (!nclines.contains(l)) {
+                          nclines.add(l);
+                          break;
+                      }
+                  }
+                  continue;
+              }
+              nclines.add(l);
+              continue;
+          }
+          nclines.add(l);
+      }
+      return nclines;
+  }
 }

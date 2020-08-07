@@ -17,7 +17,7 @@ public class ChatListener extends AbstractListener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e){
         Player player = e.getPlayer();
-        PlayerDatabase db = Hypixelify.getInstance().playerData.get(player.getUniqueId());
+        PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
 
         if(db == null || !db.isInParty() || !db.getPartyChatEnabled()) return;
         Party party = Hypixelify.getPartyManager().getParty(db.getPartyLeader());

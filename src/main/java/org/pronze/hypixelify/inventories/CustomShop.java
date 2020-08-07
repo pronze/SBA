@@ -305,7 +305,7 @@ public class CustomShop implements Listener {
                     if (property.hasName()) {
                         ItemStack newItem = event.getStack();
                         BedwarsApplyPropertyToDisplayedItem applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
-                                player, newItem, property.getReader(player).convertToMap());
+                                player, newItem, property.getReader(player, item).convertToMap());
                         Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
 
                         event.setStack(newItem);
@@ -523,7 +523,7 @@ public class CustomShop implements Listener {
                 for (ItemProperty property : event.getProperties()) {
                     if (property.hasName()) {
                         BedwarsApplyPropertyToBoughtItem applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player,
-                                newItem, property.getReader(player).convertToMap());
+                                newItem, property.getReader(player, event.getItem()).convertToMap());
                         Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
 
                         newItem = applyEvent.getStack();
