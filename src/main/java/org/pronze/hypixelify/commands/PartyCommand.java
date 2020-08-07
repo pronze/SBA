@@ -9,15 +9,13 @@ import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
-import org.pronze.hypixelify.database.DatabaseManager;
+import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 public class PartyCommand implements TabExecutor {
     @Override

@@ -1,5 +1,6 @@
-package org.pronze.hypixelify.database;
+package org.pronze.hypixelify.manager;
 import org.bukkit.entity.Player;
+import org.pronze.hypixelify.database.PlayerDatabase;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -24,7 +25,7 @@ public class DatabaseManager {
         if(!playerData.containsKey(player.getUniqueId())) return;
 
         getDatabase(player).handleOffline();
-        playerData.remove(player.getUniqueId());
+        deleteDatabase(player);
      }
 
 

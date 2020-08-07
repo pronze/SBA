@@ -269,7 +269,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 setPartyLeader(null);
                             }
                         }
-                        updateDatabase();
+                        Hypixelify.getDatabaseManager().updateAll();
                         cancel();
                     }
                 }
@@ -334,10 +334,10 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 ShopUtil.sendMessage(pInstance, Messages.message_invite_expired);
                         }
                         setInvitedParty(null);
-                        updateDatabase();
+                        Hypixelify.getDatabaseManager().updateAll();
                         this.cancel();
                     } else if (!isInvited) {
-                        updateDatabase();
+                        Hypixelify.getDatabaseManager().updateAll();
                         expiredTime = 60;
                         this.cancel();
                     }

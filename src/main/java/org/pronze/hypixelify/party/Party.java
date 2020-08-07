@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.database.DatabaseManager;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.ArrayList;

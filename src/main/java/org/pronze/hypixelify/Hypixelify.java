@@ -10,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.commands.ShoutCommand;
-import org.pronze.hypixelify.database.DatabaseManager;
+import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.listener.*;

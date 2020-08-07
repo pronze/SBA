@@ -4,7 +4,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -16,8 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
-import org.pronze.hypixelify.database.DatabaseManager;
+import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -70,7 +68,7 @@ public class PlayerListener extends AbstractListener {
         final DatabaseManager dbManager = Hypixelify.getDatabaseManager();
         if(dbManager.getDatabase(player) == null) return;
 
-        dbManager.getDatabase(player).handleOffline();
+        dbManager.handleOffline(player);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
