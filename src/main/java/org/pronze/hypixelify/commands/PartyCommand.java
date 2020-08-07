@@ -179,6 +179,10 @@ public class PartyCommand implements TabExecutor {
 
             Party party = partyManager.getParty(playerDatabase.getPartyLeader());
             if (party == null) return true;
+            if(!playerDatabase.getPartyLeader().isOnline()){
+                player.sendMessage(ChatColor.RED + "Please wait until the leader comes back online..., or party disbands");
+                return true;
+            }
             partyManager.removeFromParty(player, party);
             ShopUtil.sendMessage(player, Messages.message_party_left);
         }

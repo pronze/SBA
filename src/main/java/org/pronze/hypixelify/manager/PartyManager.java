@@ -48,6 +48,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
         parties.get(leader).disband();
         parties.remove(leader);
+        Hypixelify.getDatabaseManager().updateAll();
     }
 
     @Override
@@ -83,6 +84,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
                 p.sendMessage(ShopUtil.translateColors(message).replace("{player}", player.getDisplayName()));
             }
         }
+
     }
 
     @Override
@@ -94,16 +96,19 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
 
         parties.get(db.getPartyLeader()).removeMember(player);
 
-        for (Player pl : parties.get(db.getPartyLeader()).getAllPlayers()) {
-            if (pl != null && pl.isOnline()) {
-                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-quit")) {
-                    pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
+        if(parties.get(db.getPartyLeader()).getPlayers() != null && !parties.get(db.getPartyLeader()).getPlayers().isEmpty()) {
+            for (Player pl : parties.get(db.getPartyLeader()).getAllPlayers()) {
+                if (pl != null && pl.isOnline()) {
+                    for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-quit")) {
+                        pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getDisplayName()));
+                    }
                 }
             }
         }
-
         db.setIsInParty(false);
         db.setPartyLeader(null);
+        Hypixelify.getDatabaseManager().updateAll();
+
     }
 
     @Override
@@ -131,6 +136,8 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
         }
         db.setIsInParty(false);
         db.setPartyLeader(null);
+        Hypixelify.getDatabaseManager().updateAll();
+
     }
 
     @Override

@@ -35,7 +35,7 @@ public class DatabaseManager {
                     updateAll();
                 }
             }
-        }.runTaskLater(Hypixelify.getInstance(), 20L * 65);
+        }.runTaskLater(Hypixelify.getInstance(), 20L * 62);
 
      }
 
