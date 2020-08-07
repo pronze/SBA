@@ -50,6 +50,12 @@ public class PartyCommand implements TabExecutor {
             return true;
         }
 
+        else if(playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null
+                && !playerDatabase.getPartyLeader().isOnline()){
+                player.sendMessage(ChatColor.RED + "Please wait until the leader comes back online..., or party disbands");
+                return true;
+        }
+
         else if (args[0].equalsIgnoreCase("invite")) {
             if (args.length != 2) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
@@ -179,10 +185,6 @@ public class PartyCommand implements TabExecutor {
 
             Party party = partyManager.getParty(playerDatabase.getPartyLeader());
             if (party == null) return true;
-            if(!playerDatabase.getPartyLeader().isOnline()){
-                player.sendMessage(ChatColor.RED + "Please wait until the leader comes back online..., or party disbands");
-                return true;
-            }
             partyManager.removeFromParty(player, party);
             ShopUtil.sendMessage(player, Messages.message_party_left);
         }

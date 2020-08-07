@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.manager;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
@@ -28,14 +29,24 @@ public class DatabaseManager {
 
         getDatabase(player).handleOffline();
         new BukkitRunnable(){
+            int timeout = 70;
+            boolean done = false;
+
             @Override
             public void run() {
                 if(getDatabase(player).shouldClear()) {
+                    done = true;
                     deleteDatabase(player);
                     updateAll();
                 }
+                if(done || timeout == 0){
+                    Bukkit.getLogger().info("Task has been cancelled");
+                    cancel();
+                }
+
+                timeout--;
             }
-        }.runTaskLater(Hypixelify.getInstance(), 20L * 62);
+        }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
 
      }
 

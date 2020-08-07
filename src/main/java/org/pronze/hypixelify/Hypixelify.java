@@ -130,7 +130,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
             Bukkit.getLogger().warning("Failed to initalize Citizens shop reverting to normal shops...");
 
-            if (Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)) {
+            if (Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)
+            || configurator.config.getBoolean("citizens-shop", true)) {
+
+                configurator.config.set("citizens-shop", false);
+                configurator.saveConfig();
                 Main.getConfigurator().config.set("shop.citizens-enabled", false);
                 Main.getConfigurator().saveConfig();
                 Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
