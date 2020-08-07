@@ -1,5 +1,7 @@
 package org.pronze.hypixelify.manager;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.PlayerDatabase;
 
 import java.util.HashMap;
@@ -25,7 +27,16 @@ public class DatabaseManager {
         if(!playerData.containsKey(player.getUniqueId())) return;
 
         getDatabase(player).handleOffline();
-        deleteDatabase(player);
+        new BukkitRunnable(){
+            @Override
+            public void run() {
+                if(getDatabase(player).shouldClear()) {
+                    deleteDatabase(player);
+                    updateAll();
+                }
+            }
+        }.runTaskLater(Hypixelify.getInstance(), 20L * 65);
+
      }
 
 

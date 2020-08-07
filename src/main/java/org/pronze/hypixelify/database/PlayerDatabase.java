@@ -27,6 +27,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     private Player partyLeader;
     private int shout;
     private boolean shouted = false;
+    private boolean clear = false;
 
     public PlayerDatabase(Player player) {
         this.player = player.getUniqueId();
@@ -34,6 +35,11 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         pInstance = player;
         shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         init();
+    }
+
+    @Override
+    public boolean shouldClear(){
+        return clear;
     }
 
     @Override
@@ -241,10 +247,12 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                             final Party party = partyManager.getParty(partyLeader);
                             if (party != null) {
                                 if (!partyLeader.getUniqueId().equals(player)) {
-                                    for (Player pl : partyManager.getParty(partyLeader).getAllPlayers()) {
-                                        if (!player.equals(pl.getUniqueId())) {
-                                            for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
-                                                pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", name));
+                                    if(partyManager.getParty(partyLeader).getAllPlayers() != null && !partyManager.getParty(partyLeader).getAllPlayers().isEmpty()) {
+                                        for (Player pl : partyManager.getParty(partyLeader).getAllPlayers()) {
+                                            if (pl != null && pl.isOnline() && !player.equals(pl.getUniqueId())) {
+                                                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
+                                                    pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", name));
+                                                }
                                             }
                                         }
                                     }
@@ -269,12 +277,12 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 setPartyLeader(null);
                             }
                         }
-                        Hypixelify.getDatabaseManager().updateAll();
+                        clear = true;
                         cancel();
                     }
                 }
                 //if player comes back online, reset the timeout.
-                else if (timeout < 60) {
+                else {
                     timeout = 60;
                     cancel();
                 }

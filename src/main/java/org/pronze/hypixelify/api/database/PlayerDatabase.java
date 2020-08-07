@@ -5,6 +5,8 @@ import org.pronze.hypixelify.api.party.Party;
 public interface PlayerDatabase {
 
 
+    boolean shouldClear();
+
     boolean getPartyChatEnabled();
 
     boolean isPartyLeader();
