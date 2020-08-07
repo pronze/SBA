@@ -52,6 +52,7 @@ public class PartyListener extends AbstractListener{
         final Party party = Hypixelify.getPartyManager().getParty(player);
         if (data == null || party == null) return;
         if (!data.isInParty() || !data.isPartyLeader()) return;
+        if(party.getPlayers() == null || party.getPlayers().isEmpty()) return;
 
         for (Player pl : party.getPlayers()) {
             if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) return;

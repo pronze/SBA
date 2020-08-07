@@ -39,8 +39,7 @@ public class DatabaseManager {
                     deleteDatabase(player);
                     updateAll();
                 }
-                if(done || timeout == 0){
-                    Bukkit.getLogger().info("Task has been cancelled");
+                if(done || timeout == 0 || player.isOnline()){
                     cancel();
                 }
 
