@@ -1,4 +1,8 @@
 package org.pronze.hypixelify.listener;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -226,6 +230,27 @@ public class PlayerListener extends AbstractListener {
 
         Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
+
+        //remove custom made objectives from player.
+        if (Hypixelify.isProtocolLib() &&player != null && player.isOnline()) {
+            ProtocolManager m = ProtocolLibrary.getProtocolManager();
+            try {
+                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+                packet.getIntegers().write(0, 1);
+                packet.getStrings().write(0, "bwa-tag");
+                m.sendServerPacket(player, packet);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try {
+                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+                packet.getIntegers().write(0, 1);
+                packet.getStrings().write(0, "bwa-tab");
+                m.sendServerPacket(player, packet);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
         Game game = e.getGame();
         if(game.getStatus() != GameStatus.RUNNING) return;
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
@@ -233,6 +258,8 @@ public class PlayerListener extends AbstractListener {
                 Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
             }
         }
+
+
     }
 
     @EventHandler

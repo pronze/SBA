@@ -7,6 +7,10 @@
 
     <repositories>
         <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
+        </repository>
+        <repository>
             <id>everything</id>
             <url>https://repo.citizensnpcs.co/</url>
         </repository>
@@ -62,6 +66,11 @@
             <artifactId>BedWars-API</artifactId>
             <version>0.2.12-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>4.5.0</version>
         </dependency>
     </dependencies>
     <build>

@@ -1,5 +1,9 @@
 package org.pronze.hypixelify;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -35,11 +39,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private Messages messages;
     private ListenerManager listenerManager;
     public boolean papiEnabled;
+    private boolean isProtocolLib;
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
     }
 
+    public static boolean isProtocolLib(){
+        return plugin.isProtocolLib;
+    }
     public static org.pronze.hypixelify.api.party.PartyManager getPartyManager(){
         return plugin.partyManager;
     }
@@ -86,6 +94,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         boolean hookedWithCitizens = SafeShop.canInstantiate();
         boolean isLegacy = Main.isLegacy();
+        isProtocolLib = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 
         Bukkit.getLogger().info("");
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -205,6 +214,31 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+
+        if(Hypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()){
+            for(Player pl : Bukkit.getOnlinePlayers()){
+                if(pl != null && pl.isOnline()){
+                    ProtocolManager m = ProtocolLibrary.getProtocolManager();
+                    try {
+                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+                        packet.getIntegers().write(0, 1);
+                        packet.getStrings().write(0, "bwa-tag");
+                        m.sendServerPacket(pl, packet);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    try {
+                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
+                        packet.getIntegers().write(0, 1);
+                        packet.getStrings().write(0, "bwa-tab");
+                        m.sendServerPacket(pl, packet);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+
         if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
             Bukkit.getLogger().info("[SBAHypixelify]: Shutting down party tasks...");
             if (partyManager != null && partyManager.parties != null) {
@@ -218,6 +252,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 databaseManager = null;
             }
         }
+
         Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");
         listenerManager.unregisterAll();
         listenerManager = null;

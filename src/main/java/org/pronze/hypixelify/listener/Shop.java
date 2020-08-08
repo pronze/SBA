@@ -33,8 +33,6 @@ public class Shop extends AbstractListener {
     private GameStore upgradeShop;
 
     public Shop(){
-
-
         PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
         shop = new GameStore(null, "shop.yml", false,  "[BW] Shop",
                 false, false);

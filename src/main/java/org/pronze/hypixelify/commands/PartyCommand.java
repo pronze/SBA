@@ -206,10 +206,12 @@ public class PartyCommand implements TabExecutor {
 
             ShopUtil.sendMessage(player, Messages.message_decline_user);
 
-            for (Player pl : invitedParty.getAllPlayers()) {
-                if (pl != null && pl.isOnline()) {
-                    for(String st : Messages.message_declined){
-                        pl.sendMessage(ShopUtil.translateColors(st.replace("{player}", player.getDisplayName())));
+            if(invitedParty.getAllPlayers() != null && !invitedParty.getAllPlayers().isEmpty()) {
+                for (Player pl : invitedParty.getAllPlayers()) {
+                    if (pl != null && pl.isOnline()) {
+                        for (String st : Messages.message_declined) {
+                            pl.sendMessage(ShopUtil.translateColors(st.replace("{player}", player.getDisplayName())));
+                        }
                     }
                 }
             }
@@ -231,6 +233,7 @@ public class PartyCommand implements TabExecutor {
             Player leader = playerDatabase.getPartyLeader();
             if(leader == null) return true;
             player.sendMessage("Players: ");
+            if(partyManager.getParty(leader).getPlayers() == null) return true;
             for (Player pl : partyManager.getParty(leader).getAllPlayers()) {
                 player.sendMessage(pl.getDisplayName());
             }
@@ -279,6 +282,9 @@ public class PartyCommand implements TabExecutor {
                 }
                 return true;
             }
+
+            if(partyManager.getParty(player).getPlayers() == null ||
+            partyManager.getParty(player).getPlayers().isEmpty()) return true;
 
             if (!partyManager.getParty(player).getAllPlayers().contains(invited)) {
                 ShopUtil.sendMessage(player, Messages.message_player_not_found);

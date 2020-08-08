@@ -1,6 +1,4 @@
 package org.pronze.hypixelify.listener;
-
-import org.bukkit.Bukkit;
 import org.pronze.hypixelify.Hypixelify;
 
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ public class ListenerManager {
                 listeners.add(new PartyListener());
         }
         if(Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)
-        && Bukkit.getServer().getPluginManager().getPlugin("Citizens") != null){
+        && SafeShop.canInstantiate()){
                 listeners.add(new Shop());
         }
         if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){

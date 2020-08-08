@@ -30,17 +30,19 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
             return;
 
 
-        for (Player pl : party.getAllPlayers()) {
-            if (pl != null) {
-                if (pl.isOnline()) {
-                    for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.disband")) {
-                        pl.sendMessage(ShopUtil.translateColors(str));
+        if(party.getPlayers() != null && !party.getPlayers().isEmpty()) {
+            for (Player pl : party.getAllPlayers()) {
+                if (pl != null) {
+                    if (pl.isOnline()) {
+                        for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.disband")) {
+                            pl.sendMessage(ShopUtil.translateColors(str));
+                        }
                     }
-                }
-                final PlayerDatabase plDatabase = Hypixelify.getDatabaseManager().getDatabase(pl);
-                if (plDatabase != null) {
-                    plDatabase.setIsInParty(false);
-                    plDatabase.setPartyLeader(null);
+                    final PlayerDatabase plDatabase = Hypixelify.getDatabaseManager().getDatabase(pl);
+                    if (plDatabase != null) {
+                        plDatabase.setIsInParty(false);
+                        plDatabase.setPartyLeader(null);
+                    }
                 }
             }
         }

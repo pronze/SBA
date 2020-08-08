@@ -45,7 +45,7 @@ public class ScoreBoard {
                 if (game.getStatus() != GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
                     ticks += 2;
                     updateTitle();
-                    if (ticks % 20 == 0)
+                    if (ticks % 10 == 0)
                         updateScoreboard();
                 } else {
                     cancel();
