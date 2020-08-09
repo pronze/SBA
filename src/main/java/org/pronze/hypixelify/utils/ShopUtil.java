@@ -13,6 +13,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
 import org.pronze.hypixelify.listener.PlayerListener;
 import org.pronze.hypixelify.listener.Shop;
@@ -479,6 +480,16 @@ public class ShopUtil {
             if (p != null && p.getType().name().endsWith(name) && !p.getType().name().equalsIgnoreCase(newItem.getType().name())) {
                 player.getInventory().remove(p);
             }
+        }
+    }
+
+    public static String ChatColorChanger(Player player){
+        final PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
+        if(db.getLevel() > 100 || player.isOp()){
+            return "§f";
+        }
+        else{
+            return "§7";
         }
     }
 

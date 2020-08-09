@@ -7,6 +7,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.game.Game;
 
 public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
@@ -15,13 +16,19 @@ public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     private ItemStack stack;
     private String name;
     private  RunningTeam team;
+    private Game game;
 
 
-    public PlayerToolUpgradeEvent(Player player, ItemStack stack, String name, RunningTeam team){
+    public PlayerToolUpgradeEvent(Player player, ItemStack stack, String name, RunningTeam team, Game game){
         this.player = player;
         this.stack = stack;
         this.name = name;
         this.team = team;
+        this.game = game;
+    }
+
+    public Game getGame(){
+        return game;
     }
 
     public RunningTeam getTeam(){

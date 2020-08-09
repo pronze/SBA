@@ -90,6 +90,7 @@ public class Configurator {
 
         AtomicBoolean modify = new AtomicBoolean(false);
 
+        checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
         checkOrSetConfig(modify, "legacy-mode", false);
         checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));

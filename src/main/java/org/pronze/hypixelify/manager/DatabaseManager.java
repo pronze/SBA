@@ -34,6 +34,9 @@ public class DatabaseManager {
 
             @Override
             public void run() {
+                if(getDatabase(player) == null){
+                    cancel();
+                }
                 if(getDatabase(player).shouldClear()) {
                     done = true;
                     deleteDatabase(player);

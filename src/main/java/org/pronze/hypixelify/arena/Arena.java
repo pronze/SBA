@@ -1,24 +1,37 @@
 package org.pronze.hypixelify.arena;
 
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.pronze.hypixelify.Configurator;
+import org.pronze.hypixelify.scoreboard.ScoreBoard;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.Team;
+import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.nms.title.Title;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bukkit.entity.Player;
-import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.scoreboard.ScoreBoard;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.events.*;
-import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.nms.title.Title;
-
 public class Arena {
-    private Game game;
-    private ScoreBoard scoreBoard;
     public UpgradeTask upgradeTask;
+    private final Game game;
+    private final ScoreBoard scoreBoard;
+    private final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
+
+    public Arena(Game game) {
+        this.game = game;
+        scoreBoard = new ScoreBoard(this);
+
+        upgradeTask = new UpgradeTask(game);
+    }
 
     public Game getGame() {
         return this.game;
@@ -28,19 +41,9 @@ public class Arena {
         return this.scoreBoard;
     }
 
-    public Arena(Game game) {
-        this.game = game;
-        scoreBoard = new ScoreBoard(this);
-
-        upgradeTask = new UpgradeTask(game);
-    }
-
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getPlayer())) return;
-        if(!e.getGame().equals(game)) return;
-
-        for(Player p : e.getTeam().getConnectedPlayers()){
-            Title.sendTitle(p,"§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
+        for (Player p : e.getTeam().getConnectedPlayers()) {
+            Title.sendTitle(p, "§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
         }
     }
 
@@ -48,14 +51,14 @@ public class Arena {
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {
             scoreBoard.updateScoreboard();
-            if(upgradeTask != null && !upgradeTask.isCancelled()) {
+            if (upgradeTask != null && !upgradeTask.isCancelled()) {
                 upgradeTask.cancel();
                 upgradeTask = null;
             }
             if (e.getWinningTeam() != null) {
                 Team winner = e.getWinningTeam();
                 Map<String, Integer> dataKills = new HashMap<>();
-                for(Player player : e.getGame().getConnectedPlayers()){
+                for (Player player : e.getGame().getConnectedPlayers()) {
                     dataKills.put(player.getDisplayName(),
                             Main.getPlayerStatisticsManager().getStatistic(player).getCurrentKills());
                 }
@@ -92,7 +95,7 @@ public class Arena {
                 for (Player teamplayer : e.getWinningTeam().getConnectedPlayers())
                     WinTeamPlayers.add(teamplayer.getName());
 
-                for(Player pl : e.getWinningTeam().getConnectedPlayers()){
+                for (Player pl : e.getWinningTeam().getConnectedPlayers()) {
                     Title.sendTitle(pl, "§6§lVICTORY!", "", 0, 90, 0);
                 }
                 for (Player player : game.getConnectedPlayers()) {
@@ -111,18 +114,44 @@ public class Arena {
         }
     }
 
-    public void onGameStarted(BedwarsGameStartedEvent e){
-        if(!e.getGame().equals(game)) return;
-        for(Player p : e.getGame().getConnectedPlayers()){
-            for(String os : Configurator.gamestart_message){
+    public void onGameStarted(BedwarsGameStartedEvent e) {
+        if (!e.getGame().equals(game)) return;
+        for (Player p : e.getGame().getConnectedPlayers()) {
+            for (String os : Configurator.gamestart_message) {
                 p.sendMessage(os);
             }
         }
+
+        for (RunningTeam t : game.getRunningTeams()) {
+            purchasedTrap.put(t, false);
+        }
+
+    }
+
+    public boolean addTrap(RunningTeam t){
+        if(purchasedTrap.get(t)) return false;
+
+        purchasedTrap.put(t, true);
+        return true;
+    }
+
+    public void PlayerMoveEvent(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        double radius = Math.pow(7, 2);
+
+        if (!purchasedTrap.containsValue(true)) return;
+
+        for (RunningTeam rt : purchasedTrap.keySet()) {
+            if (!purchasedTrap.get(rt)) continue;
+
+            if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= radius) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 1));
+                purchasedTrap.put(rt, false);
+            }
+        }
+
     }
 
 
-
-
-
-    }
+}
 

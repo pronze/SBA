@@ -24,11 +24,15 @@ import java.util.List;
 public class LobbyBoard extends AbstractListener {
 
     public static List<Player> players;
-    private Location location;
+    private static Location location;
     private final List<String> lobby_scoreboard_lines;
     private int count = 0;
     private final List<String> board_body;
     private BukkitTask task;
+
+    public static boolean isInWorld(Location loc){
+        return loc.getWorld().equals(location.getWorld());
+    }
 
     public LobbyBoard() {
         players = new ArrayList<>();

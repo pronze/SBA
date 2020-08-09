@@ -13,7 +13,7 @@ import org.screamingsandals.bedwars.Main;
 
 import java.util.UUID;
 
-public class PlayerDatabase implements org.pronze.hypixelify.api.database.PlayerDatabase{
+public class PlayerDatabase implements org.pronze.hypixelify.api.database.PlayerDatabase {
 
     private final String name;
     private final Player pInstance;
@@ -38,24 +38,24 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
-    public boolean shouldClear(){
+    public boolean shouldClear() {
         return clear;
     }
 
     @Override
-    public int getShoutTimeOut(){
+    public int getShoutTimeOut() {
         return shout;
     }
 
     @Override
-    public void shout(){
-        if(!shouted){
+    public void shout() {
+        if (!shouted) {
             shouted = true;
-            new BukkitRunnable(){
+            new BukkitRunnable() {
                 @Override
                 public void run() {
                     shout--;
-                    if(shout == 0){
+                    if (shout == 0) {
                         shouted = false;
                         shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
                         this.cancel();
@@ -66,7 +66,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
-    public boolean canShout(){
+    public boolean canShout() {
         return !shouted;
     }
 
@@ -138,61 +138,56 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
-    public int getKills(){
+    public int getKills() {
         return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills() +
                 Main.getPlayerStatisticsManager().getStatistic(pInstance).getKills();
     }
 
     @Override
-    public int getWins(){
+    public int getWins() {
         return Main.getPlayerStatisticsManager().getStatistic(pInstance).getWins() +
                 Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentWins();
     }
 
     @Override
-    public int getBedDestroys(){
+    public int getBedDestroys() {
         return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentDestroyedBeds() +
                 Main.getPlayerStatisticsManager().getStatistic(pInstance).getDestroyedBeds();
     }
 
     @Override
-    public int getDeaths(){
+    public int getDeaths() {
         return Main.getPlayerStatisticsManager().getStatistic(pInstance).getDeaths() +
                 Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills();
     }
 
     @Override
-    public int getXP(){
-        int total;
+    public int getXP() {
         try {
-            total = (getBedDestroys() * 5) + (getKills() * 2);
-        }  catch(Exception e){
+            return Main.getPlayerStatisticsManager().getStatistic(pInstance).getScore() +
+                    Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentScore();
+        } catch (Exception e) {
             return 1;
         }
-        return total;
     }
 
     @Override
-    public int getLevel(){
-        try {
-            int xp = getXP();
+    public int getLevel() {
+        int xp = getXP();
 
-            if (xp < 50)
-                return 1;
-        } catch(Exception e){
+        if (xp < 50)
             return 1;
-        }
 
-        return getXP() / 50;
+        return getXP() / 500;
     }
 
     @Override
-    public String getProgress(){
-        String p = "§b{p}§7/§a50";
+    public String getProgress() {
+        String p = "§b{p}§7/§a500";
         int progress;
         try {
-            progress = getXP() - (getLevel() * 50);
-        } catch(Exception e){
+            progress = getXP() - (getLevel() * 500);
+        } catch (Exception e) {
             progress = 1;
         }
         return p
@@ -200,26 +195,26 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
-    public String getCompletedBoxes(){
+    public String getCompletedBoxes() {
         int progress;
         try {
-            progress = (getXP() - (getLevel() * 50)) * 2;
-        } catch(Exception e){
+            progress = (getXP() - (getLevel() * 500)) / 5;
+        } catch (Exception e) {
             progress = 1;
         }
         char i;
-        i = String.valueOf(Math.abs((long)progress)).charAt(0);
-        if(progress < 10) {
+        i = String.valueOf(Math.abs((long) progress)).charAt(0);
+        if (progress < 10) {
             i = '1';
         }
         return "§b" + Strings.repeat("■", Integer.parseInt(String.valueOf(i)))
-                + "§7" +  Strings.repeat("■", 10 - Integer.parseInt(String.valueOf(i)));
+                + "§7" + Strings.repeat("■", 10 - Integer.parseInt(String.valueOf(i)));
     }
 
 
     @Override
-    public double getKD(){
-        return  Main.getPlayerStatisticsManager().getStatistic(pInstance).getKD();
+    public double getKD() {
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getKD();
     }
 
     @Override
@@ -247,7 +242,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                             final Party party = partyManager.getParty(partyLeader);
                             if (party != null) {
                                 if (!partyLeader.getUniqueId().equals(player)) {
-                                    if(partyManager.getParty(partyLeader).getAllPlayers() != null && !partyManager.getParty(partyLeader).getAllPlayers().isEmpty()) {
+                                    if (partyManager.getParty(partyLeader).getAllPlayers() != null && !partyManager.getParty(partyLeader).getAllPlayers().isEmpty()) {
                                         for (Player pl : partyManager.getParty(partyLeader).getAllPlayers()) {
                                             if (pl != null && pl.isOnline() && !player.equals(pl.getUniqueId())) {
                                                 for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {

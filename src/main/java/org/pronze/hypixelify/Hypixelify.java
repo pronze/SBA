@@ -40,6 +40,17 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private ListenerManager listenerManager;
     public boolean papiEnabled;
     private boolean isProtocolLib;
+    private boolean debug = false;
+    private boolean mainLobby;
+
+    public static void debug(String message){
+        if(!plugin.debug) return;
+        Bukkit.getLogger().info(message);
+    }
+
+    public static boolean LobbyBoardEnabled(){
+        return plugin.mainLobby;
+    }
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
@@ -48,6 +59,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public static boolean isProtocolLib(){
         return plugin.isProtocolLib;
     }
+
     public static org.pronze.hypixelify.api.party.PartyManager getPartyManager(){
         return plugin.partyManager;
     }
@@ -90,7 +102,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         configurator = new Configurator(this);
         configurator.loadDefaults();
-
+        debug = configurator.config.getBoolean("debug.enabled", false);
+        mainLobby = Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false);
 
         boolean hookedWithCitizens = SafeShop.canInstantiate();
         boolean isLegacy = Main.isLegacy();
@@ -209,7 +222,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());
         Objects.requireNonNull(getCommand("shout")).setExecutor(new ShoutCommand());
-
     }
 
     @Override

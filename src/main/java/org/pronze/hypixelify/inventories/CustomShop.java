@@ -436,6 +436,7 @@ public class CustomShop implements Listener {
         ItemStack newItem = e.getUpgradedItem();
         RunningTeam team = e.getTeam();
         String name = e.getName();
+        org.screamingsandals.bedwars.api.game.Game game = e.getGame();
 
         if (name.equalsIgnoreCase("sharpness")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
@@ -447,7 +448,21 @@ public class CustomShop implements Listener {
                 e.setCancelled(true);
                 player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have a greater or equal enchantment in your pickaxe!");
             }
-        } else if (name.equalsIgnoreCase("protection")) {
+        }
+        else if(name.equalsIgnoreCase("blindtrap")) {
+            if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+                if(!Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).addTrap(team)){
+                    player.sendMessage(ChatColor.RED + "You already purchased this trap!, wait for it to wear out");
+                    e.setCancelled(true);
+                }
+            } else{
+                e.setCancelled(true);
+                player.sendMessage(ChatColor.RED + "An error has occured");
+            }
+        }
+
+
+        else if (name.equalsIgnoreCase("protection")) {
             if (Objects.requireNonNull(player.getInventory().getBoots()).getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
                 e.setCancelled(true);
                 player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have the greatest enchantment.");
@@ -516,7 +531,7 @@ public class CustomShop implements Listener {
 
         ItemStack materialItem = type.getStack(price);
 
-        boolean sharp = false, prot = false, efficiency = false;
+        boolean sharp = false, prot = false, efficiency = false, trap = false;
 
         if (event.hasPlayerInInventory(materialItem)) {
             if (event.hasProperties()) {
@@ -530,6 +545,7 @@ public class CustomShop implements Listener {
                         sharp = property.getPropertyName().equalsIgnoreCase("sharpness");
                         prot = property.getPropertyName().equalsIgnoreCase("protection");
                         efficiency = property.getPropertyName().equalsIgnoreCase("efficiency");
+                        trap = property.getPropertyName().equals("blindtrap");
                     }
                 }
             }
@@ -543,9 +559,9 @@ public class CustomShop implements Listener {
 
 
             try {
-                if (sharp || efficiency || prot) {
-                    String name = sharp ? "sharpness" : efficiency ? "efficiency" : "protection";
-                    PlayerToolUpgradeEvent e = new PlayerToolUpgradeEvent(player, newItem, name, team);
+                if (sharp || efficiency || prot || trap) {
+                    String name = sharp ? "sharpness" : efficiency ? "efficiency" : trap ?  "blindtrap" : "protection";
+                    PlayerToolUpgradeEvent e = new PlayerToolUpgradeEvent(player, newItem, name, team, game);
                     Bukkit.getServer().getPluginManager().callEvent(e);
                     if (e.isCancelled()) {
                         return;
