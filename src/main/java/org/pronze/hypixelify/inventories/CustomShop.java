@@ -37,10 +37,13 @@ import org.screamingsandals.bedwars.lib.sgui.item.PlayerItemInfo;
 import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
+import sun.reflect.annotation.ExceptionProxy;
 
 
 import java.io.File;
 import java.util.*;
+
+import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class CustomShop implements Listener {
 
@@ -454,6 +457,8 @@ public class CustomShop implements Listener {
                 if(!Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).addTrap(team)){
                     player.sendMessage(ChatColor.RED + "You already purchased this trap!, wait for it to wear out");
                     e.setCancelled(true);
+                } else{
+                    team.getConnectedPlayers().forEach(pl-> sendTitle(pl, "§6Blindness Trap has been purchased!", "", 20, 40, 20));
                 }
             } else{
                 e.setCancelled(true);

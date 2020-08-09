@@ -94,10 +94,10 @@ data:
         properties: blindtrap
         stack:
           type: STRING
-          display-name: "Blindess trap"
+          display-name: "§bBlindess trap"
           lore:
-            - "Get informed when an enemy enters a 7 block radius of your base"
-            - "Blind the foe and gain an upper advantage!"
+            - "§7Get informed when an enemy enters a 7 block radius of your base"
+            - "§7Blind the foe and gain an upper advantage!"
 
       - price: 1 of gold
         properties:

@@ -27,8 +27,10 @@ public class Arena {
     private final Game game;
     private final ScoreBoard scoreBoard;
     private final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
+    private double radius;
 
     public Arena(Game game) {
+        radius = Math.pow(7, 2);
         this.game = game;
         scoreBoard = new ScoreBoard(this);
 
@@ -139,7 +141,6 @@ public class Arena {
 
     public void PlayerMoveEvent(PlayerMoveEvent e) {
         Player player = e.getPlayer();
-        double radius = Math.pow(7, 2);
 
         if (!purchasedTrap.containsValue(true)) return;
 
@@ -148,7 +149,7 @@ public class Arena {
             if(rt.isPlayerInTeam(player)) continue;
 
             if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= radius) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
                 purchasedTrap.put(rt, false);
                 rt.getConnectedPlayers().forEach(pl->sendTitle(pl, "§cTrap Triggered!", "§eSomeone has entered your base!",
                         20, 40, 20));
