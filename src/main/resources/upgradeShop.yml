@@ -92,7 +92,12 @@ data:
       - price: 2 of diamond
         skip: 1
         properties: blindtrap
-
+        stack:
+          type: STRING
+          display-name: "Blindess trap"
+          lore:
+            - "Get informed when an enemy enters a 7 block radius of your base"
+            - "Blind the foe and gain an upper advantage!"
 
       - price: 1 of gold
         properties:

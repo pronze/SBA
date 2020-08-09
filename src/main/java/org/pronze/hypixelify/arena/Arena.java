@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
+
 public class Arena {
     public UpgradeTask upgradeTask;
     private final Game game;
@@ -43,7 +45,7 @@ public class Arena {
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         for (Player p : e.getTeam().getConnectedPlayers()) {
-            Title.sendTitle(p, "§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
+            sendTitle(p, "§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
         }
     }
 
@@ -96,7 +98,7 @@ public class Arena {
                     WinTeamPlayers.add(teamplayer.getName());
 
                 for (Player pl : e.getWinningTeam().getConnectedPlayers()) {
-                    Title.sendTitle(pl, "§6§lVICTORY!", "", 0, 90, 0);
+                    sendTitle(pl, "§6§lVICTORY!", "", 0, 90, 0);
                 }
                 for (Player player : game.getConnectedPlayers()) {
                     for (String os : Configurator.overstats_message)
@@ -143,10 +145,13 @@ public class Arena {
 
         for (RunningTeam rt : purchasedTrap.keySet()) {
             if (!purchasedTrap.get(rt)) continue;
+            if(rt.isPlayerInTeam(player)) continue;
 
             if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= radius) {
                 player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 1));
                 purchasedTrap.put(rt, false);
+                rt.getConnectedPlayers().forEach(pl->sendTitle(pl, "§cTrap Triggered!", "§eSomeone has entered your base!",
+                        20, 40, 20));
             }
         }
 

@@ -545,7 +545,7 @@ public class CustomShop implements Listener {
                         sharp = property.getPropertyName().equalsIgnoreCase("sharpness");
                         prot = property.getPropertyName().equalsIgnoreCase("protection");
                         efficiency = property.getPropertyName().equalsIgnoreCase("efficiency");
-                        trap = property.getPropertyName().equals("blindtrap");
+                        trap = property.getPropertyName().equalsIgnoreCase("blindtrap");
                     }
                 }
             }
@@ -618,8 +618,8 @@ public class CustomShop implements Listener {
 
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(Hypixelify.getConfigurator().config.getString("message.cannot-buy","§cYou don't have enough {type}")
-                        .replace("{type}", priceType));
+                player.sendMessage(Hypixelify.getConfigurator().config.getString("message.cannot-buy","§cYou don't have enough {price}")
+                        .replace("{price}", priceType));
             }
         }
     }
