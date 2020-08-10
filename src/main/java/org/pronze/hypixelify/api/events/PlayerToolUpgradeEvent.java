@@ -1,6 +1,5 @@
 package org.pronze.hypixelify.api.events;
 
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -17,7 +16,15 @@ public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     private String name;
     private  RunningTeam team;
     private Game game;
+    private String price = null;
 
+    public String getPrice(){
+        return price;
+    }
+
+    public void setPrice(String pr){
+        price = pr;
+    }
 
     public PlayerToolUpgradeEvent(Player player, ItemStack stack, String name, RunningTeam team, Game game){
         this.player = player;

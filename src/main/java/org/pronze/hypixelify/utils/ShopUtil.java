@@ -14,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
-import org.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
 import org.pronze.hypixelify.listener.PlayerListener;
 import org.pronze.hypixelify.listener.Shop;
 import org.screamingsandals.bedwars.Main;

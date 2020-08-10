@@ -37,7 +37,6 @@ import org.screamingsandals.bedwars.lib.nms.title.Title;
 import java.util.*;
 
 public class PlayerListener extends AbstractListener {
-    static public HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
     static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
     static public ArrayList<Material> allowed = new ArrayList<>();
     static public ArrayList<Material> generatorDropItems = new ArrayList<>();
@@ -59,7 +58,6 @@ public class PlayerListener extends AbstractListener {
 
     @Override
     public void onDisable() {
-        PlayerItems.clear();
         UpgradeKeys.clear();
         allowed.clear();
         generatorDropItems.clear();
@@ -86,13 +84,20 @@ public class PlayerListener extends AbstractListener {
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         if(!game.isPlayerInAnyTeam(player)) return;
         Team team = game.getTeamOfPlayer(player);
+        List<ItemStack> playerItems = null;
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+            Arena arena = Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName());
+            playerItems = arena.getStorage().getItemsOfPlayer(player);
+        }
 
+        List<ItemStack> finalPlayerItems = playerItems;
         new BukkitRunnable() {
 
             @Override
             public void run() {
                 if (player.getGameMode().equals(GameMode.SURVIVAL) && isInGame(player)) {
-                    ShopUtil.giveItemToPlayer(PlayerItems.get(player), player, team.getColor());
+                    if(finalPlayerItems != null)
+                        ShopUtil.giveItemToPlayer(finalPlayerItems, player, team.getColor());
                     player.sendMessage(Messages.message_respawned_title);
                     Title.sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                     this.cancel();
@@ -124,6 +129,7 @@ public class PlayerListener extends AbstractListener {
                 }
             }.runTaskLater(Hypixelify.getInstance(), 1L);
         }
+
         List<ItemStack> items = new ArrayList<>();
         ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
 
@@ -143,7 +149,9 @@ public class PlayerListener extends AbstractListener {
             }
         }
         items.add(sword);
-        PlayerItems.put(player, items);
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
+            Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getStorage().putPlayerItems(player, items);
+        }
 
         if(giveKillerResources) {
             Player killer = e.getEntity().getKiller();

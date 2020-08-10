@@ -256,18 +256,18 @@ public class ScoreBoard {
 
 
     private String getTeamBedStatus(RunningTeam team) {
-        return team.isDead() ? "§c\u2718" :
-                "&§\u2714";
+        return team.isDead() ? "§c\u2717" :
+                "§a\u2713";
     }
 
     private String getTeamStatusFormat(RunningTeam team) {
-        String alive = "{color} {team} §a\u2714 §8{you}";
+        String alive = "{color} {team} §a\u2713 §8{you}";
         String destroyed = "{color} {team} §a§f{players}§8 {you}";
 
         String status = team.isTargetBlockExists() ? alive : destroyed;
 
         if (team.isDead() && team.getConnectedPlayers().size() <= 0)
-            status = "{color} {team} §c\u2718 {you}";
+            status = "{color} {team} §c\u2717 {you}";
 
         String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
                 + team.getName().charAt(0);

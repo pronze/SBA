@@ -423,11 +423,10 @@ public class Configurator {
                 "Total Kills: §a{kills}",
                 "Total Wins: §a{deaths}",
                 "",
-                "K/D ratio: §a{k/d}",
+                "K/D ratio: §6{k/d}",
                 "",
                 "§ewww.minecraft.net"
         ));
-
 
         if (modify.get()) {
             try {
@@ -467,16 +466,18 @@ public class Configurator {
         gamestart_message = LobbyScoreboard.listColor(config.getStringList("game-start.message"));
 
 
-        if (config.getBoolean("first_start")) {
+        if (config.getBoolean("first_start") || !Objects.equals(config.get("version"), "1.2.9")) {
             Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
+            config.set("citizens-shop", false);
             saveConfig();
             Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
-            assert plugin != null;
-            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-            Bukkit.getServer().getPluginManager().enablePlugin(plugin);
-            Bukkit.getLogger().info("[SBAHypixelify]: " + ChatColor.GREEN + " Made changes to the config.yml file!");
+            if (plugin != null) {
+                Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+                Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+                Bukkit.getLogger().info("[SBAHypixelify]: " + ChatColor.GREEN + " Made changes to the config.yml file!");
+            }
         }
     }
 

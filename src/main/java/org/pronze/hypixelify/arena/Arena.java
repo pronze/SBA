@@ -5,6 +5,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.pronze.hypixelify.Configurator;
+import org.pronze.hypixelify.database.PlayerStorage;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -13,8 +14,6 @@ import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.nms.title.Title;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,13 +27,19 @@ public class Arena {
     private final ScoreBoard scoreBoard;
     private final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
     private double radius;
+    private PlayerStorage storage;
+
+    public PlayerStorage getStorage(){
+        return storage;
+    }
 
     public Arena(Game game) {
         radius = Math.pow(7, 2);
         this.game = game;
         scoreBoard = new ScoreBoard(this);
-
         upgradeTask = new UpgradeTask(game);
+        storage = new PlayerStorage(game);
+
     }
 
     public Game getGame() {
