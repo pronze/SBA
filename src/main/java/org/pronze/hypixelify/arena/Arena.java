@@ -2,7 +2,7 @@ package org.pronze.hypixelify.arena;
 
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.database.PlayerStorage;
+import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -22,26 +22,21 @@ public class Arena {
     public GameTask gameTask;
     private final Game game;
     private final ScoreBoard scoreBoard;
-    public final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
     public double radius;
-    private final PlayerStorage storage;
+    private GameStorage storage;
 
-    public PlayerStorage getStorage(){
+    public GameStorage getStorage(){
         return storage;
     }
 
     public Arena(Game game) {
         radius = Math.pow(7, 2);
         this.game = game;
+        storage = new GameStorage(game);
         scoreBoard = new ScoreBoard(this);
         gameTask = new GameTask(this);
-        storage = new PlayerStorage(game);
     }
 
-
-    public boolean trapInstantiate(){
-        return purchasedTrap.containsValue(true);
-    }
 
     public Game getGame() {
         return this.game;
@@ -65,6 +60,7 @@ public class Arena {
                 gameTask.cancel();
                 gameTask = null;
             }
+            storage = null;
 
             if (e.getWinningTeam() != null) {
                 Team winner = e.getWinningTeam();
@@ -134,17 +130,11 @@ public class Arena {
         }
 
         for (RunningTeam t : game.getRunningTeams()) {
-            purchasedTrap.put(t, false);
+            storage.setTrap(t, false);
         }
 
     }
 
-    public boolean addTrap(RunningTeam t){
-        if(purchasedTrap.get(t)) return false;
-
-        purchasedTrap.put(t, true);
-        return true;
-    }
 
 
 

@@ -14,41 +14,48 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.commands.ShoutCommand;
-import org.pronze.hypixelify.manager.DatabaseManager;
-import org.pronze.hypixelify.inventories.GamesInventory;
+import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.inventories.CustomShop;
-import org.pronze.hypixelify.listener.*;
+import org.pronze.hypixelify.inventories.GamesInventory;
+import org.pronze.hypixelify.listener.ListenerManager;
+import org.pronze.hypixelify.listener.LobbyScoreboard;
+import org.pronze.hypixelify.listener.SafeShop;
 import org.pronze.hypixelify.manager.ArenaManager;
+import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
+
 import java.util.Objects;
 
 public class Hypixelify extends JavaPlugin implements Listener {
 
     private static Hypixelify plugin;
+    public boolean papiEnabled;
     private CustomShop shop;
     private String version;
     private DatabaseManager databaseManager;
-
     private PartyManager partyManager;
     private Configurator configurator;
     private ArenaManager arenamanager;
     private GamesInventory gamesInventory;
     private Messages messages;
     private ListenerManager listenerManager;
-    public boolean papiEnabled;
     private boolean isProtocolLib;
     private boolean debug = false;
     private boolean mainLobby;
 
-    public static void debug(String message){
-        if(!plugin.debug || message == null) return;
-        Bukkit.getLogger().info(ChatColor.RED + "[DEBUG]: " + message);
+
+    public static GameStorage getGameStorage(Game game) {
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
+            return Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getStorage();
+
+        return null;
     }
 
-    public static boolean LobbyBoardEnabled(){
+    public static boolean LobbyBoardEnabled() {
         return plugin.mainLobby;
     }
 
@@ -56,11 +63,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.configurator;
     }
 
-    public static boolean isProtocolLib(){
+    public static boolean isProtocolLib() {
         return plugin.isProtocolLib;
     }
 
-    public static org.pronze.hypixelify.api.party.PartyManager getPartyManager(){
+    public static org.pronze.hypixelify.api.party.PartyManager getPartyManager() {
         return plugin.partyManager;
     }
 
@@ -80,11 +87,17 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.gamesInventory;
     }
 
-    public static DatabaseManager getDatabaseManager(){
+    public static DatabaseManager getDatabaseManager() {
         return plugin.databaseManager;
     }
-    public static boolean isPapiEnabled(){
+
+    public static boolean isPapiEnabled() {
         return plugin.papiEnabled;
+    }
+
+    public static void debug(String message) {
+        if (!plugin.debug || message == null) return;
+        Bukkit.getLogger().info(ChatColor.RED + "[DEBUG]: " + message);
     }
 
     public void onEnable() {
@@ -136,10 +149,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         listenerManager = new ListenerManager();
 
-        if(messages == null) {
-            messages = new Messages();
-            messages.loadConfig();
-        }
+        if (messages != null)
+            messages = null;
+
+        messages = new Messages();
+        messages.loadConfig();
+
         InventoryListener.init(this);
         shop = new CustomShop();
 
@@ -151,7 +166,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
             Bukkit.getLogger().warning("Failed to initalize Citizens shop reverting to normal shops...");
 
             if (Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)
-            || configurator.config.getBoolean("citizens-shop", true)) {
+                    || configurator.config.getBoolean("citizens-shop", true)) {
                 configurator.config.set("citizens-shop", false);
                 configurator.saveConfig();
                 Main.getConfigurator().config.set("shop.citizens-enabled", false);
@@ -186,23 +201,23 @@ public class Hypixelify extends JavaPlugin implements Listener {
             Bukkit.getPluginManager().registerEvents(new LobbyScoreboard(), this);
 
 
-        if (!configurator.config.getString("version").contains(version)) {
+        if (!Objects.requireNonNull(configurator.config.getString("version")).contains(version)) {
             Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
 
         //Do changes for legacy support.
         if (Main.isLegacy()) {
             boolean doneChanges = false;
-            if (Main.getConfigurator().config.getString("items.leavegame").equalsIgnoreCase("RED_BED")) {
+            if (Objects.requireNonNull(Main.getConfigurator().config.getString("items.leavegame")).equalsIgnoreCase("RED_BED")) {
                 Main.getConfigurator().config.set("items.leavegame", "BED");
                 doneChanges = true;
             }
-            if (Main.getConfigurator().config.getString("items.shopcosmetic").equalsIgnoreCase("GRAY_STAINED_GLASS_PANE")) {
+            if (Objects.requireNonNull(Main.getConfigurator().config.getString("items.shopcosmetic")).equalsIgnoreCase("GRAY_STAINED_GLASS_PANE")) {
                 Main.getConfigurator().config.set("items.shopcosmetic", "STAINED_GLASS_PANE");
                 doneChanges = true;
             }
 
-            if(Main.getConfigurator().config.getBoolean("scoreboard.enable", true)){
+            if (Main.getConfigurator().config.getBoolean("scoreboard.enable", true)) {
                 Main.getConfigurator().config.set("scoreboard.enable", false);
                 Main.getConfigurator().config.set("lobby-scoreboard.enabled", false);
                 doneChanges = true;
@@ -227,9 +242,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
 
-        if(Hypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()){
-            for(Player pl : Bukkit.getOnlinePlayers()){
-                if(pl != null && pl.isOnline()){
+        if (Hypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()) {
+            for (Player pl : Bukkit.getOnlinePlayers()) {
+                if (pl != null && pl.isOnline()) {
                     ProtocolManager m = ProtocolLibrary.getProtocolManager();
                     try {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
@@ -294,7 +309,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public ArenaManager getArenaManager() {
         return this.arenamanager;
     }
-
 }
 
 

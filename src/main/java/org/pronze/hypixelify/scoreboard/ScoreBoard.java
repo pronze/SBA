@@ -171,8 +171,8 @@ public class ScoreBoard {
                         .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
                         .replace("{game}", game.getName()).replace("{date}", date)
                         .replace("{team_bed_status}", p_t_b_s)
-                        .replace("{tier}", arena.upgradeTask.getTier().replace("-", " ")
-                                + " in " + ChatColor.GREEN + arena.upgradeTask.getFormattedTimeLeft());
+                        .replace("{tier}", arena.gameTask.getTier().replace("-", " ")
+                                + " in " + ChatColor.GREEN + arena.gameTask.getFormattedTimeLeft());
 
                 if (game.isPlayerInAnyTeam(player) && chatColor != null) {
                     addline = addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())

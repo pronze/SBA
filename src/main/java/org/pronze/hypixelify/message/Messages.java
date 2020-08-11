@@ -41,50 +41,76 @@ public class Messages {
     public static List<String> message_not_in_game;
     public static String shoutFormat;
     public static List<String> message_shout_wait;
+    public static String trapTriggered_title, trapTriggered_subtitle, blindnessTrapPurchased, generatorUpgrade;
+    public static String message_greatest_enchantment;
+    public static String ERROR_OCCURED;
+    public static String message_upgrade_team_protection;
+    public static String trap_timeout_message;
+    public static String already_purchased_thing;
 
-
-    public Messages(){
+    public Messages() {
 
     }
 
-    public void loadConfig(){
-        message_shout_wait = Hypixelify.getConfigurator().config.getStringList("message.shout-wait");
-        shoutFormat = Hypixelify.getConfigurator().config.getString("message.shout-format","§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}");
-        message_not_in_game = Hypixelify.getConfigurator().config.getStringList("message.not-in-game");
-        message_you = Hypixelify.getConfigurator().config.getString("scoreboard.you", "§7YOU");
-        upgrade_Keyword = Hypixelify.getConfigurator().config.getString("message.upgrade", "Upgrade: ");
-        message_respawned_title = Hypixelify.getConfigurator().config.getString("message.respawned-title");
-        message_respawn_subtitle = Hypixelify.getConfigurator().config.getString("message.respawn-subtitle");
-        message_respawn_title = Hypixelify.getConfigurator().config.getString("message.respawn-title");
-        message_party_left = Hypixelify.getConfigurator().config.getStringList("party.message.left");
-        message_cannot_invite = Hypixelify.getConfigurator().config.getStringList("party.message.cannotinvite");
-        message_no_other_commands = Hypixelify.getConfigurator().config.getStringList("party.message.no-other-commands");
-        message_leader_join_leave =  Hypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave");
-        message_invite_expired = Hypixelify.getConfigurator().config.getStringList("party.message.expired");
-        message_invalid_command = Hypixelify.getConfigurator().config.getStringList("party.message.invalid-command");
-        message_access_denied = Hypixelify.getConfigurator().config.getStringList("party.message.access-denied");
-        message_not_in_party = Hypixelify.getConfigurator().config.getStringList("party.message.notinparty");
-        message_invited = Hypixelify.getConfigurator().config.getStringList("party.message.invited");
-        message_already_invited = Hypixelify.getConfigurator().config.getStringList("party.message.alreadyInvited");
-        message_warped = Hypixelify.getConfigurator().config.getStringList("party.message.warp");
-        message_warping = Hypixelify.getConfigurator().config.getStringList("party.message.warping");
-        message_invite = Hypixelify.getConfigurator().config.getStringList("party.message.invite");
-        message_accepted = Hypixelify.getConfigurator().config.getStringList("party.message.accepted");
-        message_offline_left = Hypixelify.getConfigurator().config.getStringList("party.message.offline-left");
-        message_offline_quit = Hypixelify.getConfigurator().config.getStringList("party.message.offline-quit");
-        message_declined = Hypixelify.getConfigurator().config.getStringList("party.message.declined");
-        message_kicked = Hypixelify.getConfigurator().config.getStringList("party.message.kicked");
-        message_disband_inactivity = Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity");
-        message_disband = Hypixelify.getConfigurator().config.getStringList("party.message.disband");
-        message_player_not_found = Hypixelify.getConfigurator().config.getStringList("party.message.player-not-found");
-        message_blank_yourself = Hypixelify.getConfigurator().config.getStringList("party.message.cannot-blank-yourself");
-        message_not_invited = Hypixelify.getConfigurator().config.getStringList("party.message.not-invited");
-        message_got_kicked = Hypixelify.getConfigurator().config.getStringList("party.message.got-kicked");
-        message_decline_inc = Hypixelify.getConfigurator().config.getStringList("party.message.decline-inc");
-        message_decline_user = Hypixelify.getConfigurator().config.getStringList("party.message.declined-user");
-        message_p_chat_enabled_disabled = Hypixelify.getConfigurator().config.getStringList("party.message.chat-enable-disabled");
-        message_party_help = Hypixelify.getConfigurator().config.getStringList("party.message.help");
-        message_cannot_invite_yourself = Hypixelify.getConfigurator().config.getStringList("party.message.cannot-invite-yourself");
+    public String fetchString(String toFetch) {
+        return Hypixelify.getConfigurator().config.getString(toFetch);
+    }
+
+    public String fetchString(String toFetch, String def) {
+        return Hypixelify.getConfigurator().config.getString(toFetch, def);
+    }
+
+    public List<String> fetchStringList(String toFetch) {
+        return Hypixelify.getConfigurator().config.getStringList(toFetch);
+    }
+
+    public void loadConfig() {
+        already_purchased_thing = fetchString("message.already-purchased");
+        trap_timeout_message = fetchString("message.wait-trap");
+        message_upgrade_team_protection = fetchString("message.upgrade-team-protection");
+        ERROR_OCCURED = fetchString("message.error-occured");
+        message_greatest_enchantment = fetchString("message.greatest-enchantment");
+        generatorUpgrade = fetchString("message.generator-upgrade");
+        blindnessTrapPurchased = fetchString("message.blindness-trap-purchased-title");
+        trapTriggered_title = fetchString("message.trap-triggered.title");
+        trapTriggered_subtitle = fetchString("message.trap-triggered.sub-title");
+        message_respawned_title = fetchString("message.respawned-title");
+        message_respawn_subtitle = fetchString("message.respawn-subtitle");
+        message_respawn_title = fetchString("message.respawn-title");
+        shoutFormat = fetchString("message.shout-format", "§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}");
+        message_you = fetchString("scoreboard.you", "§7YOU");
+        upgrade_Keyword = fetchString("message.upgrade", "Upgrade: ");
+        message_shout_wait = fetchStringList("message.shout-wait");
+        message_not_in_game = fetchStringList("message.not-in-game");
+        message_party_left = fetchStringList("party.message.left");
+        message_cannot_invite = fetchStringList("party.message.cannotinvite");
+        message_no_other_commands = fetchStringList("party.message.no-other-commands");
+        message_leader_join_leave = fetchStringList("party.message.leader-join-leave");
+        message_invite_expired = fetchStringList("party.message.expired");
+        message_invalid_command = fetchStringList("party.message.invalid-command");
+        message_access_denied = fetchStringList("party.message.access-denied");
+        message_not_in_party = fetchStringList("party.message.notinparty");
+        message_invited = fetchStringList("party.message.invited");
+        message_already_invited = fetchStringList("party.message.alreadyInvited");
+        message_warped = fetchStringList("party.message.warp");
+        message_warping = fetchStringList("party.message.warping");
+        message_invite = fetchStringList("party.message.invite");
+        message_accepted = fetchStringList("party.message.accepted");
+        message_offline_left = fetchStringList("party.message.offline-left");
+        message_offline_quit = fetchStringList("party.message.offline-quit");
+        message_declined = fetchStringList("party.message.declined");
+        message_kicked = fetchStringList("party.message.kicked");
+        message_disband_inactivity = fetchStringList("party.message.disband-inactivity");
+        message_disband = fetchStringList("party.message.disband");
+        message_player_not_found = fetchStringList("party.message.player-not-found");
+        message_blank_yourself = fetchStringList("party.message.cannot-blank-yourself");
+        message_not_invited = fetchStringList("party.message.not-invited");
+        message_got_kicked = fetchStringList("party.message.got-kicked");
+        message_decline_inc = fetchStringList("party.message.decline-inc");
+        message_decline_user = fetchStringList("party.message.declined-user");
+        message_p_chat_enabled_disabled = fetchStringList("party.message.chat-enable-disabled");
+        message_party_help = fetchStringList("party.message.help");
+        message_cannot_invite_yourself = fetchStringList("party.message.cannot-invite-yourself");
     }
 
 }

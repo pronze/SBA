@@ -14,12 +14,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import org.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
+import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.events.*;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent.Result;
+import org.screamingsandals.bedwars.api.events.BedwarsUpgradeBoughtEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsUpgradeImprovedEvent;
 import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.upgrades.Upgrade;
@@ -35,7 +38,6 @@ import org.screamingsandals.bedwars.lib.sgui.events.ShopTransactionEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.item.ItemProperty;
 import org.screamingsandals.bedwars.lib.sgui.item.PlayerItemInfo;
-import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
@@ -338,6 +340,12 @@ public class CustomShop implements Listener {
             }
         }
 
+        else if(!event.getPropertyName().equalsIgnoreCase("sharpness")
+                  || !event.getPropertyName().equalsIgnoreCase("protection")) {
+            return;
+        }
+
+
         else if (event.getPropertyName().equalsIgnoreCase("sharpness")) {
             ItemStack sword = null;
             for (ItemStack i : event.getPlayer().getInventory().getContents()) {
@@ -353,8 +361,7 @@ public class CustomShop implements Listener {
             event.setStack(stack);
             price = Integer.toString(Prices.get(shop.getEnchantmentLevel(Enchantment.DAMAGE_ALL)));
             event.setPrice(price);
-        }
-       else  if (event.getPropertyName().equalsIgnoreCase("protection")) {
+        } else if (event.getPropertyName().equalsIgnoreCase("protection")) {
             ItemStack shop = ShopUtil.shopEnchants(event.getStack(), Objects.requireNonNull(event.getPlayer().getInventory().getBoots()), Enchantment.PROTECTION_ENVIRONMENTAL);
             ItemStack stack = event.getStack();
             stack.addEnchantments(shop.getEnchantments());
@@ -363,32 +370,32 @@ public class CustomShop implements Listener {
             event.setPrice(price);
         }
 
-       if(event.getStack().getLore() != null) {
-           for (String st : event.getStack().getLore()) {
-               if (st.contains("Maximum Enchant")) return;
-           }
-       }
+        if (event.getStack().getLore() != null) {
+            for (String st : event.getStack().getLore()) {
+                if (st.contains("Maximum Enchant")) return;
+            }
+        }
 
-       //fix lores
+        //fix lores
         boolean enabled = Main.getConfigurator().config.getBoolean("lore.generate-automatically", true);
 
-       if(enabled && price != null){
-           List<String> loreText = event.getReader().getStringList("generated-lore-text",
-                   Main.getConfigurator().config.getStringList("lore.text"));
-           ItemSpawnerType type = Main.getSpawnerType((event.getReader().getString("price-type")).toLowerCase());
-           ItemStack stack = event.getStack();
-           ItemMeta stackMeta = stack.getItemMeta();
-           List<String> lore = new ArrayList<>();
-           for (String s : loreText) {
-               s = s.replaceAll("%price%", price);
-               s = s.replaceAll("%resource%", type.getItemName());
-               s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
-               lore.add(s);
-           }
-           stackMeta.setLore(lore);
-           stack.setItemMeta(stackMeta);
-           event.setStack(stack);
-       }
+        if (enabled && price != null) {
+            List<String> loreText = event.getReader().getStringList("generated-lore-text",
+                    Main.getConfigurator().config.getStringList("lore.text"));
+            ItemSpawnerType type = Main.getSpawnerType((event.getReader().getString("price-type")).toLowerCase());
+            ItemStack stack = event.getStack();
+            ItemMeta stackMeta = stack.getItemMeta();
+            List<String> lore = new ArrayList<>();
+            for (String s : loreText) {
+                s = s.replaceAll("%price%", price);
+                s = s.replaceAll("%resource%", type.getItemName());
+                s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
+                lore.add(s);
+            }
+            stackMeta.setLore(lore);
+            stack.setItemMeta(stackMeta);
+            event.setStack(stack);
+        }
 
     }
 
@@ -444,37 +451,40 @@ public class CustomShop implements Listener {
         if (name.equalsIgnoreCase("sharpness")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
                 e.setCancelled(true);
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have the greatest enchantment");
-            } else{
+                player.sendMessage(Messages.message_greatest_enchantment);
+            } else {
                 e.setPrice(Integer.toString(Prices.get(newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL))));
             }
         } else if (name.equalsIgnoreCase("efficiency")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
                 e.setCancelled(true);
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You Already have a greater or equal enchantment in your pickaxe!");
+                player.sendMessage(Messages.message_greatest_enchantment);
             }
         } else if (name.equalsIgnoreCase("blindtrap")) {
-            if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
-                if (!Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).addTrap(team)) {
-                    player.sendMessage(ChatColor.RED + "You already purchased this trap!, wait for it to wear out");
-                    e.setCancelled(true);
-                } else {
-                    team.getConnectedPlayers().forEach(pl -> sendTitle(pl, "§6Blindness Trap has been purchased!", "", 20, 40, 20));
-                }
-            } else {
+            if (Hypixelify.getGameStorage(game) == null) {
                 e.setCancelled(true);
-                player.sendMessage(ChatColor.RED + "An error has occured");
+                player.sendMessage(Messages.ERROR_OCCURED);
+                return;
+            }
+            if (Objects.requireNonNull(Hypixelify.getGameStorage(game)).isTrapEnabled(team)) {
+                player.sendMessage(Messages.trap_timeout_message);
+                e.setCancelled(true);
+            } else {
+                Objects.requireNonNull(Hypixelify.getGameStorage(game)).setTrap(team, true);
+                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.blindnessTrapPurchased, "", 20, 40, 20));
             }
         } else if (name.equalsIgnoreCase("protection")) {
-            if (Objects.requireNonNull(player.getInventory().getBoots()).getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
+            if (Objects.requireNonNull(player.getInventory().getBoots())
+                    .getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
                 e.setCancelled(true);
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You already have the greatest enchantment.");
+                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + Messages.message_greatest_enchantment);
             } else {
                 e.setPrice(Integer.toString(Prices.get(newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL))));
                 ShopUtil.addEnchantsToPlayerArmor(player, newItem);
                 for (Player playerCheck : team.getConnectedPlayers()) {
                     ShopUtil.addEnchantsToPlayerArmor(playerCheck, newItem);
-                    playerCheck.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + player.getName() + ChatColor.YELLOW + " has upgraded team protection");
+                    playerCheck.sendMessage(Messages.message_upgrade_team_protection
+                            .replace("{player}", player.getName()));
                 }
             }
         }
@@ -545,10 +555,10 @@ public class CustomShop implements Listener {
                                 newItem, property.getReader(player, event.getItem()).convertToMap(), mapReader);
                         Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
                         newItem = applyEvent.getStack();
-                        if(applyEvent.getPrice() != null)
+                        if (applyEvent.getPrice() != null)
                             materialItem = type.getStack(Integer.parseInt(applyEvent.getPrice()));
-                        if(property.getPropertyName().equalsIgnoreCase("sharpness") || property.getPropertyName().equalsIgnoreCase("protection")
-                        || property.getPropertyName().equalsIgnoreCase("efficiency") || property.getPropertyName().equalsIgnoreCase("blindtrap")){
+                        if (property.getPropertyName().equalsIgnoreCase("sharpness") || property.getPropertyName().equalsIgnoreCase("protection")
+                                || property.getPropertyName().equalsIgnoreCase("efficiency") || property.getPropertyName().equalsIgnoreCase("blindtrap")) {
                             propName = property.getPropertyName();
                         }
                     }
@@ -570,12 +580,12 @@ public class CustomShop implements Listener {
                     if (e.isCancelled()) {
                         return;
                     }
-                    if(e.getPrice() != null)
+                    if (e.getPrice() != null)
                         materialItem = type.getStack(Integer.parseInt(e.getPrice()));
 
                     if (event.hasPlayerInInventory(materialItem) &&
                             !Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                        player.sendMessage(Hypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}")
+                        player.sendMessage(Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}"))
                                 .replace("{price}", priceType));
                     }
                     sellstack(materialItem, event);
@@ -586,34 +596,31 @@ public class CustomShop implements Listener {
                             Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
                     return;
 
-                }
-
-                else if (newItem.getType().name().endsWith("SWORD")) {
+                } else if (newItem.getType().name().endsWith("SWORD")) {
 
                     if (!player.getInventory().contains(newItem.getType())) {
                         ShopUtil.upgradeSwordOnPurchase(player, newItem);
                         buystack(newItem, event);
                     } else {
                         shouldSellStack = false;
-                        player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same sword!");
+                        player.sendMessage(Messages.already_purchased_thing
+                        .replace("{thing}", "Sword"));
                     }
-                }
-
-                else if (newItem.getType().equals(player.getInventory().getBoots().getType())) {
-                    player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same armor");
+                } else if (newItem.getType().equals(player.getInventory().getBoots().getType())) {
+                    player.sendMessage(Messages.already_purchased_thing
+                            .replace("{thing}", "Armor"));
                     shouldSellStack = false;
-                }
-
-                else if (newItem.getType().name().contains("BOOTS")) {
+                } else if (newItem.getType().name().contains("BOOTS")) {
                     ShopUtil.buyArmor(player, newItem.getType(), newItem.getType().name());
-                }
-
-                else if (newItem.getType().name().endsWith("AXE")) {
+                } else if (newItem.getType().name().endsWith("AXE")) {
                     ShopUtil.removeAxeOrPickaxe(player, newItem);
                     if (!player.getInventory().contains(newItem)) {
                         buystack(newItem, event);
                     } else {
-                        player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + "You've Already purchased the same " + newItem.getType().name().substring(newItem.getType().name().indexOf("_")).substring(1));
+                        player.sendMessage(Messages.already_purchased_thing
+                                .replace("{thing}",
+                                        newItem.getType().name().substring
+                                                (newItem.getType().name().indexOf("_")).substring(1)));
                         shouldSellStack = false;
                     }
                 } else {
@@ -636,7 +643,7 @@ public class CustomShop implements Listener {
 
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(Hypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}")
+                player.sendMessage(Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}"))
                         .replace("{price}", priceType));
             }
         }

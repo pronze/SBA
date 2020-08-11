@@ -119,7 +119,16 @@ public class Configurator {
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "citizens-shop", false);
         checkOrSetConfig(modify, "shout.time-out", 60);
+        checkOrSetConfig(modify, "message.already-purchased", "§c§lYou already purchased the same {thing}");
+        checkOrSetConfig(modify, "message.wait-trap", "§cYou already purchased this trap!, wait for it to wear out");
+        checkOrSetConfig(modify, "message.upgrade-team-protection", "§o§c{player}§e has upgraded team protection");
+        checkOrSetConfig(modify, "message.error-occured", "§c§lAN ERROR HAS OCCURED");
+        checkOrSetConfig(modify, "message.greatest-enchantment", "§c§lYou Already have the greatest enchantment");
+        checkOrSetConfig(modify, "message.generator-upgrade", "{MatName} generator has been upgraded to {tier}");
         checkOrSetConfig(modify, "message.shout-format", "§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}");
+        checkOrSetConfig(modify, "message.trap-triggered.title", "§cTrap Triggered!");
+        checkOrSetConfig(modify, "message.trap-triggered.sub-title", "§eSomeone has entered your base!");
+        checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "§6Blindness Trap has been purchased!");
         checkOrSetConfig(modify, "message.cannot-buy", "§cYou don't have enough {price}");
         checkOrSetConfig(modify, "message.purchase", "§aYou purchased §e{item}");
         checkOrSetConfig(modify, "message.respawn-title", "§cYOU DIED!");
@@ -436,6 +445,7 @@ public class Configurator {
 
         try {
             String str = config.getString("games-inventory.stack-material");
+            assert str != null;
             if (str.toLowerCase().contains("bed") || str.toLowerCase().contains("rocket") || str.toLowerCase().contains("sign")
                     || str.toLowerCase().contains("pearl")) {
                 config.set("games-inventory.stack-material", "PAPER");

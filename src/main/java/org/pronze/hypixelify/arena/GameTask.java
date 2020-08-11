@@ -5,6 +5,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.database.GameStorage;
+import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -20,15 +22,16 @@ public class GameTask extends BukkitRunnable {
     private int time;
     private Game game;
     private Arena arena;
-
-    private Map<Integer, String> Tiers = new HashMap<>();
-    private Map<Integer, Integer> tier_timer = new HashMap<>();
+    private GameStorage storage;
+    private final Map<Integer, String> Tiers = new HashMap<>();
+    private final Map<Integer, Integer> tier_timer = new HashMap<>();
     private int tier = 1;
-    SimpleDateFormat dateFormat;
+    private final SimpleDateFormat dateFormat;
 
     public GameTask(Arena arena){
         this.arena = arena;
         this.game = arena.getGame();
+        this.storage = arena.getStorage();
         dateFormat =  new SimpleDateFormat("mm:ss");
         Tiers.put(1, "Diamond-I");
         Tiers.put(2, "Emerald-I");
@@ -51,19 +54,19 @@ public class GameTask extends BukkitRunnable {
         if(game.getStatus() != GameStatus.RUNNING){
             game = null;
             arena = null;
+            storage = null;
             cancel();
         }
 
-        if (arena.trapInstantiate()) {
+        if (storage.areTrapsEnabled()) {
             for (Player player : game.getConnectedPlayers()) {
-                for (RunningTeam rt : arena.purchasedTrap.keySet()) {
-                    if (!arena.purchasedTrap.get(rt)) continue;
-                    if (rt.isPlayerInTeam(player)) continue;
+                for (RunningTeam rt : storage.getTraps()) {
+                    if (!storage.isTrapEnabled(rt) || rt.isPlayerInTeam(player)) continue;
 
                     if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= arena.radius) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
-                        arena.purchasedTrap.put(rt, false);
-                        rt.getConnectedPlayers().forEach(pl -> sendTitle(pl, "§cTrap Triggered!", "§eSomeone has entered your base!",
+                        storage.setTrap(rt, false);
+                        rt.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
                                 20, 40, 20));
                     }
                 }
@@ -83,8 +86,9 @@ public class GameTask extends BukkitRunnable {
                     }
                 });
                 String MatName = tier % 2 == 0 ? "§aEmerald§6" : "§bDiamond§6";
-                game.getConnectedPlayers().forEach(player -> player.sendMessage("{MatName} generator has been upgraded to "
-                        .replace("{MatName}" , MatName) + Tiers.get(tier)));
+                game.getConnectedPlayers().forEach(player -> player.sendMessage(Messages.generatorUpgrade
+                        .replace("{MatName}" , MatName)
+                        .replace("{tier}", Tiers.get(tier))));
                 tier++;
             }
         }
