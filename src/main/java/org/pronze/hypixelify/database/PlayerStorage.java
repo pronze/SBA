@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PlayerStorage {
-    private Game game;
-    private HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
+    private final Game game;
+    private final HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
 
 
     public List<ItemStack> getItemsOfPlayer(Player player){

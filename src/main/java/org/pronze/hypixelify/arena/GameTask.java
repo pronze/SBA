@@ -1,7 +1,11 @@
 package org.pronze.hypixelify.arena;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
@@ -9,17 +13,22 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-public class UpgradeTask extends BukkitRunnable {
+import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
+
+public class GameTask extends BukkitRunnable {
 
     private int time;
     private Game game;
+    private Arena arena;
+
     private Map<Integer, String> Tiers = new HashMap<>();
     private Map<Integer, Integer> tier_timer = new HashMap<>();
     private int tier = 1;
     SimpleDateFormat dateFormat;
 
-    public UpgradeTask(Game game){
-        this.game = game;
+    public GameTask(Arena arena){
+        this.arena = arena;
+        this.game = arena.getGame();
         dateFormat =  new SimpleDateFormat("mm:ss");
         Tiers.put(1, "Diamond-I");
         Tiers.put(2, "Emerald-I");
@@ -40,8 +49,27 @@ public class UpgradeTask extends BukkitRunnable {
     @Override
     public void run() {
         if(game.getStatus() != GameStatus.RUNNING){
+            game = null;
+            arena = null;
             cancel();
         }
+
+        if (arena.trapInstantiate()) {
+            for (Player player : game.getConnectedPlayers()) {
+                for (RunningTeam rt : arena.purchasedTrap.keySet()) {
+                    if (!arena.purchasedTrap.get(rt)) continue;
+                    if (rt.isPlayerInTeam(player)) continue;
+
+                    if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= arena.radius) {
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
+                        arena.purchasedTrap.put(rt, false);
+                        rt.getConnectedPlayers().forEach(pl -> sendTitle(pl, "§cTrap Triggered!", "§eSomeone has entered your base!",
+                                20, 40, 20));
+                    }
+                }
+            }
+        }
+
 
         if(!Tiers.get(tier).equals(Tiers.get(9))){
             if (time == tier_timer.get(tier)) {

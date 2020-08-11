@@ -1,9 +1,6 @@
 package org.pronze.hypixelify.arena;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.database.PlayerStorage;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
@@ -22,13 +19,12 @@ import java.util.Map;
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class Arena {
-    public UpgradeTask upgradeTask;
+    public GameTask gameTask;
     private final Game game;
     private final ScoreBoard scoreBoard;
     public final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
     public double radius;
-    private PlayerStorage storage;
-    private TrapTask trapTask;
+    private final PlayerStorage storage;
 
     public PlayerStorage getStorage(){
         return storage;
@@ -38,9 +34,8 @@ public class Arena {
         radius = Math.pow(7, 2);
         this.game = game;
         scoreBoard = new ScoreBoard(this);
-        upgradeTask = new UpgradeTask(game);
+        gameTask = new GameTask(this);
         storage = new PlayerStorage(game);
-        trapTask = new TrapTask(this);
     }
 
 
@@ -66,15 +61,11 @@ public class Arena {
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {
             scoreBoard.updateScoreboard();
-            if (upgradeTask != null && !upgradeTask.isCancelled()) {
-                upgradeTask.cancel();
-                upgradeTask = null;
+            if (gameTask != null && !gameTask.isCancelled()) {
+                gameTask.cancel();
+                gameTask = null;
             }
 
-            if(trapTask != null && !trapTask.isCancelled()){
-                trapTask.cancel();
-                trapTask = null;
-            }
             if (e.getWinningTeam() != null) {
                 Team winner = e.getWinningTeam();
                 Map<String, Integer> dataKills = new HashMap<>();
