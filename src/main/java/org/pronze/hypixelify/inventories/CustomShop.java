@@ -479,7 +479,7 @@ public class CustomShop implements Listener {
                 e.setCancelled(true);
                 player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + Messages.message_greatest_enchantment);
             } else {
-                e.setPrice(Integer.toString(Prices.get(newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL))));
+                e.setPrice(Integer.toString(Prices.get(newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL))));
                 ShopUtil.addEnchantsToPlayerArmor(player, newItem);
                 for (Player playerCheck : team.getConnectedPlayers()) {
                     ShopUtil.addEnchantsToPlayerArmor(playerCheck, newItem);
