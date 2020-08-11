@@ -27,7 +27,7 @@ public class PartyCommand implements TabExecutor {
         }
 
         if (!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
-            sender.sendMessage("Cannot access command, party system is disabled.");
+            sender.sendMessage(ChatColor.RED + "Cannot access command, party system is disabled.");
         }
 
         Player player = (Player) sender;

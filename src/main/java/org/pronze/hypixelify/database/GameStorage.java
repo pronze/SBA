@@ -30,11 +30,6 @@ public class GameStorage {
         return purchasedTrap.keySet();
     }
 
-    public boolean isTrapEnabled(RunningTeam team){
-        purchasedTrap.putIfAbsent(team, false);
-        return purchasedTrap.get(team);
-    }
-
     public void setTrap(RunningTeam rt, Boolean b){
         purchasedTrap.put(rt, b);
     }
@@ -43,9 +38,15 @@ public class GameStorage {
         return purchasedTrap.containsValue(true);
     }
 
-
     public Game getGame(){
         return game;
     }
+
+    public boolean isTrapEnabled(RunningTeam team){
+        purchasedTrap.putIfAbsent(team, false);
+        return purchasedTrap.get(team);
+    }
+
+
 
 }

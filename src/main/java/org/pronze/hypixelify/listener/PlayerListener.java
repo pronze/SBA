@@ -233,11 +233,10 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e) {
-        if (Main.isLegacy())
-            return;
-
         Player player = e.getPlayer();
-        ScoreboardUtil.removePlayer(player);
+        if (!Main.isLegacy()) {
+            ScoreboardUtil.removePlayer(player);
+        }
 
         //remove custom made objectives from player.
         if (Hypixelify.isProtocolLib() &&player != null && player.isOnline()) {
@@ -336,7 +335,7 @@ public class PlayerListener extends AbstractListener {
         if (!p.isOp())
             return;
 
-        if (!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())) {
+        if (!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
             new BukkitRunnable() {
                 @Override
                 public void run() {

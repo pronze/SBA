@@ -100,6 +100,7 @@ public class Configurator {
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", Hypixelify.getVersion());
         checkOrSetConfig(modify, "autoset-bw-config", true);
+        checkOrSetConfig(modify, "upgrades.multiplier", 0.25);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-I", 4);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-II", 8);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-III", 12);
@@ -119,6 +120,8 @@ public class Configurator {
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "citizens-shop", false);
         checkOrSetConfig(modify, "shout.time-out", 60);
+        checkOrSetConfig(modify, "message.bed-destroyed.title", "§c§lBED DESTROYED!");
+        checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");
         checkOrSetConfig(modify, "message.already-purchased", "§c§lYou already purchased the same {thing}");
         checkOrSetConfig(modify, "message.wait-trap", "§cYou already purchased this trap!, wait for it to wear out");
         checkOrSetConfig(modify, "message.upgrade-team-protection", "§o§c{player}§e has upgraded team protection");
@@ -218,7 +221,7 @@ public class Configurator {
 
         checkOrSetConfig(modify, "lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s");
         checkOrSetConfig(modify, "lobby-scoreboard.title", Arrays.asList(
-                "&e&lBED WARS"
+                  "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
@@ -418,6 +421,8 @@ public class Configurator {
                 "&e/p leave&7 - Leaves your current party",
                 "&1-----------------------------------------------------"));
         checkOrSetConfig(modify, "main-lobby.enabled", false);
+        checkOrSetConfig(modify, "main-lobby.custom-chat", true);
+        checkOrSetConfig(modify, "main-lobby.chat-format", "{color}[{level}✫] {name}: {message}");
         checkOrSetConfig(modify, "main-lobby.lines", Arrays.asList(
                 "",
                 "Your Level: §a{level}",
@@ -474,7 +479,7 @@ public class Configurator {
         gamestart_message = LobbyScoreboard.listColor(config.getStringList("game-start.message"));
 
 
-        if (config.getBoolean("first_start") || !Objects.equals(config.get("version"), "1.2.9")) {
+        if (config.getBoolean("first_start")) {
             Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
             upgradeCustomFiles();
             config.set("first_start", false);

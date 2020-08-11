@@ -3,6 +3,7 @@ package org.pronze.hypixelify.arena;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.database.GameStorage;
+import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -48,7 +49,7 @@ public class Arena {
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         for (Player p : e.getTeam().getConnectedPlayers()) {
-            sendTitle(p, "§c§lBED DESTROYED!", "You will no longer respawn!", 0, 40, 20);
+            sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
         }
     }
 

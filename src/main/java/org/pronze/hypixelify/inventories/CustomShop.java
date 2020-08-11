@@ -341,7 +341,7 @@ public class CustomShop implements Listener {
         }
 
         else if(!event.getPropertyName().equalsIgnoreCase("sharpness")
-                  || !event.getPropertyName().equalsIgnoreCase("protection")) {
+                  && !event.getPropertyName().equalsIgnoreCase("protection")) {
             return;
         }
 

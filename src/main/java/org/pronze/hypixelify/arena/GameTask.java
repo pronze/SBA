@@ -27,6 +27,7 @@ public class GameTask extends BukkitRunnable {
     private final Map<Integer, Integer> tier_timer = new HashMap<>();
     private int tier = 1;
     private final SimpleDateFormat dateFormat;
+    private final double multiplier;
 
     public GameTask(Arena arena){
         this.arena = arena;
@@ -46,6 +47,7 @@ public class GameTask extends BukkitRunnable {
         }
         Tiers.put(9, "Game End");
         tier_timer.put(9, game.getGameTime());
+        multiplier = Hypixelify.getConfigurator().config.getDouble("upgrades.multiplier", 0.25);
         runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
     }
 
@@ -79,10 +81,10 @@ public class GameTask extends BukkitRunnable {
                 game.getItemSpawners().forEach(itemSpawner -> {
                     if (tier % 2 == 0) {
                         if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.DIAMOND))
-                            itemSpawner.addToCurrentLevel(0.5);
+                            itemSpawner.addToCurrentLevel(multiplier);
                     } else {
                         if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.EMERALD))
-                            itemSpawner.addToCurrentLevel(0.5);
+                            itemSpawner.addToCurrentLevel(multiplier);
                     }
                 });
                 String MatName = tier % 2 == 0 ? "§aEmerald§6" : "§bDiamond§6";

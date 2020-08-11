@@ -19,13 +19,15 @@ import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.listener.ListenerManager;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
-import org.pronze.hypixelify.listener.SafeShop;
+import org.pronze.hypixelify.utils.SafeShop;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 
 import java.util.Objects;
@@ -148,10 +150,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("");
 
         listenerManager = new ListenerManager();
-
-        if (messages != null)
-            messages = null;
-
         messages = new Messages();
         messages.loadConfig();
 
@@ -241,7 +239,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-
         if (Hypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()) {
             for (Player pl : Bukkit.getOnlinePlayers()) {
                 if (pl != null && pl.isOnline()) {
@@ -290,6 +287,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         gamesInventory.destroy();
         gamesInventory = null;
         shop = null;
+        messages = null;
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
         if (plugin.isEnabled()) {

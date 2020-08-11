@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -17,6 +18,9 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.utils.ShopUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +33,7 @@ public class LobbyBoard extends AbstractListener {
     private int count = 0;
     private final List<String> board_body;
     private BukkitTask task;
+    private boolean lobbyChatOverride;
 
     public static boolean isInWorld(Location loc){
         return loc.getWorld().equals(location.getWorld());
@@ -38,6 +43,9 @@ public class LobbyBoard extends AbstractListener {
         players = new ArrayList<>();
         board_body = Hypixelify.getConfigurator().config.getStringList("main-lobby.lines");
         lobby_scoreboard_lines = Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
+        lobbyChatOverride = Hypixelify.getConfigurator().config.getBoolean("main-lobby.custom-chat", true);
+
+
         try {
             location = new Location(Bukkit.getWorld(Hypixelify.getConfigurator().config.getString("main-lobby.world")),
                     Hypixelify.getConfigurator().config.getDouble("main-lobby.x"),
@@ -77,6 +85,20 @@ public class LobbyBoard extends AbstractListener {
 
     }
 
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e){
+        if(!lobbyChatOverride) return;
+        Player player = e.getPlayer();
+        PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
+
+        if(Hypixelify.LobbyBoardEnabled() && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
+            e.setFormat(Messages.lobby_chat_format
+                    .replace("{level}", String.valueOf(db.getLevel()))
+                    .replace("{name}", e.getPlayer().getName())
+                    .replace("{message}", e.getMessage())
+                    .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer())));
+        }
+    }
     @Override
     public void onDisable() {
         for(Player player : players){

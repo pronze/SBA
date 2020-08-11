@@ -1,4 +1,4 @@
-package org.pronze.hypixelify.listener;
+package org.pronze.hypixelify.utils;
 import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.Bukkit;
 

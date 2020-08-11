@@ -38,6 +38,7 @@ public class DatabaseManager {
                 }
                 if(getDatabase(player).shouldClear()) {
                     done = true;
+                    Hypixelify.debug("Deleted database of: " + player.getName());
                     deleteDatabase(player);
                     updateAll();
                 }

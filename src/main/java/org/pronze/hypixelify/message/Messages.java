@@ -47,7 +47,8 @@ public class Messages {
     public static String message_upgrade_team_protection;
     public static String trap_timeout_message;
     public static String already_purchased_thing;
-
+    public static String lobby_chat_format;
+    public static String message_bed_destroyed_title, message_bed_destroyed_subtitle;
     public Messages() {
 
     }
@@ -65,6 +66,9 @@ public class Messages {
     }
 
     public void loadConfig() {
+        message_bed_destroyed_title = fetchString("message.bed-destroyed.title");
+        message_bed_destroyed_subtitle = fetchString("message.bed-destroyed.sub-title");
+        lobby_chat_format = fetchString("main-lobby.chat-format");
         already_purchased_thing = fetchString("message.already-purchased");
         trap_timeout_message = fetchString("message.wait-trap");
         message_upgrade_team_protection = fetchString("message.upgrade-team-protection");
