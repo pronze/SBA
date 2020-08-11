@@ -44,8 +44,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private boolean mainLobby;
 
     public static void debug(String message){
-        if(!plugin.debug) return;
-        Bukkit.getLogger().info(message);
+        if(!plugin.debug || message == null) return;
+        Bukkit.getLogger().info(ChatColor.RED + "[DEBUG]: " + message);
     }
 
     public static boolean LobbyBoardEnabled(){

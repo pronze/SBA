@@ -92,7 +92,6 @@ public class Configurator {
 
         checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
-        checkOrSetConfig(modify, "legacy-mode", false);
         checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN", "TNT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
@@ -114,12 +113,11 @@ public class Configurator {
         checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100 );
         checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200 );
         checkOrSetConfig(modify, "date.format", "MM/dd/yy");
-        checkOrSetConfig(modify, "tag_health", false);
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
-        checkOrSetConfig(modify, "citizens-shop", true);
+        checkOrSetConfig(modify, "citizens-shop", false);
         checkOrSetConfig(modify, "shout.time-out", 60);
         checkOrSetConfig(modify, "message.shout-format", "§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}");
         checkOrSetConfig(modify, "message.cannot-buy", "§cYou don't have enough {price}");
@@ -519,11 +517,10 @@ public class Configurator {
         saveConfig();
         File file2 = new File(dataFolder, "config.yml");
         main.saveResource("config.yml", true);
-        String pathname = Bukkit.getServer().getWorldContainer().getAbsolutePath() + "/plugins/BedWars/config.yml";
-
-        File file3 = new File(pathname);
+        String pathName = Main.getConfigurator().dataFolder.getAbsolutePath() + "\\config.yml";
+        File file3 = new File(pathName);
         file3.delete();
-        file2.renameTo(new File(pathname));
+        file2.renameTo(new File(pathName));
 
         shopFile = new File(dataFolder, "shop.yml");
         upgradeShop = new File(dataFolder, "upgradeShop.yml");

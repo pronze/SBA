@@ -394,14 +394,6 @@ public class PlayerListener extends AbstractListener {
         }.runTaskTimer(Hypixelify.getInstance(), 40L, 20L);
     }
 
-  @EventHandler
-  public void PlayerMoveEvent(PlayerMoveEvent e){
-      if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(e.getPlayer())) return;
-      String name = BedwarsAPI.getInstance().getGameOfPlayer(e.getPlayer()).getName();
-
-      if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(name))
-          Hypixelify.getInstance().getArenaManager().getArenas().get(name).PlayerMoveEvent(e);
-  }
 
 
 }

@@ -58,13 +58,15 @@ public class BWACommand implements TabExecutor {
                 sender.sendMessage("/bwaddon reload - Reload the addon");
                 sender.sendMessage("/bwaddon help - Show available list of commands");
                 sender.sendMessage("/bwaddon reset - resets all configs related to addon");
+                sender.sendMessage("/bwaddon setlobby - sets lobby for scoreboard and chat message");
                 return true;
             } else if (args[0].equalsIgnoreCase("reset")) {
                 sender.sendMessage("Resetting...");
                 try {
                     Hypixelify.getConfigurator().upgradeCustomFiles();
-                    ((Player) sender).performCommand("bwaddon clearnpc");
                     sender.sendMessage("Sucessfully resetted");
+                    if(sender instanceof Player)
+                        ((Player)sender).performCommand("bwaddon clearnpc");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -94,13 +96,13 @@ public class BWACommand implements TabExecutor {
 
                 Player player = (Player) sender;
                 if (args[1].equalsIgnoreCase("solo")) {
-                    Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 1);
+                    Hypixelify.getGamesInventory().openForPlayer(player, 1);
                 } else if (args[1].equalsIgnoreCase("double")) {
-                    Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 2);
+                    Hypixelify.getGamesInventory().openForPlayer(player, 2);
                 } else if (args[1].equalsIgnoreCase("triple")) {
-                    Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 3);
+                    Hypixelify.getGamesInventory().openForPlayer(player, 3);
                 } else if (args[1].equalsIgnoreCase("squad")) {
-                    Hypixelify.getInstance().getGamesInventory().openForPlayer(player, 4);
+                    Hypixelify.getGamesInventory().openForPlayer(player, 4);
                 } else {
                     sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
                 }
@@ -145,7 +147,7 @@ public class BWACommand implements TabExecutor {
         if (!commandSender.hasPermission("misat11.bw.admin"))
             return null;
         if (strings.length == 1) {
-            if (!Hypixelify.getConfigurator().config.getString("version").contains(Hypixelify.getVersion())) {
+            if (!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
                 return Arrays.asList("cancel", "upgrade");
             }
             List<String> Commands = new ArrayList<>();

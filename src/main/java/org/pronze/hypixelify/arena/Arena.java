@@ -25,9 +25,10 @@ public class Arena {
     public UpgradeTask upgradeTask;
     private final Game game;
     private final ScoreBoard scoreBoard;
-    private final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
-    private double radius;
+    public final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
+    public double radius;
     private PlayerStorage storage;
+    private TrapTask trapTask;
 
     public PlayerStorage getStorage(){
         return storage;
@@ -39,7 +40,12 @@ public class Arena {
         scoreBoard = new ScoreBoard(this);
         upgradeTask = new UpgradeTask(game);
         storage = new PlayerStorage(game);
+        trapTask = new TrapTask(this);
+    }
 
+
+    public boolean trapInstantiate(){
+        return purchasedTrap.containsValue(true);
     }
 
     public Game getGame() {
@@ -63,6 +69,11 @@ public class Arena {
             if (upgradeTask != null && !upgradeTask.isCancelled()) {
                 upgradeTask.cancel();
                 upgradeTask = null;
+            }
+
+            if(trapTask != null && !trapTask.isCancelled()){
+                trapTask.cancel();
+                trapTask = null;
             }
             if (e.getWinningTeam() != null) {
                 Team winner = e.getWinningTeam();
@@ -144,24 +155,6 @@ public class Arena {
         return true;
     }
 
-    public void PlayerMoveEvent(PlayerMoveEvent e) {
-        Player player = e.getPlayer();
-
-        if (!purchasedTrap.containsValue(true)) return;
-
-        for (RunningTeam rt : purchasedTrap.keySet()) {
-            if (!purchasedTrap.get(rt)) continue;
-            if(rt.isPlayerInTeam(player)) continue;
-
-            if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= radius) {
-                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
-                purchasedTrap.put(rt, false);
-                rt.getConnectedPlayers().forEach(pl->sendTitle(pl, "§cTrap Triggered!", "§eSomeone has entered your base!",
-                        20, 40, 20));
-            }
-        }
-
-    }
 
 
 }

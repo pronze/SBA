@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.arena;
 import org.bukkit.Material;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.pronze.hypixelify.Hypixelify;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
