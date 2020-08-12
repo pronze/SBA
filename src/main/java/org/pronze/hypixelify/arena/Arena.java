@@ -48,6 +48,7 @@ public class Arena {
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
+        storage.removeTeam(e.getTeam());
         for (Player p : e.getTeam().getConnectedPlayers()) {
             sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
         }

@@ -38,6 +38,9 @@ public class GameStorage {
         return purchasedTrap.containsValue(true);
     }
 
+    public void removeTeam(RunningTeam rt){
+        purchasedTrap.remove(rt);
+    }
     public Game getGame(){
         return game;
     }

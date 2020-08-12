@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.arena;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -7,9 +8,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.message.Messages;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.utils.Sounds;
 
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -68,8 +71,13 @@ public class GameTask extends BukkitRunnable {
                     if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= arena.radius) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
                         storage.setTrap(rt, false);
-                        rt.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
-                                20, 40, 20));
+                        player.sendMessage(ChatColor.YELLOW + "You have been blinded by " + rt.getName() + " team!");
+                        rt.getConnectedPlayers().forEach(pl -> {
+                            Sounds.playSound(pl, pl.getLocation(),
+                                    Main.getConfigurator().config.getString("sounds.on_bed_destroyed"),
+                                    Sounds.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
+                            sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
+                                20, 60, 0);});
                     }
                 }
             }

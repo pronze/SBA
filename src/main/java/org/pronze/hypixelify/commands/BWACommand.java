@@ -34,7 +34,9 @@ public class BWACommand implements TabExecutor {
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
                 sender.sendMessage("Plugin reloaded!");
                 return true;
-            } else if(args[0].equalsIgnoreCase("setlobby")){
+            }
+
+            else if(args[0].equalsIgnoreCase("setlobby")){
                 if(!(sender instanceof Player)) return true;
 
                 Player player = (Player) sender;

@@ -22,12 +22,12 @@ public class Configurator {
     public static List<String> overstats_message;
     public static List<String> gamestart_message;
     public static HashMap<String, Integer> game_size;
+    public static String date;
+    public static boolean tag_health;
     public final File dataFolder;
     public final Hypixelify main;
     public File file, oldfile, shopFile, upgradeShop, legacyShop;
     public FileConfiguration config;
-    public static String date;
-    public static boolean tag_health;
 
     public Configurator(Hypixelify main) {
         this.dataFolder = main.getDataFolder();
@@ -83,7 +83,7 @@ public class Configurator {
             main.saveResource("upgradeShop.yml", false);
         }
 
-        if(!legacyShop.exists()){
+        if (!legacyShop.exists()) {
             main.saveResource("legacy-shop.yml", false);
         }
 
@@ -111,8 +111,8 @@ public class Configurator {
         checkOrSetConfig(modify, "upgrades.time.Emerald-II", 520);
         checkOrSetConfig(modify, "upgrades.time.Diamond-III", 700);
         checkOrSetConfig(modify, "upgrades.time.Emerald-III", 900);
-        checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100 );
-        checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200 );
+        checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100);
+        checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200);
         checkOrSetConfig(modify, "date.format", "MM/dd/yy");
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
@@ -144,7 +144,7 @@ public class Configurator {
         checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
         checkOrSetConfig(modify, "games-inventory.stack-lore",
                 Arrays.asList("§8{mode}", "", "§7Available Servers: §a1", "§7Status: §a{status}"
-                ,"§7Players:§a {players}","", "§aClick to play", "§eRight click to toggle favorite!"));
+                        , "§7Players:§a {players}", "", "§aClick to play", "§eRight click to toggle favorite!"));
         checkOrSetConfig(modify, "message.upgrade", "Upgrade: ");
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
@@ -167,7 +167,7 @@ public class Configurator {
         checkOrSetConfig(modify, "games-inventory.ender_pearl-lore", Arrays.asList("§7Click here to rejoin the lastly joined game"));
 
         checkOrSetConfig(modify, "games-inventory.bed-name", "§aBed Wars ({mode})");
-        checkOrSetConfig(modify, "games-inventory.bed-lore",Arrays.asList("§7Play Bed Wars {mode}", " ", "§eClick to play!") );
+        checkOrSetConfig(modify, "games-inventory.bed-lore", Arrays.asList("§7Play Bed Wars {mode}", " ", "§eClick to play!"));
         for (String game : Main.getGameNames()) {
             String str = "lobby-scoreboard.player-size.games." + game;
             checkOrSetConfig(modify, str, 4);
@@ -221,7 +221,7 @@ public class Configurator {
 
         checkOrSetConfig(modify, "lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s");
         checkOrSetConfig(modify, "lobby-scoreboard.title", Arrays.asList(
-                  "&e&lBED WARS"
+                "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
@@ -495,70 +495,28 @@ public class Configurator {
     }
 
     public void upgradeCustomFiles() {
-        try {
-            shopFile.delete();
-            upgradeShop.delete();
-            legacyShop.delete();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        if(Hypixelify.getVersion().contains("1.2.9")){
-            config.set("scoreboard.lines.default", Arrays.asList(
-                    "&7{date}"
-                    , ""
-                    , "{tier}"
-                    , ""
-                    , "{team_status}"
-                    , ""
-                    , "&fKills: &a{kills}"
-                    , "&fTotal Kills: &a{totalkills}"
-                    , "&fBed Broken: &a{beds}"
-                    , ""
-                    , "&ewww.minecraft.net"
-            ));
 
-            config.set("scoreboard.lines.5", Arrays.asList(
-                    "&7{date}"
-                    , ""
-                    , "{tier}"
-                    , ""
-                    , "{team_status}"
-                    , ""
-                    , "&ewww.minecraft.net"
-            ));
-        }
         config.set("version", Hypixelify.getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
+
         File file2 = new File(dataFolder, "config.yml");
         main.saveResource("config.yml", true);
-        String pathName = Main.getConfigurator().dataFolder.getAbsolutePath() + "\\config.yml";
-        File file3 = new File(pathName);
-        file3.delete();
-        file2.renameTo(new File(pathName));
 
-        shopFile = new File(dataFolder, "shop.yml");
-        upgradeShop = new File(dataFolder, "upgradeShop.yml");
-        legacyShop = new File(dataFolder, "legacy-shop.yml");
-
-        if (!shopFile.exists()) {
-            main.saveResource("shop.yml", false);
+        try {
+            Main.getConfigurator().config.load(file2);
+            Main.getConfigurator().saveConfig();
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
         }
-
-        if (!upgradeShop.exists()) {
-            main.saveResource("upgradeShop.yml", false);
-        }
-
-        if(!legacyShop.exists()){
-            main.saveResource("legacy-shop.yml", false);
-        }
+        main.saveResource("shop.yml", true);
+        main.saveResource("upgradeShop.yml", true);
+        main.saveResource("legacy-shop.yml", true);
 
 
-        Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
-        if(plugin != null) {
-            Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-            Bukkit.getServer().getPluginManager().enablePlugin(plugin);
-        }
+        Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
+        Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
+
     }
 
     public void saveConfig() {
