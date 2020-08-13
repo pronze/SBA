@@ -165,6 +165,7 @@ sounds:
   on_upgrade_buy: ENTITY_EXPERIENCE_ORB_PICKUP
   on_respawn_cooldown_wait: UI_BUTTON_CLICK
   on_respawn_cooldown_done: ENTITY_PLAYER_LEVELUP
+  on_trap_triggered: ENTITY_ENDERMAN_TELEPORT
 game-effects:
   end:
     effects:

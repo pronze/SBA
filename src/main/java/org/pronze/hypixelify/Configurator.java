@@ -118,7 +118,6 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
-        checkOrSetConfig(modify, "citizens-shop", false);
         checkOrSetConfig(modify, "shout.time-out", 60);
         checkOrSetConfig(modify, "message.bed-destroyed.title", "§c§lBED DESTROYED!");
         checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");

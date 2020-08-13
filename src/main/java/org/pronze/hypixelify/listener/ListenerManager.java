@@ -1,6 +1,5 @@
 package org.pronze.hypixelify.listener;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.utils.SafeShop;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +14,6 @@ public class ListenerManager {
             listeners.add(new ChatListener());
             if(Hypixelify.getConfigurator().config.getBoolean("party.leader-autojoin-autoleave", true))
                 listeners.add(new PartyListener());
-        }
-        if(Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true)
-        && SafeShop.canInstantiate()){
-                listeners.add(new Shop());
         }
         if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
             listeners.add(new LobbyBoard());

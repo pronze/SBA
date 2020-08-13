@@ -74,8 +74,8 @@ public class GameTask extends BukkitRunnable {
                         player.sendMessage(ChatColor.YELLOW + "You have been blinded by " + rt.getName() + " team!");
                         rt.getConnectedPlayers().forEach(pl -> {
                             Sounds.playSound(pl, pl.getLocation(),
-                                    Main.getConfigurator().config.getString("sounds.on_bed_destroyed"),
-                                    Sounds.ENTITY_ENDER_DRAGON_GROWL, 1, 1);
+                                    Main.getConfigurator().config.getString("sounds.on_trap_triggered"),
+                                    Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
                             sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
                                 20, 60, 0);});
                     }

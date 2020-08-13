@@ -74,14 +74,7 @@ public class BWACommand implements TabExecutor {
                 }
 
                 return true;
-            } else if (args[0].equalsIgnoreCase("clearnpc")) {
-                if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop")) {
-                    return true;
-                }
-                ShopUtil.destroyNPCFromGameWorlds();
-                sender.sendMessage("Cleared all npcs from bedwars worlds");
-                return true;
-            } else if (args[0].equalsIgnoreCase("gamesinv")) {
+            }  else if (args[0].equalsIgnoreCase("gamesinv")) {
                 if (args.length != 2) {
                     sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
                     return true;
@@ -114,8 +107,6 @@ public class BWACommand implements TabExecutor {
                 if (args[0].equalsIgnoreCase("upgrade")) {
                     try {
                         Hypixelify.getConfigurator().upgradeCustomFiles();
-                        if (Hypixelify.getConfigurator().config.getBoolean("citizens-shop"))
-                            ShopUtil.destroyNPCFromGameWorlds();
                         sender.sendMessage("[SBAHypixelify]: " + ChatColor.GOLD + "Sucessfully upgraded files!");
                     } catch (Exception e) {
                         e.printStackTrace();

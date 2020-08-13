@@ -19,7 +19,6 @@ import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.listener.ListenerManager;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
-import org.pronze.hypixelify.utils.SafeShop;
 import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.manager.PartyManager;
@@ -117,8 +116,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         configurator.loadDefaults();
         debug = configurator.config.getBoolean("debug.enabled", false);
         mainLobby = Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false);
-
-        boolean hookedWithCitizens = SafeShop.canInstantiate();
         boolean isLegacy = Main.isLegacy();
         isProtocolLib = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 
@@ -140,8 +137,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("< Status: §fEnabled                                                                                 >");
         Bukkit.getLogger().info("< Version: §f{Version}                                                                                  >".replace("{Version}", this.getDescription().getVersion()));
         Bukkit.getLogger().info("< Build: §6Stable                                                                               §7    >");
-        Bukkit.getLogger().info("< Hooked To Citizens: §atrue§7                                                                        >"
-                .replace("true", String.valueOf(hookedWithCitizens)));
         Bukkit.getLogger().info("< Legacy Support: §atrue§7                                                                            >"
                 .replace("true", String.valueOf(isLegacy)));
         Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -157,27 +152,12 @@ public class Hypixelify extends JavaPlugin implements Listener {
         if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
 
-        if (!configurator.config.getBoolean("citizens-shop", true) || !hookedWithCitizens) {
-
-            Bukkit.getLogger().warning("Failed to initalize Citizens shop reverting to normal shops...");
-
-            if (Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)
-                    || configurator.config.getBoolean("citizens-shop", true)) {
-                configurator.config.set("citizens-shop", false);
-                configurator.saveConfig();
-                Main.getConfigurator().config.set("shop.citizens-enabled", false);
-                Main.getConfigurator().saveConfig();
-                Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
-                Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
-            }
-        } else {
             if (!Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)) {
                 Main.getConfigurator().config.set("shop.citizens-enabled", true);
                 Main.getConfigurator().saveConfig();
                 Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
                 Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
             }
-        }
 
         if (configurator.config.getBoolean("party.enabled", true)) {
             if (databaseManager == null)

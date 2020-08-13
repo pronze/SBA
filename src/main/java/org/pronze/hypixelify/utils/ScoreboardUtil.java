@@ -113,7 +113,6 @@ public class ScoreboardUtil {
             scoreboards.put(p, Bukkit.getScoreboardManager().getNewScoreboard());
         elements = cutUnranked(elements);
         Scoreboard scoreboard = scoreboards.get(p);
-
         try {
             if (scoreboard.getObjective("bwa-game") == null) {
                 scoreboard.registerNewObjective("bwa-game", "dummy");

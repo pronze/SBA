@@ -1,21 +1,15 @@
 package org.pronze.hypixelify.utils;
-
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
-import org.pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import org.pronze.hypixelify.listener.PlayerListener;
-import org.pronze.hypixelify.listener.Shop;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -25,7 +19,6 @@ import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
-import org.screamingsandals.bedwars.utils.MiscUtils;
 
 import java.util.*;
 
@@ -166,25 +159,6 @@ public class ShopUtil {
         return builder;
     }
 
-    public static void destroyNPCFromGameWorlds() {
-        List<NPC> npcs = new ArrayList<>();
-        if(CitizensAPI.getNPCRegistry() == null) return;
-
-        for (Game game : Main.getInstance().getGames()) {
-            CitizensAPI.getNPCRegistry().forEach(npc -> {
-                if(npc != null) {
-                    if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2())) {
-                        npcs.add(npc);
-                    }
-                }
-            });
-        }
-        if (!npcs.isEmpty()) {
-            for (NPC npc : npcs) {
-                npc.destroy();
-            }
-        }
-    }
 
     public static <K, V> K getKey(HashMap<K, V> map, V value) {
         for (K key : map.keySet()) {
@@ -263,6 +237,13 @@ public class ShopUtil {
         return newItem;
     }
 
+    static public String capFirstLetter ( String str )
+    {
+        String firstLetter = str.substring(0,1).toUpperCase();
+        String restLetters = str.substring(1).toLowerCase();
+        return firstLetter + restLetters;
+    }
+
     public static ArrayList<Object> createGamesGUI(int mode, List<String> lore) {
         if (Arrow == null)
             InitalizeStacks();
@@ -279,7 +260,7 @@ public class ShopUtil {
                 List<String> newLore = new ArrayList<>();
                 for (String ls : lore) {
                     String l = ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
-                            .replace("{status}", Shop.capFirstLetter(game.getStatus().name()));
+                            .replace("{status}", capFirstLetter(game.getStatus().name()));
                     newLore.add(l);
                 }
                 meta1.setLore(newLore);
@@ -426,25 +407,6 @@ public class ShopUtil {
     }
 
 
-    public static void RemoveNPCFromGame(Game game) {
-        ArrayList<NPC> npcs = new ArrayList<>();
-
-        if(CitizensAPI.getNPCRegistry() == null) return;
-        CitizensAPI.getNPCRegistry().forEach(npc -> {
-
-            if(npc != null) {
-                if (GameCreator.isInArea(npc.getStoredLocation(), game.getPos1(), game.getPos2()))
-                    npcs.add(npc);
-            }
-        });
-
-        if (npcs.isEmpty())
-            return;
-
-        for (NPC npc : npcs) {
-            npc.destroy();
-        }
-    }
 
     public static void sendMessage(Player player, List<String> message){
         for(String st : message){
