@@ -23,6 +23,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.game.GamePlayer;
+
 import java.util.Objects;
 
 public class Shop extends AbstractListener {
@@ -33,7 +34,7 @@ public class Shop extends AbstractListener {
     private GameStore upgradeShop;
 
     public Shop(){
-        PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
+       //PlayerInteractEntityEvent.getHandlerList().unregister(Objects.requireNonNull(Bukkit.getPluginManager().getPlugin("BedWars")));
         shop = new GameStore(null, "shop.yml", false,  "[BW] Shop",
                 false, false);
         upgradeShop = new GameStore(null, "upgradeShop.yml", false,  "[BW] Team Upgrades",
@@ -85,21 +86,21 @@ public class Shop extends AbstractListener {
         }
 
     }
-    @EventHandler
-    public void onEntityInteract(PlayerInteractEntityEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
+ //  @EventHandler
+ //  public void onEntityInteract(PlayerInteractEntityEvent event) {
+ //      if (event.isCancelled()) {
+ //          return;
+ //      }
 
-        Player player = event.getPlayer();
-        if (Main.isPlayerInGame(player)) {
-            GamePlayer gPlayer = Main.getPlayerGameProfile(player);
-            Game game = gPlayer.getGame();
-            if (game.getStatus() == GameStatus.WAITING || gPlayer.isSpectator) {
-                event.setCancelled(true);
-            }
-        }
-    }
+ //      Player player = event.getPlayer();
+ //      if (Main.isPlayerInGame(player)) {
+ //          GamePlayer gPlayer = Main.getPlayerGameProfile(player);
+ //          Game game = gPlayer.getGame();
+ //          if (game.getStatus() == GameStatus.WAITING || gPlayer.isSpectator) {
+ //              event.setCancelled(true);
+ //          }
+ //      }
+ //  }
 
     @EventHandler
     public void onRebuild(BedwarsPreRebuildingEvent e){

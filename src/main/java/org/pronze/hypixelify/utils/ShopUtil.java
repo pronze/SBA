@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import org.pronze.hypixelify.listener.PlayerListener;
 import org.pronze.hypixelify.listener.Shop;
 import org.screamingsandals.bedwars.Main;
@@ -24,6 +25,7 @@ import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
+import org.screamingsandals.bedwars.utils.MiscUtils;
 
 import java.util.*;
 
@@ -65,13 +67,16 @@ public class ShopUtil {
         }
     }
 
-    public static void buyArmor(Player player, Material mat_boots, String name) {
+    public static void buyArmor(Player player, Material mat_boots, String name, Game game) {
         String matName  = name.substring(0, name.indexOf("_"));
         Material mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         ItemStack boots = new ItemStack(mat_boots);
-        boots.addEnchantments(Objects.requireNonNull(player.getInventory().getBoots()).getEnchantments());
         ItemStack leggings = new ItemStack(mat_leggings);
-        leggings.addEnchantments(player.getInventory().getBoots().getEnchantments());
+        int level = Objects.requireNonNull(Hypixelify.getGameStorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
+        if(level != 0){
+            boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
+            leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
+        }
         player.getInventory().setLeggings(null);
         player.getInventory().setBoots(null);
         player.getInventory().setBoots(boots);
@@ -103,18 +108,6 @@ public class ShopUtil {
         }
 
         return true;
-    }
-
-    public static ItemStack shopEnchants(ItemStack sh_item, ItemStack pl_Item, Enchantment enchant) {
-        int sz = pl_Item.getEnchantmentLevel(enchant);
-        if (sz >= 0 && sz < 4) {
-            sh_item.addEnchantment(enchant, sz + 1);
-        } else if (sz == 4) {
-            sh_item.removeEnchantment(enchant);
-            sh_item.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
-            sh_item.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-        }
-        return sh_item;
     }
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
@@ -459,17 +452,20 @@ public class ShopUtil {
         }
     }
 
-    public static void upgradeSwordOnPurchase(Player player ,ItemStack newItem){
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null && item.getType().name().endsWith("SWORD") && item.getType() != newItem.getType()) {
-                newItem.addEnchantments(item.getEnchantments());
-                if (item.getType() == Material.WOODEN_SWORD)
-                    player.getInventory().remove(Material.WOODEN_SWORD);
-                else if (Hypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true))
-                    player.getInventory().remove(item);
+    public static void upgradeSwordOnPurchase(Player player ,ItemStack newItem, Game game){
+        if (Hypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
+            for (ItemStack item : player.getInventory().getContents()) {
+                if (item != null && item.getType().name().endsWith("SWORD")) {
+                        player.getInventory().remove(item);
+                }
             }
         }
+        int level = Objects.requireNonNull(Hypixelify.getGameStorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
+        if(level == 0) return;
+        newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
     }
+
+
 
     public static void removeAxeOrPickaxe(Player player, ItemStack newItem){
         String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
@@ -489,6 +485,26 @@ public class ShopUtil {
         else{
             return "§7";
         }
+    }
+
+    public static boolean isABedwarsSpecialProperty(String property){
+        if     (property.equalsIgnoreCase("arrowblocker")
+                || property.equalsIgnoreCase("autoigniteabletnt")
+                || property.equalsIgnoreCase("golem")
+                || property.equalsIgnoreCase("luckyblock")
+                || property.equalsIgnoreCase("magnetshoes")
+                || property.equalsIgnoreCase("protectionwall")
+                || property.equalsIgnoreCase("rescueplatform")
+                || property.equalsIgnoreCase("tntsheep")
+                || property.equalsIgnoreCase("teamchest")
+                || property.equalsIgnoreCase("throwablefireball")
+                || property.equalsIgnoreCase("tracker")
+                || property.equalsIgnoreCase("trap")
+                || property.equalsIgnoreCase("warppowder"))
+            return true;
+
+
+        return false;
     }
 
 }

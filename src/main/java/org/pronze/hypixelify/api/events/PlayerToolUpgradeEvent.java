@@ -7,6 +7,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 
 public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
@@ -17,6 +18,7 @@ public class PlayerToolUpgradeEvent extends Event implements Cancellable {
     private  RunningTeam team;
     private Game game;
     private String price = null;
+    private ItemSpawnerType type;
 
     public String getPrice(){
         return price;
@@ -26,12 +28,17 @@ public class PlayerToolUpgradeEvent extends Event implements Cancellable {
         price = pr;
     }
 
-    public PlayerToolUpgradeEvent(Player player, ItemStack stack, String name, RunningTeam team, Game game){
+    public ItemStack getStackFromPrice(int price){
+        return type.getStack(price);
+    }
+
+    public PlayerToolUpgradeEvent(Player player, ItemStack stack, String name, RunningTeam team, Game game, ItemSpawnerType type){
         this.player = player;
         this.stack = stack;
         this.name = name;
         this.team = team;
         this.game = game;
+        this.type = type;
     }
 
     public Game getGame(){

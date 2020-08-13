@@ -133,6 +133,8 @@ public class Arena {
 
         for (RunningTeam t : game.getRunningTeams()) {
             storage.setTrap(t, false);
+            storage.setProtection(t.getName(), 0);
+            storage.setSharpness(t.getName(), 0);
         }
 
     }

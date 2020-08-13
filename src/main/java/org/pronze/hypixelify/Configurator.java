@@ -483,7 +483,6 @@ public class Configurator {
             Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
-            config.set("citizens-shop", false);
             saveConfig();
             Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
             if (plugin != null) {
@@ -502,16 +501,15 @@ public class Configurator {
 
         File file2 = new File(dataFolder, "config.yml");
         main.saveResource("config.yml", true);
-
+        main.saveResource("shop.yml", true);
+        main.saveResource("upgradeShop.yml", true);
+        main.saveResource("legacy-shop.yml", true);
         try {
             Main.getConfigurator().config.load(file2);
             Main.getConfigurator().saveConfig();
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
-        main.saveResource("shop.yml", true);
-        main.saveResource("upgradeShop.yml", true);
-        main.saveResource("legacy-shop.yml", true);
 
 
         Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
