@@ -100,6 +100,7 @@ public class Configurator {
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", Hypixelify.getVersion());
         checkOrSetConfig(modify, "autoset-bw-config", true);
+        checkOrSetConfig(modify, "upgrades.trap-detection-range", 7);
         checkOrSetConfig(modify, "upgrades.multiplier", 0.25);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-I", 4);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-II", 8);
@@ -131,6 +132,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.trap-triggered.title", "§cTrap Triggered!");
         checkOrSetConfig(modify, "message.trap-triggered.sub-title", "§eSomeone has entered your base!");
         checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "§6Blindness Trap has been purchased!");
+        checkOrSetConfig(modify, "message.purchase-heal-pool", "§bHeal Pool has been purchased by: {player}");
         checkOrSetConfig(modify, "message.cannot-buy", "§cYou don't have enough {price}");
         checkOrSetConfig(modify, "message.purchase", "§aYou purchased §e{item}");
         checkOrSetConfig(modify, "message.respawn-title", "§cYOU DIED!");

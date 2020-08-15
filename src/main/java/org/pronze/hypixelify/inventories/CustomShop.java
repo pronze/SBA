@@ -516,7 +516,8 @@ public class CustomShop implements Listener {
                 e.setCancelled(true);
             } else {
                 Objects.requireNonNull(Hypixelify.getGameStorage(game)).setPool(team, true);
-                team.getConnectedPlayers().forEach(pl -> pl.sendMessage("§bBlindness trap has been purchased by: " + player.getName()));
+                team.getConnectedPlayers().forEach(pl -> pl.sendMessage(Messages.message_purchase_heal_pool
+                .replace("{player}", player.getName())));
             }
         }
         else if (name.equalsIgnoreCase("protection")) {
@@ -641,10 +642,11 @@ public class CustomShop implements Listener {
                     materialItem = type.getStack(Integer.parseInt(e.getPrice()));
 
                 //since we are  setting the price to a different one on upgrade, we do the check again
-                if (event.hasPlayerInInventory(materialItem) &&
+                if (!event.hasPlayerInInventory(materialItem) &&
                         !Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
                     player.sendMessage(Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}"))
                             .replace("{price}", priceType));
+                    return;
                 }
                 sellstack(materialItem, event);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {

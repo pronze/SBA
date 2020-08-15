@@ -49,6 +49,8 @@ public class Messages {
     public static String already_purchased_thing;
     public static String lobby_chat_format;
     public static String message_bed_destroyed_title, message_bed_destroyed_subtitle;
+    public static String message_purchase_heal_pool;
+
     public Messages() {
 
     }
@@ -66,6 +68,7 @@ public class Messages {
     }
 
     public void loadConfig() {
+        message_purchase_heal_pool = fetchString("message.purchase-heal-pool");
         message_bed_destroyed_title = fetchString("message.bed-destroyed.title");
         message_bed_destroyed_subtitle = fetchString("message.bed-destroyed.sub-title");
         lobby_chat_format = fetchString("main-lobby.chat-format");

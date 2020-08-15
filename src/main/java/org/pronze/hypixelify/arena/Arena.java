@@ -2,6 +2,7 @@ package org.pronze.hypixelify.arena;
 
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
+import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
@@ -31,7 +32,7 @@ public class Arena {
     }
 
     public Arena(Game game) {
-        radius = Math.pow(7, 2);
+        radius = Math.pow(Hypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
         this.game = game;
         storage = new GameStorage(game);
         scoreBoard = new ScoreBoard(this);

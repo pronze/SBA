@@ -82,6 +82,7 @@ data:
     column: 5
     row: 1
     properties: healpool
+    price: 8 of diamond
 
   - stack: "DRAGON_EGG;1;Ender Dragon;Unconfigured"
     column: 6

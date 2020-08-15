@@ -92,7 +92,7 @@ public class GameTask extends BukkitRunnable {
                 for(Player pl : rt.getConnectedPlayers()){
                     if(Main.getPlayerGameProfile(pl).isSpectator) continue;
                     if(storage.getTargetBlockLocation(rt).distanceSquared(pl.getLocation()) <= arena.radius){
-                        pl.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20, 1));
+                        pl.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
                     }
                 }
             }
