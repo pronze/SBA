@@ -26,7 +26,7 @@ import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
 public class ShopUtil {
 
-    public static ItemStack Diamond, FireWorks, Arrow;
+    public static ItemStack Diamond, FireWorks, Arrow, BED;
 
     private static void InitalizeStacks() {
         Arrow = new ItemStack(Material.ARROW);
@@ -37,10 +37,14 @@ public class ShopUtil {
         metaArrow.setLore(arrowLore);
         Arrow.setItemMeta(metaArrow);
 
-        if(Main.isLegacy())
+        if(Main.isLegacy()) {
             FireWorks = new ItemStack(Material.valueOf("FIREWORK"));
-        else
+            BED = new ItemStack(Material.valueOf("BED"));
+        }
+        else {
             FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
+            BED = new ItemStack(Material.RED_BED);
+        }
 
         ItemMeta fireMeta = FireWorks.getItemMeta();
         fireMeta.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Map"));
@@ -95,7 +99,7 @@ public class ShopUtil {
         if(!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name,enchantment)) return false;
 
         for (Player player : team.getConnectedPlayers()) {
-            player.sendMessage(ChatColor.ITALIC + "" + ChatColor.RED + buyer.getName() + ChatColor.YELLOW + " has upgraded team sword damage!");
+            player.sendMessage("§c" + buyer.getName() +"§e has upgraded team sword damage!");
             if(player == buyer) continue;
             ShopUtil.addEnchantsToPlayerTools(player, stack, name,enchantment);
         }
@@ -256,7 +260,7 @@ public class ShopUtil {
                     Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
                 ItemStack temp = new ItemStack(Material.valueOf(Hypixelify.getConfigurator().config.getString("games-inventory.stack-material", "PAPER")));
                 ItemMeta meta1 = temp.getItemMeta();
-                String name1 = ChatColor.GREEN + game.getName();
+                String name1 = "§a" + game.getName();
                 List<String> newLore = new ArrayList<>();
                 for (String ls : lore) {
                     String l = ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))

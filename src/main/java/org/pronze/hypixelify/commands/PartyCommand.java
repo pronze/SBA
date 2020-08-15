@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -27,7 +26,7 @@ public class PartyCommand implements TabExecutor {
         }
 
         if (!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
-            sender.sendMessage(ChatColor.RED + "Cannot access command, party system is disabled.");
+            sender.sendMessage("§cCannot access command, party system is disabled.");
         }
 
         Player player = (Player) sender;
@@ -52,7 +51,7 @@ public class PartyCommand implements TabExecutor {
 
         else if(playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null
                 && !playerDatabase.getPartyLeader().isOnline()){
-                player.sendMessage(ChatColor.RED + "Please wait until the leader comes back online..., or party disbands");
+                player.sendMessage("§cPlease wait until the leader comes back online..., or party disbands");
                 return true;
         }
 
@@ -313,7 +312,7 @@ public class PartyCommand implements TabExecutor {
             }
 
             if (partyManager.getParty(player) == null) {
-                player.sendMessage(ChatColor.RED + "An error has occured");
+                player.sendMessage("§cAn error has occured");
                 return true;
             }
 

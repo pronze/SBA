@@ -23,6 +23,7 @@ import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public class LobbyBoard extends AbstractListener {
@@ -169,11 +170,8 @@ public class LobbyBoard extends AbstractListener {
 
         if (scoreboard == null || scoreboard.getObjective("bwa-mainlobby") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            try {
-                scoreboard.registerNewObjective("bwa-mainlobby", "dummy", "Bed Wars");
-            } catch (Exception e) {
-                scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
-            }
+            scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
+
 
             scoreboard.getObjective("bwa-mainlobby").setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;
@@ -216,7 +214,7 @@ public class LobbyBoard extends AbstractListener {
 
         for (Player player : players) {
             if (player.getScoreboard().getObjective("bwa-mainlobby") == null) continue;
-            player.getScoreboard().getObjective("bwa-mainlobby").setDisplayName(lobby_scoreboard_lines.get(count));
+            Objects.requireNonNull(player.getScoreboard().getObjective("bwa-mainlobby")).setDisplayName(lobby_scoreboard_lines.get(count));
         }
 
 

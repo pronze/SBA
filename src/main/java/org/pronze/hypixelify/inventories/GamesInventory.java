@@ -177,8 +177,8 @@ public class GamesInventory implements Listener {
             if(event.getItem().getStack().getType().equals(new ItemStack(Material.BARRIER).getType())) {
                 players.get(mode).remove(player);
                 player.closeInventory();
-            } else if(event.getItem().getStack().getType().equals(new ItemStack(Material.RED_BED).getType())
-                    || event.getItem().getStack().getType().equals(new ItemStack(Material.FIREWORK_ROCKET).getType())
+            } else if(event.getItem().getStack().getType().equals(ShopUtil.BED.getType())
+                    || event.getItem().getStack().getType().equals(ShopUtil.FireWorks.getType())
                     || event.getItem().getStack().getType().equals(new ItemStack(Material.DIAMOND).getType())){
                 player.closeInventory();
                 repaint(mode);

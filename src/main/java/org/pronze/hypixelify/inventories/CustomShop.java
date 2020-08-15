@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.inventories;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -395,8 +394,8 @@ public class CustomShop implements Listener {
             }
         }
 
-        if (event.getStack().getLore() != null) {
-            for (String st : event.getStack().getLore()) {
+        if (event.getStack().getItemMeta().getLore() != null) {
+            for (String st : event.getStack().getItemMeta().getLore()) {
                 if (st.contains("Maximum Enchant")) return;
             }
         }
@@ -527,7 +526,7 @@ public class CustomShop implements Listener {
             if (Objects.requireNonNull(player.getInventory().getBoots())
                     .getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
                 e.setCancelled(true);
-                player.sendMessage(ChatColor.RED + "" + ChatColor.BOLD + Messages.message_greatest_enchantment);
+                player.sendMessage("§c§l"+ Messages.message_greatest_enchantment);
             } else {
                 int level = newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
                 int price = Prices.get(level);
@@ -653,7 +652,7 @@ public class CustomShop implements Listener {
                 }
                 sellstack(materialItem, event);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + getNameOrCustomNameOfItem(newItem));
+                    player.sendMessage("§aYou purchased §e" + getNameOrCustomNameOfItem(newItem));
                 }
                 Sounds.playSound(player, player.getLocation(),
                         Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
@@ -807,7 +806,7 @@ public class CustomShop implements Listener {
                     }
                 } else {
                     if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", true)) {
-                        player.sendMessage(ChatColor.GREEN + "You purchased " + ChatColor.YELLOW + event.getStack().getI18NDisplayName());
+                        player.sendMessage( "§aYou purchased §e"  + event.getStack().getI18NDisplayName());
                     }
                     Sounds.playSound(player, player.getLocation(),
                             Main.getConfigurator().config.getString("sounds.on_upgrade_buy"),
@@ -816,7 +815,7 @@ public class CustomShop implements Listener {
             }
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(ChatColor.RED + "you don't have enough " + priceType);
+                player.sendMessage( "§cyou don't have enough " + priceType);
             }
         }
     }

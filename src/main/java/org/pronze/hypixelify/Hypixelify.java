@@ -102,7 +102,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     public static void debug(String message) {
         if (!plugin.debug || message == null) return;
-        Bukkit.getLogger().info(ChatColor.RED + "[DEBUG]: " + message);
+        Bukkit.getLogger().info("§c[DEBUG]: §f" + message);
     }
 
     @Override
@@ -111,13 +111,19 @@ public class Hypixelify extends JavaPlugin implements Listener {
         version = this.getDescription().getVersion();
         arenamanager = new ArenaManager();
 
-        new UpdateChecker(this, 79505).getVersion(version -> {
-            if (this.getDescription().getVersion().contains(version)) {
-                Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
-            } else {
-                Bukkit.getLogger().info(ChatColor.YELLOW + " " + ChatColor.BOLD + "[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
+        if(!Main.isLegacy()) {
+            try {
+                new UpdateChecker(this, 79505).getVersion(version -> {
+                    if (this.getDescription().getVersion().contains(version)) {
+                        Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
+                    } else {
+                        Bukkit.getLogger().info("§e§l[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
+                    }
+                });
+            } catch (Exception ignored) {
+                Hypixelify.debug("Couldn't check for updates!");
             }
-        });
+        }
 
         configurator = new Configurator(this);
         configurator.loadDefaults();
@@ -185,7 +191,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
 
         if (!Objects.requireNonNull(configurator.config.getString("version")).contains(version)) {
-            Bukkit.getLogger().info(ChatColor.GREEN + "[SBAHypixelify]: Addon has been updated, join the server to make changes");
+            Bukkit.getLogger().info("§a[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
 
         //Do changes for legacy support.

@@ -3,12 +3,10 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -25,7 +23,6 @@ import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.APIUtils;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
@@ -36,6 +33,8 @@ import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.lib.nms.title.Title;
 
 import java.util.*;
+
+import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class PlayerListener extends AbstractListener {
     static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
@@ -100,7 +99,7 @@ public class PlayerListener extends AbstractListener {
                     if(finalPlayerItems != null)
                         ShopUtil.giveItemToPlayer(finalPlayerItems, player, team.getColor());
                     player.sendMessage(Messages.message_respawned_title);
-                    Title.sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
+                    sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                     this.cancel();
                 } else if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player))
                     this.cancel();
@@ -132,7 +131,11 @@ public class PlayerListener extends AbstractListener {
         }
 
         List<ItemStack> items = new ArrayList<>();
-        ItemStack sword = new ItemStack(Material.WOODEN_SWORD);
+        ItemStack sword;
+        if(Main.isLegacy())
+            sword = new ItemStack(Material.valueOf("WOOD_SWORD"));
+        else
+            sword = new ItemStack(Material.WOODEN_SWORD);
 
         for (ItemStack newItem : player.getInventory().getContents()) {
             if (newItem != null) {
@@ -180,7 +183,7 @@ public class PlayerListener extends AbstractListener {
                 @Override
                 public void run() {
                     if (livingTime > 0) {
-                        Title.sendTitle(player, Messages.message_respawn_title,
+                        sendTitle(player, Messages.message_respawn_title,
                                 Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
                         player.sendMessage(Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)));
                     }
@@ -216,7 +219,7 @@ public class PlayerListener extends AbstractListener {
         if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
             if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                player.sendMessage(ChatColor.BOLD + "" + ChatColor.RED + Hypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
+                player.sendMessage("§c§l" + Hypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
             }
         }
     }
@@ -336,9 +339,9 @@ public class PlayerListener extends AbstractListener {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    p.sendMessage(ChatColor.GOLD + "[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
+                    p.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                     p.sendMessage("Type /bwaddon upgrade to upgrade file");
-                    p.sendMessage(ChatColor.RED + "if you want to cancel the upgrade files do /bwaddon cancel");
+                    p.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
                 }
             }.runTaskLater(Hypixelify.getInstance(), 40L);
         }
@@ -374,10 +377,10 @@ public class PlayerListener extends AbstractListener {
                             int seconds = Integer.parseInt(units[1]) + 1;
                             if (seconds < 2) {
                                 player.sendMessage(ShopUtil.translateColors(message.replace("{seconds}", String.valueOf(seconds)).replace("seconds", "second")));
-                                player.sendTitle(ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                                sendTitle(player, ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds < 6) {
                                 player.sendMessage(ShopUtil.translateColors(message.replace("{seconds}", String.valueOf(seconds))));
-                                player.sendTitle(ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                                sendTitle(player, ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds % 10 == 0) {
                                 player.sendMessage(ShopUtil.translateColors(message.replace("&c{seconds}", "&6" + seconds)));
                             }

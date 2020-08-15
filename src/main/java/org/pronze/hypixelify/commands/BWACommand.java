@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -24,7 +23,7 @@ public class BWACommand implements TabExecutor {
         if (args.length >= 1) {
             if (sender instanceof Player) {
                 if (!sender.hasPermission("misat11.bw.admin") && !args[0].equalsIgnoreCase("gamesinv")) {
-                    sender.sendMessage(ChatColor.RED + "You Don't have permissions to do this command");
+                    sender.sendMessage("§cYou Don't have permissions to do this command");
                     return true;
                 }
             }
@@ -54,7 +53,7 @@ public class BWACommand implements TabExecutor {
             }
 
             else if (args[0].equalsIgnoreCase("help")) {
-                sender.sendMessage(ChatColor.RED + "SBAHypixelify");
+                sender.sendMessage("§cSBAHypixelify");
                 sender.sendMessage("Available commands:");
                 sender.sendMessage("/bwaddon reload - Reload the addon");
                 sender.sendMessage("/bwaddon help - Show available list of commands");
@@ -75,7 +74,7 @@ public class BWACommand implements TabExecutor {
                 return true;
             }  else if (args[0].equalsIgnoreCase("gamesinv")) {
                 if (args.length != 2) {
-                    sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
+                    sender.sendMessage("[SBAHypixelify]"  + "§cUnknown command, do /bwaddon help for more.");
                     return true;
                 }
 
@@ -84,7 +83,7 @@ public class BWACommand implements TabExecutor {
                     return true;
                 }
                 if (!(sender instanceof Player)) {
-                    sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + " You cannot do this command in the console");
+                    sender.sendMessage("[SBAHypixelify]" + " §cYou cannot do this command in the console");
                     return true;
                 }
 
@@ -98,7 +97,7 @@ public class BWACommand implements TabExecutor {
                 } else if (args[1].equalsIgnoreCase("squad")) {
                     Hypixelify.getGamesInventory().openForPlayer(player, 4);
                 } else {
-                    sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
+                    sender.sendMessage("[SBAHypixelify]" +  "§cUnknown command, do /bwaddon help for more.");
                 }
 
                 return true;
@@ -106,7 +105,7 @@ public class BWACommand implements TabExecutor {
                 if (args[0].equalsIgnoreCase("upgrade")) {
                     try {
                         Hypixelify.getConfigurator().upgradeCustomFiles();
-                        sender.sendMessage("[SBAHypixelify]: " + ChatColor.GOLD + "Sucessfully upgraded files!");
+                        sender.sendMessage("[SBAHypixelify]: " +  "§6Sucessfully upgraded files!");
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -120,13 +119,13 @@ public class BWACommand implements TabExecutor {
                 }
             }
             else {
-                sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
+                sender.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
                 return true;
             }
         }
 
         else {
-            sender.sendMessage("[SBAHypixelify]" + ChatColor.RED + "Unknown command, do /bwaddon help for more.");
+            sender.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
             return true;
         }
 

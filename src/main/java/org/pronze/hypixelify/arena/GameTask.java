@@ -56,69 +56,70 @@ public class GameTask extends BukkitRunnable {
 
     @Override
     public void run() {
-        if(game.getStatus() != GameStatus.RUNNING){
+        if(game.getStatus() == GameStatus.RUNNING) {
+            if (storage.areTrapsEnabled()) {
+                for (Player player : game.getConnectedPlayers()) {
+                    if (Main.getPlayerGameProfile(player).isSpectator) continue;
+
+                    for (RunningTeam rt : game.getRunningTeams()) {
+                        if (!storage.isTrapEnabled(rt) || rt.isPlayerInTeam(player)) continue;
+
+                        if (storage.getTargetBlockLocation(rt).distanceSquared(player.getLocation()) <= arena.radius) {
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
+                            storage.setTrap(rt, false);
+                            player.sendMessage("§eYou have been blinded by " + rt.getName() + " team!");
+                            rt.getConnectedPlayers().forEach(pl -> {
+                                Sounds.playSound(pl, pl.getLocation(),
+                                        Main.getConfigurator().config.getString("sounds.on_trap_triggered"),
+                                        Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+                                sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
+                                        20, 60, 0);
+                            });
+                        }
+                    }
+                }
+            }
+
+            if (storage.arePoolEnabled()) {
+                for (RunningTeam rt : game.getRunningTeams()) {
+                    if (!storage.isPoolEnabled(rt)) continue;
+
+                    for (Player pl : rt.getConnectedPlayers()) {
+                        if (Main.getPlayerGameProfile(pl).isSpectator) continue;
+                        if (storage.getTargetBlockLocation(rt).distanceSquared(pl.getLocation()) <= arena.radius) {
+                            pl.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
+                        }
+                    }
+                }
+            }
+
+
+            if (!Tiers.get(tier).equals(Tiers.get(9))) {
+                if (time == tier_timer.get(tier)) {
+                    game.getItemSpawners().forEach(itemSpawner -> {
+                        if (tier % 2 == 0) {
+                            if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.DIAMOND))
+                                itemSpawner.addToCurrentLevel(multiplier);
+                        } else {
+                            if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.EMERALD))
+                                itemSpawner.addToCurrentLevel(multiplier);
+                        }
+                    });
+                    String MatName = tier % 2 == 0 ? "§aEmerald§6" : "§bDiamond§6";
+                    game.getConnectedPlayers().forEach(player -> player.sendMessage(Messages.generatorUpgrade
+                            .replace("{MatName}", MatName)
+                            .replace("{tier}", Tiers.get(tier))));
+                    tier++;
+                }
+            }
+
+            time++;
+        } else{
             game = null;
             arena = null;
             storage = null;
-            cancel();
+            this.cancel();
         }
-
-        if (storage.areTrapsEnabled()) {
-            for (Player player : game.getConnectedPlayers()) {
-                if(Main.getPlayerGameProfile(player).isSpectator) continue;
-
-                for (RunningTeam rt : game.getRunningTeams()) {
-                    if (!storage.isTrapEnabled(rt) || rt.isPlayerInTeam(player)) continue;
-
-                    if (storage.getTargetBlockLocation(rt).distanceSquared(player.getLocation()) <= arena.radius) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
-                        storage.setTrap(rt, false);
-                        player.sendMessage(ChatColor.YELLOW + "You have been blinded by " + rt.getName() + " team!");
-                        rt.getConnectedPlayers().forEach(pl -> {
-                            Sounds.playSound(pl, pl.getLocation(),
-                                    Main.getConfigurator().config.getString("sounds.on_trap_triggered"),
-                                    Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                            sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
-                                20, 60, 0);});
-                    }
-                }
-            }
-        }
-
-        if(storage.arePoolEnabled()){
-            for(RunningTeam rt : game.getRunningTeams()){
-                if(!storage.isPoolEnabled(rt)) continue;
-
-                for(Player pl : rt.getConnectedPlayers()){
-                    if(Main.getPlayerGameProfile(pl).isSpectator) continue;
-                    if(storage.getTargetBlockLocation(rt).distanceSquared(pl.getLocation()) <= arena.radius){
-                        pl.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
-                    }
-                }
-            }
-        }
-
-
-        if(!Tiers.get(tier).equals(Tiers.get(9))){
-            if (time == tier_timer.get(tier)) {
-                game.getItemSpawners().forEach(itemSpawner -> {
-                    if (tier % 2 == 0) {
-                        if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.DIAMOND))
-                            itemSpawner.addToCurrentLevel(multiplier);
-                    } else {
-                        if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.EMERALD))
-                            itemSpawner.addToCurrentLevel(multiplier);
-                    }
-                });
-                String MatName = tier % 2 == 0 ? "§aEmerald§6" : "§bDiamond§6";
-                game.getConnectedPlayers().forEach(player -> player.sendMessage(Messages.generatorUpgrade
-                        .replace("{MatName}" , MatName)
-                        .replace("{tier}", Tiers.get(tier))));
-                tier++;
-            }
-        }
-
-        time++;
     }
 
     public int getTime(){

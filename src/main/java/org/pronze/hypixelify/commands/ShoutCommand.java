@@ -1,6 +1,5 @@
 package org.pronze.hypixelify.commands;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -25,12 +24,12 @@ public class ShoutCommand implements TabExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if(!(sender instanceof Player)){
-            sender.sendMessage(ChatColor.RED +  "This Command can only be done as a Player!");
+            sender.sendMessage("§cThis Command can only be done as a Player!");
             return true;
         }
 
         if(args.length < 1){
-            sender.sendMessage(ChatColor.RED + "Invalid usage, /shout {message} is the format!");
+            sender.sendMessage("§cInvalid usage, /shout {message} is the format!");
             return true;
         }
 
@@ -44,7 +43,7 @@ public class ShoutCommand implements TabExecutor {
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
 
         if(game.getTeamOfPlayer(player) == null){
-            player.sendMessage(ChatColor.RED + "You cannot do this command while spectating");
+            player.sendMessage("§cYou cannot do this command while spectating");
             return true;
         }
 

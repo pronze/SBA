@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.party;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -32,7 +31,7 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
 
     @Override
     public void sendChat(Player sender, String msg) {
-        msg = ChatColor.GREEN +"Party>> " + sender.getName() + ChatColor.WHITE + " : " + ChatColor.ITALIC + msg;
+        msg = "§aParty>> " + sender.getName() + "§f : §o"  + msg;
         sendMessage(msg);
     }
 

@@ -26,7 +26,7 @@ public class Configurator {
     public static boolean tag_health;
     public final File dataFolder;
     public final Hypixelify main;
-    public File file, oldfile, shopFile, upgradeShop, legacyShop;
+    public File file, oldfile, shopFile, upgradeShop, legacyShop, legacyUpgradeShop;
     public FileConfiguration config;
 
     public Configurator(Hypixelify main) {
@@ -74,6 +74,7 @@ public class Configurator {
         shopFile = new File(dataFolder, "shop.yml");
         upgradeShop = new File(dataFolder, "upgradeShop.yml");
         legacyShop = new File(dataFolder, "legacy-shop.yml");
+        legacyUpgradeShop = new File(dataFolder, "legacy-upgradeShop.yml");
 
         if (!shopFile.exists()) {
             main.saveResource("shop.yml", false);
@@ -87,6 +88,9 @@ public class Configurator {
             main.saveResource("legacy-shop.yml", false);
         }
 
+        if(!legacyUpgradeShop.exists()){
+            main.saveResource("legacy-upgradeShop.yml", false);
+        }
 
         AtomicBoolean modify = new AtomicBoolean(false);
 
@@ -481,7 +485,7 @@ public class Configurator {
 
 
         if (config.getBoolean("first_start")) {
-            Bukkit.getLogger().info("[SBAHypixelify]:" + ChatColor.GREEN + " Detected first start");
+            Bukkit.getLogger().info("[SBAHypixelify]: §a Detected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
             saveConfig();
@@ -489,7 +493,7 @@ public class Configurator {
             if (plugin != null) {
                 Bukkit.getServer().getPluginManager().disablePlugin(plugin);
                 Bukkit.getServer().getPluginManager().enablePlugin(plugin);
-                Bukkit.getLogger().info("[SBAHypixelify]: " + ChatColor.GREEN + " Made changes to the config.yml file!");
+                Bukkit.getLogger().info("[SBAHypixelify]: §aMade changes to the config.yml file!");
             }
         }
     }
@@ -505,6 +509,7 @@ public class Configurator {
         main.saveResource("shop.yml", true);
         main.saveResource("upgradeShop.yml", true);
         main.saveResource("legacy-shop.yml", true);
+        main.saveResource("legacy-upgradeShop.yml", true);
         try {
             Main.getConfigurator().config.load(file2);
             Main.getConfigurator().saveConfig();

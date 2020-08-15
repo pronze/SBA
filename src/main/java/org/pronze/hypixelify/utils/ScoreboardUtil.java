@@ -13,6 +13,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.pronze.hypixelify.Hypixelify;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 
@@ -24,7 +25,7 @@ import java.util.Objects;
 
 public class ScoreboardUtil {
     private static final Map<Player, Scoreboard> scoreboards = new HashMap<>();
-    private static Map<Player, Map<Player, Integer>> player_health = new HashMap<>();
+    private static final Map<Player, Map<Player, Integer>> player_health = new HashMap<>();
 
     private static String[] cutUnranked(String[] content) {
         String[] elements = Arrays.copyOf(content, 16);
@@ -130,8 +131,8 @@ public class ScoreboardUtil {
                             team.addEntry(pl.getName());
                     }
                 }
-                if(Hypixelify.isProtocolLib()) {
-                ProtocolManager m = ProtocolLibrary.getProtocolManager();
+                if (Hypixelify.isProtocolLib()) {
+                    ProtocolManager m = ProtocolLibrary.getProtocolManager();
                     //TAB HEALTH
                     try {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
@@ -202,7 +203,7 @@ public class ScoreboardUtil {
                     scoreboard.resetScores(entry);
             }
 
-            if(Hypixelify.isProtocolLib()) {
+            if (Hypixelify.isProtocolLib()) {
                 ProtocolManager m = ProtocolLibrary.getProtocolManager();
                 if (!player_health.containsKey(p))
                     player_health.put(p, new HashMap<>());
@@ -243,7 +244,9 @@ public class ScoreboardUtil {
                 team.setPrefix(playertag_prefix.replace("{color}", cl).replace("{team}", ChatColor.BOLD +
                         String.valueOf(t.getName().charAt(0))));
                 team.setAllowFriendlyFire(false);
-                team.setColor(org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor);
+                if (!Main.isLegacy())
+                    team.setColor(org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor);
+
                 for (Player pl : t.getConnectedPlayers()) {
                     if (!team.hasEntry(pl.getName())) {
                         if (playerteam != null && playerteam.getConnectedPlayers().contains(pl)) {
@@ -256,7 +259,7 @@ public class ScoreboardUtil {
                             String suffix = team.getSuffix();
                             String name = prefix + pl.getName() + suffix;
                             if (!name.equals(listName))
-                                pl.setPlayerListName(prefix+  pl.getName() + suffix);
+                                pl.setPlayerListName(prefix + pl.getName() + suffix);
                         }
 
                     }
