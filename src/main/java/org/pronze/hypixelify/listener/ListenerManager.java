@@ -1,6 +1,5 @@
 package org.pronze.hypixelify.listener;
 import org.pronze.hypixelify.Hypixelify;
-
 import java.util.ArrayList;
 import java.util.List;
 

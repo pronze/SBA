@@ -48,7 +48,6 @@ public class Arena {
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        storage.removeTeam(e.getTeam());
         for (Player p : e.getTeam().getConnectedPlayers()) {
             sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
         }
@@ -123,6 +122,7 @@ public class Arena {
         }
     }
 
+
     public void onGameStarted(BedwarsGameStartedEvent e) {
         if (!e.getGame().equals(game)) return;
         for (Player p : e.getGame().getConnectedPlayers()) {
@@ -133,6 +133,8 @@ public class Arena {
 
         for (RunningTeam t : game.getRunningTeams()) {
             storage.setTrap(t, false);
+            storage.setPool(t, false);
+            storage.setTargetBlockLocation(t);
             storage.setProtection(t.getName(), 0);
             storage.setSharpness(t.getName(), 0);
         }

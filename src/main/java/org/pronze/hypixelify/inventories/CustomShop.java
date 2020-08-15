@@ -505,7 +505,21 @@ public class CustomShop implements Listener {
                 Objects.requireNonNull(Hypixelify.getGameStorage(game)).setTrap(team, true);
                 team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.blindnessTrapPurchased, "", 20, 40, 20));
             }
-        } else if (name.equalsIgnoreCase("protection")) {
+        } else if(name.equalsIgnoreCase("healpool")) {
+            if (Hypixelify.getGameStorage(game) == null) {
+                e.setCancelled(true);
+                player.sendMessage(Messages.ERROR_OCCURED);
+                return;
+            }
+            if (Objects.requireNonNull(Hypixelify.getGameStorage(game)).isPoolEnabled(team)) {
+                player.sendMessage(Messages.trap_timeout_message);
+                e.setCancelled(true);
+            } else {
+                Objects.requireNonNull(Hypixelify.getGameStorage(game)).setPool(team, true);
+                team.getConnectedPlayers().forEach(pl -> pl.sendMessage("§bBlindness trap has been purchased by: " + player.getName()));
+            }
+        }
+        else if (name.equalsIgnoreCase("protection")) {
             if (Objects.requireNonNull(player.getInventory().getBoots())
                     .getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
                 e.setCancelled(true);
@@ -604,7 +618,9 @@ public class CustomShop implements Listener {
                             if (applyEvent.getPrice() != null)
                                 materialItem = type.getStack(Integer.parseInt(applyEvent.getPrice()));
                             if (property.getPropertyName().equalsIgnoreCase("sharpness") || property.getPropertyName().equalsIgnoreCase("protection")
-                                    || property.getPropertyName().equalsIgnoreCase("efficiency") || property.getPropertyName().equalsIgnoreCase("blindtrap")) {
+                                    || property.getPropertyName().equalsIgnoreCase("efficiency")
+                                    || property.getPropertyName().equalsIgnoreCase("blindtrap")
+                                    || property.getPropertyName().equalsIgnoreCase("healpool")) {
                                 propName = property.getPropertyName();
                             }
                         }

@@ -65,10 +65,12 @@ public class GameTask extends BukkitRunnable {
 
         if (storage.areTrapsEnabled()) {
             for (Player player : game.getConnectedPlayers()) {
-                for (RunningTeam rt : storage.getTraps()) {
+                if(Main.getPlayerGameProfile(player).isSpectator) continue;
+
+                for (RunningTeam rt : game.getRunningTeams()) {
                     if (!storage.isTrapEnabled(rt) || rt.isPlayerInTeam(player)) continue;
 
-                    if (rt.getTargetBlock().distanceSquared(player.getLocation()) <= arena.radius) {
+                    if (storage.getTargetBlockLocation(rt).distanceSquared(player.getLocation()) <= arena.radius) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
                         storage.setTrap(rt, false);
                         player.sendMessage(ChatColor.YELLOW + "You have been blinded by " + rt.getName() + " team!");
@@ -78,6 +80,19 @@ public class GameTask extends BukkitRunnable {
                                     Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
                             sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
                                 20, 60, 0);});
+                    }
+                }
+            }
+        }
+
+        if(storage.arePoolEnabled()){
+            for(RunningTeam rt : game.getRunningTeams()){
+                if(!storage.isPoolEnabled(rt)) continue;
+
+                for(Player pl : rt.getConnectedPlayers()){
+                    if(Main.getPlayerGameProfile(pl).isSpectator) continue;
+                    if(storage.getTargetBlockLocation(rt).distanceSquared(pl.getLocation()) <= arena.radius){
+                        pl.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 20, 1));
                     }
                 }
             }

@@ -78,9 +78,10 @@ data:
         display-name: "Bronze upgrade of the team %team%"
 
 
-  - stack: "BEACON;1;Unconfigured"
+  - stack: "BEACON;1;§bHeal Pool;§7Triggers a pool around the base that heals you!"
     column: 5
     row: 1
+    properties: healpool
 
   - stack: "DRAGON_EGG;1;Ender Dragon;Unconfigured"
     column: 6

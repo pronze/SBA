@@ -122,7 +122,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.bed-destroyed.title", "§c§lBED DESTROYED!");
         checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");
         checkOrSetConfig(modify, "message.already-purchased", "§c§lYou already purchased the same {thing}");
-        checkOrSetConfig(modify, "message.wait-trap", "§cYou already purchased this trap!, wait for it to wear out");
+        checkOrSetConfig(modify, "message.wait-trap", "§cYou already purchased this upgrade!, wait for it to wear out");
         checkOrSetConfig(modify, "message.upgrade-team-protection", "§o§c{player}§e has upgraded team protection");
         checkOrSetConfig(modify, "message.error-occured", "§c§lAN ERROR HAS OCCURED");
         checkOrSetConfig(modify, "message.greatest-enchantment", "§c§lYou Already have the greatest enchantment");

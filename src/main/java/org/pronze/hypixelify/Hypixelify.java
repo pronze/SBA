@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.commands.ShoutCommand;
@@ -26,7 +27,6 @@ import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
-
 import java.util.Objects;
 
 public class Hypixelify extends JavaPlugin implements Listener {
@@ -46,10 +46,16 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private boolean debug = false;
     private boolean mainLobby;
 
-
     public static GameStorage getGameStorage(Game game) {
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
             return Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getStorage();
+
+        return null;
+    }
+
+    public static Arena getArena(Game game){
+        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
+            return Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName());
 
         return null;
     }
@@ -99,6 +105,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info(ChatColor.RED + "[DEBUG]: " + message);
     }
 
+    @Override
     public void onEnable() {
         plugin = this;
         version = this.getDescription().getVersion();
