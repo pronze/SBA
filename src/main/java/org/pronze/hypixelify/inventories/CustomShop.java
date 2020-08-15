@@ -438,9 +438,12 @@ public class CustomShop implements Listener {
                 format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
-                if (fileName.equalsIgnoreCase("shop.yml") && Main.isLegacy())
-                    fileName = "legacy-shop.yml";
-
+                if(Main.isLegacy()) {
+                    if (fileName.equalsIgnoreCase("shop.yml"))
+                        fileName = "legacy-shop.yml";
+                    else if(fileName.equalsIgnoreCase("upgradeShop.yml"))
+                        fileName = "legacy-upgradeShop.yml";
+                }
                 format.loadFromDataFolder(Hypixelify.getInstance().getDataFolder(), fileName);
             }
         } catch (Exception ignored) {

@@ -242,7 +242,10 @@ data:
         column: 1
         stack:
           type: GOLDEN_APPLE
-      - TNT;1 for 4 of gold
+      - price: 4 of gold
+        properties: "autoigniteabletnt"
+        stack:
+          type: TNT
       - ENDER_PEARL;1 for 4 of emerald
       - WATER_BUCKET;1 for 3 of emerald
       - price: 3 of iron
@@ -352,6 +355,7 @@ data:
 
   - stack: TNT;1
     price: 4 of gold
+    properties: "autoigniteabletnt"
     row: 3
     column: 7
 

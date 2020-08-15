@@ -462,7 +462,8 @@ public class ShopUtil {
                 || property.equalsIgnoreCase("throwablefireball")
                 || property.equalsIgnoreCase("tracker")
                 || property.equalsIgnoreCase("trap")
-                || property.equalsIgnoreCase("warppowder"))
+                || property.equalsIgnoreCase("warppowder")
+                )
             return true;
 
 

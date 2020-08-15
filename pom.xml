@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.pronze</groupId>
     <artifactId>SBAHypixelify</artifactId>
-    <version>1.3.2-SNAPSHOT</version>
+    <version>1.3.2</version>
 
     <repositories>
         <repository>
@@ -75,8 +75,8 @@
         <defaultGoal>clean install</defaultGoal>
 
        <!--suppress UnresolvedMavenProperty -->
-        <finalName>SBAHypixelify-${project.version}-${BUILD_NUMBER}</finalName>
-        <!--<finalName>SBAHypixelify-${project.version}</finalName>-->
+        <!-- <finalName>SBAHypixelify-${project.version}-${BUILD_NUMBER}</finalName> -->
+        <finalName>SBAHypixelify-${project.version}</finalName>
          <plugins>
 
              <plugin>
