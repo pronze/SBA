@@ -1,5 +1,4 @@
 package org.pronze.hypixelify.arena;
-
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
@@ -27,6 +26,7 @@ public class Arena {
     public double radius;
     private GameStorage storage;
 
+
     public GameStorage getStorage(){
         return storage;
     }
@@ -53,7 +53,6 @@ public class Arena {
             sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
         }
     }
-
 
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {

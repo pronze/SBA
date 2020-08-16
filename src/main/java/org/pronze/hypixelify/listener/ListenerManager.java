@@ -5,7 +5,7 @@ import java.util.List;
 
 public class ListenerManager {
 
-    private List<AbstractListener> listeners = new ArrayList<>();
+    private final List<AbstractListener> listeners = new ArrayList<>();
 
     public ListenerManager(){
         listeners.add(new PlayerListener());
@@ -17,6 +17,7 @@ public class ListenerManager {
         if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
             listeners.add(new LobbyBoard());
         }
+
     }
 
     public void unregisterAll(){

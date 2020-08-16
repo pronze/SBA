@@ -65,7 +65,7 @@ public class LobbyScoreboard implements Listener {
 
             public void run() {
                 if (player.isOnline()  && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
-                        e.getGame().getStatus() == GameStatus.WAITING) {
+                        game.getStatus() == GameStatus.WAITING) {
                         updateScoreboard(player, game);
                 } else {
                     this.cancel();

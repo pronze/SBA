@@ -174,11 +174,17 @@ public class ShopUtil {
     }
 
     public static void initalizekeys() {
-        PlayerListener.UpgradeKeys.put("WOODEN", 1);
+
         PlayerListener.UpgradeKeys.put("STONE", 2);
-        PlayerListener.UpgradeKeys.put("GOLDEN", 3);
         PlayerListener.UpgradeKeys.put("IRON", 4);
         PlayerListener.UpgradeKeys.put("DIAMOND", 5);
+        if(!Main.isLegacy()) {
+            PlayerListener.UpgradeKeys.put("WOODEN", 1);
+            PlayerListener.UpgradeKeys.put("GOLDEN", 3);
+        } else{
+            PlayerListener.UpgradeKeys.put("WOOD", 1);
+            PlayerListener.UpgradeKeys.put("GOLD", 3);
+        }
 
         for (String material : Hypixelify.getConfigurator().config.getStringList("allowed-item-drops")) {
             Material mat;

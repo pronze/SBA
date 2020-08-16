@@ -97,11 +97,14 @@ public class ScoreboardUtil {
                 if (team == null)
                     team = scoreboard.registerNewTeam(t.getName());
                 team.setAllowFriendlyFire(false);
-                for (OfflinePlayer pl : t.getGame().getConnectedPlayers()) {
+                for (Player pl : t.getGame().getConnectedPlayers()) {
                     if (!team.hasEntry(Objects.requireNonNull(pl.getName())))
                         team.addEntry(pl.getName());
                 }
             }
+
+            if (p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard))
+                p.setScoreboard(scoreboard);
         } catch (Exception e) {
             e.printStackTrace();
         }

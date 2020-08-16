@@ -25,4 +25,6 @@ public interface PartyManager {
     void removeParty(Player leader);
 
     void removeFromInvitedParty(Player player);
+
+    void databaseDeletionFromParty(Player player, Player partyLeader);
 }

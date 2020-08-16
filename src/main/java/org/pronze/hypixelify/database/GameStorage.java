@@ -5,10 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
-
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 public class GameStorage {
     private final Game game;
@@ -29,14 +27,6 @@ public class GameStorage {
 
     public void putPlayerItems(Player player, List<ItemStack> stacks) {
         PlayerItems.put(player, stacks);
-    }
-
-    public Set<RunningTeam> getTraps() {
-        return purchasedTrap.keySet();
-    }
-
-    public Set<RunningTeam> getPools(){
-        return purchasedPool.keySet();
     }
 
     public Location getTargetBlockLocation(RunningTeam rt) {
@@ -77,14 +67,6 @@ public class GameStorage {
 
     public boolean arePoolEnabled(){
         return purchasedPool.containsValue(true);
-    }
-
-    public void removeTrapTeam(RunningTeam rt) {
-        purchasedTrap.remove(rt);
-    }
-
-    public void removePoolTeam(RunningTeam rt){
-        purchasedPool.remove(rt);
     }
 
     public Game getGame() {

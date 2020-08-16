@@ -10,7 +10,6 @@ import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
-
 import java.util.UUID;
 
 public class PlayerDatabase implements org.pronze.hypixelify.api.database.PlayerDatabase {
@@ -27,7 +26,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     private Player partyLeader;
     private int shout;
     private boolean shouted = false;
-    private boolean clear = false;
 
     public PlayerDatabase(Player player) {
         this.player = player.getUniqueId();
@@ -35,11 +33,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         pInstance = player;
         shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         init();
-    }
-
-    @Override
-    public boolean shouldClear() {
-        return clear;
     }
 
     @Override
@@ -218,72 +211,20 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
-    public void handleOffline() {
-        final PartyManager partyManager = Hypixelify.getPartyManager();
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                //Handle when player goes offline, decrement timeout after every 20 ticks delay
-                if (Bukkit.getPlayer(player) == null) {
-                    timeout--;
-                    if (timeout == 0) {
-                        //Handle pending invites
-                        if (isInvited()) {
-                            if (getInvitedParty().getLeader() != null && partyManager.getParty(partyLeader) != null) {
-                                partyManager.getParty(partyLeader).removeInvitedMember(pInstance);
-                            }
-                            setInvitedParty(null);
-                            setInvited(false);
-                        }
-
-                        //check if player is in party and remove him, if he's the leader, disband the party.
-                        if (isInParty && partyLeader != null) {
-                            final Party party = partyManager.getParty(partyLeader);
-                            if (party != null) {
-                                if (!partyLeader.getUniqueId().equals(player)) {
-                                    if (partyManager.getParty(partyLeader).getAllPlayers() != null && !partyManager.getParty(partyLeader).getAllPlayers().isEmpty()) {
-                                        for (Player pl : partyManager.getParty(partyLeader).getAllPlayers()) {
-                                            if (pl != null && pl.isOnline() && !player.equals(pl.getUniqueId())) {
-                                                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
-                                                    pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", name));
-                                                }
-                                            }
-                                        }
-                                    }
-                                    partyManager.getParty(partyLeader).removeMember(pInstance);
-                                } else if (partyLeader.getUniqueId().equals(player)) {
-                                    for (Player pl : party.getAllPlayers()) {
-                                        if (pl != null && !pl.equals(partyLeader)) {
-                                            if (pl.isOnline()) {
-                                                ShopUtil.sendMessage(pl, Messages.message_disband_inactivity);
-                                            }
-                                            org.pronze.hypixelify.api.database.PlayerDatabase plDatabase = Hypixelify.getDatabaseManager().getDatabase(pl);
-                                            if (plDatabase != null) {
-                                                plDatabase.setIsInParty(false);
-                                                plDatabase.setPartyLeader(null);
-                                            }
-                                        }
-                                    }
-                                    partyManager.getParty(partyLeader).disband();
-                                    partyManager.removeParty(partyLeader);
-                                }
-                                setIsInParty(false);
-                                setPartyLeader(null);
-                            }
-                        }
-                        clear = true;
-                        cancel();
-                    }
-                }
-                //if player comes back online, reset the timeout.
-                else {
-                    timeout = 60;
-                    cancel();
-                }
-            }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+    public void decrementTimeout(){
+        timeout--;
     }
+
+    public void resetTimeout(){
+        timeout = 60;
+    }
+
+    @Override
+    public boolean timeoutComplete(){
+        return timeout == 0;
+    }
+
+
 
     @Override
     public void updateDatabase() {

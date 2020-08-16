@@ -20,6 +20,7 @@ import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,6 @@ public class LobbyBoard extends AbstractListener {
     private final List<String> lobby_scoreboard_lines;
     private int count = 0;
     private final List<String> board_body;
-    private BukkitTask task;
     private boolean lobbyChatOverride;
 
     public static boolean isInWorld(Location loc){
@@ -57,6 +57,12 @@ public class LobbyBoard extends AbstractListener {
             );
         } catch (Exception e) {
             e.printStackTrace();
+            if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
+                Hypixelify.getConfigurator().config.set("main-lobby.enabled", false);
+                Hypixelify.getConfigurator().saveConfig();
+                onDisable();
+                return;
+            }
         }
 
         if(!Bukkit.getOnlinePlayers().isEmpty()) {
@@ -74,12 +80,15 @@ public class LobbyBoard extends AbstractListener {
             }.runTaskLater(Hypixelify.getInstance(), 40L);
         }
 
-        task =  new BukkitRunnable() {
+         new BukkitRunnable() {
             public void run() {
-                if(players == null)
+                if(players != null) {
+                    if (!players.isEmpty()) {
+                        updateScoreboard();
+                    }
+                } else
+                {
                     this.cancel();
-                if (!players.isEmpty()) {
-                    updateScoreboard();
                 }
             }
         }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
@@ -110,11 +119,7 @@ public class LobbyBoard extends AbstractListener {
         }
         players.clear();
         players = null;
-        if(task != null && !task.isCancelled())
-            task.cancel();
-
         HandlerList.unregisterAll(this);
-
     }
 
     @EventHandler
@@ -130,7 +135,7 @@ public class LobbyBoard extends AbstractListener {
                     createBoard(player);
                 }
             }
-        }.runTaskLater(Hypixelify.getInstance(), 3L);
+        }.runTaskLater(Hypixelify.getInstance(), 20L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -173,7 +178,7 @@ public class LobbyBoard extends AbstractListener {
             scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
 
 
-            scoreboard.getObjective("bwa-mainlobby").setDisplaySlot(DisplaySlot.SIDEBAR);
+            Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;
             for (String s : board_body) {
                 if(i == 0) continue;
@@ -197,13 +202,20 @@ public class LobbyBoard extends AbstractListener {
                         .replace("{wins}", String.valueOf(playerData.getWins()))
                         .replace("{k/d}", String.valueOf(playerData.getKD()));
 
-                scoreboard.getObjective("bwa-mainlobby").getScore(s).setScore(i);
+                Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).getScore(s).setScore(i);
                 i--;
             }
         }
 
         player.setScoreboard(scoreboard);
         players.add(player);
+    }
+
+    @EventHandler
+    public void onBedwarsPlayerJoin(BedwarsPlayerJoinedEvent e){
+        Player player = e.getPlayer();
+        if(players != null && player != null)
+            players.remove(player);
     }
 
     public void updateScoreboard(){

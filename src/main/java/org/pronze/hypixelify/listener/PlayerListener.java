@@ -30,7 +30,6 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GamePlayer;
-import org.screamingsandals.bedwars.lib.nms.title.Title;
 
 import java.util.*;
 

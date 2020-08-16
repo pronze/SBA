@@ -62,6 +62,8 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
         return false;
     }
 
+
+
     @Override
     public void addToParty(Player player, org.pronze.hypixelify.api.party.Party party) {
 
@@ -196,6 +198,18 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
     }
 
     @Override
+    public void removeFromInvitedParty(Player player) {
+        PlayerDatabase database = Hypixelify.getDatabaseManager().getDatabase(player);
+        if(database == null || !database.isInvited()) return;
+        org.pronze.hypixelify.api.party.Party invitedParty = database.getInvitedParty();
+        if(invitedParty == null || invitedParty.getLeader() == null) return;
+
+        invitedParty.removeInvitedMember(player);
+        database.setInvitedParty(null);
+        database.setInvited(false);
+    }
+
+    @Override
     public Party createParty(Player player){
         if(parties.containsKey(player)) return null;
         Party party = new Party(player);
@@ -208,6 +222,42 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
         parties.remove(leader);
     }
 
+    @Override
+    public void databaseDeletionFromParty(Player player, Player partyLeader){
+        final org.pronze.hypixelify.api.party.Party party = getParty(partyLeader);
+        final PlayerDatabase database = Hypixelify.getDatabaseManager().getDatabase(player);
 
+        if (party != null) {
+            if (!partyLeader.getUniqueId().equals(player)) {
+                if (party.getAllPlayers() != null && !party.getAllPlayers().isEmpty()) {
+                    for (Player pl : party.getAllPlayers()) {
+                        if (pl != null && pl.isOnline() && !player.equals(pl.getUniqueId())) {
+                            for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
+                                pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getName()));
+                            }
+                        }
+                    }
+                }
+                party.removeMember(player);
+            } else if (partyLeader.getUniqueId().equals(player)) {
+                for (Player pl : party.getAllPlayers()) {
+                    if (pl != null && !pl.equals(partyLeader)) {
+                        if (pl.isOnline()) {
+                            ShopUtil.sendMessage(pl, Messages.message_disband_inactivity);
+                        }
+                        org.pronze.hypixelify.api.database.PlayerDatabase plDatabase = Hypixelify.getDatabaseManager().getDatabase(pl);
+                        if (plDatabase != null) {
+                            plDatabase.setIsInParty(false);
+                            plDatabase.setPartyLeader(null);
+                        }
+                    }
+                }
+                party.disband();
+                removeParty(partyLeader);
+            }
+            database.setIsInParty(false);
+            database.setPartyLeader(null);
+        }
+    }
 
 }
