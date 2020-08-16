@@ -29,10 +29,6 @@ public interface PlayerDatabase {
 
     void setExpiredTimeTimeout(int timeout);
 
-    void decrementTimeout();
-
-    boolean timeoutComplete();
-
     void updateDatabase();
 
     Player getPartyLeader();

@@ -42,40 +42,22 @@ public class ScoreBoard {
         m_title = LobbyScoreboard.listColor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
         new BukkitRunnable() {
             public void run() {
-                if (game.getStatus() != GameStatus.WAITING && game.getStatus() == GameStatus.RUNNING) {
-                    ticks += 2;
-                    updateTitle();
-                    if (ticks % 5 == 0)
+                if (game.getStatus() == GameStatus.RUNNING) {
+                    ticks += 5;
+                    updateCustomObj();
+                    if(ticks % 20 == 0)
                         updateScoreboard();
                 } else {
                     cancel();
                 }
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
+        }.runTaskTimer(Hypixelify.getInstance(), 0L, 5L);
     }
 
-    public void updateTitle() {
-        tc++;
-        String Title = "";
-        if (tc >= m_title.size())
-            tc = 0;
-        int tcs = 0;
-        for (String title : m_title) {
-            if (tc == tcs)
-                Title = title.replace("{game}", game.getName()).replace("{time}",
-                        Main.getGame(game.getName()).getFormattedTimeLeft());
-            tcs++;
-        }
-        if (game.getConnectedPlayers() == null || game.getConnectedPlayers().isEmpty()) return;
-        for (Player p : game.getConnectedPlayers()) {
-            try {
-                if (p.getScoreboard().getObjective("bwa-game") == null) continue;
-                Scoreboard scoreboard = p.getScoreboard();
-                Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).setDisplayName(Title);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    public void updateCustomObj() {
+       for(Player pl : game.getConnectedPlayers()){
+           ScoreboardUtil.updateCustomObjective(pl, game);
+       }
     }
 
     public void updateScoreboard() {

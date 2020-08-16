@@ -155,6 +155,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("");
 
         listenerManager = new ListenerManager();
+        listenerManager.registerAll(this);
         messages = new Messages();
         messages.loadConfig();
 

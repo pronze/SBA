@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.listener;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.Hypixelify;
 import java.util.ArrayList;
 import java.util.List;
@@ -6,6 +7,7 @@ import java.util.List;
 public class ListenerManager {
 
     private final List<AbstractListener> listeners = new ArrayList<>();
+    private JavaPlugin plugin;
 
     public ListenerManager(){
         listeners.add(new PlayerListener());
@@ -18,6 +20,14 @@ public class ListenerManager {
             listeners.add(new LobbyBoard());
         }
 
+    }
+
+    public void registerAll(JavaPlugin plugin){
+        if(listeners.isEmpty()) return;
+
+        for(AbstractListener listener : listeners){
+            plugin.getServer().getPluginManager().registerEvents(listener, plugin);
+        }
     }
 
     public void unregisterAll(){

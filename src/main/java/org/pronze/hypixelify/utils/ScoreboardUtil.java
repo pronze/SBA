@@ -7,7 +7,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
@@ -110,6 +109,39 @@ public class ScoreboardUtil {
         }
     }
 
+    public static void updateCustomObjective(Player p, Game game) {
+        if (!Hypixelify.isProtocolLib()) return;
+
+        ProtocolManager m = ProtocolLibrary.getProtocolManager();
+        if (!player_health.containsKey(p))
+            player_health.put(p, new HashMap<>());
+        Map<Player, Integer> map = player_health.get(p);
+        for (Player pl : game.getConnectedPlayers()) {
+            DecimalFormat format = new DecimalFormat("##");
+            int j = Integer.parseInt(format.format(pl.getHealth()));
+            if (map.getOrDefault(pl, 0) != j) {
+                try {
+                    PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
+                    packet.getIntegers().write(0, j);
+                    packet.getStrings().write(0, pl.getName());
+                    packet.getStrings().write(1, "bwa-tag");
+                    m.sendServerPacket(p, packet);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                try {
+                    PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
+                    packet.getIntegers().write(0, j);
+                    packet.getStrings().write(0, pl.getName());
+                    packet.getStrings().write(1, "bwa-tab");
+                    m.sendServerPacket(p, packet);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                map.put(pl, j);
+            }
+        }
+    }
 
     public static void setGameScoreboard(Player p, String[] elements, Game game) {
         boolean exist = scoreboards.containsKey(p);
@@ -121,6 +153,7 @@ public class ScoreboardUtil {
             if (scoreboard.getObjective("bwa-game") == null) {
                 scoreboard.registerNewObjective("bwa-game", "dummy");
                 Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplaySlot(DisplaySlot.SIDEBAR);
+                scoreboard.getObjective("bwa-game").setDisplayName("§e§lBED WARS");
             }
             if ((p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard)) && !exist) {
                 for (RunningTeam t : game.getRunningTeams()) {
@@ -206,37 +239,7 @@ public class ScoreboardUtil {
                     scoreboard.resetScores(entry);
             }
 
-            if (Hypixelify.isProtocolLib()) {
-                ProtocolManager m = ProtocolLibrary.getProtocolManager();
-                if (!player_health.containsKey(p))
-                    player_health.put(p, new HashMap<>());
-                Map<Player, Integer> map = player_health.get(p);
-                for (Player pl : game.getConnectedPlayers()) {
-                    DecimalFormat format = new DecimalFormat("##");
-                    int j = Integer.parseInt(format.format(pl.getHealth()));
-                    if (map.getOrDefault(pl, 0) != j) {
-                        try {
-                            PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
-                            packet.getIntegers().write(0, j);
-                            packet.getStrings().write(0, pl.getName());
-                            packet.getStrings().write(1, "bwa-tag");
-                            m.sendServerPacket(p, packet);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_SCORE);
-                            packet.getIntegers().write(0, j);
-                            packet.getStrings().write(0, pl.getName());
-                            packet.getStrings().write(1, "bwa-tab");
-                            m.sendServerPacket(p, packet);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        map.put(pl, j);
-                    }
-                }
-            }
+
             String playertag_prefix = "{color}{team} ";
             RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {

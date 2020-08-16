@@ -45,27 +45,23 @@ public class DatabaseManager {
         final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
 
         new BukkitRunnable() {
+            int timeout = 60;
+
             @Override
             public void run() {
-                //Handle when player goes offline, decrement timeout after every 20 ticks delay
                 if (Bukkit.getPlayer(player.getUniqueId()) == null) {
-                    playerDatabase.decrementTimeout();
-                    if (playerDatabase.timeoutComplete()) {
-                        //Handle pending invites
+                    timeout--;
+                    if (timeout == 0) {
                         partyManager.removeFromInvitedParty(player);
 
-                        //check if player is in party and remove him, if he's the leader, disband the party.
                         if (playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null) {
                             partyManager.databaseDeletionFromParty(player, playerDatabase.getPartyLeader());
                         }
-
                         completableFuture.complete(true);
                         cancel();
                     }
                 }
-                //if player comes back online, reset the timeout.
                 else {
-                    playerDatabase.resetTimeout();
                     completableFuture.complete(false);
                     cancel();
                 }

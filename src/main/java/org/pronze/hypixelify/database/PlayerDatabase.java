@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.database;
 
 import com.google.common.base.Strings;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
@@ -21,7 +20,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     private boolean isInvited = false;
     private boolean partyChat = false;
     private int expiredTime = 60;
-    private int timeout = 60;
     private Party invitedParty;
     private Player partyLeader;
     private int shout;
@@ -195,6 +193,8 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         } catch (Exception e) {
             progress = 1;
         }
+        if(progress < 1)
+            progress = 1;
         char i;
         i = String.valueOf(Math.abs((long) progress)).charAt(0);
         if (progress < 10) {
@@ -208,20 +208,6 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     @Override
     public double getKD() {
         return Main.getPlayerStatisticsManager().getStatistic(pInstance).getKD();
-    }
-
-    @Override
-    public void decrementTimeout(){
-        timeout--;
-    }
-
-    public void resetTimeout(){
-        timeout = 60;
-    }
-
-    @Override
-    public boolean timeoutComplete(){
-        return timeout == 0;
     }
 
 

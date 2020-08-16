@@ -72,8 +72,8 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
    public void addInvitedMember(Player pl) {
        if (!invitedMembers.contains(pl)) {
            invitedMembers.add(pl);
-           Hypixelify.getDatabaseManager().getDatabase(pl).setInvited(true);
            Hypixelify.getDatabaseManager().getDatabase(pl).setInvitedParty(this);
+           Hypixelify.getDatabaseManager().getDatabase(pl).setInvited(true);
        }
    }
 
