@@ -174,6 +174,8 @@ public class ScoreboardUtil {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
                         packet.getIntegers().write(0, 0);
                         packet.getStrings().write(0, "bwa-tag");
+                        if(Main.isLegacy())
+                            packet.getStrings().write(1, "bwa-tag");
                         m.sendServerPacket(p, packet);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -193,7 +195,10 @@ public class ScoreboardUtil {
                         PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
                         packet.getIntegers().write(0, 0);
                         packet.getStrings().write(0, "bwa-tab");
-                        packet.getChatComponents().write(0, WrappedChatComponent.fromText("§c♥"));
+                        if(Main.isLegacy())
+                            packet.getStrings().write(1, "§c♥");
+                        else
+                            packet.getChatComponents().write(0, WrappedChatComponent.fromText("§c♥"));
                         m.sendServerPacket(p, packet);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -208,7 +213,9 @@ public class ScoreboardUtil {
                     }
                 }
 
+                updateCustomObjective(p, game);
             }
+
             for (int i = 1; i < elements.length; i++) {
                 if (elements[i] != null &&
                         Objects.requireNonNull(scoreboard.getObjective(DisplaySlot.SIDEBAR)).getScore(elements[i]).getScore() != 16 - i) {
@@ -238,6 +245,7 @@ public class ScoreboardUtil {
                 if (toErase)
                     scoreboard.resetScores(entry);
             }
+
 
 
             String playertag_prefix = "{color}{team} ";

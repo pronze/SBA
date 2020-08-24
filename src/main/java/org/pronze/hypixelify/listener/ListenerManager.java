@@ -7,7 +7,6 @@ import java.util.List;
 public class ListenerManager {
 
     private final List<AbstractListener> listeners = new ArrayList<>();
-    private JavaPlugin plugin;
 
     public ListenerManager(){
         listeners.add(new PlayerListener());
@@ -19,6 +18,8 @@ public class ListenerManager {
         if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
             listeners.add(new LobbyBoard());
         }
+        if(Hypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
+            listeners.add(new LobbyScoreboard());
 
     }
 

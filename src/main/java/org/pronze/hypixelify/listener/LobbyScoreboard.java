@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Configurator;
@@ -17,12 +18,14 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
-public class LobbyScoreboard implements Listener {
+public class LobbyScoreboard extends AbstractListener {
     private String title = "";
     private final String countdown_message;
     private final boolean isEnabled;
     private final List<String> lobby_scoreboard_lines;
     private final String date;
+    private boolean disabling = false;
+
 
     public static String format(String format){
         return ChatColor.translateAlternateColorCodes('&', format);
@@ -46,6 +49,8 @@ public class LobbyScoreboard implements Listener {
             int tc = 0;
 
             public void run() {
+                if(disabling)
+                    cancel();
                     title = lobby_scoreboard.get(tc);
                     tc++;
                     if (tc >= lobby_scoreboard.size())
@@ -161,4 +166,10 @@ public class LobbyScoreboard implements Listener {
       }
       return nclines;
   }
+
+    @Override
+    public void onDisable() {
+        disabling = true;
+        HandlerList.unregisterAll(this);
+    }
 }

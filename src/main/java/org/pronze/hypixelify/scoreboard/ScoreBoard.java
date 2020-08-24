@@ -5,8 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.arena.Arena;
