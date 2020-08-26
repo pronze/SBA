@@ -80,6 +80,8 @@ public class PlayerListener extends AbstractListener {
 
         if (!isInGame(player)) return;
 
+        if(getGame(player).getStatus() != GameStatus.RUNNING) return;
+
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         if(!game.isPlayerInAnyTeam(player)) return;
         Team team = game.getTeamOfPlayer(player);
@@ -87,6 +89,7 @@ public class PlayerListener extends AbstractListener {
         if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName())) {
             Arena arena = Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName());
             playerItems = arena.getStorage().getItemsOfPlayer(player);
+            if(playerItems == null) return;
         }
 
         List<ItemStack> finalPlayerItems = playerItems;

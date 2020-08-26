@@ -162,6 +162,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         InventoryListener.init(this);
         shop = new CustomShop();
 
+
         if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
 
@@ -269,13 +270,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
 
         Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");
-        listenerManager.unregisterAll();
+        if(listenerManager != null)
+            listenerManager.unregisterAll();
         listenerManager = null;
         Bukkit.getLogger().info("[SBAHypixelify]: Cancelling current tasks....");
         configurator = null;
         messages = null;
         arenamanager = null;
-        gamesInventory.destroy();
+        if(gamesInventory != null)
+            gamesInventory.destroy();
         gamesInventory = null;
         shop = null;
         messages = null;
