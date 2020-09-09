@@ -50,13 +50,15 @@ public class Arena {
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         for (Player p : e.getTeam().getConnectedPlayers()) {
-            sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
+            if(p != null && p.isOnline())
+                sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
         }
     }
 
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {
-            scoreBoard.updateScoreboard();
+            if(scoreBoard != null)
+                scoreBoard.updateScoreboard();
             if (gameTask != null && !gameTask.isCancelled()) {
                 gameTask.cancel();
                 gameTask = null;

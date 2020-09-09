@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
@@ -31,10 +30,8 @@ public class LobbyBoard extends AbstractListener {
 
     public static List<Player> players;
     private static Location location;
-    private final List<String> lobby_scoreboard_lines;
-    private int count = 0;
     private final List<String> board_body;
-    private boolean lobbyChatOverride;
+    private final boolean lobbyChatOverride;
 
     public static boolean isInWorld(Location loc){
         return loc.getWorld().equals(location.getWorld());
@@ -43,7 +40,6 @@ public class LobbyBoard extends AbstractListener {
     public LobbyBoard() {
         players = new ArrayList<>();
         board_body = Hypixelify.getConfigurator().config.getStringList("main-lobby.lines");
-        lobby_scoreboard_lines = Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
         lobbyChatOverride = Hypixelify.getConfigurator().config.getBoolean("main-lobby.custom-chat", true);
 
 
@@ -80,19 +76,6 @@ public class LobbyBoard extends AbstractListener {
             }.runTaskLater(Hypixelify.getInstance(), 40L);
         }
 
-         new BukkitRunnable() {
-            public void run() {
-                if(players != null) {
-                    if (!players.isEmpty()) {
-                        updateScoreboard();
-                    }
-                } else
-                {
-                    this.cancel();
-                }
-            }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
-
     }
 
     @EventHandler
@@ -111,18 +94,20 @@ public class LobbyBoard extends AbstractListener {
     }
     @Override
     public void onDisable() {
-        for(Player player : players){
-            if(player == null || !player.isOnline()) continue;
-            if (player.getScoreboard().getObjective("bwa-mainlobby") != null) {
-                player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        if(players != null) {
+            for (Player player : players) {
+                if (player == null || !player.isOnline()) continue;
+                if (player.getScoreboard().getObjective("bwa-mainlobby") != null) {
+                    player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+                }
             }
+            players.clear();
+            players = null;
         }
-        players.clear();
-        players = null;
         HandlerList.unregisterAll(this);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent e){
         Player player = e.getPlayer();
 
@@ -131,7 +116,8 @@ public class LobbyBoard extends AbstractListener {
             public void run() {
                 if(player.getScoreboard().getObjective("bwa-mainlobby") != null) return;
 
-                if(player.getWorld().getName().equalsIgnoreCase(location.getWorld().getName())){
+                if(player.getWorld().getName().equalsIgnoreCase(location.getWorld().getName())
+                && !isInGame(player)) {
                     createBoard(player);
                 }
             }
@@ -142,7 +128,8 @@ public class LobbyBoard extends AbstractListener {
     public void onWorldChange(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
         if (!player.getWorld().getName().equals(location.getWorld().getName())) {
-            players.remove(player);
+            if(players != null)
+                players.remove(player);
             if (player.getScoreboard() == null) return;
 
             if (player.getScoreboard().getObjective("bwa-mainlobby") != null) {
@@ -157,11 +144,15 @@ public class LobbyBoard extends AbstractListener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e){
+        if(players == null) return;
         players.remove(e.getPlayer());
     }
 
 
     public void createBoard(Player player) {
+        if(players == null) {
+            return;
+        }
         if(players.contains(player)) return;
 
         if(Hypixelify.getDatabaseManager().getDatabase(player) == null) return;
@@ -173,6 +164,17 @@ public class LobbyBoard extends AbstractListener {
 
         String bar = " §7[" + playerData.getCompletedBoxes() + "]";
 
+
+        int progress;
+        try {
+             progress = Integer.parseInt(playerData.getProgress());
+             if(progress < 0)
+                 progress = 0;
+        } catch (NumberFormatException e){
+            progress = 0;
+            e.printStackTrace();
+        }
+
         if (scoreboard == null || scoreboard.getObjective("bwa-mainlobby") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
             scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
@@ -181,7 +183,7 @@ public class LobbyBoard extends AbstractListener {
             Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;
             for (String s : board_body) {
-                if(i == 0) continue;
+                if(i == 0) break;
                 try {
                     if (Hypixelify.isPapiEnabled())
                         s = PlaceholderAPI.setPlaceholders(player, s);
@@ -197,7 +199,7 @@ public class LobbyBoard extends AbstractListener {
                         .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))
                         .replace("{deaths}", String.valueOf(playerData.getDeaths()))
                         .replace("{level}", "§7" + playerData.getLevel()+ "✫")
-                        .replace("{progress}", playerData.getProgress())
+                        .replace("{progress}", String.valueOf(progress))
                         .replace("{bar}", bar)
                         .replace("{wins}", String.valueOf(playerData.getWins()))
                         .replace("{k/d}", String.valueOf(playerData.getKD()));
@@ -216,21 +218,6 @@ public class LobbyBoard extends AbstractListener {
         Player player = e.getPlayer();
         if(players != null && player != null)
             players.remove(player);
-    }
-
-    public void updateScoreboard(){
-        count++;
-        if (count >= lobby_scoreboard_lines.size()) {
-            count = 0;
-        }
-
-        for (Player player : players) {
-            if (player.getScoreboard().getObjective("bwa-mainlobby") == null) continue;
-            Objects.requireNonNull(player.getScoreboard().getObjective("bwa-mainlobby")).setDisplayName(lobby_scoreboard_lines.get(count));
-        }
-
-
-
     }
 
 

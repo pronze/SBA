@@ -96,6 +96,7 @@ public class ScoreboardUtil {
                 if (team == null)
                     team = scoreboard.registerNewTeam(t.getName());
                 team.setAllowFriendlyFire(false);
+                team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                 for (Player pl : t.getGame().getConnectedPlayers()) {
                     if (!team.hasEntry(Objects.requireNonNull(pl.getName())))
                         team.addEntry(pl.getName());

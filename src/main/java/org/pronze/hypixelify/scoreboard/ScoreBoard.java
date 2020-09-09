@@ -27,8 +27,6 @@ public class ScoreBoard {
     private final Arena arena;
     private final String date;
     private final Map<String, String> teamstatus;
-    private final List<String> m_title;
-    private int tc = 0;
     private int ticks = 0;
 
     public ScoreBoard(Arena arena) {
@@ -37,7 +35,6 @@ public class ScoreBoard {
 
         game = arena.getGame();
         teamstatus = new HashMap<>();
-        m_title = LobbyScoreboard.listColor(Hypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title"));
         new BukkitRunnable() {
             public void run() {
                 if (game.getStatus() == GameStatus.RUNNING) {
