@@ -46,15 +46,15 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private boolean mainLobby;
 
     public static GameStorage getGameStorage(Game game) {
-        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            return Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName()).getStorage();
+        if (getArenaManager().getArenas().containsKey(game.getName()))
+            return getArenaManager().getArenas().get(game.getName()).getStorage();
 
         return null;
     }
 
     public static Arena getArena(Game game){
-        if (Hypixelify.getInstance().getArenaManager().getArenas().containsKey(game.getName()))
-            return Hypixelify.getInstance().getArenaManager().getArenas().get(game.getName());
+        if (getArenaManager().getArenas().containsKey(game.getName()))
+            return getArenaManager().getArenas().get(game.getName());
 
         return null;
     }
@@ -298,8 +298,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
     }
 
-    public ArenaManager getArenaManager() {
-        return this.arenamanager;
+    public static ArenaManager getArenaManager() {
+        return plugin.arenamanager;
     }
 }
 

@@ -207,9 +207,8 @@ public class ShopUtil {
     }
 
     public static void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
-        for (ItemStack itemStack : itemStackList) {
-            if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
+        for (ItemStack itemStack : itemStackList) {
             ColorChanger colorChanger = BedwarsAPI.getInstance().getColorChanger();
 
             final String materialName = itemStack.getType().toString();

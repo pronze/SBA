@@ -259,6 +259,8 @@ public class ScoreboardUtil {
                 team.setPrefix(playertag_prefix.replace("{color}", cl).replace("{team}", ChatColor.BOLD +
                         String.valueOf(t.getName().charAt(0))));
                 team.setAllowFriendlyFire(false);
+                team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+
                 if (!Main.isLegacy())
                     team.setColor(org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor);
 
