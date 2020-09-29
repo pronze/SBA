@@ -29,20 +29,10 @@ public class DatabaseManager {
 
     public void handleOffline(Player player) {
         if (!playerData.containsKey(player.getUniqueId())) return;
-
-        handleOfflineAsync(player).thenAccept(bool ->{
-            if(bool){
-                Hypixelify.debug("Deleted database of: " + player.getName());
-                deleteDatabase(player);
-                updateAll();
-            }
-        });
-    }
-
-    public CompletableFuture<Boolean> handleOfflineAsync(Player player){
-        CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         final PartyManager partyManager = Hypixelify.getPartyManager();
-        final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerDatabase playerDatabase = getDatabase(player);
+
+        if(playerDatabase == null ) return;
 
         new BukkitRunnable() {
             int timeout = 60;
@@ -57,19 +47,19 @@ public class DatabaseManager {
                         if (playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null) {
                             partyManager.databaseDeletionFromParty(player, playerDatabase.getPartyLeader());
                         }
-                        completableFuture.complete(true);
+                        Hypixelify.debug("Deleted database of: " + player.getName());
+                        deleteDatabase(player);
+                        updateAll();
                         cancel();
                     }
                 }
                 else {
-                    completableFuture.complete(false);
                     cancel();
                 }
             }
         }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
-
-        return completableFuture;
     }
+
 
 
     public void destroy() {

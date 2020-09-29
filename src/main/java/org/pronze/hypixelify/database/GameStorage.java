@@ -7,10 +7,10 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class GameStorage {
     private final Game game;
-    private final HashMap<Player, List<ItemStack>> PlayerItems = new HashMap<>();
     private final HashMap<RunningTeam, Boolean> purchasedTrap = new HashMap<>();
     private final HashMap<String, Integer> sharpness = new HashMap<>();
     private final HashMap<String, Integer> protection = new HashMap<>();
@@ -19,14 +19,6 @@ public class GameStorage {
 
     public GameStorage(Game game) {
         this.game = game;
-    }
-
-    public List<ItemStack> getItemsOfPlayer(Player player) {
-        return PlayerItems.get(player);
-    }
-
-    public void putPlayerItems(Player player, List<ItemStack> stacks) {
-        PlayerItems.put(player, stacks);
     }
 
     public Location getTargetBlockLocation(RunningTeam rt) {

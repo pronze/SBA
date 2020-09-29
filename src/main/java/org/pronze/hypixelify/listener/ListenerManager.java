@@ -10,6 +10,7 @@ public class ListenerManager {
 
     public ListenerManager(){
         listeners.add(new PlayerListener());
+        listeners.add(new BedwarsListener());
         if (Hypixelify.getConfigurator().config.getBoolean("party.enabled")) {
             listeners.add(new ChatListener());
             if(Hypixelify.getConfigurator().config.getBoolean("party.leader-autojoin-autoleave", true))

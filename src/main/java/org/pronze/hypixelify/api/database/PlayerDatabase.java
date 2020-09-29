@@ -59,5 +59,7 @@ public interface PlayerDatabase {
 
     String getProgress();
 
+    int getIntegerProgress();
+
     String getCompletedBoxes();
 }

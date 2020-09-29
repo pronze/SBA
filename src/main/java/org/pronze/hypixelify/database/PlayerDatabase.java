@@ -186,6 +186,17 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     @Override
+    public int getIntegerProgress() {
+        int progress;
+        try {
+            progress = getXP() - (getLevel() * 500);
+        } catch (Exception e) {
+            progress = 1;
+        }
+        return progress;
+    }
+
+    @Override
     public String getCompletedBoxes() {
         int progress;
         try {

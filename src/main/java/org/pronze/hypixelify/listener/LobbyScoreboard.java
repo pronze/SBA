@@ -49,12 +49,13 @@ public class LobbyScoreboard extends AbstractListener {
             int tc = 0;
 
             public void run() {
-                if(disabling)
-                    cancel();
+                if(!disabling) {
                     title = lobby_scoreboard.get(tc);
                     tc++;
                     if (tc >= lobby_scoreboard.size())
                         tc = 0;
+                } else
+                    cancel();
             }
         }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
     }

@@ -165,20 +165,22 @@ public class LobbyBoard extends AbstractListener {
         String bar = " §7[" + playerData.getCompletedBoxes() + "]";
 
 
-        int progress;
+        String progress = null;
         try {
-             progress = Integer.parseInt(playerData.getProgress());
-             if(progress < 0)
-                 progress = 0;
+             int p = playerData.getIntegerProgress();
+             if(p < 0)
+                 progress = "§b0§7/§a500";
         } catch (NumberFormatException e){
-            progress = 0;
             e.printStackTrace();
         }
+
+        if (progress == null)
+            progress = "§b0§7/§a500";
 
         if (scoreboard == null || scoreboard.getObjective("bwa-mainlobby") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
             scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
-
+            scoreboard.getObjective("bwa-mainlobby").setDisplayName("§e§lBED WARS");
 
             Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;

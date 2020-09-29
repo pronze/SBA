@@ -26,7 +26,7 @@ public class Configurator {
     public static boolean tag_health;
     public final File dataFolder;
     public final Hypixelify main;
-    public File file, oldfile, shopFile, upgradeShop, legacyShop, legacyUpgradeShop;
+    public File file, shopFile, upgradeShop, legacyShop, legacyUpgradeShop;
     public FileConfiguration config;
 
     public Configurator(Hypixelify main) {
@@ -49,7 +49,6 @@ public class Configurator {
         dataFolder.mkdirs();
 
         file = new File(dataFolder, "bwaconfig.yml");
-        oldfile = new File(dataFolder, "bwconfig.yml");
         config = new YamlConfiguration();
 
         if (!file.exists()) {
@@ -65,10 +64,6 @@ public class Configurator {
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
-
-
-        if (oldfile.exists())
-            oldfile.delete();
 
 
         shopFile = new File(dataFolder, "shop.yml");

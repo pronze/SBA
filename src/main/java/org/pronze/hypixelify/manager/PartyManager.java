@@ -228,10 +228,10 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
         final PlayerDatabase database = Hypixelify.getDatabaseManager().getDatabase(player);
 
         if (party != null) {
-            if (!partyLeader.getUniqueId().equals(player)) {
+            if (!partyLeader.getUniqueId().equals(player.getUniqueId())) {
                 if (party.getAllPlayers() != null && !party.getAllPlayers().isEmpty()) {
                     for (Player pl : party.getAllPlayers()) {
-                        if (pl != null && pl.isOnline() && !player.equals(pl.getUniqueId())) {
+                        if (pl != null && pl.isOnline() && !player.getUniqueId().equals(pl.getUniqueId())) {
                             for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.offline-left")) {
                                 pl.sendMessage(ShopUtil.translateColors(st).replace("{player}", player.getName()));
                             }
@@ -239,7 +239,7 @@ public class PartyManager implements org.pronze.hypixelify.api.party.PartyManage
                     }
                 }
                 party.removeMember(player);
-            } else if (partyLeader.getUniqueId().equals(player)) {
+            } else if (partyLeader.getUniqueId().equals(player.getUniqueId())) {
                 for (Player pl : party.getAllPlayers()) {
                     if (pl != null && !pl.equals(partyLeader)) {
                         if (pl.isOnline()) {

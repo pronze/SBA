@@ -1,16 +1,11 @@
 package org.pronze.hypixelify;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.commands.ShoutCommand;
@@ -23,9 +18,11 @@ import org.pronze.hypixelify.manager.ArenaManager;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
+
 import java.util.Objects;
 
 public class Hypixelify extends JavaPlugin implements Listener {
@@ -37,7 +34,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private DatabaseManager databaseManager;
     private PartyManager partyManager;
     private Configurator configurator;
-    private ArenaManager arenamanager;
+    private ArenaManager arenaManager;
     private GamesInventory gamesInventory;
     private Messages messages;
     private ListenerManager listenerManager;
@@ -48,13 +45,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public static GameStorage getGameStorage(Game game) {
         if (getArenaManager().getArenas().containsKey(game.getName()))
             return getArenaManager().getArenas().get(game.getName()).getStorage();
-
-        return null;
-    }
-
-    public static Arena getArena(Game game){
-        if (getArenaManager().getArenas().containsKey(game.getName()))
-            return getArenaManager().getArenas().get(game.getName());
 
         return null;
     }
@@ -79,10 +69,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin;
     }
 
-    public static CustomShop getShop() {
-        return plugin.shop;
-    }
-
     public static String getVersion() {
         return plugin.version;
     }
@@ -99,6 +85,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.papiEnabled;
     }
 
+    public static ArenaManager getArenaManager() {
+        return plugin.arenaManager;
+    }
+
+
     public static void debug(String message) {
         if (!plugin.debug || message == null) return;
         Bukkit.getLogger().info("§c[DEBUG]: §f" + message);
@@ -108,9 +99,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public void onEnable() {
         plugin = this;
         version = this.getDescription().getVersion();
-        arenamanager = new ArenaManager();
+        arenaManager = new ArenaManager();
 
-        if(!Main.isLegacy()) {
+        if (!Main.isLegacy()) {
             try {
                 new UpdateChecker(this, 79505).getVersion(version -> {
                     if (this.getDescription().getVersion().contains(version)) {
@@ -165,13 +156,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
         if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
-
-            if (!Main.getConfigurator().config.getBoolean("shop.citizens-enabled", false)) {
-                Main.getConfigurator().config.set("shop.citizens-enabled", true);
-                Main.getConfigurator().saveConfig();
-                Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
-                Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
-            }
 
         if (configurator.config.getBoolean("party.enabled", true)) {
             if (databaseManager == null)
@@ -234,23 +218,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         if (Hypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()) {
             for (Player pl : Bukkit.getOnlinePlayers()) {
                 if (pl != null && pl.isOnline()) {
-                    ProtocolManager m = ProtocolLibrary.getProtocolManager();
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                        packet.getIntegers().write(0, 1);
-                        packet.getStrings().write(0, "bwa-tag");
-                        m.sendServerPacket(pl, packet);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    try {
-                        PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                        packet.getIntegers().write(0, 1);
-                        packet.getStrings().write(0, "bwa-tab");
-                        m.sendServerPacket(pl, packet);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                    SBAUtil.removeScoreboardObjective(pl);
                 }
             }
         }
@@ -270,14 +238,14 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
 
         Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");
-        if(listenerManager != null)
+        if (listenerManager != null)
             listenerManager.unregisterAll();
         listenerManager = null;
         Bukkit.getLogger().info("[SBAHypixelify]: Cancelling current tasks....");
         configurator = null;
         messages = null;
-        arenamanager = null;
-        if(gamesInventory != null)
+        arenaManager = null;
+        if (gamesInventory != null)
             gamesInventory.destroy();
         gamesInventory = null;
         shop = null;
@@ -298,9 +266,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
     }
 
-    public static ArenaManager getArenaManager() {
-        return plugin.arenamanager;
-    }
 }
 
 
