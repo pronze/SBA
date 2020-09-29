@@ -11,12 +11,14 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -96,35 +98,31 @@ public class PlayerListener extends AbstractListener {
         }
 
         List<ItemStack> itemArr = new ArrayList<>();
-        GameStorage gameStorage = null;
-        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName()))
-            gameStorage = Hypixelify.getArenaManager().getArenas().get(game.getName()).getStorage();
 
-        if (gameStorage != null) {
-            ItemStack sword;
-            if (Main.isLegacy())
-                sword = new ItemStack(Material.valueOf("WOOD_SWORD"));
-            else
-                sword = new ItemStack(Material.WOODEN_SWORD);
+        ItemStack sword;
+        if (Main.isLegacy())
+            sword = new ItemStack(Material.valueOf("WOOD_SWORD"));
+        else
+            sword = new ItemStack(Material.WOODEN_SWORD);
 
-            for (ItemStack newItem : player.getInventory().getContents()) {
-                if (newItem != null) {
-                    if (newItem.getType().name().endsWith("SWORD")) {
-                        if (newItem.getEnchantments().size() > 0)
-                            sword.addEnchantments(newItem.getEnchantments());
-                    } else if (newItem.getType().name().endsWith("AXE")) {
-                        newItem = ShopUtil.checkifUpgraded(newItem);
-                        itemArr.add(newItem);
-                    } else if (newItem.getType().name().contains("LEGGINGS") ||
-                            newItem.getType().name().contains("BOOTS") ||
-                            newItem.getType().name().contains("CHESTPLATE") ||
-                            newItem.getType().name().contains("HELMET"))
-                        itemArr.add(newItem);
-                }
+        for (ItemStack newItem : player.getInventory().getContents()) {
+            if (newItem != null) {
+                if (newItem.getType().name().endsWith("SWORD")) {
+                    if (newItem.getEnchantments().size() > 0)
+                        sword.addEnchantments(newItem.getEnchantments());
+                } else if (newItem.getType().name().endsWith("AXE")) {
+                    newItem = ShopUtil.checkifUpgraded(newItem);
+                    itemArr.add(newItem);
+                } else if (newItem.getType().name().contains("LEGGINGS") ||
+                        newItem.getType().name().contains("BOOTS") ||
+                        newItem.getType().name().contains("CHESTPLATE") ||
+                        newItem.getType().name().contains("HELMET"))
+                    itemArr.add(newItem);
             }
-
-            itemArr.add(sword);
         }
+
+        itemArr.add(sword);
+
 
         if (giveKillerResources) {
             Player killer = e.getEntity().getKiller();
@@ -161,12 +159,12 @@ public class PlayerListener extends AbstractListener {
                         livingTime--;
                     }
                     if (livingTime == 0) {
-                        if(waitTimeout > 0 && isInGame(player)
-                                && player.getGameMode() == GameMode.SPECTATOR){
+                        if (waitTimeout > 0 && isInGame(player)
+                                && player.getGameMode() == GameMode.SPECTATOR) {
                             waitTimeout--;
                         } else {
                             if (!isInGame(player) || player.getGameMode() != GameMode.SURVIVAL
-                             || game.getStatus() != GameStatus.RUNNING) {
+                                    || game.getStatus() != GameStatus.RUNNING) {
                                 cancel();
                             } else {
                                 player.sendMessage(Messages.message_respawned_title);
