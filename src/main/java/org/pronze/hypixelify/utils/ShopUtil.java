@@ -235,13 +235,17 @@ public class ShopUtil {
     }
 
     public static ItemStack checkifUpgraded(ItemStack newItem) {
-        if (PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > PlayerListener.UpgradeKeys.get("WOODEN")) {
-            Map<Enchantment, Integer> enchant = newItem.getEnchantments();
-            Material mat;
-            mat = Material.valueOf(ShopUtil.getKey(PlayerListener.UpgradeKeys, PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
-            ItemStack temp = new ItemStack(mat);
-            temp.addEnchantments(enchant);
-            return temp;
+        try {
+            if (PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > PlayerListener.UpgradeKeys.get("WOODEN")) {
+                Map<Enchantment, Integer> enchant = newItem.getEnchantments();
+                Material mat;
+                mat = Material.valueOf(ShopUtil.getKey(PlayerListener.UpgradeKeys, PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
+                ItemStack temp = new ItemStack(mat);
+                temp.addEnchantments(enchant);
+                return temp;
+            }
+        } catch(Exception e){
+            e.printStackTrace();
         }
         return newItem;
     }
