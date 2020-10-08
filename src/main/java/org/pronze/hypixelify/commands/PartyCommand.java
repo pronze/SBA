@@ -3,27 +3,26 @@ package org.pronze.hypixelify.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.party.Party;
+import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
-import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class PartyCommand implements TabExecutor {
+public class PartyCommand extends AbstractCommand {
+
+    public PartyCommand() {
+        super(null, false, "party");
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can access this command");
-            return true;
-        }
 
         if (!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
             sender.sendMessage("§cCannot access command, party system is disabled.");
@@ -37,22 +36,15 @@ public class PartyCommand implements TabExecutor {
         }
 
         final DatabaseManager databaseManager = Hypixelify.getDatabaseManager();
-        final PlayerDatabase playerDatabase = databaseManager.getDatabase(player);
+        PlayerDatabase playerDatabase = databaseManager.getDatabase(player);
         final PartyManager partyManager = Hypixelify.getPartyManager();
 
-        if (args[0].equalsIgnoreCase("help")) {
-            if (args.length != 1) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
-            }
-            ShopUtil.sendMessage(player, Messages.message_party_help);
-            return true;
-        }
 
-        else if(playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null
-                && !playerDatabase.getPartyLeader().isOnline()){
-                player.sendMessage("§cPlease wait until the leader comes back online..., or party disbands");
-                return true;
+        if (playerDatabase.isInParty()
+                && playerDatabase.getPartyLeader() != null
+                && !playerDatabase.getPartyLeader().isOnline()) {
+            player.sendMessage("§cPlease wait until the leader comes back online..., or party disbands");
+            return true;
         }
 
         else if (args[0].equalsIgnoreCase("invite")) {
@@ -62,13 +54,15 @@ public class PartyCommand implements TabExecutor {
             }
 
             //Party size limit
-            if (playerDatabase != null) {
-                int max_sz = Hypixelify.getConfigurator().config.getInt("party.size", 4);
-                if (playerDatabase.isInParty() && partyManager.getParty(playerDatabase.getPartyLeader()) != null && partyManager.getParty(playerDatabase.getPartyLeader()).getCompleteSize() >= max_sz) {
-                    player.sendMessage("§cParty has reached maximum Size.");
-                    return true;
-                }
+            int max_sz = Hypixelify.getConfigurator().config.getInt("party.size", 4);
+            if (playerDatabase != null &&
+                    playerDatabase.isInParty() &&
+                    partyManager.getParty(playerDatabase.getPartyLeader()) != null &&
+                    partyManager.getParty(playerDatabase.getPartyLeader()).getCompleteSize() >= max_sz) {
+                player.sendMessage("§cParty has reached maximum Size.");
+                return true;
             }
+
 
             //check if player argument is online
             Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
@@ -136,9 +130,7 @@ public class PartyCommand implements TabExecutor {
                 partyManager.getParty(player).getPlayers() == null) {
             ShopUtil.sendMessage(player, Messages.message_no_other_commands);
             return true;
-        }
-
-        else if (args[0].equalsIgnoreCase("accept")) {
+        } else if (args[0].equalsIgnoreCase("accept")) {
 
             if (playerDatabase == null) {
                 player.sendMessage("§cAn error has occurred..");
@@ -159,16 +151,14 @@ public class PartyCommand implements TabExecutor {
             partyManager.addToParty(player, pParty);
             return true;
 
-        }
-
-        else if (args[0].equalsIgnoreCase("leave")) {
+        } else if (args[0].equalsIgnoreCase("leave")) {
 
             if (args.length != 1) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
                 return true;
             }
 
-            if(playerDatabase == null) return true;
+            if (playerDatabase == null) return true;
 
             if (!playerDatabase.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
@@ -186,9 +176,7 @@ public class PartyCommand implements TabExecutor {
             if (party == null) return true;
             partyManager.removeFromParty(player, party);
             ShopUtil.sendMessage(player, Messages.message_party_left);
-        }
-
-        else if (args[0].equalsIgnoreCase("decline")) {
+        } else if (args[0].equalsIgnoreCase("decline")) {
 
             if (playerDatabase == null) return true;
 
@@ -205,7 +193,7 @@ public class PartyCommand implements TabExecutor {
 
             ShopUtil.sendMessage(player, Messages.message_decline_user);
 
-            if(invitedParty.getAllPlayers() != null && !invitedParty.getAllPlayers().isEmpty()) {
+            if (invitedParty.getAllPlayers() != null && !invitedParty.getAllPlayers().isEmpty()) {
                 for (Player pl : invitedParty.getAllPlayers()) {
                     if (pl != null && pl.isOnline()) {
                         for (String st : Messages.message_declined) {
@@ -219,27 +207,23 @@ public class PartyCommand implements TabExecutor {
             playerDatabase.setInvitedParty(null);
             return true;
 
-        }
-
-        else if (args[0].equalsIgnoreCase("list")) {
+        } else if (args[0].equalsIgnoreCase("list")) {
 
             if (playerDatabase == null) return true;
-            if (!playerDatabase.isInParty()){
+            if (!playerDatabase.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return true;
             }
 
             Player leader = playerDatabase.getPartyLeader();
-            if(leader == null) return true;
+            if (leader == null) return true;
             player.sendMessage("Players: ");
-            if(partyManager.getParty(leader).getPlayers() == null) return true;
+            if (partyManager.getParty(leader).getPlayers() == null) return true;
             for (Player pl : partyManager.getParty(leader).getAllPlayers()) {
                 player.sendMessage(pl.getDisplayName());
             }
             return true;
-        }
-
-        else if (args[0].equalsIgnoreCase("disband")) {
+        } else if (args[0].equalsIgnoreCase("disband")) {
 
             if (playerDatabase == null || partyManager.getParty(playerDatabase.getPartyLeader()) == null) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
@@ -252,9 +236,7 @@ public class PartyCommand implements TabExecutor {
             }
             partyManager.disband(player);
             return true;
-        }
-
-        else if (args[0].equalsIgnoreCase("kick")) {
+        } else if (args[0].equalsIgnoreCase("kick")) {
             if (!playerDatabase.isInParty() || playerDatabase.getPartyLeader() == null) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return true;
@@ -282,8 +264,8 @@ public class PartyCommand implements TabExecutor {
                 return true;
             }
 
-            if(partyManager.getParty(player).getPlayers() == null ||
-            partyManager.getParty(player).getPlayers().isEmpty()) return true;
+            if (partyManager.getParty(player).getPlayers() == null ||
+                    partyManager.getParty(player).getPlayers().isEmpty()) return true;
 
             if (!partyManager.getParty(player).getAllPlayers().contains(invited)) {
                 ShopUtil.sendMessage(player, Messages.message_player_not_found);
@@ -293,9 +275,7 @@ public class PartyCommand implements TabExecutor {
             partyManager.kickFromParty(invited);
             return true;
 
-        }
-
-        else if (args[0].equalsIgnoreCase("warp")) {
+        } else if (args[0].equalsIgnoreCase("warp")) {
 
             if (args.length != 1) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
@@ -316,7 +296,7 @@ public class PartyCommand implements TabExecutor {
                 return true;
             }
 
-            if(playerDatabase == null || playerDatabase.getPartyLeader() == null){
+            if (playerDatabase == null || playerDatabase.getPartyLeader() == null) {
                 player.sendMessage("§cSomething went wrong, reload Addon or BedWars to fix this issue");
                 return true;
             }
@@ -326,9 +306,7 @@ public class PartyCommand implements TabExecutor {
             }
             partyManager.warpPlayersToLeader(player);
 
-        }
-
-        else if (args[0].equalsIgnoreCase("chat")) {
+        } else if (args[0].equalsIgnoreCase("chat")) {
 
             if (playerDatabase == null) return true;
 
@@ -360,14 +338,35 @@ public class PartyCommand implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+    public boolean onPreExecute(CommandSender sender, String[] args) {
+        return true;
+    }
+
+    @Override
+    public void onPostExecute() {
+
+    }
+
+    @Override
+    public void execute(String[] args, CommandSender sender) {
+
+    }
+
+    @Override
+    public void displayHelp(CommandSender sender) {
+        Player player = (Player) sender;
+        ShopUtil.sendMessage(player, Messages.message_party_help);
+    }
+
+    @Override
+    public List<String> tabCompletion(String[] strings, CommandSender commandSender) {
         if (!(commandSender instanceof Player))
             return null;
         Player player = (Player) commandSender;
 
         final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
 
-        if (playerDatabase!= null && playerDatabase.isInvited()) {
+        if (playerDatabase != null && playerDatabase.isInvited()) {
             return Arrays.asList("accept", "decline");
         }
         if (strings.length == 1) {

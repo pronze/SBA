@@ -1,8 +1,5 @@
 package org.pronze.hypixelify.commands;
-
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
@@ -13,38 +10,44 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.Collections;
 import java.util.List;
 
-public class ShoutCommand implements TabExecutor {
+public class ShoutCommand extends AbstractCommand {
+
+    public ShoutCommand() {
+        super(null, false, "shout");
+    }
 
     public boolean hasPermission(Player player){
         return player.hasPermission("bwaddon.shout") || player.isOp();
     }
 
+
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)){
-            sender.sendMessage("§cThis Command can only be done as a Player!");
-            return true;
-        }
+    public boolean onPreExecute(CommandSender sender, String[] args) {
+        return true;
+    }
 
-        if(args.length < 1){
-            sender.sendMessage("§cInvalid usage, /shout {message} is the format!");
-            return true;
-        }
+    @Override
+    public void onPostExecute() {
 
+    }
+
+    @Override
+    public void execute(String[] args, CommandSender sender) {
         Player player = (Player) sender;
 
         if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
             ShopUtil.sendMessage(player, Messages.message_not_in_game);
-            return true;
+            return;
         }
 
         Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
 
         if(game.getTeamOfPlayer(player) == null){
             player.sendMessage("§cYou cannot do this command while spectating");
-            return true;
+            return;
         }
 
         final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
@@ -56,7 +59,7 @@ public class ShoutCommand implements TabExecutor {
                 for (String st : Messages.message_shout_wait) {
                     player.sendMessage(ShopUtil.translateColors(st.replace("{seconds}", shout)));
                 }
-                return true;
+                return;
             }
         }
 
@@ -81,12 +84,18 @@ public class ShoutCommand implements TabExecutor {
 
         if(!cancelShout && !hasPermission(player))
             playerDatabase.shout();
-
-        return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public void displayHelp(CommandSender sender) {
+        sender.sendMessage("§cInvalid usage, /shout {message} is the format!");
+    }
+
+    @Override
+    public List<String> tabCompletion(String[] args, CommandSender sender) {
+        if(args.length == 1){
+            return Collections.singletonList("help");
+        }
         return null;
     }
 }

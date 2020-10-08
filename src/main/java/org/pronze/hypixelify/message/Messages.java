@@ -50,6 +50,10 @@ public class Messages {
     public static String lobby_chat_format;
     public static String message_bed_destroyed_title, message_bed_destroyed_subtitle;
     public static String message_purchase_heal_pool;
+    public static String command_invalid;
+    public static String command_player_only;
+    public static String command_no_permissions;
+
 
     public Messages() {
 
@@ -68,6 +72,9 @@ public class Messages {
     }
 
     public void loadConfig() {
+        command_no_permissions = fetchString("commands.no-permissions");
+        command_player_only = fetchString("commands.player-only");
+        command_invalid = fetchString("commands.invalid-command");
         message_purchase_heal_pool = fetchString("message.purchase-heal-pool");
         message_bed_destroyed_title = fetchString("message.bed-destroyed.title");
         message_bed_destroyed_subtitle = fetchString("message.bed-destroyed.sub-title");
@@ -118,6 +125,7 @@ public class Messages {
         message_p_chat_enabled_disabled = fetchStringList("party.message.chat-enable-disabled");
         message_party_help = fetchStringList("party.message.help");
         message_cannot_invite_yourself = fetchStringList("party.message.cannot-invite-yourself");
+
     }
 
 }

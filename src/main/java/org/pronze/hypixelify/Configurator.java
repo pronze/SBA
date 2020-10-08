@@ -440,6 +440,12 @@ public class Configurator {
                 "§ewww.minecraft.net"
         ));
 
+        checkOrSetConfig(modify, "commands.invalid-command",
+                "[SBAHypixelify] §cUnknown command, do /bwaddon help for more.");
+
+        checkOrSetConfig(modify, "commands.player-only", "[SBAHypixelify] §cOnly players can use this command!");
+        checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]§cYou do not have permissions to do this command!");
+
         if (modify.get()) {
             try {
                 config.save(file);

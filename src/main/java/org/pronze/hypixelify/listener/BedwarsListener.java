@@ -2,6 +2,7 @@ package org.pronze.hypixelify.listener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.Hypixelify;
@@ -23,7 +24,7 @@ public class BedwarsListener extends AbstractListener {
 
     @Override
     public void onDisable() {
-
+        HandlerList.unregisterAll(this);
     }
 
     @EventHandler

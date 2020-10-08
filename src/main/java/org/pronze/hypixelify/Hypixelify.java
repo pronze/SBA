@@ -6,15 +6,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
-import org.pronze.hypixelify.commands.ShoutCommand;
 import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
-import org.pronze.hypixelify.listener.ListenerManager;
+import org.pronze.hypixelify.manager.ListenerManager;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
 import org.pronze.hypixelify.manager.ArenaManager;
+import org.pronze.hypixelify.manager.CommandManager;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
@@ -41,6 +40,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private boolean isProtocolLib;
     private boolean debug = false;
     private boolean mainLobby;
+    private CommandManager commandManager;
+
 
     public static GameStorage getGameStorage(Game game) {
         if (getArenaManager().getArenas().containsKey(game.getName()))
@@ -89,6 +90,10 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.arenaManager;
     }
 
+    public static boolean isUpgraded(){
+        return !Objects.requireNonNull(getConfigurator()
+                .config.getString("version")).contains(Hypixelify.getVersion());
+    }
 
     public static void debug(String message) {
         if (!plugin.debug || message == null) return;
@@ -202,6 +207,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 Main.getConfigurator().saveConfig();
                 Bukkit.getServer().getPluginManager().disablePlugin(this);
                 Bukkit.getServer().getPluginManager().enablePlugin(this);
+                return;
             }
 
         }
@@ -209,8 +215,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
         papiEnabled = Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
 
         Bukkit.getPluginManager().registerEvents(this, this);
-        Objects.requireNonNull(getCommand("bwaddon")).setExecutor(new BWACommand());
-        Objects.requireNonNull(getCommand("shout")).setExecutor(new ShoutCommand());
+        commandManager = new CommandManager();
+        commandManager.registerAll(this);
     }
 
     @Override
@@ -265,6 +271,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
             Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
         }
     }
+
+
 
 }
 
