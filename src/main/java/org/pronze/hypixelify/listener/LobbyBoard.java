@@ -170,6 +170,8 @@ public class LobbyBoard extends AbstractListener {
              int p = playerData.getIntegerProgress();
              if(p < 0)
                  progress = "§b0§7/§a500";
+             else
+                 progress = playerData.getProgress();
         } catch (NumberFormatException e){
             e.printStackTrace();
         }
