@@ -22,17 +22,26 @@ public class PartyCommand extends AbstractCommand {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-
+    public boolean onPreExecute(CommandSender sender, String[] args) {
         if (!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
             sender.sendMessage("§cCannot access command, party system is disabled.");
+            return false;
         }
+        return true;
+    }
 
+    @Override
+    public void onPostExecute() {
+
+    }
+
+    @Override
+    public void execute(String[] args, CommandSender sender) {
         Player player = (Player) sender;
 
         if (args == null || args.length == 0 || args.length > 2) {
             ShopUtil.sendMessage(player, Messages.message_invalid_command);
-            return true;
+            return;
         }
 
         final DatabaseManager databaseManager = Hypixelify.getDatabaseManager();
@@ -44,13 +53,13 @@ public class PartyCommand extends AbstractCommand {
                 && playerDatabase.getPartyLeader() != null
                 && !playerDatabase.getPartyLeader().isOnline()) {
             player.sendMessage("§cPlease wait until the leader comes back online..., or party disbands");
-            return true;
+            return;
         }
 
         else if (args[0].equalsIgnoreCase("invite")) {
             if (args.length != 2) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
+                return;
             }
 
             //Party size limit
@@ -60,7 +69,7 @@ public class PartyCommand extends AbstractCommand {
                     partyManager.getParty(playerDatabase.getPartyLeader()) != null &&
                     partyManager.getParty(playerDatabase.getPartyLeader()).getCompleteSize() >= max_sz) {
                 player.sendMessage("§cParty has reached maximum Size.");
-                return true;
+                return;
             }
 
 
@@ -68,13 +77,13 @@ public class PartyCommand extends AbstractCommand {
             Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
             if (invited == null) {
                 ShopUtil.sendMessage(player, Messages.message_player_not_found);
-                return true;
+                return;
             }
 
 
             if (invited.getUniqueId().equals(player.getUniqueId())) {
                 ShopUtil.sendMessage(player, Messages.message_cannot_invite_yourself);
-                return true;
+                return;
             }
 
             if (playerDatabase == null)
@@ -86,7 +95,7 @@ public class PartyCommand extends AbstractCommand {
 
             if (databaseManager.getDatabase(player).isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_decline_inc);
-                return true;
+                return ;
             }
 
             Party party;
@@ -103,12 +112,12 @@ public class PartyCommand extends AbstractCommand {
 
             if (invitedData.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_cannot_invite);
-                return true;
+                return ;
             }
 
             if (invitedData.isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_already_invited);
-                return true;
+                return ;
             }
 
             if (party.canAnyoneInvite() || player.equals(party.getLeader())) {
@@ -119,7 +128,7 @@ public class PartyCommand extends AbstractCommand {
                 for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.invited")) {
                     player.sendMessage(ShopUtil.translateColors(message).replace("{player}", invited.getDisplayName()));
                 }
-                return true;
+                return ;
             }
 
         }
@@ -129,65 +138,65 @@ public class PartyCommand extends AbstractCommand {
                 partyManager.getParty(playerDatabase.getPartyLeader()) != null &&
                 partyManager.getParty(player).getPlayers() == null) {
             ShopUtil.sendMessage(player, Messages.message_no_other_commands);
-            return true;
+            return ;
         } else if (args[0].equalsIgnoreCase("accept")) {
 
             if (playerDatabase == null) {
                 player.sendMessage("§cAn error has occurred..");
-                return true;
+                return ;
             }
 
             if (!playerDatabase.isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_not_invited);
-                return true;
+                return ;
             }
 
             if (playerDatabase.isInParty() || playerDatabase.getInvitedParty() == null) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
+                return ;
             }
 
             Party pParty = playerDatabase.getInvitedParty();
             partyManager.addToParty(player, pParty);
-            return true;
+            return ;
 
         } else if (args[0].equalsIgnoreCase("leave")) {
 
             if (args.length != 1) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
+                return ;
             }
 
-            if (playerDatabase == null) return true;
+            if (playerDatabase == null) return ;
 
             if (!playerDatabase.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
-                return true;
+                return ;
             }
             if (playerDatabase.isPartyLeader()) {
                 player.sendMessage("§cYou have to disband the party first!");
-                return true;
+                return ;
             }
 
             if (playerDatabase.getPartyLeader() == null || partyManager.getParty(playerDatabase.getPartyLeader()) == null)
-                return true;
+                return ;
 
             Party party = partyManager.getParty(playerDatabase.getPartyLeader());
-            if (party == null) return true;
+            if (party == null) return ;
             partyManager.removeFromParty(player, party);
             ShopUtil.sendMessage(player, Messages.message_party_left);
         } else if (args[0].equalsIgnoreCase("decline")) {
 
-            if (playerDatabase == null) return true;
+            if (playerDatabase == null) return ;
 
             if (!playerDatabase.isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_not_invited);
-                return true;
+                return ;
             }
 
             Party invitedParty = playerDatabase.getInvitedParty();
 
-            if (invitedParty == null || invitedParty.getLeader() == null) return true;
+            if (invitedParty == null || invitedParty.getLeader() == null) return ;
 
             partyManager.getParty(invitedParty.getLeader()).removeInvitedMember(player);
 
@@ -205,119 +214,119 @@ public class PartyCommand extends AbstractCommand {
             playerDatabase.setInvited(false);
             playerDatabase.setExpiredTimeTimeout(60);
             playerDatabase.setInvitedParty(null);
-            return true;
+            return ;
 
         } else if (args[0].equalsIgnoreCase("list")) {
 
-            if (playerDatabase == null) return true;
+            if (playerDatabase == null) return ;
             if (!playerDatabase.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
-                return true;
+                return;
             }
 
             Player leader = playerDatabase.getPartyLeader();
-            if (leader == null) return true;
+            if (leader == null) return ;
             player.sendMessage("Players: ");
-            if (partyManager.getParty(leader).getPlayers() == null) return true;
+            if (partyManager.getParty(leader).getPlayers() == null) return ;
             for (Player pl : partyManager.getParty(leader).getAllPlayers()) {
                 player.sendMessage(pl.getDisplayName());
             }
-            return true;
+            return ;
         } else if (args[0].equalsIgnoreCase("disband")) {
 
             if (playerDatabase == null || partyManager.getParty(playerDatabase.getPartyLeader()) == null) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
-                return true;
+                return ;
             }
 
             if (!playerDatabase.getPartyLeader().equals(player)) {
                 ShopUtil.sendMessage(player, Messages.message_access_denied);
-                return true;
+                return ;
             }
             partyManager.disband(player);
-            return true;
+            return ;
         } else if (args[0].equalsIgnoreCase("kick")) {
             if (!playerDatabase.isInParty() || playerDatabase.getPartyLeader() == null) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
-                return true;
+                return ;
             }
 
             if (!playerDatabase.getPartyLeader().equals(player)) {
                 ShopUtil.sendMessage(player, Messages.message_access_denied);
-                return true;
+                return ;
             }
             if (args.length != 2) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
+                return ;
             }
 
             Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
             if (invited == null) {
                 ShopUtil.sendMessage(player, Messages.message_player_not_found);
-                return true;
+                return ;
             }
 
             if (invited.equals(player)) {
                 for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.cannot-blank-yourself")) {
                     player.sendMessage(ShopUtil.translateColors(str).replace("{blank}", "kick"));
                 }
-                return true;
+                return ;
             }
 
             if (partyManager.getParty(player).getPlayers() == null ||
-                    partyManager.getParty(player).getPlayers().isEmpty()) return true;
+                    partyManager.getParty(player).getPlayers().isEmpty()) return ;
 
             if (!partyManager.getParty(player).getAllPlayers().contains(invited)) {
                 ShopUtil.sendMessage(player, Messages.message_player_not_found);
-                return true;
+                return ;
             }
 
             partyManager.kickFromParty(invited);
-            return true;
+            return ;
 
         } else if (args[0].equalsIgnoreCase("warp")) {
 
             if (args.length != 1) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
+                return ;
             }
 
             if (!player.isOnline()) {
-                return true;
+                return ;
             }
 
             if (!partyManager.isInParty(player)) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
-                return true;
+                return ;
             }
 
             if (partyManager.getParty(player) == null) {
                 player.sendMessage("§cAn error has occured");
-                return true;
+                return ;
             }
 
             if (playerDatabase == null || playerDatabase.getPartyLeader() == null) {
                 player.sendMessage("§cSomething went wrong, reload Addon or BedWars to fix this issue");
-                return true;
+                return ;
             }
             if (!playerDatabase.getPartyLeader().equals(player)) {
                 ShopUtil.sendMessage(player, Messages.message_access_denied);
-                return true;
+                return ;
             }
             partyManager.warpPlayersToLeader(player);
 
         } else if (args[0].equalsIgnoreCase("chat")) {
 
-            if (playerDatabase == null) return true;
+            if (playerDatabase == null) return ;
 
             if (!playerDatabase.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
-                return true;
+                return ;
             }
 
             if (args.length != 2 || (!args[1].equalsIgnoreCase("on") && !args[1].equalsIgnoreCase("off"))) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
-                return true;
+                return ;
             }
 
             playerDatabase.setPartyChatEnabled(args[1].equalsIgnoreCase("on"));
@@ -327,29 +336,12 @@ public class PartyCommand extends AbstractCommand {
             for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.chat-enable-disabled")) {
                 player.sendMessage(ShopUtil.translateColors(st).replace("{mode}", mode));
             }
-            return true;
+            return ;
 
         } else {
             ShopUtil.sendMessage(player, Messages.message_invalid_command);
-            return true;
+            return ;
         }
-
-        return true;
-    }
-
-    @Override
-    public boolean onPreExecute(CommandSender sender, String[] args) {
-        return true;
-    }
-
-    @Override
-    public void onPostExecute() {
-
-    }
-
-    @Override
-    public void execute(String[] args, CommandSender sender) {
-
     }
 
     @Override
