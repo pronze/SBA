@@ -154,7 +154,7 @@ public class ScoreboardUtil {
             if (scoreboard.getObjective("bwa-game") == null) {
                 scoreboard.registerNewObjective("bwa-game", "dummy");
                 Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplaySlot(DisplaySlot.SIDEBAR);
-                scoreboard.getObjective("bwa-game").setDisplayName("§e§lBED WARS");
+                Objects.requireNonNull(scoreboard.getObjective("bwa-game")).setDisplayName("§e§lBED WARS");
             }
             if ((p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard)) && !exist) {
                 for (RunningTeam t : game.getRunningTeams()) {

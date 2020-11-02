@@ -6,16 +6,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pronze.hypixelify.commands.PartyCommand;
 import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
-import org.pronze.hypixelify.manager.ListenerManager;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
-import org.pronze.hypixelify.manager.ArenaManager;
-import org.pronze.hypixelify.manager.CommandManager;
-import org.pronze.hypixelify.manager.DatabaseManager;
-import org.pronze.hypixelify.manager.PartyManager;
+import org.pronze.hypixelify.manager.*;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
@@ -40,6 +35,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
     private boolean isProtocolLib;
     private boolean debug = false;
     private boolean mainLobby;
+    private boolean partyEnabled;
     private CommandManager commandManager;
 
 
@@ -90,7 +86,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.arenaManager;
     }
 
-    public static boolean isUpgraded(){
+    public static boolean isUpgraded() {
         return !Objects.requireNonNull(getConfigurator()
                 .config.getString("version")).contains(Hypixelify.getVersion());
     }
@@ -100,6 +96,10 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("§c[DEBUG]: §f" + message);
     }
 
+    public static boolean isPartyEnabled(){
+        return plugin.partyEnabled;
+    }
+
     @Override
     public void onEnable() {
         plugin = this;
@@ -107,21 +107,19 @@ public class Hypixelify extends JavaPlugin implements Listener {
         arenaManager = new ArenaManager();
 
         if (!Main.isLegacy()) {
-            try {
-                new UpdateChecker(this, 79505).getVersion(version -> {
-                    if (this.getDescription().getVersion().contains(version)) {
-                        Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
-                    } else {
-                        Bukkit.getLogger().info("§e§l[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
-                    }
-                });
-            } catch (Exception ignored) {
-                Hypixelify.debug("Couldn't check for updates!");
-            }
+            new UpdateChecker(this, 79505).getVersion(version -> {
+                if (this.getDescription().getVersion().contains(version)) {
+                    Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
+                } else {
+                    Bukkit.getLogger().info("§e§l[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
+                }
+            });
         }
 
         configurator = new Configurator(this);
         configurator.loadDefaults();
+
+        partyEnabled = configurator.config.getBoolean("party.enabled", true);
         debug = configurator.config.getBoolean("debug.enabled", false);
         mainLobby = Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false);
         boolean isLegacy = Main.isLegacy();
@@ -162,18 +160,19 @@ public class Hypixelify extends JavaPlugin implements Listener {
         if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
 
-        if (configurator.config.getBoolean("party.enabled", true)) {
-            if (databaseManager == null)
-                databaseManager = new DatabaseManager();
+        if (databaseManager == null)
+            databaseManager = new DatabaseManager();
 
-            partyManager = new PartyManager();
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (player == null) continue;
-                if (databaseManager.getDatabase(player) == null) {
-                    databaseManager.createDatabase(player);
-                }
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (player == null) continue;
+            if (databaseManager.getDatabase(player) == null) {
+                databaseManager.createDatabase(player);
             }
-            Objects.requireNonNull(getCommand("party")).setExecutor(new PartyCommand());
+        }
+
+
+        if (configurator.config.getBoolean("party.enabled", true)) {
+            partyManager = new PartyManager();
         }
 
         if (!Main.isLegacy())
@@ -185,13 +184,26 @@ public class Hypixelify extends JavaPlugin implements Listener {
         }
 
         //Do changes for legacy support.
+        changeBedWarsConfig();
+
+        papiEnabled = Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
+
+        Bukkit.getPluginManager().registerEvents(this, this);
+        commandManager = new CommandManager();
+        commandManager.registerAll(this);
+    }
+
+    public void changeBedWarsConfig(){
+        //Do changes for legacy support.
         if (Main.isLegacy()) {
             boolean doneChanges = false;
-            if (Objects.requireNonNull(Main.getConfigurator().config.getString("items.leavegame")).equalsIgnoreCase("RED_BED")) {
+            if (Objects.requireNonNull(Main.getConfigurator()
+                    .config.getString("items.leavegame")).equalsIgnoreCase("RED_BED")) {
                 Main.getConfigurator().config.set("items.leavegame", "BED");
                 doneChanges = true;
             }
-            if (Objects.requireNonNull(Main.getConfigurator().config.getString("items.shopcosmetic")).equalsIgnoreCase("GRAY_STAINED_GLASS_PANE")) {
+            if (Objects.requireNonNull(Main.getConfigurator()
+                    .config.getString("items.shopcosmetic")).equalsIgnoreCase("GRAY_STAINED_GLASS_PANE")) {
                 Main.getConfigurator().config.set("items.shopcosmetic", "STAINED_GLASS_PANE");
                 doneChanges = true;
             }
@@ -207,16 +219,9 @@ public class Hypixelify extends JavaPlugin implements Listener {
                 Main.getConfigurator().saveConfig();
                 Bukkit.getServer().getPluginManager().disablePlugin(this);
                 Bukkit.getServer().getPluginManager().enablePlugin(this);
-                return;
             }
 
         }
-
-        papiEnabled = Bukkit.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null;
-
-        Bukkit.getPluginManager().registerEvents(this, this);
-        commandManager = new CommandManager();
-        commandManager.registerAll(this);
     }
 
     @Override
@@ -253,6 +258,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         arenaManager = null;
         if (gamesInventory != null)
             gamesInventory.destroy();
+
         gamesInventory = null;
         shop = null;
         messages = null;
@@ -271,7 +277,6 @@ public class Hypixelify extends JavaPlugin implements Listener {
             Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
         }
     }
-
 
 
 }

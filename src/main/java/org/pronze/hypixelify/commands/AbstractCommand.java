@@ -61,6 +61,9 @@ public abstract class AbstractCommand implements TabExecutor {
         return tabCompletion(strings, commandSender);
     }
 
+
+    public String getPerm(){return perm;}
+
     public abstract boolean onPreExecute(CommandSender sender, String[] args);
 
     public abstract void onPostExecute();
@@ -70,4 +73,5 @@ public abstract class AbstractCommand implements TabExecutor {
     public abstract void displayHelp(CommandSender sender);
 
     public abstract List<String> tabCompletion(String[] args, CommandSender sender);
+
 }

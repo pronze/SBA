@@ -1,6 +1,7 @@
 package org.pronze.hypixelify.manager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.listener.*;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ public class ListenerManager {
     private final static List<AbstractListener> listeners = new ArrayList<>();
 
     public ListenerManager(){
+        listeners.add(new CustomShop());
         listeners.add(new PlayerListener());
         listeners.add(new BedwarsListener());
         if (Hypixelify.getConfigurator().config.getBoolean("party.enabled")) {
@@ -36,7 +38,7 @@ public class ListenerManager {
     }
 
     public void unregisterAll(){
-        if(listeners == null || listeners.isEmpty()) return;
+        if(listeners.isEmpty()) return;
 
         for(AbstractListener l : listeners){
             l.onDisable();

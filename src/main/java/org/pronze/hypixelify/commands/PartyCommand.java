@@ -1,7 +1,6 @@
 package org.pronze.hypixelify.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Hypixelify;
@@ -49,7 +48,7 @@ public class PartyCommand extends AbstractCommand {
         final PartyManager partyManager = Hypixelify.getPartyManager();
 
 
-        if (playerDatabase.isInParty()
+        if (playerDatabase != null && playerDatabase.isInParty()
                 && playerDatabase.getPartyLeader() != null
                 && !playerDatabase.getPartyLeader().isOnline()) {
             player.sendMessage("§cPlease wait until the leader comes back online..., or party disbands");

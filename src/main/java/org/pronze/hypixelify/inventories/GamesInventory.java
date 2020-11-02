@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.inventories;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,7 +20,9 @@ import org.screamingsandals.bedwars.lib.sgui.inventory.GuiHolder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class GamesInventory implements Listener {
     private final HashMap<Integer, SimpleInventories> menu = new HashMap<>();
@@ -34,7 +37,7 @@ public class GamesInventory implements Listener {
         bed_lore = Hypixelify.getConfigurator().config.getStringList("games-inventory.bed-lore");
         bed_name = Hypixelify.getConfigurator().config.getString("games-inventory.bed-name", "§aBed Wars ({mode})");
         oak_name = Hypixelify.getConfigurator().config.getString("games-inventory.oak_sign-name", "§aMap Selector ({mode})");
-        String soloprefix, doubleprefix, tripleprefix,squadprefix;
+        String soloprefix, doubleprefix, tripleprefix, squadprefix;
 
         soloprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.solo-prefix");
         doubleprefix = Hypixelify.getConfigurator().config.getString("games-inventory.gui.double-prefix");
@@ -70,25 +73,23 @@ public class GamesInventory implements Listener {
         SimpleInventories squadMenu = new SimpleInventories(option.get(4));
 
 
-
-
-        for(int i = 1; i <= 4; i++){
+        for (int i = 1; i <= 4; i++) {
 
             List<String> bLore = new ArrayList<>();
-            for(String st : bed_lore){
+            for (String st : bed_lore) {
                 st = st
                         .replace("{mode}", labels.get(i));
                 bLore.add(st);
             }
 
             List<String> sLore = new ArrayList<>();
-            for(String st : stack_lore){
+            for (String st : stack_lore) {
                 st = st.replace("{mode}", labels.get(i));
                 sLore.add(st);
             }
 
             List<ItemStack> myCategories = ShopUtil.createCategories(bLore,
-                    bed_name.replace("{mode}", labels.get(i)),oak_name.replace("{mode}", labels.get(i)));
+                    bed_name.replace("{mode}", labels.get(i)), oak_name.replace("{mode}", labels.get(i)));
             ItemStack category = myCategories.get(0);
             ItemStack category2 = myCategories.get(1);
             ItemStack category3 = myCategories.get(2);
@@ -96,7 +97,7 @@ public class GamesInventory implements Listener {
 
             ArrayList<Object> Games = ShopUtil.createGamesGUI(i, sLore);
             FormatBuilder builder = ShopUtil.createBuilder(Games, category, category2, category3, category4);
-            switch(i){
+            switch (i) {
                 case 1:
                     soloMenu.load(builder);
                     soloMenu.generateData();
@@ -125,20 +126,21 @@ public class GamesInventory implements Listener {
 
     }
 
-    public void destroy(){
+    public void destroy() {
         players.clear();
         HandlerList.unregisterAll(this);
     }
+
     public void openForPlayer(Player player, int mode) {
         GameSelectorOpenEvent event = new GameSelectorOpenEvent(player, mode);
         Bukkit.getServer().getPluginManager().callEvent(event);
 
-        if(event.isCancelled()){
+        if (event.isCancelled()) {
             return;
         }
 
         createData();
-        if(menu.get(mode) == null)
+        if (menu.get(mode) == null)
             return;
         menu.get(mode).openForPlayer(player);
         players.computeIfAbsent(mode, k -> new ArrayList<>());
@@ -160,39 +162,38 @@ public class GamesInventory implements Listener {
 
     @EventHandler
     public void onPostAction(PostActionEvent event) {
-        if (    event.getFormat() != menu.get(1) &&
+        if (event.getFormat() != menu.get(1) &&
                 event.getFormat() != menu.get(2) &&
                 event.getFormat() != menu.get(3) &&
                 event.getFormat() != menu.get(4)) {
             return;
         }
 
-        int mode = event.getFormat() == menu.get(1) ? 1 : event.getFormat() == menu.get(2) ? 2 : event.getFormat() == menu.get(3) ? 3:
+        int mode = event.getFormat() == menu.get(1) ? 1 : event.getFormat() == menu.get(2) ? 2 : event.getFormat() == menu.get(3) ? 3 :
                 event.getFormat() == menu.get(4) ? 4 : 1;
 
-
+        ItemStack stack = event.getItem().getStack();
         Player player = event.getPlayer();
-        if(event.getItem().getStack() != null)
-        {
-            if(event.getItem().getStack().getType().equals(new ItemStack(Material.BARRIER).getType())) {
+        if (stack != null) {
+            if (stack.getType() == Material.BARRIER) {
                 players.get(mode).remove(player);
                 player.closeInventory();
-            } else if(event.getItem().getStack().getType().equals(ShopUtil.BED.getType())
-                    || event.getItem().getStack().getType().equals(ShopUtil.FireWorks.getType())
-                    || event.getItem().getStack().getType().equals(new ItemStack(Material.DIAMOND).getType())){
+            } else if (stack.getType().equals(ShopUtil.BED.getType())
+                    || stack.getType().equals(ShopUtil.FireWorks.getType())
+                    || stack.getType() == Material.DIAMOND) {
                 player.closeInventory();
                 repaint(mode);
                 players.get(mode).remove(player);
                 List<Game> games = ShopUtil.getGamesWithSize(mode);
-                if(games == null || games.isEmpty())
+                if (games == null || games.isEmpty())
                     return;
-                for (Game game : games){
-                    if(game.getStatus().equals(GameStatus.WAITING)) {
+                for (Game game : games) {
+                    if (game.getStatus().equals(GameStatus.WAITING)) {
                         game.joinToGame(player);
                         break;
                     }
                 }
-            } else if(event.getItem().getStack().getType().equals(new ItemStack(Material.ENDER_PEARL).getType())){
+            } else if (stack.getType() == Material.ENDER_PEARL) {
                 player.closeInventory();
                 repaint(mode);
                 players.get(mode).remove(player);
@@ -204,12 +205,11 @@ public class GamesInventory implements Listener {
         if (reader.containsKey("game")) {
             Game game = (Game) reader.get("game");
             Main.getGame(game.getName()).joinToGame(player);
-             player.closeInventory();
-             repaint(mode);
-             players.get(mode).remove(player);
+            player.closeInventory();
+            repaint(mode);
+            players.get(mode).remove(player);
         }
     }
-
 
 
 }

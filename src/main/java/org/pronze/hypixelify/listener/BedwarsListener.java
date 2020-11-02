@@ -72,6 +72,15 @@ public class BedwarsListener extends AbstractListener {
     }
 
     @EventHandler
+    public void onOver(BedwarsPlayerKilledEvent e) {
+        Game game = e.getGame();
+        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName()))
+            Hypixelify.getArenaManager().getArenas().get(game.getName()).onPlayerKilled(e);
+    }
+
+
+
+    @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
         Game game = e.getGame();
         if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName()))

@@ -44,7 +44,7 @@ public class LobbyBoard extends AbstractListener {
 
 
         try {
-            location = new Location(Bukkit.getWorld(Hypixelify.getConfigurator().config.getString("main-lobby.world")),
+            location = new Location(Bukkit.getWorld(Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("main-lobby.world"))),
                     Hypixelify.getConfigurator().config.getDouble("main-lobby.x"),
                     Hypixelify.getConfigurator().config.getDouble("main-lobby.y"),
                     Hypixelify.getConfigurator().config.getDouble("main-lobby.z"),
@@ -203,7 +203,7 @@ public class LobbyBoard extends AbstractListener {
                         .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))
                         .replace("{deaths}", String.valueOf(playerData.getDeaths()))
                         .replace("{level}", "§7" + playerData.getLevel()+ "✫")
-                        .replace("{progress}", String.valueOf(progress))
+                        .replace("{progress}", progress)
                         .replace("{bar}", bar)
                         .replace("{wins}", String.valueOf(playerData.getWins()))
                         .replace("{k/d}", String.valueOf(playerData.getKD()));

@@ -15,6 +15,7 @@ import java.util.Objects;
 
 public class BWACommand extends AbstractCommand {
 
+    //Use default bedwars admin permissions
     public BWACommand() {
         super("misat11.bw.admin", true, "bwaddon");
     }
@@ -23,7 +24,7 @@ public class BWACommand extends AbstractCommand {
     @Override
     public boolean onPreExecute(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
-            if (!sender.hasPermission("misat11.bw.admin") &&
+            if (!sender.hasPermission(getPerm()) &&
                     !args[0].equalsIgnoreCase("gamesinv")) {
                 sender.sendMessage("§cYou Don't have permissions to do this command");
                 return false;
@@ -133,7 +134,8 @@ public class BWACommand extends AbstractCommand {
 
     @Override
     public List<String> tabCompletion(String[] strings, CommandSender commandSender) {
-        if (!commandSender.hasPermission("misat11.bw.admin"))
+        if (!commandSender.hasPermission("misat11.bw.admin")
+            || !commandSender.hasPermission("bw.admin"))
             return null;
         if (strings.length == 1) {
             if (!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
