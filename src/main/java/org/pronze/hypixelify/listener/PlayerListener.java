@@ -18,7 +18,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -48,12 +48,12 @@ public class PlayerListener extends AbstractListener {
 
     public PlayerListener() {
         ShopUtil.initalizekeys();
-        partyEnabled = Hypixelify.getConfigurator().config.getBoolean("party.enabled", true);
-        giveKillerResources = Hypixelify.getConfigurator().config.getBoolean("give-killer-resources", true);
+        partyEnabled = SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true);
+        giveKillerResources = SBAHypixelify.getConfigurator().config.getBoolean("give-killer-resources", true);
         respawnCooldown = Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled");
         respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
-        disableArmorInventoryMovement = Hypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true);
-        disableArmorDamage = Hypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true);
+        disableArmorInventoryMovement = SBAHypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true);
+        disableArmorDamage = SBAHypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true);
     }
 
     @Override
@@ -68,7 +68,7 @@ public class PlayerListener extends AbstractListener {
     public void onPlayerLeave(PlayerQuitEvent e) {
         if (!partyEnabled) return;
         Player player = e.getPlayer();
-        final DatabaseManager dbManager = Hypixelify.getDatabaseManager();
+        final DatabaseManager dbManager = SBAHypixelify.getDatabaseManager();
         if (dbManager.getDatabase(player) == null) return;
 
         dbManager.handleOffline(player);
@@ -85,16 +85,16 @@ public class PlayerListener extends AbstractListener {
         if (game == null || game.getStatus() != GameStatus.RUNNING) return;
 
 
-        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
+        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
             new BukkitRunnable() {
                 public void run() {
-                    if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-                        if (Hypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
-                            Hypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                    if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
+                        if (SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
+                            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
                         }
                     }
                 }
-            }.runTaskLater(Hypixelify.getInstance(), 1L);
+            }.runTaskLater(SBAHypixelify.getInstance(), 1L);
         }
 
         List<ItemStack> itemArr = new ArrayList<>();
@@ -175,7 +175,7 @@ public class PlayerListener extends AbstractListener {
                         }
                     }
                 }
-            }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+            }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
         }
 
 
@@ -199,10 +199,10 @@ public class PlayerListener extends AbstractListener {
         Inventory topSlot = event.getView().getTopInventory();
         Inventory bottomSlot = event.getView().getBottomInventory();
         if (event.getClickedInventory() == null) return;
-        if (event.getClickedInventory().equals(bottomSlot) && Hypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
+        if (event.getClickedInventory().equals(bottomSlot) && SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
             if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                player.sendMessage("§c§l" + Hypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
+                player.sendMessage("§c§l" + SBAHypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
             }
         }
     }
@@ -242,13 +242,13 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
-        if (partyEnabled && Hypixelify.getDatabaseManager().getDatabase(p) == null)
-            Hypixelify.getDatabaseManager().createDatabase(p);
+        if (partyEnabled && SBAHypixelify.getDatabaseManager().getDatabase(p) == null)
+            SBAHypixelify.getDatabaseManager().createDatabase(p);
 
         if (!p.isOp())
             return;
 
-        if (!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
+        if (!Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("version")).contains(SBAHypixelify.getVersion())) {
             new BukkitRunnable() {
                 @Override
                 public void run() {
@@ -256,7 +256,7 @@ public class PlayerListener extends AbstractListener {
                     p.sendMessage("Type /bwaddon upgrade to upgrade file");
                     p.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
                 }
-            }.runTaskLater(Hypixelify.getInstance(), 40L);
+            }.runTaskLater(SBAHypixelify.getInstance(), 40L);
         }
     }
 

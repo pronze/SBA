@@ -2,12 +2,11 @@ package org.pronze.hypixelify.arena;
 
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.Hypixelify;
-import org.pronze.hypixelify.database.GameStorage;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.database.GamePlayerStats;
+import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
@@ -30,7 +29,7 @@ public class Arena {
 
 
     public Arena(Game game) {
-        radius = Math.pow(Hypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
+        radius = Math.pow(SBAHypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
         this.game = game;
         storage = new GameStorage(game);
         scoreBoard = new ScoreBoard(this);
@@ -74,8 +73,9 @@ public class Arena {
                 Team winner = e.getWinningTeam();
                 Map<String, Integer> dataKills = new HashMap<>();
                 for (Player player : e.getGame().getConnectedPlayers()) {
+                    final int currentKills = getCurrentPlayerStats(player).getKills();
                     dataKills.put(player.getDisplayName(),
-                            Main.getPlayerStatisticsManager().getStatistic(player).getKills());
+                            currentKills);
                 }
                 int kills_1 = 0;
                 int kills_2 = 0;
@@ -155,7 +155,6 @@ public class Arena {
     public GamePlayerStats getCurrentPlayerStats(Player player) {
         return playerStatsCurrentMap.get(player.getUniqueId());
     }
-
 
 
     public void onPlayerKilled(BedwarsPlayerKilledEvent e) {

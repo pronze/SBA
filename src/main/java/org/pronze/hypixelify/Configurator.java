@@ -25,11 +25,11 @@ public class Configurator {
     public static String date;
     public static boolean tag_health;
     public final File dataFolder;
-    public final Hypixelify main;
+    public final SBAHypixelify main;
     public File file, shopFile, upgradeShop, legacyShop, legacyUpgradeShop;
     public FileConfiguration config;
 
-    public Configurator(Hypixelify main) {
+    public Configurator(SBAHypixelify main) {
         this.dataFolder = main.getDataFolder();
         this.main = main;
     }
@@ -97,8 +97,9 @@ public class Configurator {
         checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
-        checkOrSetConfig(modify, "version", Hypixelify.getVersion());
+        checkOrSetConfig(modify, "version", SBAHypixelify.getVersion());
         checkOrSetConfig(modify, "autoset-bw-config", true);
+        checkOrSetConfig(modify, "upgrades.timer-upgrades-enabled", true);
         checkOrSetConfig(modify, "upgrades.trap-detection-range", 7);
         checkOrSetConfig(modify, "upgrades.multiplier", 0.25);
         checkOrSetConfig(modify, "upgrades.prices.Sharpness-Prot-I", 4);
@@ -480,7 +481,7 @@ public class Configurator {
             game_size.put(s, size);
         }
 
-        tag_health = Hypixelify.getConfigurator().config.getBoolean("tag_health");
+        tag_health = SBAHypixelify.getConfigurator().config.getBoolean("tag_health");
         overstats_message = LobbyScoreboard.listColor(config.getStringList("overstats.message"));
         gamestart_message = LobbyScoreboard.listColor(config.getStringList("game-start.message"));
 
@@ -501,7 +502,7 @@ public class Configurator {
 
     public void upgradeCustomFiles() {
 
-        config.set("version", Hypixelify.getVersion());
+        config.set("version", SBAHypixelify.getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
 

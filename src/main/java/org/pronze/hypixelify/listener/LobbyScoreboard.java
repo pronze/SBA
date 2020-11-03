@@ -7,10 +7,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -40,11 +39,11 @@ public class LobbyScoreboard extends AbstractListener {
 
     public LobbyScoreboard() {
         date = new SimpleDateFormat(Configurator.date).format(new Date());
-        List<String> lobby_scoreboard = Hypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
-        lobby_scoreboard_lines = Hypixelify.getConfigurator().getStringList("lobby_scoreboard.lines");
+        List<String> lobby_scoreboard = SBAHypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
+        lobby_scoreboard_lines = SBAHypixelify.getConfigurator().getStringList("lobby_scoreboard.lines");
 
-        countdown_message = format(Hypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
-        isEnabled = Hypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true);
+        countdown_message = format(SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
+        isEnabled = SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true);
         new BukkitRunnable() {
             int tc = 0;
 
@@ -57,7 +56,7 @@ public class LobbyScoreboard extends AbstractListener {
                 } else
                     cancel();
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
+        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
     }
 
     @EventHandler
@@ -77,7 +76,7 @@ public class LobbyScoreboard extends AbstractListener {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 2L);
+        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
     }
 
     private void updateScoreboard(Player player, Game game) {

@@ -1,7 +1,7 @@
 package org.pronze.hypixelify.commands;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -50,8 +50,8 @@ public class ShoutCommand extends AbstractCommand {
             return;
         }
 
-        final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
-        boolean cancelShout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0;
+        final PlayerDatabase playerDatabase = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        boolean cancelShout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0;
 
         if(!cancelShout && !hasPermission(player)) {
             if (!playerDatabase.canShout()) {

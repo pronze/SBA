@@ -3,7 +3,7 @@ package org.pronze.hypixelify.database;
 import com.google.common.base.Strings;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.message.Messages;
@@ -29,7 +29,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         this.player = player.getUniqueId();
         name = player.getDisplayName();
         pInstance = player;
-        shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
+        shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         init();
     }
 
@@ -48,11 +48,11 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                     shout--;
                     if (shout == 0) {
                         shouted = false;
-                        shout = Hypixelify.getConfigurator().config.getInt("shout.time-out", 60);
+                        shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
                         this.cancel();
                     }
                 }
-            }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+            }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
         }
     }
 
@@ -125,7 +125,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
             public void run() {
                 updateDatabase();
             }
-        }.runTaskLater(Hypixelify.getInstance(), 1L);
+        }.runTaskLater(SBAHypixelify.getInstance(), 1L);
     }
 
     @Override
@@ -221,12 +221,12 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     @Override
     public void updateDatabase() {
         if (!isInParty || !isPartyLeader()) return;
-        final PartyManager partyManager = Hypixelify.getPartyManager();
+        final PartyManager partyManager = SBAHypixelify.getPartyManager();
         final Party party = partyManager.getParty(partyLeader);
         if (party == null) return;
         if (party.shouldDisband()) {
             if (pInstance != null && pInstance.isOnline()) {
-                for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
+                for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
                     pInstance.sendMessage(ShopUtil.translateColors(st));
                 }
             }
@@ -250,7 +250,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     @Override
     public void setInvited(boolean bool) {
         isInvited = bool;
-        final PartyManager partyManager = Hypixelify.getPartyManager();
+        final PartyManager partyManager = SBAHypixelify.getPartyManager();
 
         if (bool) {
             new BukkitRunnable() {
@@ -270,15 +270,15 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 ShopUtil.sendMessage(pInstance, Messages.message_invite_expired);
                         }
                         setInvitedParty(null);
-                        Hypixelify.getDatabaseManager().updateAll();
+                        SBAHypixelify.getDatabaseManager().updateAll();
                         this.cancel();
                     } else if (!isInvited) {
-                        Hypixelify.getDatabaseManager().updateAll();
+                        SBAHypixelify.getDatabaseManager().updateAll();
                         expiredTime = 60;
                         this.cancel();
                     }
                 }
-            }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+            }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
         }
     }
 

@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.listener.PlayerListener;
 import org.screamingsandals.bedwars.Main;
@@ -16,7 +16,6 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
-import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 
@@ -32,8 +31,8 @@ public class ShopUtil {
         Arrow = new ItemStack(Material.ARROW);
         ItemMeta metaArrow = Arrow.getItemMeta();
 
-        metaArrow.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.back-item.name", "§aGo Back"));
-        List<String> arrowLore = Hypixelify.getConfigurator().config.getStringList("games-inventory.back-item.lore");
+        metaArrow.setDisplayName(SBAHypixelify.getConfigurator().config.getString("games-inventory.back-item.name", "§aGo Back"));
+        List<String> arrowLore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.back-item.lore");
         metaArrow.setLore(arrowLore);
         Arrow.setItemMeta(metaArrow);
 
@@ -47,12 +46,12 @@ public class ShopUtil {
         }
 
         ItemMeta fireMeta = FireWorks.getItemMeta();
-        fireMeta.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Map"));
+        fireMeta.setDisplayName(SBAHypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Map"));
         FireWorks.setItemMeta(fireMeta);
 
         Diamond = new ItemStack(Material.DIAMOND);
         ItemMeta diamondMeta = Diamond.getItemMeta();
-        diamondMeta.setDisplayName(Hypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Favorite"));
+        diamondMeta.setDisplayName(SBAHypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Favorite"));
         Diamond.setItemMeta(diamondMeta);
     }
 
@@ -69,7 +68,7 @@ public class ShopUtil {
         Material mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         ItemStack boots = new ItemStack(mat_boots);
         ItemStack leggings = new ItemStack(mat_leggings);
-        int level = Objects.requireNonNull(Hypixelify.getGameStorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
+        int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
         if(level != 0){
             boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
             leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
@@ -186,7 +185,7 @@ public class ShopUtil {
             PlayerListener.UpgradeKeys.put("GOLD", 3);
         }
 
-        for (String material : Hypixelify.getConfigurator().config.getStringList("allowed-item-drops")) {
+        for (String material : SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops")) {
             Material mat;
             try {
                 mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
@@ -195,7 +194,7 @@ public class ShopUtil {
             }
             PlayerListener.allowed.add(mat);
         }
-        for (String material : Hypixelify.getConfigurator().config.getStringList("running-generator-drops")) {
+        for (String material : SBAHypixelify.getConfigurator().config.getStringList("running-generator-drops")) {
             Material mat;
             try {
                 mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
@@ -267,7 +266,7 @@ public class ShopUtil {
                 .getGames()) {
             if (Configurator.game_size.containsKey(game.getName()) &&
                     Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
-                ItemStack temp = new ItemStack(Material.valueOf(Hypixelify.getConfigurator().config.getString("games-inventory.stack-material", "PAPER")));
+                ItemStack temp = new ItemStack(Material.valueOf(SBAHypixelify.getConfigurator().config.getString("games-inventory.stack-material", "PAPER")));
                 ItemMeta meta1 = temp.getItemMeta();
                 String name1 = "§a" + game.getName();
                 List<String> newLore = new ArrayList<>();
@@ -298,7 +297,7 @@ public class ShopUtil {
         ItemMeta fsMeta = fs.getItemMeta();
         String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(Objects.requireNonNull(getGamesWithSize(mode)).size());
 
-        List<String> fsMetaLore = Hypixelify.getConfigurator().config.getStringList("games-inventory.fireworks-lore");
+        List<String> fsMetaLore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.fireworks-lore");
         List<String> tempList = new ArrayList<>();
         for(String st : fsMetaLore){
             st = st
@@ -336,7 +335,7 @@ public class ShopUtil {
     }
 
     public static Options generateOptions() {
-        Options options = new Options(Hypixelify.getInstance());
+        Options options = new Options(SBAHypixelify.getInstance());
         options.setShowPageNumber(false);
 
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
@@ -390,20 +389,20 @@ public class ShopUtil {
         category.setItemMeta(meta);
 
         ItemMeta meta2 = category2.getItemMeta();
-        meta2.setLore(Hypixelify.getConfigurator().config.getStringList("games-inventory.oak_sign-lore"));
+        meta2.setLore(SBAHypixelify.getConfigurator().config.getStringList("games-inventory.oak_sign-lore"));
         meta2.setDisplayName(name2);
         category2.setItemMeta(meta2);
 
         ItemMeta meta3 = category3.getItemMeta();
-        String name3 = Hypixelify.getConfigurator().config.getString("games-inventory.barrier-name","§cExit");
+        String name3 = SBAHypixelify.getConfigurator().config.getString("games-inventory.barrier-name","§cExit");
         meta3.setDisplayName(name3);
         category3.setItemMeta(meta3);
 
         ItemMeta meta4 = category4.getItemMeta();
-        String name4 = Hypixelify.getConfigurator().config.getString("games-inventory.ender_pearl-name"
+        String name4 = SBAHypixelify.getConfigurator().config.getString("games-inventory.ender_pearl-name"
                 ,"§cClick here to rejoin!");
 
-        meta4.setLore(Hypixelify.getConfigurator().config.getStringList("games-inventory.ender_pearl-lore"));
+        meta4.setLore(SBAHypixelify.getConfigurator().config.getStringList("games-inventory.ender_pearl-lore"));
         meta4.setDisplayName(name4);
         category4.setItemMeta(meta4);
 
@@ -428,14 +427,14 @@ public class ShopUtil {
     }
 
     public static void upgradeSwordOnPurchase(Player player ,ItemStack newItem, Game game){
-        if (Hypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
+        if (SBAHypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
             for (ItemStack item : player.getInventory().getContents()) {
                 if (item != null && item.getType().name().endsWith("SWORD")) {
                         player.getInventory().remove(item);
                 }
             }
         }
-        int level = Objects.requireNonNull(Hypixelify.getGameStorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
+        int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
         if(level == 0) return;
         newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
     }
@@ -453,7 +452,7 @@ public class ShopUtil {
     }
 
     public static String ChatColorChanger(Player player){
-        final PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
         if(db.getLevel() > 100 || player.isOp()){
             return "§f";
         }
@@ -462,6 +461,9 @@ public class ShopUtil {
         }
     }
 
+    /*
+        TODO: what the hell is this
+     */
     public static boolean isABedwarsSpecialProperty(String property){
         if     (property.equalsIgnoreCase("arrowblocker")
                 || property.equalsIgnoreCase("autoigniteabletnt")

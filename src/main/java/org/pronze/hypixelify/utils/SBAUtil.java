@@ -5,13 +5,13 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import org.bukkit.entity.Player;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 
 public class SBAUtil {
 
     public static void removeScoreboardObjective(Player player){
-        if (Hypixelify.isProtocolLib() && player != null && player.isOnline()) {
-            ProtocolManager m = ProtocolLibrary.getProtocolManager();
+        if (SBAHypixelify.isProtocolLib() && player != null && player.isOnline()) {
+            final ProtocolManager m = ProtocolLibrary.getProtocolManager();
             try {
                 PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
                 packet.getIntegers().write(0, 1);

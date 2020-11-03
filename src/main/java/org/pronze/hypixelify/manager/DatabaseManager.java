@@ -3,19 +3,19 @@ package org.pronze.hypixelify.manager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.database.PlayerDatabase;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
 public class DatabaseManager {
-    private HashMap<UUID, PlayerDatabase> playerData;
+    private final Map<UUID, PlayerDatabase> playerData = new HashMap<>();
 
     public DatabaseManager() {
-        playerData = new HashMap<>();
+        Bukkit.getOnlinePlayers().forEach(this::createDatabase);
     }
 
     public void createDatabase(Player player) {
@@ -29,7 +29,7 @@ public class DatabaseManager {
 
     public void handleOffline(Player player) {
         if (!playerData.containsKey(player.getUniqueId())) return;
-        final PartyManager partyManager = Hypixelify.getPartyManager();
+        final PartyManager partyManager = SBAHypixelify.getPartyManager();
         final PlayerDatabase playerDatabase = getDatabase(player);
 
         if(playerDatabase == null ) return;
@@ -47,7 +47,7 @@ public class DatabaseManager {
                         if (playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null) {
                             partyManager.databaseDeletionFromParty(player, playerDatabase.getPartyLeader());
                         }
-                        Hypixelify.debug("Deleted database of: " + player.getName());
+                        SBAHypixelify.debug("Deleted database of: " + player.getName());
                         deleteDatabase(player);
                         updateAll();
                         cancel();
@@ -57,14 +57,13 @@ public class DatabaseManager {
                     cancel();
                 }
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 20L);
+        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
     }
 
 
 
     public void destroy() {
         playerData.clear();
-        playerData = null;
     }
 
     public org.pronze.hypixelify.database.PlayerDatabase getDatabase(Player player) {
@@ -73,7 +72,7 @@ public class DatabaseManager {
 
 
     public void updateAll() {
-        if (playerData == null || playerData.isEmpty()) return;
+        if (playerData.isEmpty()) return;
 
         for (PlayerDatabase db : playerData.values()) {
             if (db == null) continue;

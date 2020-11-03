@@ -5,7 +5,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.utils.SBAUtil;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
@@ -30,19 +30,19 @@ public class BedwarsListener extends AbstractListener {
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
         final Game game = e.getGame();
-        Map<Player, Scoreboard> scoreboards = ScoreboardUtil.getScoreboards();
+        final Map<Player, Scoreboard> scoreboards = ScoreboardUtil.getScoreboards();
         for (Player player : game.getConnectedPlayers()) {
             if (scoreboards.containsKey(player))
                 ScoreboardUtil.removePlayer(player);
         }
         Arena arena = new Arena(game);
-        Hypixelify.getArenaManager().addArena(game.getName(), arena);
+        SBAHypixelify.getArenaManager().addArena(game.getName(), arena);
         new BukkitRunnable() {
             public void run() {
                 if(arena.getScoreBoard() != null)
                     arena.getScoreBoard().updateScoreboard();
             }
-        }.runTaskLater(Hypixelify.getInstance(), 2L);
+        }.runTaskLater(SBAHypixelify.getInstance(), 2L);
 
         arena.onGameStarted(e);
     }
@@ -50,17 +50,17 @@ public class BedwarsListener extends AbstractListener {
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final Game game = e.getGame();
-        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-            Hypixelify.getArenaManager().getArenas().get(game.getName()).onTargetBlockDestroyed(e);
+        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
+            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).onTargetBlockDestroyed(e);
             new BukkitRunnable() {
                 public void run() {
-                    if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-                        if (Hypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
-                            Hypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+                    if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
+                        if (SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
+                            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
                         }
                     }
                 }
-            }.runTaskLater(Hypixelify.getInstance(), 1L);
+            }.runTaskLater(SBAHypixelify.getInstance(), 1L);
         }
     }
 
@@ -68,14 +68,14 @@ public class BedwarsListener extends AbstractListener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onEnd(BedwarsGameEndEvent e) {
         Game game = e.getGame();
-        Hypixelify.getArenaManager().removeArena(game.getName());
+        SBAHypixelify.getArenaManager().removeArena(game.getName());
     }
 
     @EventHandler
     public void onOver(BedwarsPlayerKilledEvent e) {
         Game game = e.getGame();
-        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName()))
-            Hypixelify.getArenaManager().getArenas().get(game.getName()).onPlayerKilled(e);
+        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName()))
+            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).onPlayerKilled(e);
     }
 
 
@@ -83,8 +83,8 @@ public class BedwarsListener extends AbstractListener {
     @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
         Game game = e.getGame();
-        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName()))
-            Hypixelify.getArenaManager().getArenas().get(game.getName()).onOver(e);
+        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName()))
+            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).onOver(e);
     }
 
 
@@ -122,7 +122,7 @@ public class BedwarsListener extends AbstractListener {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 40L, 20L);
+        }.runTaskTimer(SBAHypixelify.getInstance(), 40L, 20L);
     }
 
 
@@ -133,9 +133,9 @@ public class BedwarsListener extends AbstractListener {
         SBAUtil.removeScoreboardObjective(player);
         Game game = e.getGame();
         if (game.getStatus() != GameStatus.RUNNING) return;
-        if (Hypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-            if (Hypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
-                Hypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
+            if (SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
+                SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
             }
         }
 

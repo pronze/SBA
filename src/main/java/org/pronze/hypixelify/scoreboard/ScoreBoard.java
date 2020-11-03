@@ -6,7 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Configurator;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.database.GamePlayerStats;
 import org.pronze.hypixelify.message.Messages;
@@ -26,15 +26,15 @@ public class ScoreBoard {
     private final Game game;
     private final Arena arena;
     private final String date;
-    private final Map<String, String> teamstatus;
+    private final Map<String, String> teamstatus = new HashMap<>();
     private int ticks = 0;
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
         date = new SimpleDateFormat(Configurator.date).format(new Date());
 
-        game = (Game)arena.getGame();
-        teamstatus = new HashMap<>();
+        game = (Game) arena.getGame();
+
         new BukkitRunnable() {
             public void run() {
                 if (game.getStatus() == GameStatus.RUNNING) {
@@ -46,7 +46,7 @@ public class ScoreBoard {
                     cancel();
                 }
             }
-        }.runTaskTimer(Hypixelify.getInstance(), 0L, 5L);
+        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 5L);
     }
 
     public void updateCustomObj() {

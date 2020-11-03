@@ -2,7 +2,7 @@ package org.pronze.hypixelify.manager;
 
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.commands.AbstractCommand;
 import org.pronze.hypixelify.commands.BWACommand;
 import org.pronze.hypixelify.commands.PartyCommand;
@@ -17,7 +17,7 @@ public class CommandManager {
 
     public CommandManager(){
         commands.add(new BWACommand());
-        if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
+        if (SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
             commands.add(new PartyCommand());
             commands.add(new ShoutCommand());
         }
@@ -30,7 +30,7 @@ public class CommandManager {
         for(AbstractCommand command : commands){
             PluginCommand pluginCommand = plugin.getCommand(command.getCommandName());
             if(pluginCommand == null){
-                Hypixelify.debug("Command: " + command.getCommandName() + " failed to register");
+                SBAHypixelify.debug("Command: " + command.getCommandName() + " failed to register");
                 continue;
             }
             pluginCommand.setExecutor(command);

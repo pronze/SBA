@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -111,7 +111,7 @@ public class ScoreboardUtil {
     }
 
     public static void updateCustomObjective(Player p, Game game) {
-        if (!Hypixelify.isProtocolLib()) return;
+        if (!SBAHypixelify.isProtocolLib()) return;
 
         ProtocolManager m = ProtocolLibrary.getProtocolManager();
         if (!player_health.containsKey(p))
@@ -168,7 +168,7 @@ public class ScoreboardUtil {
                             team.addEntry(pl.getName());
                     }
                 }
-                if (Hypixelify.isProtocolLib()) {
+                if (SBAHypixelify.isProtocolLib()) {
                     ProtocolManager m = ProtocolLibrary.getProtocolManager();
                     //TAB HEALTH
                     try {

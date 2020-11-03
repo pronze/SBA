@@ -2,6 +2,7 @@ package org.pronze.hypixelify.listener;
 
 import com.google.common.base.Strings;
 import me.clip.placeholderapi.PlaceholderAPI;
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -12,10 +13,9 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Scoreboard;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
@@ -28,108 +28,106 @@ import java.util.Objects;
 
 public class LobbyBoard extends AbstractListener {
 
-    public static List<Player> players;
     private static Location location;
+    private final List<Player> players = new ArrayList<>();
     private final List<String> board_body;
     private final boolean lobbyChatOverride;
 
-    public static boolean isInWorld(Location loc){
-        return loc.getWorld().equals(location.getWorld());
-    }
-
     public LobbyBoard() {
-        players = new ArrayList<>();
-        board_body = Hypixelify.getConfigurator().config.getStringList("main-lobby.lines");
-        lobbyChatOverride = Hypixelify.getConfigurator().config.getBoolean("main-lobby.custom-chat", true);
+        board_body = SBAHypixelify.getConfigurator().config.getStringList("main-lobby.lines");
+        lobbyChatOverride = SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.custom-chat", true);
 
 
         try {
-            location = new Location(Bukkit.getWorld(Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("main-lobby.world"))),
-                    Hypixelify.getConfigurator().config.getDouble("main-lobby.x"),
-                    Hypixelify.getConfigurator().config.getDouble("main-lobby.y"),
-                    Hypixelify.getConfigurator().config.getDouble("main-lobby.z"),
-                    (float) Hypixelify.getConfigurator().config.getDouble("main-lobby.yaw"),
-                    (float) Hypixelify.getConfigurator().config.getDouble("main-lobby.pitch")
+            location = new Location(Bukkit.getWorld(Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("main-lobby.world"))),
+                    SBAHypixelify.getConfigurator().config.getDouble("main-lobby.x"),
+                    SBAHypixelify.getConfigurator().config.getDouble("main-lobby.y"),
+                    SBAHypixelify.getConfigurator().config.getDouble("main-lobby.z"),
+                    (float) SBAHypixelify.getConfigurator().config.getDouble("main-lobby.yaw"),
+                    (float) SBAHypixelify.getConfigurator().config.getDouble("main-lobby.pitch")
             );
         } catch (Exception e) {
             e.printStackTrace();
-            if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
-                Hypixelify.getConfigurator().config.set("main-lobby.enabled", false);
-                Hypixelify.getConfigurator().saveConfig();
+            if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)) {
+                SBAHypixelify.getConfigurator().config.set("main-lobby.enabled", false);
+                SBAHypixelify.getConfigurator().saveConfig();
                 onDisable();
+                Bukkit.getServer().getLogger().warning("Could not find lobby world!");
                 return;
             }
         }
 
-        if(!Bukkit.getOnlinePlayers().isEmpty()) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (player == null || !player.isOnline()) continue;
 
-                        if(player.getWorld().getName().equalsIgnoreCase(location.getWorld().getName())){
-                            createBoard(player);
-                        }
-                    }
-                }
-            }.runTaskLater(Hypixelify.getInstance(), 40L);
+        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(),
+                () -> Bukkit.getOnlinePlayers().forEach(this::createBoard), 3L);
+
+    }
+
+    public static boolean isInWorld(Location loc) {
+        try {
+            return loc.getWorld().equals(location.getWorld());
+        } catch (Throwable e) {
+            return false;
         }
+    }
 
+    public static boolean hasMainLobbyObjective(Player player) {
+        return player.getScoreboard().getObjective("bwa-mainlobby") != null;
     }
 
     @EventHandler
-    public void onChat(AsyncPlayerChatEvent e){
-        if(!lobbyChatOverride) return;
+    public void onChat(AsyncPlayerChatEvent e) {
+        if (!lobbyChatOverride) return;
         Player player = e.getPlayer();
-        PlayerDatabase db = Hypixelify.getDatabaseManager().getDatabase(player);
+        PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
 
-        if(Hypixelify.LobbyBoardEnabled() && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
-            e.setFormat(Messages.lobby_chat_format
-                    .replace("{level}", String.valueOf(db.getLevel()))
-                    .replace("{name}", e.getPlayer().getName())
-                    .replace("{message}", e.getMessage())
-                    .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer())));
+        if (SBAHypixelify.LobbyBoardEnabled() && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
+            if (Messages.lobby_chat_format != null) {
+                e.setFormat(Messages.lobby_chat_format
+                        .replace("{level}", String.valueOf(db.getLevel()))
+                        .replace("{name}", e.getPlayer().getName())
+                        .replace("{message}", e.getMessage())
+                        .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer())));
+            }
         }
     }
+
     @Override
     public void onDisable() {
-        if(players != null) {
-            for (Player player : players) {
-                if (player == null || !player.isOnline()) continue;
-                if (player.getScoreboard().getObjective("bwa-mainlobby") != null) {
-                    player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+        players.forEach(pl -> {
+            try {
+                if (pl.getScoreboard().getObjective("bwa-mainlobby") != null) {
+                    pl.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            players.clear();
-            players = null;
-        }
+        });
+
+        players.clear();
         HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerJoin(PlayerJoinEvent e){
-        Player player = e.getPlayer();
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        final Player player = e.getPlayer();
 
-      new BukkitRunnable(){
-            @Override
-            public void run() {
-                if(player.getScoreboard().getObjective("bwa-mainlobby") != null) return;
+        Bukkit.getServer().getScheduler().runTask(SBAHypixelify.getInstance(),
+                () -> {
+                    if (hasMainLobbyObjective(player)) return;
 
-                if(player.getWorld().getName().equalsIgnoreCase(location.getWorld().getName())
-                && !isInGame(player)) {
-                    createBoard(player);
-                }
-            }
-        }.runTaskLater(Hypixelify.getInstance(), 20L);
+                    if (isInWorld(player.getLocation()) && !isInGame(player)) {
+                        createBoard(player);
+                    }
+                });
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
-        if (!player.getWorld().getName().equals(location.getWorld().getName())) {
-            if(players != null)
-                players.remove(player);
+
+        if (!isInWorld(player.getLocation())) {
+            players.remove(player);
             if (player.getScoreboard() == null) return;
 
             if (player.getScoreboard().getObjective("bwa-mainlobby") != null) {
@@ -143,22 +141,22 @@ public class LobbyBoard extends AbstractListener {
     }
 
     @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent e){
-        if(players == null) return;
+    public void onPlayerLeave(PlayerQuitEvent e) {
         players.remove(e.getPlayer());
     }
 
 
     public void createBoard(Player player) {
-        if(players == null) {
+        if (players.contains(player)) return;
+
+
+        final PlayerDatabase playerData = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        if (playerData == null) {
+            SBAHypixelify.debug("Player data of player: " + player.getDisplayName() + " is null," +
+                    "skipping scoreboard creation");
             return;
         }
-        if(players.contains(player)) return;
 
-        if(Hypixelify.getDatabaseManager().getDatabase(player) == null) return;
-
-        final PlayerDatabase  playerData = Hypixelify.getDatabaseManager().getDatabase(player);
-        if(playerData == null) return;
 
         Scoreboard scoreboard = player.getScoreboard();
 
@@ -167,12 +165,12 @@ public class LobbyBoard extends AbstractListener {
 
         String progress = null;
         try {
-             int p = playerData.getIntegerProgress();
-             if(p < 0)
-                 progress = "§b0§7/§a500";
-             else
-                 progress = playerData.getProgress();
-        } catch (NumberFormatException e){
+            int p = playerData.getIntegerProgress();
+            if (p < 0)
+                progress = "§b0§7/§a500";
+            else
+                progress = playerData.getProgress();
+        } catch (NumberFormatException e) {
             e.printStackTrace();
         }
 
@@ -187,14 +185,14 @@ public class LobbyBoard extends AbstractListener {
             Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;
             for (String s : board_body) {
-                if(i == 0) break;
+                if (i == 0) break;
                 try {
-                    if (Hypixelify.isPapiEnabled())
+                    if (SBAHypixelify.isPapiEnabled())
                         s = PlaceholderAPI.setPlaceholders(player, s);
                 } catch (Exception ignored) {
 
                 }
-                if (s == "" || s == " " || s.isEmpty())
+                if (StringUtils.isEmpty(s))
                     s = Strings.repeat(" ", i);
 
 
@@ -202,7 +200,7 @@ public class LobbyBoard extends AbstractListener {
                         .replace("{kills}", String.valueOf(playerData.getKills()))
                         .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))
                         .replace("{deaths}", String.valueOf(playerData.getDeaths()))
-                        .replace("{level}", "§7" + playerData.getLevel()+ "✫")
+                        .replace("{level}", "§7" + playerData.getLevel() + "✫")
                         .replace("{progress}", progress)
                         .replace("{bar}", bar)
                         .replace("{wins}", String.valueOf(playerData.getWins()))
@@ -218,13 +216,9 @@ public class LobbyBoard extends AbstractListener {
     }
 
     @EventHandler
-    public void onBedwarsPlayerJoin(BedwarsPlayerJoinedEvent e){
-        Player player = e.getPlayer();
-        if(players != null && player != null)
-            players.remove(player);
+    public void onBedWarsPlayerJoin(BedwarsPlayerJoinedEvent e) {
+        players.remove(e.getPlayer());
     }
-
-
 
 
 }

@@ -2,7 +2,7 @@ package org.pronze.hypixelify.party;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.utils.ShopUtil;
 
 import java.util.ArrayList;
@@ -72,8 +72,8 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
    public void addInvitedMember(Player pl) {
        if (!invitedMembers.contains(pl)) {
            invitedMembers.add(pl);
-           Hypixelify.getDatabaseManager().getDatabase(pl).setInvitedParty(this);
-           Hypixelify.getDatabaseManager().getDatabase(pl).setInvited(true);
+           SBAHypixelify.getDatabaseManager().getDatabase(pl).setInvitedParty(this);
+           SBAHypixelify.getDatabaseManager().getDatabase(pl).setInvited(true);
        }
    }
 
@@ -120,7 +120,7 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
         if (player.equals(leader)) {
             for (Player pl : players) {
                 if (Bukkit.getPlayer(pl.getUniqueId()) != null && !pl.equals(leader)) {
-                    for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
+                    for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
                         pl.sendMessage(ShopUtil.translateColors(st));
                     }
                 }

@@ -1,6 +1,6 @@
 package org.pronze.hypixelify.message;
 
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 
 import java.util.List;
 
@@ -60,15 +60,15 @@ public class Messages {
     }
 
     public String fetchString(String toFetch) {
-        return Hypixelify.getConfigurator().config.getString(toFetch);
+        return SBAHypixelify.getConfigurator().config.getString(toFetch);
     }
 
     public String fetchString(String toFetch, String def) {
-        return Hypixelify.getConfigurator().config.getString(toFetch, def);
+        return SBAHypixelify.getConfigurator().config.getString(toFetch, def);
     }
 
     public List<String> fetchStringList(String toFetch) {
-        return Hypixelify.getConfigurator().config.getStringList(toFetch);
+        return SBAHypixelify.getConfigurator().config.getStringList(toFetch);
     }
 
     public void loadConfig() {

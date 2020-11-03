@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.screamingsandals.bedwars.Main;
 
 import java.util.ArrayList;
@@ -51,19 +51,19 @@ public class BWACommand extends AbstractCommand {
             Player player = (Player) sender;
             Location location = player.getLocation();
 
-            Hypixelify.getConfigurator().config.set("main-lobby.enabled", true);
-            Hypixelify.getConfigurator().config.set("main-lobby.world", location.getWorld().getName());
-            Hypixelify.getConfigurator().config.set("main-lobby.x", location.getX());
-            Hypixelify.getConfigurator().config.set("main-lobby.y", location.getY());
-            Hypixelify.getConfigurator().config.set("main-lobby.z", location.getZ());
-            Hypixelify.getConfigurator().config.set("main-lobby.yaw", location.getYaw());
-            Hypixelify.getConfigurator().config.set("main-lobby.pitch", location.getPitch());
-            Hypixelify.getConfigurator().saveConfig();
+            SBAHypixelify.getConfigurator().config.set("main-lobby.enabled", true);
+            SBAHypixelify.getConfigurator().config.set("main-lobby.world", location.getWorld().getName());
+            SBAHypixelify.getConfigurator().config.set("main-lobby.x", location.getX());
+            SBAHypixelify.getConfigurator().config.set("main-lobby.y", location.getY());
+            SBAHypixelify.getConfigurator().config.set("main-lobby.z", location.getZ());
+            SBAHypixelify.getConfigurator().config.set("main-lobby.yaw", location.getYaw());
+            SBAHypixelify.getConfigurator().config.set("main-lobby.pitch", location.getPitch());
+            SBAHypixelify.getConfigurator().saveConfig();
             player.sendMessage("Sucessfully set Lobby location!");
         } else if (args[0].equalsIgnoreCase("reset")) {
             sender.sendMessage("Resetting...");
             try {
-                Hypixelify.getConfigurator().upgradeCustomFiles();
+                SBAHypixelify.getConfigurator().upgradeCustomFiles();
                 sender.sendMessage("Sucessfully resetted");
             } catch (Exception e) {
                 e.printStackTrace();
@@ -74,7 +74,7 @@ public class BWACommand extends AbstractCommand {
                 return;
             }
 
-            if (!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled")) {
+            if (!SBAHypixelify.getConfigurator().config.getBoolean("games-inventory.enabled")) {
                 sender.sendMessage("§cGames inventory has been disabled, Contact the server owner to enable it.");
                 return;
             }
@@ -85,13 +85,13 @@ public class BWACommand extends AbstractCommand {
 
             Player player = (Player) sender;
             if (args[1].equalsIgnoreCase("solo")) {
-                Hypixelify.getGamesInventory().openForPlayer(player, 1);
+                SBAHypixelify.getGamesInventory().openForPlayer(player, 1);
             } else if (args[1].equalsIgnoreCase("double")) {
-                Hypixelify.getGamesInventory().openForPlayer(player, 2);
+                SBAHypixelify.getGamesInventory().openForPlayer(player, 2);
             } else if (args[1].equalsIgnoreCase("triple")) {
-                Hypixelify.getGamesInventory().openForPlayer(player, 3);
+                SBAHypixelify.getGamesInventory().openForPlayer(player, 3);
             } else if (args[1].equalsIgnoreCase("squad")) {
-                Hypixelify.getGamesInventory().openForPlayer(player, 4);
+                SBAHypixelify.getGamesInventory().openForPlayer(player, 4);
             } else {
                 sender.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
             }
@@ -100,19 +100,19 @@ public class BWACommand extends AbstractCommand {
 
 
         //Show the upgrade files command on update
-        else if (Hypixelify.isUpgraded()) {
+        else if (SBAHypixelify.isUpgraded()) {
 
             if (args[0].equalsIgnoreCase("upgrade")) {
                 try {
-                    Hypixelify.getConfigurator().upgradeCustomFiles();
+                    SBAHypixelify.getConfigurator().upgradeCustomFiles();
                     sender.sendMessage("[SBAHypixelify]: " + "§6Sucessfully upgraded files!");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
             } else if (args[0].equalsIgnoreCase("cancel")) {
-                Hypixelify.getConfigurator().config.set("version", Hypixelify.getVersion());
-                Hypixelify.getConfigurator().saveConfig();
+                SBAHypixelify.getConfigurator().config.set("version", SBAHypixelify.getVersion());
+                SBAHypixelify.getConfigurator().saveConfig();
                 sender.sendMessage("[SBAHypixelify]: Cancelled shop and upgradeShop changes");
             }
         } else {
@@ -138,7 +138,7 @@ public class BWACommand extends AbstractCommand {
             || !commandSender.hasPermission("bw.admin"))
             return null;
         if (strings.length == 1) {
-            if (!Objects.requireNonNull(Hypixelify.getConfigurator().config.getString("version")).contains(Hypixelify.getVersion())) {
+            if (!Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("version")).contains(SBAHypixelify.getVersion())) {
                 return Arrays.asList("cancel", "upgrade");
             }
             List<String> Commands = new ArrayList<>();
@@ -148,15 +148,15 @@ public class BWACommand extends AbstractCommand {
             Commands.add("clearnpc");
             Commands.add("gamesinv");
             Commands.add("setlobby");
-            if (!Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
+            if (!SBAHypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
                 Commands.remove("gamesinv");
-            if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
+            if (!SBAHypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
                 Commands.remove("clearnpc");
 
             return Commands;
         }
         if (strings.length == 2 && strings[0].equalsIgnoreCase("gamesinv")) {
-            if (!Hypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
+            if (!SBAHypixelify.getConfigurator().config.getBoolean("citizens-shop", true))
                 return null;
             return Arrays.asList("solo", "double", "triple", "squad");
         }

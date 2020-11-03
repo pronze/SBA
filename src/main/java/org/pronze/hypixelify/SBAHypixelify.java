@@ -19,9 +19,9 @@ import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 
 import java.util.Objects;
 
-public class Hypixelify extends JavaPlugin implements Listener {
+public class SBAHypixelify extends JavaPlugin implements Listener {
 
-    private static Hypixelify plugin;
+    private static SBAHypixelify plugin;
     public boolean papiEnabled;
     private CustomShop shop;
     private String version;
@@ -62,7 +62,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
         return plugin.partyManager;
     }
 
-    public static Hypixelify getInstance() {
+    public static SBAHypixelify getInstance() {
         return plugin;
     }
 
@@ -88,7 +88,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     public static boolean isUpgraded() {
         return !Objects.requireNonNull(getConfigurator()
-                .config.getString("version")).contains(Hypixelify.getVersion());
+                .config.getString("version")).contains(SBAHypixelify.getVersion());
     }
 
     public static void debug(String message) {
@@ -96,8 +96,16 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getLogger().info("§c[DEBUG]: §f" + message);
     }
 
-    public static boolean isPartyEnabled(){
-        return plugin.partyEnabled;
+    public static void checkForUpdates() {
+        if (!Main.isLegacy()) {
+            new UpdateChecker(plugin, 79505).getVersion(version -> {
+                if (plugin.getDescription().getVersion().contains(version)) {
+                    Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
+                } else {
+                    Bukkit.getLogger().info("§e§l[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
+                }
+            });
+        }
     }
 
     @Override
@@ -106,50 +114,20 @@ public class Hypixelify extends JavaPlugin implements Listener {
         version = this.getDescription().getVersion();
         arenaManager = new ArenaManager();
 
-        if (!Main.isLegacy()) {
-            new UpdateChecker(this, 79505).getVersion(version -> {
-                if (this.getDescription().getVersion().contains(version)) {
-                    Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
-                } else {
-                    Bukkit.getLogger().info("§e§l[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
-                }
-            });
-        }
+        checkForUpdates();
 
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
         partyEnabled = configurator.config.getBoolean("party.enabled", true);
         debug = configurator.config.getBoolean("debug.enabled", false);
-        mainLobby = Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false);
-        boolean isLegacy = Main.isLegacy();
+        mainLobby = SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false);
         isProtocolLib = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 
-        Bukkit.getLogger().info("");
-        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        Bukkit.getLogger().info("<  _____ ______   ___   _   _                _             _  _   __                              >");
-        Bukkit.getLogger().info("< /  ___|| ___ \\ / _ \\ | | | |              (_)           | |(_) / _|                             >");
-        Bukkit.getLogger().info("< \\ `--. | |_/ // /_\\ \\| |_| | _   _  _ __   _ __  __ ___ | | _ | |_  _   _                       >");
-        Bukkit.getLogger().info("<  `--. \\| ___ \\|  _  ||  _  || | | || '_ \\ | |\\ \\/ // _ \\| || ||  _|| | | |                      >");
-        Bukkit.getLogger().info("< /\\__/ /| |_/ /| | | || | | || |_| || |_) || | >  <|  __/| || || |  | |_| |                      > ");
-        Bukkit.getLogger().info("< \\____/ \\____/ \\_| |_/\\_| |_/ \\__, || .__/ |_|/_/\\_\\____||_||_||_|  \\__,  |                      >");
-        Bukkit.getLogger().info("<                               __/ || |                               __/ |                      >");
-        Bukkit.getLogger().info("<                              |___/ |_|                              |___/                       >");
-        Bukkit.getLogger().info("<  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______ >");
-        Bukkit.getLogger().info("< |______||______||______||______||______||______||______||______||______||______||______||______|>");
-        Bukkit.getLogger().info("<  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______  ______ >");
-        Bukkit.getLogger().info("< |______||______||______||______||______||______||______||______||______||______||______||______|>");
-        Bukkit.getLogger().info("<                                                                                                 >");
-        Bukkit.getLogger().info("< Status: §fEnabled                                                                                 >");
-        Bukkit.getLogger().info("< Version: §f{Version}                                                                                  >".replace("{Version}", this.getDescription().getVersion()));
-        Bukkit.getLogger().info("< Build: §6Stable                                                                               §7    >");
-        Bukkit.getLogger().info("< Legacy Support: §atrue§7                                                                            >"
-                .replace("true", String.valueOf(isLegacy)));
-        Bukkit.getLogger().info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        Bukkit.getLogger().info("");
 
         listenerManager = new ListenerManager();
         listenerManager.registerAll(this);
+
         messages = new Messages();
         messages.loadConfig();
 
@@ -157,19 +135,11 @@ public class Hypixelify extends JavaPlugin implements Listener {
         shop = new CustomShop();
 
 
-        if (Hypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
+        if (SBAHypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
 
         if (databaseManager == null)
             databaseManager = new DatabaseManager();
-
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            if (player == null) continue;
-            if (databaseManager.getDatabase(player) == null) {
-                databaseManager.createDatabase(player);
-            }
-        }
-
 
         if (configurator.config.getBoolean("party.enabled", true)) {
             partyManager = new PartyManager();
@@ -180,7 +150,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
 
         if (!Objects.requireNonNull(configurator.config.getString("version")).contains(version)) {
-            Bukkit.getLogger().info("§a[SBAHypixelify]: Addon has been updated, join the server to make changes");
+            getLogger().info("§a[SBAHypixelify]: Addon has been updated, join the server to make changes");
         }
 
         //Do changes for legacy support.
@@ -191,9 +161,13 @@ public class Hypixelify extends JavaPlugin implements Listener {
         Bukkit.getPluginManager().registerEvents(this, this);
         commandManager = new CommandManager();
         commandManager.registerAll(this);
+
+
+        getLogger().info("[SBAHypixelify]: Plugin has loaded");
+
     }
 
-    public void changeBedWarsConfig(){
+    public void changeBedWarsConfig() {
         //Do changes for legacy support.
         if (Main.isLegacy()) {
             boolean doneChanges = false;
@@ -226,7 +200,7 @@ public class Hypixelify extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
-        if (Hypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()) {
+        if (SBAHypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()) {
             for (Player pl : Bukkit.getOnlinePlayers()) {
                 if (pl != null && pl.isOnline()) {
                     SBAUtil.removeScoreboardObjective(pl);
@@ -234,34 +208,17 @@ public class Hypixelify extends JavaPlugin implements Listener {
             }
         }
 
-        if (Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
-            Bukkit.getLogger().info("[SBAHypixelify]: Shutting down party tasks...");
-            if (partyManager != null && partyManager.parties != null) {
-                partyManager.parties.clear();
-                partyManager.parties = null;
-                partyManager = null;
-            }
-
-            if (databaseManager != null) {
-                databaseManager.destroy();
-                databaseManager = null;
-            }
-        }
-
         Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");
         if (listenerManager != null)
             listenerManager.unregisterAll();
-        listenerManager = null;
+
         Bukkit.getLogger().info("[SBAHypixelify]: Cancelling current tasks....");
-        configurator = null;
         messages = null;
         arenaManager = null;
         if (gamesInventory != null)
             gamesInventory.destroy();
 
-        gamesInventory = null;
-        shop = null;
-        messages = null;
+        shop.destroy();
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
         if (plugin.isEnabled()) {
@@ -273,8 +230,8 @@ public class Hypixelify extends JavaPlugin implements Listener {
     public void onBwReload(PluginEnableEvent event) {
         String plugin = event.getPlugin().getName();
         if (plugin.equalsIgnoreCase("BedWars")) {
-            Bukkit.getServer().getPluginManager().disablePlugin(Hypixelify.getInstance());
-            Bukkit.getServer().getPluginManager().enablePlugin(Hypixelify.getInstance());
+            Bukkit.getServer().getPluginManager().disablePlugin(SBAHypixelify.getInstance());
+            Bukkit.getServer().getPluginManager().enablePlugin(SBAHypixelify.getInstance());
         }
     }
 

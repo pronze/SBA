@@ -3,7 +3,7 @@ package org.pronze.hypixelify.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
@@ -22,7 +22,7 @@ public class PartyCommand extends AbstractCommand {
 
     @Override
     public boolean onPreExecute(CommandSender sender, String[] args) {
-        if (!Hypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
+        if (!SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
             sender.sendMessage("§cCannot access command, party system is disabled.");
             return false;
         }
@@ -43,9 +43,9 @@ public class PartyCommand extends AbstractCommand {
             return;
         }
 
-        final DatabaseManager databaseManager = Hypixelify.getDatabaseManager();
+        final DatabaseManager databaseManager = SBAHypixelify.getDatabaseManager();
         PlayerDatabase playerDatabase = databaseManager.getDatabase(player);
-        final PartyManager partyManager = Hypixelify.getPartyManager();
+        final PartyManager partyManager = SBAHypixelify.getPartyManager();
 
 
         if (playerDatabase != null && playerDatabase.isInParty()
@@ -62,7 +62,7 @@ public class PartyCommand extends AbstractCommand {
             }
 
             //Party size limit
-            int max_sz = Hypixelify.getConfigurator().config.getInt("party.size", 4);
+            int max_sz = SBAHypixelify.getConfigurator().config.getInt("party.size", 4);
             if (playerDatabase != null &&
                     playerDatabase.isInParty() &&
                     partyManager.getParty(playerDatabase.getPartyLeader()) != null &&
@@ -86,7 +86,7 @@ public class PartyCommand extends AbstractCommand {
             }
 
             if (playerDatabase == null)
-                Hypixelify.getDatabaseManager().createDatabase(player);
+                SBAHypixelify.getDatabaseManager().createDatabase(player);
 
             PlayerDatabase invitedData = databaseManager.getDatabase(invited);
             if (invitedData == null)
@@ -121,10 +121,10 @@ public class PartyCommand extends AbstractCommand {
 
             if (party.canAnyoneInvite() || player.equals(party.getLeader())) {
                 partyManager.getParty(party.getLeader()).addInvitedMember(invited);
-                for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.invite")) {
+                for (String message : SBAHypixelify.getConfigurator().config.getStringList("party.message.invite")) {
                     invited.sendMessage(ShopUtil.translateColors(message).replace("{player}", player.getDisplayName()));
                 }
-                for (String message : Hypixelify.getConfigurator().config.getStringList("party.message.invited")) {
+                for (String message : SBAHypixelify.getConfigurator().config.getStringList("party.message.invited")) {
                     player.sendMessage(ShopUtil.translateColors(message).replace("{player}", invited.getDisplayName()));
                 }
                 return ;
@@ -266,7 +266,7 @@ public class PartyCommand extends AbstractCommand {
             }
 
             if (invited.equals(player)) {
-                for (String str : Hypixelify.getConfigurator().config.getStringList("party.message.cannot-blank-yourself")) {
+                for (String str : SBAHypixelify.getConfigurator().config.getStringList("party.message.cannot-blank-yourself")) {
                     player.sendMessage(ShopUtil.translateColors(str).replace("{blank}", "kick"));
                 }
                 return ;
@@ -332,7 +332,7 @@ public class PartyCommand extends AbstractCommand {
 
             String mode = args[1].equals("on") ? "enabled" : "disabled";
 
-            for (String st : Hypixelify.getConfigurator().config.getStringList("party.message.chat-enable-disabled")) {
+            for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.chat-enable-disabled")) {
                 player.sendMessage(ShopUtil.translateColors(st).replace("{mode}", mode));
             }
             return ;
@@ -355,7 +355,7 @@ public class PartyCommand extends AbstractCommand {
             return null;
         Player player = (Player) commandSender;
 
-        final PlayerDatabase playerDatabase = Hypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerDatabase playerDatabase = SBAHypixelify.getDatabaseManager().getDatabase(player);
 
         if (playerDatabase != null && playerDatabase.isInvited()) {
             return Arrays.asList("accept", "decline");

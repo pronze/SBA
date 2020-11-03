@@ -1,6 +1,6 @@
 package org.pronze.hypixelify.manager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.pronze.hypixelify.Hypixelify;
+import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.listener.*;
 
@@ -15,16 +15,16 @@ public class ListenerManager {
         listeners.add(new CustomShop());
         listeners.add(new PlayerListener());
         listeners.add(new BedwarsListener());
-        if (Hypixelify.getConfigurator().config.getBoolean("party.enabled")) {
+        if (SBAHypixelify.getConfigurator().config.getBoolean("party.enabled")) {
             listeners.add(new ChatListener());
-            if(Hypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
+            if(SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)){
                 listeners.add(new LobbyBoard());
             }
-            if(Hypixelify.getConfigurator().config.getBoolean("party.leader-autojoin-autoleave", true))
+            if(SBAHypixelify.getConfigurator().config.getBoolean("party.leader-autojoin-autoleave", true))
                 listeners.add(new PartyListener());
         }
 
-        if(Hypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
+        if(SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             listeners.add(new LobbyScoreboard());
 
     }
