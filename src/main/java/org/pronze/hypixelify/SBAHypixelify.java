@@ -13,6 +13,7 @@ import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
 import org.pronze.hypixelify.manager.*;
 import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.placeholderapi.SBAExpansion;
 import org.pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -172,6 +173,13 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         commandManager.registerAll(this);
 
 
+        try{
+            if (papiEnabled) {
+                new SBAExpansion().register();
+            }
+        } catch (Throwable t){
+            t.printStackTrace();
+        }
         getLogger().info("[SBAHypixelify]: Plugin has loaded");
 
     }
