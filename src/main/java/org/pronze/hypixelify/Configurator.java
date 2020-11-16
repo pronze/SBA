@@ -225,7 +225,7 @@ public class Configurator {
 
         checkOrSetConfig(modify, "lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s");
         checkOrSetConfig(modify, "lobby-scoreboard.title", Arrays.asList(
-                "&e&lBED WARS"
+                  "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"

@@ -35,10 +35,11 @@ public class BedwarsListener extends AbstractListener {
     public void onStarted(BedwarsGameStartedEvent e) {
         final Game game = e.getGame();
         final Map<Player, Scoreboard> scoreboards = ScoreboardUtil.getScoreboards();
-        for (Player player : game.getConnectedPlayers()) {
-            if (scoreboards.containsKey(player))
+        game.getConnectedPlayers().forEach(player -> {
+            if (scoreboards.containsKey(player)) {
                 ScoreboardUtil.removePlayer(player);
-        }
+            }
+        });
         Arena arena = new Arena(game);
         SBAHypixelify.getArenaManager().addArena(game.getName(), arena);
         Scheduler.runTaskLater(() -> arena.getScoreBoard().updateScoreboard(), 2L);
@@ -73,9 +74,10 @@ public class BedwarsListener extends AbstractListener {
 
     @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
-        Game game = e.getGame();
-        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName()))
-            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).onOver(e);
+        final Game game = e.getGame();
+        final Arena arena = SBAHypixelify.getArena(game.getName());
+        if (arena != null)
+            arena.onOver(e);
     }
 
 
@@ -100,11 +102,16 @@ public class BedwarsListener extends AbstractListener {
                             if (j == seconds) return;
                             j = seconds;
                             if (seconds < 2) {
-                                player.sendMessage(ShopUtil.translateColors(message.replace("{seconds}", String.valueOf(seconds)).replace("seconds", "second")));
-                                sendTitle(player, ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                                player.sendMessage(ShopUtil
+                                        .translateColors(message.replace("{seconds}", String.valueOf(seconds))
+                                                .replace("seconds", "second")));
+                                sendTitle(player, ShopUtil
+                                        .translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds < 6) {
-                                player.sendMessage(ShopUtil.translateColors(message.replace("{seconds}", String.valueOf(seconds))));
-                                sendTitle(player, ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                                player.sendMessage(ShopUtil
+                                        .translateColors(message.replace("{seconds}", String.valueOf(seconds))));
+                                sendTitle(player, ShopUtil
+                                        .translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds % 10 == 0) {
                                 player.sendMessage(ShopUtil.translateColors(message.replace("&c{seconds}", "&6" + seconds)));
                             }
@@ -126,7 +133,7 @@ public class BedwarsListener extends AbstractListener {
         final Game game = e.getGame();
         if (game.getStatus() != GameStatus.RUNNING) return;
         final Arena arena = SBAHypixelify.getArena(game.getName());
-        if(arena != null){
+        if (arena != null) {
             arena.getScoreBoard().updateScoreboard();
         }
     }

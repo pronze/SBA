@@ -31,15 +31,18 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GamePlayer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class PlayerListener extends AbstractListener {
 
-     private final ArrayList<Material> allowed = new ArrayList<>();
-     private final ArrayList<Material> generatorDropItems = new ArrayList<>();
-     private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
+
+    private final ArrayList<Material> allowed = new ArrayList<>();
+    private final ArrayList<Material> generatorDropItems = new ArrayList<>();
+    private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
             disableArmorDamage, permanentItems, blockItemOnChest;
 
     private final int respawnTime;
@@ -52,12 +55,11 @@ public class PlayerListener extends AbstractListener {
         respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
         disableArmorInventoryMovement = SBAHypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true);
         disableArmorDamage = SBAHypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true);
-        permanentItems  = SBAHypixelify.getConfigurator().config.getBoolean("permanent-items", true);
-        blockItemOnChest  =  SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true);
+        permanentItems = SBAHypixelify.getConfigurator().config.getBoolean("permanent-items", true);
+        blockItemOnChest = SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true);
 
 
-
-        SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops").forEach(material ->{
+        SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops").forEach(material -> {
             Material mat;
             try {
                 mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
@@ -107,16 +109,16 @@ public class PlayerListener extends AbstractListener {
 
         final Arena arena = SBAHypixelify.getArena(game.getName());
 
-        if(arena == null) return;
+        if (arena == null) return;
 
-        Scheduler.runTaskLater(() ->{
-            if(arena.getScoreBoard() != null){
+        Scheduler.runTaskLater(() -> {
+            if (arena.getScoreBoard() != null) {
                 arena.getScoreBoard().updateScoreboard();
             }
         }, 1L);
 
         final List<ItemStack> itemArr = new ArrayList<>();
-        if(permanentItems) {
+        if (permanentItems) {
             ItemStack sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD")) : new ItemStack(Material.WOODEN_SWORD);
 
 
@@ -255,7 +257,7 @@ public class PlayerListener extends AbstractListener {
 
         final String typeName = e.getItem().getType().toString();
 
-        if (       typeName.contains("BOOTS")
+        if (typeName.contains("BOOTS")
                 || typeName.contains("HELMET")
                 || typeName.contains("LEGGINGS")
                 || typeName.contains("CHESTPLATE")
@@ -277,7 +279,7 @@ public class PlayerListener extends AbstractListener {
 
         if (!SBAHypixelify.getConfigurator().config.getString("version", SBAHypixelify.getVersion())
                 .contains(SBAHypixelify.getVersion())) {
-            Scheduler.runTaskLater(()->{
+            Scheduler.runTaskLater(() -> {
                 p.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                 p.sendMessage("Type /bwaddon upgrade to upgrade file");
                 p.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");

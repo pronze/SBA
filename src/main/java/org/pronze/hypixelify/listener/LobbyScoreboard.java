@@ -7,24 +7,31 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
 public class LobbyScoreboard extends AbstractListener {
+
+
+
     private String title = "";
     private final String countdown_message;
     private final boolean isEnabled;
     private final List<String> lobby_scoreboard_lines;
     private final String date;
     private boolean disabling = false;
-
+    private final List<Player> players = new ArrayList<>();
+    private BukkitTask updateTask;
 
     public static String format(String format){
         return ChatColor.translateAlternateColorCodes('&', format);
@@ -44,7 +51,7 @@ public class LobbyScoreboard extends AbstractListener {
 
         countdown_message = format(SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
         isEnabled = SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true);
-        new BukkitRunnable() {
+        updateTask = new BukkitRunnable() {
             int tc = 0;
 
             public void run() {
@@ -53,6 +60,19 @@ public class LobbyScoreboard extends AbstractListener {
                     tc++;
                     if (tc >= lobby_scoreboard.size())
                         tc = 0;
+
+                    players.forEach(player->{
+                        if(player == null || !player.isOnline()) return;
+
+                        final BedwarsAPI bedwarsAPI = BedwarsAPI.getInstance();
+
+                        final Game game = bedwarsAPI.getGameOfPlayer(player);
+
+                        if (game != null && game.getStatus() == GameStatus.WAITING) {
+                            updateScoreboard(player, game);
+                        }
+                    });
+
                 } else
                     cancel();
             }
@@ -63,20 +83,20 @@ public class LobbyScoreboard extends AbstractListener {
     public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
         if (!isEnabled)
             return;
-        final Game game = e.getGame();
+
         final Player player = e.getPlayer();
 
-        new BukkitRunnable() {
+        players.add(player);
+    }
 
-            public void run() {
-                if (player.isOnline()  && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
-                        game.getStatus() == GameStatus.WAITING) {
-                        updateScoreboard(player, game);
-                } else {
-                    this.cancel();
-                }
-            }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
+    @EventHandler
+    public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
+        players.remove(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent e){
+        players.remove(e.getPlayer());
     }
 
     private void updateScoreboard(Player player, Game game) {
@@ -169,6 +189,16 @@ public class LobbyScoreboard extends AbstractListener {
 
     @Override
     public void onDisable() {
+        try{
+            if(updateTask != null && !updateTask.isCancelled()) {
+                updateTask.cancel();
+            }
+        } catch (Throwable t){
+            t.printStackTrace();
+        }
+
+        updateTask = null;
+
         disabling = true;
         HandlerList.unregisterAll(this);
     }

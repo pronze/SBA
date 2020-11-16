@@ -62,9 +62,6 @@ public class DatabaseManager {
 
 
 
-    public void destroy() {
-        playerData.clear();
-    }
 
     public org.pronze.hypixelify.database.PlayerDatabase getDatabase(Player player) {
         return playerData.get(player.getUniqueId());

@@ -56,13 +56,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- may need this later
-        <dependency>
-            <groupId>com.google.inject</groupId>
-            <artifactId>guice</artifactId>
-            <version>4.2.3</version>
-        </dependency>
-        -->
 
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
