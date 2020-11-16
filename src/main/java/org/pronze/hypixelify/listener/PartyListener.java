@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.listener;
+import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -18,14 +19,16 @@ public class PartyListener extends AbstractListener{
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBWJoin(BedwarsPlayerJoinedEvent e) {
-        Game game = e.getGame();
-        Player player = e.getPlayer();
+        final Game game = e.getGame();
+        final Player player = e.getPlayer();
         final PlayerDatabase data = SBAHypixelify.getDatabaseManager().getDatabase(player);
         final Party party = SBAHypixelify.getPartyManager().getParty(player);
+
         if (data == null || party == null) return;
         if (!data.isInParty() || data.getPartyLeader() == null) return;
         if (!data.isPartyLeader()) return;
         if (party.getPlayers() == null) return;
+
         if (game.getStatus().equals(GameStatus.WAITING) && game.getConnectedPlayers().size() < game.getMaxPlayers()) {
                     for (Player pl : party.getPlayers()) {
                         if (pl == null) return;
@@ -44,8 +47,10 @@ public class PartyListener extends AbstractListener{
 
     @EventHandler
     public void onBwPlayerLeave(BedwarsPlayerLeaveEvent e) {
-        Player player = e.getPlayer();
-        Game game = e.getGame();
+        final Player player = e.getPlayer();
+        final Game game = e.getGame();
+        final BedwarsAPI API = BedwarsAPI.getInstance();
+
         if (player == null) return;
         if (!player.isOnline()) return;
         final PlayerDatabase data = SBAHypixelify.getDatabaseManager().getDatabase(player);
@@ -55,12 +60,12 @@ public class PartyListener extends AbstractListener{
         if(party.getPlayers() == null || party.getPlayers().isEmpty()) return;
 
         for (Player pl : party.getPlayers()) {
-            if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) return;
+            if (!API.isPlayerPlayingAnyGame(pl)) return;
 
-            if (BedwarsAPI.getInstance().getGameOfPlayer(pl).equals(game)) return;
+            if (API.getGameOfPlayer(pl).equals(game)) return;
 
-            if (BedwarsAPI.getInstance().getGameOfPlayer(pl).getStatus().equals(GameStatus.RUNNING)) {
-                BedwarsAPI.getInstance().getGameOfPlayer(pl).leaveFromGame(pl);
+            if (API.getGameOfPlayer(pl).getStatus().equals(GameStatus.RUNNING)) {
+                API.getGameOfPlayer(pl).leaveFromGame(pl);
                 for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
                     pl.sendMessage(ShopUtil.translateColors(st));
                 }

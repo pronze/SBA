@@ -52,7 +52,7 @@ import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class CustomShop extends AbstractListener {
 
-    public static final HashMap<Integer, Integer> Prices = new HashMap<>();
+    private final Map<Integer, Integer> Prices = new HashMap<>();
     private final Map<String, SimpleInventories> shopMap = new HashMap<>();
     private final Options options = new Options(Main.getInstance());
 
@@ -175,11 +175,6 @@ public class CustomShop extends AbstractListener {
         loadNewShop("default", null, true);
     }
 
-
-    public void destroy(){
-        HandlerList.unregisterAll(this);
-    }
-
     private static String getNameOrCustomNameOfItem(ItemStack stack) {
         try {
             if (stack.hasItemMeta()) {
@@ -206,6 +201,10 @@ public class CustomShop extends AbstractListener {
             stringBuilder.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
         }
         return stringBuilder.toString().trim();
+    }
+
+    public void destroy() {
+        HandlerList.unregisterAll(this);
     }
 
     public void show(Player player, GameStore store) {
@@ -255,24 +254,43 @@ public class CustomShop extends AbstractListener {
                 return;
             }
 
+            final ItemStack eventStack = event.getStack();
+            final String typeName = eventStack.getType().name();
 
+            /*
+                Add shop inventory enchants here
+                Note: only visible to user
+             */
             try {
-                if (event.getStack() != null && event.getStack().getType().name().endsWith("SWORD")) {
-                    ItemStack stack = event.getStack();
-                    RunningTeam rt = game.getTeamOfPlayer(player);
-                    if (rt != null && Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(rt.getName()) != 0) {
-                        stack.addEnchantment(Enchantment.DAMAGE_ALL,
-                                Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(rt.getName()));
-                        event.setStack(stack);
+                if (eventStack != null) {
+                    if (typeName.endsWith("SWORD")) {
+                        final RunningTeam rt = game.getTeamOfPlayer(player);
+                        int sharpness = 0;
+                        try {
+                            sharpness = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(rt.getName());
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+
+                        if (rt != null && sharpness != 0) {
+                            eventStack.addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+                            event.setStack(eventStack);
+                        }
                     }
-                }
-                if (event.getStack() != null && event.getStack().getType().name().endsWith("BOOTS")) {
-                    ItemStack stack = event.getStack();
-                    RunningTeam rt = game.getTeamOfPlayer(player);
-                    if (rt != null && Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(rt.getName()) != 0) {
-                        stack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL,
-                                Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(rt.getName()));
-                        event.setStack(stack);
+
+                    if (typeName.endsWith("BOOTS")) {
+                        final RunningTeam rt = game.getTeamOfPlayer(player);
+                        int protection = 0;
+                        try {
+                            protection = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(rt.getName());
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+
+                        if (protection != 0)
+                            eventStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protection);
+
+                        event.setStack(eventStack);
                     }
                 }
 
@@ -369,20 +387,22 @@ public class CustomShop extends AbstractListener {
     public void onApplyPropertyToItem(ApplyPropertyToItemEvent event) {
         String price = null;
         org.screamingsandals.bedwars.api.game.Game game = event.getGame();
-        Player player = event.getPlayer();
-        RunningTeam team = game.getTeamOfPlayer(player);
+        final Player player = event.getPlayer();
+        final RunningTeam team = game.getTeamOfPlayer(player);
+        final String propertyName = event.getPropertyName();
 
-        if (event.getPropertyName().equalsIgnoreCase("applycolorbyteam")
-                || event.getPropertyName().equalsIgnoreCase("transform::applycolorbyteam")) {
-            CurrentTeam t = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
+        if (propertyName.equalsIgnoreCase("applycolorbyteam")
+                || propertyName.equalsIgnoreCase("transform::applycolorbyteam")) {
+            final CurrentTeam t = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
 
             if (Main.getConfigurator().config.getBoolean("automatic-coloring-in-shop")) {
                 event.setStack(Main.applyColor(t.teamInfo.color, event.getStack()));
             }
-        } else if (!event.getPropertyName().equalsIgnoreCase("sharpness")
-                && !event.getPropertyName().equalsIgnoreCase("protection")) {
+
+        } else if (!propertyName.equalsIgnoreCase("sharpness")
+                && !propertyName.equalsIgnoreCase("protection")) {
             return;
-        } else if (event.getPropertyName().equalsIgnoreCase("sharpness")) {
+        } else if (propertyName.equalsIgnoreCase("sharpness")) {
             if (team == null) return;
             ItemStack stack = event.getStack();
             int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(team.getName()) + 1;
@@ -396,7 +416,7 @@ public class CustomShop extends AbstractListener {
                 event.setPrice(price);
                 event.setStack(stack);
             }
-        } else if (event.getPropertyName().equalsIgnoreCase("protection")) {
+        } else if (propertyName.equalsIgnoreCase("protection")) {
             if (team == null) return;
             ItemStack stack = event.getStack();
             int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(team.getName()) + 1;
@@ -442,7 +462,7 @@ public class CustomShop extends AbstractListener {
     }
 
     private void loadNewShop(String name, String fileName, boolean useParent) {
-        SimpleInventories format = new SimpleInventories(options);
+        final SimpleInventories format = new SimpleInventories(options);
         try {
             if (useParent) {
                 String shopFileName = "shop.yml";
@@ -473,8 +493,9 @@ public class CustomShop extends AbstractListener {
     }
 
     public void buystack(ItemStack newItem, ShopTransactionEvent event) {
-        Player player = event.getPlayer();
-        HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
+        final Player player = event.getPlayer();
+        final HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
+
         if (!noFit.isEmpty()) {
             noFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
         }
@@ -624,12 +645,12 @@ public class CustomShop extends AbstractListener {
             if (event.hasProperties()) {
                 for (ItemProperty property : event.getProperties()) {
                     if (property.hasName()) {
-                        if (ShopUtil.isABedwarsSpecialProperty(property.getPropertyName())) {
+                        if (!const_properties.contains(property.getPropertyName().toLowerCase())) {
                             BedwarsApplyPropertyToBoughtItem applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player,
                                     newItem, property.getReader(player).convertToMap());
                             Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
-
                             newItem = applyEvent.getStack();
+
                         } else {
                             ApplyPropertyToItemEvent applyEvent = new ApplyPropertyToItemEvent(game, player,
                                     newItem, property.getReader(player, event.getItem()).convertToMap(), mapReader);

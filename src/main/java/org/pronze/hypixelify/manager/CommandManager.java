@@ -13,7 +13,7 @@ import java.util.List;
 
 public class CommandManager {
 
-    private final static List<AbstractCommand> commands = new ArrayList<>();
+    private final List<AbstractCommand> commands = new ArrayList<>();
 
     public CommandManager(){
         commands.add(new BWACommand());

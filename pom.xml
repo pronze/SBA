@@ -12,7 +12,7 @@
         </repository>
         <repository>
             <id>screaming-repo</id>
-            <url>https://repo.screamingsandals.org/</url>
+            <url>https://repo.screamingsandals.org/public</url>
         </repository>
 
         <repository>

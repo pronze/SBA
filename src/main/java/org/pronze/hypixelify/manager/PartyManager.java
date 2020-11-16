@@ -11,11 +11,12 @@ import org.screamingsandals.bedwars.api.game.Game;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PartyManager implements org.pronze.hypixelify.api.party.PartyManager{
 
 
-    public final HashMap<Player, Party> parties = new HashMap<>();
+    public final Map<Player, Party> parties = new HashMap<>();
 
     @Override
     public List<org.pronze.hypixelify.api.party.Party> getParties(){

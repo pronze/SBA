@@ -130,28 +130,33 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
 
     @Override
     public int getKills() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getKills();
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getKills();
     }
 
     @Override
     public int getWins() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getWins();
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getWins() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentWins();
     }
 
     @Override
     public int getBedDestroys() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getDestroyedBeds();
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentDestroyedBeds() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getDestroyedBeds();
     }
 
     @Override
     public int getDeaths() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getDeaths() ;
+        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getDeaths() +
+                Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills();
     }
 
     @Override
     public int getXP() {
         try {
-            return Main.getPlayerStatisticsManager().getStatistic(pInstance).getScore();
+            return Main.getPlayerStatisticsManager().getStatistic(pInstance).getScore() +
+                    Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentScore();
         } catch (Exception e) {
             return 1;
         }

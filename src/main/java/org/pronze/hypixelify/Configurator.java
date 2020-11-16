@@ -90,6 +90,9 @@ public class Configurator {
         AtomicBoolean modify = new AtomicBoolean(false);
 
         checkOrSetConfig(modify, "debug.enabled", false);
+
+        checkOrSetConfig(modify, "permanent-items", true);
+
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
         checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN", "TNT"));

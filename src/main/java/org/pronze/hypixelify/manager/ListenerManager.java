@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ListenerManager {
 
-    private final static List<AbstractListener> listeners = new ArrayList<>();
+    private final List<AbstractListener> listeners = new ArrayList<>();
 
     public ListenerManager(){
         listeners.add(new CustomShop());

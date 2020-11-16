@@ -1,32 +1,36 @@
-package org.pronze.hypixelify.arena;
 
+package org.pronze.hypixelify.arena;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.database.GamePlayerStats;
 import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.scoreboard.ScoreBoard;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class Arena {
+    public GameTask gameTask;
     private final Game game;
     private final ScoreBoard scoreBoard;
-    private final Map<UUID, GamePlayerStats> playerStatsCurrentMap = new HashMap<>();
-    public GameTask gameTask;
     public double radius;
     private GameStorage storage;
 
+
+    public GameStorage getStorage(){
+        return storage;
+    }
 
     public Arena(Game game) {
         radius = Math.pow(SBAHypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
@@ -36,9 +40,6 @@ public class Arena {
         gameTask = new GameTask(this);
     }
 
-    public GameStorage getStorage() {
-        return storage;
-    }
 
     public Game getGame() {
         return this.game;
@@ -49,19 +50,15 @@ public class Arena {
     }
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        final Player destroyer = e.getPlayer();
-        int score = playerStatsCurrentMap.get(destroyer.getUniqueId()).getBedDestroys();
-        playerStatsCurrentMap.get(destroyer.getUniqueId()).setBedDestroys(score + 1);
-
         for (Player p : e.getTeam().getConnectedPlayers()) {
-            if (p != null && p.isOnline())
+            if(p != null && p.isOnline())
                 sendTitle(p, Messages.message_bed_destroyed_title, Messages.message_bed_destroyed_subtitle, 0, 40, 20);
         }
     }
 
     public void onOver(BedwarsGameEndingEvent e) {
         if (e.getGame().getName().equals(game.getName())) {
-            if (scoreBoard != null)
+            if(scoreBoard != null)
                 scoreBoard.updateScoreboard();
             if (gameTask != null && !gameTask.isCancelled()) {
                 gameTask.cancel();
@@ -73,9 +70,8 @@ public class Arena {
                 Team winner = e.getWinningTeam();
                 Map<String, Integer> dataKills = new HashMap<>();
                 for (Player player : e.getGame().getConnectedPlayers()) {
-                    final int currentKills = getCurrentPlayerStats(player).getKills();
                     dataKills.put(player.getDisplayName(),
-                            currentKills);
+                            Main.getPlayerStatisticsManager().getStatistic(player).getCurrentKills());
                 }
                 int kills_1 = 0;
                 int kills_2 = 0;
@@ -146,39 +142,9 @@ public class Arena {
             storage.setSharpness(t.getName(), 0);
         }
 
-        for (Player pl : game.getConnectedPlayers()) {
-            playerStatsCurrentMap.put(pl.getUniqueId(), new GamePlayerStats());
-        }
-
-    }
-
-    public GamePlayerStats getCurrentPlayerStats(Player player) {
-        return playerStatsCurrentMap.get(player.getUniqueId());
     }
 
 
-    public void onPlayerKilled(BedwarsPlayerKilledEvent e) {
-        final Player killer = e.getKiller();
-        final Player player = e.getPlayer();
-        final Game game = e.getGame();
-
-        GamePlayerStats playerStatsCurrent = getCurrentPlayerStats(player);
-        GamePlayerStats killerStatsCurrent = getCurrentPlayerStats(killer);
 
 
-        final RunningTeam playerTeam = game.getTeamOfPlayer(player);
-
-
-        if (playerTeam == null || !playerTeam.isTargetBlockExists()) {
-            final int finalKills = killerStatsCurrent.getFinalKills();
-            killerStatsCurrent.setFinalKills(finalKills + 1);
-        }
-
-        final int kills = getCurrentPlayerStats(player).getKills();
-        killerStatsCurrent.setKills(kills + 1);
-        final int deaths = playerStatsCurrent.getDeaths();
-        playerStatsCurrent.setDeaths(deaths + 1);
-
-    }
 }
-

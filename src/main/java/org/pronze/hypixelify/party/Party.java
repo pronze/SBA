@@ -13,7 +13,6 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
     private int member_size = 0;
     private List<Player> players = new ArrayList<>();
     private List<Player> invitedMembers = new ArrayList<>();
-
     private Player leader;
     private final boolean anyoneCanInvite = true;
 

@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.database.GameStorage;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
@@ -44,6 +45,14 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
             return getArenaManager().getArenas().get(game.getName()).getStorage();
 
         return null;
+    }
+
+    public static boolean arenaExists(String arenaName){
+        return getArenaManager().getArenas().containsKey(arenaName);
+    }
+
+    public static Arena getArena(String arenaName){
+        return getArenaManager().getArenas().get(arenaName);
     }
 
     public static boolean LobbyBoardEnabled() {

@@ -1,4 +1,6 @@
 package org.pronze.hypixelify.listener;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -7,7 +9,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.arena.Arena;
+import org.pronze.hypixelify.scoreboard.ScoreBoard;
 import org.pronze.hypixelify.utils.SBAUtil;
+import org.pronze.hypixelify.utils.Scheduler;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -37,31 +41,26 @@ public class BedwarsListener extends AbstractListener {
         }
         Arena arena = new Arena(game);
         SBAHypixelify.getArenaManager().addArena(game.getName(), arena);
-        new BukkitRunnable() {
-            public void run() {
-                if(arena.getScoreBoard() != null)
-                    arena.getScoreBoard().updateScoreboard();
-            }
-        }.runTaskLater(SBAHypixelify.getInstance(), 2L);
-
+        Scheduler.runTaskLater(() -> arena.getScoreBoard().updateScoreboard(), 2L);
         arena.onGameStarted(e);
     }
 
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final Game game = e.getGame();
-        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).onTargetBlockDestroyed(e);
-            new BukkitRunnable() {
-                public void run() {
-                    if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-                        if (SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
-                            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
+        final Arena arena = SBAHypixelify.getArena(game.getName());
+        if (arena != null) {
+            arena.onTargetBlockDestroyed(e);
+
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(),
+                    () -> {
+                        final ScoreBoard board = arena.getScoreBoard();
+                        if (board != null) {
+                            board.updateScoreboard();
                         }
-                    }
-                }
-            }.runTaskLater(SBAHypixelify.getInstance(), 1L);
+                    }, 1L);
         }
+
     }
 
 
@@ -70,14 +69,6 @@ public class BedwarsListener extends AbstractListener {
         Game game = e.getGame();
         SBAHypixelify.getArenaManager().removeArena(game.getName());
     }
-
-    @EventHandler
-    public void onOver(BedwarsPlayerKilledEvent e) {
-        Game game = e.getGame();
-        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName()))
-            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).onPlayerKilled(e);
-    }
-
 
 
     @EventHandler
@@ -93,6 +84,7 @@ public class BedwarsListener extends AbstractListener {
         Player player = e.getPlayer();
         Game game = e.getGame();
         String message = "&eThe game starts in &c{seconds} &eseconds";
+
         new BukkitRunnable() {
             int j = 0;
 
@@ -105,7 +97,7 @@ public class BedwarsListener extends AbstractListener {
                         if (!time.contains("0-1")) {
                             String[] units = time.split(":");
                             int seconds = Integer.parseInt(units[1]) + 1;
-                            if(j == seconds) return;
+                            if (j == seconds) return;
                             j = seconds;
                             if (seconds < 2) {
                                 player.sendMessage(ShopUtil.translateColors(message.replace("{seconds}", String.valueOf(seconds)).replace("seconds", "second")));
@@ -128,18 +120,15 @@ public class BedwarsListener extends AbstractListener {
 
     @EventHandler
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
-        Player player = e.getPlayer();
+        final Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
         SBAUtil.removeScoreboardObjective(player);
-        Game game = e.getGame();
+        final Game game = e.getGame();
         if (game.getStatus() != GameStatus.RUNNING) return;
-        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-            if (SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
-                SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
-            }
+        final Arena arena = SBAHypixelify.getArena(game.getName());
+        if(arena != null){
+            arena.getScoreBoard().updateScoreboard();
         }
-
-
     }
 
 }

@@ -8,13 +8,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.arena.Arena;
-import org.pronze.hypixelify.database.GamePlayerStats;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ScoreboardUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 
@@ -26,21 +25,21 @@ public class ScoreBoard {
     private final Game game;
     private final Arena arena;
     private final String date;
-    private final Map<String, String> teamstatus = new HashMap<>();
+    private final Map<String, String> teamstatus;
     private int ticks = 0;
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
         date = new SimpleDateFormat(Configurator.date).format(new Date());
 
-        game = (Game) arena.getGame();
-
+        game = arena.getGame();
+        teamstatus = new HashMap<>();
         new BukkitRunnable() {
             public void run() {
                 if (game.getStatus() == GameStatus.RUNNING) {
                     ticks += 5;
                     updateCustomObj();
-                    if (ticks % 20 == 0)
+                    if(ticks % 20 == 0)
                         updateScoreboard();
                 } else {
                     cancel();
@@ -50,7 +49,7 @@ public class ScoreBoard {
     }
 
     public void updateCustomObj() {
-        for (Player pl : game.getConnectedPlayers()) {
+        for(Player pl : game.getConnectedPlayers()){
             ScoreboardUtil.updateCustomObjective(pl, game);
         }
     }
@@ -89,16 +88,15 @@ public class ScoreBoard {
             String fks = "0";
             String dis = "0";
             String bes = "0";
-            final GamePlayerStats currentStats = arena.getCurrentPlayerStats(player);
 
             if (game.countAvailableTeams() < 5) {
-                PlayerStatistic totalStats = Main.getPlayerStatisticsManager().getStatistic(player);
+                PlayerStatistic statistic = Main.getPlayerStatisticsManager().getStatistic(player);
                 try {
-                    tks = String.valueOf( totalStats.getKills());
-                    ks = String.valueOf(currentStats.getKills());
-                    fks = String.valueOf(totalStats.getKills());
-                    dis = String.valueOf(currentStats.getDeaths());
-                    bes = String.valueOf(currentStats.getBedDestroys());
+                    tks = String.valueOf(statistic.getCurrentKills() + statistic.getKills());
+                    ks = String.valueOf(statistic.getCurrentKills());
+                    fks = String.valueOf(statistic.getKills());
+                    dis = String.valueOf(statistic.getCurrentDeaths());
+                    bes = String.valueOf(statistic.getCurrentDestroyedBeds());
                 } catch (Exception e) {
                     String nullscore = "0";
                     tks = nullscore;
@@ -145,16 +143,12 @@ public class ScoreBoard {
                         .replace("{alive_players}", String.valueOf(alive_players))
                         .replace("{team}", p_t).replace("{beds}", bes).replace("{dies}", dis)
                         .replace("{totalkills}", tks).replace("{finalkills}", fks).replace("{kills}", ks)
-                        .replace("{time}", game.getFormattedTimeLeft())
-                        .replace("{formattime}", game.getFormattedTimeLeft())
+                        .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                        .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
                         .replace("{game}", game.getName()).replace("{date}", date)
-                        .replace("{team_bed_status}", p_t_b_s);
-
-                if(arena != null && arena.gameTask != null && arena.gameTask.getTier() != null){
-                        addline = addline.replace("{tier}", arena.gameTask.getTier().replace("-", " ")
-                            + " in §a" + arena.gameTask.getFormattedTimeLeft());
-                }
-
+                        .replace("{team_bed_status}", p_t_b_s)
+                        .replace("{tier}", arena.gameTask.getTier().replace("-", " ")
+                                + " in §a" + arena.gameTask.getFormattedTimeLeft());
 
                 if (game.isPlayerInAnyTeam(player) && chatColor != null) {
                     addline = addline.replace("{team_peoples}", p_t_ps).replace("{player_name}", player.getName())

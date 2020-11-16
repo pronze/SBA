@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
@@ -78,16 +79,22 @@ public class LobbyBoard extends AbstractListener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         if (!lobbyChatOverride) return;
-        Player player = e.getPlayer();
-        PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final Player player = e.getPlayer();
+        final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
 
         if (SBAHypixelify.LobbyBoardEnabled() && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
             if (Messages.lobby_chat_format != null) {
-                e.setFormat(Messages.lobby_chat_format
+                String format = Messages.lobby_chat_format
                         .replace("{level}", String.valueOf(db.getLevel()))
                         .replace("{name}", e.getPlayer().getName())
                         .replace("{message}", e.getMessage())
-                        .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer())));
+                        .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer()));
+
+                if(SBAHypixelify.isPapiEnabled()){
+                    format = PlaceholderAPI.setPlaceholders(player, format);
+                }
+
+                e.setFormat(format);
             }
         }
     }
@@ -130,7 +137,7 @@ public class LobbyBoard extends AbstractListener {
             players.remove(player);
             if (player.getScoreboard() == null) return;
 
-            if (player.getScoreboard().getObjective("bwa-mainlobby") != null) {
+            if (hasMainLobbyObjective(player)) {
                 player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                 return;
             }
@@ -179,8 +186,8 @@ public class LobbyBoard extends AbstractListener {
 
         if (scoreboard == null || scoreboard.getObjective("bwa-mainlobby") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
-            scoreboard.getObjective("bwa-mainlobby").setDisplayName("§e§lBED WARS");
+            Objective obj = scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
+            obj.setDisplayName("§e§lBED WARS");
 
             Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;

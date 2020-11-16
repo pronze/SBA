@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.utils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -9,7 +10,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
-import org.pronze.hypixelify.listener.PlayerListener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -25,9 +25,23 @@ import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
 public class ShopUtil {
 
+    private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
     public static ItemStack Diamond, FireWorks, Arrow, BED;
 
     private static void InitalizeStacks() {
+
+        UpgradeKeys.clear();
+        UpgradeKeys.put("STONE", 2);
+        UpgradeKeys.put("IRON", 4);
+        UpgradeKeys.put("DIAMOND", 5);
+        if (!Main.isLegacy()) {
+            UpgradeKeys.put("WOODEN", 1);
+            UpgradeKeys.put("GOLDEN", 3);
+        } else {
+            UpgradeKeys.put("WOOD", 1);
+            UpgradeKeys.put("GOLD", 3);
+        }
+
         Arrow = new ItemStack(Material.ARROW);
         ItemMeta metaArrow = Arrow.getItemMeta();
 
@@ -36,11 +50,10 @@ public class ShopUtil {
         metaArrow.setLore(arrowLore);
         Arrow.setItemMeta(metaArrow);
 
-        if(Main.isLegacy()) {
+        if (Main.isLegacy()) {
             FireWorks = new ItemStack(Material.valueOf("FIREWORK"));
             BED = new ItemStack(Material.valueOf("BED"));
-        }
-        else {
+        } else {
             FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
             BED = new ItemStack(Material.RED_BED);
         }
@@ -55,21 +68,27 @@ public class ShopUtil {
         Diamond.setItemMeta(diamondMeta);
     }
 
-    public static void addEnchantsToPlayerArmor(Player player, ItemStack item) {
-        for (ItemStack i : player.getInventory().getArmorContents()) {
-            if (i != null) {
-                i.addEnchantments(item.getEnchantments());
+    public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
+        Arrays.stream(player.getInventory().getArmorContents()).forEach(item ->{
+            if(item != null){
+                item.addEnchantments(newItem.getEnchantments());
             }
-        }
+        });
     }
 
     public static void buyArmor(Player player, Material mat_boots, String name, Game game) {
-        String matName  = name.substring(0, name.indexOf("_"));
+        String matName = name.substring(0, name.indexOf("_"));
         Material mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         ItemStack boots = new ItemStack(mat_boots);
         ItemStack leggings = new ItemStack(mat_leggings);
-        int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
-        if(level != 0){
+        int level = 0;
+        try {
+            level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
+        } catch (Throwable ignored){
+
+        }
+
+        if (level != 0) {
             boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
             leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
         }
@@ -80,9 +99,15 @@ public class ShopUtil {
     }
 
     public static boolean addEnchantsToPlayerTools(Player buyer, ItemStack newItem, String name, Enchantment enchantment) {
+        final int newItemEnchantLevel = newItem.getEnchantmentLevel(enchantment);
+
         for (ItemStack item : buyer.getInventory().getContents()) {
-            if (item != null && item.getType().name().endsWith(name)) {
-                if (item.getEnchantmentLevel(enchantment) >= newItem.getEnchantmentLevel(enchantment) || newItem.getEnchantmentLevel(enchantment) >= 5)
+            if(item == null) continue;
+
+            final String typeName = item.getType().name();
+            final int itemEnchantLevel = item.getEnchantmentLevel(enchantment);
+            if (typeName.endsWith(name)) {
+                if (itemEnchantLevel >= newItemEnchantLevel || newItemEnchantLevel >= 5)
                     return false;
 
                 item.addEnchantments(newItem.getEnchantments());
@@ -92,16 +117,17 @@ public class ShopUtil {
         return true;
     }
 
-    public static boolean addEnchantsToTeamTools(Player buyer, ItemStack stack, String name,  Enchantment enchantment){
+    public static boolean addEnchantsToTeamTools(Player buyer, ItemStack stack, String name, Enchantment enchantment) {
         RunningTeam team = BedwarsAPI.getInstance().getGameOfPlayer(buyer).getTeamOfPlayer(buyer);
 
-        if(!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name,enchantment)) return false;
+        if (!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name, enchantment)) return false;
 
-        for (Player player : team.getConnectedPlayers()) {
-            player.sendMessage("§c" + buyer.getName() +"§e has upgraded team sword damage!");
-            if(player == buyer) continue;
-            ShopUtil.addEnchantsToPlayerTools(player, stack, name,enchantment);
-        }
+        team.getConnectedPlayers().forEach(player->{
+            if(player == null) return;
+            player.sendMessage("§c" + buyer.getName() + "§e has upgraded team sword damage!");
+            if (player == buyer) return;
+            ShopUtil.addEnchantsToPlayerTools(player, stack, name, enchantment);
+        });
 
         return true;
     }
@@ -121,25 +147,25 @@ public class ShopUtil {
     }
 
     public static List<Game> getGamesWithSize(int c) {
-        List<String> allmapnames = getAllKeysForValue(Configurator.game_size, c);
-        if (allmapnames == null || allmapnames.isEmpty())
+        final List<String> maps = getAllKeysForValue(Configurator.game_size, c);
+        if (maps == null || maps.isEmpty())
             return null;
 
-        ArrayList<Game> listofgames = new ArrayList<>();
+        final ArrayList<Game> listofgames = new ArrayList<>();
 
-        for (String n : allmapnames) {
-            if (Main.getGameNames().contains(n)) {
-                listofgames.add(Main.getGame(n));
-            }
-        }
+        maps.forEach(map->{
+            if(Main.getGameNames().contains(map))
+                listofgames.add(Main.getGame(map));
+        });
 
         return listofgames;
     }
 
     public static FormatBuilder createBuilder(ArrayList<Object> games, ItemStack category, ItemStack category2, ItemStack category3,
                                               ItemStack category4) {
-        FormatBuilder builder = new FormatBuilder();
-        Map<String, Object> options = new HashMap<>();
+        final FormatBuilder builder = new FormatBuilder();
+        final Map<String, Object> options = new HashMap<>();
+
         options.put("rows", 6);
         options.put("render_actual_rows", 6);
 
@@ -163,7 +189,7 @@ public class ShopUtil {
     }
 
 
-    public static <K, V> K getKey(HashMap<K, V> map, V value) {
+    public static <K, V> K getKey(Map<K, V> map, V value) {
         for (K key : map.keySet()) {
             if (value.equals(map.get(key))) {
                 return key;
@@ -172,42 +198,16 @@ public class ShopUtil {
         return null;
     }
 
-    public static void initalizekeys() {
-
-        PlayerListener.UpgradeKeys.put("STONE", 2);
-        PlayerListener.UpgradeKeys.put("IRON", 4);
-        PlayerListener.UpgradeKeys.put("DIAMOND", 5);
-        if(!Main.isLegacy()) {
-            PlayerListener.UpgradeKeys.put("WOODEN", 1);
-            PlayerListener.UpgradeKeys.put("GOLDEN", 3);
-        } else{
-            PlayerListener.UpgradeKeys.put("WOOD", 1);
-            PlayerListener.UpgradeKeys.put("GOLD", 3);
-        }
-
-        for (String material : SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops")) {
-            Material mat;
-            try {
-                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
-            } catch (Exception ignored) {
-                continue;
-            }
-            PlayerListener.allowed.add(mat);
-        }
-        for (String material : SBAHypixelify.getConfigurator().config.getStringList("running-generator-drops")) {
-            Material mat;
-            try {
-                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
-            } catch (Exception ignored) {
-                continue;
-            }
-            PlayerListener.generatorDropItems.add(mat);
-        }
-    }
 
     public static void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
+        if (itemStackList == null) return;
 
-        for (ItemStack itemStack : itemStackList) {
+       itemStackList.forEach(itemStack -> {
+
+           if(itemStack == null){
+               return;
+           }
+
             ColorChanger colorChanger = BedwarsAPI.getInstance().getColorChanger();
 
             final String materialName = itemStack.getType().toString();
@@ -230,28 +230,30 @@ public class ShopUtil {
             } else {
                 playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
             }
-        }
+        });
+
     }
 
     public static ItemStack checkifUpgraded(ItemStack newItem) {
         try {
-            if (PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > PlayerListener.UpgradeKeys.get("WOODEN")) {
-                Map<Enchantment, Integer> enchant = newItem.getEnchantments();
-                Material mat;
-                mat = Material.valueOf(ShopUtil.getKey(PlayerListener.UpgradeKeys, PlayerListener.UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) - 1) + newItem.getType().name().substring(newItem.getType().name().lastIndexOf("_")));
+            if (UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > 1) {
+                final Map<Enchantment, Integer> enchant = newItem.getEnchantments();
+                final String typeName = newItem.getType().name();
+                final int upgradeValue = UpgradeKeys.get(typeName.substring(0, typeName.indexOf("_"))) - 1;
+                final Material mat = Material.valueOf(getKey(UpgradeKeys, upgradeValue) + typeName.substring(typeName.lastIndexOf("_")));
                 ItemStack temp = new ItemStack(mat);
                 temp.addEnchantments(enchant);
                 return temp;
             }
-        } catch(Exception e){
+        } catch (Throwable e) {
             e.printStackTrace();
         }
         return newItem;
     }
 
-    static public String capFirstLetter ( String str )
-    {
-        String firstLetter = str.substring(0,1).toUpperCase();
+
+    static public String capFirstLetter(String str) {
+        String firstLetter = str.substring(0, 1).toUpperCase();
         String restLetters = str.substring(1).toLowerCase();
         return firstLetter + restLetters;
     }
@@ -299,7 +301,7 @@ public class ShopUtil {
 
         List<String> fsMetaLore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.fireworks-lore");
         List<String> tempList = new ArrayList<>();
-        for(String st : fsMetaLore){
+        for (String st : fsMetaLore) {
             st = st
                     .replace("{mode}", getModeFromInt(mode))
                     .replace("{games}", size);
@@ -373,10 +375,10 @@ public class ShopUtil {
 
         ItemStack category;
         ItemStack category2;
-        if(Main.isLegacy()){
+        if (Main.isLegacy()) {
             category = new ItemStack(Material.valueOf("BED"));
             category2 = new ItemStack(Material.valueOf("SIGN"));
-        } else{
+        } else {
             category = new ItemStack(Material.valueOf("RED_BED"));
             category2 = new ItemStack(Material.valueOf("OAK_SIGN"));
         }
@@ -394,13 +396,13 @@ public class ShopUtil {
         category2.setItemMeta(meta2);
 
         ItemMeta meta3 = category3.getItemMeta();
-        String name3 = SBAHypixelify.getConfigurator().config.getString("games-inventory.barrier-name","§cExit");
+        String name3 = SBAHypixelify.getConfigurator().config.getString("games-inventory.barrier-name", "§cExit");
         meta3.setDisplayName(name3);
         category3.setItemMeta(meta3);
 
         ItemMeta meta4 = category4.getItemMeta();
         String name4 = SBAHypixelify.getConfigurator().config.getString("games-inventory.ender_pearl-name"
-                ,"§cClick here to rejoin!");
+                , "§cClick here to rejoin!");
 
         meta4.setLore(SBAHypixelify.getConfigurator().config.getStringList("games-inventory.ender_pearl-lore"));
         meta4.setDisplayName(name4);
@@ -419,70 +421,56 @@ public class ShopUtil {
     }
 
 
-
-    public static void sendMessage(Player player, List<String> message){
-        for(String st : message){
-            player.sendMessage(translateColors(st));
-        }
+    public static void sendMessage(Player player, List<String> message) {
+        message.forEach(st -> player.sendMessage(translateColors(st)));
     }
 
-    public static void upgradeSwordOnPurchase(Player player ,ItemStack newItem, Game game){
+    public static void upgradeSwordOnPurchase(Player player, ItemStack newItem, Game game) {
         if (SBAHypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
-            for (ItemStack item : player.getInventory().getContents()) {
-                if (item != null && item.getType().name().endsWith("SWORD")) {
-                        player.getInventory().remove(item);
-                }
-            }
+            Arrays.stream(player.getInventory().getContents()).forEach(item -> {
+                if (item == null) return;
+
+                final String typeName = item.getType().name();
+
+                if (typeName.endsWith("SWORD"))
+                    player.getInventory().remove(item);
+
+            });
         }
-        int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
-        if(level == 0) return;
-        newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
+        int level;
+        try {
+            level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
+        } catch (Throwable t) {
+            return;
+        }
+
+        if (level != 0)
+            newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
     }
 
 
+    public static void removeAxeOrPickaxe(Player player, ItemStack newItem) {
+        final String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
 
-    public static void removeAxeOrPickaxe(Player player, ItemStack newItem){
-        String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
+        Arrays.stream(player.getInventory().getContents()).forEach(item->{
+            if(item == null) return;
 
-        for (ItemStack p : player.getInventory().getContents()) {
-            if (p != null && p.getType().name().endsWith(name) && !p.getType().name().equalsIgnoreCase(newItem.getType().name())) {
-                player.getInventory().remove(p);
+            final String typeName = item.getType().name();
+
+            if(typeName.endsWith(name) && !typeName.equalsIgnoreCase(name)){
+                player.getInventory().remove(item);
             }
-        }
+        });
     }
 
-    public static String ChatColorChanger(Player player){
+    public static String ChatColorChanger(Player player) {
         final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
-        if(db.getLevel() > 100 || player.isOp()){
+        if (db.getLevel() > 100 || player.isOp()) {
             return "§f";
-        }
-        else{
+        } else {
             return "§7";
         }
     }
 
-    /*
-        TODO: what the hell is this
-     */
-    public static boolean isABedwarsSpecialProperty(String property){
-        if     (property.equalsIgnoreCase("arrowblocker")
-                || property.equalsIgnoreCase("autoigniteabletnt")
-                || property.equalsIgnoreCase("golem")
-                || property.equalsIgnoreCase("luckyblock")
-                || property.equalsIgnoreCase("magnetshoes")
-                || property.equalsIgnoreCase("protectionwall")
-                || property.equalsIgnoreCase("rescueplatform")
-                || property.equalsIgnoreCase("tntsheep")
-                || property.equalsIgnoreCase("teamchest")
-                || property.equalsIgnoreCase("throwablefireball")
-                || property.equalsIgnoreCase("tracker")
-                || property.equalsIgnoreCase("trap")
-                || property.equalsIgnoreCase("warppowder")
-                )
-            return true;
-
-
-        return false;
-    }
 
 }

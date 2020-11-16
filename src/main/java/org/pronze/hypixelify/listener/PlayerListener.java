@@ -19,8 +19,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.SBAHypixelify;
+import org.pronze.hypixelify.arena.Arena;
 import org.pronze.hypixelify.manager.DatabaseManager;
 import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.utils.Scheduler;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -29,36 +31,55 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GamePlayer;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class PlayerListener extends AbstractListener {
-    static public HashMap<String, Integer> UpgradeKeys = new HashMap<>();
-    static public ArrayList<Material> allowed = new ArrayList<>();
-    static public ArrayList<Material> generatorDropItems = new ArrayList<>();
-    private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
-            disableArmorDamage;
+
+     private final ArrayList<Material> allowed = new ArrayList<>();
+     private final ArrayList<Material> generatorDropItems = new ArrayList<>();
+     private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
+            disableArmorDamage, permanentItems, blockItemOnChest;
 
     private final int respawnTime;
 
 
     public PlayerListener() {
-        ShopUtil.initalizekeys();
         partyEnabled = SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true);
         giveKillerResources = SBAHypixelify.getConfigurator().config.getBoolean("give-killer-resources", true);
         respawnCooldown = Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled");
         respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
         disableArmorInventoryMovement = SBAHypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true);
         disableArmorDamage = SBAHypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true);
+        permanentItems  = SBAHypixelify.getConfigurator().config.getBoolean("permanent-items", true);
+        blockItemOnChest  =  SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true);
+
+
+
+        SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops").forEach(material ->{
+            Material mat;
+            try {
+                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+            } catch (Exception ignored) {
+                return;
+            }
+            allowed.add(mat);
+        });
+
+        SBAHypixelify.getConfigurator().config.getStringList("running-generator-drops").forEach(material -> {
+            Material mat;
+            try {
+                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+            } catch (Exception ignored) {
+                return;
+            }
+            generatorDropItems.add(mat);
+        });
     }
 
     @Override
     public void onDisable() {
-        UpgradeKeys.clear();
         allowed.clear();
         generatorDropItems.clear();
         HandlerList.unregisterAll(this);
@@ -67,7 +88,7 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         if (!partyEnabled) return;
-        Player player = e.getPlayer();
+        final Player player = e.getPlayer();
         final DatabaseManager dbManager = SBAHypixelify.getDatabaseManager();
         if (dbManager.getDatabase(player) == null) return;
 
@@ -77,52 +98,47 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
-        Player player = e.getEntity();
+        final Player player = e.getEntity();
 
         if (!isInGame(player)) return;
 
-        Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+        final Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         if (game == null || game.getStatus() != GameStatus.RUNNING) return;
 
+        final Arena arena = SBAHypixelify.getArena(game.getName());
 
-        if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-            new BukkitRunnable() {
-                public void run() {
-                    if (SBAHypixelify.getArenaManager().getArenas().containsKey(game.getName())) {
-                        if (SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard() != null) {
-                            SBAHypixelify.getArenaManager().getArenas().get(game.getName()).getScoreBoard().updateScoreboard();
-                        }
-                    }
-                }
-            }.runTaskLater(SBAHypixelify.getInstance(), 1L);
-        }
+        if(arena == null) return;
 
-        List<ItemStack> itemArr = new ArrayList<>();
-
-        ItemStack sword;
-        if (Main.isLegacy())
-            sword = new ItemStack(Material.valueOf("WOOD_SWORD"));
-        else
-            sword = new ItemStack(Material.WOODEN_SWORD);
-
-        for (ItemStack newItem : player.getInventory().getContents()) {
-            if (newItem != null) {
-                if (newItem.getType().name().endsWith("SWORD")) {
-                    if (newItem.getEnchantments().size() > 0)
-                        sword.addEnchantments(newItem.getEnchantments());
-                } else if (newItem.getType().name().endsWith("AXE")) {
-                    newItem = ShopUtil.checkifUpgraded(newItem);
-                    itemArr.add(newItem);
-                } else if (newItem.getType().name().contains("LEGGINGS") ||
-                        newItem.getType().name().contains("BOOTS") ||
-                        newItem.getType().name().contains("CHESTPLATE") ||
-                        newItem.getType().name().contains("HELMET"))
-                    itemArr.add(newItem);
+        Scheduler.runTaskLater(() ->{
+            if(arena.getScoreBoard() != null){
+                arena.getScoreBoard().updateScoreboard();
             }
+        }, 1L);
+
+        final List<ItemStack> itemArr = new ArrayList<>();
+        if(permanentItems) {
+            ItemStack sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD")) : new ItemStack(Material.WOODEN_SWORD);
+
+
+            Arrays.stream(player.getInventory().getContents()).forEach(stack -> {
+                final String name = stack.getType().name();
+
+                if (name.endsWith("SWORD"))
+                    sword.addEnchantments(stack.getEnchantments());
+
+                if (name.endsWith("AXE"))
+                    itemArr.add(ShopUtil.checkifUpgraded(stack));
+
+                if (name.endsWith("LEGGINGS") ||
+                        name.endsWith("BOOTS") ||
+                        name.endsWith("CHESTPLATE") ||
+                        name.endsWith("HELMET"))
+                    itemArr.add(stack);
+
+            });
+
+            itemArr.add(sword);
         }
-
-        itemArr.add(sword);
-
 
         if (giveKillerResources) {
             Player killer = e.getEntity().getKiller();
@@ -136,6 +152,7 @@ public class PlayerListener extends AbstractListener {
                 }
             }
         }
+
         final Player victim = e.getEntity();
         GamePlayer gVictim = Main.getPlayerGameProfile(victim);
 
@@ -143,7 +160,6 @@ public class PlayerListener extends AbstractListener {
         if (respawnCooldown && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
                 game.getTeamOfPlayer(player).isTargetBlockExists()) {
 
-            final List<ItemStack> playerItems = itemArr;
             new BukkitRunnable() {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
@@ -169,7 +185,7 @@ public class PlayerListener extends AbstractListener {
                             } else {
                                 player.sendMessage(Messages.message_respawned_title);
                                 sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
-                                ShopUtil.giveItemToPlayer(playerItems, player, victimTeam.getColor());
+                                ShopUtil.giveItemToPlayer(itemArr, player, victimTeam.getColor());
                                 this.cancel();
                             }
                         }
@@ -196,11 +212,17 @@ public class PlayerListener extends AbstractListener {
         if (disableArmorInventoryMovement && event.getSlotType() == SlotType.ARMOR)
             event.setCancelled(true);
 
-        Inventory topSlot = event.getView().getTopInventory();
-        Inventory bottomSlot = event.getView().getBottomInventory();
-        if (event.getClickedInventory() == null) return;
-        if (event.getClickedInventory().equals(bottomSlot) && SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true) && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) && bottomSlot.getType() == InventoryType.PLAYER) {
-            if (event.getCurrentItem().getType().name().endsWith("AXE") || event.getCurrentItem().getType().name().endsWith("SWORD")) {
+        final Inventory topSlot = event.getView().getTopInventory();
+        final Inventory bottomSlot = event.getView().getBottomInventory();
+        final Inventory clickedInventory = event.getClickedInventory();
+        final String typeName = event.getCurrentItem().getType().name();
+
+        if (clickedInventory == null) return;
+
+        if (clickedInventory.equals(bottomSlot) && blockItemOnChest &&
+                (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST) &&
+                bottomSlot.getType() == InventoryType.PLAYER) {
+            if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
                 player.sendMessage("§c§l" + SBAHypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
             }
@@ -212,9 +234,13 @@ public class PlayerListener extends AbstractListener {
     public void onItemDrop(PlayerDropItemEvent evt) {
         if (!isInGame(evt.getPlayer())) return;
 
-        if (!allowed.contains(evt.getItemDrop().getItemStack().getType()) && !evt.getItemDrop().getItemStack().getType().name().endsWith("WOOL")) {
+        final Player player = evt.getPlayer();
+        final ItemStack ItemDrop = evt.getItemDrop().getItemStack();
+        final Material type = ItemDrop.getType();
+
+        if (!allowed.contains(type) && !type.name().endsWith("WOOL")) {
             evt.setCancelled(true);
-            evt.getPlayer().getInventory().remove(evt.getItemDrop().getItemStack());
+            player.getInventory().remove(ItemDrop);
         }
     }
 
@@ -227,12 +253,13 @@ public class PlayerListener extends AbstractListener {
         if (!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
         if (Main.getPlayerGameProfile(player).isSpectator) return;
 
+        final String typeName = e.getItem().getType().toString();
 
-        if (e.getItem().getType().toString().contains("BOOTS")
-                || e.getItem().getType().toString().contains("HELMET")
-                || e.getItem().getType().toString().contains("LEGGINGS")
-                || e.getItem().getType().toString().contains("CHESTPLATE")
-                || e.getItem().getType().toString().contains("SWORD")) {
+        if (       typeName.contains("BOOTS")
+                || typeName.contains("HELMET")
+                || typeName.contains("LEGGINGS")
+                || typeName.contains("CHESTPLATE")
+                || typeName.contains("SWORD")) {
             e.setCancelled(true);
         }
 
@@ -248,15 +275,13 @@ public class PlayerListener extends AbstractListener {
         if (!p.isOp())
             return;
 
-        if (!Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("version")).contains(SBAHypixelify.getVersion())) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    p.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
-                    p.sendMessage("Type /bwaddon upgrade to upgrade file");
-                    p.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
-                }
-            }.runTaskLater(SBAHypixelify.getInstance(), 40L);
+        if (!SBAHypixelify.getConfigurator().config.getString("version", SBAHypixelify.getVersion())
+                .contains(SBAHypixelify.getVersion())) {
+            Scheduler.runTaskLater(()->{
+                p.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
+                p.sendMessage("Type /bwaddon upgrade to upgrade file");
+                p.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
+            }, 40L);
         }
     }
 
