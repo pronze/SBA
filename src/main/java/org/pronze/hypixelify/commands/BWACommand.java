@@ -17,14 +17,14 @@ public class BWACommand extends AbstractCommand {
 
     //Use default bedwars admin permissions
     public BWACommand() {
-        super("misat11.bw.admin", true, "bwaddon");
+        super(null, true, "bwaddon");
     }
 
 
     @Override
     public boolean onPreExecute(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
-            if (!sender.hasPermission(getPerm()) &&
+            if (!sender.hasPermission("misat11.bw.admin") &&
                     !args[0].equalsIgnoreCase("gamesinv")) {
                 sender.sendMessage("§cYou Don't have permissions to do this command");
                 return false;
