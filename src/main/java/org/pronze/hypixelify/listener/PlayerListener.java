@@ -43,12 +43,13 @@ public class PlayerListener extends AbstractListener {
     private final ArrayList<Material> allowed = new ArrayList<>();
     private final ArrayList<Material> generatorDropItems = new ArrayList<>();
     private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
-            disableArmorDamage, permanentItems, blockItemOnChest;
+            disableArmorDamage, permanentItems, blockItemOnChest, blockItemDrops;
 
     private final int respawnTime;
 
 
     public PlayerListener() {
+        blockItemDrops = SBAHypixelify.getConfigurator().config.getBoolean("block-item-drops", true);
         partyEnabled = SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true);
         giveKillerResources = SBAHypixelify.getConfigurator().config.getBoolean("give-killer-resources", true);
         respawnCooldown = Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled");
@@ -59,15 +60,17 @@ public class PlayerListener extends AbstractListener {
         blockItemOnChest = SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true);
 
 
-        SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops").forEach(material -> {
-            Material mat;
-            try {
-                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
-            } catch (Exception ignored) {
-                return;
-            }
-            allowed.add(mat);
-        });
+
+            SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops").forEach(material -> {
+                Material mat;
+                try {
+                    mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+                } catch (Exception ignored) {
+                    return;
+                }
+                allowed.add(mat);
+            });
+
 
         SBAHypixelify.getConfigurator().config.getStringList("running-generator-drops").forEach(material -> {
             Material mat;
@@ -235,12 +238,13 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
         if (!isInGame(evt.getPlayer())) return;
+        if(!blockItemDrops) return;
 
         final Player player = evt.getPlayer();
         final ItemStack ItemDrop = evt.getItemDrop().getItemStack();
         final Material type = ItemDrop.getType();
 
-        if (!allowed.contains(type) && !type.name().endsWith("WOOL")) {
+        if ( !allowed.contains(type) && !type.name().endsWith("WOOL")) {
             evt.setCancelled(true);
             player.getInventory().remove(ItemDrop);
         }
