@@ -24,7 +24,6 @@ import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent.Result;
 import org.screamingsandals.bedwars.api.events.BedwarsUpgradeBoughtEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsUpgradeImprovedEvent;
-import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.upgrades.Upgrade;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
@@ -32,6 +31,7 @@ import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.lib.sgui.SimpleInventories;
 import org.screamingsandals.bedwars.lib.sgui.events.GenerateItemEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.PreActionEvent;
@@ -44,6 +44,7 @@ import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
@@ -172,7 +173,7 @@ public class CustomShop extends AbstractListener {
             return "";
         });
 
-        loadNewShop("default", null, true);
+        loadNewShop("default", "shop.yml", false);
     }
 
     private static String getNameOrCustomNameOfItem(ItemStack stack) {
@@ -207,13 +208,16 @@ public class CustomShop extends AbstractListener {
         HandlerList.unregisterAll(this);
     }
 
-    public void show(Player player, GameStore store) {
+    public void show(Player player, org.screamingsandals.bedwars.api.game.GameStore store) {
         try {
             boolean parent = true;
             String file = null;
             if (store != null) {
-                parent = store.getUseParent();
-                file = store.getShopFile();
+
+                parent = (boolean) store.getClass().getMethod("getUseParent").invoke(store);
+                file = (String) store.getClass().getMethod("getShopFile").invoke(store);
+                //parent = store.getUseParent();
+                //file = store.getShopFile();
             }
             if (file != null) {
                 if (file.endsWith(".yml")) {
@@ -221,7 +225,7 @@ public class CustomShop extends AbstractListener {
                 }
                 String name = (parent ? "+" : "-") + file;
                 if (!shopMap.containsKey(name)) {
-                    if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false) && new File(Main.getInstance().getDataFolder(), file + ".groovy").exists()) {
+                    if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false) && new File(SBAHypixelify.getInstance().getDataFolder(), file + ".groovy").exists()) {
                         loadNewShop(name, file + ".groovy", parent);
                     } else {
                         loadNewShop(name, file + ".yml", parent);
@@ -232,8 +236,9 @@ public class CustomShop extends AbstractListener {
             } else {
                 shopMap.get("default").openForPlayer(player);
             }
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
             player.sendMessage(" Your shop.yml is invalid! Check it out or contact us on Discord");
+            e.printStackTrace();
         }
     }
 
@@ -362,10 +367,11 @@ public class CustomShop extends AbstractListener {
 
     @EventHandler
     public void onShopOpen(BedwarsOpenShopEvent event) {
-        if (Main.getPlayerGameProfile(event.getPlayer()).isSpectator) return;
+        final Player player = event.getPlayer();
+        if (Main.getPlayerGameProfile(player).isSpectator) return;
         if (SBAHypixelify.getConfigurator().config.getBoolean("store.replace-store-with-hypixelstore", true)) {
-            event.setResult(Result.DISALLOW_THIRD_PARTY_SHOP);
-            this.show(event.getPlayer(), event.getStore());
+            event.setResult(Result.DISALLOW_UNKNOWN);
+            this.show(player, event.getStore());
         }
     }
 
@@ -483,9 +489,10 @@ public class CustomShop extends AbstractListener {
                 }
                 format.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), fileName);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             Bukkit.getLogger().severe("Wrong shop.yml configuration!");
             Bukkit.getLogger().severe("Your villagers won't work, check validity of your YAML!");
+            SBAHypixelify.debug(e.getMessage());
         }
 
         format.generateData();

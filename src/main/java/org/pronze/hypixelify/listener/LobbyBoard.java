@@ -119,14 +119,14 @@ public class LobbyBoard extends AbstractListener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         final Player player = e.getPlayer();
 
-        Bukkit.getServer().getScheduler().runTask(SBAHypixelify.getInstance(),
+        Bukkit.getServer().getScheduler().runTaskLater(SBAHypixelify.getInstance(),
                 () -> {
                     if (hasMainLobbyObjective(player)) return;
 
                     if (isInWorld(player.getLocation()) && !isInGame(player)) {
                         createBoard(player);
                     }
-                });
+                }, 3L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

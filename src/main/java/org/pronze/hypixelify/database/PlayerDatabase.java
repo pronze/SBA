@@ -7,6 +7,7 @@ import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.utils.Scheduler;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import java.util.UUID;
@@ -120,12 +121,7 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
     public void init() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                updateDatabase();
-            }
-        }.runTaskLater(SBAHypixelify.getInstance(), 1L);
+        Scheduler.runTaskLater(this::updateDatabase, 1L);
     }
 
     @Override
@@ -275,10 +271,10 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
                                 ShopUtil.sendMessage(pInstance, Messages.message_invite_expired);
                         }
                         setInvitedParty(null);
-                        SBAHypixelify.getDatabaseManager().updateAll();
+                        Scheduler.runTask(()->SBAHypixelify.getDatabaseManager().updateAll());
                         this.cancel();
                     } else if (!isInvited) {
-                        SBAHypixelify.getDatabaseManager().updateAll();
+                        Scheduler.runTask(()->SBAHypixelify.getDatabaseManager().updateAll());
                         expiredTime = 60;
                         this.cancel();
                     }

@@ -110,9 +110,9 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         if (!Main.isLegacy()) {
             new UpdateChecker(plugin, 79505).getVersion(version -> {
                 if (plugin.getDescription().getVersion().contains(version)) {
-                    Bukkit.getLogger().info("[SBAHypixelify]: You are using the latest version of the addon");
+                    Bukkit.getLogger().info("You are using the latest version of the addon");
                 } else {
-                    Bukkit.getLogger().info("§e§l[SBAHypixelify]: THERE IS A NEW UPDATE AVAILABLE.");
+                    Bukkit.getLogger().info("§e§lTHERE IS A NEW UPDATE AVAILABLE.");
                 }
             });
         }
@@ -180,7 +180,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         } catch (Throwable t){
             t.printStackTrace();
         }
-        getLogger().info("[SBAHypixelify]: Plugin has loaded");
+        getLogger().info("Plugin has loaded");
 
     }
 
@@ -218,11 +218,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
     @Override
     public void onDisable() {
         if (SBAHypixelify.isProtocolLib() && !Bukkit.getOnlinePlayers().isEmpty()) {
-            for (Player pl : Bukkit.getOnlinePlayers()) {
-                if (pl != null && pl.isOnline()) {
-                    SBAUtil.removeScoreboardObjective(pl);
-                }
-            }
+            Bukkit.getOnlinePlayers().forEach(SBAUtil::removeScoreboardObjective);
         }
 
         Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");

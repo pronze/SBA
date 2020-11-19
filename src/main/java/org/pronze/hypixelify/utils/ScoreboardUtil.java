@@ -117,7 +117,7 @@ public class ScoreboardUtil {
         if (!player_health.containsKey(p))
             player_health.put(p, new HashMap<>());
         Map<Player, Integer> map = player_health.get(p);
-        for (Player pl : game.getConnectedPlayers()) {
+        game.getConnectedPlayers().forEach(pl-> {
             DecimalFormat format = new DecimalFormat("##");
             int j = Integer.parseInt(format.format(pl.getHealth()));
             if (map.getOrDefault(pl, 0) != j) {
@@ -141,7 +141,7 @@ public class ScoreboardUtil {
                 }
                 map.put(pl, j);
             }
-        }
+        });
     }
 
     public static void setGameScoreboard(Player p, String[] elements, Game game) {
@@ -163,6 +163,7 @@ public class ScoreboardUtil {
                         team = scoreboard.registerNewTeam(t.getName());
                     team.setAllowFriendlyFire(false);
                     team.setPrefix(org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString());
+
                     for (Player pl : t.getConnectedPlayers()) {
                         if (!team.hasEntry(pl.getName()))
                             team.addEntry(pl.getName());
@@ -249,8 +250,8 @@ public class ScoreboardUtil {
 
 
 
-            String playertag_prefix = "{color}{team} ";
-            RunningTeam playerteam = game.getTeamOfPlayer(p);
+            final String playertag_prefix = "{color}{team} ";
+            final RunningTeam playerteam = game.getTeamOfPlayer(p);
             for (org.screamingsandals.bedwars.api.RunningTeam t : game.getRunningTeams()) {
                 String cl = org.screamingsandals.bedwars.game.TeamColor.valueOf(t.getColor().name()).chatColor.toString();
                 Team team = scoreboard.getTeam(t.getName());

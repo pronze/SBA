@@ -103,7 +103,7 @@ public class LobbyScoreboard extends AbstractListener {
         List<String> ncelements = new ArrayList<>();
         ncelements.add(title.replace("{game}", game.getName()));
         ncelements.addAll(getLine(player, game));
-        ncelements = elementsPro(ncelements);
+        ncelements = makeElementsUnique(ncelements);
         if (ncelements.size() < 16) {
             int es = ncelements.size();
             for (int i = 0; i < 16 - es; i++)
@@ -164,28 +164,20 @@ public class LobbyScoreboard extends AbstractListener {
 
 
 
-  private List<String> elementsPro(List<String> lines) {
-      ArrayList<String> nclines = new ArrayList<>();
-      for (String ls : lines) {
-          String l = ls;
-          if (l != null) {
-              if (nclines.contains(l)) {
-                  for (int i = 0; i == 0; ) {
-                      l = l + "§r";
-                      if (!nclines.contains(l)) {
-                          nclines.add(l);
-                          break;
-                      }
-                  }
-                  continue;
-              }
-              nclines.add(l);
-              continue;
-          }
-          nclines.add(l);
-      }
-      return nclines;
-  }
+    private List<String> makeElementsUnique(List<String> lines) {
+        final ArrayList<String> sbLines = new ArrayList<>();
+        lines.forEach(ls -> {
+            if (ls == null) return;
+
+            String l = ls;
+            while (sbLines.contains(l)) {
+                l = l + "§r";
+            }
+
+            sbLines.add(l);
+        });
+        return sbLines;
+    }
 
     @Override
     public void onDisable() {

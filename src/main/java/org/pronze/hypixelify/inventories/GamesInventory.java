@@ -175,16 +175,18 @@ public class GamesInventory implements Listener {
         ItemStack stack = event.getItem().getStack();
         Player player = event.getPlayer();
         if (stack != null) {
-            if (stack.getType() == Material.BARRIER) {
+            final Material stackType = stack.getType();
+
+            if (stackType == Material.BARRIER) {
                 players.get(mode).remove(player);
                 player.closeInventory();
-            } else if (stack.getType().equals(ShopUtil.BED.getType())
-                    || stack.getType().equals(ShopUtil.FireWorks.getType())
-                    || stack.getType() == Material.DIAMOND) {
+            } else if (stackType.equals(ShopUtil.BED.getType())
+                    || stackType.equals(ShopUtil.FireWorks.getType())
+                    || stackType == Material.DIAMOND) {
                 player.closeInventory();
                 repaint(mode);
                 players.get(mode).remove(player);
-                List<Game> games = ShopUtil.getGamesWithSize(mode);
+                final List<Game> games = ShopUtil.getGamesWithSize(mode);
                 if (games == null || games.isEmpty())
                     return;
                 for (Game game : games) {

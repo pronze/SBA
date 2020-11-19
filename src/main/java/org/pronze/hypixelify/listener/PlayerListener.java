@@ -126,6 +126,9 @@ public class PlayerListener extends AbstractListener {
 
 
             Arrays.stream(player.getInventory().getContents()).forEach(stack -> {
+                if(stack == null){
+                    return;
+                }
                 final String name = stack.getType().name();
 
                 if (name.endsWith("SWORD"))

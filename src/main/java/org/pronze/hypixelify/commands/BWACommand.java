@@ -15,7 +15,6 @@ import java.util.Objects;
 
 public class BWACommand extends AbstractCommand {
 
-    //Use default bedwars admin permissions
     public BWACommand() {
         super(null, true, "bwaddon");
     }

@@ -53,19 +53,17 @@ public class ScoreBoard {
     }
 
     public void updateCustomObj() {
-        for (Player pl : game.getConnectedPlayers()) {
-            ScoreboardUtil.updateCustomObjective(pl, game);
-        }
+        game.getConnectedPlayers().forEach(p->ScoreboardUtil.updateCustomObjective(p, game));
     }
 
     public void updateScoreboard() {
         List<String> scoreboard_lines;
         final List<String> lines = new ArrayList<>();
 
-        if(currentTitlePos >= animatedTitle.size())
+        if (currentTitlePos >= animatedTitle.size())
             currentTitlePos = 0;
 
-        final String currentTitle  = animatedTitle.get(currentTitlePos);
+        final String currentTitle = animatedTitle.get(currentTitlePos);
 
         if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines = Configurator.Scoreboard_Lines.get("5");
@@ -114,22 +112,22 @@ public class ScoreBoard {
 
 
             for (String ls : scoreboard_lines) {
+
                 if (ls.contains("{team_status}")) {
-                    for (Team t : game.getAvailableTeams()) {
+                    game.getAvailableTeams().forEach(t -> {
                         String you = "";
-                        if (playerTeam != null)
+                        if (playerTeam != null) {
                             if (playerTeam.getName().equals(t.getName())) {
                                 you = Messages.message_you;
-                            } else {
-                                you = "";
                             }
+                        }
                         if (teamstatus.containsKey(t.getName())) {
                             lines.add(teamstatus.get(t.getName()).replace("{you}", you));
-                            continue;
+                            return;
                         }
                         lines.add(ls.replace("{team_status}",
                                 getTeamStatusFormat(t).replace("{you}", you)));
-                    }
+                    });
                     continue;
                 }
 
@@ -167,7 +165,7 @@ public class ScoreBoard {
                         addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
                 }
                 if (lines.contains(addline)) {
-                    lines.add(conflict(lines, addline));
+                    lines.add(getUniqueString(lines, addline));
                     continue;
                 }
                 lines.add(addline);
@@ -183,43 +181,39 @@ public class ScoreBoard {
                 for (int i = 0; i < 16 - es; i++)
                     elements.add(1, null);
             }
-            List<String> ncelements = elementsPro(elements);
-            String[] scoreboardelements = ncelements.toArray(new String[0]);
-            ScoreboardUtil.setGameScoreboard(player, scoreboardelements, this.game);
+            elements = makeElementsUnique(elements);
+            ScoreboardUtil.setGameScoreboard(player, elements.toArray(new String[0]), this.game);
 
         }
     }
 
 
-    private List<String> elementsPro(List<String> lines) {
-        ArrayList<String> nclines = new ArrayList<>();
-        for (String ls : lines) {
+    /*
+        Makes similar elements of a List unique
+        Useful so that same lines can be used in scoreboard
+     */
+    private List<String> makeElementsUnique(List<String> lines) {
+        final ArrayList<String> sbLines = new ArrayList<>();
+        lines.forEach(ls -> {
+            if (ls == null) return;
+
             String l = ls;
-            if (l != null) {
-                if (nclines.contains(l)) {
-                    for (int i = 0; i == 0; ) {
-                        l = l + "§r";
-                        if (!nclines.contains(l)) {
-                            nclines.add(l);
-                            break;
-                        }
-                    }
-                    continue;
-                }
-                nclines.add(l);
-                continue;
+            while (sbLines.contains(l)) {
+                l = l + "§r";
             }
-            nclines.add(l);
-        }
-        return nclines;
+
+            sbLines.add(l);
+        });
+        return sbLines;
     }
 
-    private String conflict(List<String> lines, String line) {
+    private String getUniqueString(List<String> lines, String line) {
+        if (lines == null || line == null)
+            return null;
+
         String l = line;
-        for (int i = 0; i == 0; ) {
+        while (lines.contains(l)) {
             l = l + "§r";
-            if (!lines.contains(l))
-                return l;
         }
         return l;
     }
