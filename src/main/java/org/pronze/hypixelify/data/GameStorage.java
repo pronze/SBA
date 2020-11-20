@@ -2,6 +2,7 @@ package org.pronze.hypixelify.data;
 
 import org.bukkit.Location;
 import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.game.Game;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,14 @@ import java.util.Map;
 public class GameStorage {
 
     private final Map<String, TeamData> teamDataMap = new HashMap<>();
+
+    public GameStorage(Game game){
+        game.getRunningTeams().forEach(team->{
+            teamDataMap.put(team.getName(), new TeamData(0, 0,
+                    false, false, team.getTargetBlock()));
+        });
+    }
+
 
     public Location getTargetBlockLocation(RunningTeam rt) {
         return teamDataMap.get(rt.getName()).getTargetBlockLoc();

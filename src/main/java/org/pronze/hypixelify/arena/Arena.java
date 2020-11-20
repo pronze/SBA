@@ -33,7 +33,7 @@ public class Arena {
     public Arena(Game game) {
         radius = Math.pow(SBAHypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
         this.mGame = game;
-        storage = new GameStorage();
+        storage = new GameStorage(game);
         scoreBoard = new ScoreBoard(this);
         gameTask = new GameTask(this);
     }
@@ -153,15 +153,6 @@ public class Arena {
                 player.sendMessage(message);
             });
         });
-
-        mGame.getRunningTeams().forEach(t -> {
-            storage.setTrap(t, false);
-            storage.setPool(t, false);
-            storage.setTargetBlockLocation(t);
-            storage.setProtection(t.getName(), 0);
-            storage.setSharpness(t.getName(), 0);
-        });
-
     }
 
 
