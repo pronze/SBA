@@ -16,11 +16,11 @@ public class ChatListener extends AbstractListener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e){
-        Player player = e.getPlayer();
-        PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final Player player = e.getPlayer();
+        final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
 
         if(db == null || !db.isInParty() || !db.getPartyChatEnabled()) return;
-        Party party = SBAHypixelify.getPartyManager().getParty(db.getPartyLeader());
+        final Party party = SBAHypixelify.getPartyManager().getParty(db.getPartyLeader());
         if(party == null) return;
         if(party.getAllPlayers() == null) return;
         party.sendChat(player, e.getMessage());

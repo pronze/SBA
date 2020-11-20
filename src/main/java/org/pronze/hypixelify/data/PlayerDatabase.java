@@ -1,4 +1,4 @@
-package org.pronze.hypixelify.database;
+package org.pronze.hypixelify.data;
 
 import com.google.common.base.Strings;
 import org.bukkit.entity.Player;

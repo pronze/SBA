@@ -20,8 +20,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.arena.Arena;
-import org.pronze.hypixelify.manager.DatabaseManager;
+import org.pronze.hypixelify.service.PlayerWrapperService;
 import org.pronze.hypixelify.message.Messages;
+import org.pronze.hypixelify.utils.SBAUtil;
 import org.pronze.hypixelify.utils.Scheduler;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -40,8 +41,8 @@ import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 public class PlayerListener extends AbstractListener {
 
 
-    private final ArrayList<Material> allowed = new ArrayList<>();
-    private final ArrayList<Material> generatorDropItems = new ArrayList<>();
+    private final List<Material> allowed;
+    private final List<Material> generatorDropItems;
     private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
             disableArmorDamage, permanentItems, blockItemOnChest, blockItemDrops;
 
@@ -59,28 +60,8 @@ public class PlayerListener extends AbstractListener {
         permanentItems = SBAHypixelify.getConfigurator().config.getBoolean("permanent-items", true);
         blockItemOnChest = SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true);
 
-
-
-            SBAHypixelify.getConfigurator().config.getStringList("allowed-item-drops").forEach(material -> {
-                Material mat;
-                try {
-                    mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
-                } catch (Exception ignored) {
-                    return;
-                }
-                allowed.add(mat);
-            });
-
-
-        SBAHypixelify.getConfigurator().config.getStringList("running-generator-drops").forEach(material -> {
-            Material mat;
-            try {
-                mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
-            } catch (Exception ignored) {
-                return;
-            }
-            generatorDropItems.add(mat);
-        });
+        allowed = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
+        generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
     }
 
     @Override
@@ -90,15 +71,7 @@ public class PlayerListener extends AbstractListener {
         HandlerList.unregisterAll(this);
     }
 
-    @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent e) {
-        if (!partyEnabled) return;
-        final Player player = e.getPlayer();
-        final DatabaseManager dbManager = SBAHypixelify.getDatabaseManager();
-        if (dbManager.getDatabase(player) == null) return;
 
-        dbManager.handleOffline(player);
-    }
 
 
     @EventHandler
@@ -126,7 +99,7 @@ public class PlayerListener extends AbstractListener {
 
 
             Arrays.stream(player.getInventory().getContents()).forEach(stack -> {
-                if(stack == null){
+                if (stack == null) {
                     return;
                 }
                 final String name = stack.getType().name();
@@ -152,12 +125,16 @@ public class PlayerListener extends AbstractListener {
             Player killer = e.getEntity().getKiller();
 
             if (killer != null && isInGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
-                for (ItemStack dropItem : player.getInventory().getContents()) {
-                    if (dropItem != null && generatorDropItems.contains(dropItem.getType())) {
-                        killer.sendMessage("+" + dropItem.getAmount() + " " + dropItem.getType().name());
-                        killer.getInventory().addItem(dropItem);
+                Arrays.stream(player.getInventory().getContents()).forEach(drops->{
+                    if(drops == null){
+                        return;
                     }
-                }
+
+                    if(generatorDropItems.contains(drops)){
+                        killer.sendMessage("+" + drops.getAmount() + " " + drops.getType().name());
+                        killer.getInventory().addItem(drops);
+                    }
+                });
             }
         }
 
@@ -241,13 +218,13 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
         if (!isInGame(evt.getPlayer())) return;
-        if(!blockItemDrops) return;
+        if (!blockItemDrops) return;
 
         final Player player = evt.getPlayer();
         final ItemStack ItemDrop = evt.getItemDrop().getItemStack();
         final Material type = ItemDrop.getType();
 
-        if ( !allowed.contains(type) && !type.name().endsWith("WOOL")) {
+        if (!allowed.contains(type) && !type.name().endsWith("WOOL")) {
             evt.setCancelled(true);
             player.getInventory().remove(ItemDrop);
         }
@@ -274,22 +251,30 @@ public class PlayerListener extends AbstractListener {
 
     }
 
+    @EventHandler
+    public void onPlayerLeave(PlayerQuitEvent e) {
+        if (!partyEnabled) return;
+        final Player player = e.getPlayer();
+        final PlayerWrapperService dbManager = SBAHypixelify.getDatabaseManager();
+        if (dbManager.getDatabase(player) == null) return;
+
+        dbManager.handleOffline(player);
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
-        Player p = e.getPlayer();
-        if (partyEnabled && SBAHypixelify.getDatabaseManager().getDatabase(p) == null)
-            SBAHypixelify.getDatabaseManager().createDatabase(p);
+        final Player player = e.getPlayer();
+        SBAHypixelify.getDatabaseManager().register(player);
 
-        if (!p.isOp())
+        if (!player.isOp())
             return;
 
         if (!SBAHypixelify.getConfigurator().config.getString("version", SBAHypixelify.getVersion())
                 .contains(SBAHypixelify.getVersion())) {
             Scheduler.runTaskLater(() -> {
-                p.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
-                p.sendMessage("Type /bwaddon upgrade to upgrade file");
-                p.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
+                player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
+                player.sendMessage("Type /bwaddon upgrade to upgrade file");
+                player.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
             }, 40L);
         }
     }

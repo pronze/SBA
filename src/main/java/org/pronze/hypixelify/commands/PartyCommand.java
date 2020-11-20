@@ -7,7 +7,7 @@ import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.database.PlayerDatabase;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
-import org.pronze.hypixelify.manager.DatabaseManager;
+import org.pronze.hypixelify.service.PlayerWrapperService;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
 
@@ -16,13 +16,18 @@ import java.util.List;
 
 public class PartyCommand extends AbstractCommand {
 
+    private final boolean partyEnabled;
+
+
     public PartyCommand() {
         super(null, false, "party");
+        partyEnabled = SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true);
+
     }
 
     @Override
     public boolean onPreExecute(CommandSender sender, String[] args) {
-        if (!SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true)) {
+        if (!partyEnabled) {
             sender.sendMessage("§cCannot access command, party system is disabled.");
             return false;
         }
@@ -43,8 +48,8 @@ public class PartyCommand extends AbstractCommand {
             return;
         }
 
-        final DatabaseManager databaseManager = SBAHypixelify.getDatabaseManager();
-        PlayerDatabase playerDatabase = databaseManager.getDatabase(player);
+        final PlayerWrapperService playerWrapperService = SBAHypixelify.getDatabaseManager();
+        final PlayerDatabase playerDatabase = playerWrapperService.getDatabase(player);
         final PartyManager partyManager = SBAHypixelify.getPartyManager();
 
 
@@ -88,11 +93,11 @@ public class PartyCommand extends AbstractCommand {
             if (playerDatabase == null)
                 SBAHypixelify.getDatabaseManager().createDatabase(player);
 
-            PlayerDatabase invitedData = databaseManager.getDatabase(invited);
+            PlayerDatabase invitedData = playerWrapperService.getDatabase(invited);
             if (invitedData == null)
-                databaseManager.createDatabase(invited);
+                playerWrapperService.createDatabase(invited);
 
-            if (databaseManager.getDatabase(player).isInvited()) {
+            if (playerWrapperService.getDatabase(player).isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_decline_inc);
                 return ;
             }
@@ -353,7 +358,7 @@ public class PartyCommand extends AbstractCommand {
     public List<String> tabCompletion(String[] strings, CommandSender commandSender) {
         if (!(commandSender instanceof Player))
             return null;
-        Player player = (Player) commandSender;
+        final Player player = (Player) commandSender;
 
         final PlayerDatabase playerDatabase = SBAHypixelify.getDatabaseManager().getDatabase(player);
 

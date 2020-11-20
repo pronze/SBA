@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.commands;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.SBAHypixelify;
@@ -10,6 +11,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,14 +38,14 @@ public class ShoutCommand extends AbstractCommand {
 
     @Override
     public void execute(String[] args, CommandSender sender) {
-        Player player = (Player) sender;
+        final Player player = (Player) sender;
 
         if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
             ShopUtil.sendMessage(player, Messages.message_not_in_game);
             return;
         }
 
-        Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+        final Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
 
         if(game.getTeamOfPlayer(player) == null){
             player.sendMessage("§cYou cannot do this command while spectating");
@@ -51,7 +53,8 @@ public class ShoutCommand extends AbstractCommand {
         }
 
         final PlayerDatabase playerDatabase = SBAHypixelify.getDatabaseManager().getDatabase(player);
-        boolean cancelShout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0;
+        final boolean cancelShout = SBAHypixelify.getConfigurator()
+                .config.getInt("shout.time-out", 60) == 0;
 
         if(!cancelShout && !hasPermission(player)) {
             if (!playerDatabase.canShout()) {
@@ -63,20 +66,24 @@ public class ShoutCommand extends AbstractCommand {
             }
         }
 
-        RunningTeam team = game.getTeamOfPlayer(player);
-        String color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
-
-        StringBuilder builder = new StringBuilder();
-
-        for(String st : args){
-            builder.append(st).append(" ");
+        final RunningTeam team = game.getTeamOfPlayer(player);
+        String color = ChatColor.GRAY.toString();
+        if(team != null) {
+            color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
         }
+
+        final StringBuilder builder = new StringBuilder();
+
+        Arrays.stream(args).forEach(st -> builder.append(st).append(" "));
 
         String st = Messages.shoutFormat
                 .replace("{color}", color)
-                .replace("{team}", team.getName())
                 .replace("{player}", player.getName())
                 .replace("{message}", builder.toString());
+
+        if(team != null){
+            st = st.replace("{team}", team.getName());
+        }
 
         for(Player pl : game.getConnectedPlayers()){
             pl.sendMessage(st);

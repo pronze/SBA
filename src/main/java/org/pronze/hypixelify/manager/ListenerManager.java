@@ -1,4 +1,5 @@
 package org.pronze.hypixelify.manager;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.inventories.CustomShop;
@@ -31,18 +32,13 @@ public class ListenerManager {
 
     public void registerAll(JavaPlugin plugin){
         if(listeners.isEmpty()) return;
-
-        for(AbstractListener listener : listeners){
-            plugin.getServer().getPluginManager().registerEvents(listener, plugin);
-        }
+        final PluginManager pluginManager = plugin.getServer().getPluginManager();
+        listeners.forEach(listener-> pluginManager.registerEvents(listener, plugin));
     }
 
     public void unregisterAll(){
         if(listeners.isEmpty()) return;
-
-        for(AbstractListener l : listeners){
-            l.onDisable();
-        }
+        listeners.forEach(AbstractListener::onDisable);
         listeners.clear();
     }
 }

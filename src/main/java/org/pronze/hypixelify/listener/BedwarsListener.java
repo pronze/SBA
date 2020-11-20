@@ -1,6 +1,5 @@
 package org.pronze.hypixelify.listener;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -53,13 +52,12 @@ public class BedwarsListener extends AbstractListener {
         if (arena != null) {
             arena.onTargetBlockDestroyed(e);
 
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(),
-                    () -> {
-                        final ScoreBoard board = arena.getScoreBoard();
-                        if (board != null) {
-                            board.updateScoreboard();
-                        }
-                    }, 1L);
+            Scheduler.runTaskLater(() -> {
+                final ScoreBoard board = arena.getScoreBoard();
+                if (board != null) {
+                    board.updateScoreboard();
+                }
+            }, 1L);
         }
 
     }
@@ -83,24 +81,25 @@ public class BedwarsListener extends AbstractListener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
-        Player player = e.getPlayer();
-        Game game = e.getGame();
+        final Player player = e.getPlayer();
+        final org.screamingsandals.bedwars.game.Game game = Main.getGame(e.getGame().getName());
+
         String message = "&eThe game starts in &c{seconds} &eseconds";
 
         new BukkitRunnable() {
-            int j = 0;
+            int buffer = 0; //fixes the bug where it constantly shows will start in 1 second
 
             public void run() {
-                if (player.isOnline() && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) &&
+                if (player.isOnline() &&
                         game.getConnectedPlayers().contains(player) &&
-                        game.getStatus().equals(GameStatus.WAITING)) {
+                        game.getStatus() == GameStatus.WAITING) {
                     if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
-                        String time = Main.getGame(game.getName()).getFormattedTimeLeft();
+                        String time = game.getFormattedTimeLeft();
                         if (!time.contains("0-1")) {
                             String[] units = time.split(":");
                             int seconds = Integer.parseInt(units[1]) + 1;
-                            if (j == seconds) return;
-                            j = seconds;
+                            if (buffer == seconds) return;
+                            buffer = seconds;
                             if (seconds < 2) {
                                 player.sendMessage(ShopUtil
                                         .translateColors(message.replace("{seconds}", String.valueOf(seconds))

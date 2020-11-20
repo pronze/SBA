@@ -6,6 +6,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.message.Messages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractCommand implements TabExecutor {
@@ -13,7 +14,6 @@ public abstract class AbstractCommand implements TabExecutor {
     private final String perm;
     private final boolean console;
     private final String commandName;
-
 
     public AbstractCommand(String perm,
                            boolean consoleUse,
@@ -60,6 +60,7 @@ public abstract class AbstractCommand implements TabExecutor {
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
         return tabCompletion(strings, commandSender);
     }
+
 
 
     public String getPerm(){return perm;}

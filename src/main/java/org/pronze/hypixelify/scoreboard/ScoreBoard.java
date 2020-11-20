@@ -165,7 +165,7 @@ public class ScoreBoard {
                         addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
                 }
                 if (lines.contains(addline)) {
-                    lines.add(getUniqueString(lines, addline));
+                    lines.add(ScoreboardUtil.getUniqueString(lines, addline));
                     continue;
                 }
                 lines.add(addline);
@@ -181,43 +181,11 @@ public class ScoreBoard {
                 for (int i = 0; i < 16 - es; i++)
                     elements.add(1, null);
             }
-            elements = makeElementsUnique(elements);
+            elements = ScoreboardUtil.makeElementsUnique(elements);
             ScoreboardUtil.setGameScoreboard(player, elements.toArray(new String[0]), this.game);
 
         }
     }
-
-
-    /*
-        Makes similar elements of a List unique
-        Useful so that same lines can be used in scoreboard
-     */
-    private List<String> makeElementsUnique(List<String> lines) {
-        final ArrayList<String> sbLines = new ArrayList<>();
-        lines.forEach(ls -> {
-            if (ls == null) return;
-
-            String l = ls;
-            while (sbLines.contains(l)) {
-                l = l + "§r";
-            }
-
-            sbLines.add(l);
-        });
-        return sbLines;
-    }
-
-    private String getUniqueString(List<String> lines, String line) {
-        if (lines == null || line == null)
-            return null;
-
-        String l = line;
-        while (lines.contains(l)) {
-            l = l + "§r";
-        }
-        return l;
-    }
-
 
     private String getTeamBedStatus(RunningTeam team) {
         return team.isDead() ? "§c\u2717" :

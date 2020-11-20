@@ -6,7 +6,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.database.GameStorage;
+import org.pronze.hypixelify.data.GameStorage;
 import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;

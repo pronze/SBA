@@ -17,10 +17,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ScoreboardUtil {
     private static final Map<Player, Scoreboard> scoreboards = new HashMap<>();
@@ -291,6 +288,32 @@ public class ScoreboardUtil {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static List<String> makeElementsUnique(List<String> lines) {
+        final ArrayList<String> sbLines = new ArrayList<>();
+        lines.forEach(ls -> {
+            if (ls == null) return;
+
+            String l = ls;
+            while (sbLines.contains(l)) {
+                l = l + "§r";
+            }
+
+            sbLines.add(l);
+        });
+        return sbLines;
+    }
+
+    public static String getUniqueString(List<String> lines, String line) {
+        if (lines == null || line == null)
+            return null;
+
+        String l = line;
+        while (lines.contains(l)) {
+            l = l + "§r";
+        }
+        return l;
     }
 
 

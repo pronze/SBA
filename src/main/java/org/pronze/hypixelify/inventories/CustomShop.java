@@ -44,7 +44,6 @@ import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
@@ -179,7 +178,7 @@ public class CustomShop extends AbstractListener {
     private static String getNameOrCustomNameOfItem(ItemStack stack) {
         try {
             if (stack.hasItemMeta()) {
-                ItemMeta meta = stack.getItemMeta();
+                final ItemMeta meta = stack.getItemMeta();
                 if (meta == null) {
                     return "";
                 }
@@ -213,11 +212,8 @@ public class CustomShop extends AbstractListener {
             boolean parent = true;
             String file = null;
             if (store != null) {
-
                 parent = (boolean) store.getClass().getMethod("getUseParent").invoke(store);
                 file = (String) store.getClass().getMethod("getShopFile").invoke(store);
-                //parent = store.getUseParent();
-                //file = store.getShopFile();
             }
             if (file != null) {
                 if (file.endsWith(".yml")) {
@@ -231,7 +227,7 @@ public class CustomShop extends AbstractListener {
                         loadNewShop(name, file + ".yml", parent);
                     }
                 }
-                SimpleInventories shop = shopMap.get(name);
+                final SimpleInventories shop = shopMap.get(name);
                 shop.openForPlayer(player);
             } else {
                 shopMap.get("default").openForPlayer(player);
@@ -248,13 +244,14 @@ public class CustomShop extends AbstractListener {
             return;
         }
 
-        PlayerItemInfo item = event.getInfo();
-        Player player = event.getPlayer();
-        Game game = Main.getPlayerGameProfile(player).getGame();
-        MapReader reader = item.getReader();
+        final PlayerItemInfo item = event.getInfo();
+        final Player player = event.getPlayer();
+        final Game game = Main.getPlayerGameProfile(player).getGame();
+        final MapReader reader = item.getReader();
+
         if (reader.containsKey("price") && reader.containsKey("price-type")) {
-            int price = reader.getInt("price");
-            ItemSpawnerType type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
+            final int price = reader.getInt("price");
+            final ItemSpawnerType type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
             if (type == null) {
                 return;
             }
@@ -302,34 +299,8 @@ public class CustomShop extends AbstractListener {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //
-            boolean enabled = Main.getConfigurator().config.getBoolean("lore.generate-automatically", true);
-            enabled = reader.getBoolean("generate-lore", enabled);
 
-            List<String> loreText = reader.getStringList("generated-lore-text",
-                    Main.getConfigurator().config.getStringList("lore.text"));
-
-            String nprice = Integer.toString(price);
-
-
-            if (enabled) {
-                ItemStack stack = event.getStack();
-                ItemMeta stackMeta = stack.getItemMeta();
-                List<String> lore = new ArrayList<>();
-                if (stackMeta.hasLore()) {
-                    lore = stackMeta.getLore();
-                }
-                for (String s : loreText) {
-                    s = s.replaceAll("%price%", nprice);
-                    s = s.replaceAll("%resource%", type.getItemName());
-                    s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
-                    assert lore != null;
-                    lore.add(s);
-                }
-                stackMeta.setLore(lore);
-                stack.setItemMeta(stackMeta);
-                event.setStack(stack);
-            }
+            event.setStack(setLores(event.getStack(), reader, String.valueOf(price)));
 
 
             if (item.hasProperties()) {
@@ -341,7 +312,6 @@ public class CustomShop extends AbstractListener {
                         Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
                         event.setStack(newItem);
                     }
-
                 }
             }
 
@@ -389,26 +359,48 @@ public class CustomShop extends AbstractListener {
         }
     }
 
+    public ItemStack setLores(ItemStack stack, MapReader reader, String price){
+        boolean enabled = Main.getConfigurator().config
+                .getBoolean("lore.generate-automatically", true);
+
+        if (enabled) {
+            final List<String> loreText = reader.getStringList("generated-lore-text",
+                    Main.getConfigurator().config.getStringList("lore.text"));
+            final ItemSpawnerType type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
+            final ItemMeta stackMeta = stack.getItemMeta();
+            final List<String> lore = new ArrayList<>();
+            for (String s : loreText) {
+                s = s.replaceAll("%price%", String.valueOf(price));
+                s = s.replaceAll("%resource%", type.getItemName());
+                s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
+                lore.add(s);
+            }
+            stackMeta.setLore(lore);
+            stack.setItemMeta(stackMeta);
+        }
+
+        return stack;
+    }
     @EventHandler
     public void onApplyPropertyToItem(ApplyPropertyToItemEvent event) {
         String price = null;
-        org.screamingsandals.bedwars.api.game.Game game = event.getGame();
+        final org.screamingsandals.bedwars.api.game.Game game = event.getGame();
         final Player player = event.getPlayer();
         final RunningTeam team = game.getTeamOfPlayer(player);
         final String propertyName = event.getPropertyName();
+        final ItemStack itemStack = event.getStack();
 
         if (propertyName.equalsIgnoreCase("applycolorbyteam")
                 || propertyName.equalsIgnoreCase("transform::applycolorbyteam")) {
             final CurrentTeam t = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
 
             if (Main.getConfigurator().config.getBoolean("automatic-coloring-in-shop")) {
-                event.setStack(Main.applyColor(t.teamInfo.color, event.getStack()));
+                event.setStack(Main.applyColor(t.teamInfo.color, itemStack));
             }
 
-        } else if (!propertyName.equalsIgnoreCase("sharpness")
-                && !propertyName.equalsIgnoreCase("protection")) {
-            return;
-        } else if (propertyName.equalsIgnoreCase("sharpness")) {
+        }
+
+        else if (propertyName.equalsIgnoreCase("sharpness")) {
             if (team == null) return;
             ItemStack stack = event.getStack();
             int level = Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).getSharpness(team.getName()) + 1;
@@ -438,31 +430,16 @@ public class CustomShop extends AbstractListener {
             }
         }
 
-        if (event.getStack().getItemMeta().getLore() != null) {
-            for (String st : event.getStack().getItemMeta().getLore()) {
+        final List<String> lore = event.getStack().getItemMeta().getLore();
+
+        if (lore != null) {
+            for (String st : lore) {
                 if (st.contains("Maximum Enchant")) return;
             }
         }
 
-        //fix lores
-        boolean enabled = Main.getConfigurator().config.getBoolean("lore.generate-automatically", true);
-
-        if (enabled && price != null) {
-            List<String> loreText = event.getReader().getStringList("generated-lore-text",
-                    Main.getConfigurator().config.getStringList("lore.text"));
-            ItemSpawnerType type = Main.getSpawnerType((event.getReader().getString("price-type")).toLowerCase());
-            ItemStack stack = event.getStack();
-            ItemMeta stackMeta = stack.getItemMeta();
-            List<String> lore = new ArrayList<>();
-            for (String s : loreText) {
-                s = s.replaceAll("%price%", price);
-                s = s.replaceAll("%resource%", type.getItemName());
-                s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
-                lore.add(s);
-            }
-            stackMeta.setLore(lore);
-            stack.setItemMeta(stackMeta);
-            event.setStack(stack);
+        if (price != null) {
+            event.setStack(setLores(event.getStack(), event.getReader(), price));
         }
 
     }
@@ -515,11 +492,11 @@ public class CustomShop extends AbstractListener {
 
     @EventHandler
     public void onPlayerToolUpgrade(PlayerToolUpgradeEvent e) {
-        Player player = e.getPlayer();
-        ItemStack newItem = e.getUpgradedItem();
-        RunningTeam team = e.getTeam();
-        String name = e.getName();
-        org.screamingsandals.bedwars.api.game.Game game = e.getGame();
+        final Player player = e.getPlayer();
+        final ItemStack newItem = e.getUpgradedItem();
+        final RunningTeam team = e.getTeam();
+        final String name = e.getName();
+        final org.screamingsandals.bedwars.api.game.Game game = e.getGame();
 
         if (name.equalsIgnoreCase("sharpness")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
@@ -535,12 +512,16 @@ public class CustomShop extends AbstractListener {
                 }
                 e.setPrice(Integer.toString(price));
             }
-        } else if (name.equalsIgnoreCase("efficiency")) {
+        }
+
+        else if (name.equalsIgnoreCase("efficiency")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
                 e.setCancelled(true);
                 player.sendMessage(Messages.message_greatest_enchantment);
             }
-        } else if (name.equalsIgnoreCase("blindtrap")) {
+        }
+
+        else if (name.equalsIgnoreCase("blindtrap")) {
             if (SBAHypixelify.getGameStorage(game) == null) {
                 e.setCancelled(true);
                 player.sendMessage(Messages.ERROR_OCCURED);
@@ -553,7 +534,9 @@ public class CustomShop extends AbstractListener {
                 Objects.requireNonNull(SBAHypixelify.getGameStorage(game)).setTrap(team, true);
                 team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.blindnessTrapPurchased, "", 20, 40, 20));
             }
-        } else if (name.equalsIgnoreCase("healpool")) {
+        }
+
+        else if (name.equalsIgnoreCase("healpool")) {
             if (SBAHypixelify.getGameStorage(game) == null) {
                 e.setCancelled(true);
                 player.sendMessage(Messages.ERROR_OCCURED);
@@ -567,7 +550,9 @@ public class CustomShop extends AbstractListener {
                 team.getConnectedPlayers().forEach(pl -> pl.sendMessage(Messages.message_purchase_heal_pool
                         .replace("{player}", player.getName())));
             }
-        } else if (name.equalsIgnoreCase("protection")) {
+        }
+
+        else if (name.equalsIgnoreCase("protection")) {
             if (Objects.requireNonNull(player.getInventory().getBoots())
                     .getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
                 e.setCancelled(true);
@@ -592,13 +577,13 @@ public class CustomShop extends AbstractListener {
     }
 
     private void handleBuy(ShopTransactionEvent event) {
-        Player player = event.getPlayer();
-        Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
-        RunningTeam team = game.getTeamOfPlayer(player);
-        ClickType clickType = event.getClickType();
-        MapReader mapReader = event.getItem().getReader();
-        String priceType = event.getType().toLowerCase();
-        ItemSpawnerType type = Main.getSpawnerType(priceType);
+        final Player player = event.getPlayer();
+        final Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
+        final RunningTeam team = game.getTeamOfPlayer(player);
+        final ClickType clickType = event.getClickType();
+        final MapReader mapReader = event.getItem().getReader();
+        final String priceType = event.getType().toLowerCase();
+        final ItemSpawnerType type = Main.getSpawnerType(priceType);
         ItemStack newItem = event.getStack();
 
         int amount = newItem.getAmount();
@@ -676,7 +661,7 @@ public class CustomShop extends AbstractListener {
             }
 
             boolean shouldSellStack = true;
-
+            final String typeName = newItem.getType().name();
 
             if (propName != null) {
                 PlayerToolUpgradeEvent e = new PlayerToolUpgradeEvent(player, newItem, propName, team, game, type);
@@ -703,7 +688,7 @@ public class CustomShop extends AbstractListener {
 
                 return;
 
-            } else if (newItem.getType().name().endsWith("SWORD")) {
+            } else if (typeName.endsWith("SWORD")) {
 
                 if (!player.getInventory().contains(newItem.getType())) {
                     ShopUtil.upgradeSwordOnPurchase(player, newItem, game);

@@ -1,19 +1,20 @@
 package org.pronze.hypixelify;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.pronze.hypixelify.arena.Arena;
-import org.pronze.hypixelify.database.GameStorage;
+import org.pronze.hypixelify.data.GameStorage;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
 import org.pronze.hypixelify.manager.*;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.placeholderapi.SBAExpansion;
+import org.pronze.hypixelify.service.PlayerWrapperService;
 import org.pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -27,7 +28,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
     public boolean papiEnabled;
     private CustomShop shop;
     private String version;
-    private DatabaseManager databaseManager;
+    private PlayerWrapperService playerWrapperService;
     private PartyManager partyManager;
     private Configurator configurator;
     private ArenaManager arenaManager;
@@ -84,8 +85,8 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         return plugin.gamesInventory;
     }
 
-    public static DatabaseManager getDatabaseManager() {
-        return plugin.databaseManager;
+    public static PlayerWrapperService getDatabaseManager() {
+        return plugin.playerWrapperService;
     }
 
     public static boolean isPapiEnabled() {
@@ -131,6 +132,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
 
         partyEnabled = configurator.config.getBoolean("party.enabled", true);
         debug = configurator.config.getBoolean("debug.enabled", false);
+
         mainLobby = SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false);
         isProtocolLib = Bukkit.getServer().getPluginManager().getPlugin("ProtocolLib") != null;
 
@@ -145,11 +147,11 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         shop = new CustomShop();
 
 
-        if (SBAHypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true))
+        if (configurator.config.getBoolean("games-inventory.enabled", true))
             gamesInventory = new GamesInventory();
 
-        if (databaseManager == null)
-            databaseManager = new DatabaseManager();
+        if (playerWrapperService == null)
+            playerWrapperService = new PlayerWrapperService();
 
         if (configurator.config.getBoolean("party.enabled", true)) {
             partyManager = new PartyManager();
@@ -221,15 +223,16 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
             Bukkit.getOnlinePlayers().forEach(SBAUtil::removeScoreboardObjective);
         }
 
-        Bukkit.getLogger().info("[SBAHypixelify]: Unregistering listeners....");
+        Bukkit.getLogger().info("Unregistering listeners....");
         if (listenerManager != null)
             listenerManager.unregisterAll();
 
-        Bukkit.getLogger().info("[SBAHypixelify]: Cancelling current tasks....");
+        Bukkit.getLogger().info("Cancelling current tasks....");
         messages = null;
         arenaManager = null;
         if (gamesInventory != null)
             gamesInventory.destroy();
+
 
         shop.destroy();
         this.getServer().getScheduler().cancelTasks(plugin);
@@ -241,10 +244,12 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onBwReload(PluginEnableEvent event) {
-        String plugin = event.getPlugin().getName();
+        final String plugin = event.getPlugin().getName();
+        final PluginManager pluginManager = Bukkit.getServer().getPluginManager();
+
         if (plugin.equalsIgnoreCase("BedWars")) {
-            Bukkit.getServer().getPluginManager().disablePlugin(SBAHypixelify.getInstance());
-            Bukkit.getServer().getPluginManager().enablePlugin(SBAHypixelify.getInstance());
+            pluginManager.disablePlugin(SBAHypixelify.getInstance());
+            pluginManager.enablePlugin(SBAHypixelify.getInstance());
         }
     }
 

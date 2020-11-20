@@ -15,8 +15,7 @@ import java.util.Map;
 
 public class PartyManager implements org.pronze.hypixelify.api.party.PartyManager{
 
-
-    public final Map<Player, Party> parties = new HashMap<>();
+    private final Map<Player, Party> parties = new HashMap<>();
 
     @Override
     public List<org.pronze.hypixelify.api.party.Party> getParties(){

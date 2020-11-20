@@ -4,7 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.database.PlayerDatabase;
+import org.pronze.hypixelify.data.PlayerDatabase;
 
 public class SBAExpansion extends PlaceholderExpansion {
     @Override

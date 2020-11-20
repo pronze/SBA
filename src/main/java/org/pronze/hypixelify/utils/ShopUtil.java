@@ -43,10 +43,13 @@ public class ShopUtil {
         }
 
         Arrow = new ItemStack(Material.ARROW);
-        ItemMeta metaArrow = Arrow.getItemMeta();
+        final ItemMeta metaArrow = Arrow.getItemMeta();
 
-        metaArrow.setDisplayName(SBAHypixelify.getConfigurator().config.getString("games-inventory.back-item.name", "§aGo Back"));
-        List<String> arrowLore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.back-item.lore");
+        metaArrow.setDisplayName(SBAHypixelify.getConfigurator()
+                .config.getString("games-inventory.back-item.name", "§aGo Back"));
+        final List<String> arrowLore = SBAHypixelify.getConfigurator()
+                .config.getStringList("games-inventory.back-item.lore");
+
         metaArrow.setLore(arrowLore);
         Arrow.setItemMeta(metaArrow);
 
@@ -59,12 +62,14 @@ public class ShopUtil {
         }
 
         ItemMeta fireMeta = FireWorks.getItemMeta();
-        fireMeta.setDisplayName(SBAHypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Map"));
+        fireMeta.setDisplayName(SBAHypixelify.getConfigurator()
+                .config.getString("games-inventory.firework-name", "§aRandom Map"));
         FireWorks.setItemMeta(fireMeta);
 
         Diamond = new ItemStack(Material.DIAMOND);
         ItemMeta diamondMeta = Diamond.getItemMeta();
-        diamondMeta.setDisplayName(SBAHypixelify.getConfigurator().config.getString("games-inventory.firework-name", "§aRandom Favorite"));
+        diamondMeta.setDisplayName(SBAHypixelify.getConfigurator()
+                .config.getString("games-inventory.firework-name", "§aRandom Favorite"));
         Diamond.setItemMeta(diamondMeta);
     }
 
@@ -262,26 +267,35 @@ public class ShopUtil {
         if (Arrow == null)
             InitalizeStacks();
 
-        ArrayList<Object> games = new ArrayList<>();
+        final ArrayList<Object> games = new ArrayList<>();
         int items = 0;
+
+        final ItemStack arenaMaterial = new ItemStack(Material
+                .valueOf(SBAHypixelify.getConfigurator().config
+                        .getString("games-inventory.stack-material", "PAPER")));
+
+        final ItemMeta arenaMatMeta = arenaMaterial.getItemMeta();
+
         for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
                 .getGames()) {
             if (Configurator.game_size.containsKey(game.getName()) &&
                     Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
-                ItemStack temp = new ItemStack(Material.valueOf(SBAHypixelify.getConfigurator().config.getString("games-inventory.stack-material", "PAPER")));
-                ItemMeta meta1 = temp.getItemMeta();
                 String name1 = "§a" + game.getName();
                 List<String> newLore = new ArrayList<>();
-                for (String ls : lore) {
-                    String l = ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
-                            .replace("{status}", capFirstLetter(game.getStatus().name()));
-                    newLore.add(l);
-                }
-                meta1.setLore(newLore);
-                meta1.setDisplayName(name1);
-                temp.setItemMeta(meta1);
+                lore.forEach(ls->{
+                    if(ls == null || ls.isEmpty()){
+                        return;
+                    }
+                    newLore.add(
+                            ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
+                                    .replace("{status}", capFirstLetter(game.getStatus().name()))
+                    );
+                });
+                arenaMatMeta.setLore(newLore);
+                arenaMatMeta.setDisplayName(name1);
+                arenaMaterial.setItemMeta(arenaMatMeta);
                 HashMap<String, Object> gameStack = new HashMap<>();
-                gameStack.put("stack", temp);
+                gameStack.put("stack", arenaMaterial);
                 gameStack.put("game", game);
                 games.add(gameStack);
                 items++;
@@ -334,6 +348,12 @@ public class ShopUtil {
 
     public static String getModeFromInt(int mode) {
         return mode == 1 ? "Solo" : mode == 2 ? "Double" : mode == 3 ? "Triples" : "Squads";
+    }
+
+    public static int getIntFromMode(String mode){
+        return mode.equalsIgnoreCase("Solo") ? 1 :
+                mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 :
+                mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
     public static Options generateOptions() {

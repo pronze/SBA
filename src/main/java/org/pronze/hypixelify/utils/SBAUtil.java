@@ -4,8 +4,12 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.SBAHypixelify;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SBAUtil {
 
@@ -29,5 +33,30 @@ public class SBAUtil {
                 ex.printStackTrace();
             }
         }
+    }
+
+    public static List<Material> parseMaterialFromConfig(String key){
+        final List<Material> materialList = new ArrayList<>();
+
+        final List<String> materialNames = SBAHypixelify.getConfigurator().config.getStringList(key);
+        try{
+            materialNames.forEach(material->{
+                if(material == null || material.isEmpty()){
+                    return;
+                }
+
+                try{
+                    final Material mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+                    materialList.add(mat);
+                } catch (Exception ignored){
+
+                }
+
+            });
+        } catch (Throwable t){
+            t.printStackTrace();
+        }
+
+        return materialList;
     }
 }

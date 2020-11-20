@@ -67,10 +67,10 @@ public class GamesInventory implements Listener {
     }
 
     private void createData() {
-        SimpleInventories soloMenu = new SimpleInventories(option.get(1));
-        SimpleInventories doubleMenu = new SimpleInventories(option.get(2));
-        SimpleInventories tripleMenu = new SimpleInventories(option.get(3));
-        SimpleInventories squadMenu = new SimpleInventories(option.get(4));
+        final SimpleInventories soloMenu = new SimpleInventories(option.get(1));
+        final SimpleInventories doubleMenu = new SimpleInventories(option.get(2));
+        final SimpleInventories tripleMenu = new SimpleInventories(option.get(3));
+        final SimpleInventories squadMenu = new SimpleInventories(option.get(4));
 
 
         for (int i = 1; i <= 4; i++) {
@@ -132,7 +132,7 @@ public class GamesInventory implements Listener {
     }
 
     public void openForPlayer(Player player, int mode) {
-        GameSelectorOpenEvent event = new GameSelectorOpenEvent(player, mode);
+        final GameSelectorOpenEvent event = new GameSelectorOpenEvent(player, mode);
         Bukkit.getServer().getPluginManager().callEvent(event);
 
         if (event.isCancelled()) {
@@ -203,9 +203,9 @@ public class GamesInventory implements Listener {
             }
         }
 
-        MapReader reader = event.getItem().getReader();
+        final MapReader reader = event.getItem().getReader();
         if (reader.containsKey("game")) {
-            Game game = (Game) reader.get("game");
+            final Game game = (Game) reader.get("game");
             Main.getGame(game.getName()).joinToGame(player);
             player.closeInventory();
             repaint(mode);
