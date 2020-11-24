@@ -138,29 +138,10 @@ public class ScoreBoard {
                                 + " in §a" + arena.gameTask.getFormattedTimeLeft());
 
                 if (game.isPlayerInAnyTeam(player) && chatColor != null) {
-                    addline = addline.replace("{team_peoples}", teamSize).replace("{player_name}", player.getName())
-                            .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString());
+                    addline = addline.replace("{teams}", String.valueOf(game.getRunningTeams().size()))
+                            .replace("{color}", chatColor.toString());
                 }
 
-                //TODO: More testing here
-            //    for (RunningTeam t : game.getRunningTeams()) {
-            //        if (addline.contains("{team_" + t.getName() + "_status}")) {
-            //            String stf = getTeamStatusFormat(t);
-            //            if (game.getTeamOfPlayer(player) == null) {
-            //                stf = stf.replace("{you}", "");
-            //            } else if (game.getTeamOfPlayer(player) == t) {
-            //                stf = stf.replace("{you}", Messages.message_you);
-            //            } else {
-            //                stf = stf.replace("{you}", "");
-            //            }
-            //            addline = addline.replace("{team_" + t.getName() + "_status}", stf);
-            //        }
-            //        if (addline.contains("{team_" + t.getName() + "_bed_status}"))
-            //            addline = addline.replace("{team_" + t.getName() + "_bed_status}",
-            //                    getTeamBedStatus(t));
-            //        if (addline.contains("{team_" + t.getName() + "_peoples}"))
-            //            addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
-            //    }
                 if (lines.contains(addline)) {
                     lines.add(ScoreboardUtil.getUniqueString(lines, addline));
                     continue;

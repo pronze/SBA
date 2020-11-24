@@ -184,8 +184,6 @@ public class ScoreboardUtil {
             for (RunningTeam team : game.getRunningTeams()) {
                 Team scoreboardTeam = scoreboard.getTeam(team.getName());
 
-                //Increase performance by updating if only the team isn't registered, seems logical for now
-                //TODO: test this
                 //TODO: Hide spectators (Configurable Option)
                 if (scoreboardTeam == null) {
                     scoreboardTeam = scoreboard.registerNewTeam(team.getName());
