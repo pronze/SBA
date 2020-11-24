@@ -6,7 +6,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.api.service.WrapperService;
-import org.pronze.hypixelify.data.PlayerDatabase;
+import org.pronze.hypixelify.data.PlayerWrapper;
 import org.pronze.hypixelify.utils.Scheduler;
 
 import java.util.HashMap;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class PlayerWrapperService implements WrapperService<Player> {
 
-    private final Map<UUID, PlayerDatabase> playerData = new HashMap<>();
+    private final Map<UUID, PlayerWrapper> playerData = new HashMap<>();
     private final Map<UUID, BukkitTask> deletionTasks = new HashMap<>();
 
     public PlayerWrapperService() {
@@ -26,7 +26,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
     public void handleOffline(Player player) {
         if (!playerData.containsKey(player.getUniqueId())) return;
         final PartyManager partyManager = SBAHypixelify.getPartyManager();
-        final PlayerDatabase playerDatabase = getDatabase(player);
+        final PlayerWrapper playerDatabase = getWrapper(player);
 
         if (playerDatabase == null) return;
 
@@ -44,7 +44,8 @@ public class PlayerWrapperService implements WrapperService<Player> {
     }
 
 
-    public org.pronze.hypixelify.data.PlayerDatabase getDatabase(Player player) {
+
+    public PlayerWrapper getWrapper(Player player) {
         return playerData.get(player.getUniqueId());
     }
 
@@ -52,15 +53,18 @@ public class PlayerWrapperService implements WrapperService<Player> {
     public void updateAll() {
         if (playerData.isEmpty()) return;
 
-        for (PlayerDatabase db : playerData.values()) {
-            if (db == null) continue;
-            db.updateDatabase();
-        }
+        Scheduler.runTask(()->{
+            for (PlayerWrapper db : playerData.values()) {
+                if (db == null) continue;
+                db.updateDatabase();
+            }
+        });
+
     }
 
     @Override
     public void register(Player player) {
-        playerData.put(player.getUniqueId(), new PlayerDatabase(player));
+        playerData.put(player.getUniqueId(), new PlayerWrapper(player));
         SBAHypixelify.debug("Registered player: " +
                 player.getDisplayName());
         cancelTasksIfExists(player);

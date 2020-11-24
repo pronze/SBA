@@ -46,13 +46,27 @@ public class LobbyScoreboard extends AbstractListener {
 
     public LobbyScoreboard() {
         date = new SimpleDateFormat(Configurator.date).format(new Date());
-        List<String> lobby_scoreboard = SBAHypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
-        lobby_scoreboard_lines = SBAHypixelify.getConfigurator().getStringList("lobby_scoreboard.lines");
+        List<String> lobby_scoreboard = SBAHypixelify.getConfigurator()
+                .getStringList("lobby-scoreboard.title");
 
-        countdown_message = format(SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
-        isEnabled = SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true);
+        lobby_scoreboard_lines = SBAHypixelify.getConfigurator()
+                .getStringList("lobby_scoreboard.lines");
+
+        countdown_message = format(SBAHypixelify.getConfigurator().config
+                .getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
+        isEnabled = SBAHypixelify.getConfigurator().config
+                .getBoolean("lobby-scoreboard.enabled", true);
+
+        if(!isEnabled){
+            onDisable();
+            return;
+        }
+
+        cancelTask();
+
         updateTask = new BukkitRunnable() {
             int tc = 0;
+            final BedwarsAPI bedwarsAPI = BedwarsAPI.getInstance();
 
             public void run() {
                 if(!disabling) {
@@ -63,8 +77,6 @@ public class LobbyScoreboard extends AbstractListener {
 
                     players.forEach(player->{
                         if(player == null || !player.isOnline()) return;
-
-                        final BedwarsAPI bedwarsAPI = BedwarsAPI.getInstance();
 
                         final Game game = bedwarsAPI.getGameOfPlayer(player);
 
@@ -85,7 +97,6 @@ public class LobbyScoreboard extends AbstractListener {
             return;
 
         final Player player = e.getPlayer();
-
         players.add(player);
     }
 
@@ -114,7 +125,7 @@ public class LobbyScoreboard extends AbstractListener {
     }
 
     private List<String> getLine(Player player, Game game) {
-        List<String> line = new ArrayList<>();
+        final List<String> line = new ArrayList<>();
         String state = "§fWaiting...";
         String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
@@ -179,8 +190,7 @@ public class LobbyScoreboard extends AbstractListener {
         return sbLines;
     }
 
-    @Override
-    public void onDisable() {
+    public void cancelTask(){
         try{
             if(updateTask != null && !updateTask.isCancelled()) {
                 updateTask.cancel();
@@ -188,9 +198,11 @@ public class LobbyScoreboard extends AbstractListener {
         } catch (Throwable t){
             t.printStackTrace();
         }
-
         updateTask = null;
-
+    }
+    @Override
+    public void onDisable() {
+        cancelTask();
         disabling = true;
         HandlerList.unregisterAll(this);
     }

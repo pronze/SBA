@@ -39,11 +39,13 @@ public class BedwarsListener extends AbstractListener {
                 ScoreboardUtil.removePlayer(player);
             }
         });
-        Arena arena = new Arena(game);
+        final Arena arena = new Arena(game);
         SBAHypixelify.getArenaManager().addArena(game.getName(), arena);
         Scheduler.runTaskLater(() -> arena.getScoreBoard().updateScoreboard(), 2L);
         arena.onGameStarted(e);
     }
+
+
 
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {

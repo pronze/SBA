@@ -4,7 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.data.PlayerDatabase;
+import org.pronze.hypixelify.data.PlayerWrapper;
 
 public class SBAExpansion extends PlaceholderExpansion {
     @Override
@@ -27,7 +27,7 @@ public class SBAExpansion extends PlaceholderExpansion {
 
 
         if(identifier.startsWith("sbaplayer_")){
-            final PlayerDatabase database = SBAHypixelify.getDatabaseManager().getDatabase(player);
+            final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
             if(database == null){
                 return null;
             }

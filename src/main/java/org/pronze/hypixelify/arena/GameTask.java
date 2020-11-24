@@ -1,11 +1,13 @@
 package org.pronze.hypixelify.arena;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.pronze.hypixelify.SBAHypixelify;
+import org.pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
 import org.pronze.hypixelify.data.GameStorage;
 import org.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
@@ -67,16 +69,21 @@ public class GameTask extends BukkitRunnable {
                         if (!storage.isTrapEnabled(rt) || rt.isPlayerInTeam(player)) continue;
 
                         if (storage.getTargetBlockLocation(rt).distanceSquared(player.getLocation()) <= arena.radius) {
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
-                            storage.setTrap(rt, false);
-                            player.sendMessage("§eYou have been blinded by " + rt.getName() + " team!");
-                            rt.getConnectedPlayers().forEach(pl -> {
-                                Sounds.playSound(pl, pl.getLocation(),
-                                        Main.getConfigurator().config.getString("sounds.on_trap_triggered"),
-                                        Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
-                                        20, 60, 0);
-                            });
+                            TeamTrapTriggeredEvent event = new TeamTrapTriggeredEvent(player, rt, arena);
+                            Bukkit.getServer().getPluginManager().callEvent(event);
+
+                            if(!event.isCancelled()) {
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
+                                storage.setTrap(rt, false);
+                                player.sendMessage("§eYou have been blinded by " + rt.getName() + " team!");
+                                rt.getConnectedPlayers().forEach(pl -> {
+                                    Sounds.playSound(pl, pl.getLocation(),
+                                            Main.getConfigurator().config.getString("sounds.on_trap_triggered"),
+                                            Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+                                    sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
+                                            20, 60, 0);
+                                });
+                            }
                         }
                     }
                 }

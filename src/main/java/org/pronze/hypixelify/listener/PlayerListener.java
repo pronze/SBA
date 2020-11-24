@@ -255,8 +255,8 @@ public class PlayerListener extends AbstractListener {
     public void onPlayerLeave(PlayerQuitEvent e) {
         if (!partyEnabled) return;
         final Player player = e.getPlayer();
-        final PlayerWrapperService dbManager = SBAHypixelify.getDatabaseManager();
-        if (dbManager.getDatabase(player) == null) return;
+        final PlayerWrapperService dbManager = SBAHypixelify.getWrapperService();
+        if (dbManager.getWrapper(player) == null) return;
 
         dbManager.handleOffline(player);
     }
@@ -264,7 +264,7 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         final Player player = e.getPlayer();
-        SBAHypixelify.getDatabaseManager().register(player);
+        SBAHypixelify.getWrapperService().register(player);
 
         if (!player.isOp())
             return;

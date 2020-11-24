@@ -1,10 +1,10 @@
-package org.pronze.hypixelify.api.database;
+package org.pronze.hypixelify.api.wrapper;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.api.party.Party;
 
 import java.util.concurrent.CompletableFuture;
 
-public interface PlayerDatabase {
+public interface PlayerWrapper {
 
 
     boolean getPartyChatEnabled();
@@ -27,7 +27,6 @@ public interface PlayerDatabase {
 
     void setPartyLeader(Player player);
 
-    void setExpiredTimeTimeout(int timeout);
 
     void updateDatabase();
 

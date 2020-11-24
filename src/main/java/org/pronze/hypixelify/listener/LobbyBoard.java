@@ -17,7 +17,7 @@ import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
@@ -80,7 +80,7 @@ public class LobbyBoard extends AbstractListener {
     public void onChat(AsyncPlayerChatEvent e) {
         if (!lobbyChatOverride) return;
         final Player player = e.getPlayer();
-        final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
 
         if (SBAHypixelify.LobbyBoardEnabled() && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
             if (Messages.lobby_chat_format != null) {
@@ -157,7 +157,7 @@ public class LobbyBoard extends AbstractListener {
         if (players.contains(player)) return;
 
 
-        final PlayerDatabase playerData = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper playerData = SBAHypixelify.getWrapperService().getWrapper(player);
         if (playerData == null) {
             SBAHypixelify.debug("Player data of player: " + player.getDisplayName() + " is null," +
                     "skipping scoreboard creation");

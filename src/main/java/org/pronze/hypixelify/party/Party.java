@@ -3,7 +3,11 @@ package org.pronze.hypixelify.party;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.SBAHypixelify;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
+import org.pronze.hypixelify.utils.MessageUtils;
+import org.pronze.hypixelify.utils.Scheduler;
 import org.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.lib.lang.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,14 +41,15 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
     public List<Player> getOfflinePlayers() {
         List<Player> offlinePlayers = new ArrayList<>();
 
-        for (Player player : players) {
-            if (player != null) {
-                if (Bukkit.getPlayer(player.getUniqueId()) == null) {
-                    offlinePlayers.add(player);
-                }
+        players.forEach(player->{
+            if(player == null){
+                return;
             }
-        }
 
+            if(!player.isOnline() || Bukkit.getPlayer(player.getUniqueId()) == null){
+                offlinePlayers.add(player);
+            }
+        });
         if (offlinePlayers.isEmpty()) return null;
 
         return offlinePlayers;
@@ -71,8 +76,10 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
    public void addInvitedMember(Player pl) {
        if (!invitedMembers.contains(pl)) {
            invitedMembers.add(pl);
-           SBAHypixelify.getDatabaseManager().getDatabase(pl).setInvitedParty(this);
-           SBAHypixelify.getDatabaseManager().getDatabase(pl).setInvited(true);
+           final PlayerWrapper wrapper = SBAHypixelify.getWrapperService().getWrapper(pl);
+
+           wrapper.setInvitedParty(this);
+           wrapper.setInvited(true);
        }
    }
 
@@ -116,16 +123,10 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
 
     @Override
     public void removeMember(Player player) {
+
         if (player.equals(leader)) {
-            for (Player pl : players) {
-                if (Bukkit.getPlayer(pl.getUniqueId()) != null && !pl.equals(leader)) {
-                    for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
-                        pl.sendMessage(ShopUtil.translateColors(st));
-                    }
-                }
-            }
-            players.clear();
-            leader = null;
+            getPlayers().forEach(pl->MessageUtils.sendMessage("party.message.disband-inactivity", pl));
+            Scheduler.runTask(()->SBAHypixelify.getPartyManager().disband(player));
             return;
         }
         players.remove(player);
@@ -134,8 +135,6 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
     @Override
     public int getCompleteSize(){
         if( players == null || invitedMembers == null) return 0;
-
-
         return players.size() + invitedMembers.size();
     }
 
@@ -151,15 +150,19 @@ public class Party implements org.pronze.hypixelify.api.party.Party {
 
     @Override
     public List<Player> getAllPlayers(){
-        List<Player> newPlayerList = new ArrayList<>();
-        for (Player player : players) {
-            if (player == null || !player.isOnline())
-                continue;
+        final List<Player> newPlayerList = new ArrayList<>();
+
+        players.forEach(player->{
+            if(player == null || !player.isOnline()){
+                return;
+            }
 
             newPlayerList.add(player);
-        }
+        });
+
         if(newPlayerList.isEmpty())
             return null;
+
         return newPlayerList;
     }
 }

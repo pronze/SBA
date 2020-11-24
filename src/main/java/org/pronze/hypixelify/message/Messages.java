@@ -41,6 +41,7 @@ public class Messages {
     public static List<String> message_not_in_game;
     public static String shoutFormat;
     public static List<String> message_shout_wait;
+    public static List<String> message_party_disband_inactivity;
     public static String trapTriggered_title, trapTriggered_subtitle, blindnessTrapPurchased, generatorUpgrade;
     public static String message_greatest_enchantment;
     public static String ERROR_OCCURED;
@@ -72,6 +73,7 @@ public class Messages {
     }
 
     public void loadConfig() {
+        message_party_disband_inactivity=  fetchStringList("party.message.disband-inactivity");
         command_no_permissions = fetchString("commands.no-permissions");
         command_player_only = fetchString("commands.player-only");
         command_invalid = fetchString("commands.invalid-command");

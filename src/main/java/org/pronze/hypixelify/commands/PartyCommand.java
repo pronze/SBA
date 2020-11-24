@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
 import org.pronze.hypixelify.service.PlayerWrapperService;
@@ -48,14 +48,14 @@ public class PartyCommand extends AbstractCommand {
             return;
         }
 
-        final PlayerWrapperService playerWrapperService = SBAHypixelify.getDatabaseManager();
-        final PlayerDatabase playerDatabase = playerWrapperService.getDatabase(player);
+        final PlayerWrapperService playerWrapperService = SBAHypixelify.getWrapperService();
+        final PlayerWrapper playerWrapper = playerWrapperService.getWrapper(player);
         final PartyManager partyManager = SBAHypixelify.getPartyManager();
 
 
-        if (playerDatabase != null && playerDatabase.isInParty()
-                && playerDatabase.getPartyLeader() != null
-                && !playerDatabase.getPartyLeader().isOnline()) {
+        if (playerWrapper != null && playerWrapper.isInParty()
+                && playerWrapper.getPartyLeader() != null
+                && !playerWrapper.getPartyLeader().isOnline()) {
             player.sendMessage("§cPlease wait until the leader comes back online..., or party disbands");
             return;
         }
@@ -68,10 +68,10 @@ public class PartyCommand extends AbstractCommand {
 
             //Party size limit
             int max_sz = SBAHypixelify.getConfigurator().config.getInt("party.size", 4);
-            if (playerDatabase != null &&
-                    playerDatabase.isInParty() &&
-                    partyManager.getParty(playerDatabase.getPartyLeader()) != null &&
-                    partyManager.getParty(playerDatabase.getPartyLeader()).getCompleteSize() >= max_sz) {
+            if (playerWrapper != null &&
+                    playerWrapper.isInParty() &&
+                    partyManager.getParty(playerWrapper.getPartyLeader()) != null &&
+                    partyManager.getParty(playerWrapper.getPartyLeader()).getCompleteSize() >= max_sz) {
                 player.sendMessage("§cParty has reached maximum Size.");
                 return;
             }
@@ -90,25 +90,25 @@ public class PartyCommand extends AbstractCommand {
                 return;
             }
 
-            if (playerDatabase == null)
-                SBAHypixelify.getDatabaseManager().createDatabase(player);
+            if (playerWrapper == null)
+                SBAHypixelify.getWrapperService().register(player);
 
-            PlayerDatabase invitedData = playerWrapperService.getDatabase(invited);
+            PlayerWrapper invitedData = playerWrapperService.getWrapper(invited);
             if (invitedData == null)
-                playerWrapperService.createDatabase(invited);
+                playerWrapperService.register(invited);
 
-            if (playerWrapperService.getDatabase(player).isInvited()) {
+            if (playerWrapperService.getWrapper(player).isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_decline_inc);
                 return ;
             }
 
             Party party;
-            if (!playerDatabase.isInParty()) {
+            if (!playerWrapper.isInParty()) {
                 party = partyManager.getParty(player);
                 if (party == null) {
                     party = partyManager.createParty(player);
-                    playerDatabase.setIsInParty(true);
-                    playerDatabase.setPartyLeader(player);
+                    playerWrapper.setIsInParty(true);
+                    playerWrapper.setPartyLeader(player);
                 }
             } else {
                 party = partyManager.getParty(player);
@@ -138,29 +138,29 @@ public class PartyCommand extends AbstractCommand {
         }
 
         //check if player does not do other commands on his newly created party.
-        else if (playerDatabase != null && playerDatabase.isInParty() &&
-                partyManager.getParty(playerDatabase.getPartyLeader()) != null &&
+        else if (playerWrapper != null && playerWrapper.isInParty() &&
+                partyManager.getParty(playerWrapper.getPartyLeader()) != null &&
                 partyManager.getParty(player).getPlayers() == null) {
             ShopUtil.sendMessage(player, Messages.message_no_other_commands);
             return ;
         } else if (args[0].equalsIgnoreCase("accept")) {
 
-            if (playerDatabase == null) {
+            if (playerWrapper == null) {
                 player.sendMessage("§cAn error has occurred..");
                 return ;
             }
 
-            if (!playerDatabase.isInvited()) {
+            if (!playerWrapper.isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_not_invited);
                 return ;
             }
 
-            if (playerDatabase.isInParty() || playerDatabase.getInvitedParty() == null) {
+            if (playerWrapper.isInParty() || playerWrapper.getInvitedParty() == null) {
                 ShopUtil.sendMessage(player, Messages.message_invalid_command);
                 return ;
             }
 
-            Party pParty = playerDatabase.getInvitedParty();
+            Party pParty = playerWrapper.getInvitedParty();
             partyManager.addToParty(player, pParty);
             return ;
 
@@ -171,34 +171,34 @@ public class PartyCommand extends AbstractCommand {
                 return ;
             }
 
-            if (playerDatabase == null) return ;
+            if (playerWrapper == null) return ;
 
-            if (!playerDatabase.isInParty()) {
+            if (!playerWrapper.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return ;
             }
-            if (playerDatabase.isPartyLeader()) {
+            if (playerWrapper.isPartyLeader()) {
                 player.sendMessage("§cYou have to disband the party first!");
                 return ;
             }
 
-            if (playerDatabase.getPartyLeader() == null || partyManager.getParty(playerDatabase.getPartyLeader()) == null)
+            if (playerWrapper.getPartyLeader() == null || partyManager.getParty(playerWrapper.getPartyLeader()) == null)
                 return ;
 
-            Party party = partyManager.getParty(playerDatabase.getPartyLeader());
+            Party party = partyManager.getParty(playerWrapper.getPartyLeader());
             if (party == null) return ;
             partyManager.removeFromParty(player, party);
             ShopUtil.sendMessage(player, Messages.message_party_left);
         } else if (args[0].equalsIgnoreCase("decline")) {
 
-            if (playerDatabase == null) return ;
+            if (playerWrapper == null) return ;
 
-            if (!playerDatabase.isInvited()) {
+            if (!playerWrapper.isInvited()) {
                 ShopUtil.sendMessage(player, Messages.message_not_invited);
                 return ;
             }
 
-            Party invitedParty = playerDatabase.getInvitedParty();
+            Party invitedParty = playerWrapper.getInvitedParty();
 
             if (invitedParty == null || invitedParty.getLeader() == null) return ;
 
@@ -215,20 +215,19 @@ public class PartyCommand extends AbstractCommand {
                     }
                 }
             }
-            playerDatabase.setInvited(false);
-            playerDatabase.setExpiredTimeTimeout(60);
-            playerDatabase.setInvitedParty(null);
+            playerWrapper.setInvited(false);
+            playerWrapper.setInvitedParty(null);
             return ;
 
         } else if (args[0].equalsIgnoreCase("list")) {
 
-            if (playerDatabase == null) return ;
-            if (!playerDatabase.isInParty()) {
+            if (playerWrapper == null) return ;
+            if (!playerWrapper.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return;
             }
 
-            Player leader = playerDatabase.getPartyLeader();
+            Player leader = playerWrapper.getPartyLeader();
             if (leader == null) return ;
             player.sendMessage("Players: ");
             if (partyManager.getParty(leader).getPlayers() == null) return ;
@@ -238,24 +237,24 @@ public class PartyCommand extends AbstractCommand {
             return ;
         } else if (args[0].equalsIgnoreCase("disband")) {
 
-            if (playerDatabase == null || partyManager.getParty(playerDatabase.getPartyLeader()) == null) {
+            if (playerWrapper == null || partyManager.getParty(playerWrapper.getPartyLeader()) == null) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return ;
             }
 
-            if (!playerDatabase.getPartyLeader().equals(player)) {
+            if (!playerWrapper.getPartyLeader().equals(player)) {
                 ShopUtil.sendMessage(player, Messages.message_access_denied);
                 return ;
             }
             partyManager.disband(player);
             return ;
         } else if (args[0].equalsIgnoreCase("kick")) {
-            if (!playerDatabase.isInParty() || playerDatabase.getPartyLeader() == null) {
+            if (!playerWrapper.isInParty() || playerWrapper.getPartyLeader() == null) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return ;
             }
 
-            if (!playerDatabase.getPartyLeader().equals(player)) {
+            if (!playerWrapper.getPartyLeader().equals(player)) {
                 ShopUtil.sendMessage(player, Messages.message_access_denied);
                 return ;
             }
@@ -309,11 +308,11 @@ public class PartyCommand extends AbstractCommand {
                 return ;
             }
 
-            if (playerDatabase == null || playerDatabase.getPartyLeader() == null) {
+            if (playerWrapper == null || playerWrapper.getPartyLeader() == null) {
                 player.sendMessage("§cSomething went wrong, reload Addon or BedWars to fix this issue");
                 return ;
             }
-            if (!playerDatabase.getPartyLeader().equals(player)) {
+            if (!playerWrapper.getPartyLeader().equals(player)) {
                 ShopUtil.sendMessage(player, Messages.message_access_denied);
                 return ;
             }
@@ -321,9 +320,9 @@ public class PartyCommand extends AbstractCommand {
 
         } else if (args[0].equalsIgnoreCase("chat")) {
 
-            if (playerDatabase == null) return ;
+            if (playerWrapper == null) return ;
 
-            if (!playerDatabase.isInParty()) {
+            if (!playerWrapper.isInParty()) {
                 ShopUtil.sendMessage(player, Messages.message_not_in_party);
                 return ;
             }
@@ -333,7 +332,7 @@ public class PartyCommand extends AbstractCommand {
                 return ;
             }
 
-            playerDatabase.setPartyChatEnabled(args[1].equalsIgnoreCase("on"));
+            playerWrapper.setPartyChatEnabled(args[1].equalsIgnoreCase("on"));
 
             String mode = args[1].equals("on") ? "enabled" : "disabled";
 
@@ -360,14 +359,14 @@ public class PartyCommand extends AbstractCommand {
             return null;
         final Player player = (Player) commandSender;
 
-        final PlayerDatabase playerDatabase = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
 
-        if (playerDatabase != null && playerDatabase.isInvited()) {
+        if (playerWrapper != null && playerWrapper.isInvited()) {
             return Arrays.asList("accept", "decline");
         }
         if (strings.length == 1) {
-            if (playerDatabase != null && playerDatabase.isInParty()
-                    && playerDatabase.getPartyLeader().equals(player))
+            if (playerWrapper != null && playerWrapper.isInParty()
+                    && playerWrapper.getPartyLeader().equals(player))
                 return Arrays.asList("invite", "list", "disband", "kick", "warp");
 
 

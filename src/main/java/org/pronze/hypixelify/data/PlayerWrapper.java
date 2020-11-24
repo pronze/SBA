@@ -3,6 +3,8 @@ package org.pronze.hypixelify.data;
 import com.google.common.base.Strings;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.junit.Ignore;
 import org.pronze.hypixelify.SBAHypixelify;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.api.party.PartyManager;
@@ -10,27 +12,33 @@ import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.Scheduler;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
+
 import java.util.UUID;
 
-public class PlayerDatabase implements org.pronze.hypixelify.api.database.PlayerDatabase {
+public class PlayerWrapper implements org.pronze.hypixelify.api.wrapper.PlayerWrapper {
 
     private final String name;
     private final Player pInstance;
     private UUID player;
+    private BukkitTask inviteTask;
+    private Party invitedParty;
+    private Player partyLeader;
+    private PlayerStatistic statistic;
+    private int shout;
+
+
     private boolean isInParty = false;
     private boolean isInvited = false;
     private boolean partyChat = false;
-    private int expiredTime = 60;
-    private Party invitedParty;
-    private Player partyLeader;
-    private int shout;
     private boolean shouted = false;
 
-    public PlayerDatabase(Player player) {
+    public PlayerWrapper(Player player) {
         this.player = player.getUniqueId();
         name = player.getDisplayName();
         pInstance = player;
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
+        statistic  = Main.getPlayerStatisticsManager().getStatistic(pInstance);
         init();
     }
 
@@ -115,44 +123,41 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     }
 
 
-    @Override
-    public void setExpiredTimeTimeout(int timeout) {
-        expiredTime = timeout;
-    }
 
     public void init() {
         Scheduler.runTaskLater(this::updateDatabase, 1L);
     }
 
+
     @Override
     public int getKills() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills() +
-                Main.getPlayerStatisticsManager().getStatistic(pInstance).getKills();
+        return statistic.getCurrentKills() +
+               statistic.getKills();
     }
 
     @Override
     public int getWins() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getWins() +
-                Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentWins();
+        return statistic.getWins() +
+                statistic.getCurrentWins();
     }
 
     @Override
     public int getBedDestroys() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentDestroyedBeds() +
-                Main.getPlayerStatisticsManager().getStatistic(pInstance).getDestroyedBeds();
+        return statistic.getCurrentDestroyedBeds() +
+               statistic.getDestroyedBeds();
     }
 
     @Override
     public int getDeaths() {
-        return Main.getPlayerStatisticsManager().getStatistic(pInstance).getDeaths() +
-                Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentKills();
+        return statistic.getDeaths() +
+                statistic.getCurrentKills();
     }
 
     @Override
     public int getXP() {
         try {
-            return Main.getPlayerStatisticsManager().getStatistic(pInstance).getScore() +
-                    Main.getPlayerStatisticsManager().getStatistic(pInstance).getCurrentScore();
+            return statistic.getScore() +
+                    statistic.getCurrentScore();
         } catch (Exception e) {
             return 1;
         }
@@ -226,14 +231,13 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
         final Party party = partyManager.getParty(partyLeader);
         if (party == null) return;
         if (party.shouldDisband()) {
-            if (pInstance != null && pInstance.isOnline()) {
-                for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.disband-inactivity")) {
-                    pInstance.sendMessage(ShopUtil.translateColors(st));
-                }
+            if (pInstance.isOnline()) {
+                Messages.message_party_disband_inactivity
+                        .forEach(st->pInstance.sendMessage(ShopUtil.translateColors(st)));
             }
             setIsInParty(false);
             party.disband();
-            partyManager.removeParty(partyLeader);
+            Scheduler.runTask(()->partyManager.removeParty(partyLeader));
             setPartyLeader(null);
         }
     }
@@ -251,35 +255,43 @@ public class PlayerDatabase implements org.pronze.hypixelify.api.database.Player
     @Override
     public void setInvited(boolean bool) {
         isInvited = bool;
-        final PartyManager partyManager = SBAHypixelify.getPartyManager();
 
-        if (bool) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    expiredTime--;
-                    if (expiredTime == 0 && isInvited) {
-                        expiredTime = 60;
-                        isInvited = false;
-                        final Party party = partyManager.getParty(invitedParty.getLeader());
+        if(bool){
+            final PartyManager partyManager = SBAHypixelify.getPartyManager();
+            inviteTask = Scheduler.runTaskLater(()->{
+                if(isInvited) {
+                    final Party party = partyManager.getParty(invitedParty.getLeader());
 
-                        if (invitedParty != null && party != null) {
-                            party.removeInvitedMember(pInstance);
-                            if (invitedParty.getLeader() != null && invitedParty.getLeader().isOnline())
-                                ShopUtil.sendMessage(invitedParty.getLeader(), Messages.message_invite_expired);
-                            if (pInstance != null && pInstance.isOnline())
-                                ShopUtil.sendMessage(pInstance, Messages.message_invite_expired);
-                        }
-                        setInvitedParty(null);
-                        Scheduler.runTask(()->SBAHypixelify.getDatabaseManager().updateAll());
-                        this.cancel();
-                    } else if (!isInvited) {
-                        Scheduler.runTask(()->SBAHypixelify.getDatabaseManager().updateAll());
-                        expiredTime = 60;
-                        this.cancel();
+                    if (invitedParty != null && party != null) {
+                        party.removeInvitedMember(pInstance);
+                        final Player partyLeader = invitedParty.getLeader();
+
+                        if (partyLeader != null && partyLeader.isOnline())
+                            ShopUtil.sendMessage(partyLeader, Messages.message_invite_expired);
+                        if (pInstance != null && pInstance.isOnline())
+                            ShopUtil.sendMessage(pInstance, Messages.message_invite_expired);
                     }
+                    setInvitedParty(null);
+                    Scheduler.runTask(() -> {
+                        SBAHypixelify.getWrapperService().updateAll();
+                        isInvited = false;
+                    });
                 }
-            }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
+            }, 20L * 60);
+        } else{
+            cancelInviteTask();
+        }
+
+    }
+
+    public void cancelInviteTask(){
+        try{
+            if(inviteTask != null && !inviteTask.isCancelled()){
+                inviteTask.cancel();
+                inviteTask = null;
+            }
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 

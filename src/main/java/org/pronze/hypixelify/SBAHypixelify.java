@@ -11,7 +11,10 @@ import org.pronze.hypixelify.data.GameStorage;
 import org.pronze.hypixelify.inventories.CustomShop;
 import org.pronze.hypixelify.inventories.GamesInventory;
 import org.pronze.hypixelify.listener.LobbyScoreboard;
-import org.pronze.hypixelify.manager.*;
+import org.pronze.hypixelify.manager.ArenaManager;
+import org.pronze.hypixelify.manager.CommandManager;
+import org.pronze.hypixelify.manager.ListenerManager;
+import org.pronze.hypixelify.manager.PartyManager;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.placeholderapi.SBAExpansion;
 import org.pronze.hypixelify.service.PlayerWrapperService;
@@ -49,11 +52,11 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         return null;
     }
 
-    public static boolean arenaExists(String arenaName){
+    public static boolean arenaExists(String arenaName) {
         return getArenaManager().getArenas().containsKey(arenaName);
     }
 
-    public static Arena getArena(String arenaName){
+    public static Arena getArena(String arenaName) {
         return getArenaManager().getArenas().get(arenaName);
     }
 
@@ -85,7 +88,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         return plugin.gamesInventory;
     }
 
-    public static PlayerWrapperService getDatabaseManager() {
+    public static PlayerWrapperService getWrapperService() {
         return plugin.playerWrapperService;
     }
 
@@ -175,11 +178,11 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
         commandManager.registerAll(this);
 
 
-        try{
+        try {
             if (papiEnabled) {
                 new SBAExpansion().register();
             }
-        } catch (Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
         }
         getLogger().info("Plugin has loaded");

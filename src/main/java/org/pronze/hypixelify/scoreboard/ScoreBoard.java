@@ -1,7 +1,4 @@
 package org.pronze.hypixelify.scoreboard;
-
-import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -27,7 +24,6 @@ public class ScoreBoard {
     private final String date;
     private final Map<String, String> teamstatus;
     private final List<String> animatedTitle;
-
     private int ticks = 0;
     private int currentTitlePos = 0;
 
@@ -146,35 +142,33 @@ public class ScoreBoard {
                             .replace("{teams}", String.valueOf(game.getRunningTeams().size())).replace("{color}", chatColor.toString());
                 }
 
-                for (RunningTeam t : game.getRunningTeams()) {
-                    if (addline.contains("{team_" + t.getName() + "_status}")) {
-                        String stf = getTeamStatusFormat(t);
-                        if (game.getTeamOfPlayer(player) == null) {
-                            stf = stf.replace("{you}", "");
-                        } else if (game.getTeamOfPlayer(player) == t) {
-                            stf = stf.replace("{you}", Messages.message_you);
-                        } else {
-                            stf = stf.replace("{you}", "");
-                        }
-                        addline = addline.replace("{team_" + t.getName() + "_status}", stf);
-                    }
-                    if (addline.contains("{team_" + t.getName() + "_bed_status}"))
-                        addline = addline.replace("{team_" + t.getName() + "_bed_status}",
-                                getTeamBedStatus(t));
-                    if (addline.contains("{team_" + t.getName() + "_peoples}"))
-                        addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
-                }
+                //TODO: More testing here
+            //    for (RunningTeam t : game.getRunningTeams()) {
+            //        if (addline.contains("{team_" + t.getName() + "_status}")) {
+            //            String stf = getTeamStatusFormat(t);
+            //            if (game.getTeamOfPlayer(player) == null) {
+            //                stf = stf.replace("{you}", "");
+            //            } else if (game.getTeamOfPlayer(player) == t) {
+            //                stf = stf.replace("{you}", Messages.message_you);
+            //            } else {
+            //                stf = stf.replace("{you}", "");
+            //            }
+            //            addline = addline.replace("{team_" + t.getName() + "_status}", stf);
+            //        }
+            //        if (addline.contains("{team_" + t.getName() + "_bed_status}"))
+            //            addline = addline.replace("{team_" + t.getName() + "_bed_status}",
+            //                    getTeamBedStatus(t));
+            //        if (addline.contains("{team_" + t.getName() + "_peoples}"))
+            //            addline = addline.replace("{team_" + t.getName() + "_peoples}", String.valueOf(t.getConnectedPlayers().size()));
+            //    }
                 if (lines.contains(addline)) {
                     lines.add(ScoreboardUtil.getUniqueString(lines, addline));
                     continue;
                 }
                 lines.add(addline);
             }
-            String title = currentTitle;
-            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-                title = PlaceholderAPI.setPlaceholders(player, title);
             List<String> elements = new ArrayList<>();
-            elements.add(title);
+            elements.add(currentTitle);
             elements.addAll(lines);
             if (elements.size() < 16) {
                 int es = elements.size();
@@ -183,7 +177,6 @@ public class ScoreBoard {
             }
             elements = ScoreboardUtil.makeElementsUnique(elements);
             ScoreboardUtil.setGameScoreboard(player, elements.toArray(new String[0]), this.game);
-
         }
     }
 

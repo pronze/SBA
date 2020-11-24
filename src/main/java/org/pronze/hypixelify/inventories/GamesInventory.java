@@ -77,8 +77,7 @@ public class GamesInventory implements Listener {
 
             List<String> bLore = new ArrayList<>();
             for (String st : bed_lore) {
-                st = st
-                        .replace("{mode}", labels.get(i));
+                st = st.replace("{mode}", labels.get(i));
                 bLore.add(st);
             }
 

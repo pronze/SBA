@@ -9,7 +9,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.pronze.hypixelify.Configurator;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -484,7 +484,7 @@ public class ShopUtil {
     }
 
     public static String ChatColorChanger(Player player) {
-        final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
         if (db.getLevel() > 100 || player.isOp()) {
             return "§f";
         } else {

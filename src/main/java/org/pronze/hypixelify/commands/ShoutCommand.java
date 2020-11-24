@@ -3,7 +3,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.pronze.hypixelify.message.Messages;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -52,13 +52,13 @@ public class ShoutCommand extends AbstractCommand {
             return;
         }
 
-        final PlayerDatabase playerDatabase = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
         final boolean cancelShout = SBAHypixelify.getConfigurator()
                 .config.getInt("shout.time-out", 60) == 0;
 
         if(!cancelShout && !hasPermission(player)) {
-            if (!playerDatabase.canShout()) {
-                String shout = String.valueOf(playerDatabase.getShoutTimeOut());
+            if (!playerWrapper.canShout()) {
+                String shout = String.valueOf(playerWrapper.getShoutTimeOut());
                 for (String st : Messages.message_shout_wait) {
                     player.sendMessage(ShopUtil.translateColors(st.replace("{seconds}", shout)));
                 }
@@ -90,7 +90,7 @@ public class ShoutCommand extends AbstractCommand {
         }
 
         if(!cancelShout && !hasPermission(player))
-            playerDatabase.shout();
+            playerWrapper.shout();
     }
 
     @Override

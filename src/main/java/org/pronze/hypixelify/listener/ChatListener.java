@@ -4,7 +4,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.pronze.hypixelify.api.party.Party;
 
 public class ChatListener extends AbstractListener {
@@ -17,7 +17,7 @@ public class ChatListener extends AbstractListener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e){
         final Player player = e.getPlayer();
-        final PlayerDatabase db = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
 
         if(db == null || !db.isInParty() || !db.getPartyChatEnabled()) return;
         final Party party = SBAHypixelify.getPartyManager().getParty(db.getPartyLeader());

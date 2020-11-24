@@ -1,11 +1,10 @@
 package org.pronze.hypixelify.listener;
-import org.bukkit.block.data.type.Bed;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.pronze.hypixelify.SBAHypixelify;
-import org.pronze.hypixelify.api.database.PlayerDatabase;
+import org.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.pronze.hypixelify.api.party.Party;
 import org.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -21,7 +20,7 @@ public class PartyListener extends AbstractListener{
     public void onBWJoin(BedwarsPlayerJoinedEvent e) {
         final Game game = e.getGame();
         final Player player = e.getPlayer();
-        final PlayerDatabase data = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper data = SBAHypixelify.getWrapperService().getWrapper(player);
         final Party party = SBAHypixelify.getPartyManager().getParty(player);
 
         if (data == null || party == null) return;
@@ -53,7 +52,7 @@ public class PartyListener extends AbstractListener{
 
         if (player == null) return;
         if (!player.isOnline()) return;
-        final PlayerDatabase data = SBAHypixelify.getDatabaseManager().getDatabase(player);
+        final PlayerWrapper data = SBAHypixelify.getWrapperService().getWrapper(player);
         final Party party = SBAHypixelify.getPartyManager().getParty(player);
         if (data == null || party == null) return;
         if (!data.isInParty() || !data.isPartyLeader()) return;
