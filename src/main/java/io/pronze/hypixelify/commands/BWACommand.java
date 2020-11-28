@@ -1,15 +1,20 @@
 package io.pronze.hypixelify.commands;
 
+import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.inventories.GamesInventory;
+import io.pronze.hypixelify.utils.ShopUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
-import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.game.GameCreator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +55,7 @@ public class BWACommand extends AbstractCommand {
         final PluginManager pluginManager = Bukkit.getServer().getPluginManager();
         final FileConfiguration config = SBAHypixelify.getConfigurator().config;
 
-        switch (base.toLowerCase()){
+        switch (base.toLowerCase()) {
 
 
             case "reload":
@@ -108,7 +113,7 @@ public class BWACommand extends AbstractCommand {
                 final GamesInventory gamesInventory = SBAHypixelify.getGamesInventory();
 
                 final int mode = ShopUtil.getIntFromMode(args[1]);
-                if(mode == 0){
+                if (mode == 0) {
                     pl.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
                     return;
                 }
@@ -118,7 +123,7 @@ public class BWACommand extends AbstractCommand {
 
 
             case "upgrade":
-                if(!SBAHypixelify.isUpgraded()){
+                if (!SBAHypixelify.isUpgraded()) {
                     sender.sendMessage("Cannot do this right now!");
                     break;
                 }
@@ -132,7 +137,7 @@ public class BWACommand extends AbstractCommand {
 
 
             case "cancel":
-                if(!SBAHypixelify.isUpgraded()){
+                if (!SBAHypixelify.isUpgraded()) {
                     sender.sendMessage("Cannot do this right now!");
                     break;
                 }
@@ -140,6 +145,32 @@ public class BWACommand extends AbstractCommand {
                 config.set("version", SBAHypixelify.getVersion());
                 SBAHypixelify.getConfigurator().saveConfig();
                 sender.sendMessage("[SBAHypixelify]: Cancelled shop and upgradeShop changes");
+                break;
+
+            case "cleargens":
+                BedwarsAPI.getInstance().getGames().forEach(game -> {
+                    if (game == null) {
+                        return;
+                    }
+
+                    final World world = game.getGameWorld();
+
+                    if (world == null) {
+                        return;
+                    }
+
+                    for (Entity entity : world.getEntities()) {
+                        if (entity == null) {
+                            return;
+                        }
+                        if (entity.getType() == EntityType.ARMOR_STAND) {
+                            if (GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2())) {
+                                entity.remove();
+                            }
+                        }
+                    }
+
+                });
                 break;
             default:
                 sender.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
@@ -161,14 +192,14 @@ public class BWACommand extends AbstractCommand {
     @Override
     public List<String> tabCompletion(String[] strings, CommandSender commandSender) {
         if (!commandSender.hasPermission("misat11.bw.admin")
-            || !commandSender.hasPermission("bw.admin"))
+                || !commandSender.hasPermission("bw.admin"))
             return null;
         if (strings.length == 1) {
             if (SBAHypixelify.isUpgraded()) {
                 return Arrays.asList("cancel", "upgrade");
             }
             final List<String> Commands = new ArrayList<>(Arrays
-                    .asList("reload", "help", "reset", "gamesinv", "setlobby"));
+                    .asList("reload", "help", "reset", "gamesinv", "setlobby", "cleargens"));
 
             if (!gamesInvEnabled)
                 Commands.remove("gamesinv");

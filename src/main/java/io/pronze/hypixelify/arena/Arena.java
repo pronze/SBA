@@ -13,7 +13,6 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 
@@ -24,25 +23,19 @@ import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 public class Arena {
 
 
-    public final double radius;
-    private final Game mGame;
-    private final ScoreBoard scoreboard;
-    private final GameStorage storage;
-    private final List<RotatingGenerators> rotatingGenerators = new ArrayList<>();
     private static final List<String> generatorHoloText = Arrays.asList(
             "§eTier §c0",
             "{material}",
             "§eSpawns in §c{seconds} §aseconds"
     );
-
-    private static final String diamondHoloText ="§bDiamond";
-    private static final String emeraldHoloText ="§aEmerald";
+    private static final String diamondHoloText = "§bDiamond";
+    private static final String emeraldHoloText = "§aEmerald";
+    public final double radius;
+    private final Game mGame;
+    private final ScoreBoard scoreboard;
+    private final GameStorage storage;
+    private final List<RotatingGenerators> rotatingGenerators = new ArrayList<>();
     public GameTask gameTask;
-
-    public List<RotatingGenerators> getRotatingGenerators(){
-        return rotatingGenerators;
-    }
-
 
     public Arena(Game game) {
         radius = Math.pow(SBAHypixelify.getConfigurator()
@@ -51,6 +44,10 @@ public class Arena {
         storage = new GameStorage(game);
         scoreboard = new ScoreBoard(this);
         gameTask = new GameTask(this);
+    }
+
+    public List<RotatingGenerators> getRotatingGenerators() {
+        return rotatingGenerators;
     }
 
     public GameStorage getStorage() {
@@ -93,14 +90,14 @@ public class Arena {
                             new ItemStack(Material.EMERALD_BLOCK);
 
                     List<String> genHolo = new ArrayList<>();
-                    for(String st : generatorHoloText){
+                    for (String st : generatorHoloText) {
                         String l = st.replace("{material}",
                                 spawnerMaterial.equals(Material.DIAMOND) ? diamondHoloText : emeraldHoloText);
                         genHolo.add(l);
                     }
 
                     rotatingGenerators.add(new RotatingGenerators(spawner,
-                            rotationStack, genHolo, mGame).spawn(mGame.getConnectedPlayers()));
+                            rotationStack, genHolo).spawn(mGame.getConnectedPlayers()));
                 }
             });
         }
@@ -119,7 +116,6 @@ public class Arena {
 
         });
     }
-
 
 
     public void onOver(BedwarsGameEndingEvent e) {
@@ -154,12 +150,14 @@ public class Arena {
                         .getStatistic(player).getCurrentKills());
             });
 
+
             int kills_1 = 0;
             int kills_2 = 0;
             int kills_3 = 0;
             String kills_1_player = "none";
             String kills_2_player = "none";
             String kills_3_player = "none";
+
 
             for (String player : dataKills.keySet()) {
                 int k = dataKills.get(player);
@@ -173,14 +171,6 @@ public class Arena {
                 if (k > kills_2 && k <= kills_1 && !player.equals(kills_1_player)) {
                     kills_2_player = player;
                     kills_2 = k;
-                }
-            }
-            for (String player : dataKills.keySet()) {
-                int k = dataKills.get(player);
-                if (k > kills_3 && k <= kills_2 && !player.equals(kills_1_player) &&
-                        !player.equals(kills_2_player)) {
-                    kills_3_player = player;
-                    kills_3 = k;
                 }
             }
 

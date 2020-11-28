@@ -7,7 +7,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 
@@ -17,7 +16,6 @@ public class RotatingGenerators {
 
     public static List<RotatingGenerators> cache = new ArrayList<>();
     private final List<String> lines;
-    private Game game;
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
@@ -27,12 +25,10 @@ public class RotatingGenerators {
 
     public RotatingGenerators(ItemSpawner spawner,
                               ItemStack itemStack,
-                              List<String> lines,
-                              Game game) {
+                              List<String> lines) {
         this.location = spawner.getLocation();
         this.itemStack = itemStack;
         this.lines = lines;
-        this.game = game;
         this.itemSpawner = spawner;
         time = spawner.getItemSpawnerType().getInterval() + 1;
         cache.add( this);

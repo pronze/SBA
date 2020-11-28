@@ -61,6 +61,9 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
 
     @Override
     public boolean isInParty(Player player) {
+        if(player == null){
+            return false;
+        }
         return SBAHypixelify.getWrapperService().getWrapper(player).isInParty();
     }
 
@@ -168,8 +171,10 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
     public io.pronze.hypixelify.party.Party getParty(Player player) {
         if (!isInParty(player)) return null;
 
+        if(player == null){
+            return null;
+        }
         final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
-        if (database == null) return null;
         final Player partyLeader = database.getPartyLeader();
 
         if (partyLeader != null && isInParty(partyLeader)) {

@@ -308,26 +308,6 @@ public class ScoreboardUtil {
                 }
             }
         }
-
-        /*
-        for (String entry : scoreboard.getEntries()) {
-            boolean toErase = true;
-            int b;
-            int j;
-
-            for (j = elements.length, b = 0; b < j; b++) {
-                String element = elements[b];
-                if (element != null && element.equals(entry)
-                        && obj.getScore(entry).getScore() == 16 - Arrays.asList(elements).indexOf(element)) {
-                    toErase = false;
-                    break;
-                }
-            }
-            if (toErase)
-                scoreboard.resetScores(entry);
-        }
-
-         */
     }
 
 
