@@ -12,7 +12,7 @@ compass-enabled: true
 join-randomly-on-lobby-join: false
 add-wool-to-inventory-on-join: true
 prevent-spawning-mobs: true
-spawner-holograms: true
+spawner-holograms: false
 spawner-disable-merge: true
 prevent-lobby-spawn-mobs-in-radius: 16
 spawner-holo-height: 0.25
@@ -86,14 +86,14 @@ resources:
     name: Emerald
     interval: 60
     translate: resource_emerald
-    spread: 1.0
+    spread: 0.1
   diamond:
     material: DIAMOND
     color: BLUE
     name: Diamond
     interval: 30
     translate: resource_diamond
-    spread: 1.0
+    spread: 0.1
   iron:
     material: IRON_INGOT
     color: WHITE
