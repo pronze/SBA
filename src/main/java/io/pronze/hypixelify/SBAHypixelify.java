@@ -21,9 +21,11 @@ import io.pronze.hypixelify.placeholderapi.SBAExpansion;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 
+import java.util.List;
 import java.util.Objects;
 
 public class SBAHypixelify extends JavaPlugin implements Listener {
@@ -198,7 +200,10 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
                 return;
             }
             RotatingGenerators.scheduleTask();
+            SBAUtil.destroySpawnerArmorStandEntities();
         }
+
+
     }
 
     public void changeBedWarsConfig() {
@@ -236,6 +241,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+
         if (SBAHypixelify.isProtocolLib()) {
             Bukkit.getOnlinePlayers().forEach(SBAUtil::removeScoreboardObjective);
         }

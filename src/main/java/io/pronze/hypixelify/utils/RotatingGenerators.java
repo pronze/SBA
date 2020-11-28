@@ -16,6 +16,7 @@ public class RotatingGenerators {
 
     public static List<RotatingGenerators> cache = new ArrayList<>();
     private final List<String> lines;
+    public static final String entityName = "sba_rot_entity";
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
@@ -34,6 +35,9 @@ public class RotatingGenerators {
         cache.add( this);
     }
 
+    public ArmorStand getArmorStandEntity(){
+        return armorStand;
+    }
     public static void scheduleTask() {
         Scheduler.runTimerTask(() -> {
             cache.stream().filter(Objects::nonNull).forEach(generator -> {
@@ -87,6 +91,7 @@ public class RotatingGenerators {
         armorStand = (ArmorStand) location.getWorld().
                 spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
 
+        armorStand.setCustomName(entityName);
         armorStand.setVisible(false);
         armorStand.setHelmet(itemStack);
         armorStand.setGravity(false);
@@ -127,8 +132,23 @@ public class RotatingGenerators {
             armorStand.remove();
         if (hologram != null)
             hologram.destroy();
+    }
 
-        cache.remove(this);
+    public static void destroy(List<RotatingGenerators> rotatingGenerators){
+        if(rotatingGenerators == null || rotatingGenerators.isEmpty()){
+            return;
+        }
+
+       rotatingGenerators.forEach(generator->{
+           if(generator == null){
+               return;
+           }
+
+           generator.destroy();
+       });
+
+        cache.removeAll(rotatingGenerators);
+
     }
 
 

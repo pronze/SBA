@@ -6,6 +6,7 @@ import io.pronze.hypixelify.data.GameStorage;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
 import io.pronze.hypixelify.utils.RotatingGenerators;
+import io.pronze.hypixelify.utils.SBAUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -77,8 +78,11 @@ public class Arena {
             });
         });
 
+        SBAUtil.destroySpawnerArmorStandEntitiesFrom(mGame);
         initalizeGenerators();
     }
+
+
 
     public void initalizeGenerators() {
         if (SBAHypixelify.getConfigurator().config.getBoolean("floating-generator.enabled", true)) {
@@ -125,9 +129,7 @@ public class Arena {
             return;
         }
 
-        for (RotatingGenerators generator : rotatingGenerators) {
-            generator.destroy();
-        }
+        RotatingGenerators.destroy(rotatingGenerators);
         rotatingGenerators.clear();
 
         if (scoreboard != null)
@@ -171,6 +173,15 @@ public class Arena {
                 if (k > kills_2 && k <= kills_1 && !player.equals(kills_1_player)) {
                     kills_2_player = player;
                     kills_2 = k;
+                }
+            }
+
+            for (String player : dataKills.keySet()) {
+                int k = dataKills.get(player);
+                if (k > kills_3 && k <= kills_2 && !player.equals(kills_1_player) &&
+                        !player.equals(kills_2_player)) {
+                    kills_3_player = player;
+                    kills_3 = k;
                 }
             }
 

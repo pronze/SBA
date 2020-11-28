@@ -2,6 +2,7 @@ package io.pronze.hypixelify.commands;
 
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.inventories.GamesInventory;
+import io.pronze.hypixelify.utils.RotatingGenerators;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -148,10 +149,22 @@ public class BWACommand extends AbstractCommand {
                 break;
 
             case "cleargens":
+                if (args.length != 2) {
+                    sender.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
+                    return;
+                }
+
+                if(!args[1].equalsIgnoreCase("true") && !args[1].equalsIgnoreCase("false")){
+                    sender.sendMessage("2nd argument must be true or false");
+                    return;
+                }
+
+                final boolean toEraseAll = Boolean.parseBoolean(args[1].toLowerCase());
                 BedwarsAPI.getInstance().getGames().forEach(game -> {
                     if (game == null) {
                         return;
                     }
+
 
                     final World world = game.getGameWorld();
 
@@ -165,12 +178,17 @@ public class BWACommand extends AbstractCommand {
                         }
                         if (entity.getType() == EntityType.ARMOR_STAND) {
                             if (GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2())) {
-                                entity.remove();
+                                if(toEraseAll || (entity.getCustomName() != null && entity.getCustomName()
+                                        .equalsIgnoreCase(RotatingGenerators.entityName))) {
+                                    entity.remove();
+                                }
                             }
                         }
                     }
 
                 });
+                RotatingGenerators.cache.clear();
+
                 break;
             default:
                 sender.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
