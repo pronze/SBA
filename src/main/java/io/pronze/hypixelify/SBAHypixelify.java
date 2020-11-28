@@ -246,15 +246,7 @@ public class SBAHypixelify extends JavaPlugin implements Listener {
             Bukkit.getOnlinePlayers().forEach(SBAUtil::removeScoreboardObjective);
         }
 
-        try{
-            for(RotatingGenerators g : RotatingGenerators.cache){
-                g.destroy();
-            }
-            RotatingGenerators.cache.clear();
-        } catch (Throwable t){
-            t.printStackTrace();
-        }
-
+        RotatingGenerators.destroy(RotatingGenerators.cache);
         getLogger().info("Unregistering listeners....");
         if (listenerManager != null)
             listenerManager.unregisterAll();

@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -20,7 +19,7 @@ import java.util.List;
 
 public class SBAUtil {
 
-    public static void removeScoreboardObjective(Player player){
+    public static void removeScoreboardObjective(Player player) {
         if (SBAHypixelify.isProtocolLib() && player != null && player.isOnline()) {
             final ProtocolManager m = ProtocolLibrary.getProtocolManager();
             try {
@@ -45,92 +44,88 @@ public class SBAUtil {
     /*
         Destroys the armorstand entities if somehow the server crashes and the entities remain.
      */
-    public static void destroySpawnerArmorStandEntitiesFrom(Game game){
+    public static void destroySpawnerArmorStandEntitiesFrom(Game game) {
         final World gameWorld = game.getGameWorld();
-        if(gameWorld == null){
+        if (gameWorld == null) {
             return;
         }
 
         final List<RotatingGenerators> toDestroy = new ArrayList<>();
 
-        for(Entity entity : gameWorld.getEntities()){
-            if(entity == null){
-                continue;
-            }
 
-            if(entity.getType() == EntityType.ARMOR_STAND){
-                if(GameCreator.isInArea(entity.getLocation(),game.getPos1(), game.getPos2())){
-                    final String customName = entity.getCustomName();
+        for (Entity entity : gameWorld.getEntitiesByClass(ArmorStand.class)) {
 
-                    if(customName == null){
-                        continue;
-                    }
-                    if(customName.equalsIgnoreCase(RotatingGenerators.entityName)){
+            if (GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2())) {
+                final String customName = entity.getCustomName();
 
-                        for(RotatingGenerators generator : RotatingGenerators.cache){
-                            if(generator == null){
-                                continue;
-                            }
-                            final ArmorStand armorStand = generator.getArmorStandEntity();
-                            if(armorStand == null) continue;
+                if (customName == null) {
+                    continue;
+                }
+                if (customName.equalsIgnoreCase(RotatingGenerators.entityName)) {
 
-
-                            if(armorStand.equals(entity)){
-                                toDestroy.add(generator);
-                            }
+                    for (RotatingGenerators generator : RotatingGenerators.cache) {
+                        if (generator == null) {
+                            continue;
                         }
+                        final ArmorStand armorStand = generator.getArmorStandEntity();
+                        if (armorStand == null) continue;
 
-                        entity.remove();
+
+                        if (armorStand.equals(entity)) {
+                            toDestroy.add(generator);
+                        }
                     }
+
+                    entity.remove();
                 }
             }
         }
 
-       toDestroy.forEach(generator->{
-           if(generator == null){
-               return;
-           }
+        toDestroy.forEach(generator -> {
+            if (generator == null) {
+                return;
+            }
 
-           generator.destroy();
-       });
+            generator.destroy();
+        });
 
         RotatingGenerators.cache.removeAll(toDestroy);
     }
 
-    public static void destroySpawnerArmorStandEntities(){
-        if(BedwarsAPI.getInstance() == null){
+    public static void destroySpawnerArmorStandEntities() {
+        if (BedwarsAPI.getInstance() == null) {
             return;
         }
 
         final List<Game> games = BedwarsAPI.getInstance().getGames();
-        if(games != null){
-            for(Game game : games){
-                if(game != null){
+        if (games != null) {
+            for (Game game : games) {
+                if (game != null) {
                     SBAUtil.destroySpawnerArmorStandEntitiesFrom(game);
                 }
             }
         }
     }
 
-    public static List<Material> parseMaterialFromConfig(String key){
+    public static List<Material> parseMaterialFromConfig(String key) {
         final List<Material> materialList = new ArrayList<>();
 
         final List<String> materialNames = SBAHypixelify.getConfigurator().config.getStringList(key);
-        try{
-            materialNames.forEach(material->{
-                if(material == null || material.isEmpty()){
+        try {
+            materialNames.forEach(material -> {
+                if (material == null || material.isEmpty()) {
                     return;
                 }
 
-                try{
+                try {
                     final Material mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
                     materialList.add(mat);
-                } catch (Exception ignored){
+                } catch (Exception ignored) {
 
                 }
 
             });
-        } catch (Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
         }
 

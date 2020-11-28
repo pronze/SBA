@@ -39,6 +39,14 @@ public class BedwarsListener extends AbstractListener {
     }
 
 
+    @EventHandler
+    public void onPreRebuild(BedwarsPreRebuildingEvent e){
+        final Game game = e.getGame();
+        final Arena arena = SBAHypixelify.getArena(game.getName());
+        if(arena != null){
+            arena.onPreRebuildingEvent();
+        }
+    }
 
 
 
@@ -61,7 +69,7 @@ public class BedwarsListener extends AbstractListener {
 
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onEnd(BedwarsGameEndEvent e) {
+    public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
         Game game = e.getGame();
         SBAHypixelify.getArenaManager().removeArena(game.getName());
     }

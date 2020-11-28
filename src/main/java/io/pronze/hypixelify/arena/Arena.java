@@ -14,6 +14,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPreRebuildingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 
@@ -122,6 +123,12 @@ public class Arena {
     }
 
 
+    public void onPreRebuildingEvent(){
+        RotatingGenerators.destroy(rotatingGenerators);
+        rotatingGenerators.clear();
+    }
+
+
     public void onOver(BedwarsGameEndingEvent e) {
         final Game game = e.getGame();
 
@@ -129,8 +136,7 @@ public class Arena {
             return;
         }
 
-        RotatingGenerators.destroy(rotatingGenerators);
-        rotatingGenerators.clear();
+
 
         if (scoreboard != null)
             scoreboard.updateScoreboard();

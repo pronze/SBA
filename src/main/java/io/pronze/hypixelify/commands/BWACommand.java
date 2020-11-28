@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -172,17 +173,15 @@ public class BWACommand extends AbstractCommand {
                         return;
                     }
 
-                    for (Entity entity : world.getEntities()) {
+                    for (Entity entity : world.getEntitiesByClass(ArmorStand.class)) {
                         if (entity == null) {
                             return;
                         }
-                        if (entity.getType() == EntityType.ARMOR_STAND) {
                             if (GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2())) {
                                 if(toEraseAll || (entity.getCustomName() != null && entity.getCustomName()
                                         .equalsIgnoreCase(RotatingGenerators.entityName))) {
                                     entity.remove();
                                 }
-                            }
                         }
                     }
 
