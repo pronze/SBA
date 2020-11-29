@@ -124,11 +124,18 @@ public class Configurator {
         checkOrSetConfig(modify, "upgrades.time.Diamond-IV", 1100);
         checkOrSetConfig(modify, "upgrades.time.Emerald-IV", 1200);
         checkOrSetConfig(modify, "date.format", "MM/dd/yy");
+        checkOrSetConfig(modify, "lobby-scoreboard.solo-prefix", "Solo");
+        checkOrSetConfig(modify, "lobby-scoreboard.doubles-prefix", "Doubles");
+        checkOrSetConfig(modify, "lobby-scoreboard.triples-prefix", "Triples");
+        checkOrSetConfig(modify, "lobby-scoreboard.Squads-prefix", "Squads");
+
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
+        checkOrSetConfig(modify, "message.waiting", "§fWaiting...");
+        checkOrSetConfig(modify, "message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
         checkOrSetConfig(modify, "message.bed-destroyed.title", "§c§lBED DESTROYED!");
         checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");
         checkOrSetConfig(modify, "message.already-purchased", "§c§lYou already purchased the same {thing}");

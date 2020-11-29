@@ -1,6 +1,7 @@
 package io.pronze.hypixelify.listener;
 
 import io.pronze.hypixelify.SBAHypixelify;
+import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
 import io.pronze.hypixelify.utils.Scheduler;
 import io.pronze.hypixelify.utils.ScoreboardUtil;
@@ -89,8 +90,6 @@ public class BedwarsListener extends AbstractListener {
         final Player player = e.getPlayer();
         final org.screamingsandals.bedwars.game.Game game = Main.getGame(e.getGame().getName());
 
-        String message = "&eThe game starts in &c{seconds} &eseconds";
-
         new BukkitRunnable() {
             int buffer = 0; //fixes the bug where it constantly shows will start in 1 second
 
@@ -107,17 +106,17 @@ public class BedwarsListener extends AbstractListener {
                             buffer = seconds;
                             if (seconds < 2) {
                                 player.sendMessage(ShopUtil
-                                        .translateColors(message.replace("{seconds}", String.valueOf(seconds))
+                                        .translateColors(Messages.message_game_starts_in.replace("{seconds}", String.valueOf(seconds))
                                                 .replace("seconds", "second")));
                                 sendTitle(player, ShopUtil
                                         .translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds < 6) {
                                 player.sendMessage(ShopUtil
-                                        .translateColors(message.replace("{seconds}", String.valueOf(seconds))));
+                                        .translateColors(Messages.message_game_starts_in.replace("{seconds}", String.valueOf(seconds))));
                                 sendTitle(player, ShopUtil
                                         .translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds % 10 == 0) {
-                                player.sendMessage(ShopUtil.translateColors(message.replace("&c{seconds}", "&6" + seconds)));
+                                player.sendMessage(ShopUtil.translateColors(Messages.message_game_starts_in.replace("&c{seconds}", "&6" + seconds)));
                             }
                         }
                     }

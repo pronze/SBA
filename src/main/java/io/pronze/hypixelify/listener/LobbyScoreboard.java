@@ -127,7 +127,9 @@ public class LobbyScoreboard extends AbstractListener {
 
     private List<String> getLine(Player player, Game game) {
         final List<String> line = new ArrayList<>();
-        String state = "§fWaiting...";
+        String state = SBAHypixelify.getConfigurator().config.getString("message.waiting"
+                , "§fWaiting...");
+
         String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = Math.max(needplayers, 0);
@@ -135,16 +137,16 @@ public class LobbyScoreboard extends AbstractListener {
         String mode;
         switch(s){
             case 1:
-                mode = "Solo";
+                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.solo-prefix", "Solo");
                 break;
             case 2:
-                mode = "Double";
+                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.doubles-prefix", "Doubles");
                 break;
             case 3:
-                mode = "Triples";
+                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.triples-prefix", "Triples");
                 break;
             case 4:
-                mode = "Squads";
+                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.squads-prefix", "Squads");
                 break;
             default:
                 mode = s +"v" +s +"v" + s + "v" +s;

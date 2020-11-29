@@ -124,6 +124,14 @@ public class Arena {
 
 
     public void onPreRebuildingEvent(){
+        try{
+            if(gameTask != null && !gameTask.isCancelled()){
+                gameTask.cancel();
+                gameTask = null;
+            }
+        } catch (Throwable t){
+            t.printStackTrace();
+        }
         RotatingGenerators.destroy(rotatingGenerators);
         rotatingGenerators.clear();
     }

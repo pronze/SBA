@@ -54,6 +54,7 @@ public class Messages {
     public static String command_invalid;
     public static String command_player_only;
     public static String command_no_permissions;
+    public static String message_game_starts_in;
 
 
     public Messages() {
@@ -73,6 +74,7 @@ public class Messages {
     }
 
     public void loadConfig() {
+        message_game_starts_in = fetchString("message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
         message_party_disband_inactivity=  fetchStringList("party.message.disband-inactivity");
         command_no_permissions = fetchString("commands.no-permissions");
         command_player_only = fetchString("commands.player-only");
