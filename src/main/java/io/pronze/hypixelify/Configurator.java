@@ -127,8 +127,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.solo-prefix", "Solo");
         checkOrSetConfig(modify, "lobby-scoreboard.doubles-prefix", "Doubles");
         checkOrSetConfig(modify, "lobby-scoreboard.triples-prefix", "Triples");
-        checkOrSetConfig(modify, "lobby-scoreboard.Squads-prefix", "Squads");
-
+        checkOrSetConfig(modify, "lobby-scoreboard.squads-prefix", "Squads");
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
