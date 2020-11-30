@@ -78,6 +78,23 @@ public class ScoreboardUtil {
                     team = scoreboard.registerNewTeam(t.getName());
                 team.setAllowFriendlyFire(false);
                 team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                ChatColor cl;
+
+                try {
+                    cl = TeamColor.fromApiColor(t.getColor()).chatColor;
+                    team.setPrefix(PLAYERTAG_PREFIX
+                            .replace("{color}", cl.toString()).replace("{team}", ChatColor.BOLD +
+                                    String.valueOf(team.getName().charAt(0))));
+                    if (!Main.isLegacy())
+                        team.setColor(ChatColor.valueOf(cl.name()));
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+
+
+
+
+
                 for (Player pl : t.getGame().getConnectedPlayers()) {
                     if (!team.hasEntry(Objects.requireNonNull(pl.getName())))
                         team.addEntry(pl.getName());
