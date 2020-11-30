@@ -1,0 +1,5 @@
+dependencies {
+    shade project(':SBAHypixelify-API')
+    implementation 'com.comphenix.protocol:ProtocolLib:4.5.0'
+    compileOnly 'me.clip:placeholderapi:2.10.9'
+}
