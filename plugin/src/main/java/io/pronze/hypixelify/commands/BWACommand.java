@@ -113,7 +113,7 @@ public class BWACommand extends AbstractCommand {
                 final Player pl = (Player) sender;
                 final GamesInventory gamesInventory = SBAHypixelify.getGamesInventory();
 
-                final int mode = ShopUtil.getIntFromMode(args[1]);
+                final int mode = ShopUtil.getIntFromMode(args[1].toLowerCase());
                 if (mode == 0) {
                     pl.sendMessage("[SBAHypixelify]" + "§cUnknown command, do /bwaddon help for more.");
                     return;
@@ -223,7 +223,7 @@ public class BWACommand extends AbstractCommand {
             return Commands;
         }
         if (strings.length == 2 && strings[0].equalsIgnoreCase("gamesinv")) {
-            return Arrays.asList("solo", "double", "triple", "squad");
+            return Arrays.asList("solo", "double", "triples", "squads");
         }
 
         return null;
