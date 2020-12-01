@@ -130,7 +130,7 @@ public class PlayerListener extends AbstractListener {
                         return;
                     }
 
-                    if(generatorDropItems.contains(drops)){
+                    if(generatorDropItems.contains(drops.getType())){
                         killer.sendMessage("+" + drops.getAmount() + " " + drops.getType().name());
                         killer.getInventory().addItem(drops);
                     }
