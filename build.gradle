@@ -41,8 +41,8 @@ subprojects{
 
     dependencies{
         compileOnly paper("1.16.4")
-        compileOnly 'org.screamingsandals.bedwars:BedWars:0.2.15-SNAPSHOT'
-        compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.2.15-SNAPSHOT'
+        compileOnly 'org.screamingsandals.bedwars:BedWars:0.3.0-SNAPSHOT'
+        compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.3.0-SNAPSHOT'
     }
 }
 

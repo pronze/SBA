@@ -10,6 +10,7 @@ spigot {
     name = 'SBAHypixelify'
     apiVersion = '1.13'
     load = POST_WORLD
+    depends = ['BedWars']
     softDepends = [
             'PlaceholderAPI',
             'ProtocolLib'
