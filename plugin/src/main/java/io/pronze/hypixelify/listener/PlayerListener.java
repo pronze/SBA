@@ -125,16 +125,16 @@ public class PlayerListener extends AbstractListener {
             Player killer = e.getEntity().getKiller();
 
             if (killer != null && isInGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
-                Arrays.stream(player.getInventory().getContents()).forEach(drops->{
-                    if(drops == null){
+                for(ItemStack drop : player.getInventory().getContents()) {
+                    if(drop == null){
                         return;
                     }
 
-                    if(generatorDropItems.contains(drops.getType())){
-                        killer.sendMessage("+" + drops.getAmount() + " " + drops.getType().name());
-                        killer.getInventory().addItem(drops);
+                    if(generatorDropItems.contains(drop.getType())){
+                        killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name());
+                        killer.getInventory().addItem(drop);
                     }
-                });
+                }
             }
         }
 

@@ -120,26 +120,22 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
 
     @Override
     public int getKills() {
-        return statistic.getCurrentKills() +
-                statistic.getKills();
+        return statistic.getKills();
     }
 
     @Override
     public int getWins() {
-        return statistic.getWins() +
-                statistic.getCurrentWins();
+        return statistic.getWins();
     }
 
     @Override
     public int getBedDestroys() {
-        return statistic.getCurrentDestroyedBeds() +
-                statistic.getDestroyedBeds();
+        return statistic.getDestroyedBeds();
     }
 
     @Override
     public int getDeaths() {
-        return statistic.getDeaths() +
-                statistic.getCurrentKills();
+        return statistic.getDeaths();
     }
 
     @Override

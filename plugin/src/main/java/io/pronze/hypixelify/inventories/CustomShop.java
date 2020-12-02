@@ -705,8 +705,8 @@ public class CustomShop extends AbstractListener {
             } else if (newItem.getType().name().contains("BOOTS")) {
                 ShopUtil.buyArmor(player, newItem.getType(), newItem.getType().name(), game);
             } else if (newItem.getType().name().endsWith("AXE")) {
-                ShopUtil.removeAxeOrPickaxe(player, newItem);
                 if (!player.getInventory().contains(newItem)) {
+                    ShopUtil.removeAxeOrPickaxe(player, newItem);
                     buystack(newItem, event);
                 } else {
                     player.sendMessage(Messages.already_purchased_thing

@@ -472,15 +472,15 @@ public class ShopUtil {
     public static void removeAxeOrPickaxe(Player player, ItemStack newItem) {
         final String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
 
-        Arrays.stream(player.getInventory().getContents()).forEach(item->{
+        for (ItemStack item : player.getInventory().getContents()) {
             if(item == null) return;
 
             final String typeName = item.getType().name();
 
-            if(typeName.endsWith(name) && !typeName.equalsIgnoreCase(name)){
+            if(typeName.endsWith(name)){
                 player.getInventory().remove(item);
             }
-        });
+        }
     }
 
     public static String ChatColorChanger(Player player) {

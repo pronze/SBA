@@ -71,6 +71,7 @@ public class ScoreboardUtil {
             obj.setDisplayName(elements[0]);
 
             updateValues(elements, scoreboard, obj);
+            RunningTeam playerteam = game.getTeamOfPlayer(p);
 
             for (RunningTeam t : game.getRunningTeams()) {
                 Team team = scoreboard.getTeam(t.getName());
@@ -92,12 +93,22 @@ public class ScoreboardUtil {
                 }
 
 
+                for (Player pl : t.getConnectedPlayers()) {
+                    if (!team.hasEntry(pl.getName())) {
+                        if (playerteam != null && playerteam.getConnectedPlayers().contains(pl)) {
+                            team.addEntry(pl.getName());
+                            continue;
+                        }
+                        String listName = pl.getPlayerListName();
+                        if (listName.equals(pl.getName())) {
+                            String prefix = team.getPrefix();
+                            String suffix = team.getSuffix();
+                            String name = prefix + pl.getName() + suffix;
+                            if (!name.equals(listName))
+                                pl.setPlayerListName(prefix + pl.getName() + suffix);
+                        }
 
-
-
-                for (Player pl : t.getGame().getConnectedPlayers()) {
-                    if (!team.hasEntry(Objects.requireNonNull(pl.getName())))
-                        team.addEntry(pl.getName());
+                    }
                 }
             }
 
