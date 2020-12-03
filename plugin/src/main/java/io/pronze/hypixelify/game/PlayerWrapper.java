@@ -141,8 +141,7 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
     @Override
     public int getXP() {
         try {
-            return statistic.getScore() +
-                    statistic.getCurrentScore();
+            return statistic.getScore();
         } catch (Exception e) {
             return 1;
         }
