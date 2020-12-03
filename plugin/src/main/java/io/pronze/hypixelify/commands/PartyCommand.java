@@ -355,7 +355,9 @@ public class PartyCommand extends AbstractCommand {
             return Arrays.asList("accept", "decline");
         }
         if (strings.length == 1) {
-            if (playerWrapper.isInParty() && playerWrapper.getPartyLeader().equals(player))
+            final Player partyLeader = playerWrapper.getPartyLeader();
+            if (playerWrapper.isInParty() && partyLeader != null &&
+                    playerWrapper.getPartyLeader().equals(player))
                 return Arrays.asList("invite", "list", "disband", "kick", "warp");
 
 
