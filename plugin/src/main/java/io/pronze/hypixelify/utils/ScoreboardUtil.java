@@ -77,7 +77,6 @@ public class ScoreboardUtil {
                 Team team = scoreboard.getTeam(t.getName());
                 if (team == null)
                     team = scoreboard.registerNewTeam(t.getName());
-                team.setAllowFriendlyFire(false);
                 team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
                 ChatColor cl;
 
@@ -92,6 +91,16 @@ public class ScoreboardUtil {
                     e.printStackTrace();
                 }
 
+                for(String playerEntry : new HashSet<>(team.getEntries())) {
+                    final Player player = Bukkit.getPlayerExact(playerEntry);
+                    if (player == null) {
+                        continue;
+                    }
+
+                    if (!t.getConnectedPlayers().contains(player)) {
+                        team.removeEntry(playerEntry);
+                    }
+                }
 
                 for (Player pl : t.getConnectedPlayers()) {
                     if (!team.hasEntry(pl.getName())) {
