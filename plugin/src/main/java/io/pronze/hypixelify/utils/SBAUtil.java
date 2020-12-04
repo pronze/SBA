@@ -6,6 +6,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.game.RotatingGenerators;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
@@ -63,6 +64,12 @@ public class SBAUtil {
                     continue;
                 }
                 if (customName.equalsIgnoreCase(RotatingGenerators.entityName)) {
+
+                    Chunk chunk = entity.getLocation().getChunk();
+
+                    if (!chunk.isLoaded()) {
+                        chunk.load();
+                    }
 
                     for (RotatingGenerators generator : RotatingGenerators.cache) {
                         if (generator == null) {
