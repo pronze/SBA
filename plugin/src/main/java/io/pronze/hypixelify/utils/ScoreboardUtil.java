@@ -121,8 +121,7 @@ public class ScoreboardUtil {
                 }
             }
 
-            if (p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard))
-                p.setScoreboard(scoreboard);
+            p.setScoreboard(scoreboard);
         } catch (Exception e) {
             e.printStackTrace();
         }

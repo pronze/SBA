@@ -260,18 +260,30 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
     public void onBedWarsPlayerKilled(BedwarsPlayerKilledEvent e){
         final Game game = e.getGame();
 
-        final Player killer = e.getKiller();
         final Player victim = e.getPlayer();
+        final PlayerData victimData = playerDataMap.get(victim.getUniqueId());
+        victimData.setDeaths(victimData.getDeaths() + 1);
+
+        final Player killer = e.getKiller();
+
+        if (killer == null) {
+            return;
+        }
 
         final GamePlayer gVictim = Main.getPlayerGameProfile(victim);
 
+        if (gVictim == null || gVictim.isSpectator) {
+            return;
+        }
+
         final CurrentTeam team = Main.getGame(game.getName()).getPlayerTeam(gVictim);
 
-        final PlayerData victimData = playerDataMap.get(victim.getUniqueId());
+        if (team == null) {
+            return;
+        }
         final PlayerData killerData = playerDataMap.get(victim.getUniqueId());
 
         killerData.setKills(killerData.getKills() + 1);
-        victimData.setDeaths(victimData.getDeaths() + 1);
 
         if(!team.isBed){
             killerData.setFinalKills(killerData.getFinalKills() + 1);
