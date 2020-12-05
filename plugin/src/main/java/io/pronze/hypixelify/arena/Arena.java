@@ -263,6 +263,7 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         final Player victim = e.getPlayer();
         final PlayerData victimData = playerDataMap.get(victim.getUniqueId());
         victimData.setDeaths(victimData.getDeaths() + 1);
+        playerDataMap.put(victim.getUniqueId(), victimData);
 
         final Player killer = e.getKiller();
 
@@ -289,7 +290,6 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
             killerData.setFinalKills(killerData.getFinalKills() + 1);
         }
 
-        playerDataMap.put(victim.getUniqueId(), victimData);
         playerDataMap.put(killer.getUniqueId(), killerData);
 
 
