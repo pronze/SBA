@@ -1,6 +1,7 @@
 package io.pronze.hypixelify.listener;
 
 import io.pronze.hypixelify.SBAHypixelify;
+import io.pronze.hypixelify.game.PlayerData;
 import io.pronze.hypixelify.utils.Scheduler;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -121,13 +122,20 @@ public class PlayerListener extends AbstractListener {
             itemArr.add(sword);
         }
 
+        PlayerData data = arena.getPlayerData(player.getUniqueId());
+
+        if (data != null) {
+            data.setInventory(itemArr);
+            arena.putPlayerData(player.getUniqueId(), data);
+        }
+
         if (giveKillerResources) {
             Player killer = e.getEntity().getKiller();
 
             if (killer != null && isInGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
                 for(ItemStack drop : player.getInventory().getContents().clone()) {
                     if(drop == null){
-                        return;
+                        continue;
                     }
 
                     if(generatorDropItems.contains(drop.getType())){
@@ -149,37 +157,36 @@ public class PlayerListener extends AbstractListener {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
                 int livingTime = respawnTime;
-                int waitTimeout = 4;
+                byte buffer = 4;
 
                 @Override
                 public void run() {
+                    if (!isInGame(player) || player.getGameMode() != GameMode.SPECTATOR) {
+                        this.cancel();
+                        return;
+                    }
+
                     if (livingTime > 0) {
                         sendTitle(player, Messages.message_respawn_title,
                                 Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
                         player.sendMessage(Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)));
                         livingTime--;
                     }
+
                     if (livingTime == 0) {
-                        if (waitTimeout > 0 && isInGame(player)
-                                && player.getGameMode() == GameMode.SPECTATOR) {
-                            waitTimeout--;
+
+                        if (buffer > 0) {
+                            buffer--;
                         } else {
-                            if (!isInGame(player) || player.getGameMode() != GameMode.SURVIVAL
-                                    || game.getStatus() != GameStatus.RUNNING) {
-                                cancel();
-                            } else {
                                 player.sendMessage(Messages.message_respawned_title);
                                 sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                                 ShopUtil.giveItemToPlayer(itemArr, player, victimTeam.getColor());
                                 this.cancel();
-                            }
                         }
                     }
                 }
             }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
         }
-
-
     }
 
 
@@ -256,8 +263,6 @@ public class PlayerListener extends AbstractListener {
         if (!partyEnabled) return;
         final Player player = e.getPlayer();
         final PlayerWrapperService dbManager = SBAHypixelify.getWrapperService();
-        if (dbManager.getWrapper(player) == null) return;
-
         dbManager.handleOffline(player);
     }
 

@@ -257,6 +257,14 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
 
     }
 
+    public void putPlayerData(UUID uuid, PlayerData data) {
+        playerDataMap.put(uuid, data);
+    }
+
+    public PlayerData getPlayerData(UUID uuid) {
+        return playerDataMap.get(uuid);
+    }
+
     public void onBedWarsPlayerKilled(BedwarsPlayerKilledEvent e){
         final Game game = e.getGame();
 
