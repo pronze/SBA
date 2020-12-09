@@ -125,7 +125,7 @@ public class PlayerListener extends AbstractListener {
             Player killer = e.getEntity().getKiller();
 
             if (killer != null && isInGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
-                for(ItemStack drop : player.getInventory().getContents()) {
+                for(ItemStack drop : player.getInventory().getContents().clone()) {
                     if(drop == null){
                         return;
                     }
