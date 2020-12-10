@@ -19,6 +19,8 @@ public class UpdateChecker {
                     if (version != null) {
                         if (!version.equalsIgnoreCase(SBAHypixelify.getVersion())) {
                             Bukkit.getLogger().info("§e§lTHERE IS A NEW UPDATE AVAILABLE.");
+                        } else {
+                            Bukkit.getLogger().info("No updates found");
                         }
                     }
                 }

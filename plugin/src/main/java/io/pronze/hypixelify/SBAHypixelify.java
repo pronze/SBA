@@ -15,9 +15,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import io.pronze.hypixelify.arena.Arena;
+import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.GameStorage;
-import io.pronze.hypixelify.manager.ArenaManager;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.placeholderapi.SBAExpansion;
 import io.pronze.hypixelify.service.PlayerWrapperService;
@@ -27,6 +26,8 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
@@ -43,7 +44,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     private Configurator configurator;
 
-    private ArenaManager arenaManager;
 
     private GamesInventory gamesInventory;
 
@@ -52,9 +52,12 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private boolean debug = false;
     private boolean isSnapshot;
 
+    private final Map<String, Arena> arenas = new HashMap<>();
+
+
     public static GameStorage getGamestorage(Game game) {
-        if (getArenaManager().getArenas().containsKey(game.getName()))
-            return getArenaManager().getArenas().get(game.getName()).getStorage();
+        if (plugin.arenas.containsKey(game.getName()))
+            return plugin.arenas.get(game.getName()).getStorage();
 
         return null;
     }
@@ -69,8 +72,14 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         return playerWrapperService.getWrapper(player);
     }
 
-    public static Arena getArena(String arenaName) {
-        return getArenaManager().getArenas().get(arenaName);
+    public static Arena getArena(String arenaName) { return plugin.arenas.get(arenaName); }
+
+    public static void addArena(Arena arena) { plugin.arenas.put(arena.getGame().getName(), arena); }
+
+    public static void removeArena(String arenaName) { plugin.arenas.remove(arenaName); }
+
+    public static Map<String, Arena> getArenas() {
+        return plugin.arenas;
     }
 
     public static Configurator getConfigurator() {
@@ -101,9 +110,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         return plugin.playerWrapperService;
     }
 
-    public static ArenaManager getArenaManager() {
-        return plugin.arenaManager;
-    }
 
     public static boolean isUpgraded() {
         return !Objects.requireNonNull(getConfigurator()
@@ -128,7 +134,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
 
-        arenaManager = new ArenaManager();
         playerWrapperService = new PlayerWrapperService();
 
         if (!isSnapshot) {
@@ -225,7 +230,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public void onDisable() {
-
         if (SBAHypixelify.isProtocolLib()) {
             Bukkit.getOnlinePlayers().forEach(SBAUtil::removeScoreboardObjective);
         }
@@ -241,6 +245,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         getLogger().info("Cancelling current tasks....");
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
+
+        arenas.clear();
     }
 
 

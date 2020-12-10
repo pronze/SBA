@@ -270,16 +270,18 @@ public class ShopUtil {
         final ArrayList<Object> games = new ArrayList<>();
         int items = 0;
 
-        final ItemStack arenaMaterial = new ItemStack(Material
-                .valueOf(SBAHypixelify.getConfigurator().config
-                        .getString("games-inventory.stack-material", "PAPER")));
 
-        final ItemMeta arenaMatMeta = arenaMaterial.getItemMeta();
 
         for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
                 .getGames()) {
             if (Configurator.game_size.containsKey(game.getName()) &&
                     Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
+                ItemStack arenaMaterial = new ItemStack(Material
+                        .valueOf(SBAHypixelify.getConfigurator().config
+                                .getString("games-inventory.stack-material", "PAPER")));
+
+                ItemMeta arenaMatMeta = arenaMaterial.getItemMeta();
+
                 String name1 = "§a" + game.getName();
                 List<String> newLore = new ArrayList<>();
                 lore.forEach(ls->{

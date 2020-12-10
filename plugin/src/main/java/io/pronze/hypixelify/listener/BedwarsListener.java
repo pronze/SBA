@@ -12,7 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
-import io.pronze.hypixelify.arena.Arena;
+import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.utils.SBAUtil;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -28,8 +28,8 @@ public class BedwarsListener implements Listener {
     public void onStarted(BedwarsGameStartedEvent e) {
         final Game game = e.getGame();
         final Arena arena = new Arena(game);
-        SBAHypixelify.getArenaManager().addArena(game.getName(), arena);
-        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), ()-> arena.getScoreBoard().updateScoreboard(), 2L);
+        SBAHypixelify.addArena(arena);
+        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), ()-> arena.getScoreboard().updateScoreboard(), 2L);
         arena.onGameStarted(e);
     }
 
@@ -64,7 +64,7 @@ public class BedwarsListener implements Listener {
             arena.onTargetBlockDestroyed(e);
 
             Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
-                final ScoreBoard board = arena.getScoreBoard();
+                final ScoreBoard board = arena.getScoreboard();
                 if (board != null) {
                     board.updateScoreboard();
                 }
@@ -77,7 +77,7 @@ public class BedwarsListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
         Game game = e.getGame();
-        SBAHypixelify.getArenaManager().removeArena(game.getName());
+        SBAHypixelify.removeArena(game.getName());
     }
 
 
@@ -142,7 +142,7 @@ public class BedwarsListener implements Listener {
         if (game.getStatus() != GameStatus.RUNNING) return;
         final Arena arena = SBAHypixelify.getArena(game.getName());
         if (arena != null) {
-            arena.getScoreBoard().updateScoreboard();
+            arena.getScoreboard().updateScoreboard();
         }
     }
 

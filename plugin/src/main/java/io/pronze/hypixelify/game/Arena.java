@@ -1,13 +1,11 @@
-package io.pronze.hypixelify.arena;
+package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.Configurator;
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.game.PlayerData;
-import io.pronze.hypixelify.game.RotatingGenerators;
-import io.pronze.hypixelify.game.GameStorage;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
 import io.pronze.hypixelify.utils.SBAUtil;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -26,6 +24,7 @@ import java.util.*;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
+@Getter
 public class Arena implements io.pronze.hypixelify.api.game.Arena {
 
 
@@ -38,18 +37,23 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
 
     private static final String diamondHoloText = "§bDiamond";
     private static final String emeraldHoloText = "§aEmerald";
+
     public final double radius;
-    private final Game mGame;
+
+    private final Game game;
+
     private final ScoreBoard scoreboard;
     private final GameStorage storage;
+
     private final List<RotatingGenerators> rotatingGenerators = new ArrayList<>();
     private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
+
     public GameTask gameTask;
 
     public Arena(Game game) {
         radius = Math.pow(SBAHypixelify.getConfigurator()
                 .config.getInt("upgrades.trap-detection-range", 7), 2);
-        this.mGame = game;
+        this.game = game;
         storage = new GameStorage(game);
         scoreboard = new ScoreBoard(this);
         gameTask = new GameTask(this);
@@ -59,29 +63,20 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         });
     }
 
-    public Map<UUID, PlayerData> getPlayerDataMap(){return playerDataMap;}
-
     @Override
     public List<RotatingGenerators> getRotatingGenerators() {
         return rotatingGenerators;
     }
 
-    public GameStorage getStorage() {
-        return storage;
-    }
-
+    @Override
     public Game getGame() {
-        return this.mGame;
-    }
-
-    public ScoreBoard getScoreBoard() {
-        return this.scoreboard;
+        return game;
     }
 
     public void onGameStarted(BedwarsGameStartedEvent e) {
         final Game game = e.getGame();
 
-        if (!game.equals(mGame)) return;
+        if (!game.equals(this.game)) return;
 
         game.getConnectedPlayers().forEach(player -> {
             Configurator.gamestart_message.forEach(message -> {
@@ -93,7 +88,7 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
             });
         });
 
-        SBAUtil.destroySpawnerArmorStandEntitiesFrom(mGame);
+        SBAUtil.destroySpawnerArmorStandEntitiesFrom(this.game);
         initalizeGenerators();
     }
 
@@ -101,7 +96,7 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
 
     public void initalizeGenerators() {
         if (SBAHypixelify.getConfigurator().config.getBoolean("floating-generator.enabled", true)) {
-            mGame.getItemSpawners().forEach(spawner -> {
+            game.getItemSpawners().forEach(spawner -> {
                 final Material spawnerMaterial = spawner.getItemSpawnerType().getMaterial();
 
                 if (spawnerMaterial.equals(Material.DIAMOND) || spawnerMaterial.equals(Material.EMERALD)) {
@@ -116,7 +111,7 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
                     }
 
                     rotatingGenerators.add(new io.pronze.hypixelify.game.RotatingGenerators(spawner,
-                            rotationStack, genHolo).spawn(mGame.getConnectedPlayers()));
+                            rotationStack, genHolo).spawn(game.getConnectedPlayers()));
                 }
             });
         }
@@ -141,7 +136,6 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
             final PlayerData data = playerDataMap.get(destroyer.getUniqueId());
             final int currentDestroys = data.getBedDestroys();
             data.setBedDestroys(currentDestroys + 1);
-            playerDataMap.put(destroyer.getUniqueId(), data);
         }
 
     }
@@ -164,11 +158,9 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
     public void onOver(BedwarsGameEndingEvent e) {
         final Game game = e.getGame();
 
-        if (!mGame.equals(game)) {
+        if (!this.game.equals(game)) {
             return;
         }
-
-
 
         if (scoreboard != null)
             scoreboard.updateScoreboard();
@@ -271,7 +263,6 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         final Player victim = e.getPlayer();
         final PlayerData victimData = playerDataMap.get(victim.getUniqueId());
         victimData.setDeaths(victimData.getDeaths() + 1);
-        playerDataMap.put(victim.getUniqueId(), victimData);
 
         final Player killer = e.getKiller();
 
@@ -297,8 +288,6 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         if(!team.isBed){
             killerData.setFinalKills(killerData.getFinalKills() + 1);
         }
-
-        playerDataMap.put(killer.getUniqueId(), killerData);
 
 
 

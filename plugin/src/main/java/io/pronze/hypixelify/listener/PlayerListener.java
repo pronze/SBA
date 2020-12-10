@@ -18,7 +18,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import io.pronze.hypixelify.arena.Arena;
+import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.SBAUtil;
@@ -61,6 +61,7 @@ public class PlayerListener implements Listener {
 
         allowed = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
         generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
+
     }
 
 
@@ -79,8 +80,8 @@ public class PlayerListener implements Listener {
         if (arena == null) return;
 
         Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
-            if (arena.getScoreBoard() != null) {
-                arena.getScoreBoard().updateScoreboard();
+            if (arena.getScoreboard() != null) {
+                arena.getScoreboard().updateScoreboard();
             }
         }, 1L);
 

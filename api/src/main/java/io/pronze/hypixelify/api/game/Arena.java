@@ -1,8 +1,4 @@
 package io.pronze.hypixelify.api.game;
-
-import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 
 import java.util.List;
@@ -16,14 +12,16 @@ public interface Arena {
      */
     List<? extends RotatingGenerators> getRotatingGenerators();
 
+    /**
+     *
+     * @return game storage
+     */
     GameStorage getStorage();
 
+    /**
+     *
+     * @return game object of this arena
+     */
     Game getGame();
-
-    void onOver(BedwarsGameEndingEvent e);
-
-    void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e);
-
-    void onGameStarted(BedwarsGameStartedEvent e);
 
 }

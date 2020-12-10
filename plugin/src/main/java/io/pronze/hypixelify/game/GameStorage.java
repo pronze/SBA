@@ -14,10 +14,9 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
 
 
     public GameStorage(Game game){
-        game.getRunningTeams().forEach(team->{
-            teamDataMap.put(team.getName(), new TeamData(0, 0,
-                    false, false, team.getTargetBlock()));
-        });
+        game.getRunningTeams()
+                .forEach(team->{ teamDataMap.put(team.getName(), new TeamData(0, 0,
+                    false, false, team.getTargetBlock())); });
     }
 
 
@@ -36,31 +35,26 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
     public void setTrap(RunningTeam rt, boolean b) {
         final TeamData data = teamDataMap.get(rt.getName());
         data.setPurchasedTrap(b);
-        teamDataMap.put(rt.getName(), data);
     }
 
     public void setPool(RunningTeam rt, boolean b) {
         final TeamData data = teamDataMap.get(rt.getName());
         data.setPurchasedPool(b);
-        teamDataMap.put(rt.getName(), data);
     }
 
     public void setSharpness(String teamName, Integer level) {
         final TeamData data = teamDataMap.get(teamName);
         data.setSharpness(level);
-        teamDataMap.put(teamName, data);
     }
 
     public void setProtection(String teamName, Integer level) {
         final TeamData data = teamDataMap.get(teamName);
         data.setProtection(level);
-        teamDataMap.put(teamName, data);
     }
 
     public void setTargetBlockLocation(RunningTeam rt) {
         final TeamData data = teamDataMap.get(rt.getName());
         data.setTargetBlockLoc(rt.getTargetBlock());
-        teamDataMap.put(rt.getName(), data);
     }
 
     public boolean areTrapsEnabled() {

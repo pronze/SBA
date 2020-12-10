@@ -1,7 +1,8 @@
-package io.pronze.hypixelify.arena;
+package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
+import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.GameStorage;
 import io.pronze.hypixelify.message.Messages;
 import org.bukkit.Bukkit;

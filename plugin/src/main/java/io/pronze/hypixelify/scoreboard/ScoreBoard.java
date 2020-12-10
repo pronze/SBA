@@ -6,7 +6,7 @@ import io.pronze.hypixelify.utils.ScoreboardUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import io.pronze.hypixelify.arena.Arena;
+import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
