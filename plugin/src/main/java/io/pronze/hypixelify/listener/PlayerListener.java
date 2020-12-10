@@ -96,10 +96,10 @@ public class PlayerListener extends AbstractListener {
 
         final List<ItemStack> itemArr = new ArrayList<>();
         if (permanentItems) {
-            ItemStack sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD")) : new ItemStack(Material.WOODEN_SWORD);
+            final ItemStack sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD")) : new ItemStack(Material.WOODEN_SWORD);
 
 
-            Arrays.stream(player.getInventory().getContents()).forEach(stack -> {
+            Arrays.stream(player.getInventory().getContents().clone()).forEach(stack -> {
                 if (stack == null) {
                     return;
                 }
@@ -117,22 +117,20 @@ public class PlayerListener extends AbstractListener {
                         name.endsWith("HELMET"))
                     itemArr.add(stack);
 
+                if (name.contains("SHEARS")) {
+                    itemArr.add(stack);
+                }
+
             });
 
             itemArr.add(sword);
         }
 
-        PlayerData data = arena.getPlayerData(player.getUniqueId());
-
-        if (data != null) {
-            data.setInventory(itemArr);
-            arena.putPlayerData(player.getUniqueId(), data);
-        }
 
         if (giveKillerResources) {
             Player killer = e.getEntity().getKiller();
 
-            if (killer != null && isInGame(killer) && killer.getGameMode().equals(GameMode.SURVIVAL)) {
+            if (killer != null && isInGame(killer) && killer.getGameMode() == GameMode.SURVIVAL) {
                 for(ItemStack drop : player.getInventory().getContents().clone()) {
                     if(drop == null){
                         continue;
