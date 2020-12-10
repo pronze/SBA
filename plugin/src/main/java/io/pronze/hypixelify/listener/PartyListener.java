@@ -3,20 +3,19 @@ import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.Party;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import io.pronze.hypixelify.utils.ShopUtil;
+import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
-public class PartyListener extends AbstractListener{
+public class PartyListener implements Listener {
 
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onBWJoin(BedwarsPlayerJoinedEvent e) {
         final Game game = e.getGame();
         final Player player = e.getPlayer();
@@ -28,7 +27,7 @@ public class PartyListener extends AbstractListener{
         if (!data.isPartyLeader()) return;
         if (party.getPlayers() == null) return;
 
-        if (game.getStatus().equals(GameStatus.WAITING) && game.getConnectedPlayers().size() < game.getMaxPlayers()) {
+        if (game.getStatus() == GameStatus.WAITING && game.getConnectedPlayers().size() < game.getMaxPlayers()) {
                     for (Player pl : party.getPlayers()) {
                         if (pl == null) return;
                         if (!pl.isOnline()) return;
@@ -72,8 +71,4 @@ public class PartyListener extends AbstractListener{
         }
     }
 
-    @Override
-    public void onDisable() {
-        HandlerList.unregisterAll(this);
-    }
 }

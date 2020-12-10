@@ -282,8 +282,6 @@ public class Configurator {
                 , "&ewww.sample.net"
         ));
 
-        checkOrSetConfig(modify, "party.enabled", true);
-        checkOrSetConfig(modify, "party.debug", false);
         checkOrSetConfig(modify, "party.leader-autojoin-autoleave", true);
         checkOrSetConfig(modify, "party.size", 4);
         checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(

@@ -4,7 +4,6 @@ import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.PartyManager;
 import io.pronze.hypixelify.api.service.WrapperService;
 import io.pronze.hypixelify.game.PlayerWrapper;
-import io.pronze.hypixelify.utils.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
@@ -34,7 +33,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
             return;
         }
 
-        deletionTasks.put(player.getUniqueId(), Scheduler.runTaskLater(() -> {
+        deletionTasks.put(player.getUniqueId(), Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
 
             partyManager.removeFromInvitedParty(player);
 
@@ -58,7 +57,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
     public void updateAll() {
         if (playerData.isEmpty()) return;
 
-        Scheduler.runTask(()->{
+        Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), ()->{
             for (PlayerWrapper db : playerData.values()) {
                 if (db == null) continue;
                 db.updateDatabase();

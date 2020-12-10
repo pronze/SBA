@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,6 +21,7 @@ import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class LobbyBoard extends AbstractListener {
+public class LobbyBoard implements Listener {
 
     private static Location location;
     private final List<Player> players = new ArrayList<>();
@@ -52,7 +54,7 @@ public class LobbyBoard extends AbstractListener {
             if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)) {
                 SBAHypixelify.getConfigurator().config.set("main-lobby.enabled", false);
                 SBAHypixelify.getConfigurator().saveConfig();
-                onDisable();
+                disable();
                 Bukkit.getServer().getLogger().warning("Could not find lobby world!");
                 return;
             }
@@ -82,7 +84,8 @@ public class LobbyBoard extends AbstractListener {
         final Player player = e.getPlayer();
         final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
 
-        if (SBAHypixelify.LobbyBoardEnabled() && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
+        if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
+                && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
             if (Messages.lobby_chat_format != null) {
                 String format = Messages.lobby_chat_format
                         .replace("{level}", String.valueOf(db.getLevel()))
@@ -90,7 +93,7 @@ public class LobbyBoard extends AbstractListener {
                         .replace("{message}", e.getMessage())
                         .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer()));
 
-                if(SBAHypixelify.isPapiEnabled()){
+                if(SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")){
                     format = PlaceholderAPI.setPlaceholders(player, format);
                 }
 
@@ -99,12 +102,11 @@ public class LobbyBoard extends AbstractListener {
         }
     }
 
-    @Override
-    public void onDisable() {
+    public void disable() {
         players.forEach(pl -> {
             try {
                 if (pl.getScoreboard().getObjective("bwa-mainlobby") != null) {
-                    pl.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
+                    pl.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -123,7 +125,7 @@ public class LobbyBoard extends AbstractListener {
                 () -> {
                     if (hasMainLobbyObjective(player)) return;
 
-                    if (isInWorld(player.getLocation()) && !isInGame(player)) {
+                    if (isInWorld(player.getLocation()) && !BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) {
                         createBoard(player);
                     }
                 }, 3L);
@@ -194,7 +196,7 @@ public class LobbyBoard extends AbstractListener {
             for (String s : board_body) {
                 if (i == 0) break;
                 try {
-                    if (SBAHypixelify.isPapiEnabled())
+                    if(SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI"))
                         s = PlaceholderAPI.setPlaceholders(player, s);
                 } catch (Exception ignored) {
 

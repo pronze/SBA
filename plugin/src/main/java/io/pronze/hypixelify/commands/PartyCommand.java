@@ -34,6 +34,8 @@ public class PartyCommand extends AbstractCommand {
             sender.sendMessage("§cCannot access command, party system is disabled.");
             return false;
         }
+
+
         //can cast safely due to code in abstract class
         final Player player = (Player) sender;
 

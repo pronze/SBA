@@ -1,7 +1,7 @@
 package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.utils.Scheduler;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -11,16 +11,14 @@ import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class RotatingGenerators implements io.pronze.hypixelify.api.game.RotatingGenerators {
 
     public static final String entityName = "sba_rot_entity";
     public static List<RotatingGenerators> cache = new ArrayList<>();
-    private final List<String> lines;
+    private List<String> lines;
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
@@ -40,23 +38,22 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
     }
 
     public static void scheduleTask() {
-        Scheduler.runTimerTask(() -> {
-            cache.stream().filter(Objects::nonNull).forEach(generator -> {
-                final Location loc = generator.location;
-                if (loc == null || generator.armorStand == null)
-                    return;
 
+        Bukkit.getScheduler().runTaskTimer(SBAHypixelify.getInstance(), () -> {
+            cache.stream().filter(generator-> generator != null &&
+                                 generator.location != null &&
+                                 generator.armorStand != null).forEach(generator -> {
+                final Location loc = generator.location;
                 loc.setYaw(loc.getYaw() + 10f);
                 generator.armorStand.teleport(loc);
                 generator.location = loc;
             });
         }, 0L, 2L);
 
-        Scheduler.runTimerTask(() -> {
-            cache.stream().filter(Objects::nonNull).forEach(generator -> {
-                if (generator.hologram == null) {
-                    return;
-                }
+        //Maybe use bedwarsgametickevent for this?
+        Bukkit.getScheduler().runTaskTimer(SBAHypixelify.getInstance(), () -> {
+            cache.stream().filter(generator-> generator != null && generator.hologram != null)
+                    .forEach(generator -> {
                 generator.time--;
 
 
@@ -130,6 +127,8 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
         for (int i = 0; i < lines.size(); i++) {
             hologram.setLine(i, lines.get(i));
         }
+
+        this.lines = new ArrayList<>(lines);
 
     }
 

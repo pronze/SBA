@@ -25,12 +25,12 @@ public class SBAExpansion extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
 
+        if (player == null) {
+            return " ";
+        }
 
-        if(identifier.startsWith("sbaplayer_")){
+        if (identifier.startsWith("player_")) {
             final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
-            if(database == null){
-                return null;
-            }
             switch (identifier.substring(10).toLowerCase()){
                 case "level":
                     return Integer.toString(database.getLevel());

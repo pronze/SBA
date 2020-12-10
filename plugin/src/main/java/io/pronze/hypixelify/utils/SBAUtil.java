@@ -64,9 +64,7 @@ public class SBAUtil {
                     continue;
                 }
                 if (customName.equalsIgnoreCase(RotatingGenerators.entityName)) {
-
                     Chunk chunk = entity.getLocation().getChunk();
-
                     if (!chunk.isLoaded()) {
                         chunk.load();
                     }
@@ -83,8 +81,6 @@ public class SBAUtil {
                             toDestroy.add(generator);
                         }
                     }
-
-                    entity.remove();
                 }
             }
         }
@@ -93,7 +89,6 @@ public class SBAUtil {
             if (generator == null) {
                 return;
             }
-
             generator.destroy();
         });
 

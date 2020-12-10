@@ -3,16 +3,11 @@ import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.Party;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
 
-public class ChatListener extends AbstractListener {
-
-    @Override
-    public void onDisable() {
-        HandlerList.unregisterAll(this);
-    }
+public class ChatListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e){

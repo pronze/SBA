@@ -11,7 +11,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
@@ -21,7 +23,7 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
-public class LobbyScoreboard extends AbstractListener {
+public class LobbyScoreboard implements Listener {
 
 
 
@@ -30,7 +32,6 @@ public class LobbyScoreboard extends AbstractListener {
     private final boolean isEnabled;
     private final List<String> lobby_scoreboard_lines;
     private final String date;
-    private boolean disabling = false;
     private final List<Player> players = new ArrayList<>();
     private BukkitTask updateTask;
 
@@ -59,7 +60,7 @@ public class LobbyScoreboard extends AbstractListener {
                 .getBoolean("lobby-scoreboard.enabled", true);
 
         if(!isEnabled){
-            onDisable();
+            disable();
             return;
         }
 
@@ -70,7 +71,6 @@ public class LobbyScoreboard extends AbstractListener {
             final BedwarsAPI bedwarsAPI = BedwarsAPI.getInstance();
 
             public void run() {
-                if(!disabling) {
                     title = lobby_scoreboard.get(tc);
                     tc++;
                     if (tc >= lobby_scoreboard.size())
@@ -85,9 +85,6 @@ public class LobbyScoreboard extends AbstractListener {
                             updateScoreboard(player, game);
                         }
                     });
-
-                } else
-                    cancel();
             }
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
     }
@@ -104,6 +101,14 @@ public class LobbyScoreboard extends AbstractListener {
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e){
         players.remove(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onPluginDisable(PluginDisableEvent e) {
+        final String pluginName = e.getPlugin().getName();
+        if (pluginName.equalsIgnoreCase(SBAHypixelify.getInstance().getName())) {
+            disable();
+        }
     }
 
     @EventHandler
@@ -152,7 +157,7 @@ public class LobbyScoreboard extends AbstractListener {
                 mode = s +"v" +s +"v" + s + "v" +s;
         }
 
-        if (game.countConnectedPlayers() >= game.getMinPlayers() && game.getStatus().equals(GameStatus.WAITING)) {
+        if (game.countConnectedPlayers() >= game.getMinPlayers() && game.getStatus() == GameStatus.WAITING) {
             String time = Main.getGame(game.getName()).getFormattedTimeLeft();
             if(!time.contains("0-1")) {
                 String[] units = time.split(":");
@@ -203,10 +208,9 @@ public class LobbyScoreboard extends AbstractListener {
         }
         updateTask = null;
     }
-    @Override
-    public void onDisable() {
+
+    public void disable() {
         cancelTask();
-        disabling = true;
         HandlerList.unregisterAll(this);
     }
 }

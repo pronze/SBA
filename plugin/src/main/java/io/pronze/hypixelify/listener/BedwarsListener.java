@@ -3,14 +3,15 @@ package io.pronze.hypixelify.listener;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
-import io.pronze.hypixelify.utils.Scheduler;
 import io.pronze.hypixelify.utils.ScoreboardUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.Scoreboard;
 import io.pronze.hypixelify.arena.Arena;
 import io.pronze.hypixelify.utils.SBAUtil;
 import io.pronze.hypixelify.utils.ShopUtil;
@@ -19,24 +20,28 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
-import java.util.Map;
-
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
-public class BedwarsListener extends AbstractListener {
-
-    @Override
-    public void onDisable() {
-        HandlerList.unregisterAll(this);
-    }
+public class BedwarsListener implements Listener {
 
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
         final Game game = e.getGame();
         final Arena arena = new Arena(game);
         SBAHypixelify.getArenaManager().addArena(game.getName(), arena);
-        Scheduler.runTaskLater(() -> arena.getScoreBoard().updateScoreboard(), 2L);
+        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), ()-> arena.getScoreBoard().updateScoreboard(), 2L);
         arena.onGameStarted(e);
+    }
+
+    @EventHandler
+    public void onBwReload(PluginEnableEvent event) {
+        final String plugin = event.getPlugin().getName();
+        final PluginManager pluginManager = Bukkit.getServer().getPluginManager();
+
+        if (plugin.equalsIgnoreCase("BedWars")) {
+            pluginManager.disablePlugin(SBAHypixelify.getInstance());
+            pluginManager.enablePlugin(SBAHypixelify.getInstance());
+        }
     }
 
 
@@ -58,7 +63,7 @@ public class BedwarsListener extends AbstractListener {
         if (arena != null) {
             arena.onTargetBlockDestroyed(e);
 
-            Scheduler.runTaskLater(() -> {
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                 final ScoreBoard board = arena.getScoreBoard();
                 if (board != null) {
                     board.updateScoreboard();

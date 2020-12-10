@@ -5,8 +5,8 @@ import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.Party;
 import io.pronze.hypixelify.api.party.PartyManager;
 import io.pronze.hypixelify.message.Messages;
-import io.pronze.hypixelify.utils.Scheduler;
 import io.pronze.hypixelify.utils.ShopUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -115,7 +115,8 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
     }
 
     public void init() {
-        Scheduler.runTaskLater(this::updateDatabase, 1L);
+        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(),
+                this::updateDatabase, 1L);
     }
 
     @Override
@@ -237,7 +238,7 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
             }
             setIsInParty(false);
             party.disband();
-            Scheduler.runTask(() -> partyManager.removeParty(party));
+            Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), () -> partyManager.removeParty(party));
             setParty(null);
         }
     }
@@ -259,7 +260,7 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
         if (bool) {
             final PartyManager partyManager = SBAHypixelify.getPartyManager();
             cancelInviteTask();
-            inviteTask = Scheduler.runTaskLater(() -> {
+            inviteTask = Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                 if (isInvited) {
                     final Party party = partyManager.getParty(invitedParty.getLeader());
 

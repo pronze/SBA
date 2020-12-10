@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Messages {
 
+    //TODO: save memory by calling getConfigurator() directly
     public static List<String> message_cannot_invite;
     public static List<String> message_no_other_commands;
     public static List<String> message_leader_join_leave;

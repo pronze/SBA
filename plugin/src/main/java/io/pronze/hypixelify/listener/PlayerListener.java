@@ -1,15 +1,12 @@
 package io.pronze.hypixelify.listener;
 
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.game.PlayerData;
-import io.pronze.hypixelify.utils.Scheduler;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
+import org.bukkit.event.*;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -39,39 +36,32 @@ import java.util.List;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
-public class PlayerListener extends AbstractListener {
+public class PlayerListener implements Listener {
 
 
     private final List<Material> allowed;
     private final List<Material> generatorDropItems;
-    private final boolean partyEnabled, giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
+    private final boolean  giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
             disableArmorDamage, permanentItems, blockItemOnChest, blockItemDrops;
 
     private final int respawnTime;
 
 
     public PlayerListener() {
-        blockItemDrops = SBAHypixelify.getConfigurator().config.getBoolean("block-item-drops", true);
-        partyEnabled = SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true);
-        giveKillerResources = SBAHypixelify.getConfigurator().config.getBoolean("give-killer-resources", true);
-        respawnCooldown = Main.getConfigurator().config.getBoolean("respawn-cooldown.enabled");
-        respawnTime = Main.getConfigurator().config.getInt("respawn-cooldown.time", 5);
-        disableArmorInventoryMovement = SBAHypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true);
-        disableArmorDamage = SBAHypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true);
-        permanentItems = SBAHypixelify.getConfigurator().config.getBoolean("permanent-items", true);
-        blockItemOnChest = SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true);
+        FileConfiguration config = SBAHypixelify.getConfigurator().config;
+
+        blockItemDrops = config.getBoolean("block-item-drops", true);
+        giveKillerResources = config.getBoolean("give-killer-resources", true);
+        respawnCooldown = config.getBoolean("respawn-cooldown.enabled");
+        respawnTime = config.getInt("respawn-cooldown.time", 5);
+        disableArmorInventoryMovement = config.getBoolean("disable-armor-inventory-movement", true);
+        disableArmorDamage = config.getBoolean("disable-sword-armor-damage", true);
+        permanentItems = config.getBoolean("permanent-items", true);
+        blockItemOnChest = config.getBoolean("block-players-putting-certain-items-onto-chest", true);
 
         allowed = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
         generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
     }
-
-    @Override
-    public void onDisable() {
-        allowed.clear();
-        generatorDropItems.clear();
-        HandlerList.unregisterAll(this);
-    }
-
 
 
 
@@ -79,7 +69,7 @@ public class PlayerListener extends AbstractListener {
     public void onPlayerDeath(PlayerDeathEvent e) {
         final Player player = e.getEntity();
 
-        if (!isInGame(player)) return;
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
         final Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         if (game == null || game.getStatus() != GameStatus.RUNNING) return;
@@ -88,7 +78,7 @@ public class PlayerListener extends AbstractListener {
 
         if (arena == null) return;
 
-        Scheduler.runTaskLater(() -> {
+        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
             if (arena.getScoreBoard() != null) {
                 arena.getScoreBoard().updateScoreboard();
             }
@@ -130,7 +120,8 @@ public class PlayerListener extends AbstractListener {
         if (giveKillerResources) {
             Player killer = e.getEntity().getKiller();
 
-            if (killer != null && isInGame(killer) && killer.getGameMode() == GameMode.SURVIVAL) {
+            if (killer != null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(killer)
+                    && killer.getGameMode() == GameMode.SURVIVAL) {
                 for(ItemStack drop : player.getInventory().getContents().clone()) {
                     if(drop == null){
                         continue;
@@ -159,7 +150,7 @@ public class PlayerListener extends AbstractListener {
 
                 @Override
                 public void run() {
-                    if (!isInGame(player) || player.getGameMode() != GameMode.SPECTATOR) {
+                    if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) || player.getGameMode() != GameMode.SPECTATOR) {
                         this.cancel();
                         return;
                     }
@@ -197,7 +188,7 @@ public class PlayerListener extends AbstractListener {
 
         final Player player = (Player) event.getWhoClicked();
 
-        if (!isInGame(player)) return;
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
         if (disableArmorInventoryMovement && event.getSlotType() == SlotType.ARMOR)
             event.setCancelled(true);
@@ -222,7 +213,7 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
-        if (!isInGame(evt.getPlayer())) return;
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(evt.getPlayer())) return;
         if (!blockItemDrops) return;
 
         final Player player = evt.getPlayer();
@@ -240,8 +231,8 @@ public class PlayerListener extends AbstractListener {
     public void itemDamage(PlayerItemDamageEvent e) {
         if (!disableArmorDamage) return;
         Player player = e.getPlayer();
-        if (!isInGame(player)) return;
-        if (!BedwarsAPI.getInstance().getGameOfPlayer(player).isPlayerInAnyTeam(player)) return;
+        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+
         if (Main.getPlayerGameProfile(player).isSpectator) return;
 
         final String typeName = e.getItem().getType().toString();
@@ -258,7 +249,6 @@ public class PlayerListener extends AbstractListener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
-        if (!partyEnabled) return;
         final Player player = e.getPlayer();
         final PlayerWrapperService dbManager = SBAHypixelify.getWrapperService();
         dbManager.handleOffline(player);
@@ -274,7 +264,7 @@ public class PlayerListener extends AbstractListener {
 
         if (!SBAHypixelify.getConfigurator().config.getString("version", SBAHypixelify.getVersion())
                 .contains(SBAHypixelify.getVersion())) {
-            Scheduler.runTaskLater(() -> {
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                 player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                 player.sendMessage("Type /bwaddon upgrade to upgrade file");
                 player.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");

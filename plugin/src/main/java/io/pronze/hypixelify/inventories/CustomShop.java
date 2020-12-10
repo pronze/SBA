@@ -5,6 +5,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemFlag;
@@ -13,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import io.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
-import io.pronze.hypixelify.listener.AbstractListener;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -47,9 +47,9 @@ import java.util.*;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
-//TODO: simplify the whole class smh, what was I thinking?
+//TODO: Rewrite entire CustomShop
 
-public class CustomShop extends AbstractListener {
+public class CustomShop implements Listener {
 
     private final Map<Integer, Integer> Prices = new HashMap<>();
     private final Map<String, SimpleInventories> shopMap = new HashMap<>();
@@ -848,8 +848,4 @@ public class CustomShop extends AbstractListener {
         }
     }
 
-    @Override
-    public void onDisable() {
-        HandlerList.unregisterAll(this);
-    }
 }

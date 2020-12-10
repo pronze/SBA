@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//TODO: Rewrite entire party system
+
 public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager {
 
     private final Map<Player, io.pronze.hypixelify.party.Party> parties = new HashMap<>();

@@ -71,7 +71,6 @@ public class ScoreboardUtil {
             obj.setDisplayName(elements[0]);
 
             updateValues(elements, scoreboard, obj);
-            RunningTeam playerteam = game.getTeamOfPlayer(p);
 
             for (RunningTeam t : game.getRunningTeams()) {
                 Team team = scoreboard.getTeam(t.getName());
@@ -104,19 +103,7 @@ public class ScoreboardUtil {
 
                 for (Player pl : t.getConnectedPlayers()) {
                     if (!team.hasEntry(pl.getName())) {
-                        if (playerteam != null && playerteam.getConnectedPlayers().contains(pl)) {
-                            team.addEntry(pl.getName());
-                            continue;
-                        }
-                        String listName = pl.getPlayerListName();
-                        if (listName.equals(pl.getName())) {
-                            String prefix = team.getPrefix();
-                            String suffix = team.getSuffix();
-                            String name = prefix + pl.getName() + suffix;
-                            if (!name.equals(listName))
-                                pl.setPlayerListName(prefix + pl.getName() + suffix);
-                        }
-
+                        team.addEntry(pl.getName());
                     }
                 }
             }
@@ -137,7 +124,16 @@ public class ScoreboardUtil {
             exist = false;
         }
 
+        if (scoreboard.getObjective(LOBBY_OBJECTIVE_NAME) != null) {
+            try {
+                scoreboard.getObjective(LOBBY_OBJECTIVE_NAME).unregister();
+            } catch (Throwable t) {}
+        }
+
         try {
+            if (scoreboard == Bukkit.getScoreboardManager().getMainScoreboard()) {
+                scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+            }
             Objective obj = scoreboard.getObjective(GAME_OBJECTIVE_NAME);
             if (obj == null) {
                 obj = scoreboard.registerNewObjective(GAME_OBJECTIVE_NAME, "dummy");
@@ -147,7 +143,7 @@ public class ScoreboardUtil {
 
             if ((p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard)) && !exist) {
 
-                game.getRunningTeams().forEach(t -> {
+                for (RunningTeam t : game.getRunningTeams()) {
                     Team team = scoreboard.getTeam(t.getName());
                     if (team == null)
                         team = scoreboard.registerNewTeam(t.getName());
@@ -159,7 +155,7 @@ public class ScoreboardUtil {
                         if (!team.hasEntry(pl.getName()))
                             team.addEntry(pl.getName());
                     }
-                });
+                }
 
                 if (SBAHypixelify.isProtocolLib()) {
                     //TAB HEALTH
@@ -214,7 +210,6 @@ public class ScoreboardUtil {
 
             updateValues(elements, scoreboard, obj);
 
-            final RunningTeam playerTeam = game.getTeamOfPlayer(p);
             for (RunningTeam team : game.getRunningTeams()) {
                 Team scoreboardTeam = scoreboard.getTeam(team.getName());
                 ChatColor cl = null;
@@ -235,21 +230,22 @@ public class ScoreboardUtil {
                     if (!Main.isLegacy())
                         scoreboardTeam.setColor(ChatColor.valueOf(cl.name()));
 
+
                     for (Player pl : team.getConnectedPlayers()) {
                         if (!scoreboardTeam.hasEntry(pl.getName())) {
-                            if (playerTeam != null && playerTeam.getConnectedPlayers().contains(pl)) {
                                 scoreboardTeam.addEntry(pl.getName());
-                                continue;
-                            }
-                            final String listName = pl.getPlayerListName();
-                            if (listName.equals(pl.getName())) {
-                                final String prefix = scoreboardTeam.getPrefix();
-                                final String suffix = scoreboardTeam.getSuffix();
-                                String name = prefix + pl.getName() + suffix;
-                                if (!name.equals(listName))
-                                    pl.setPlayerListName(prefix + pl.getName() + suffix);
-                            }
                         }
+                    }
+                }
+
+                for(String playerEntry : new HashSet<>(scoreboardTeam.getEntries())) {
+                    final Player player = Bukkit.getPlayerExact(playerEntry);
+                    if (player == null) {
+                        continue;
+                    }
+
+                    if (!team.getConnectedPlayers().contains(player)) {
+                        scoreboardTeam.removeEntry(playerEntry);
                     }
                 }
 

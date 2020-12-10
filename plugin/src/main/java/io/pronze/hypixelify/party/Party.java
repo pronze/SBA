@@ -1,7 +1,6 @@
 package io.pronze.hypixelify.party;
 
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.utils.Scheduler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -122,7 +121,7 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
 
         if (player.equals(leader)) {
             getPlayers().forEach(pl->MessageUtils.sendMessage("party.message.disband-inactivity", pl));
-            Scheduler.runTask(()->SBAHypixelify.getPartyManager().disband(player));
+            Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), ()-> SBAHypixelify.getPartyManager().disband(player));
             return;
         }
         players.remove(player);
