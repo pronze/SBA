@@ -44,7 +44,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     private Configurator configurator;
 
-
     private GamesInventory gamesInventory;
 
     private Messages messages;
@@ -163,6 +162,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         pluginManager.registerEvents(new ChatListener(), this);
         pluginManager.registerEvents(new PartyListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
+        pluginManager.registerEvents(new LobbyScoreboard(), this);
 
         //Do changes for legacy support.
         changeBedWarsConfig();
