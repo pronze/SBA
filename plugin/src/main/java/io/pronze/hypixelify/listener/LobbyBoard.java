@@ -186,7 +186,7 @@ public class LobbyBoard implements Listener {
         if (progress == null)
             progress = "§b0§7/§a500";
 
-        if (scoreboard == null || scoreboard.getObjective("bwa-mainlobby") == null) {
+        if (scoreboard == null || scoreboard.equals(Bukkit.getScoreboardManager().getMainScoreboard())|| scoreboard.getObjective("bwa-mainlobby") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
             Objective obj = scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
             obj.setDisplayName("§e§lBED WARS");

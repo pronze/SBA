@@ -151,7 +151,7 @@ public class PlayerListener implements Listener {
 
                 @Override
                 public void run() {
-                    if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player) || player.getGameMode() != GameMode.SPECTATOR) {
+                    if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) {
                         this.cancel();
                         return;
                     }
