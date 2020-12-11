@@ -163,6 +163,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         pluginManager.registerEvents(new PartyListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new LobbyScoreboard(), this);
+        pluginManager.registerEvents(shop, this);
 
         //Do changes for legacy support.
         changeBedWarsConfig();
