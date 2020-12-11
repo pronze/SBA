@@ -164,8 +164,7 @@ public class PlayerListener implements Listener {
                     }
 
                     if (livingTime == 0) {
-
-                        if (buffer > 0) {
+                        if (buffer > 0 && player.getGameMode() != GameMode.SPECTATOR) {
                             buffer--;
                         } else {
                                 player.sendMessage(Messages.message_respawned_title);
