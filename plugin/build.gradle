@@ -23,7 +23,7 @@ spigot {
         }
 
         party{
-            aliases['p']
+            aliases = ['p']
             description = 'Command of SBAHypixelify plugin used for parties'
             usage = '/party [subcommand]'
         }

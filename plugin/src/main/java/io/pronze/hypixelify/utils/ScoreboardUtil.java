@@ -150,7 +150,6 @@ public class ScoreboardUtil {
                     team.setAllowFriendlyFire(false);
                     team.setPrefix(org.screamingsandals.bedwars.game.TeamColor
                             .valueOf(t.getColor().name()).chatColor.toString());
-
                     for (Player pl : t.getConnectedPlayers()) {
                         if (!team.hasEntry(pl.getName()))
                             team.addEntry(pl.getName());
