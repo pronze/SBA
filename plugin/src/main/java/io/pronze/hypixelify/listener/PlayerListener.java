@@ -7,7 +7,6 @@ import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.SBAUtil;
 import io.pronze.hypixelify.utils.ShopUtil;
-import lombok.var;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -179,13 +178,13 @@ public class PlayerListener implements Listener {
     //TODO: Replace it with BedwarsPlayerRespawnedEvent after 0.3.x.x relases
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerRespawn(PlayerRespawnEvent e) {
-        final var player = e.getPlayer();
+        final Player player = e.getPlayer();
 
-        final var api = BedwarsAPI.getInstance();
+        final BedwarsAPI api = BedwarsAPI.getInstance();
 
         if (api.isPlayerPlayingAnyGame(player)) {
-            final var game = api.getGameOfPlayer(player);
-            final var gPlayer = Main.getPlayerGameProfile(player);
+            final Game game = api.getGameOfPlayer(player);
+            final GamePlayer gPlayer = Main.getPlayerGameProfile(player);
 
             if (game == null) {
                 return;
@@ -199,7 +198,7 @@ public class PlayerListener implements Listener {
                 return;
             }
 
-            final var arena = SBAHypixelify.getArena(game.getName());
+            final Arena arena = SBAHypixelify.getArena(game.getName());
             if (arena != null) {
                 final List<ItemStack> playerItems = arena.getPlayerData(player.getUniqueId()).getInventory();
                 player.sendMessage(Messages.message_respawned_title);

@@ -1,7 +1,5 @@
 package io.pronze.hypixelify;
 
-import lombok.val;
-import lombok.var;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
