@@ -6,6 +6,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.game.RotatingGenerators;
+import io.pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -23,20 +24,19 @@ public class SBAUtil {
 
     public static void removeScoreboardObjective(Player player) {
         if (SBAHypixelify.isProtocolLib() && player != null && player.isOnline()) {
-            final ProtocolManager m = ProtocolLibrary.getProtocolManager();
             try {
-                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                packet.getIntegers().write(0, 1);
-                packet.getStrings().write(0, "bwa-tag");
-                m.sendServerPacket(player, packet);
+                WrapperPlayServerScoreboardObjective obj = new WrapperPlayServerScoreboardObjective();
+                obj.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
+                obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
+                obj.sendPacket(player);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
             try {
-                PacketContainer packet = m.createPacket(PacketType.Play.Server.SCOREBOARD_OBJECTIVE);
-                packet.getIntegers().write(0, 1);
-                packet.getStrings().write(0, "bwa-tab");
-                m.sendServerPacket(player, packet);
+                WrapperPlayServerScoreboardObjective obj = new WrapperPlayServerScoreboardObjective();
+                obj.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
+                obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
+                obj.sendPacket(player);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -113,7 +113,7 @@ public class SBAUtil {
     public static List<Material> parseMaterialFromConfig(String key) {
         final List<Material> materialList = new ArrayList<>();
 
-        final List<String> materialNames = SBAHypixelify.getConfigurator().config.getStringList(key);
+        final List<String> materialNames = SBAHypixelify.getConfigurator().getStringList(key);
         try {
             materialNames.forEach(material -> {
                 if (material == null || material.isEmpty()) {

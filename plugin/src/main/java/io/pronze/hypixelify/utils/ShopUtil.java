@@ -315,7 +315,7 @@ public class ShopUtil {
         ItemMeta fsMeta = fs.getItemMeta();
         String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(Objects.requireNonNull(getGamesWithSize(mode)).size());
 
-        List<String> fsMetaLore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.fireworks-lore");
+        List<String> fsMetaLore = SBAHypixelify.getConfigurator().getStringList("games-inventory.fireworks-lore");
         List<String> tempList = new ArrayList<>();
         for (String st : fsMetaLore) {
             st = st
@@ -413,20 +413,20 @@ public class ShopUtil {
         category.setItemMeta(meta);
 
         ItemMeta meta2 = category2.getItemMeta();
-        meta2.setLore(SBAHypixelify.getConfigurator().config.getStringList("games-inventory.oak_sign-lore"));
+        meta2.setLore(SBAHypixelify.getConfigurator().getStringList("games-inventory.oak_sign-lore"));
         meta2.setDisplayName(name2);
         category2.setItemMeta(meta2);
 
         ItemMeta meta3 = category3.getItemMeta();
-        String name3 = SBAHypixelify.getConfigurator().config.getString("games-inventory.barrier-name", "§cExit");
+        String name3 = SBAHypixelify.getConfigurator().getString("games-inventory.barrier-name", "§cExit");
         meta3.setDisplayName(name3);
         category3.setItemMeta(meta3);
 
         ItemMeta meta4 = category4.getItemMeta();
-        String name4 = SBAHypixelify.getConfigurator().config.getString("games-inventory.ender_pearl-name"
+        String name4 = SBAHypixelify.getConfigurator().getString("games-inventory.ender_pearl-name"
                 , "§cClick here to rejoin!");
 
-        meta4.setLore(SBAHypixelify.getConfigurator().config.getStringList("games-inventory.ender_pearl-lore"));
+        meta4.setLore(SBAHypixelify.getConfigurator().getStringList("games-inventory.ender_pearl-lore"));
         meta4.setDisplayName(name4);
         category4.setItemMeta(meta4);
 

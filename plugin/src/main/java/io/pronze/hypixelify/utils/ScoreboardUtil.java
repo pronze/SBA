@@ -58,7 +58,7 @@ public class ScoreboardUtil {
         Scoreboard scoreboard = p.getScoreboard();
         try {
             if (scoreboard == null || scoreboard == Bukkit.getScoreboardManager().getMainScoreboard() ||
-                    scoreboard.getObjectives().size() != 1) {
+                    scoreboard.getObjective(LOBBY_OBJECTIVE_NAME) == null) {
                 p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                 scoreboard = p.getScoreboard();
             }

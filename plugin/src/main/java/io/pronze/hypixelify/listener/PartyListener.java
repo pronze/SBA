@@ -34,7 +34,7 @@ public class PartyListener implements Listener {
                         if (BedwarsAPI.getInstance().isPlayerPlayingAnyGame(pl)) {
                             BedwarsAPI.getInstance().getGameOfPlayer(pl).leaveFromGame(pl);
                         }
-                        for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
+                        for (String st : SBAHypixelify.getConfigurator().getStringList("party.message.leader-join-leave")) {
                             pl.sendMessage(ShopUtil.translateColors(st));
                         }
                         game.joinToGame(pl);
@@ -64,7 +64,7 @@ public class PartyListener implements Listener {
 
             if (API.getGameOfPlayer(pl).getStatus().equals(GameStatus.RUNNING)) {
                 API.getGameOfPlayer(pl).leaveFromGame(pl);
-                for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.leader-join-leave")) {
+                for (String st : SBAHypixelify.getConfigurator().getStringList("party.message.leader-join-leave")) {
                     pl.sendMessage(ShopUtil.translateColors(st));
                 }
             }

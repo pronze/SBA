@@ -32,7 +32,7 @@ public class ScoreBoard {
     public ScoreBoard(Arena arena) {
         this.arena = arena;
         date = new SimpleDateFormat(Configurator.date).format(new Date());
-        animatedTitle = SBAHypixelify.getConfigurator().config.getStringList("lobby-scoreboard.title");
+        animatedTitle = SBAHypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
         game = arena.getGame();
         teamstatus = new HashMap<>();
         new BukkitRunnable() {

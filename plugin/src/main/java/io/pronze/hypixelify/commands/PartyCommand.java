@@ -264,7 +264,7 @@ public class PartyCommand extends AbstractCommand {
             }
 
             if (invited.equals(player)) {
-                for (String str : SBAHypixelify.getConfigurator().config.getStringList("party.message.cannot-blank-yourself")) {
+                for (String str : SBAHypixelify.getConfigurator().getStringList("party.message.cannot-blank-yourself")) {
                     player.sendMessage(ShopUtil.translateColors(str).replace("{blank}", "kick"));
                 }
                 return;
@@ -328,7 +328,7 @@ public class PartyCommand extends AbstractCommand {
 
             String mode = args[1].equals("on") ? "enabled" : "disabled";
 
-            for (String st : SBAHypixelify.getConfigurator().config.getStringList("party.message.chat-enable-disabled")) {
+            for (String st : SBAHypixelify.getConfigurator().getStringList("party.message.chat-enable-disabled")) {
                 player.sendMessage(ShopUtil.translateColors(st).replace("{mode}", mode));
             }
             return;

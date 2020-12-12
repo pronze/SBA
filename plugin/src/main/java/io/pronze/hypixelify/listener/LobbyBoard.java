@@ -37,12 +37,12 @@ public class LobbyBoard implements Listener {
     private final boolean lobbyChatOverride;
 
     public LobbyBoard() {
-        board_body = SBAHypixelify.getConfigurator().config.getStringList("main-lobby.lines");
+        board_body = SBAHypixelify.getConfigurator().getStringList("main-lobby.lines");
         lobbyChatOverride = SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.custom-chat", true);
 
 
         try {
-            location = new Location(Bukkit.getWorld(Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("main-lobby.world"))),
+            location = new Location(Bukkit.getWorld(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("main-lobby.world"))),
                     SBAHypixelify.getConfigurator().config.getDouble("main-lobby.x"),
                     SBAHypixelify.getConfigurator().config.getDouble("main-lobby.y"),
                     SBAHypixelify.getConfigurator().config.getDouble("main-lobby.z"),

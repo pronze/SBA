@@ -63,15 +63,15 @@ public class Messages {
     }
 
     public String fetchString(String toFetch) {
-        return SBAHypixelify.getConfigurator().config.getString(toFetch);
+        return SBAHypixelify.getConfigurator().getString(toFetch);
     }
 
     public String fetchString(String toFetch, String def) {
-        return SBAHypixelify.getConfigurator().config.getString(toFetch, def);
+        return SBAHypixelify.getConfigurator().getString(toFetch, def);
     }
 
     public List<String> fetchStringList(String toFetch) {
-        return SBAHypixelify.getConfigurator().config.getStringList(toFetch);
+        return SBAHypixelify.getConfigurator().getStringList(toFetch);
     }
 
     public void loadConfig() {

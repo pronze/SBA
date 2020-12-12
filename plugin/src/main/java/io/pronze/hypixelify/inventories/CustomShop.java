@@ -100,7 +100,7 @@ public class CustomShop implements Listener {
         options.setShowPageNumber(false);
         options.setInventoryType(InventoryType.valueOf(Main.getConfigurator().config.getString("shop.inventory-type", "CHEST")));
 
-        options.setPrefix(SBAHypixelify.getConfigurator().config.getString("shop-name", "[SBAHypixelify] Shop"));
+        options.setPrefix(SBAHypixelify.getConfigurator().getString("shop-name", "[SBAHypixelify] Shop"));
         options.setGenericShop(true);
         options.setGenericShopPriceTypeRequired(true);
         options.setAnimationsEnabled(true);
@@ -674,7 +674,7 @@ public class CustomShop implements Listener {
                 //since we are  setting the price to a different one on upgrade, we do the check again
                 if (!event.hasPlayerInInventory(materialItem) &&
                         !Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}"))
+                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
                             .replace("{price}", priceType));
                     return;
                 }
@@ -722,7 +722,7 @@ public class CustomShop implements Listener {
             if (shouldSellStack) {
                 sellstack(materialItem, event);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("message.purchase", "§aYou purchased &e"))
+                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.purchase", "§aYou purchased &e"))
                             .replace("{item}", getNameOrCustomNameOfItem(newItem)));
                 }
                 Sounds.playSound(player, player.getLocation(),
@@ -732,7 +732,7 @@ public class CustomShop implements Listener {
 
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().config.getString("message.cannot-buy", "§cYou don't have enough {price}"))
+                player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
                         .replace("{price}", priceType));
             }
         }

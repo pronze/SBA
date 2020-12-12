@@ -1,8 +1,10 @@
 package io.pronze.hypixelify.listener;
 
 import io.pronze.hypixelify.SBAHypixelify;
+import io.pronze.hypixelify.game.PlayerWrapper;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
+import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.ScoreboardUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

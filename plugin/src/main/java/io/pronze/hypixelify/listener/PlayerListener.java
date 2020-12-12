@@ -1,28 +1,30 @@
 package io.pronze.hypixelify.listener;
 
 import io.pronze.hypixelify.SBAHypixelify;
+import io.pronze.hypixelify.game.Arena;
+import io.pronze.hypixelify.game.PlayerData;
+import io.pronze.hypixelify.message.Messages;
+import io.pronze.hypixelify.service.PlayerWrapperService;
+import io.pronze.hypixelify.utils.SBAUtil;
+import io.pronze.hypixelify.utils.ShopUtil;
+import lombok.var;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.*;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import io.pronze.hypixelify.game.Arena;
-import io.pronze.hypixelify.service.PlayerWrapperService;
-import io.pronze.hypixelify.message.Messages;
-import io.pronze.hypixelify.utils.SBAUtil;
-import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -41,7 +43,7 @@ public class PlayerListener implements Listener {
 
     private final List<Material> allowed;
     private final List<Material> generatorDropItems;
-    private final boolean  giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
+    private final boolean giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
             disableArmorDamage, permanentItems, blockItemOnChest, blockItemDrops;
 
     private final int respawnTime;
@@ -65,19 +67,21 @@ public class PlayerListener implements Listener {
     }
 
 
-
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
-        final Player player = e.getEntity();
+        SBAHypixelify.debug("Player death event called");
 
-        if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
+        final Player player = e.getEntity();
 
         final Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         if (game == null || game.getStatus() != GameStatus.RUNNING) return;
 
         final Arena arena = SBAHypixelify.getArena(game.getName());
 
-        if (arena == null) return;
+        if (arena == null) {
+            SBAHypixelify.debug("Arena is null");
+            return;
+        }
 
         Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
             if (arena.getScoreboard() != null) {
@@ -115,6 +119,8 @@ public class PlayerListener implements Listener {
             });
 
             itemArr.add(sword);
+            PlayerData playerData = arena.getPlayerData(player.getUniqueId());
+            playerData.setInventory(itemArr);
         }
 
 
@@ -123,12 +129,12 @@ public class PlayerListener implements Listener {
 
             if (killer != null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(killer)
                     && killer.getGameMode() == GameMode.SURVIVAL) {
-                for(ItemStack drop : player.getInventory().getContents().clone()) {
-                    if(drop == null){
+                for (ItemStack drop : player.getInventory().getContents().clone()) {
+                    if (drop == null) {
                         continue;
                     }
 
-                    if(generatorDropItems.contains(drop.getType())){
+                    if (generatorDropItems.contains(drop.getType())) {
                         killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name());
                         killer.getInventory().addItem(drop);
                     }
@@ -136,8 +142,7 @@ public class PlayerListener implements Listener {
             }
         }
 
-        final Player victim = e.getEntity();
-        GamePlayer gVictim = Main.getPlayerGameProfile(victim);
+        GamePlayer gVictim = Main.getPlayerGameProfile(player);
 
         CurrentTeam victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
         if (respawnCooldown && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
@@ -147,7 +152,6 @@ public class PlayerListener implements Listener {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
                 int livingTime = respawnTime;
-                byte buffer = 4;
 
                 @Override
                 public void run() {
@@ -156,6 +160,7 @@ public class PlayerListener implements Listener {
                         return;
                     }
 
+                    //send custom title because we disabled Bedwars from showing any title
                     if (livingTime > 0) {
                         sendTitle(player, Messages.message_respawn_title,
                                 Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
@@ -164,18 +169,47 @@ public class PlayerListener implements Listener {
                     }
 
                     if (livingTime == 0) {
-                        if (buffer > 0 && player.getGameMode() != GameMode.SPECTATOR) {
-                            buffer--;
-                        } else {
-                                player.sendMessage(Messages.message_respawned_title);
-                                sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
-                                ShopUtil.giveItemToPlayer(itemArr, player, victimTeam.getColor());
-                                this.cancel();
-                        }
+                        this.cancel();
                     }
                 }
             }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
         }
+    }
+
+    //TODO: Replace it with BedwarsPlayerRespawnedEvent after 0.3.x.x relases
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerRespawn(PlayerRespawnEvent e) {
+        final var player = e.getPlayer();
+
+        final var api = BedwarsAPI.getInstance();
+
+        if (api.isPlayerPlayingAnyGame(player)) {
+            final var game = api.getGameOfPlayer(player);
+            final var gPlayer = Main.getPlayerGameProfile(player);
+
+            if (game == null) {
+                return;
+            }
+
+            if (game.getStatus() != GameStatus.RUNNING) {
+                return;
+            }
+
+            if (gPlayer.isSpectator) {
+                return;
+            }
+
+            final var arena = SBAHypixelify.getArena(game.getName());
+            if (arena != null) {
+                final List<ItemStack> playerItems = arena.getPlayerData(player.getUniqueId()).getInventory();
+                player.sendMessage(Messages.message_respawned_title);
+                sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
+                if (playerItems != null) {
+                    ShopUtil.giveItemToPlayer(playerItems, player, Main.getGame(game.getName()).getPlayerTeam(gPlayer).getColor());
+                }
+            }
+        }
+
     }
 
 
@@ -205,7 +239,7 @@ public class PlayerListener implements Listener {
                 bottomSlot.getType() == InventoryType.PLAYER) {
             if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                player.sendMessage("§c§l" + SBAHypixelify.getConfigurator().config.getString("message.cannot-put-item-on-chest"));
+                player.sendMessage("§c§l" + SBAHypixelify.getConfigurator().getString("message.cannot-put-item-on-chest"));
             }
         }
     }
@@ -262,7 +296,7 @@ public class PlayerListener implements Listener {
         if (!player.isOp())
             return;
 
-        if (!SBAHypixelify.getConfigurator().config.getString("version", SBAHypixelify.getVersion())
+        if (!SBAHypixelify.getConfigurator().getString("version", SBAHypixelify.getVersion())
                 .contains(SBAHypixelify.getVersion())) {
             Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                 player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");

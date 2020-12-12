@@ -33,16 +33,16 @@ public class GamesInventory implements Listener {
     private final List<String> bed_lore, stack_lore;
 
     public GamesInventory() {
-        stack_lore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.stack-lore");
-        bed_lore = SBAHypixelify.getConfigurator().config.getStringList("games-inventory.bed-lore");
-        bed_name = SBAHypixelify.getConfigurator().config.getString("games-inventory.bed-name", "§aBed Wars ({mode})");
-        oak_name = SBAHypixelify.getConfigurator().config.getString("games-inventory.oak_sign-name", "§aMap Selector ({mode})");
+        stack_lore = SBAHypixelify.getConfigurator().getStringList("games-inventory.stack-lore");
+        bed_lore = SBAHypixelify.getConfigurator().getStringList("games-inventory.bed-lore");
+        bed_name = SBAHypixelify.getConfigurator().getString("games-inventory.bed-name", "§aBed Wars ({mode})");
+        oak_name = SBAHypixelify.getConfigurator().getString("games-inventory.oak_sign-name", "§aMap Selector ({mode})");
         String soloprefix, doubleprefix, tripleprefix, squadprefix;
 
-        soloprefix = SBAHypixelify.getConfigurator().config.getString("games-inventory.gui.solo-prefix");
-        doubleprefix = SBAHypixelify.getConfigurator().config.getString("games-inventory.gui.double-prefix");
-        tripleprefix = SBAHypixelify.getConfigurator().config.getString("games-inventory.gui.triple-prefix");
-        squadprefix = SBAHypixelify.getConfigurator().config.getString("games-inventory.gui.squad-prefix");
+        soloprefix = SBAHypixelify.getConfigurator().getString("games-inventory.gui.solo-prefix");
+        doubleprefix = SBAHypixelify.getConfigurator().getString("games-inventory.gui.double-prefix");
+        tripleprefix = SBAHypixelify.getConfigurator().getString("games-inventory.gui.triple-prefix");
+        squadprefix = SBAHypixelify.getConfigurator().getString("games-inventory.gui.squad-prefix");
 
         Options option1 = ShopUtil.generateOptions();
         option1.setPrefix(soloprefix);

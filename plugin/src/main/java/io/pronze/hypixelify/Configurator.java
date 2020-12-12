@@ -1,11 +1,15 @@
 package io.pronze.hypixelify;
 
+import lombok.val;
+import lombok.var;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import io.pronze.hypixelify.listener.LobbyScoreboard;
 import org.screamingsandals.bedwars.Main;
@@ -130,60 +134,60 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.squads-prefix", "Squads");
         checkOrSetConfig(modify, "lobby-scoreboard.enabled", true);
         checkOrSetConfig(modify, "lobby-scoreboard.interval", 2);
-        checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "§fWaiting...");
+        checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
-        checkOrSetConfig(modify, "message.waiting", "§fWaiting...");
+        checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
-        checkOrSetConfig(modify, "message.bed-destroyed.title", "§c§lBED DESTROYED!");
+        checkOrSetConfig(modify, "message.bed-destroyed.title", "&c&lBED DESTROYED!");
         checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");
-        checkOrSetConfig(modify, "message.already-purchased", "§c§lYou already purchased the same {thing}");
-        checkOrSetConfig(modify, "message.wait-trap", "§cYou already purchased this upgrade!, wait for it to wear out");
-        checkOrSetConfig(modify, "message.upgrade-team-protection", "§o§c{player}§e has upgraded team protection");
-        checkOrSetConfig(modify, "message.error-occured", "§c§lAN ERROR HAS OCCURED");
-        checkOrSetConfig(modify, "message.greatest-enchantment", "§c§lYou Already have the greatest enchantment");
+        checkOrSetConfig(modify, "message.already-purchased", "&c&lYou already purchased the same {thing}");
+        checkOrSetConfig(modify, "message.wait-trap", "&cYou already purchased this upgrade!, wait for it to wear out");
+        checkOrSetConfig(modify, "message.upgrade-team-protection", "&o&c{player}&e has upgraded team protection");
+        checkOrSetConfig(modify, "message.error-occured", "&c&lAN ERROR HAS OCCURED");
+        checkOrSetConfig(modify, "message.greatest-enchantment", "&c&lYou Already have the greatest enchantment");
         checkOrSetConfig(modify, "message.generator-upgrade", "{MatName} generator has been upgraded to {tier}");
-        checkOrSetConfig(modify, "message.shout-format", "§6[SHOUT] {color}[{team}]§r {player}§7: §r{message}");
-        checkOrSetConfig(modify, "message.trap-triggered.title", "§cTrap Triggered!");
-        checkOrSetConfig(modify, "message.trap-triggered.sub-title", "§eSomeone has entered your base!");
-        checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "§6Blindness Trap has been purchased!");
-        checkOrSetConfig(modify, "message.purchase-heal-pool", "§bHeal Pool has been purchased by: {player}");
-        checkOrSetConfig(modify, "message.cannot-buy", "§cYou don't have enough {price}");
-        checkOrSetConfig(modify, "message.purchase", "§aYou purchased §e{item}");
-        checkOrSetConfig(modify, "message.respawn-title", "§cYOU DIED!");
-        checkOrSetConfig(modify, "message.respawn-subtitle", "§eYou will respawn in §c%time% §eseconds");
-        checkOrSetConfig(modify, "message.respawned-title", "§eYou have respawned");
+        checkOrSetConfig(modify, "message.shout-format", "&6[SHOUT] {color}[{team}]&r {player}&7: &r{message}");
+        checkOrSetConfig(modify, "message.trap-triggered.title", "&cTrap Triggered!");
+        checkOrSetConfig(modify, "message.trap-triggered.sub-title", "&eSomeone has entered your base!");
+        checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "&6Blindness Trap has been purchased!");
+        checkOrSetConfig(modify, "message.purchase-heal-pool", "&bHeal Pool has been purchased by: {player}");
+        checkOrSetConfig(modify, "message.cannot-buy", "&cYou don't have enough {price}");
+        checkOrSetConfig(modify, "message.purchase", "&aYou purchased &e{item}");
+        checkOrSetConfig(modify, "message.respawn-title", "&cYOU DIED!");
+        checkOrSetConfig(modify, "message.respawn-subtitle", "&eYou will respawn in &c%time% &eseconds");
+        checkOrSetConfig(modify, "message.respawned-title", "&eYou have respawned");
         checkOrSetConfig(modify, "message.cannot-put-item-on-chest", "You cannot put this item onto this chest.");
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         checkOrSetConfig(modify, "games-inventory.enabled", true);
         checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
         checkOrSetConfig(modify, "games-inventory.stack-lore",
-                Arrays.asList("§8{mode}", "", "§7Available Servers: §a1", "§7Status: §a{status}"
-                        , "§7Players:§a {players}", "", "§aClick to play", "§eRight click to toggle favorite!"));
+                Arrays.asList("&8{mode}", "", "&7Available Servers: &a1", "&7Status: &a{status}"
+                        , "&7Players:&a {players}", "", "&aClick to play", "&eRight click to toggle favorite!"));
         checkOrSetConfig(modify, "message.upgrade", "Upgrade: ");
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
         checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
         checkOrSetConfig(modify, "games-inventory.gui.squad-prefix", "Bed Wars Squads");
-        checkOrSetConfig(modify, "games-inventory.back-item.name", "§aGo Back");
-        checkOrSetConfig(modify, "games-inventory.back-item.lore", Arrays.asList("§7To Play Bed Wars"));
-        checkOrSetConfig(modify, "games-inventory.firework-name", "§aRandom Map");
-        checkOrSetConfig(modify, "games-inventory.firework-lore", Arrays.asList("§8{mode}", "", "§7Map Selections: §a{games}", "", "§aClick to Play"));
+        checkOrSetConfig(modify, "games-inventory.back-item.name", "&aGo Back");
+        checkOrSetConfig(modify, "games-inventory.back-item.lore", Arrays.asList("&7To Play Bed Wars"));
+        checkOrSetConfig(modify, "games-inventory.firework-name", "&aRandom Map");
+        checkOrSetConfig(modify, "games-inventory.firework-lore", Arrays.asList("&8{mode}", "", "&7Map Selections: &a{games}", "", "&aClick to Play"));
 
-        checkOrSetConfig(modify, "games-inventory.diamond-name", "§aRandom Favorite");
-        checkOrSetConfig(modify, "games-inventory.oak_sign-name", "§aMap Selector ({mode})");
+        checkOrSetConfig(modify, "games-inventory.diamond-name", "&aRandom Favorite");
+        checkOrSetConfig(modify, "games-inventory.oak_sign-name", "&aMap Selector ({mode})");
         checkOrSetConfig(modify, "games-inventory.oak_sign-lore", Arrays.asList(
-                "§7Pick which map you want to play"
-                , "§7from a list of available servers."
+                "&7Pick which map you want to play"
+                , "&7from a list of available servers."
                 , " "
-                , "§eClick to browse!"));
-        checkOrSetConfig(modify, "games-inventory.barrier-name", "§cExit");
-        checkOrSetConfig(modify, "games-inventory.ender_pearl-name", "§cClick here to rejoin!");
-        checkOrSetConfig(modify, "games-inventory.ender_pearl-lore", Arrays.asList("§7Click here to rejoin the lastly joined game"));
+                , "&eClick to browse!"));
+        checkOrSetConfig(modify, "games-inventory.barrier-name", "&cExit");
+        checkOrSetConfig(modify, "games-inventory.ender_pearl-name", "&cClick here to rejoin!");
+        checkOrSetConfig(modify, "games-inventory.ender_pearl-lore", Arrays.asList("&7Click here to rejoin the lastly joined game"));
 
-        checkOrSetConfig(modify, "games-inventory.bed-name", "§aBed Wars ({mode})");
-        checkOrSetConfig(modify, "games-inventory.bed-lore", Arrays.asList("§7Play Bed Wars {mode}", " ", "§eClick to play!"));
+        checkOrSetConfig(modify, "games-inventory.bed-name", "&aBed Wars ({mode})");
+        checkOrSetConfig(modify, "games-inventory.bed-lore", Arrays.asList("&7Play Bed Wars {mode}", " ", "&eClick to play!"));
         for (String game : Main.getGameNames()) {
             String str = "lobby-scoreboard.player-size.games." + game;
             checkOrSetConfig(modify, str, 4);
@@ -212,7 +216,7 @@ public class Configurator {
                 , ""
                 , "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
         ));
-        checkOrSetConfig(modify, "scoreboard.you", "§7YOU");
+        checkOrSetConfig(modify, "scoreboard.you", "&7YOU");
         checkOrSetConfig(modify, "scoreboard.lines.default", Arrays.asList(
                 "&7{date}"
                 , ""
@@ -439,26 +443,26 @@ public class Configurator {
         checkOrSetConfig(modify, "main-lobby.chat-format", "{color}[{level}✫] {name}: {message}");
         checkOrSetConfig(modify, "main-lobby.lines", Arrays.asList(
                 "",
-                "Your Level: §a{level}",
+                "Your Level: &a{level}",
                 "",
                 "Progress: {progress}",
                 "{bar}",
                 "",
-                "Loot Chests: §60",
+                "Loot Chests: &60",
                 "",
-                "Total Kills: §a{kills}",
-                "Total Wins: §a{deaths}",
+                "Total Kills: &a{kills}",
+                "Total Wins: &a{deaths}",
                 "",
-                "K/D ratio: §6{k/d}",
+                "K/D ratio: &6{k/d}",
                 "",
-                "§ewww.minecraft.net"
+                "&ewww.minecraft.net"
         ));
 
         checkOrSetConfig(modify, "commands.invalid-command",
-                "[SBAHypixelify] §cUnknown command, do /bwaddon help for more.");
+                "[SBAHypixelify] &cUnknown command, do /bwaddon help for more.");
 
-        checkOrSetConfig(modify, "commands.player-only", "[SBAHypixelify] §cOnly players can use this command!");
-        checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]§cYou do not have permissions to do this command!");
+        checkOrSetConfig(modify, "commands.player-only", "[SBAHypixelify] &cOnly players can use this command!");
+        checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]&cYou do not have permissions to do this command!");
 
         if (modify.get()) {
             try {
@@ -500,7 +504,7 @@ public class Configurator {
 
 
         if (config.getBoolean("first_start")) {
-            Bukkit.getLogger().info("[SBAHypixelify]: §a Detected first start");
+            Bukkit.getLogger().info("[SBAHypixelify]: &a Detected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
             saveConfig();
@@ -508,7 +512,7 @@ public class Configurator {
             if (plugin != null) {
                 Bukkit.getServer().getPluginManager().disablePlugin(plugin);
                 Bukkit.getServer().getPluginManager().enablePlugin(plugin);
-                Bukkit.getLogger().info("[SBAHypixelify]: §aMade changes to the config.yml file!");
+                Bukkit.getLogger().info("[SBAHypixelify]: &aMade changes to the config.yml file!");
             }
         }
     }
@@ -556,7 +560,23 @@ public class Configurator {
         return list;
     }
 
+    public String getString(String path) {
+        if (config.isSet(path) && config.getString(path) != null) {
+            return ChatColor.translateAlternateColorCodes('&', config.getString(path));
+        }
+
+
+        return null;
+    }
+
+    public String getString(String path, String def) {
+        return ChatColor.translateAlternateColorCodes('&', config.getString(path, def));
+    }
+
+
     private void checkOrSetConfig(AtomicBoolean modify, String path, Object value) {
         checkOrSet(modify, this.config, path, value);
     }
+
+
 }

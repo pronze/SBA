@@ -132,7 +132,7 @@ public class LobbyScoreboard implements Listener {
 
     private List<String> getLine(Player player, Game game) {
         final List<String> line = new ArrayList<>();
-        String state = SBAHypixelify.getConfigurator().config.getString("message.waiting"
+        String state = SBAHypixelify.getConfigurator().getString("message.waiting"
                 , "§fWaiting...");
 
         String countdown = "null";
@@ -142,16 +142,16 @@ public class LobbyScoreboard implements Listener {
         String mode;
         switch(s){
             case 1:
-                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.solo-prefix", "Solo");
+                mode = SBAHypixelify.getConfigurator().getString("lobby-scoreboard.solo-prefix", "Solo");
                 break;
             case 2:
-                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.doubles-prefix", "Doubles");
+                mode = SBAHypixelify.getConfigurator().getString("lobby-scoreboard.doubles-prefix", "Doubles");
                 break;
             case 3:
-                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.triples-prefix", "Triples");
+                mode = SBAHypixelify.getConfigurator().getString("lobby-scoreboard.triples-prefix", "Triples");
                 break;
             case 4:
-                mode = SBAHypixelify.getConfigurator().config.getString("lobby-scoreboard.squads-prefix", "Squads");
+                mode = SBAHypixelify.getConfigurator().getString("lobby-scoreboard.squads-prefix", "Squads");
                 break;
             default:
                 mode = s +"v" +s +"v" + s + "v" +s;
