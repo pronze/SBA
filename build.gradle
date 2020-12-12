@@ -2,7 +2,7 @@ defaultTasks 'clean', 'screamCompile'
 
 allprojects {
     group = 'io.pronze.hypixelify'
-    version = '1.4.1'
+    version = '1.4.2'
 }
 
 
