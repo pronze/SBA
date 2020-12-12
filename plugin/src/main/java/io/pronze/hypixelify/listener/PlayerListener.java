@@ -3,6 +3,7 @@ package io.pronze.hypixelify.listener;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.PlayerData;
+import io.pronze.hypixelify.game.RotatingGenerators;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.SBAUtil;
@@ -11,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -45,7 +47,6 @@ public class PlayerListener implements Listener {
     private final boolean giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
             disableArmorDamage, permanentItems, blockItemOnChest, blockItemDrops;
 
-    private final int respawnTime;
 
 
     public PlayerListener() {
@@ -53,8 +54,7 @@ public class PlayerListener implements Listener {
 
         blockItemDrops = config.getBoolean("block-item-drops", true);
         giveKillerResources = config.getBoolean("give-killer-resources", true);
-        respawnCooldown = config.getBoolean("respawn-cooldown.enabled");
-        respawnTime = config.getInt("respawn-cooldown.time", 5);
+        respawnCooldown = config.getBoolean("respawn-cooldown.enabled", true);
         disableArmorInventoryMovement = config.getBoolean("disable-armor-inventory-movement", true);
         disableArmorDamage = config.getBoolean("disable-sword-armor-damage", true);
         permanentItems = config.getBoolean("permanent-items", true);
@@ -105,7 +105,7 @@ public class PlayerListener implements Listener {
                 if (name.endsWith("AXE"))
                     itemArr.add(ShopUtil.checkifUpgraded(stack));
 
-                if (name.endsWith("LEGGINGS") ||
+                if (    name.endsWith("LEGGINGS") ||
                         name.endsWith("BOOTS") ||
                         name.endsWith("CHESTPLATE") ||
                         name.endsWith("HELMET"))
@@ -115,6 +115,7 @@ public class PlayerListener implements Listener {
                     itemArr.add(stack);
                 }
 
+                SBAHypixelify.debug(stack.getType().name());
             });
 
             itemArr.add(sword);
@@ -144,13 +145,16 @@ public class PlayerListener implements Listener {
         GamePlayer gVictim = Main.getPlayerGameProfile(player);
 
         CurrentTeam victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
+
         if (respawnCooldown && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
                 game.getTeamOfPlayer(player).isTargetBlockExists()) {
 
             new BukkitRunnable() {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
-                int livingTime = respawnTime;
+                int livingTime = SBAHypixelify.getConfigurator().config.getInt("respawn-cooldown.time", 5);
+
+                byte buffer = 2;
 
                 @Override
                 public void run() {
@@ -167,48 +171,30 @@ public class PlayerListener implements Listener {
                         livingTime--;
                     }
 
+
                     if (livingTime == 0) {
-                        this.cancel();
+                        if (gVictim.isSpectator && buffer > 0) {
+                            buffer--;
+                        } else {
+                            player.sendMessage(Messages.message_respawned_title);
+                            sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
+                            ShopUtil.giveItemToPlayer(itemArr, player, Main.getGame(game.getName()).getPlayerTeam(gamePlayer).getColor());
+                            this.cancel();
+                        }
                     }
                 }
             }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
         }
     }
 
-    //TODO: Replace it with BedwarsPlayerRespawnedEvent after 0.3.x.x relases
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerRespawn(PlayerRespawnEvent e) {
-        final Player player = e.getPlayer();
 
-        final BedwarsAPI api = BedwarsAPI.getInstance();
+    @EventHandler
+    public void onPlayerArmorStandManipulateEvent (PlayerArmorStandManipulateEvent  e) {
+         final ArmorStand armorStand = e.getRightClicked();
 
-        if (api.isPlayerPlayingAnyGame(player)) {
-            final Game game = api.getGameOfPlayer(player);
-            final GamePlayer gPlayer = Main.getPlayerGameProfile(player);
-
-            if (game == null) {
-                return;
-            }
-
-            if (game.getStatus() != GameStatus.RUNNING) {
-                return;
-            }
-
-            if (gPlayer.isSpectator) {
-                return;
-            }
-
-            final Arena arena = SBAHypixelify.getArena(game.getName());
-            if (arena != null) {
-                final List<ItemStack> playerItems = arena.getPlayerData(player.getUniqueId()).getInventory();
-                player.sendMessage(Messages.message_respawned_title);
-                sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
-                if (playerItems != null) {
-                    ShopUtil.giveItemToPlayer(playerItems, player, Main.getGame(game.getName()).getPlayerTeam(gPlayer).getColor());
-                }
-            }
-        }
-
+         if (armorStand.getCustomName() != null && armorStand.getCustomName().equalsIgnoreCase(RotatingGenerators.entityName)) {
+             e.setCancelled(true);
+         }
     }
 
 

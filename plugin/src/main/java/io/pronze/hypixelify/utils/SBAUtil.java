@@ -1,9 +1,5 @@
 package io.pronze.hypixelify.utils;
 
-import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.game.RotatingGenerators;
 import io.pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;

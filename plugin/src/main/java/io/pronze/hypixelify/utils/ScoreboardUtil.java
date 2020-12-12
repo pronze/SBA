@@ -1,5 +1,6 @@
 package io.pronze.hypixelify.utils;
 
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
@@ -185,7 +186,7 @@ public class ScoreboardUtil {
                     try {
                         WrapperPlayServerScoreboardObjective scoreboardObjective =
                                 new WrapperPlayServerScoreboardObjective();
-                        scoreboardObjective.setMode(0);
+                        scoreboardObjective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
                         scoreboardObjective.setName(TAG_OBJECTIVE_NAME);
                         scoreboardObjective.setDisplayName(WrappedChatComponent.fromText("§c♥"));
                         scoreboardObjective.sendPacket(p);
@@ -302,8 +303,9 @@ public class ScoreboardUtil {
                     WrapperPlayServerScoreboardScore packet = new WrapperPlayServerScoreboardScore();
                     packet.setValue(playerHealth);
                     packet.setScoreName(pl.getName());
+                    packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
                     packet.setObjectiveName(TAG_OBJECTIVE_NAME);
-                    packet.sendPacket(pl);
+                    packet.sendPacket(p);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -311,6 +313,7 @@ public class ScoreboardUtil {
                     WrapperPlayServerScoreboardScore packet = new WrapperPlayServerScoreboardScore();
                     packet.setValue(playerHealth);
                     packet.setScoreName(pl.getName());
+                    packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
                     packet.setObjectiveName(TAB_OBJECTIVE_NAME);
                     packet.sendPacket(p);
                 } catch (Exception e) {

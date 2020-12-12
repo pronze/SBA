@@ -105,13 +105,10 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
 
         armorStand = (ArmorStand) location.getWorld().
                 spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
-        armorStand.setDisabledSlots(EquipmentSlot.HEAD);
         armorStand.setCustomName(entityName);
         armorStand.setVisible(false);
         armorStand.setHelmet(itemStack);
         armorStand.setGravity(false);
-
-
         return this;
     }
 

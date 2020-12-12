@@ -133,7 +133,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
 
-        playerWrapperService = new PlayerWrapperService();
 
         if (!isSnapshot) {
             UpdateChecker.run(this, 79505);
@@ -141,6 +140,9 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
         configurator = new Configurator(this);
         configurator.loadDefaults();
+
+        playerWrapperService = new PlayerWrapperService();
+
 
         debug = configurator.config.getBoolean("debug.enabled", false);
 
@@ -236,7 +238,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public void onDisable() {
         if (SBAHypixelify.isProtocolLib()) {
-            Bukkit.getOnlinePlayers().forEach(SBAUtil::removeScoreboardObjective);
+            Bukkit.getOnlinePlayers().stream().filter(Objects::nonNull).forEach(SBAUtil::removeScoreboardObjective);
         }
 
         RotatingGenerators.destroy(RotatingGenerators.cache);

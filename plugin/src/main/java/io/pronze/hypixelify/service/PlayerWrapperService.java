@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerWrapperService implements WrapperService<Player> {
@@ -19,7 +20,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
     private final Map<UUID, BukkitTask> deletionTasks = new HashMap<>();
 
     public PlayerWrapperService() {
-        Bukkit.getOnlinePlayers().forEach(this::register);
+        Bukkit.getOnlinePlayers().stream().filter(Objects::nonNull).forEach(this::register);
     }
 
 
@@ -79,7 +80,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
 
         if(deletionTasks.containsKey(playerUUID)) {
             BukkitTask deletionTask = deletionTasks.get(playerUUID);
-            if(deletionTask != null) {
+            if(deletionTask != null && !deletionTask.isCancelled()) {
                 try {
                     deletionTask.cancel();
                 } catch (Throwable t) {

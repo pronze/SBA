@@ -139,8 +139,8 @@ public class BedwarsListener implements Listener {
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
         final Player player = e.getPlayer();
         ScoreboardUtil.removePlayer(player);
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         SBAUtil.removeScoreboardObjective(player);
+        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         final Game game = e.getGame();
         if (game.getStatus() != GameStatus.RUNNING) return;
         final Arena arena = SBAHypixelify.getArena(game.getName());

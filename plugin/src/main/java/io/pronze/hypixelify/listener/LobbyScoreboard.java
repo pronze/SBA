@@ -76,15 +76,15 @@ public class LobbyScoreboard implements Listener {
                     if (tc >= lobby_scoreboard.size())
                         tc = 0;
 
-                    players.forEach(player->{
-                        if(player == null || !player.isOnline()) return;
+                    for (Player player : new ArrayList<>(players)) {
+                        if (player == null || !player.isOnline()) continue;
 
                         final Game game = bedwarsAPI.getGameOfPlayer(player);
 
                         if (game != null && game.getStatus() == GameStatus.WAITING) {
                             updateScoreboard(player, game);
                         }
-                    });
+                    }
             }
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
     }

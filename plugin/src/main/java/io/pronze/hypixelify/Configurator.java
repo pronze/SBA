@@ -488,7 +488,7 @@ public class Configurator {
         Scoreboard_Lines = new HashMap<>();
         for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
             Scoreboard_Lines.put(key,
-                    LobbyScoreboard.listColor(config.getStringList("scoreboard.lines." + key)));
+                    LobbyScoreboard.listColor(getStringList("scoreboard.lines." + key)));
 
         game_size = new HashMap<>();
         for (String s : Main.getGameNames()) {
@@ -497,8 +497,8 @@ public class Configurator {
         }
 
         tag_health = SBAHypixelify.getConfigurator().config.getBoolean("tag_health");
-        overstats_message = LobbyScoreboard.listColor(config.getStringList("overstats.message"));
-        gamestart_message = LobbyScoreboard.listColor(config.getStringList("game-start.message"));
+        overstats_message = LobbyScoreboard.listColor(getStringList("overstats.message"));
+        gamestart_message = LobbyScoreboard.listColor(getStringList("game-start.message"));
 
 
         if (config.getBoolean("first_start")) {
