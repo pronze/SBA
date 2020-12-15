@@ -1,10 +1,8 @@
 package io.pronze.hypixelify.listener;
 
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.game.PlayerWrapper;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
-import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.ScoreboardUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -98,7 +96,7 @@ public class BedwarsListener implements Listener {
         final org.screamingsandals.bedwars.game.Game game = Main.getGame(e.getGame().getName());
 
         new BukkitRunnable() {
-            int buffer = 0; //fixes the bug where it constantly shows will start in 1 second
+            int buffer = 300; //fixes the bug where it constantly shows will start in 1 second
 
             public void run() {
                 if (player.isOnline() &&
@@ -123,7 +121,7 @@ public class BedwarsListener implements Listener {
                                 sendTitle(player, ShopUtil
                                         .translateColors("&c" + seconds), "", 0, 20, 0);
                             } else if (seconds % 10 == 0) {
-                                player.sendMessage(ShopUtil.translateColors(Messages.message_game_starts_in.replace("&c{seconds}", "&6" + seconds)));
+                                player.sendMessage(Messages.message_game_starts_in.replace("§c{seconds}", "§6" + seconds));
                             }
                         }
                     }

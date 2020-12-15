@@ -54,7 +54,7 @@ public class LobbyScoreboard implements Listener {
         lobby_scoreboard_lines = SBAHypixelify.getConfigurator()
                 .getStringList("lobby_scoreboard.lines");
 
-        countdown_message = format(SBAHypixelify.getConfigurator().config
+        countdown_message = format(SBAHypixelify.getConfigurator()
                 .getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
         isEnabled = SBAHypixelify.getConfigurator().config
                 .getBoolean("lobby-scoreboard.enabled", true);
@@ -76,8 +76,8 @@ public class LobbyScoreboard implements Listener {
                     if (tc >= lobby_scoreboard.size())
                         tc = 0;
 
-                    for (Player player : new ArrayList<>(players)) {
-                        if (player == null || !player.isOnline()) continue;
+                    for (Player player : players) {
+                        if (player == null) continue;
 
                         final Game game = bedwarsAPI.getGameOfPlayer(player);
 
