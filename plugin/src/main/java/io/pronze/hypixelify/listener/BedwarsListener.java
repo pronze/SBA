@@ -120,8 +120,6 @@ public class BedwarsListener implements Listener {
                                         .translateColors(Messages.message_game_starts_in.replace("{seconds}", String.valueOf(seconds))));
                                 sendTitle(player, ShopUtil
                                         .translateColors("&c" + seconds), "", 0, 20, 0);
-                            } else if (seconds % 10 == 0) {
-                                player.sendMessage(Messages.message_game_starts_in.replace("§c{seconds}", "§6" + seconds));
                             }
                         }
                     }
