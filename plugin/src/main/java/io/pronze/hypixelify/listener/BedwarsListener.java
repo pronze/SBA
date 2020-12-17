@@ -13,13 +13,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.utils.SBAUtil;
 import io.pronze.hypixelify.utils.ShopUtil;
+import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class BedwarsListener implements Listener {
+
+    private Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
@@ -92,11 +99,19 @@ public class BedwarsListener implements Listener {
         final var player = e.getPlayer();
         final var game = Main.getGame(e.getGame().getName());
 
-        new BukkitRunnable() {
+        final var task = runnableCache.get(player.getUniqueId());
+
+        if (task != null) {
+            if (!task.isCancelled()) {
+                task.cancel();
+            }
+        }
+
+        runnableCache.put(player.getUniqueId(), new BukkitRunnable() {
             int buffer = 300; //fixes the bug where it constantly shows will start in 1 second
 
             public void run() {
-                if (    player.isOnline() &&
+                if ( player.isOnline() &&
                         game.getConnectedPlayers().contains(player) &&
                         game.getStatus() == GameStatus.WAITING) {
 
@@ -122,9 +137,10 @@ public class BedwarsListener implements Listener {
                     }
                 } else {
                     this.cancel();
+                    runnableCache.remove(player.getUniqueId());
                 }
             }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 40L, 20L);
+        }.runTaskTimer(SBAHypixelify.getInstance(), 40L, 20L));
     }
 
 
