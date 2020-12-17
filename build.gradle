@@ -2,7 +2,7 @@ defaultTasks 'clean', 'screamCompile'
 
 allprojects {
     group = 'io.pronze.hypixelify'
-    version = '1.4.3-SNAPSHOT'
+    version = '1.4.3'
 }
 
 
@@ -44,6 +44,9 @@ subprojects{
         compileOnly 'org.screamingsandals.bedwars:BedWars:0.3.0-SNAPSHOT'
         compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.3.0-SNAPSHOT'
     }
+
+    sourceCompatibility = '11.0'
+
 }
 
 

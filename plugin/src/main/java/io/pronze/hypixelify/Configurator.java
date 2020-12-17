@@ -437,6 +437,7 @@ public class Configurator {
                 "&e/p leave&7 - Leaves your current party",
                 "&1-----------------------------------------------------"));
         checkOrSetConfig(modify, "main-lobby.enabled", false);
+        checkOrSetConfig(modify, "main-lobby.title", "&e&lBED WARS");
         checkOrSetConfig(modify, "main-lobby.custom-chat", true);
         checkOrSetConfig(modify, "main-lobby.chat-format", "{color}[{level}✫] {name}: {message}");
         checkOrSetConfig(modify, "main-lobby.lines", Arrays.asList(

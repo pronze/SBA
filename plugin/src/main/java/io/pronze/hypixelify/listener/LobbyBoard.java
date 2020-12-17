@@ -189,7 +189,7 @@ public class LobbyBoard implements Listener {
         if (scoreboard == null || scoreboard.equals(Bukkit.getScoreboardManager().getMainScoreboard())|| scoreboard.getObjective("bwa-mainlobby") == null) {
             scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
             Objective obj = scoreboard.registerNewObjective("bwa-mainlobby", "dummy");
-            obj.setDisplayName("§e§lBED WARS");
+            obj.setDisplayName(SBAHypixelify.getConfigurator().getString("main-lobby.title", "&e&lBED WARS"));
 
             Objects.requireNonNull(scoreboard.getObjective("bwa-mainlobby")).setDisplaySlot(DisplaySlot.SIDEBAR);
             int i = 15;
