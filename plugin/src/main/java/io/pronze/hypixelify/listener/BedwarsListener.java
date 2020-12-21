@@ -111,7 +111,7 @@ public class BedwarsListener implements Listener {
         }
 
         runnableCache.put(player.getUniqueId(), new BukkitRunnable() {
-            int buffer = 300; //fixes the bug where it constantly shows will start in 1 second
+            int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
 
             public void run() {
                 if ( player.isOnline() &&
@@ -154,7 +154,8 @@ public class BedwarsListener implements Listener {
 
 
         if (task != null) {
-            if (!task.isCancelled()) {
+            if (Bukkit.getScheduler().isQueued(task.getTaskId()) ||
+                    !task.isCancelled()) {
                 try {
                     task.cancel();
                 } catch (Throwable ignored) {}
