@@ -26,7 +26,7 @@ import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 public class BedwarsListener implements Listener {
 
-    private Map<UUID, BukkitTask> runnableCache = new HashMap<>();
+    private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
@@ -101,9 +101,12 @@ public class BedwarsListener implements Listener {
 
         final var task = runnableCache.get(player.getUniqueId());
 
+
         if (task != null) {
             if (!task.isCancelled()) {
-                task.cancel();
+                try {
+                    task.cancel();
+                } catch (Throwable ignored) {}
             }
         }
 
@@ -147,6 +150,18 @@ public class BedwarsListener implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
+        final var task = runnableCache.get(player.getUniqueId());
+
+
+        if (task != null) {
+            if (!task.isCancelled()) {
+                try {
+                    task.cancel();
+                } catch (Throwable ignored) {}
+            }
+        }
+        runnableCache.remove(player.getUniqueId());
+
         ScoreboardUtil.removePlayer(player);
         SBAUtil.removeScoreboardObjective(player);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());

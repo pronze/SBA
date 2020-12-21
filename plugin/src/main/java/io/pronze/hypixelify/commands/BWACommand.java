@@ -197,7 +197,7 @@ public class BWACommand extends AbstractCommand {
 
     @Override
     public void displayHelp(CommandSender sender) {
-        sender.sendMessage("§cSBAHypixelify");
+        sender.sendMessage("§cSBAHypixelify v" + SBAHypixelify.getInstance().getDescription().getVersion());
         sender.sendMessage("Available commands:");
         sender.sendMessage("/bwaddon reload - Reload the addon");
         sender.sendMessage("/bwaddon help - Show available list of commands");

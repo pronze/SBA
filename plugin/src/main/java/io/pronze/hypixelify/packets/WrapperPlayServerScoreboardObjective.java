@@ -24,6 +24,7 @@ import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.IntEnum;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import org.screamingsandals.bedwars.Main;
 
 public class WrapperPlayServerScoreboardObjective extends AbstractPacket {
     public static final PacketType TYPE =
@@ -92,6 +93,10 @@ public class WrapperPlayServerScoreboardObjective extends AbstractPacket {
      * @param value - new value.
      */
     public void setDisplayName(WrappedChatComponent value) {
+        if (Main.isLegacy()) {
+            handle.getStrings().write(1, value.toString());
+            return;
+        }
         handle.getChatComponents().write(0, value);
     }
 
