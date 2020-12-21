@@ -277,7 +277,7 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         if (team == null) {
             return;
         }
-        final PlayerData killerData = playerDataMap.get(victim.getUniqueId());
+        final PlayerData killerData = playerDataMap.get(killer.getUniqueId());
 
         killerData.setKills(killerData.getKills() + 1);
 
