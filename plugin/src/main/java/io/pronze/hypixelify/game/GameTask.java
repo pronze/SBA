@@ -18,6 +18,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.utils.Sounds;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,11 +122,14 @@ public class GameTask extends BukkitRunnable {
                             }
 
                         });
-                        String MatName = tier % 2 == 0 ? "§aEmerald§6" : "§bDiamond§6";
-                        final String tierName = Tiers.get(tier);
-                        final String tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
+                        String MatName = tier % 2 == 0 ? Main.getConfigurator().config
+                                .getString("message.emerald", "§aEmerald§6") :
+                                Main.getConfigurator().config.getString("message.diamond","§bDiamond§6");
 
-                        final Material type = tier % 2 == 0 ? Material.EMERALD_BLOCK : Material.DIAMOND_BLOCK;
+                        final var tierName = Tiers.get(tier);
+                        final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
+
+                        final var type = tier % 2 == 0 ? Material.EMERALD_BLOCK : Material.DIAMOND_BLOCK;
 
                         arena.getRotatingGenerators().forEach(rotatingGenerators -> {
                             if(rotatingGenerators == null){
@@ -134,8 +138,24 @@ public class GameTask extends BukkitRunnable {
 
                             final Material matType = rotatingGenerators.getItemStack().getType();
 
-                            if(matType == type)
-                                rotatingGenerators.setLine(0,  "§eTier §c" +  tierLevel);
+                            if(matType == type) {
+                                final var lines = rotatingGenerators.getLines();
+                                final var newLines = new ArrayList<String>();
+
+                                if (lines != null) {
+                                    for (var l : lines) {
+
+                                        if (l == null) {
+                                            continue;
+                                        }
+
+                                        newLines.add(l
+                                                .replace("{tier}", tierLevel)
+                                                .replace("{material}", matType.name()));
+                                    }
+                                }
+                                rotatingGenerators.update(newLines);
+                            }
                         });
 
 

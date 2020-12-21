@@ -28,12 +28,7 @@ import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 public class Arena implements io.pronze.hypixelify.api.game.Arena {
 
 
-    private static final List<String> generatorHoloText = Arrays.asList(
-            "§eTier §c0",
-            "{material}",
-            "§eSpawns in §c{seconds} §aseconds"
-    );
-
+    private final List<String> generatorHoloText;
 
     private static final String diamondHoloText = "§bDiamond";
     private static final String emeraldHoloText = "§aEmerald";
@@ -51,6 +46,7 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
     public GameTask gameTask;
 
     public Arena(Game game) {
+        generatorHoloText = SBAHypixelify.getConfigurator().getStringList("floating-generator.holo-text");
         radius = Math.pow(SBAHypixelify.getConfigurator()
                 .config.getInt("upgrades.trap-detection-range", 7), 2);
         this.game = game;
@@ -288,9 +284,6 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         if(!team.isBed){
             killerData.setFinalKills(killerData.getFinalKills() + 1);
         }
-
-
-
     }
 
 

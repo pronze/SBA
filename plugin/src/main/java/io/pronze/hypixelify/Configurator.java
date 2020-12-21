@@ -108,6 +108,11 @@ public class Configurator {
         checkOrSetConfig(modify, "floating-generator.enabled", true);
         checkOrSetConfig(modify, "floating-generator.holo-height", 2.0);
         checkOrSetConfig(modify, "floating-generator.item-height", 0.25);
+        checkOrSetConfig(modify, "floating-generator.holo-text", Arrays.asList(
+                "§eTier §c{tier}",
+                "{material}",
+                "§eSpawns in §c{seconds} §aseconds"
+        ));
 
         checkOrSetConfig(modify, "upgrades.timer-upgrades-enabled", true);
         checkOrSetConfig(modify, "upgrades.show-upgrade-message", true);
@@ -135,6 +140,8 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
+        checkOrSetConfig(modify, "message.diamond", "Diamond");
+        checkOrSetConfig(modify, "message.emerald", "Emerald");
         checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
         checkOrSetConfig(modify, "message.bed-destroyed.title", "&c&lBED DESTROYED!");

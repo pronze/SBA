@@ -1,6 +1,7 @@
 package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -18,11 +19,11 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
 
     public static final String entityName = "sba_rot_entity";
     public static List<RotatingGenerators> cache = new ArrayList<>();
-    private List<String> lines;
+    @Getter private List<String> lines;
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
-    private Hologram hologram;
+    @Getter private Hologram hologram;
     private final ItemSpawner itemSpawner;
     private int time;
 
@@ -57,8 +58,19 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                 generator.time--;
 
 
-                generator.setLine(2, "§eSpawns in §c{seconds} §eseconds".replace("{seconds}",
-                        String.valueOf(generator.time)));
+                final var lines = generator.getLines();
+                if (lines != null) {
+                    final var newLines = new ArrayList<String>();
+
+                    for (var line : lines) {
+                        if (line == null) {
+                            continue;
+                        }
+                        newLines.add(line.replace("{seconds}", String.valueOf(generator.time)));
+                    }
+
+                    generator.update(newLines);
+                }
 
                 if (generator.time <= 0) {
                     generator.time = generator.itemSpawner.getItemSpawnerType().getInterval();
@@ -93,12 +105,11 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
     }
 
     public RotatingGenerators spawn(List<Player> players) {
-        float holoHeight = (float) SBAHypixelify.getConfigurator()
+        final var holoHeight = (float) SBAHypixelify.getConfigurator()
                 .config.getDouble("floating-generator.holo-height", 2.0);
 
-        float itemHeight = (float) SBAHypixelify.getConfigurator()
+        final var itemHeight = (float) SBAHypixelify.getConfigurator()
                 .config.getDouble("floating-generator.item-height", 0.25);
-
 
         hologram = Main.getHologramManager()
                 .spawnHologram(players, location.clone().add(0, holoHeight, 0), lines.toArray(new String[0]));
@@ -122,6 +133,9 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
         }
 
         for (int i = 0; i < lines.size(); i++) {
+            if (lines.get(i) == null) {
+                continue;
+            }
             hologram.setLine(i, lines.get(i));
         }
 
@@ -143,6 +157,9 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
 
     public void setLine(int index, String line) {
         hologram.setLine(index, line);
+        if (lines != null) {
+            lines.set(index, line);
+        }
     }
 
     public void destroy() {
