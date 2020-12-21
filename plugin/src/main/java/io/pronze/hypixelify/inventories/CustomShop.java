@@ -475,9 +475,17 @@ public class CustomShop implements Listener {
         shopMap.put(name, format);
     }
 
-    public void buystack(ItemStack newItem, ShopTransactionEvent event) {
-        final Player player = event.getPlayer();
-        final HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
+    public void buyStack(ItemStack newItem, ShopTransactionEvent event) {
+        final var player = event.getPlayer();
+
+        if (newItem == null) {
+            return;
+        }
+
+        if (SBAHypixelify.getConfigurator().config.getBoolean("experimental.reset-item-meta-on-purchase", false)) {
+            newItem = new ItemStack(newItem.getType(), newItem.getAmount());
+        }
+        final var noFit = player.getInventory().addItem(newItem);
 
         if (!noFit.isEmpty()) {
             noFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
@@ -691,7 +699,7 @@ public class CustomShop implements Listener {
 
                 if (!player.getInventory().contains(newItem.getType())) {
                     ShopUtil.upgradeSwordOnPurchase(player, newItem, game);
-                    buystack(newItem, event);
+                    buyStack(newItem, event);
                 } else {
                     shouldSellStack = false;
                     player.sendMessage(Messages.already_purchased_thing
@@ -707,7 +715,7 @@ public class CustomShop implements Listener {
             } else if (newItem.getType().name().endsWith("AXE")) {
                 if (!player.getInventory().contains(newItem)) {
                     ShopUtil.removeAxeOrPickaxe(player, newItem);
-                    buystack(newItem, event);
+                    buyStack(newItem, event);
                 } else {
                     player.sendMessage(Messages.already_purchased_thing
                             .replace("{thing}",
@@ -716,7 +724,7 @@ public class CustomShop implements Listener {
                     shouldSellStack = false;
                 }
             } else {
-                buystack(newItem, event);
+                buyStack(newItem, event);
             }
 
             if (shouldSellStack) {
