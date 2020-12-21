@@ -126,7 +126,7 @@ public class BedwarsListener implements Listener {
                             int seconds = Integer.parseInt(units[1]) + 1;
                             if (buffer == seconds) return;
                             buffer = seconds;
-                            if (seconds <= 5) {
+                            if (seconds <= 10) {
                                 String message = ShopUtil
                                         .translateColors(Messages.message_game_starts_in
                                                 .replace("{seconds}", String.valueOf(seconds)));
@@ -143,7 +143,7 @@ public class BedwarsListener implements Listener {
                     runnableCache.remove(player.getUniqueId());
                 }
             }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 40L, 20L));
+        }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L));
     }
 
 
