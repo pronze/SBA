@@ -146,7 +146,7 @@ public class GameTask extends BukkitRunnable {
                             final Material matType = rotatingGenerators.getItemStack().getType();
 
                             if(matType == type) {
-                                final var lines = RotatingGenerators.getFormat();
+                                final var lines = RotatingGenerators.format;
                                 final var newLines = new ArrayList<String>();
 
                                 if (lines != null) {
@@ -157,6 +157,8 @@ public class GameTask extends BukkitRunnable {
                                         }
 
                                         newLines.add(l
+                                                .replace("{time}", String.valueOf(
+                                                        rotatingGenerators.getTime()))
                                                 .replace("{tier}", tierLevel)
                                                 .replace("{material}", matType.name()));
                                     }

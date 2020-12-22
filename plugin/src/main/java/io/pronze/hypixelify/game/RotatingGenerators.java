@@ -1,6 +1,7 @@
 package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -16,18 +17,20 @@ import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class RotatingGenerators implements io.pronze.hypixelify.api.game.RotatingGenerators {
 
     public static final String entityName = "sba_rot_entity";
     public static List<RotatingGenerators> cache = new ArrayList<>();
-    @Getter private List<String> lines;
-    @Getter @Setter private static List<String> format = new ArrayList<>();
-    @Getter private Hologram hologram;
+    private List<String> lines;
+    public static List<String> format = new ArrayList<>();
+    private Hologram hologram;
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
     private final ItemSpawner itemSpawner;
     private int time;
+    private int tierLevel;
 
     public RotatingGenerators(ItemSpawner spawner,
                               ItemStack itemStack,
@@ -60,7 +63,7 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                 generator.time--;
 
 
-                final var lines = RotatingGenerators.getFormat();
+                final var lines = RotatingGenerators.format;
                 if (lines != null) {
                     final var newLines = new ArrayList<String>();
 
@@ -68,7 +71,11 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                         if (line == null) {
                             continue;
                         }
-                        newLines.add(line.replace("{seconds}", String.valueOf(generator.time)));
+                        newLines.add(
+                                line
+                                        .replace("{tier}", String.valueOf(generator.getTierLevel()))
+                                        .replace("{material}", generator.getItemSpawner().getItemSpawnerType().getMaterial().name())
+                                        .replace("{seconds}", String.valueOf(generator.time)));
                     }
 
                     generator.update(newLines);
