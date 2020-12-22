@@ -138,8 +138,8 @@ public class DragonListener implements Listener {
                 List<SpecialItem> dragons = game.getActivedSpecialItems(Dragon.class);
                 for (SpecialItem item : dragons) {
                     if (item instanceof EnderDragon) {
-                        Dragon golem = (Dragon) item;
-                        if (golem.getEntity().equals(eventDragon)) {
+                        Dragon dragon = (Dragon) item;
+                        if (dragon.getEntity().equals(eventDragon)) {
                             event.getDrops().clear();
                         }
                     }
