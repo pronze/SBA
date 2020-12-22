@@ -111,7 +111,7 @@ public class Configurator {
         checkOrSetConfig(modify, "floating-generator.holo-text", Arrays.asList(
                 "§eTier §c{tier}",
                 "{material}",
-                "§eSpawns in §c{seconds} §aseconds"
+                "§eSpawns in §c{seconds} §eseconds"
         ));
 
         checkOrSetConfig(modify, "upgrades.timer-upgrades-enabled", true);

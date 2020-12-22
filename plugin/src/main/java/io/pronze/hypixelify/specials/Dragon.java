@@ -44,10 +44,6 @@ public class Dragon extends SpecialItem {
 
         entity = dragon;
 
-        EntityUtils.makeMobAttackTarget(entity, 0.7, 100, -1)
-                .getTargetSelector()
-                .attackNearestTarget(0, "EntityPlayer");
-
         game.registerSpecialItem(this);
         Main.registerGameEntity(dragon, (org.screamingsandals.bedwars.game.Game) game);
     }

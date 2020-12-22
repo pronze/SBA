@@ -180,9 +180,9 @@ public class GameTask extends BukkitRunnable {
 
             //we have reached the ender dragon stage :)
             else {
-                if (arena.getStorage().areDragonsEnabled()) {
+                if (storage.areDragonsEnabled()) {
                     game.getRunningTeams().forEach(team-> {
-                        final var isEnabled = arena.getStorage().isDragonEnabled(team);
+                        final var isEnabled = storage.isDragonEnabled(team);
                         final var firstPlayer = team.getConnectedPlayers().get(0);
 
                         //why? idk
@@ -192,7 +192,7 @@ public class GameTask extends BukkitRunnable {
 
                         if (isEnabled) {
                             new Dragon(game, firstPlayer, team, game.getSpectatorSpawn()).spawn();
-                            arena.getStorage().setDragon(team, false);
+                            storage.setDragon(team, false);
                         }
                     });
 
