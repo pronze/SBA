@@ -194,7 +194,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 pluginManager.enablePlugin(Main.getInstance());
                 return;
             }
-            RotatingGenerators.setFormat(SBAHypixelify.getConfigurator().getStringList("floating-generator.holo-text"));
+            RotatingGenerators.format = SBAHypixelify.getConfigurator().getStringList("floating-generator.holo-text");
             SBAUtil.destroySpawnerArmorStandEntities();
             RotatingGenerators.scheduleTask();
         }
