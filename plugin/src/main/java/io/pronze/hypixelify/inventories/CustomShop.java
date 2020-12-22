@@ -532,7 +532,7 @@ public class CustomShop implements Listener {
                 player.sendMessage(Messages.trap_timeout_message);
                 e.setCancelled(true);
             } else {
-                gameStorage.setTrap(team, true);
+                gameStorage.setDragon(team, true);
                 team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.dragonTrapPurchased, "", 20, 40, 20));
             }
         }
