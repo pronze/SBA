@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -67,6 +68,11 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                 if (lines != null) {
                     final var newLines = new ArrayList<String>();
 
+                    String MatName = generator.getItemSpawner().getItemSpawnerType().getMaterial() == Material.EMERALD
+                            ? Main.getConfigurator().config
+                            .getString("message.emerald", "§aEmerald§6") :
+                            Main.getConfigurator().config.getString("message.diamond","§bDiamond§6");
+
                     for (var line : lines) {
                         if (line == null) {
                             continue;
@@ -74,7 +80,7 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                         newLines.add(
                                 line
                                         .replace("{tier}", String.valueOf(generator.getTierLevel()))
-                                        .replace("{material}", generator.getItemSpawner().getItemSpawnerType().getMaterial().name())
+                                        .replace("{material}", MatName)
                                         .replace("{seconds}", String.valueOf(generator.time)));
                     }
 

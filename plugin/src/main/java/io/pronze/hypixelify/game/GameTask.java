@@ -130,8 +130,8 @@ public class GameTask extends BukkitRunnable {
 
                         });
                         String MatName = tier % 2 == 0 ? Main.getConfigurator().config
-                                .getString("message.emerald", "§aEmerald§6") :
-                                Main.getConfigurator().config.getString("message.diamond","§bDiamond§6");
+                                .getString("message.emerald", "§aEmerald§e") :
+                                Main.getConfigurator().config.getString("message.diamond","§bDiamond§e");
 
                         final var tierName = Tiers.get(tier);
                         final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
