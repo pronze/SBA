@@ -143,7 +143,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.diamond", "Diamond");
         checkOrSetConfig(modify, "message.emerald", "Emerald");
         checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
-        checkOrSetConfig(modify, "message.dragon-trap-purchased", "&6Blindness Trap has been purchased!");
+        checkOrSetConfig(modify, "message.dragon-trap-purchased", "&6Dragon upgrade has been purchased!");
         checkOrSetConfig(modify, "message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
         checkOrSetConfig(modify, "message.bed-destroyed.title", "&c&lBED DESTROYED!");
         checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");
