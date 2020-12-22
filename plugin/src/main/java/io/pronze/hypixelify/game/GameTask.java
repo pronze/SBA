@@ -146,7 +146,7 @@ public class GameTask extends BukkitRunnable {
                             final Material matType = rotatingGenerators.getItemStack().getType();
 
                             if(matType == type) {
-                                final var lines = rotatingGenerators.getLines();
+                                final var lines = RotatingGenerators.getFormat();
                                 final var newLines = new ArrayList<String>();
 
                                 if (lines != null) {
@@ -190,9 +190,12 @@ public class GameTask extends BukkitRunnable {
 
                         if (isEnabled) {
                             new Dragon(game, firstPlayer, team, game.getSpectatorSpawn()).spawn();
+                            arena.getStorage().setDragon(team, false);
                         }
+                    });
 
-                        arena.getStorage().setDragon(team, false);
+                    game.getConnectedPlayers().forEach(player-> {
+                        player.sendMessage(SBAHypixelify.getConfigurator().getString("message.dragon-spawn"));
                     });
                 }
             }

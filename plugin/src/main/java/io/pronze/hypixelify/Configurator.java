@@ -143,6 +143,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.diamond", "Diamond");
         checkOrSetConfig(modify, "message.emerald", "Emerald");
         checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
+        checkOrSetConfig(modify, "message.dragon-spawn", "&cDragons has been spawned!, good luck");
         checkOrSetConfig(modify, "message.dragon-trap-purchased", "&6Dragon upgrade has been purchased!");
         checkOrSetConfig(modify, "message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
         checkOrSetConfig(modify, "message.bed-destroyed.title", "&c&lBED DESTROYED!");
@@ -468,6 +469,8 @@ public class Configurator {
         checkOrSetConfig(modify, "commands.invalid-command",
                 "[SBAHypixelify] &cUnknown command, do /bwaddon help for more.");
 
+        checkOrSetConfig(modify, "dragon.name-format", "%teamcolor%%team% Dragon");
+        checkOrSetConfig(modify, "dragon.custom-name-enabled", true);
         checkOrSetConfig(modify, "commands.player-only", "[SBAHypixelify] &cOnly players can use this command!");
         checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]&cYou do not have permissions to do this command!");
 

@@ -10,6 +10,7 @@ import io.pronze.hypixelify.inventories.CustomShop;
 import io.pronze.hypixelify.inventories.GamesInventory;
 import io.pronze.hypixelify.listener.*;
 import io.pronze.hypixelify.game.RotatingGenerators;
+import io.pronze.hypixelify.specials.listener.DragonListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
@@ -165,6 +166,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         pluginManager.registerEvents(new PartyListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new LobbyScoreboard(), this);
+        pluginManager.registerEvents(new DragonListener(), this);
         if (configurator.config.getBoolean("main-lobby.enabled", false))
             pluginManager.registerEvents(new LobbyBoard(), this);
 
@@ -192,6 +194,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 pluginManager.enablePlugin(Main.getInstance());
                 return;
             }
+            RotatingGenerators.setFormat(SBAHypixelify.getConfigurator().getStringList("floating-generator.holo-text"));
             SBAUtil.destroySpawnerArmorStandEntities();
             RotatingGenerators.scheduleTask();
         }

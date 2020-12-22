@@ -2,6 +2,7 @@ package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
@@ -20,10 +21,11 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
     public static final String entityName = "sba_rot_entity";
     public static List<RotatingGenerators> cache = new ArrayList<>();
     @Getter private List<String> lines;
+    @Getter @Setter private static List<String> format = new ArrayList<>();
+    @Getter private Hologram hologram;
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
-    @Getter private Hologram hologram;
     private final ItemSpawner itemSpawner;
     private int time;
 
@@ -58,7 +60,7 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                 generator.time--;
 
 
-                final var lines = generator.getLines();
+                final var lines = RotatingGenerators.getFormat();
                 if (lines != null) {
                     final var newLines = new ArrayList<String>();
 
@@ -124,11 +126,11 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
     }
 
     public void update(List<String> lines) {
-        if (lines == null || lines.size() < 1) {
+        if (lines == null || lines.isEmpty()) {
             return;
         }
 
-        if (this.lines.equals(lines)) {
+        if (lines.equals(getLines())) {
             return;
         }
 
@@ -140,7 +142,6 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
         }
 
         this.lines = new ArrayList<>(lines);
-
     }
 
     public ItemStack getItemStack() {
