@@ -12,11 +12,12 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
 
     private final Map<String, TeamData> teamDataMap = new HashMap<>();
 
-
     public GameStorage(Game game){
         game.getRunningTeams()
-                .forEach(team->{ teamDataMap.put(team.getName(), new TeamData(0, 0,
-                    false, false, team.getTargetBlock())); });
+                .forEach(team->{
+                    teamDataMap.put(team.getName(), new TeamData(0, 0,
+                    false, false, false,
+                            team.getTargetBlock())); });
     }
 
 
@@ -42,6 +43,11 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
         data.setPurchasedPool(b);
     }
 
+    public void setDragon(RunningTeam rt, boolean b) {
+        final TeamData data = teamDataMap.get(rt.getName());
+        data.setPurchasedDragonUpgrade(b);
+    }
+
     public void setSharpness(String teamName, Integer level) {
         final TeamData data = teamDataMap.get(teamName);
         data.setSharpness(level);
@@ -57,30 +63,36 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
         data.setTargetBlockLoc(rt.getTargetBlock());
     }
 
-    public boolean areTrapsEnabled() {
-        for (TeamData data : teamDataMap.values()) {
+    public boolean areDragonsEnabled() {
+        for(var data : teamDataMap.values()) {
             if (data == null) continue;
-
-            if (data.isPurchasedTrap()) {
+            if (data.isPurchasedDragonUpgrade()) {
                 return true;
             }
         }
 
+        return false;
+    }
+
+    public boolean areTrapsEnabled() {
+        for (TeamData data : teamDataMap.values()) {
+            if (data == null) continue;
+            if (data.isPurchasedTrap()) {
+                return true;
+            }
+        }
         return false;
     }
 
     public boolean arePoolEnabled() {
         for (TeamData data : teamDataMap.values()) {
             if (data == null) continue;
-
             if (data.isPurchasedPool()) {
                 return true;
             }
         }
-
         return false;
     }
-
 
     public boolean isTrapEnabled(RunningTeam team) {
         final TeamData data = teamDataMap.get(team.getName());
@@ -90,6 +102,11 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
     public boolean isPoolEnabled(RunningTeam team) {
         final TeamData data = teamDataMap.get(team.getName());
         return data.isPurchasedTrap();
+    }
+
+    public boolean isDragonEnabled(RunningTeam team) {
+        final TeamData data = teamDataMap.get(team.getName());
+        return data.isPurchasedDragonUpgrade();
     }
 
 

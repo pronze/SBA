@@ -5,6 +5,7 @@ import io.pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
 import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.GameStorage;
 import io.pronze.hypixelify.message.Messages;
+import io.pronze.hypixelify.specials.Dragon;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -108,6 +109,12 @@ public class GameTask extends BukkitRunnable {
 
 
             if (!Tiers.get(tier).equals(Tiers.get(9))) {
+
+                if (SBAHypixelify.getConfigurator().config.getBoolean("debug.enabled", false)){
+                    Tiers.put(tier, Tiers.get(9));
+                    return;
+                }
+
                 if (time == tier_timer.get(tier)) {
                     if (timerUpgrades) {
                         game.getItemSpawners().forEach(itemSpawner -> {
@@ -166,6 +173,27 @@ public class GameTask extends BukkitRunnable {
                         }
                     }
                     tier++;
+                }
+            }
+
+            //we have reached the ender dragon stage :)
+            else {
+                if (arena.getStorage().areDragonsEnabled()) {
+                    game.getRunningTeams().forEach(team-> {
+                        final var isEnabled = arena.getStorage().isDragonEnabled(team);
+                        final var firstPlayer = team.getConnectedPlayers().get(0);
+
+                        //why? idk
+                        if (firstPlayer == null) {
+                            return;
+                        }
+
+                        if (isEnabled) {
+                            new Dragon(game, firstPlayer, team, game.getSpectatorSpawn()).spawn();
+                        }
+
+                        arena.getStorage().setDragon(team, false);
+                    });
                 }
             }
 

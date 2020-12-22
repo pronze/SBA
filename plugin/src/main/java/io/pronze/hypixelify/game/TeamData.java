@@ -11,5 +11,6 @@ public class TeamData {
      private int protection;
      private boolean purchasedPool;
      private boolean purchasedTrap;
+     private boolean purchasedDragonUpgrade;
      private Location targetBlockLoc;
 }

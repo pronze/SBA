@@ -59,7 +59,8 @@ public class CustomShop implements Listener {
             "sharpness",
             "protection",
             "blindtrap",
-            "healpool"
+            "healpool",
+            "dragon"
     );
 
     public CustomShop() {
@@ -504,6 +505,13 @@ public class CustomShop implements Listener {
         final RunningTeam team = e.getTeam();
         final String name = e.getName();
         final org.screamingsandals.bedwars.api.game.Game game = e.getGame();
+        final var gameStorage = SBAHypixelify.getGamestorage(game);
+
+        if (gameStorage == null) {
+            e.setCancelled(true);
+            player.sendMessage(Messages.ERROR_OCCURED);
+            return;
+        }
 
         if (name.equalsIgnoreCase("sharpness")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
@@ -518,6 +526,14 @@ public class CustomShop implements Listener {
                             , level);
                 }
                 e.setPrice(Integer.toString(price));
+            }
+        } else if (name.equalsIgnoreCase("dragon")) {
+            if (gameStorage.isTrapEnabled(team)) {
+                player.sendMessage(Messages.trap_timeout_message);
+                e.setCancelled(true);
+            } else {
+                gameStorage.setTrap(team, true);
+                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.dragonTrapPurchased, "", 20, 40, 20));
             }
         }
 
