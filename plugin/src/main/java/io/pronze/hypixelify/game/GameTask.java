@@ -55,21 +55,20 @@ public class GameTask extends BukkitRunnable {
         for (int i = 1; i < 9; i++) {
             final var romanNumeral = SBAUtil.romanNumerals.get(inc);
             final var material = i % 2  == 0 ?
-                    SBAHypixelify.getConfigurator().getString("message.diamond") :
-                    SBAHypixelify.getConfigurator().getString("message.emerald");
+                    SBAHypixelify.getConfigurator().getString("message.emerald") :
+                    SBAHypixelify.getConfigurator().getString("message.diamond");
 
-            Tiers.put(i, material + "-" + romanNumeral);
+            final var str = material + "-" + romanNumeral;
+            Tiers.put(i, str);
 
-            final var configMat = i % 2 == 0 ?
-                    "Diamond" : "Emerald";
-            tier_timer.put(i, SBAHypixelify.getConfigurator().config
-                    .getInt("upgrades.time." + configMat + "-" + romanNumeral));
+            final var configMat = i % 2 == 0 ? "Emerald" : "Diamond";
+            final var m_Time = SBAHypixelify.getConfigurator().config
+                    .getInt("upgrades.time." + configMat + "-" + romanNumeral);
+            tier_timer.put(i, m_Time);
 
             if (i % 2 == 0) inc+= 1;
         }
 
-        for (int i = 1; i < 9; i++) {
-        }
         Tiers.put(9, SBAHypixelify.getConfigurator().getString("message.game-end"));
         tier_timer.put(9, game.getGameTime());
         multiplier = SBAHypixelify.getConfigurator().config.getDouble("upgrades.multiplier", 0.25);
@@ -136,16 +135,16 @@ public class GameTask extends BukkitRunnable {
                         String matName = null;
                         Material type = null;
                         for (final var itemSpawner : game.getItemSpawners()) {
-                            if (tier % 2 == 0) {
+                            if (tier % 2 != 0) {
                                 if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND){
                                     itemSpawner.addToCurrentLevel(multiplier);
-                                    matName = SBAHypixelify.getConfigurator().getString("message.diamond");
+                                    matName = "§b" + SBAHypixelify.getConfigurator().getString("message.diamond");
                                     type = Material.DIAMOND_BLOCK;
                                 }
                             } else {
                                 if (itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD) {
                                     itemSpawner.addToCurrentLevel(multiplier);
-                                    matName = SBAHypixelify.getConfigurator().getString("message.emerald");
+                                    matName = "§a" + SBAHypixelify.getConfigurator().getString("message.emerald");
                                     type = Material.EMERALD_BLOCK;
                                 }
                             }
@@ -168,6 +167,7 @@ public class GameTask extends BukkitRunnable {
                                     });
                                 }
                                 generator.update(newLines);
+                                generator.setTierLevel(generator.getTierLevel() + 1);
                             }
                         }
 

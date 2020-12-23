@@ -141,8 +141,8 @@ public class Configurator {
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
         checkOrSetConfig(modify, "message.game-end", "Game End");
-        checkOrSetConfig(modify, "message.diamond", "&bDiamond&r");
-        checkOrSetConfig(modify, "message.emerald", "&aEmerald&r");
+        checkOrSetConfig(modify, "message.diamond", "Diamond");
+        checkOrSetConfig(modify, "message.emerald", "Emerald");
         checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "message.dragon-spawn", "&cDragons has been spawned!, good luck");
         checkOrSetConfig(modify, "message.dragon-trap-purchased", "&6Dragon upgrade has been purchased!");

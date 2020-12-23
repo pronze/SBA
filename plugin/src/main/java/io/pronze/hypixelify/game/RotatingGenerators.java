@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +46,9 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
     public static void scheduleTask() {
 
         Bukkit.getScheduler().runTaskTimer(SBAHypixelify.getInstance(), () -> {
-            cache.stream().filter(generator-> generator != null &&
-                                 generator.location != null &&
-                                 generator.armorStand != null).forEach(generator -> {
+            cache.stream().filter(generator -> generator != null &&
+                    generator.location != null &&
+                    generator.armorStand != null).forEach(generator -> {
                 final Location loc = generator.location;
                 loc.setYaw(loc.getYaw() + 10f);
                 generator.armorStand.teleport(loc);
@@ -57,38 +58,34 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
 
         //Maybe use bedwarsgametickevent for this?
         Bukkit.getScheduler().runTaskTimer(SBAHypixelify.getInstance(), () -> {
-            cache.stream().filter(generator-> generator != null && generator.hologram != null)
+            cache.stream().filter(generator -> generator != null && generator.hologram != null)
                     .forEach(generator -> {
-                generator.time--;
+                        generator.time--;
 
 
-                final var lines = RotatingGenerators.format;
-                if (lines != null) {
-                    final var newLines = new ArrayList<String>();
+                        final var newLines = new ArrayList<String>();
 
-                    final var matName = generator.getItemSpawner().getItemSpawnerType().getMaterial() == Material.EMERALD
-                            ? SBAHypixelify.getConfigurator().config
-                            .getString("message.emerald", "§aEmerald&e") :
-                            SBAHypixelify.getConfigurator().config.getString("message.diamond","§bDiamond&e");
+                        final var matName = generator.getItemSpawner().getItemSpawnerType().getMaterial() == Material.EMERALD
+                                ? "§a" + SBAHypixelify.getConfigurator().config
+                                .getString("message.emerald", "Emerald&e") :
+                                "§b" + SBAHypixelify.getConfigurator().config.getString("message.diamond");
 
-                    for (var line : lines) {
-                        if (line == null) {
-                            continue;
+                        for (var line : RotatingGenerators.format) {
+                            if (line == null) {
+                                continue;
+                            }
+                            newLines.add(line
+                                    .replace("{tier}", String.valueOf(generator.getTierLevel()))
+                                    .replace("{material}", matName + "§6")
+                                    .replace("{seconds}", String.valueOf(generator.time)));
                         }
-                        newLines.add(
-                                line
-                                        .replace("{tier}", String.valueOf(generator.getTierLevel()))
-                                        .replace("{material}", matName + ChatColor.GOLD)
-                                        .replace("{seconds}", String.valueOf(generator.time)));
-                    }
 
-                    generator.update(newLines);
-                }
+                        generator.update(newLines);
 
-                if (generator.time <= 0) {
-                    generator.time = generator.itemSpawner.getItemSpawnerType().getInterval();
-                }
-            });
+                        if (generator.time <= 0) {
+                            generator.time = generator.itemSpawner.getItemSpawnerType().getInterval();
+                        }
+                    });
         }, 0L, 20L);
     }
 
