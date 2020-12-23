@@ -2,15 +2,13 @@ package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
@@ -68,10 +66,10 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                 if (lines != null) {
                     final var newLines = new ArrayList<String>();
 
-                    String MatName = generator.getItemSpawner().getItemSpawnerType().getMaterial() == Material.EMERALD
-                            ? Main.getConfigurator().config
-                            .getString("message.emerald", "§aEmerald§6") :
-                            Main.getConfigurator().config.getString("message.diamond","§bDiamond§6");
+                    final var matName = generator.getItemSpawner().getItemSpawnerType().getMaterial() == Material.EMERALD
+                            ? SBAHypixelify.getConfigurator().config
+                            .getString("message.emerald", "§aEmerald&e") :
+                            SBAHypixelify.getConfigurator().config.getString("message.diamond","§bDiamond&e");
 
                     for (var line : lines) {
                         if (line == null) {
@@ -80,7 +78,7 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                         newLines.add(
                                 line
                                         .replace("{tier}", String.valueOf(generator.getTierLevel()))
-                                        .replace("{material}", MatName)
+                                        .replace("{material}", matName + ChatColor.GOLD)
                                         .replace("{seconds}", String.valueOf(generator.time)));
                     }
 

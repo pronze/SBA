@@ -8,6 +8,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -484,8 +485,13 @@ public class CustomShop implements Listener {
         }
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("experimental.reset-item-meta-on-purchase", false)) {
-            newItem = new ItemStack(newItem.getType(), newItem.getAmount());
+            final var meta = Bukkit.getServer().getItemFactory().getItemMeta(newItem.getType());
+            final var enchants = newItem.getEnchantments();
+            newItem.setItemMeta(meta);
+            if (!enchants.isEmpty())
+                newItem.addEnchantments(enchants);
         }
+
         final var noFit = player.getInventory().addItem(newItem);
 
         if (!noFit.isEmpty()) {

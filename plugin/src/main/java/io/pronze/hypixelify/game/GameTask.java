@@ -6,7 +6,9 @@ import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.GameStorage;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.specials.Dragon;
+import io.pronze.hypixelify.utils.SBAUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -46,14 +48,18 @@ public class GameTask extends BukkitRunnable {
         dateFormat = new SimpleDateFormat("mm:ss");
         timerUpgrades = SBAHypixelify.getConfigurator().config.getBoolean("upgrades.timer-upgrades-enabled", true);
         showUpgradeMessage = SBAHypixelify.getConfigurator().config.getBoolean("upgrades.show-upgrade-message", true);
-        Tiers.put(1, "Diamond-I");
-        Tiers.put(2, "Emerald-I");
-        Tiers.put(3, "Diamond-II");
-        Tiers.put(4, "Emerald-II");
-        Tiers.put(5, "Diamond-III");
-        Tiers.put(6, "Emerald-III");
-        Tiers.put(7, "Diamond-IV");
-        Tiers.put(8, "Emerald-IV");
+
+        byte inc = 1;
+        for (int i = 1; i < 9; i++) {
+            final var romanNumeral = SBAUtil.romanNumerals.get(inc);
+            final var material = i % 2  == 0 ?
+                    SBAHypixelify.getConfigurator().getString("message.diamond") :
+                    SBAHypixelify.getConfigurator().getString("message.emerald");
+
+            Tiers.put(i, material + "-" + romanNumeral);
+            if (i % 2 == 0) inc+= 1;
+        }
+
         for (int i = 1; i < 9; i++) {
             tier_timer.put(i, SBAHypixelify.getConfigurator().config.getInt("upgrades.time." + Tiers.get(i)));
         }
@@ -124,9 +130,9 @@ public class GameTask extends BukkitRunnable {
                             }
 
                         });
-                        String MatName = tier % 2 == 0 ? Main.getConfigurator().config
-                                .getString("message.emerald", "§aEmerald§e") :
-                                Main.getConfigurator().config.getString("message.diamond","§bDiamond§e");
+                        final var matName = tier % 2 == 0 ? SBAHypixelify.getConfigurator().config
+                                .getString("message.emerald", "&aEmerald&r") :
+                                SBAHypixelify.getConfigurator().config.getString("message.diamond","&bDiamond&r");
 
                         final var tierName = Tiers.get(tier);
                         final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
@@ -165,7 +171,7 @@ public class GameTask extends BukkitRunnable {
 
                         if (showUpgradeMessage) {
                             game.getConnectedPlayers().forEach(player -> player.sendMessage(Messages.generatorUpgrade
-                                    .replace("{MatName}", MatName)
+                                    .replace("{MatName}", matName)
                                     .replace("{tier}", Tiers.get(tier))));
                         }
                     }

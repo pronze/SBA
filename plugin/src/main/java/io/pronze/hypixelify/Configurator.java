@@ -140,8 +140,8 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
-        checkOrSetConfig(modify, "message.diamond", "&bDiamond&e");
-        checkOrSetConfig(modify, "message.emerald", "&aEmerald&e");
+        checkOrSetConfig(modify, "message.diamond", "&bDiamond&r");
+        checkOrSetConfig(modify, "message.emerald", "&aEmerald&r");
         checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "message.dragon-spawn", "&cDragons has been spawned!, good luck");
         checkOrSetConfig(modify, "message.dragon-trap-purchased", "&6Dragon upgrade has been purchased!");
@@ -153,7 +153,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.upgrade-team-protection", "&o&c{player}&e has upgraded team protection");
         checkOrSetConfig(modify, "message.error-occured", "&c&lAN ERROR HAS OCCURED");
         checkOrSetConfig(modify, "message.greatest-enchantment", "&c&lYou Already have the greatest enchantment");
-        checkOrSetConfig(modify, "message.generator-upgrade", "{MatName} generator has been upgraded to {tier}");
+        checkOrSetConfig(modify, "message.generator-upgrade", "{MatName}&e generator has been upgraded to &c{tier}");
         checkOrSetConfig(modify, "message.shout-format", "&6[SHOUT] {color}[{team}]&r {player}&7: &r{message}");
         checkOrSetConfig(modify, "message.trap-triggered.title", "&cTrap Triggered!");
         checkOrSetConfig(modify, "message.trap-triggered.sub-title", "&eSomeone has entered your base!");

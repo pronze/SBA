@@ -18,6 +18,24 @@ import java.util.List;
 
 public class SBAUtil {
 
+    //lazy solution but fine for now xdd
+    public static List<String> romanNumerals = new ArrayList<>() {
+        {
+            add("null");
+            add("I");
+            add("II");
+            add("III");
+            add("IV");
+            add("V");
+            add("VI");
+            add("VII");
+            add("VIII");
+            add("IX");
+            add("X");
+        }
+    };
+
+
     public static void removeScoreboardObjective(Player player) {
         if (SBAHypixelify.isProtocolLib() && player != null && player.isOnline()) {
             try {
