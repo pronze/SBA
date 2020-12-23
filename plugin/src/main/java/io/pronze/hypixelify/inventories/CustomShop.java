@@ -489,7 +489,7 @@ public class CustomShop implements Listener {
             final var enchants = newItem.getEnchantments();
             newItem.setItemMeta(meta);
             if (!enchants.isEmpty())
-                newItem.addEnchantments(enchants);
+                newItem.addUnsafeEnchantments(enchants);
         }
 
         final var noFit = player.getInventory().addItem(newItem);
