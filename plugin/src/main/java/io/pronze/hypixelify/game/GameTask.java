@@ -46,8 +46,10 @@ public class GameTask extends BukkitRunnable {
         this.game = arena.getGame();
         this.storage = arena.getStorage();
         dateFormat = new SimpleDateFormat("mm:ss");
-        timerUpgrades = SBAHypixelify.getConfigurator().config.getBoolean("upgrades.timer-upgrades-enabled", true);
-        showUpgradeMessage = SBAHypixelify.getConfigurator().config.getBoolean("upgrades.show-upgrade-message", true);
+        timerUpgrades = SBAHypixelify.getConfigurator().config
+                .getBoolean("upgrades.timer-upgrades-enabled", true);
+        showUpgradeMessage = SBAHypixelify.getConfigurator().config
+                .getBoolean("upgrades.show-upgrade-message", true);
 
         byte inc = 1;
         for (int i = 1; i < 9; i++) {
@@ -57,13 +59,18 @@ public class GameTask extends BukkitRunnable {
                     SBAHypixelify.getConfigurator().getString("message.emerald");
 
             Tiers.put(i, material + "-" + romanNumeral);
+
+            final var configMat = i % 2 == 0 ?
+                    "Diamond" : "Emerald";
+            tier_timer.put(i, SBAHypixelify.getConfigurator().config
+                    .getInt("upgrades.time." + configMat + "-" + romanNumeral));
+
             if (i % 2 == 0) inc+= 1;
         }
 
         for (int i = 1; i < 9; i++) {
-            tier_timer.put(i, SBAHypixelify.getConfigurator().config.getInt("upgrades.time." + Tiers.get(i)));
         }
-        Tiers.put(9, "Game End");
+        Tiers.put(9, SBAHypixelify.getConfigurator().getString("message.game-end"));
         tier_timer.put(9, game.getGameTime());
         multiplier = SBAHypixelify.getConfigurator().config.getDouble("upgrades.multiplier", 0.25);
         runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
@@ -72,107 +79,104 @@ public class GameTask extends BukkitRunnable {
     @Override
     public void run() {
         if (game.getStatus() == GameStatus.RUNNING) {
+
             if (storage.areTrapsEnabled()) {
-                for (Player player : game.getConnectedPlayers()) {
-                    if (Main.getPlayerGameProfile(player).isSpectator) continue;
+                game.getConnectedPlayers().forEach(player-> {
+                    if (Main.getPlayerGameProfile(player).isSpectator) return;
 
-                    for (RunningTeam rt : game.getRunningTeams()) {
-                        if (!storage.isTrapEnabled(rt) || rt.isPlayerInTeam(player)) continue;
+                    game.getRunningTeams().forEach(team-> {
+                        if (!storage.isTrapEnabled(team) || team.isPlayerInTeam(player)) return;
 
-                        if (storage.getTargetBlockLocation(rt).distanceSquared(player.getLocation()) <= arena.radius) {
-                            TeamTrapTriggeredEvent event = new TeamTrapTriggeredEvent(player, rt, arena);
-                            Bukkit.getServer().getPluginManager().callEvent(event);
+                        if (storage.getTargetBlockLocation(team)
+                                .distanceSquared(player.getLocation()) <= arena.radius) {
+                            final var triggeredEvent = new TeamTrapTriggeredEvent(player, team, arena);
+                            SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
-                            if (!event.isCancelled()) {
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
-                                storage.setTrap(rt, false);
-                                player.sendMessage("§eYou have been blinded by " + rt.getName() + " team!");
-                                rt.getConnectedPlayers().forEach(pl -> {
-                                    Sounds.playSound(pl, pl.getLocation(),
-                                            Main.getConfigurator().config.getString("sounds.on_trap_triggered"),
+                            if (!triggeredEvent.isCancelled()) {
+                                storage.setTrap(team, false);
+                                player.addPotionEffect(new PotionEffect
+                                        (PotionEffectType.BLINDNESS, 20 * 3, 2));
+
+                                player.sendMessage(SBAHypixelify
+                                        .getConfigurator()
+                                        .getString("message.trap-triggered.message"));
+
+                                team.getConnectedPlayers().forEach(pl -> {
+                                    Sounds.playSound(pl, pl.getLocation(), Main.getConfigurator()
+                                                    .config.getString("sounds.on_trap_triggered"),
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                    sendTitle(pl, Messages.trapTriggered_title, Messages.trapTriggered_subtitle,
-                                            20, 60, 0);
+                                    sendTitle(pl, Messages.trapTriggered_title,
+                                            Messages.trapTriggered_subtitle, 20, 60, 0);
                                 });
                             }
                         }
-                    }
-                }
+                    });
+                });
             }
 
             if (storage.arePoolEnabled()) {
-                for (RunningTeam rt : game.getRunningTeams()) {
-                    if (!storage.isPoolEnabled(rt)) continue;
+                game.getRunningTeams().forEach(team-> {
+                    if (!storage.isPoolEnabled(team)) return;
 
-                    for (Player pl : rt.getConnectedPlayers()) {
-                        if (Main.getPlayerGameProfile(pl).isSpectator) continue;
-                        if (storage.getTargetBlockLocation(rt).distanceSquared(pl.getLocation()) <= arena.radius) {
-                            pl.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
+                    team.getConnectedPlayers().forEach(player-> {
+                        if (Main.getPlayerGameProfile(player).isSpectator) return;
+                        if (storage.getTargetBlockLocation(team)
+                                .distanceSquared(player.getLocation()) <= arena.radius) {
+                            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,
+                                    30, 1));
                         }
-                    }
-                }
+                    });
+                });
             }
-
 
             if (!Tiers.get(tier).equals(Tiers.get(9))) {
 
                 if (time == tier_timer.get(tier)) {
                     if (timerUpgrades) {
-                        game.getItemSpawners().forEach(itemSpawner -> {
+                        String matName = null;
+                        Material type = null;
+                        for (final var itemSpawner : game.getItemSpawners()) {
                             if (tier % 2 == 0) {
-                                if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.DIAMOND)){
+                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND){
                                     itemSpawner.addToCurrentLevel(multiplier);
-                            }
+                                    matName = SBAHypixelify.getConfigurator().getString("message.diamond");
+                                    type = Material.DIAMOND_BLOCK;
+                                }
                             } else {
-                                if (itemSpawner.getItemSpawnerType().getMaterial().equals(Material.EMERALD)) {
+                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD) {
                                     itemSpawner.addToCurrentLevel(multiplier);
+                                    matName = SBAHypixelify.getConfigurator().getString("message.emerald");
+                                    type = Material.EMERALD_BLOCK;
                                 }
                             }
-
-                        });
-                        final var matName = tier % 2 == 0 ? SBAHypixelify.getConfigurator().config
-                                .getString("message.emerald", "&aEmerald&r") :
-                                SBAHypixelify.getConfigurator().config.getString("message.diamond","&bDiamond&r");
+                        }
 
                         final var tierName = Tiers.get(tier);
                         final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
 
-                        final var type = tier % 2 == 0 ? Material.EMERALD_BLOCK : Material.DIAMOND_BLOCK;
-
-                        arena.getRotatingGenerators().forEach(rotatingGenerators -> {
-                            if(rotatingGenerators == null){
-                                return;
-                            }
-
-                            final Material matType = rotatingGenerators.getItemStack().getType();
-
-                            if(matType == type) {
+                        for (final var generator : arena.getRotatingGenerators()) {
+                            final var generatorMatType = generator.getItemStack().getType();
+                            if (generatorMatType == type) {
                                 final var lines = RotatingGenerators.format;
                                 final var newLines = new ArrayList<String>();
-
                                 if (lines != null) {
-                                    for (var l : lines) {
-
-                                        if (l == null) {
-                                            continue;
-                                        }
-
-                                        newLines.add(l
-                                                .replace("{time}", String.valueOf(
-                                                        rotatingGenerators.getTime()))
+                                    lines.forEach(line-> {
+                                        newLines.add(line
+                                                .replace("{time}", String.valueOf(generator.getTime()))
                                                 .replace("{tier}", tierLevel)
-                                                .replace("{material}", matType.name()));
-                                    }
+                                                .replace("{material}", generatorMatType.name()));
+                                    });
                                 }
-                                rotatingGenerators.update(newLines);
+                                generator.update(newLines);
                             }
-                        });
+                        }
 
-
-                        if (showUpgradeMessage) {
-                            game.getConnectedPlayers().forEach(player -> player.sendMessage(Messages.generatorUpgrade
-                                    .replace("{MatName}", matName)
-                                    .replace("{tier}", Tiers.get(tier))));
+                        if (showUpgradeMessage && matName != null) {
+                            String finalMatName = matName;
+                            game.getConnectedPlayers().forEach(player ->
+                                    player.sendMessage(Messages.generatorUpgrade
+                                            .replace("{MatName}", finalMatName)
+                                            .replace("{tier}", Tiers.get(tier))));
                         }
                     }
                     tier++;

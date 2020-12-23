@@ -140,6 +140,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
+        checkOrSetConfig(modify, "message.game-end", "Game End");
         checkOrSetConfig(modify, "message.diamond", "&bDiamond&r");
         checkOrSetConfig(modify, "message.emerald", "&aEmerald&r");
         checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
@@ -155,6 +156,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.greatest-enchantment", "&c&lYou Already have the greatest enchantment");
         checkOrSetConfig(modify, "message.generator-upgrade", "{MatName}&e generator has been upgraded to &c{tier}");
         checkOrSetConfig(modify, "message.shout-format", "&6[SHOUT] {color}[{team}]&r {player}&7: &r{message}");
+        checkOrSetConfig(modify, "message.trap-triggered.message", "§eYou have been blinded by %team% team!");
         checkOrSetConfig(modify, "message.trap-triggered.title", "&cTrap Triggered!");
         checkOrSetConfig(modify, "message.trap-triggered.sub-title", "&eSomeone has entered your base!");
         checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "&6Blindness Trap has been purchased!");

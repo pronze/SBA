@@ -95,16 +95,16 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
             game.getItemSpawners().forEach(spawner -> {
                 final Material spawnerMaterial = spawner.getItemSpawnerType().getMaterial();
 
-                if (spawnerMaterial.equals(Material.DIAMOND) || spawnerMaterial.equals(Material.EMERALD)) {
-                    ItemStack rotationStack = spawnerMaterial.equals(Material.DIAMOND) ? new ItemStack(Material.DIAMOND_BLOCK) :
+                if (spawnerMaterial == Material.DIAMOND || spawnerMaterial == Material.EMERALD) {
+                    ItemStack rotationStack = spawnerMaterial == Material.DIAMOND ? new ItemStack(Material.DIAMOND_BLOCK) :
                             new ItemStack(Material.EMERALD_BLOCK);
 
-                    List<String> genHolo = new ArrayList<>();
-                    for (String st : generatorHoloText) {
-                        String l = st.replace("{material}",
-                                spawnerMaterial.equals(Material.DIAMOND) ? diamondHoloText : emeraldHoloText);
-                        genHolo.add(l);
-                    }
+                    final var genHolo = new ArrayList<String>();
+                    generatorHoloText.forEach(text-> {
+                        genHolo.add(text.replace("{material}",
+                                spawnerMaterial == Material.DIAMOND ? diamondHoloText
+                                : emeraldHoloText));
+                    });
 
                     rotatingGenerators.add(new io.pronze.hypixelify.game.RotatingGenerators(spawner,
                             rotationStack, genHolo).spawn(game.getConnectedPlayers()));

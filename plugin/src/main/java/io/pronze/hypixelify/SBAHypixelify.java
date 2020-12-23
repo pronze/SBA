@@ -36,17 +36,11 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
 
     private CustomShop shop;
-
     private String version;
-
     private PlayerWrapperService playerWrapperService;
-
     private io.pronze.hypixelify.manager.PartyManager partyManager;
-
     private Configurator configurator;
-
     private GamesInventory gamesInventory;
-
     private Messages messages;
 
     private boolean debug = false;
@@ -134,7 +128,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
 
-
         if (!isSnapshot) {
             UpdateChecker.run(this, 79505);
         }
@@ -143,8 +136,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         configurator.loadDefaults();
 
         playerWrapperService = new PlayerWrapperService();
-
-
         debug = configurator.config.getBoolean("debug.enabled", false);
 
         messages = new Messages();
@@ -176,8 +167,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         //Do changes for legacy support.
         changeBedWarsConfig();
 
-
-
         try {
             if (pluginManager.isPluginEnabled("PlaceholderAPI")) {
                 new SBAExpansion().register();
@@ -200,9 +189,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         }
 
         getServer().getServicesManager().register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
-
         getLogger().info("Plugin has loaded");
-
     }
 
 
@@ -234,7 +221,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 Bukkit.getServer().getPluginManager().disablePlugin(this);
                 Bukkit.getServer().getPluginManager().enablePlugin(this);
             }
-
         }
     }
 
@@ -255,13 +241,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         getLogger().info("Cancelling current tasks....");
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
-
         arenas.clear();
     }
-
-
-
-
 }
 
 
