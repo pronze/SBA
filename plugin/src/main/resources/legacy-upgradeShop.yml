@@ -87,8 +87,6 @@ data:
   - stack: "DRAGON_EGG;1;Ender Dragon;Summon the dragon to bring wreck upon your enemies!"
     column: 6
     row: 1
-    properties: dragon
-    price: 20 of diamond
 
   - stack: "LEATHER;1;TRAPS;TRAP YOUR ENEMY"
     column: 7

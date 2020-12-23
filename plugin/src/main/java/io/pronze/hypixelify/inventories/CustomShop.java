@@ -527,15 +527,15 @@ public class CustomShop implements Listener {
                 }
                 e.setPrice(Integer.toString(price));
             }
-        } else if (name.equalsIgnoreCase("dragon")) {
-            if (gameStorage.isTrapEnabled(team)) {
-                player.sendMessage(Messages.trap_timeout_message);
-                e.setCancelled(true);
-            } else {
-                gameStorage.setDragon(team, true);
-                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.dragonTrapPurchased, "", 20, 40, 20));
-            }
-        }
+        }//else if (name.equalsIgnoreCase("dragon")) {
+         //  if (gameStorage.isTrapEnabled(team)) {
+         //      player.sendMessage(Messages.trap_timeout_message);
+         //      e.setCancelled(true);
+         //  } else {
+         //      gameStorage.setDragon(team, true);
+         //      team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.dragonTrapPurchased, "", 20, 40, 20));
+         //  }
+         //  }
 
         else if (name.equalsIgnoreCase("efficiency")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {

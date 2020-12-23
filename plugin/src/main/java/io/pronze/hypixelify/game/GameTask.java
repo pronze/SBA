@@ -110,11 +110,6 @@ public class GameTask extends BukkitRunnable {
 
             if (!Tiers.get(tier).equals(Tiers.get(9))) {
 
-                if (SBAHypixelify.getConfigurator().config.getBoolean("debug.enabled", false)){
-                    Tiers.put(tier, Tiers.get(9));
-                    return;
-                }
-
                 if (time == tier_timer.get(tier)) {
                     if (timerUpgrades) {
                         game.getItemSpawners().forEach(itemSpawner -> {
@@ -178,29 +173,29 @@ public class GameTask extends BukkitRunnable {
                 }
             }
 
-            //we have reached the ender dragon stage :)
-            else {
-                if (storage.areDragonsEnabled()) {
-                    game.getRunningTeams().forEach(team-> {
-                        final var isEnabled = storage.isDragonEnabled(team);
-                        final var firstPlayer = team.getConnectedPlayers().get(0);
+         ////we have reached the ender dragon stage :)
+         //else {
+         //    if (storage.areDragonsEnabled()) {
+         //        game.getRunningTeams().forEach(team-> {
+         //            final var isEnabled = storage.isDragonEnabled(team);
+         //            final var firstPlayer = team.getConnectedPlayers().get(0);
 
-                        //why? idk
-                        if (firstPlayer == null) {
-                            return;
-                        }
+         //            //why? idk
+         //            if (firstPlayer == null) {
+         //                return;
+         //            }
 
-                        if (isEnabled) {
-                            new Dragon(game, firstPlayer, team, game.getSpectatorSpawn()).spawn();
-                            storage.setDragon(team, false);
-                        }
-                    });
+         //            if (isEnabled) {
+         //                new Dragon(game, firstPlayer, team, game.getSpectatorSpawn()).spawn();
+         //                storage.setDragon(team, false);
+         //            }
+         //        });
 
-                    game.getConnectedPlayers().forEach(player-> {
-                        player.sendMessage(SBAHypixelify.getConfigurator().getString("message.dragon-spawn"));
-                    });
-                }
-            }
+         //        game.getConnectedPlayers().forEach(player-> {
+         //            player.sendMessage(SBAHypixelify.getConfigurator().getString("message.dragon-spawn"));
+         //        });
+         //    }
+         //}
 
             time++;
         } else {
