@@ -7,15 +7,18 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
+import org.screamingsandals.lib.paperlib.PaperLib;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 public class RotatingGenerators implements io.pronze.hypixelify.api.game.RotatingGenerators {
@@ -103,7 +106,6 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
         });
 
         cache.removeAll(rotatingGenerators);
-
     }
 
     public ArmorStand getArmorStandEntity() {
@@ -124,15 +126,48 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
         hologram = Main.getHologramManager()
                 .spawnHologram(players, location.clone().add(0, holoHeight, 0), lines.toArray(new String[0]));
 
-        armorStand = (ArmorStand) location.getWorld().
-                spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
-        armorStand.setCustomName(entityName);
-        armorStand.setVisible(false);
-        armorStand.setHelmet(itemStack);
-        armorStand.setGravity(false);
+        PaperLib.getChunkAtAsync(location)
+                .thenAccept(chunk-> {
+                    armorStand = (ArmorStand) location.getWorld().
+                            spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
+                    armorStand.setCustomName(entityName);
+                    armorStand.setVisible(false);
+                    armorStand.setHelmet(itemStack);
+                    armorStand.setGravity(false);
+
+                    //make sure there aren't any other rotating generator entities in the same area
+                    armorStand.getLocation().getWorld().getNearbyEntitiesByType(ArmorStand.class, armorStand.getLocation()
+                            , 1, 1, 1)
+                            .stream()
+                            .filter(RotatingGenerators::isRotatingEntity)
+                            .forEach(Entity::remove);
+                });
+
         return this;
     }
 
+    public static boolean isRotatingEntity(Entity entity) {
+        if (entity == null) {
+            return false;
+        }
+
+        if (!(entity instanceof ArmorStand)) {
+            return false;
+        }
+
+        final var armorStandEntity = (ArmorStand) entity;
+        final var customName = armorStandEntity.getCustomName();
+
+        if (customName == null) {
+            return false;
+        }
+
+        if (customName.equalsIgnoreCase(RotatingGenerators.entityName)) {
+            return true;
+        }
+
+        return false;
+    }
     public void update(List<String> lines) {
         if (lines == null || lines.isEmpty()) {
             return;
