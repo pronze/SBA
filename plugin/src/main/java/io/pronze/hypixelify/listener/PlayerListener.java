@@ -35,6 +35,7 @@ import org.screamingsandals.bedwars.game.GamePlayer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
@@ -45,7 +46,6 @@ public class PlayerListener implements Listener {
     private final List<Material> generatorDropItems;
     private final boolean giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
             disableArmorDamage, permanentItems, blockItemOnChest, blockItemDrops;
-
 
 
     public PlayerListener() {
@@ -87,38 +87,37 @@ public class PlayerListener implements Listener {
             }
         }, 1L);
 
-        final List<ItemStack> itemArr = new ArrayList<>();
+        final var itemArr = new ArrayList<ItemStack>();
         if (permanentItems) {
-            final ItemStack sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD")) : new ItemStack(Material.WOODEN_SWORD);
+            final var sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD")) : new ItemStack(Material.WOODEN_SWORD);
 
+            Arrays.stream(player
+                    .getInventory()
+                    .getContents()
+                    .clone())
+                    .filter(Objects::nonNull)
+                    .forEach(stack -> {
+                        final String name = stack.getType().name();
 
-            Arrays.stream(player.getInventory().getContents().clone()).forEach(stack -> {
-                if (stack == null) {
-                    return;
-                }
-                final String name = stack.getType().name();
+                        if (name.endsWith("SWORD"))
+                            sword.addEnchantments(stack.getEnchantments());
 
-                if (name.endsWith("SWORD"))
-                    sword.addEnchantments(stack.getEnchantments());
+                        if (name.endsWith("AXE"))
+                            itemArr.add(ShopUtil.checkifUpgraded(stack));
 
-                if (name.endsWith("AXE"))
-                    itemArr.add(ShopUtil.checkifUpgraded(stack));
+                        if (name.endsWith("LEGGINGS")
+                                || name.endsWith("BOOTS")
+                                || name.endsWith("CHESTPLATE")
+                                || name.endsWith("HELMET"))
+                            itemArr.add(stack);
 
-                if (    name.endsWith("LEGGINGS") ||
-                        name.endsWith("BOOTS") ||
-                        name.endsWith("CHESTPLATE") ||
-                        name.endsWith("HELMET"))
-                    itemArr.add(stack);
+                        if (name.contains("SHEARS"))
+                            itemArr.add(stack);
 
-                if (name.contains("SHEARS")) {
-                    itemArr.add(stack);
-                }
-
-                SBAHypixelify.debug(stack.getType().name());
-            });
+                    });
 
             itemArr.add(sword);
-            PlayerData playerData = arena.getPlayerData(player.getUniqueId());
+            final var playerData = arena.getPlayerData(player.getUniqueId());
             playerData.setInventory(itemArr);
         }
 
@@ -170,7 +169,7 @@ public class PlayerListener implements Listener {
                                         .replace("%time%", String.valueOf(livingTime)),
                                 0, 20, 0);
 
-                        player.sendMessage(SBAHypixelify.getConfigurator().getString("message.respawn-subtitle")
+                        player.sendMessage(SBAHypixelify.getConfigurator().getString("message.respawn-message")
                                 .replace("%time%", String.valueOf(livingTime)));
                         livingTime--;
                     }
@@ -180,8 +179,8 @@ public class PlayerListener implements Listener {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {
-                            player.sendMessage(SBAHypixelify.getConfigurator().getString("message.respawned-title"));
-                            sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
+                            player.sendMessage(SBAHypixelify.getConfigurator().getString("message.respawned-message"));
+                            sendTitle(player, SBAHypixelify.getConfigurator().getString("message.respawned-title"), "", 5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player, Main.getGame(game.getName()).getPlayerTeam(gamePlayer).getColor());
                             this.cancel();
                         }
@@ -193,12 +192,12 @@ public class PlayerListener implements Listener {
 
 
     @EventHandler
-    public void onPlayerArmorStandManipulateEvent (PlayerArmorStandManipulateEvent  e) {
-         final ArmorStand armorStand = e.getRightClicked();
+    public void onPlayerArmorStandManipulateEvent(PlayerArmorStandManipulateEvent e) {
+        final ArmorStand armorStand = e.getRightClicked();
 
-         if (armorStand.getCustomName() != null && armorStand.getCustomName().equalsIgnoreCase(RotatingGenerators.entityName)) {
-             e.setCancelled(true);
-         }
+        if (armorStand.getCustomName() != null && armorStand.getCustomName().equalsIgnoreCase(RotatingGenerators.entityName)) {
+            e.setCancelled(true);
+        }
     }
 
 

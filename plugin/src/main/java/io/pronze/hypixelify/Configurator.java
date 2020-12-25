@@ -165,8 +165,10 @@ public class Configurator {
         checkOrSetConfig(modify, "message.cannot-buy", "&cYou don't have enough {price}");
         checkOrSetConfig(modify, "message.purchase", "&aYou purchased &e{item}");
         checkOrSetConfig(modify, "message.respawn-title", "&cYOU DIED!");
+        checkOrSetConfig(modify, "message.respawn-message", "&eYou will respawn in &c%time% &eseconds");
+        checkOrSetConfig(modify, "message.respawned-message", "&eYou have respawned");
         checkOrSetConfig(modify, "message.respawn-subtitle", "&eYou will respawn in &c%time% &eseconds");
-        checkOrSetConfig(modify, "message.respawned-title", "&eYou have respawned");
+        checkOrSetConfig(modify, "message.respawned-title", "§aRESPAWNED!");
         checkOrSetConfig(modify, "message.cannot-put-item-on-chest", "You cannot put this item onto this chest.");
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
