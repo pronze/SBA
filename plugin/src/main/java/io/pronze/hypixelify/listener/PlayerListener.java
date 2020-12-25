@@ -4,7 +4,6 @@ import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.PlayerData;
 import io.pronze.hypixelify.game.RotatingGenerators;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.SBAUtil;
 import io.pronze.hypixelify.utils.ShopUtil;
@@ -165,9 +164,14 @@ public class PlayerListener implements Listener {
 
                     //send custom title because we disabled Bedwars from showing any title
                     if (livingTime > 0) {
-                        sendTitle(player, Messages.message_respawn_title,
-                                Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)), 0, 20, 0);
-                        player.sendMessage(Messages.message_respawn_subtitle.replace("%time%", String.valueOf(livingTime)));
+                        sendTitle(player, SBAHypixelify.getConfigurator()
+                                        .getString("message.respawn-title"),
+                                SBAHypixelify.getConfigurator().getString("message.respawn-subtitle")
+                                        .replace("%time%", String.valueOf(livingTime)),
+                                0, 20, 0);
+
+                        player.sendMessage(SBAHypixelify.getConfigurator().getString("message.respawn-subtitle")
+                                .replace("%time%", String.valueOf(livingTime)));
                         livingTime--;
                     }
 
@@ -176,7 +180,7 @@ public class PlayerListener implements Listener {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {
-                            player.sendMessage(Messages.message_respawned_title);
+                            player.sendMessage(SBAHypixelify.getConfigurator().getString("message.respawned-title"));
                             sendTitle(player, "§aRESPAWNED!", "", 5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player, Main.getGame(game.getName()).getPlayerTeam(gamePlayer).getColor());
                             this.cancel();

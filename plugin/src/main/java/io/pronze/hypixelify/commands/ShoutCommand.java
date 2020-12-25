@@ -4,7 +4,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -41,7 +40,7 @@ public class ShoutCommand extends AbstractCommand {
         final Player player = (Player) sender;
 
         if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
-            ShopUtil.sendMessage(player, Messages.message_not_in_game);
+            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("message.not-in-game"));
             return;
         }
 
@@ -59,7 +58,7 @@ public class ShoutCommand extends AbstractCommand {
         if(!cancelShout && !hasPermission(player)) {
             if (!playerWrapper.canShout()) {
                 String shout = String.valueOf(playerWrapper.getShoutTimeOut());
-                for (String st : Messages.message_shout_wait) {
+                for (String st : SBAHypixelify.getConfigurator().getStringList("message.shout-wait")) {
                     player.sendMessage(ShopUtil.translateColors(st.replace("{seconds}", shout)));
                 }
                 return;
@@ -76,7 +75,7 @@ public class ShoutCommand extends AbstractCommand {
 
         Arrays.stream(args).forEach(st -> builder.append(st).append(" "));
 
-        String st = Messages.shoutFormat
+        String st = SBAHypixelify.getConfigurator().getString("message.shout-format")
                 .replace("{color}", color)
                 .replace("{player}", player.getName())
                 .replace("{message}", builder.toString());

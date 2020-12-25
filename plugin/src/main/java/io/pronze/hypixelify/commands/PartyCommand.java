@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.MessageUtils;
 import io.pronze.hypixelify.utils.ShopUtil;
@@ -60,7 +59,7 @@ public class PartyCommand extends AbstractCommand {
         Player player = (Player) sender;
 
         if (args == null || args.length == 0 || args.length > 2) {
-            ShopUtil.sendMessage(player, Messages.message_invalid_command);
+            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
             return;
         }
 
@@ -73,7 +72,7 @@ public class PartyCommand extends AbstractCommand {
 
         if (args[0].equalsIgnoreCase("invite")) {
             if (args.length != 2) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
                 return;
             }
 
@@ -90,20 +89,20 @@ public class PartyCommand extends AbstractCommand {
             //check if player argument is online
             final Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
             if (invited == null) {
-                ShopUtil.sendMessage(player, Messages.message_player_not_found);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.player-not-found"));
                 return;
             }
 
 
             if (invited.getUniqueId().equals(player.getUniqueId())) {
-                ShopUtil.sendMessage(player, Messages.message_cannot_invite_yourself);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.cannot-invite-yourself"));
                 return;
             }
 
             final PlayerWrapper invitedData = playerWrapperService.getWrapper(invited);
 
             if (playerWrapper.isInvited()) {
-                ShopUtil.sendMessage(player, Messages.message_decline_inc);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.decline-inc"));
                 return;
             }
 
@@ -116,12 +115,12 @@ public class PartyCommand extends AbstractCommand {
             }
 
             if (invitedData.isInParty()) {
-                ShopUtil.sendMessage(player, Messages.message_cannot_invite);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.cannotinvite"));
                 return;
             }
 
             if (invitedData.isInvited()) {
-                ShopUtil.sendMessage(player, Messages.message_already_invited);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.alreadyInvited"));
                 return;
             }
 
@@ -141,17 +140,17 @@ public class PartyCommand extends AbstractCommand {
         //check if player does not do other commands on his newly created party.
         else if (playerWrapper.isInParty() && initParty != null
                 && initParty.getPlayers() == null) {
-            ShopUtil.sendMessage(player, Messages.message_no_other_commands);
+            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.no-other-commands"));
             return;
         } else if (args[0].equalsIgnoreCase("accept")) {
 
             if (!playerWrapper.isInvited()) {
-                ShopUtil.sendMessage(player, Messages.message_not_invited);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.not-invited"));
                 return;
             }
 
             if (playerWrapper.isInParty() || playerWrapper.getInvitedParty() == null) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
                 return;
             }
 
@@ -162,12 +161,12 @@ public class PartyCommand extends AbstractCommand {
         } else if (args[0].equalsIgnoreCase("leave")) {
 
             if (args.length != 1) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
                 return;
             }
 
             if (!playerWrapper.isInParty()) {
-                ShopUtil.sendMessage(player, Messages.message_not_in_party);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.notinparty"));
                 return;
             }
             if (playerWrapper.isPartyLeader()) {
@@ -180,11 +179,11 @@ public class PartyCommand extends AbstractCommand {
 
             if (initParty == null) return;
             partyManager.removeFromParty(player, initParty);
-            ShopUtil.sendMessage(player, Messages.message_party_left);
+            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.left"));
         } else if (args[0].equalsIgnoreCase("decline")) {
 
             if (!playerWrapper.isInvited()) {
-                ShopUtil.sendMessage(player, Messages.message_not_invited);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.not-invited"));
                 return;
             }
 
@@ -194,7 +193,7 @@ public class PartyCommand extends AbstractCommand {
 
             partyManager.getParty(invitedParty.getLeader()).removeInvitedMember(player);
 
-            ShopUtil.sendMessage(player, Messages.message_decline_user);
+            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.declined-user"));
 
 
             final List<Player> partyMembers = invitedParty.getAllPlayers();
@@ -215,7 +214,7 @@ public class PartyCommand extends AbstractCommand {
         } else if (args[0].equalsIgnoreCase("list")) {
 
             if (!playerWrapper.isInParty()) {
-                ShopUtil.sendMessage(player, Messages.message_not_in_party);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.notinparty"));
                 return;
             }
 
@@ -232,34 +231,34 @@ public class PartyCommand extends AbstractCommand {
         } else if (args[0].equalsIgnoreCase("disband")) {
 
             if (initParty == null) {
-                ShopUtil.sendMessage(player, Messages.message_not_in_party);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.notinparty"));
                 return;
             }
 
             if (!initPartyLeader.equals(player)) {
-                ShopUtil.sendMessage(player, Messages.message_access_denied);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.access-denied"));
                 return;
             }
             partyManager.disband(player);
             return;
         } else if (args[0].equalsIgnoreCase("kick")) {
             if (!playerWrapper.isInParty() || initPartyLeader == null) {
-                ShopUtil.sendMessage(player, Messages.message_not_in_party);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.notinparty"));
                 return;
             }
 
             if (!initPartyLeader.equals(player)) {
-                ShopUtil.sendMessage(player, Messages.message_access_denied);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.access-denied"));
                 return;
             }
             if (args.length != 2) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
                 return;
             }
 
             final Player invited = Bukkit.getPlayerExact(args[1].toLowerCase());
             if (invited == null) {
-                ShopUtil.sendMessage(player, Messages.message_player_not_found);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.player-not-found"));
                 return;
             }
 
@@ -274,7 +273,7 @@ public class PartyCommand extends AbstractCommand {
                     partyManager.getParty(player).getPlayers().isEmpty()) return;
 
             if (!partyManager.getParty(player).getAllPlayers().contains(invited)) {
-                ShopUtil.sendMessage(player, Messages.message_player_not_found);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.player-not-found"));
                 return;
             }
 
@@ -284,7 +283,7 @@ public class PartyCommand extends AbstractCommand {
         } else if (args[0].equalsIgnoreCase("warp")) {
 
             if (args.length != 1) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
                 return;
             }
 
@@ -293,7 +292,7 @@ public class PartyCommand extends AbstractCommand {
             }
 
             if (!partyManager.isInParty(player)) {
-                ShopUtil.sendMessage(player, Messages.message_not_in_party);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.notinparty"));
                 return;
             }
 
@@ -307,7 +306,7 @@ public class PartyCommand extends AbstractCommand {
                 return;
             }
             if (!playerWrapper.getPartyLeader().equals(player)) {
-                ShopUtil.sendMessage(player, Messages.message_access_denied);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.access-denied"));
                 return;
             }
             partyManager.warpPlayersToLeader(player);
@@ -315,12 +314,12 @@ public class PartyCommand extends AbstractCommand {
         } else if (args[0].equalsIgnoreCase("chat")) {
 
             if (!playerWrapper.isInParty()) {
-                ShopUtil.sendMessage(player, Messages.message_not_in_party);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.notinparty"));
                 return;
             }
 
             if (args.length != 2 || (!args[1].equalsIgnoreCase("on") && !args[1].equalsIgnoreCase("off"))) {
-                ShopUtil.sendMessage(player, Messages.message_invalid_command);
+                ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
                 return;
             }
 
@@ -334,7 +333,7 @@ public class PartyCommand extends AbstractCommand {
             return;
 
         } else {
-            ShopUtil.sendMessage(player, Messages.message_invalid_command);
+            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.invalid-command"));
             return;
         }
     }
@@ -342,7 +341,7 @@ public class PartyCommand extends AbstractCommand {
     @Override
     public void displayHelp(CommandSender sender) {
         Player player = (Player) sender;
-        ShopUtil.sendMessage(player, Messages.message_party_help);
+        ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("party.message.help"));
     }
 
     @Override

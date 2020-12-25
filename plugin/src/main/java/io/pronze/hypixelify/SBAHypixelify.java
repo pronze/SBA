@@ -12,21 +12,21 @@ import io.pronze.hypixelify.listener.*;
 import io.pronze.hypixelify.game.RotatingGenerators;
 import io.pronze.hypixelify.specials.listener.DragonListener;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.pronze.hypixelify.game.Arena;
 import io.pronze.hypixelify.game.GameStorage;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.placeholderapi.SBAExpansion;
 import io.pronze.hypixelify.service.PlayerWrapperService;
 import io.pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
-
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -41,7 +41,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private io.pronze.hypixelify.manager.PartyManager partyManager;
     private Configurator configurator;
     private GamesInventory gamesInventory;
-    private Messages messages;
 
     private boolean debug = false;
     private boolean isSnapshot;
@@ -118,9 +117,25 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public void onEnable() {
         if (getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
-            getLogger().severe("Could not find Screaming BedWars plugin!, make sure " +
+            showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
-            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        if (!Main.getVersion().contains("0.3.")) {
+            showErrorMessage("You need at least a minimum of 0.3.0 version of Screaming-BedWars to run SBAHypixelify!",
+                    "Get the latest version from here: https://ci.screamingsandals.org/job/BedWars-0.x.x/");
+            return;
+        }
+
+        if (!ClassStorage.IS_SPIGOT_SERVER) {
+            showErrorMessage("Did not detect spigot",
+                    "Make sure you have spigot installed to run this plugin");
+            return;
+        }
+
+        if (Main.getVersionNumber() < 109) {
+            showErrorMessage("Minecraft server is running versions below 1.9, please upgrade!");
             return;
         }
 
@@ -138,20 +153,17 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         playerWrapperService = new PlayerWrapperService();
         debug = configurator.config.getBoolean("debug.enabled", false);
 
-        messages = new Messages();
-        messages.loadConfig();
-
         InventoryListener.init(this);
         shop = new CustomShop();
         gamesInventory = new GamesInventory();
 
         partyManager = new io.pronze.hypixelify.manager.PartyManager();
 
-        getCommand("party").setExecutor(new PartyCommand());
-        getCommand("shout").setExecutor(new ShoutCommand());
-        getCommand("bwaddon").setExecutor(new BWACommand());
+        registerCommand("party", new PartyCommand());
+        registerCommand("shout", new ShoutCommand());
+        registerCommand("bwaddon", new BWACommand());
 
-        final PluginManager pluginManager = Bukkit.getServer().getPluginManager();
+        final var pluginManager = Bukkit.getServer().getPluginManager();
         pluginManager.registerEvents(new BedwarsListener(), this);
         pluginManager.registerEvents(new ChatListener(), this);
         pluginManager.registerEvents(new PartyListener(), this);
@@ -192,6 +204,22 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         getLogger().info("Plugin has loaded");
     }
 
+    protected void showErrorMessage(String... messages) {
+        getLogger().severe("======PLUGIN ERROR===========");
+        getLogger().severe("Plugin: SBAHypixelify is being disabled for the following error:");
+        Arrays.stream(messages)
+                .filter(Objects::nonNull)
+                .forEach(getLogger()::severe);
+        getLogger().severe("=============================");
+        getServer().getPluginManager().disablePlugin(this);
+    }
+
+    public void registerCommand(String commandName, CommandExecutor executor) {
+        var pluginCommand = getCommand(commandName);
+        if (pluginCommand != null) {
+            pluginCommand.setExecutor(executor);
+        }
+    }
 
     public void changeBedWarsConfig() {
         //Do changes for legacy support.
@@ -227,7 +255,10 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public void onDisable() {
         if (SBAHypixelify.isProtocolLib()) {
-            Bukkit.getOnlinePlayers().stream().filter(Objects::nonNull).forEach(SBAUtil::removeScoreboardObjective);
+            Bukkit.getOnlinePlayers()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .forEach(SBAUtil::removeScoreboardObjective);
         }
 
         RotatingGenerators.destroy(RotatingGenerators.cache);

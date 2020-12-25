@@ -7,7 +7,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import io.pronze.hypixelify.game.Arena;
-import io.pronze.hypixelify.message.Messages;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
@@ -115,7 +114,7 @@ public class ScoreBoard {
                         String you = "";
                         if (playerTeam != null) {
                             if (playerTeam.getName().equals(t.getName())) {
-                                you = Messages.message_you;
+                                you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
                             }
                         }
                         if (teamstatus.containsKey(t.getName())) {

@@ -2,20 +2,12 @@ package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
-import io.pronze.hypixelify.game.Arena;
-import io.pronze.hypixelify.game.GameStorage;
-import io.pronze.hypixelify.message.Messages;
-import io.pronze.hypixelify.specials.Dragon;
 import io.pronze.hypixelify.utils.SBAUtil;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.utils.Sounds;
@@ -105,8 +97,8 @@ public class GameTask extends BukkitRunnable {
                                     Sounds.playSound(pl, pl.getLocation(), Main.getConfigurator()
                                                     .config.getString("sounds.on_trap_triggered"),
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                    sendTitle(pl, Messages.trapTriggered_title,
-                                            Messages.trapTriggered_subtitle, 20, 60, 0);
+                                    sendTitle(pl, SBAHypixelify.getConfigurator().getString("message.trap-triggered.title"),
+                                            SBAHypixelify.getConfigurator().getString("message.trap-triggered.sub-title"), 20, 60, 0);
                                 });
                             }
                         }
@@ -175,7 +167,7 @@ public class GameTask extends BukkitRunnable {
                         if (showUpgradeMessage && matName != null) {
                             String finalMatName = matName;
                             game.getConnectedPlayers().forEach(player ->
-                                    player.sendMessage(Messages.generatorUpgrade
+                                    player.sendMessage(SBAHypixelify.getConfigurator().getString("message.generator-upgrade")
                                             .replace("{MatName}", finalMatName)
                                             .replace("{tier}", Tiers.get(tier))));
                         }

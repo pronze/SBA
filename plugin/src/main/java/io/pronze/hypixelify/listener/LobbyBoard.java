@@ -19,7 +19,6 @@ import org.bukkit.scoreboard.Objective;
 import org.bukkit.scoreboard.Scoreboard;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
@@ -86,8 +85,8 @@ public class LobbyBoard implements Listener {
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
                 && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
-            if (Messages.lobby_chat_format != null) {
-                String format = Messages.lobby_chat_format
+            if (SBAHypixelify.getConfigurator().getString("main-lobby.chat-format") != null) {
+                String format = SBAHypixelify.getConfigurator().getString("main-lobby.chat-format")
                         .replace("{level}", String.valueOf(db.getLevel()))
                         .replace("{name}", e.getPlayer().getName())
                         .replace("{message}", e.getMessage())

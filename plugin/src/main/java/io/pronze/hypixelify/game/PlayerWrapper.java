@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.Party;
 import io.pronze.hypixelify.api.party.PartyManager;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -233,7 +232,7 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
         if (party == null) return;
         if (party.shouldDisband()) {
             if (instance.isOnline()) {
-                Messages.message_party_disband_inactivity
+                SBAHypixelify.getConfigurator().getStringList("party.message.disband-inactivity")
                         .forEach(st -> instance.sendMessage(ShopUtil.translateColors(st)));
             }
             setIsInParty(false);
@@ -269,9 +268,9 @@ public class PlayerWrapper implements io.pronze.hypixelify.api.wrapper.PlayerWra
                         final Player partyLeader = invitedParty.getLeader();
 
                         if (partyLeader != null && partyLeader.isOnline())
-                            ShopUtil.sendMessage(partyLeader, Messages.message_invite_expired);
+                            ShopUtil.sendMessage(partyLeader, SBAHypixelify.getConfigurator().getStringList("party.message.expired"));
                         if (instance != null && instance.isOnline())
-                            ShopUtil.sendMessage(instance, Messages.message_invite_expired);
+                            ShopUtil.sendMessage(instance,SBAHypixelify.getConfigurator().getStringList("party.message.expired"));
                     }
                     setInvitedParty(null);
                     SBAHypixelify.getWrapperService().updateAll();

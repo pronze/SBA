@@ -2,7 +2,6 @@ package io.pronze.hypixelify.game;
 
 import io.pronze.hypixelify.Configurator;
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.scoreboard.ScoreBoard;
 import io.pronze.hypixelify.utils.SBAUtil;
 import lombok.Getter;
@@ -121,8 +120,8 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
                 return;
             }
 
-            sendTitle(player, Messages.message_bed_destroyed_title,
-                    Messages.message_bed_destroyed_subtitle, 0, 40, 20);
+            sendTitle(player, SBAHypixelify.getConfigurator().getString("message.bed-destroyed.title"),
+                    SBAHypixelify.getConfigurator().getString("message.bed-destroyed.sub-title"), 0, 40, 20);
 
         });
 

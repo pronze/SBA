@@ -13,7 +13,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import io.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
-import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.Team;
@@ -473,14 +472,14 @@ public class CustomShop implements Listener {
 
         if (gameStorage == null) {
             e.setCancelled(true);
-            player.sendMessage(Messages.ERROR_OCCURED);
+            player.sendMessage(SBAHypixelify.getConfigurator().getString("message.error-occured"));
             return;
         }
 
         if (name.equalsIgnoreCase("sharpness")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
                 e.setCancelled(true);
-                player.sendMessage(Messages.message_greatest_enchantment);
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.greatest-enchantment"));
             } else {
                 var level = newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
                 var price = Prices.get(level);
@@ -493,48 +492,48 @@ public class CustomShop implements Listener {
             }
         }//else if (name.equalsIgnoreCase("dragon")) {
          //  if (gameStorage.isTrapEnabled(team)) {
-         //      player.sendMessage(Messages.trap_timeout_message);
+         //      player.sendMessage(SBAHypixelify.getConfigurator().getString("message.wait-trap"));
          //      e.setCancelled(true);
          //  } else {
          //      gameStorage.setDragon(team, true);
-         //      team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.dragonTrapPurchased, "", 20, 40, 20));
+         //      team.getConnectedPlayers().forEach(pl -> sendTitle(pl, SBAHypixelify.getConfigurator().getString("message.dragon-trap-purchased"), "", 20, 40, 20));
          //  }
          //  }
 
         else if (name.equalsIgnoreCase("efficiency")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
                 e.setCancelled(true);
-                player.sendMessage(Messages.message_greatest_enchantment);
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.greatest-enchantment"));
             }
         }
 
         else if (name.equalsIgnoreCase("blindtrap")) {
             if (SBAHypixelify.getGamestorage(game) == null) {
                 e.setCancelled(true);
-                player.sendMessage(Messages.ERROR_OCCURED);
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.error-occured"));
                 return;
             }
             if (Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).isTrapEnabled(team)) {
-                player.sendMessage(Messages.trap_timeout_message);
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.wait-trap"));
                 e.setCancelled(true);
             } else {
                 Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setTrap(team, true);
-                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.blindnessTrapPurchased, "", 20, 40, 20));
+                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, SBAHypixelify.getConfigurator().getString("message.blindness-trap-purchased-title"), "", 20, 40, 20));
             }
         }
 
         else if (name.equalsIgnoreCase("healpool")) {
             if (SBAHypixelify.getGamestorage(game) == null) {
                 e.setCancelled(true);
-                player.sendMessage(Messages.ERROR_OCCURED);
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.error-occured"));
                 return;
             }
             if (Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).isPoolEnabled(team)) {
-                player.sendMessage(Messages.trap_timeout_message);
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.wait-trap"));
                 e.setCancelled(true);
             } else {
                 Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setPool(team, true);
-                team.getConnectedPlayers().forEach(pl -> pl.sendMessage(Messages.message_purchase_heal_pool
+                team.getConnectedPlayers().forEach(pl -> pl.sendMessage(SBAHypixelify.getConfigurator().getString("message.purchase-heal-pool")
                         .replace("{player}", player.getName())));
             }
         }
@@ -543,7 +542,7 @@ public class CustomShop implements Listener {
             if (Objects.requireNonNull(player.getInventory().getBoots())
                     .getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
                 e.setCancelled(true);
-                player.sendMessage("§c§l" + Messages.message_greatest_enchantment);
+                player.sendMessage("§c§l" + SBAHypixelify.getConfigurator().getString("message.greatest-enchantment"));
             } else {
                 var level = newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
                 var price = Prices.get(level);
@@ -556,7 +555,7 @@ public class CustomShop implements Listener {
                 ShopUtil.addEnchantsToPlayerArmor(player, newItem);
                 for (Player playerCheck : team.getConnectedPlayers()) {
                     ShopUtil.addEnchantsToPlayerArmor(playerCheck, newItem);
-                    playerCheck.sendMessage(Messages.message_upgrade_team_protection
+                    playerCheck.sendMessage(SBAHypixelify.getConfigurator().getString("message.upgrade-team-protection")
                             .replace("{player}", player.getName()));
                 }
             }
@@ -701,12 +700,12 @@ public class CustomShop implements Listener {
                     buyStack(newItem, event);
                 } else {
                     shouldSellStack = false;
-                    player.sendMessage(Messages.already_purchased_thing
+                    player.sendMessage(SBAHypixelify.getConfigurator().getString("message.already-purchased")
                                     .replace("{thing}", "Sword"));
                 }
             } else if (player.getInventory().getBoots() != null
                     && newItem.getType().equals(player.getInventory().getBoots().getType())) {
-                player.sendMessage(Messages.already_purchased_thing
+                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.already-purchased")
                         .replace("{thing}", "Armor"));
                 shouldSellStack = false;
             } else if (newItem.getType().name().contains("BOOTS")) {
@@ -716,7 +715,7 @@ public class CustomShop implements Listener {
                     ShopUtil.removeAxeOrPickaxe(player, newItem);
                     buyStack(newItem, event);
                 } else {
-                    player.sendMessage(Messages.already_purchased_thing
+                    player.sendMessage(SBAHypixelify.getConfigurator().getString("message.already-purchased")
                             .replace("{thing}",
                                     newItem.getType().name().substring
                                             (newItem.getType().name().indexOf("_")).substring(1)));

@@ -2,7 +2,6 @@ package io.pronze.hypixelify.manager;
 
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.Party;
-import io.pronze.hypixelify.message.Messages;
 import org.bukkit.entity.Player;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import io.pronze.hypixelify.utils.MessageUtils;
@@ -209,7 +208,7 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
             }
 
 
-            ShopUtil.sendMessage(leader, Messages.message_warping);
+            ShopUtil.sendMessage(leader, SBAHypixelify.getConfigurator().getStringList("party.message.warping"));
 
             partyMembers.forEach(pl -> {
 
@@ -227,15 +226,15 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
 
                     playerGame.leaveFromGame(pl);
                 }
-                ShopUtil.sendMessage(pl, Messages.message_warped);
+                ShopUtil.sendMessage(pl, SBAHypixelify.getConfigurator().getStringList("party.message.warp"));
                 game.joinToGame(pl);
             });
 
         } else {
-            ShopUtil.sendMessage(leader, Messages.message_warping);
+            ShopUtil.sendMessage(leader, SBAHypixelify.getConfigurator().getStringList("party.message.warping"));
             partyMembers.forEach(member -> {
                 member.teleport(leader.getLocation());
-                ShopUtil.sendMessage(member, Messages.message_warped);
+                ShopUtil.sendMessage(member, SBAHypixelify.getConfigurator().getStringList("party.message.warp"));
             });
 
         }
@@ -302,7 +301,7 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
         } else {
             partyMembers.forEach(member -> {
                 if (member.isOnline()) {
-                    ShopUtil.sendMessage(member, Messages.message_disband_inactivity);
+                    ShopUtil.sendMessage(member, SBAHypixelify.getConfigurator().getStringList("party.message.disband-inactivity"));
                 }
 
                 final PlayerWrapper plDatabase = SBAHypixelify.getWrapperService().getWrapper(member);

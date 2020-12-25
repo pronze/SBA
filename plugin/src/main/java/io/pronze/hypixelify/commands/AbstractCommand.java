@@ -1,10 +1,10 @@
 package io.pronze.hypixelify.commands;
 
+import io.pronze.hypixelify.SBAHypixelify;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
-import io.pronze.hypixelify.message.Messages;
 
 import java.util.List;
 
@@ -33,12 +33,12 @@ public abstract class AbstractCommand implements TabExecutor {
 
         if (onPreExecute(sender, strings)) {
             if (!console && !(sender instanceof Player)) {
-                sender.sendMessage(Messages.command_player_only);
+                sender.sendMessage(SBAHypixelify.getConfigurator().getString("commands.player-only"));
                 return true;
             }
 
             if (perm != null && !sender.hasPermission(perm)) {
-                sender.sendMessage(Messages.command_no_permissions);
+                sender.sendMessage(SBAHypixelify.getConfigurator().getString("commands.no-permissions"));
                 return true;
             }
 

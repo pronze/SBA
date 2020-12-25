@@ -159,7 +159,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.shout-format", "&6[SHOUT] {color}[{team}]&r {player}&7: &r{message}");
         checkOrSetConfig(modify, "message.trap-triggered.message", "§eYou have been blinded by %team% team!");
         checkOrSetConfig(modify, "message.trap-triggered.title", "&cTrap Triggered!");
-        checkOrSetConfig(modify, "message.trap-triggered.sub-title", "&eSomeone has entered your base!");
+        checkOrSetConfig(modify, SBAHypixelify.getConfigurator().getString("message.trap-triggered.sub-title"), "&eSomeone has entered your base!");
         checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "&6Blindness Trap has been purchased!");
         checkOrSetConfig(modify, "message.purchase-heal-pool", "&bHeal Pool has been purchased by: {player}");
         checkOrSetConfig(modify, "message.cannot-buy", "&cYou don't have enough {price}");
