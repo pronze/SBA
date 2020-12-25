@@ -139,7 +139,7 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
                     armorStand.getLocation().getWorld().getNearbyEntitiesByType(ArmorStand.class, armorStand.getLocation()
                             , 1, 1, 1)
                             .stream()
-                            .filter(RotatingGenerators::isRotatingEntity)
+                            .filter(entity-> isRotatingEntity(entity) && !entity.equals(armorStand))
                             .forEach(Entity::remove);
                 });
 
