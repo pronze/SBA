@@ -98,7 +98,8 @@ public class GameTask extends BukkitRunnable {
 
                                 player.sendMessage(SBAHypixelify
                                         .getConfigurator()
-                                        .getString("message.trap-triggered.message"));
+                                        .getString("message.trap-triggered.message")
+                                        .replace("%team%", team.getName()));
 
                                 team.getConnectedPlayers().forEach(pl -> {
                                     Sounds.playSound(pl, pl.getLocation(), Main.getConfigurator()
