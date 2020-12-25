@@ -140,6 +140,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
+        checkOrSetConfig(modify, "message.maximum-enchant-lore", Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
         checkOrSetConfig(modify, "message.game-end", "Game End");
         checkOrSetConfig(modify, "message.diamond", "Diamond");
         checkOrSetConfig(modify, "message.emerald", "Emerald");

@@ -6,9 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -18,13 +16,9 @@ import io.pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
 import io.pronze.hypixelify.message.Messages;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
-import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent.Result;
-import org.screamingsandals.bedwars.api.events.BedwarsUpgradeBoughtEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsUpgradeImprovedEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.upgrades.Upgrade;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
@@ -38,17 +32,15 @@ import org.screamingsandals.bedwars.lib.sgui.events.PreActionEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.ShopTransactionEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.item.ItemProperty;
-import org.screamingsandals.bedwars.lib.sgui.item.PlayerItemInfo;
 import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
-
-//TODO: Rewrite entire CustomShop
 
 public class CustomShop implements Listener {
 
@@ -194,13 +186,15 @@ public class CustomShop implements Listener {
         } catch (Throwable ignored) {
         }
 
-        String normalItemName = stack.getType().name().replace("_", " ").toLowerCase();
-        String[] sArray = normalItemName.split(" ");
-        StringBuilder stringBuilder = new StringBuilder();
+        final var normalItemName = stack.getType().name().replace("_", " ").toLowerCase();
+        final var sArray = normalItemName.split(" ");
+        final var stringBuilder = new StringBuilder();
 
-        for (String s : sArray) {
-            stringBuilder.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
-        }
+        Arrays.stream(sArray)
+                .forEach(s-> {
+                    stringBuilder.append(Character.toUpperCase(s.charAt(0)))
+                            .append(s.substring(1)).append(" ");
+                });
         return stringBuilder.toString().trim();
     }
 
@@ -245,80 +239,57 @@ public class CustomShop implements Listener {
             return;
         }
 
-        final PlayerItemInfo item = event.getInfo();
-        final Player player = event.getPlayer();
-        final Game game = Main.getPlayerGameProfile(player).getGame();
-        final MapReader reader = item.getReader();
+        final var item = event.getInfo();
+        final var player = event.getPlayer();
+        final var game = Main.getPlayerGameProfile(player).getGame();
+        final var reader = item.getReader();
+        final var gameStorage = SBAHypixelify.getGamestorage(game);
+        final var runningTeam = game.getTeamOfPlayer(player);
 
         if (reader.containsKey("price") && reader.containsKey("price-type")) {
-            final int price = reader.getInt("price");
-            final ItemSpawnerType type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
+            final var price = reader.getInt("price");
+            final var type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
             if (type == null) {
                 return;
             }
 
-            final ItemStack eventStack = event.getStack();
-            final String typeName = eventStack.getType().name();
+            final var eventStack = event.getStack();
+            final var typeName = eventStack.getType().name();
 
-            /*
-                Add shop inventory enchants here
-                Note: only visible to user
-             */
-            try {
-                if (eventStack != null) {
-                    if (typeName.endsWith("SWORD")) {
-                        final RunningTeam rt = game.getTeamOfPlayer(player);
-                        int sharpness = 0;
-                        try {
-                            sharpness = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getSharpness(rt.getName());
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-
-                        if (rt != null && sharpness != 0) {
-                            eventStack.addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
-                            event.setStack(eventStack);
-                        }
-                    }
-
-                    if (typeName.endsWith("BOOTS")) {
-                        final RunningTeam rt = game.getTeamOfPlayer(player);
-                        int protection = 0;
-                        try {
-                            protection = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getProtection(rt.getName());
-                        } catch (Throwable t) {
-                            t.printStackTrace();
-                        }
-
-                        if (protection != 0)
-                            eventStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protection);
-
-                        event.setStack(eventStack);
+            if (gameStorage != null) {
+                if (typeName.endsWith("SWORD")) {
+                    int sharpness = gameStorage.getSharpness(runningTeam.getName());
+                    if (sharpness != 0) {
+                        eventStack.addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
                     }
                 }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+                if (typeName.endsWith("BOOTS")) {
+                    int protection = gameStorage.getProtection(runningTeam.getName());
+                    if (protection != 0) {
+                        eventStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protection);
+                    }
+                }
+                event.setStack(eventStack);
             }
 
             event.setStack(setLores(event.getStack(), reader, String.valueOf(price)));
 
-
             if (item.hasProperties()) {
-                for (ItemProperty property : item.getProperties()) {
-                    if (property.hasName()) {
-                        ItemStack newItem = event.getStack();
-                        ApplyPropertyToItemEvent applyEvent = new ApplyPropertyToItemEvent(game,
-                                player, newItem, property.getReader(player, item).convertToMap(), reader);
-                        Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
-                        event.setStack(newItem);
-                    }
-                }
+                item.getProperties()
+                        .stream()
+                        .filter(ItemProperty::hasName)
+                        .forEach(property-> {
+                            final var newItem = event.getStack();
+                            final var applyPropertyEvent =
+                                    !const_properties.contains(property.getPropertyName().toLowerCase()) ?
+                                    new ApplyPropertyToItemEvent(game, player, newItem,
+                                            property.getReader(player, item).convertToMap(), reader) :
+                                    new BedwarsApplyPropertyToDisplayedItem(game, player, newItem, property.getReader(player).convertToMap());
+                            Main.getInstance().getServer().getPluginManager().callEvent(applyPropertyEvent);
+                            event.setStack(newItem);
+                        });
             }
-
-
         }
-
     }
 
     @EventHandler
@@ -338,7 +309,7 @@ public class CustomShop implements Listener {
 
     @EventHandler
     public void onShopOpen(BedwarsOpenShopEvent event) {
-        final Player player = event.getPlayer();
+        final var player = event.getPlayer();
         if (Main.getPlayerGameProfile(player).isSpectator) return;
         if (SBAHypixelify.getConfigurator().config.getBoolean("store.replace-store-with-hypixelstore", true)) {
             event.setResult(Result.DISALLOW_UNKNOWN);
@@ -351,8 +322,7 @@ public class CustomShop implements Listener {
         if (!shopMap.containsValue(event.getFormat()) || event.isCancelled()) {
             return;
         }
-
-        MapReader reader = event.getItem().getReader();
+        final var reader = event.getItem().getReader();
         if (reader.containsKey("upgrade")) {
             handleUpgrade(event);
         } else {
@@ -361,88 +331,73 @@ public class CustomShop implements Listener {
     }
 
     public ItemStack setLores(ItemStack stack, MapReader reader, String price){
-        boolean enabled = Main.getConfigurator().config
+        var loreEnabled = Main.getConfigurator().config
                 .getBoolean("lore.generate-automatically", true);
-
-        if (enabled) {
-            final List<String> loreText = reader.getStringList("generated-lore-text",
+        if (loreEnabled) {
+            final var loreText = reader.getStringList("generated-lore-text",
                     Main.getConfigurator().config.getStringList("lore.text"));
-            final ItemSpawnerType type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
-            final ItemMeta stackMeta = stack.getItemMeta();
-            final List<String> lore = new ArrayList<>();
-            for (String s : loreText) {
-                s = s.replaceAll("%price%", String.valueOf(price));
-                s = s.replaceAll("%resource%", type.getItemName());
-                s = s.replaceAll("%amount%", Integer.toString(stack.getAmount()));
-                lore.add(s);
-            }
-            stackMeta.setLore(lore);
+            final var type = Main.getSpawnerType((reader.getString("price-type")).toLowerCase());
+            final var stackMeta = stack.getItemMeta();
+            final var newLore = new ArrayList<String>();
+            loreText.forEach(lore-> {
+                newLore.add(lore
+                .replace("%price%", String.valueOf(price))
+                .replace("%resource%", type.getItemName())
+                .replace("%amount%", Integer.toString(stack.getAmount())));
+            });
+            stackMeta.setLore(newLore);
             stack.setItemMeta(stackMeta);
         }
-
         return stack;
     }
+
     @EventHandler
     public void onApplyPropertyToItem(ApplyPropertyToItemEvent event) {
         String price = null;
-        final org.screamingsandals.bedwars.api.game.Game game = event.getGame();
-        final Player player = event.getPlayer();
-        final RunningTeam team = game.getTeamOfPlayer(player);
-        final String propertyName = event.getPropertyName();
-        final ItemStack itemStack = event.getStack();
+        final var game = event.getGame();
+        final var player = event.getPlayer();
+        final var team = game.getTeamOfPlayer(player);
+        final var propertyName = event.getPropertyName();
+        final var stack = event.getStack();
+        final var gameStorage = SBAHypixelify.getGamestorage(game);
 
-        if (propertyName.equalsIgnoreCase("applycolorbyteam")
-                || propertyName.equalsIgnoreCase("transform::applycolorbyteam")) {
-            final CurrentTeam t = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
-
-            if (Main.getConfigurator().config.getBoolean("automatic-coloring-in-shop")) {
-                event.setStack(Main.applyColor(t.teamInfo.color, itemStack));
-            }
-
+        if (gameStorage == null) {
+            return;
         }
 
-        else if (propertyName.equalsIgnoreCase("sharpness")) {
-            if (team == null) return;
-            ItemStack stack = event.getStack();
-            int level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getSharpness(team.getName()) + 1;
-            if (level == 5) {
-                stack.removeEnchantment(Enchantment.DAMAGE_ALL);
-                stack.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
+        if (propertyName.equalsIgnoreCase("sharpness")
+        || propertyName.equalsIgnoreCase("protection")) {
+            final var isSharp = propertyName.equalsIgnoreCase("sharpness");
+            final var enchant = isSharp
+                    ? Enchantment.DAMAGE_ALL : Enchantment.PROTECTION_ENVIRONMENTAL;
+
+            final var level = isSharp ? gameStorage.getSharpness(team.getName()) + 1 :
+                    gameStorage.getProtection(team.getName()) + 1;
+
+            if (level >= 5) {
+                stack.removeEnchantment(enchant);
+                stack.setLore(SBAHypixelify.getConfigurator().getStringList("message.maximum-enchant-lore"));
                 stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             } else {
-                stack.addEnchantment(Enchantment.DAMAGE_ALL, level);
-                price = Integer.toString(Prices.get(level));
-                event.setPrice(price);
-                event.setStack(stack);
-            }
-        } else if (propertyName.equalsIgnoreCase("protection")) {
-            if (team == null) return;
-            ItemStack stack = event.getStack();
-            int level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getProtection(team.getName()) + 1;
-            if (level == 5) {
-                stack.removeEnchantment(Enchantment.DAMAGE_ALL);
-                stack.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
-                stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
-            } else {
-                stack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
+                stack.addEnchantment(enchant, level);
                 price = Integer.toString(Prices.get(level));
                 event.setPrice(price);
                 event.setStack(stack);
             }
         }
 
-        final List<String> lore = event.getStack().getItemMeta().getLore();
-
-        if (lore != null) {
-            for (String st : lore) {
-                if (st.contains("Maximum Enchant")) return;
+        if (event.getStack().hasItemMeta()) {
+            final var lores = event.getStack().getItemMeta().getLore();
+            if (lores != null) {
+                for (var lore : lores) {
+                    if (lore.contains("Maximum Enchant")) return;
+                }
             }
         }
 
         if (price != null) {
             event.setStack(setLores(event.getStack(), event.getReader(), price));
         }
-
     }
 
     private void loadNewShop(String name, String fileName, boolean useParent) {
@@ -471,6 +426,8 @@ public class CustomShop implements Listener {
             Bukkit.getLogger().severe("Wrong shop.yml configuration!");
             Bukkit.getLogger().severe("Your villagers won't work, check validity of your YAML!");
             SBAHypixelify.debug(e.getMessage());
+            SBAHypixelify.getInstance().getServer().getPluginManager().disablePlugin(SBAHypixelify.getInstance());
+            return;
         }
 
         format.generateData();
@@ -504,13 +461,14 @@ public class CustomShop implements Listener {
         player.getInventory().removeItem(newItem);
     }
 
+    //TODO: this needs to be rewritten
     @EventHandler
     public void onPlayerToolUpgrade(PlayerToolUpgradeEvent e) {
-        final Player player = e.getPlayer();
-        final ItemStack newItem = e.getUpgradedItem();
-        final RunningTeam team = e.getTeam();
-        final String name = e.getName();
-        final org.screamingsandals.bedwars.api.game.Game game = e.getGame();
+        final var player = e.getPlayer();
+        final var newItem = e.getUpgradedItem();
+        final var team = e.getTeam();
+        final var name = e.getName();
+        final var game = e.getGame();
         final var gameStorage = SBAHypixelify.getGamestorage(game);
 
         if (gameStorage == null) {
@@ -524,9 +482,9 @@ public class CustomShop implements Listener {
                 e.setCancelled(true);
                 player.sendMessage(Messages.message_greatest_enchantment);
             } else {
-                int level = newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
-                int price = Prices.get(level);
-                ItemStack materialItem = e.getStackFromPrice(price);
+                var level = newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
+                var price = Prices.get(level);
+                var materialItem = e.getStackFromPrice(price);
                 if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
                     Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setSharpness(team.getName()
                             , level);
@@ -587,9 +545,9 @@ public class CustomShop implements Listener {
                 e.setCancelled(true);
                 player.sendMessage("§c§l" + Messages.message_greatest_enchantment);
             } else {
-                int level = newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
-                int price = Prices.get(level);
-                ItemStack materialItem = e.getStackFromPrice(price);
+                var level = newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
+                var price = Prices.get(level);
+                var materialItem = e.getStackFromPrice(price);
                 if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
                     Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setProtection(team.getName()
                             , level);
@@ -606,21 +564,21 @@ public class CustomShop implements Listener {
     }
 
     private void handleBuy(ShopTransactionEvent event) {
-        final Player player = event.getPlayer();
-        final Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
-        final RunningTeam team = game.getTeamOfPlayer(player);
-        final ClickType clickType = event.getClickType();
-        final MapReader mapReader = event.getItem().getReader();
-        final String priceType = event.getType().toLowerCase();
-        final ItemSpawnerType type = Main.getSpawnerType(priceType);
-        ItemStack newItem = event.getStack();
+        final var player = event.getPlayer();
+        final var game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
+        final var team = game.getTeamOfPlayer(player);
+        final var clickType = event.getClickType();
+        final var mapReader = event.getItem().getReader();
+        final var priceType = event.getType().toLowerCase();
+        final var type = Main.getSpawnerType(priceType);
+        var newItem = event.getStack();
 
         int amount = newItem.getAmount();
         int price = event.getPrice();
         int inInventory = 0;
 
         if (mapReader.containsKey("currency-changer")) {
-            String changeItemToName = mapReader.getString("currency-changer");
+            final var changeItemToName = mapReader.getString("currency-changer");
             ItemSpawnerType changeItemType;
             if (changeItemToName == null) {
                 return;
@@ -658,43 +616,62 @@ public class CustomShop implements Listener {
             }
         }
 
-        ItemStack materialItem = type.getStack(price);
+        var materialItem = type.getStack(price);
 
         String propName = null;
 
         if (event.hasPlayerInInventory(materialItem)) {
             if (event.hasProperties()) {
-                for (ItemProperty property : event.getProperties()) {
-                    if (property.hasName()) {
-                        if (!const_properties.contains(property.getPropertyName().toLowerCase())) {
-                            BedwarsApplyPropertyToBoughtItem applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player,
-                                    newItem, property.getReader(player).convertToMap());
-                            Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
-                            newItem = applyEvent.getStack();
+                AtomicReference<ItemStack> finalNewItem = new AtomicReference<>(newItem);
+                AtomicReference<Integer> priceReference = new AtomicReference<>();
+                AtomicReference<String> propertyReference = new AtomicReference<>();
 
-                        } else {
-                            ApplyPropertyToItemEvent applyEvent = new ApplyPropertyToItemEvent(game, player,
-                                    newItem, property.getReader(player, event.getItem()).convertToMap(), mapReader);
-                            Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
-                            newItem = applyEvent.getStack();
-                            if (applyEvent.getPrice() != null)
-                                materialItem = type.getStack(Integer.parseInt(applyEvent.getPrice()));
+                event.getProperties()
+                        .stream()
+                        .filter(ItemProperty::hasName)
+                        .forEach(property-> {
+                            final var propertyName = property.getPropertyName().toLowerCase();
+                            final var isCustomProperty = const_properties.contains(propertyName);
 
-                            if (const_properties.contains(property.getPropertyName().toLowerCase())) {
-                                propName = property.getPropertyName();
-                            }
+                            final var propertyData = property.getReader(player, event.getItem()).convertToMap();
 
-                        }
-                    }
+                            final var applyEvent = isCustomProperty ?
+                                    new ApplyPropertyToItemEvent(game, player, finalNewItem.get(), propertyData, mapReader) :
+                                    new BedwarsApplyPropertyToBoughtItem(game, player, finalNewItem.get(), propertyData);
+                            SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(applyEvent);
+
+                            try {
+                                final var stack = (ItemStack) applyEvent.getClass().getMethod("getStack", null).invoke(applyEvent);
+                                finalNewItem.set(stack);
+
+                                if (isCustomProperty) {
+                                    final var appliedPrice = Integer.parseInt((String) applyEvent.getClass().getMethod("getPrice", null).invoke(applyEvent));
+                                    priceReference.set(appliedPrice);
+                                    propertyReference.set(propertyName);
+                                }
+                            } catch (Throwable ignored) {}
+                        });
+
+                final var newItemFromReference = finalNewItem.get();
+                if (newItemFromReference != null) {
+                    newItem = newItemFromReference;
+                }
+
+                if (priceReference.get() != null) {
+                    materialItem = type.getStack(priceReference.get());
+                }
+
+                if (propertyReference.get() != null) {
+                    propName = propertyReference.get();
                 }
             }
 
-            boolean shouldSellStack = true;
-            final String typeName = newItem.getType().name();
+            var shouldSellStack = true;
+            final var typeName = newItem.getType().name();
 
             if (propName != null) {
-                PlayerToolUpgradeEvent e = new PlayerToolUpgradeEvent(player, newItem, propName, team, game, type);
-                Bukkit.getServer().getPluginManager().callEvent(e);
+                final var e = new PlayerToolUpgradeEvent(player, newItem, propName, team, game, type);
+                Main.getInstance().getServer().getPluginManager().callEvent(e);
                 if (e.isCancelled()) {
                     return;
                 }
@@ -725,7 +702,7 @@ public class CustomShop implements Listener {
                 } else {
                     shouldSellStack = false;
                     player.sendMessage(Messages.already_purchased_thing
-                            .replace("{thing}", "Sword"));
+                                    .replace("{thing}", "Sword"));
                 }
             } else if (player.getInventory().getBoots() != null
                     && newItem.getType().equals(player.getInventory().getBoots().getType())) {
@@ -768,6 +745,7 @@ public class CustomShop implements Listener {
         }
     }
 
+    //TODO: bring in proper spawner upgrades later
     private void handleUpgrade(ShopTransactionEvent event) {
         Player player = event.getPlayer();
         Game game = Main.getPlayerGameProfile(event.getPlayer()).getGame();
