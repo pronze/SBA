@@ -10,14 +10,11 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.CurrentTeam;
-import org.screamingsandals.bedwars.game.GamePlayer;
 
 import java.util.*;
 
@@ -25,8 +22,6 @@ import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 
 @Getter
 public class Arena implements io.pronze.hypixelify.api.game.Arena {
-
-
     private final List<String> generatorHoloText;
 
     private static final String diamondHoloText = "§bDiamond";
@@ -53,9 +48,8 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         scoreboard = new ScoreBoard(this);
         gameTask = new GameTask(this);
 
-        game.getConnectedPlayers().forEach(player ->{
-            playerDataMap.put(player.getUniqueId(), new PlayerData());
-        });
+        game.getConnectedPlayers()
+                .forEach(player -> playerDataMap.put(player.getUniqueId(), new PlayerData()));
     }
 
     @Override
@@ -69,89 +63,71 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
     }
 
     public void onGameStarted(BedwarsGameStartedEvent e) {
-        final Game game = e.getGame();
-
+        final var game = e.getGame();
         if (!game.equals(this.game)) return;
-
-        game.getConnectedPlayers().forEach(player -> {
-            Configurator.gamestart_message.forEach(message -> {
-                if (message == null || message.isEmpty()) {
-                    return;
-                }
-
-                player.sendMessage(message);
-            });
-        });
-
+        game.getConnectedPlayers().forEach(player -> Configurator.gamestart_message
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(player::sendMessage));
         SBAUtil.destroySpawnerArmorStandEntitiesFrom(this.game);
         initalizeGenerators();
     }
 
-
-
     public void initalizeGenerators() {
-        if (SBAHypixelify.getConfigurator().config.getBoolean("floating-generator.enabled", true)) {
-            game.getItemSpawners().forEach(spawner -> {
-                final Material spawnerMaterial = spawner.getItemSpawnerType().getMaterial();
+        if (SBAHypixelify.getConfigurator().config
+                .getBoolean("floating-generator.enabled", true)) {
 
-                if (spawnerMaterial == Material.DIAMOND || spawnerMaterial == Material.EMERALD) {
-                    ItemStack rotationStack = spawnerMaterial == Material.DIAMOND ? new ItemStack(Material.DIAMOND_BLOCK) :
-                            new ItemStack(Material.EMERALD_BLOCK);
+            game.getItemSpawners()
+                    .stream()
+                    .filter(RotatingGenerators::canBeUsed)
+                    .forEach(spawner -> {
+                        final var spawnerMaterial = spawner.getItemSpawnerType().getMaterial();
+                        final var rotationStack = spawnerMaterial == Material.DIAMOND ?
+                                new ItemStack(Material.DIAMOND_BLOCK) :
+                                new ItemStack(Material.EMERALD_BLOCK);
 
-                    final var genHolo = new ArrayList<String>();
-                    generatorHoloText.forEach(text-> {
-                        genHolo.add(text.replace("{material}",
+                        final var genHolo = new ArrayList<String>();
+                        generatorHoloText.forEach(text -> genHolo.add(text.replace("{material}",
                                 spawnerMaterial == Material.DIAMOND ? diamondHoloText
-                                : emeraldHoloText));
-                    });
+                                        : emeraldHoloText)));
 
-                    rotatingGenerators.add(new io.pronze.hypixelify.game.RotatingGenerators(spawner,
-                            rotationStack, genHolo).spawn(game.getConnectedPlayers()));
-                }
-            });
+                        rotatingGenerators.add(new io.pronze.hypixelify.game.RotatingGenerators(spawner,
+                                rotationStack, genHolo).spawn(game.getConnectedPlayers()));
+                    });
         }
     }
 
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        final RunningTeam Team = e.getTeam();
-        Team.getConnectedPlayers().forEach(player -> {
-            if (player == null || !player.isOnline()) {
-                return;
-            }
+        final var team = e.getTeam();
+        team.getConnectedPlayers().forEach(player -> sendTitle(player, SBAHypixelify.getConfigurator()
+                        .getString("message.bed-destroyed.title"),
+                SBAHypixelify.getConfigurator()
+                        .getString("message.bed-destroyed.sub-title"), 0, 40, 20));
 
-            sendTitle(player, SBAHypixelify.getConfigurator().getString("message.bed-destroyed.title"),
-                    SBAHypixelify.getConfigurator().getString("message.bed-destroyed.sub-title"), 0, 40, 20);
-
-        });
-
-        final Player destroyer = e.getPlayer();
-
-        if(destroyer != null){
-            final PlayerData data = playerDataMap.get(destroyer.getUniqueId());
-            final int currentDestroys = data.getBedDestroys();
+        final var destroyer = e.getPlayer();
+        if (destroyer != null) {
+            final var data = playerDataMap.get(destroyer.getUniqueId());
+            final var currentDestroys = data.getBedDestroys();
             data.setBedDestroys(currentDestroys + 1);
         }
-
     }
 
-
-    public void onPreRebuildingEvent(){
-        try{
-            if(gameTask != null && !gameTask.isCancelled()){
+    public void onPreRebuildingEvent() {
+        try {
+            if (gameTask != null && !gameTask.isCancelled()) {
                 gameTask.cancel();
                 gameTask = null;
             }
-        } catch (Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
         }
         io.pronze.hypixelify.game.RotatingGenerators.destroy(rotatingGenerators);
         rotatingGenerators.clear();
     }
 
-
     public void onOver(BedwarsGameEndingEvent e) {
-        final Game game = e.getGame();
+        final var game = e.getGame();
 
         if (!this.game.equals(game)) {
             return;
@@ -168,18 +144,18 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         } catch (IllegalStateException ignored) {
         }
 
-        final RunningTeam winner = e.getWinningTeam();
+        final var winner = e.getWinningTeam();
 
         if (winner != null) {
-            final Map<String, Integer> dataKills = new HashMap<>();
-            playerDataMap.forEach((uuid, playerData) ->{
-                final Player player = Bukkit.getPlayer(uuid);
-                if(player == null){
-                    return;
-                }
-
-                dataKills.put(player.getDisplayName(), playerData.getKills());
-            });
+            final var dataKills = new HashMap<String, Integer>();
+            playerDataMap
+                    .keySet()
+                    .stream()
+                    .map(Bukkit::getPlayer)
+                    .filter(Objects::nonNull)
+                    .forEach((player) -> {
+                        dataKills.put(player.getDisplayName(), playerDataMap.get(player.getUniqueId()).getKills());
+                    });
 
 
             int kills_1 = 0;
@@ -214,13 +190,12 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
                 }
             }
 
-            final List<String> WinTeamPlayers = new ArrayList<>();
+            final var WinTeamPlayers = new ArrayList<String>();
 
-            winner.getConnectedPlayers().forEach(player ->
-                    WinTeamPlayers.add(player.getDisplayName()));
-
+            winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
             winner.getConnectedPlayers().forEach(pl ->
-                    sendTitle(pl, "§6§lVICTORY!", "", 0, 90, 0));
+                    sendTitle(pl, SBAHypixelify.getConfigurator().getString("message.victory-title"),
+                            "", 0, 90, 0));
 
             for (Player player : game.getConnectedPlayers()) {
                 for (String message : Configurator.overstats_message) {
@@ -252,35 +227,27 @@ public class Arena implements io.pronze.hypixelify.api.game.Arena {
         return playerDataMap.get(uuid);
     }
 
-    public void onBedWarsPlayerKilled(BedwarsPlayerKilledEvent e){
-        final Game game = e.getGame();
+    public void onBedWarsPlayerKilled(BedwarsPlayerKilledEvent e) {
+        final var game = e.getGame();
 
-        final Player victim = e.getPlayer();
-        final PlayerData victimData = playerDataMap.get(victim.getUniqueId());
+        final var victim = e.getPlayer();
+        final var victimData = playerDataMap.get(victim.getUniqueId());
         victimData.setDeaths(victimData.getDeaths() + 1);
-
-        final Player killer = e.getKiller();
-
+        final var killer = e.getKiller();
         if (killer == null) {
             return;
         }
-
-        final GamePlayer gVictim = Main.getPlayerGameProfile(victim);
-
+        final var gVictim = Main.getPlayerGameProfile(victim);
         if (gVictim == null || gVictim.isSpectator) {
             return;
         }
-
-        final CurrentTeam team = Main.getGame(game.getName()).getPlayerTeam(gVictim);
-
+        final var team = Main.getGame(game.getName()).getPlayerTeam(gVictim);
         if (team == null) {
             return;
         }
-        final PlayerData killerData = playerDataMap.get(killer.getUniqueId());
-
+        final var killerData = playerDataMap.get(killer.getUniqueId());
         killerData.setKills(killerData.getKills() + 1);
-
-        if(!team.isBed){
+        if (!team.isBed) {
             killerData.setFinalKills(killerData.getFinalKills() + 1);
         }
     }

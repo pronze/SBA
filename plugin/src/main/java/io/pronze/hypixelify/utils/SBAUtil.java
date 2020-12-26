@@ -12,9 +12,11 @@ import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameCreator;
+import org.screamingsandals.lib.paperlib.PaperLib;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class SBAUtil {
 
@@ -35,11 +37,10 @@ public class SBAUtil {
         }
     };
 
-
     public static void removeScoreboardObjective(Player player) {
-        if (SBAHypixelify.isProtocolLib() && player != null && player.isOnline()) {
+        if (SBAHypixelify.isProtocolLib()) {
             try {
-                WrapperPlayServerScoreboardObjective obj = new WrapperPlayServerScoreboardObjective();
+                final var obj = new WrapperPlayServerScoreboardObjective();
                 obj.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
                 obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
                 obj.sendPacket(player);
@@ -47,7 +48,7 @@ public class SBAUtil {
                 ex.printStackTrace();
             }
             try {
-                WrapperPlayServerScoreboardObjective obj = new WrapperPlayServerScoreboardObjective();
+                final var obj = new WrapperPlayServerScoreboardObjective();
                 obj.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
                 obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
                 obj.sendPacket(player);
@@ -57,55 +58,40 @@ public class SBAUtil {
         }
     }
 
-    /*
-        Destroys the armorstand entities if somehow the server crashes and the entities remain.
-     */
     public static void destroySpawnerArmorStandEntitiesFrom(Game game) {
-        final World gameWorld = game.getGameWorld();
+        final var gameWorld = game.getGameWorld();
         if (gameWorld == null) {
             return;
         }
 
-        final List<RotatingGenerators> toDestroy = new ArrayList<>();
+        final var toDestroy = new ArrayList<RotatingGenerators>();
 
-
-        for (Entity entity : gameWorld.getEntitiesByClass(ArmorStand.class)) {
-
-            if (GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2())) {
-                final String customName = entity.getCustomName();
-
-                if (customName == null) {
-                    continue;
-                }
-                if (customName.equalsIgnoreCase(RotatingGenerators.entityName)) {
-                    Chunk chunk = entity.getLocation().getChunk();
-                    if (!chunk.isLoaded()) {
-                        chunk.load();
-                    }
-
-                    for (RotatingGenerators generator : RotatingGenerators.cache) {
-                        if (generator == null) {
-                            continue;
+        gameWorld.getEntitiesByClass(ArmorStand.class)
+                .forEach(entity-> {
+                    if (GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2())) {
+                        final var customName = entity.getCustomName();
+                        if (customName == null) {
+                            return;
                         }
-                        final ArmorStand armorStand = generator.getArmorStandEntity();
-                        if (armorStand == null) continue;
+                        if (customName.equalsIgnoreCase(RotatingGenerators.entityName)) {
+                            RotatingGenerators
+                                    .cache
+                                    .stream()
+                                    .filter(gen-> gen != null && gen.getArmorStandEntity() != null)
+                                    .forEach(generator-> {
+                                if (generator.getArmorStandEntity().equals(entity)) {
+                                    toDestroy.add(generator);
+                                    generator.setArmorStand(null);
+                                }
+                            });
 
-
-                        if (armorStand.equals(entity)) {
-                            toDestroy.add(generator);
+                            PaperLib.getChunkAtAsync(entity.getLocation())
+                                    .thenAccept(chunk-> entity.remove());
                         }
                     }
-                }
-            }
-        }
+                });
 
-        toDestroy.forEach(generator -> {
-            if (generator == null) {
-                return;
-            }
-            generator.destroy();
-        });
-
+        toDestroy.forEach(RotatingGenerators::destroy);
         RotatingGenerators.cache.removeAll(toDestroy);
     }
 
@@ -114,38 +100,29 @@ public class SBAUtil {
             return;
         }
 
-        final List<Game> games = BedwarsAPI.getInstance().getGames();
-        if (games != null) {
-            for (Game game : games) {
-                if (game != null) {
-                    SBAUtil.destroySpawnerArmorStandEntitiesFrom(game);
-                }
-            }
-        }
+        final var games = BedwarsAPI.getInstance().getGames();
+        games.stream()
+                .filter(Objects::nonNull)
+                .forEach(SBAUtil::destroySpawnerArmorStandEntitiesFrom);
     }
 
     public static List<Material> parseMaterialFromConfig(String key) {
-        final List<Material> materialList = new ArrayList<>();
+        final var materialList = new ArrayList<Material>();
 
-        final List<String> materialNames = SBAHypixelify.getConfigurator().getStringList(key);
+        final var materialNames = SBAHypixelify.getConfigurator().getStringList(key);
         try {
-            materialNames.forEach(material -> {
-                if (material == null || material.isEmpty()) {
-                    return;
-                }
-
+            materialNames.stream()
+                    .filter(mat-> mat != null && !mat.isEmpty())
+                    .forEach(material -> {
                 try {
-                    final Material mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
+                    final var mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
                     materialList.add(mat);
-                } catch (Exception ignored) {
-
-                }
+                } catch (Exception ignored) {}
 
             });
         } catch (Throwable t) {
             t.printStackTrace();
         }
-
         return materialList;
     }
 }

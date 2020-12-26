@@ -11,11 +11,11 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e){
-        final Player player = e.getPlayer();
-        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var player = e.getPlayer();
+        final var db = SBAHypixelify.getWrapperService().getWrapper(player);
 
         if(db == null || !db.isInParty() || !db.getPartyChatEnabled()) return;
-        final Party party = SBAHypixelify.getPartyManager().getParty(db.getPartyLeader());
+        final var party = SBAHypixelify.getPartyManager().getParty(db.getPartyLeader());
         if(party == null) return;
         if(party.getAllPlayers() == null) return;
         party.sendChat(player, e.getMessage());

@@ -10,10 +10,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class UpdateChecker {
 
-
     public static void run(JavaPlugin plugin, int resourceId) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try (InputStream inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resourceId).openStream(); Scanner scanner = new Scanner(inputStream)) {
+            try (final var inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resourceId).openStream(); Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
                     String version = scanner.next();
                     if (version != null) {

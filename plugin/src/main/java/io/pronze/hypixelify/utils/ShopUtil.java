@@ -7,15 +7,12 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import io.pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 
@@ -28,8 +25,7 @@ public class ShopUtil {
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
     public static ItemStack Diamond, FireWorks, Arrow, BED;
 
-    private static void InitalizeStacks() {
-
+    static {
         UpgradeKeys.clear();
         UpgradeKeys.put("STONE", 2);
         UpgradeKeys.put("IRON", 4);
@@ -43,11 +39,11 @@ public class ShopUtil {
         }
 
         Arrow = new ItemStack(Material.ARROW);
-        final ItemMeta metaArrow = Arrow.getItemMeta();
+        final var metaArrow = Arrow.getItemMeta();
 
         metaArrow.setDisplayName(SBAHypixelify.getConfigurator()
                 .config.getString("games-inventory.back-item.name", "§aGo Back"));
-        final List<String> arrowLore = SBAHypixelify.getConfigurator()
+        final var arrowLore = SBAHypixelify.getConfigurator()
                 .config.getStringList("games-inventory.back-item.lore");
 
         metaArrow.setLore(arrowLore);
@@ -61,38 +57,36 @@ public class ShopUtil {
             BED = new ItemStack(Material.RED_BED);
         }
 
-        ItemMeta fireMeta = FireWorks.getItemMeta();
-        fireMeta.setDisplayName(SBAHypixelify.getConfigurator()
-                .config.getString("games-inventory.firework-name", "§aRandom Map"));
+        final var fireMeta = FireWorks.getItemMeta();
+        fireMeta.setDisplayName(SBAHypixelify.getConfigurator().config
+                .getString("games-inventory.firework-name", "§aRandom Map"));
         FireWorks.setItemMeta(fireMeta);
 
         Diamond = new ItemStack(Material.DIAMOND);
-        ItemMeta diamondMeta = Diamond.getItemMeta();
-        diamondMeta.setDisplayName(SBAHypixelify.getConfigurator()
-                .config.getString("games-inventory.firework-name", "§aRandom Favorite"));
+        final var diamondMeta = Diamond.getItemMeta();
+        diamondMeta.setDisplayName(SBAHypixelify.getConfigurator().config
+                .getString("games-inventory.firework-name", "§aRandom Favorite"));
         Diamond.setItemMeta(diamondMeta);
     }
 
     public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
-        Arrays.stream(player.getInventory().getArmorContents()).forEach(item ->{
-            if(item != null){
-                item.addEnchantments(newItem.getEnchantments());
-            }
-        });
+        Arrays.stream(player.getInventory().getArmorContents())
+                .filter(Objects::nonNull)
+                .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
     }
 
     public static void buyArmor(Player player, Material mat_boots, String name, Game game) {
-        String matName = name.substring(0, name.indexOf("_"));
-        Material mat_leggings = Material.valueOf(matName + "_LEGGINGS");
-        ItemStack boots = new ItemStack(mat_boots);
-        ItemStack leggings = new ItemStack(mat_leggings);
-        int level = 0;
-        try {
-            level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
-        } catch (Throwable ignored){
+        final var matName = name.substring(0, name.indexOf("_"));
+        final var mat_leggings = Material.valueOf(matName + "_LEGGINGS");
+        final var boots = new ItemStack(mat_boots);
+        final var leggings = new ItemStack(mat_leggings);
+        final var gameStorage = SBAHypixelify.getGamestorage(game);
 
+        if (gameStorage == null) {
+            return;
         }
 
+        final var level = gameStorage.getProtection(game.getTeamOfPlayer(player).getName());
         if (level != 0) {
             boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
             leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
@@ -104,13 +98,13 @@ public class ShopUtil {
     }
 
     public static boolean addEnchantsToPlayerTools(Player buyer, ItemStack newItem, String name, Enchantment enchantment) {
-        final int newItemEnchantLevel = newItem.getEnchantmentLevel(enchantment);
+        final var newItemEnchantLevel = newItem.getEnchantmentLevel(enchantment);
 
-        for (ItemStack item : buyer.getInventory().getContents()) {
-            if(item == null) continue;
+        for (final var item : buyer.getInventory().getContents()) {
+            if (item == null) continue;
 
-            final String typeName = item.getType().name();
-            final int itemEnchantLevel = item.getEnchantmentLevel(enchantment);
+            final var typeName = item.getType().name();
+            final var itemEnchantLevel = item.getEnchantmentLevel(enchantment);
             if (typeName.endsWith(name)) {
                 if (itemEnchantLevel >= newItemEnchantLevel || newItemEnchantLevel >= 5)
                     return false;
@@ -123,12 +117,12 @@ public class ShopUtil {
     }
 
     public static boolean addEnchantsToTeamTools(Player buyer, ItemStack stack, String name, Enchantment enchantment) {
-        RunningTeam team = BedwarsAPI.getInstance().getGameOfPlayer(buyer).getTeamOfPlayer(buyer);
+        final var team = BedwarsAPI.getInstance().getGameOfPlayer(buyer).getTeamOfPlayer(buyer);
 
         if (!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name, enchantment)) return false;
 
-        team.getConnectedPlayers().forEach(player->{
-            if(player == null) return;
+        team.getConnectedPlayers().forEach(player -> {
+            if (player == null) return;
             player.sendMessage("§c" + buyer.getName() + "§e has upgraded team sword damage!");
             if (player == buyer) return;
             ShopUtil.addEnchantsToPlayerTools(player, stack, name, enchantment);
@@ -152,28 +146,26 @@ public class ShopUtil {
     }
 
     public static List<Game> getGamesWithSize(int c) {
-        final List<String> maps = getAllKeysForValue(Configurator.game_size, c);
+        final var maps = getAllKeysForValue(Configurator.game_size, c);
         if (maps == null || maps.isEmpty())
             return null;
 
-        final ArrayList<Game> listofgames = new ArrayList<>();
+        final var gameList = new ArrayList<Game>();
 
-        maps.forEach(map->{
-            if(Main.getGameNames().contains(map))
-                listofgames.add(Main.getGame(map));
-        });
+        maps.stream()
+                .filter(Main.getGameNames()::contains)
+                .forEach(map -> gameList.add(Main.getGame(map)));
 
-        return listofgames;
+        return gameList;
     }
 
     public static FormatBuilder createBuilder(ArrayList<Object> games, ItemStack category, ItemStack category2, ItemStack category3,
                                               ItemStack category4) {
-        final FormatBuilder builder = new FormatBuilder();
-        final Map<String, Object> options = new HashMap<>();
+        final var builder = new FormatBuilder();
+        final var options = new HashMap<>();
 
         options.put("rows", 6);
         options.put("render_actual_rows", 6);
-
 
         builder.add(category)
                 .set("column", 3)
@@ -207,46 +199,43 @@ public class ShopUtil {
     public static void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
         if (itemStackList == null) return;
 
-       itemStackList.forEach(itemStack -> {
+        itemStackList
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(itemStack -> {
+                    final var colorChanger = BedwarsAPI.getInstance().getColorChanger();
+                    final var materialName = itemStack.getType().toString();
+                    final var playerInventory = player.getInventory();
 
-           if(itemStack == null){
-               return;
-           }
-
-            ColorChanger colorChanger = BedwarsAPI.getInstance().getColorChanger();
-
-            final String materialName = itemStack.getType().toString();
-            final PlayerInventory playerInventory = player.getInventory();
-
-            if (materialName.contains("HELMET")) {
-                playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
-            } else if (materialName.contains("CHESTPLATE")) {
-                playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
-            } else if (materialName.contains("LEGGINGS")) {
-                playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
-            } else if (materialName.contains("BOOTS")) {
-                playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
-            } else if (materialName.contains("PICKAXE")) {
-                playerInventory.setItem(7, itemStack);
-            } else if (materialName.contains("AXE")) {
-                playerInventory.setItem(8, itemStack);
-            } else if (materialName.contains("SWORD")) {
-                playerInventory.setItem(0, itemStack);
-            } else {
-                playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
-            }
-        });
+                    if (materialName.contains("HELMET")) {
+                        playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
+                    } else if (materialName.contains("CHESTPLATE")) {
+                        playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
+                    } else if (materialName.contains("LEGGINGS")) {
+                        playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
+                    } else if (materialName.contains("BOOTS")) {
+                        playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
+                    } else if (materialName.contains("PICKAXE")) {
+                        playerInventory.setItem(7, itemStack);
+                    } else if (materialName.contains("AXE")) {
+                        playerInventory.setItem(8, itemStack);
+                    } else if (materialName.contains("SWORD")) {
+                        playerInventory.setItem(0, itemStack);
+                    } else {
+                        playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
+                    }
+                });
 
     }
 
     public static ItemStack checkifUpgraded(ItemStack newItem) {
         try {
             if (UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > 1) {
-                final Map<Enchantment, Integer> enchant = newItem.getEnchantments();
-                final String typeName = newItem.getType().name();
-                final int upgradeValue = UpgradeKeys.get(typeName.substring(0, typeName.indexOf("_"))) - 1;
-                final Material mat = Material.valueOf(getKey(UpgradeKeys, upgradeValue) + typeName.substring(typeName.lastIndexOf("_")));
-                ItemStack temp = new ItemStack(mat);
+                final var enchant = newItem.getEnchantments();
+                final var typeName = newItem.getType().name();
+                final var upgradeValue = UpgradeKeys.get(typeName.substring(0, typeName.indexOf("_"))) - 1;
+                final var mat = Material.valueOf(getKey(UpgradeKeys, upgradeValue) + typeName.substring(typeName.lastIndexOf("_")));
+                final var temp = new ItemStack(mat);
                 temp.addEnchantments(enchant);
                 return temp;
             }
@@ -264,18 +253,13 @@ public class ShopUtil {
     }
 
     public static ArrayList<Object> createGamesGUI(int mode, List<String> lore) {
-        if (Arrow == null)
-            InitalizeStacks();
-
-        final ArrayList<Object> games = new ArrayList<>();
+        final var games = new ArrayList<>();
         int items = 0;
-
-
 
         for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
                 .getGames()) {
-            if (Configurator.game_size.containsKey(game.getName()) &&
-                    Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
+            if (Configurator.game_size.containsKey(game.getName())
+                    && Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
                 ItemStack arenaMaterial = new ItemStack(Material
                         .valueOf(SBAHypixelify.getConfigurator().config
                                 .getString("games-inventory.stack-material", "PAPER")));
@@ -283,15 +267,13 @@ public class ShopUtil {
                 ItemMeta arenaMatMeta = arenaMaterial.getItemMeta();
 
                 String name1 = "§a" + game.getName();
-                List<String> newLore = new ArrayList<>();
-                lore.forEach(ls->{
-                    if(ls == null || ls.isEmpty()){
+                final var newLore = new ArrayList<String>();
+                lore.forEach(ls -> {
+                    if (ls == null || ls.isEmpty()) {
                         return;
                     }
-                    newLore.add(
-                            ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
-                                    .replace("{status}", capFirstLetter(game.getStatus().name()))
-                    );
+                    newLore.add(ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
+                            .replace("{status}", capFirstLetter(game.getStatus().name())));
                 });
                 arenaMatMeta.setLore(newLore);
                 arenaMatMeta.setDisplayName(name1);
@@ -304,40 +286,33 @@ public class ShopUtil {
             }
         }
 
-        ItemStack arrowStack = Arrow;
-        HashMap<String, Object> arrows = new HashMap<>();
+        final var arrowStack = Arrow;
+        final var arrows = new HashMap<>();
         arrows.put("stack", arrowStack);
         arrows.put("row", 5);
         arrows.put("column", 4);
         arrows.put("locate", "main");
 
-        ItemStack fs = FireWorks;
-        ItemMeta fsMeta = fs.getItemMeta();
-        String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(Objects.requireNonNull(getGamesWithSize(mode)).size());
+        final var fs = FireWorks;
+        final var fsMeta = fs.getItemMeta();
+        final var size = getGamesWithSize(mode) == null ? "0" : String.valueOf(Objects.requireNonNull(getGamesWithSize(mode)).size());
 
-        List<String> fsMetaLore = SBAHypixelify.getConfigurator().getStringList("games-inventory.fireworks-lore");
-        List<String> tempList = new ArrayList<>();
-        for (String st : fsMetaLore) {
-            st = st
-                    .replace("{mode}", getModeFromInt(mode))
-                    .replace("{games}", size);
-            tempList.add(st);
-        }
-
+        final var fsMetaLore = SBAHypixelify.getConfigurator().getStringList("games-inventory.fireworks-lore");
+        final var tempList = new ArrayList<String>();
+        fsMetaLore.forEach(st -> st.replace("{mode}", getModeFromInt(mode).replace("{games}", size)));
         fsMeta.setLore(tempList);
 
-
         fs.setItemMeta(fsMeta);
-        HashMap<String, Object> fireworks = new HashMap<>();
+        final var fireworks = new HashMap<>();
         fireworks.put("stack", fs);
         fireworks.put("row", 4);
         fireworks.put("column", 3);
 
-        ItemStack Dia = Diamond;
-        ItemMeta diaMeta = Dia.getItemMeta();
+        final var Dia = Diamond;
+        final var diaMeta = Dia.getItemMeta();
         diaMeta.setLore(fsMeta.getLore());
         Dia.setItemMeta(diaMeta);
-        HashMap<String, Object> diamond = new HashMap<>();
+        final var diamond = new HashMap<>();
         diamond.put("stack", Dia);
         diamond.put("row", 4);
         diamond.put("column", 5);
@@ -352,35 +327,35 @@ public class ShopUtil {
         return mode == 1 ? "Solo" : mode == 2 ? "Double" : mode == 3 ? "Triples" : "Squads";
     }
 
-    public static int getIntFromMode(String mode){
+    public static int getIntFromMode(String mode) {
         return mode.equalsIgnoreCase("Solo") ? 1 :
                 mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 :
-                mode.equalsIgnoreCase("Squads") ? 4 : 0;
+                        mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
     public static Options generateOptions() {
-        Options options = new Options(SBAHypixelify.getInstance());
+        final var options = new Options(SBAHypixelify.getInstance());
         options.setShowPageNumber(false);
 
-        ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
-        ItemMeta backItemMeta = backItem.getItemMeta();
+        final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
+        final var backItemMeta = backItem.getItemMeta();
         backItemMeta.setDisplayName(i18n("shop_back", false));
         backItem.setItemMeta(backItemMeta);
         options.setBackItem(backItem);
 
-        ItemStack pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
-        ItemMeta pageBackItemMeta = backItem.getItemMeta();
+        final var pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
+        final var pageBackItemMeta = backItem.getItemMeta();
         pageBackItemMeta.setDisplayName(i18n("page_back", false));
         pageBackItem.setItemMeta(pageBackItemMeta);
         options.setPageBackItem(pageBackItem);
 
-        ItemStack pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
-        ItemMeta pageForwardItemMeta = backItem.getItemMeta();
+        final var pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
+        final var pageForwardItemMeta = backItem.getItemMeta();
         pageForwardItemMeta.setDisplayName(i18n("page_forward", false));
         pageForwardItem.setItemMeta(pageForwardItemMeta);
         options.setPageForwardItem(pageForwardItem);
 
-        ItemStack cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
+        final var cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
         options.setCosmeticItem(cosmeticItem);
         options.setRender_header_start(600);
         options.setRender_footer_start(600);
@@ -393,7 +368,7 @@ public class ShopUtil {
 
     public static List<ItemStack> createCategories(List<String> lore1,
                                                    String name, String name2) {
-        List<ItemStack> myList = new ArrayList<>();
+        final var myList = new ArrayList<ItemStack>();
 
         ItemStack category;
         ItemStack category2;
@@ -405,25 +380,25 @@ public class ShopUtil {
             category2 = new ItemStack(Material.valueOf("OAK_SIGN"));
         }
 
-        ItemStack category3 = new ItemStack(Material.BARRIER);
-        ItemStack category4 = new ItemStack(Material.ENDER_PEARL);
-        ItemMeta meta = category.getItemMeta();
+        final var category3 = new ItemStack(Material.BARRIER);
+        final var category4 = new ItemStack(Material.ENDER_PEARL);
+        final var meta = category.getItemMeta();
         meta.setLore(lore1);
         meta.setDisplayName(name);
         category.setItemMeta(meta);
 
-        ItemMeta meta2 = category2.getItemMeta();
+        final var meta2 = category2.getItemMeta();
         meta2.setLore(SBAHypixelify.getConfigurator().getStringList("games-inventory.oak_sign-lore"));
         meta2.setDisplayName(name2);
         category2.setItemMeta(meta2);
 
-        ItemMeta meta3 = category3.getItemMeta();
-        String name3 = SBAHypixelify.getConfigurator().getString("games-inventory.barrier-name", "§cExit");
+        final var meta3 = category3.getItemMeta();
+        final var name3 = SBAHypixelify.getConfigurator().getString("games-inventory.barrier-name", "§cExit");
         meta3.setDisplayName(name3);
         category3.setItemMeta(meta3);
 
-        ItemMeta meta4 = category4.getItemMeta();
-        String name4 = SBAHypixelify.getConfigurator().getString("games-inventory.ender_pearl-name"
+        final var meta4 = category4.getItemMeta();
+        final var name4 = SBAHypixelify.getConfigurator().getString("games-inventory.ender_pearl-name"
                 , "§cClick here to rejoin!");
 
         meta4.setLore(SBAHypixelify.getConfigurator().getStringList("games-inventory.ender_pearl-lore"));
@@ -449,23 +424,15 @@ public class ShopUtil {
 
     public static void upgradeSwordOnPurchase(Player player, ItemStack newItem, Game game) {
         if (SBAHypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
-            Arrays.stream(player.getInventory().getContents()).forEach(item -> {
-                if (item == null) return;
-
-                final String typeName = item.getType().name();
-
-                if (typeName.endsWith("SWORD"))
-                    player.getInventory().remove(item);
-
-            });
-        }
-        int level;
-        try {
-            level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
-        } catch (Throwable t) {
-            return;
+            Arrays.stream(player.getInventory().getContents())
+                    .filter(Objects::nonNull)
+                    .filter(stack-> stack.getType().name().endsWith("SWORD"))
+                    .forEach(player.getInventory()::removeItem);
         }
 
+        final var gameStorage = SBAHypixelify.getGamestorage(game);
+
+        int level = gameStorage.getSharpness(game.getTeamOfPlayer(player).getName());
         if (level != 0)
             newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
     }
@@ -474,19 +441,14 @@ public class ShopUtil {
     public static void removeAxeOrPickaxe(Player player, ItemStack newItem) {
         final String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
 
-        for (ItemStack item : player.getInventory().getContents()) {
-            if(item == null) return;
-
-            final String typeName = item.getType().name();
-
-            if(typeName.endsWith(name)){
-                player.getInventory().remove(item);
-            }
-        }
+        Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .filter(stack-> stack.getType().name().endsWith(name))
+                .forEach(player.getInventory()::remove);
     }
 
     public static String ChatColorChanger(Player player) {
-        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var db = SBAHypixelify.getWrapperService().getWrapper(player);
         if (db.getLevel() > 100 || player.isOp()) {
             return "§f";
         } else {

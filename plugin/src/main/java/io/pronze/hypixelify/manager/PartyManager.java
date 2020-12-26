@@ -10,10 +10,7 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //TODO: Rewrite entire party system
 
@@ -36,14 +33,12 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
         final List<Player> partyPlayers = party.getPlayers();
 
         if (partyPlayers != null) {
-            partyPlayers.forEach(player -> {
-                if (player == null) {
-                    return;
-                }
-
+            partyPlayers.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(player -> {
                 if (player.isOnline())
-                    SBAHypixelify.getConfigurator().config
-                            .getStringList("party.message.disband").forEach(player::sendMessage);
+                    SBAHypixelify.getConfigurator().config.getStringList("party.message.disband")
+                            .forEach(player::sendMessage);
 
                 final PlayerWrapper wrapper = SBAHypixelify.getWrapperService().getWrapper(player);
                 if (wrapper != null) {
@@ -74,38 +69,32 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
         if (party == null) {
             throw new IllegalArgumentException("Party cannot be null");
         }
-
-        final Player partyLeader = party.getLeader();
-
+        final var partyLeader = party.getLeader();
         if (partyLeader == null) {
             return;
         }
-
         party.addMember(player);
         party.removeInvitedMember(player);
-        final PlayerWrapper playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
         playerWrapper.setParty(partyLeader);
         playerWrapper.setInvited(false);
         playerWrapper.setIsInParty(true);
         playerWrapper.setInvitedParty(null);
-
-        final List<Player> partyMembers = party.getAllPlayers();
-
+        final var partyMembers = party.getAllPlayers();
         if (partyMembers != null) {
-            partyMembers.forEach(pl -> {
-                if (pl == null || !pl.isOnline()) {
+            partyMembers
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .forEach(pl -> {
+                if (!pl.isOnline()) {
                     return;
                 }
 
-                SBAHypixelify.getConfigurator()
-                        .config.getStringList("party.message.accepted").forEach(message -> {
-                    if (message == null) {
-                        return;
-                    }
-
-                    pl.sendMessage(ShopUtil.translateColors(message)
-                            .replace("{player}", player.getDisplayName()));
-                });
+                SBAHypixelify.getConfigurator().config.getStringList("party.message.accepted")
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .forEach(message -> pl.sendMessage(ShopUtil.translateColors(message)
+                                .replace("{player}", player.getDisplayName())));
             });
         }
 
@@ -113,20 +102,18 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
 
     @Override
     public void removeFromParty(Player player, Party party) {
-        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
-
+        final var db = SBAHypixelify.getWrapperService().getWrapper(player);
         if (db == null || party == null || party.getLeader() == null)
             return;
-
         party.removeMember(player);
-        final List<Player> partyMembers = party.getAllPlayers();
-
+        final var partyMembers = party.getAllPlayers();
         if (partyMembers != null) {
-            partyMembers.forEach(member -> {
-                if (member == null || !member.isOnline()) {
+            partyMembers.stream()
+                    .filter(Objects::nonNull)
+                    .forEach(member -> {
+                if (!member.isOnline()) {
                     return;
                 }
-
                 MessageUtils.sendMessage("party.message.offline-quit", member);
             });
         }
@@ -140,85 +127,68 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
     @Override
     public void kickFromParty(Player player) {
         if (getParty(player) == null || player == null) return;
-        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
-
+        final var db = SBAHypixelify.getWrapperService().getWrapper(player);
         if (db == null || db.getPartyLeader() == null) return;
-        final Player leader = db.getPartyLeader();
-
-        final io.pronze.hypixelify.party.Party party = parties.get(leader);
+        final var leader = db.getPartyLeader();
+        final var party = parties.get(leader);
         if (leader == null || party == null) return;
 
         party.removeMember(player);
         MessageUtils.sendMessage("party.message.got-kicked", player);
-
-        final List<Player> partyMembers = party.getPlayers();
+        final var partyMembers = party.getPlayers();
 
         if (partyMembers != null) {
-            final Map<String, String> replacementMap = new HashMap<>();
+            final var replacementMap = new HashMap<String, String>();
             replacementMap.put("{player}", player.getDisplayName());
-
-            partyMembers.forEach(member -> {
-                MessageUtils.sendMessage("party.message.kicked", player, replacementMap);
-            });
+            partyMembers.forEach(member -> MessageUtils.sendMessage("party.message.kicked",
+                    player, replacementMap));
         }
-
         db.setIsInParty(false);
         db.setParty(null);
         SBAHypixelify.getWrapperService().updateAll();
-
     }
 
     @Override
     public io.pronze.hypixelify.party.Party getParty(Player player) {
         if (!isInParty(player)) return null;
-
         if(player == null){
             return null;
         }
-        final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
-        final Player partyLeader = database.getPartyLeader();
-
+        final var database = SBAHypixelify.getWrapperService().getWrapper(player);
+        if (database == null) return null;
+        final var partyLeader = database.getPartyLeader();
         if (partyLeader != null && isInParty(partyLeader)) {
             return parties.get(partyLeader);
         }
-
         return null;
     }
 
 
     @Override
     public void warpPlayersToLeader(Player leader) {
-        final BedwarsAPI BAPI = BedwarsAPI.getInstance();
-        final io.pronze.hypixelify.party.Party party = getParty(leader);
-
+        final var bedwarsAPI = BedwarsAPI.getInstance();
+        final var party = getParty(leader);
         if (party == null) {
             return;
         }
-
-        final List<Player> partyMembers = party.getPlayers();
+        final var partyMembers = party.getPlayers();
         if (partyMembers == null) {
             return;
         }
-
-        if (BAPI.isPlayerPlayingAnyGame(leader)) {
-            final Game game = BAPI.getGameOfPlayer(leader);
+        if (bedwarsAPI.isPlayerPlayingAnyGame(leader)) {
+            final var game = bedwarsAPI.getGameOfPlayer(leader);
             if (game.getStatus() != GameStatus.WAITING) {
                 leader.sendMessage("Cannot do this now!");
                 return;
             }
-
-
             ShopUtil.sendMessage(leader, SBAHypixelify.getConfigurator().getStringList("party.message.warping"));
-
             partyMembers.forEach(pl -> {
-
                 if (game.getConnectedPlayers().size() >= game.getMaxPlayers()) {
                     pl.sendMessage("§cYou could not be warped to game");
                     return;
                 }
 
-
-                final Game playerGame = BAPI.getGameOfPlayer(pl);
+                final Game playerGame = bedwarsAPI.getGameOfPlayer(pl);
                 if (playerGame != null) {
                     if (playerGame.equals(game)) {
                         return;
@@ -242,11 +212,10 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
 
     @Override
     public void removeFromInvitedParty(Player player) {
-        final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var database = SBAHypixelify.getWrapperService().getWrapper(player);
         if (database == null || !database.isInvited()) return;
-        Party invitedParty = database.getInvitedParty();
+        var invitedParty = database.getInvitedParty();
         if (invitedParty == null) return;
-
         invitedParty.removeInvitedMember(player);
         database.setInvitedParty(null);
         database.setInvited(false);
@@ -255,7 +224,7 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
     @Override
     public io.pronze.hypixelify.party.Party createParty(Player player) {
         if (parties.containsKey(player)) return null;
-        io.pronze.hypixelify.party.Party party = new io.pronze.hypixelify.party.Party(player);
+        final var party = new io.pronze.hypixelify.party.Party(player);
         parties.put(player, party);
         return party;
     }
@@ -275,20 +244,19 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
 
     @Override
     public void databaseDeletionFromParty(Player player, Player partyLeader) {
-        final Party party = getParty(partyLeader);
-        final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var party = getParty(partyLeader);
+        final var database = SBAHypixelify.getWrapperService().getWrapper(player);
 
-        if (party == null) {
+        if (database == null || party == null) {
             return;
         }
 
-        final List<Player> partyMembers = party.getAllPlayers();
-        final Map<String, String> replacementMap = new HashMap<>();
+        final var partyMembers = party.getAllPlayers();
+        final var replacementMap = new HashMap<String, String>();
 
         replacementMap.put("{player}", player.getDisplayName());
 
         if (!partyLeader.getUniqueId().equals(player.getUniqueId())) {
-
             if (partyMembers != null) {
                 partyMembers.forEach(member -> {
                     if (!player.equals(member)) {
@@ -304,7 +272,7 @@ public class PartyManager implements io.pronze.hypixelify.api.party.PartyManager
                     ShopUtil.sendMessage(member, SBAHypixelify.getConfigurator().getStringList("party.message.disband-inactivity"));
                 }
 
-                final PlayerWrapper plDatabase = SBAHypixelify.getWrapperService().getWrapper(member);
+                final var plDatabase = SBAHypixelify.getWrapperService().getWrapper(member);
                 if (plDatabase != null) {
                     plDatabase.setIsInParty(false);
                     plDatabase.setParty(null);

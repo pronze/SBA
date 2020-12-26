@@ -3,7 +3,6 @@ package io.pronze.hypixelify.game;
 import io.pronze.hypixelify.SBAHypixelify;
 import lombok.Data;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
@@ -182,6 +181,14 @@ public class RotatingGenerators implements io.pronze.hypixelify.api.game.Rotatin
         if (lines != null) {
             lines.set(index, line);
         }
+    }
+
+    public static boolean canBeUsed(ItemSpawner spawner) {
+        final var type = spawner.getItemSpawnerType().getMaterial();
+        if (type == Material.DIAMOND || type == Material.EMERALD) {
+            return true;
+        }
+        return false;
     }
 
     public void destroy() {

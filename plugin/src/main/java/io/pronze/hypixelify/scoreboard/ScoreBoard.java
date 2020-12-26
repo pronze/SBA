@@ -1,10 +1,9 @@
 package io.pronze.hypixelify.scoreboard;
+
 import io.pronze.hypixelify.Configurator;
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.game.PlayerData;
 import io.pronze.hypixelify.utils.ScoreboardUtil;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import io.pronze.hypixelify.game.Arena;
 import org.screamingsandals.bedwars.Main;
@@ -12,7 +11,6 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -49,17 +47,17 @@ public class ScoreBoard {
     }
 
     public void updateCustomObj() {
-        game.getConnectedPlayers().forEach(p-> ScoreboardUtil.updateCustomObjective(p, game));
+        game.getConnectedPlayers().forEach(p -> ScoreboardUtil.updateCustomObjective(p, game));
     }
 
     public void updateScoreboard() {
         List<String> scoreboard_lines;
-        final List<String> lines = new ArrayList<>();
+        final var lines = new ArrayList<String>();
 
         if (currentTitlePos >= animatedTitle.size())
             currentTitlePos = 0;
 
-        final String currentTitle = animatedTitle.get(currentTitlePos);
+        final var currentTitle = animatedTitle.get(currentTitlePos);
 
         if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines = Configurator.Scoreboard_Lines.get("5");
@@ -69,96 +67,90 @@ public class ScoreBoard {
             scoreboard_lines = Arrays.asList("", "{team_status}", "");
         }
 
+        game.getConnectedPlayers()
+                .forEach(player -> {
+                    final var playerData = arena.getPlayerData(player.getUniqueId());
+                    ChatColor chatColor = null;
+                    final var playerTeam = game.getTeamOfPlayer(player);
+                    lines.clear();
+                    String totalKills;
+                    String currentKills;
+                    String finalKills;
+                    String currentDeaths;
+                    String currentBedDestroys;
 
-        for (Player player : game.getConnectedPlayers()) {
-            final PlayerData playerData = arena.getPlayerDataMap().get(player.getUniqueId());
-            ChatColor chatColor = null;
-            final RunningTeam playerTeam = game.getTeamOfPlayer(player);
-            lines.clear();
-            String totalKills;
-            String currentKills;
-            String finalKills;
-            String currentDeaths;
-            String currentBedDestroys;
+                    final var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+                    try {
+                        totalKills = String.valueOf(statistic.getKills());
+                        currentKills = String.valueOf(playerData.getKills());
+                        finalKills = String.valueOf(statistic.getKills());
+                        currentDeaths = String.valueOf(playerData.getDeaths());
+                        currentBedDestroys = String.valueOf(playerData.getBedDestroys());
+                    } catch (Throwable e) {
+                        totalKills = currentKills = finalKills = currentDeaths = currentBedDestroys = "0";
+                    }
 
-            final PlayerStatistic statistic = Main.getPlayerStatisticsManager().getStatistic(player);
-            try {
-                totalKills = String.valueOf(statistic.getKills());
-                currentKills = String.valueOf(playerData.getKills());
-                finalKills = String.valueOf(statistic.getKills());
-                currentDeaths = String.valueOf(playerData.getDeaths());
-                currentBedDestroys = String.valueOf(playerData.getBedDestroys());
-            } catch (Throwable e) {
-                final String nullscore = "0";
-                totalKills = nullscore;
-                currentKills = nullscore;
-                finalKills = nullscore;
-                currentDeaths = nullscore;
-                currentBedDestroys = nullscore;
-            }
+                    String teamName = "";
+                    String teamStatus = "";
 
-            String teamName = "";
-            String teamStatus = "";
+                    if (playerTeam != null && playerTeam.countConnectedPlayers() > 0) {
+                        chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(playerTeam.getColor().name()).chatColor;
+                        teamName = playerTeam.getName();
+                        teamStatus = getTeamBedStatus(playerTeam);
+                    }
 
-            if (playerTeam != null && playerTeam.countConnectedPlayers() > 0) {
-                chatColor = org.screamingsandals.bedwars.game.TeamColor.valueOf(playerTeam.getColor().name()).chatColor;
-                teamName = playerTeam.getName();
-                teamStatus = getTeamBedStatus(playerTeam);
-            }
-
-
-            for (String ls : scoreboard_lines) {
-
-                if (ls.contains("{team_status}")) {
-                    game.getAvailableTeams().forEach(t -> {
-                        String you = "";
-                        if (playerTeam != null) {
-                            if (playerTeam.getName().equals(t.getName())) {
-                                you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
-                            }
+                    for (String ls : scoreboard_lines) {
+                        if (ls.contains("{team_status}")) {
+                            game.getAvailableTeams().forEach(t -> {
+                                String you = "";
+                                if (playerTeam != null) {
+                                    if (playerTeam.getName().equals(t.getName())) {
+                                        you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
+                                    }
+                                }
+                                if (teamstatus.containsKey(t.getName())) {
+                                    lines.add(teamstatus.get(t.getName()).replace("{you}", you));
+                                    return;
+                                }
+                                lines.add(ls.replace("{team_status}",
+                                        getTeamStatusFormat(t).replace("{you}", you)));
+                            });
+                            continue;
                         }
-                        if (teamstatus.containsKey(t.getName())) {
-                            lines.add(teamstatus.get(t.getName()).replace("{you}", you));
-                            return;
+
+                        String addline = ls
+                                .replace("{team}", teamName).replace("{beds}", currentBedDestroys).replace("{dies}", currentDeaths)
+                                .replace("{totalkills}", totalKills).replace("{finalkills}", finalKills).replace("{kills}", currentKills)
+                                .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                                .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                                .replace("{game}", game.getName()).replace("{date}", date)
+                                .replace("{team_bed_status}", teamStatus)
+                                .replace("{tier}", arena.gameTask.getTier().replace("-", " ")
+                                        + " in §a" + arena.gameTask.getFormattedTimeLeft());
+
+                        if (game.isPlayerInAnyTeam(player) && chatColor != null) {
+                            addline = addline.replace("{teams}", String.valueOf(game.getRunningTeams().size()))
+                                    .replace("{color}", chatColor.toString());
                         }
-                        lines.add(ls.replace("{team_status}",
-                                getTeamStatusFormat(t).replace("{you}", you)));
-                    });
-                    continue;
-                }
 
-                String addline = ls
-                        .replace("{team}", teamName).replace("{beds}", currentBedDestroys).replace("{dies}", currentDeaths)
-                        .replace("{totalkills}", totalKills).replace("{finalkills}", finalKills).replace("{kills}", currentKills)
-                        .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                        .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                        .replace("{game}", game.getName()).replace("{date}", date)
-                        .replace("{team_bed_status}", teamStatus)
-                        .replace("{tier}", arena.gameTask.getTier().replace("-", " ")
-                                + " in §a" + arena.gameTask.getFormattedTimeLeft());
+                        if (lines.contains(addline)) {
+                            lines.add(ScoreboardUtil.getUniqueString(lines, addline));
+                            continue;
+                        }
+                        lines.add(addline);
+                    }
 
-                if (game.isPlayerInAnyTeam(player) && chatColor != null) {
-                    addline = addline.replace("{teams}", String.valueOf(game.getRunningTeams().size()))
-                            .replace("{color}", chatColor.toString());
-                }
-
-                if (lines.contains(addline)) {
-                    lines.add(ScoreboardUtil.getUniqueString(lines, addline));
-                    continue;
-                }
-                lines.add(addline);
-            }
-            List<String> elements = new ArrayList<>();
-            elements.add(currentTitle);
-            elements.addAll(lines);
-            if (elements.size() < 16) {
-                int es = elements.size();
-                for (int i = 0; i < 16 - es; i++)
-                    elements.add(1, null);
-            }
-            elements = ScoreboardUtil.makeElementsUnique(elements);
-            ScoreboardUtil.setGameScoreboard(player, elements.toArray(new String[0]), this.game);
-        }
+                    List<String> elements = new ArrayList<>();
+                    elements.add(currentTitle);
+                    elements.addAll(lines);
+                    if (elements.size() < 16) {
+                        int es = elements.size();
+                        for (int i = 0; i < 16 - es; i++)
+                            elements.add(1, null);
+                    }
+                    elements = ScoreboardUtil.makeElementsUnique(elements);
+                    ScoreboardUtil.setGameScoreboard(player, elements.toArray(new String[0]), this.game);
+                });
     }
 
     private String getTeamBedStatus(RunningTeam team) {
@@ -198,10 +190,9 @@ public class ScoreBoard {
             return getTeamStatusFormat(rt);
         }
 
-        String destroyed = "{color} {team} §c\u2718 {you}";
-
-
-        String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
+        final var destroyed = "{color} {team} §c\u2718 {you}";
+        final var formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor()
+                .name()).chatColor.toString()
                 + team.getName().charAt(0);
 
         return destroyed.replace("{bed_status}", "§c\u2718")

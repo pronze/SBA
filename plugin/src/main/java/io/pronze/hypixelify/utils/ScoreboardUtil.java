@@ -17,10 +17,9 @@ import org.screamingsandals.bedwars.game.TeamColor;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ScoreboardUtil {
-
-
     public static final String GAME_OBJECTIVE_NAME = "bwa-game";
     public static final String LOBBY_OBJECTIVE_NAME = "bwa-lobby";
     public static final String TAG_OBJECTIVE_NAME = "bwa-tag";
@@ -53,61 +52,54 @@ public class ScoreboardUtil {
         player_health.remove(player);
     }
 
-
     public static void setLobbyScoreboard(Player p, String[] elements, Game game) {
         elements = resizeContent(elements);
-        Scoreboard scoreboard = p.getScoreboard();
+        final var scoreboard = p.getScoreboard() == null
+                || p.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()
+                || p.getScoreboard().getObjective(LOBBY_OBJECTIVE_NAME) == null ?
+                Bukkit.getScoreboardManager().getNewScoreboard()
+                : p.getScoreboard();
         try {
-            if (scoreboard == null || scoreboard == Bukkit.getScoreboardManager().getMainScoreboard() ||
-                    scoreboard.getObjective(LOBBY_OBJECTIVE_NAME) == null) {
-                p.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-                scoreboard = p.getScoreboard();
-            }
-
-            Objective obj = scoreboard.getObjective(LOBBY_OBJECTIVE_NAME);
+            var obj = scoreboard.getObjective(LOBBY_OBJECTIVE_NAME);
             if (obj == null) {
                 obj = scoreboard.registerNewObjective(LOBBY_OBJECTIVE_NAME, "dummy");
                 obj.setDisplaySlot(DisplaySlot.SIDEBAR);
             }
             obj.setDisplayName(elements[0]);
-
             updateValues(elements, scoreboard, obj);
 
-            for (RunningTeam t : game.getRunningTeams()) {
-                Team team = scoreboard.getTeam(t.getName());
-                if (team == null)
-                    team = scoreboard.registerNewTeam(t.getName());
-                team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
-                ChatColor cl;
+            game.getRunningTeams().forEach(runningTeam-> {
+                final var scoreboardTeam = scoreboard.getTeam(runningTeam.getName()) == null ?
+                        scoreboard.registerNewTeam(runningTeam.getName()) :
+                        scoreboard.getTeam(runningTeam.getName());
 
-                try {
-                    cl = TeamColor.fromApiColor(t.getColor()).chatColor;
-                    team.setPrefix(PLAYERTAG_PREFIX
-                            .replace("{color}", cl.toString()).replace("{team}", ChatColor.BOLD +
-                                    String.valueOf(team.getName().charAt(0))));
-                    if (!Main.isLegacy())
-                        team.setColor(ChatColor.valueOf(cl.name()));
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
+                final var chatColor = TeamColor.fromApiColor(runningTeam.getColor()).chatColor;
+                scoreboardTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                scoreboardTeam.setPrefix(PLAYERTAG_PREFIX
+                        .replace("{color}", chatColor.toString())
+                        .replace("{team}", ChatColor.BOLD +
+                                String.valueOf(runningTeam.getName().charAt(0))));
+                if (!Main.isLegacy()) {
+                    scoreboardTeam.setColor(chatColor);
                 }
 
-                for(String playerEntry : new HashSet<>(team.getEntries())) {
-                    final Player player = Bukkit.getPlayerExact(playerEntry);
-                    if (player == null) {
-                        continue;
-                    }
+                new HashSet<>(scoreboardTeam.getEntries())
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(Bukkit::getPlayerExact)
+                        .filter(Objects::nonNull)
+                        .forEach(player-> {
+                            if (!runningTeam.getConnectedPlayers().contains(player)) {
+                                scoreboardTeam.removeEntry(player.getName());
+                            }
+                        });
 
-                    if (!t.getConnectedPlayers().contains(player)) {
-                        team.removeEntry(playerEntry);
-                    }
-                }
-
-                for (Player pl : t.getConnectedPlayers()) {
-                    if (!team.hasEntry(pl.getName())) {
-                        team.addEntry(pl.getName());
-                    }
-                }
-            }
+                runningTeam.getConnectedPlayers()
+                        .stream()
+                        .map(Player::getName)
+                        .filter(playerName-> !scoreboardTeam.hasEntry(playerName))
+                        .forEach(scoreboardTeam::addEntry);
+            });
 
             p.setScoreboard(scoreboard);
         } catch (Exception e) {
@@ -118,63 +110,65 @@ public class ScoreboardUtil {
 
     public static void setGameScoreboard(Player p, String[] elements, Game game) {
         elements = resizeContent(elements);
-        Scoreboard scoreboard = p.getScoreboard();
+        final var scoreboard = p.getScoreboard() == null
+                || p.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()
+                || p.getScoreboard().getObjective(GAME_OBJECTIVE_NAME) == null ?
+                Bukkit.getScoreboardManager().getNewScoreboard()
+                : p.getScoreboard();
 
         boolean exist = true;
-        if (scoreboard == null || scoreboard.getObjective(GAME_OBJECTIVE_NAME) == null) {
+        if (scoreboard.getObjective(GAME_OBJECTIVE_NAME) == null) {
             exist = false;
         }
 
-        if (scoreboard.getObjective(LOBBY_OBJECTIVE_NAME) != null) {
+        final var lobbyObjective = scoreboard.getObjective(LOBBY_OBJECTIVE_NAME);
+        if (lobbyObjective != null) {
             try {
-                scoreboard.getObjective(LOBBY_OBJECTIVE_NAME).unregister();
-            } catch (Throwable t) {}
+                lobbyObjective.unregister();
+            } catch (Throwable ignored) {}
         }
 
         try {
-            if (scoreboard == Bukkit.getScoreboardManager().getMainScoreboard()) {
-                scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-            }
-            Objective obj = scoreboard.getObjective(GAME_OBJECTIVE_NAME);
+            var obj = scoreboard.getObjective(GAME_OBJECTIVE_NAME);
             if (obj == null) {
                 obj = scoreboard.registerNewObjective(GAME_OBJECTIVE_NAME, "dummy");
                 obj.setDisplaySlot(DisplaySlot.SIDEBAR);
                 obj.setDisplayName(BOARD_DISPLAY_NAME);
             }
 
-            if ((p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard)) && !exist) {
+            if (!exist) {
+                game.getRunningTeams().forEach(runningTeam -> {
+                    final var team = scoreboard.getTeam(runningTeam.getName()) == null ?
+                            scoreboard.registerNewTeam(runningTeam.getName()) :
+                            scoreboard.getTeam(runningTeam.getName());
 
-                for (RunningTeam t : game.getRunningTeams()) {
-                    Team team = scoreboard.getTeam(t.getName());
-                    if (team == null)
-                        team = scoreboard.registerNewTeam(t.getName());
+                    final var teamColor = TeamColor.fromApiColor(runningTeam.getColor()).chatColor;
                     team.setAllowFriendlyFire(false);
-                    team.setPrefix(org.screamingsandals.bedwars.game.TeamColor
-                            .valueOf(t.getColor().name()).chatColor.toString());
-                    for (Player pl : t.getConnectedPlayers()) {
-                        if (!team.hasEntry(pl.getName()))
-                            team.addEntry(pl.getName());
+                    team.setPrefix(teamColor.toString());
+                    if (!Main.isLegacy()) {
+                        team.setColor(teamColor);
                     }
-                }
+
+                    runningTeam.getConnectedPlayers()
+                            .stream()
+                            .map(Player::getName)
+                            .filter(playerName-> !team.hasEntry(playerName))
+                            .forEach(team::addEntry);
+                });
 
                 if (SBAHypixelify.isProtocolLib()) {
                     //TAB HEALTH
                     try {
-                        WrapperPlayServerScoreboardObjective scoreboardObjective =
-                                new WrapperPlayServerScoreboardObjective();
-                        scoreboardObjective
-                                .setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
+                        final var scoreboardObjective = new WrapperPlayServerScoreboardObjective();
+                        scoreboardObjective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
                         scoreboardObjective.setName(TAB_OBJECTIVE_NAME);
                         scoreboardObjective.sendPacket(p);
-
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                     try {
-                        WrapperPlayServerScoreboardDisplayObjective displayObjective
-                                = new WrapperPlayServerScoreboardDisplayObjective();
-
+                        final var displayObjective = new WrapperPlayServerScoreboardDisplayObjective();
                         displayObjective.setPosition(0);
                         displayObjective.setScoreName(TAB_OBJECTIVE_NAME);
                         displayObjective.sendPacket(p);
@@ -184,8 +178,7 @@ public class ScoreboardUtil {
 
                     //TAG HEALTH
                     try {
-                        WrapperPlayServerScoreboardObjective scoreboardObjective =
-                                new WrapperPlayServerScoreboardObjective();
+                        final var scoreboardObjective = new WrapperPlayServerScoreboardObjective();
                         scoreboardObjective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
                         scoreboardObjective.setName(TAG_OBJECTIVE_NAME);
                         scoreboardObjective.setDisplayName(WrappedChatComponent.fromText("§c♥"));
@@ -194,9 +187,7 @@ public class ScoreboardUtil {
                         e.printStackTrace();
                     }
                     try {
-                        WrapperPlayServerScoreboardDisplayObjective displayObjective
-                                = new WrapperPlayServerScoreboardDisplayObjective();
-
+                        final var displayObjective = new WrapperPlayServerScoreboardDisplayObjective();
                         displayObjective.setPosition(2);
                         displayObjective.setScoreName(TAG_OBJECTIVE_NAME);
                         displayObjective.sendPacket(p);
@@ -210,48 +201,48 @@ public class ScoreboardUtil {
 
             updateValues(elements, scoreboard, obj);
 
-            for (RunningTeam team : game.getRunningTeams()) {
-                Team scoreboardTeam = scoreboard.getTeam(team.getName());
-                ChatColor cl = null;
-
-                try {
-                    cl = TeamColor.fromApiColor(team.getColor()).chatColor;
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                }
-                if (scoreboardTeam == null) {
-                    scoreboardTeam = scoreboard.registerNewTeam(team.getName());
-                    scoreboardTeam.setPrefix(PLAYERTAG_PREFIX
-                            .replace("{color}", cl.toString()).replace("{team}", ChatColor.BOLD +
+            game.getRunningTeams().forEach(runningTeam -> {
+                var team = scoreboard.getTeam(runningTeam.getName());
+                final var chatColor = TeamColor.fromApiColor(runningTeam.getColor()).chatColor;
+                if (team == null) {
+                    team = scoreboard.registerNewTeam(runningTeam.getName());
+                    team.setPrefix(PLAYERTAG_PREFIX
+                            .replace("{color}", chatColor.toString())
+                            .replace("{team}", ChatColor.BOLD +
                                     String.valueOf(team.getName().charAt(0))));
-                    scoreboardTeam.setAllowFriendlyFire(false);
-                    scoreboardTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+                    team.setAllowFriendlyFire(false);
+                    team.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
 
                     if (!Main.isLegacy())
-                        scoreboardTeam.setColor(ChatColor.valueOf(cl.name()));
+                        team.setColor(chatColor);
 
-
-                    for (Player pl : team.getConnectedPlayers()) {
-                        if (!scoreboardTeam.hasEntry(pl.getName())) {
-                                scoreboardTeam.addEntry(pl.getName());
-                        }
-                    }
+                    final var finalTeam = team;
+                    runningTeam.getConnectedPlayers()
+                            .stream()
+                            .map(Player::getName)
+                            .filter(playerName-> !finalTeam.hasEntry(playerName))
+                            .forEach(team::addEntry);
+                }
+                final var teamColor = TeamColor.fromApiColor(runningTeam.getColor()).chatColor;
+                team.setAllowFriendlyFire(false);
+                team.setPrefix(teamColor.toString());
+                if (!Main.isLegacy()) {
+                    team.setColor(teamColor);
                 }
 
-                for(String playerEntry : new HashSet<>(scoreboardTeam.getEntries())) {
-                    final Player player = Bukkit.getPlayerExact(playerEntry);
-                    if (player == null) {
-                        continue;
-                    }
+                final var finalTeam = team;
+                new HashSet<>(scoreboard.getEntries())
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(Bukkit::getPlayerExact)
+                        .filter(Objects::nonNull)
+                        .forEach(teamPlayer-> {
+                            if (!runningTeam.getConnectedPlayers().contains(teamPlayer)) {
+                                finalTeam.removeEntry(teamPlayer.getName());
+                            }
+                        });
 
-                    if (!team.getConnectedPlayers().contains(player)) {
-                        scoreboardTeam.removeEntry(playerEntry);
-                    }
-                }
-
-
-            }
-
+            });
 
             if (p.getScoreboard() == null || !p.getScoreboard().equals(scoreboard))
                 p.setScoreboard(scoreboard);
@@ -261,10 +252,10 @@ public class ScoreboardUtil {
     }
 
     public static List<String> makeElementsUnique(List<String> lines) {
-        final ArrayList<String> sbLines = new ArrayList<>();
-        lines.forEach(ls -> {
-            if (ls == null) return;
-
+        final var sbLines = new ArrayList<String>();
+        lines.stream()
+                .filter(Objects::nonNull)
+                .forEach(ls -> {
             final StringBuilder builder = new StringBuilder(ls);
 
             while (sbLines.contains(builder.toString())) {
@@ -279,12 +270,10 @@ public class ScoreboardUtil {
     public static String getUniqueString(List<String> lines, String line) {
         if (lines == null || line == null)
             return null;
-
-        final StringBuilder builder = new StringBuilder(line);
+        final var builder = new StringBuilder(line);
         while (lines.contains(builder.toString())) {
             builder.append("§r");
         }
-
         return builder.toString();
     }
 
@@ -296,11 +285,12 @@ public class ScoreboardUtil {
 
         final Map<Player, Integer> map = player_health.get(p);
 
-        game.getConnectedPlayers().forEach(pl -> {
-            int playerHealth = Integer.parseInt(DECIMAL_FORMAT.format(pl.getHealth()));
+        game.getConnectedPlayers()
+                .forEach(pl -> {
+            var playerHealth = Integer.parseInt(DECIMAL_FORMAT.format(pl.getHealth()));
             if (map.getOrDefault(pl, 0) != playerHealth) {
                 try {
-                    WrapperPlayServerScoreboardScore packet = new WrapperPlayServerScoreboardScore();
+                    final var packet = new WrapperPlayServerScoreboardScore();
                     packet.setValue(playerHealth);
                     packet.setScoreName(pl.getName());
                     packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
@@ -310,7 +300,7 @@ public class ScoreboardUtil {
                     e.printStackTrace();
                 }
                 try {
-                    WrapperPlayServerScoreboardScore packet = new WrapperPlayServerScoreboardScore();
+                    final var packet = new WrapperPlayServerScoreboardScore();
                     packet.setValue(playerHealth);
                     packet.setScoreName(pl.getName());
                     packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
@@ -325,21 +315,20 @@ public class ScoreboardUtil {
     }
 
     public static void updateValues(String[] elements, final Scoreboard scoreboard, Objective obj) {
-        /*
-            Checks if elements are from scores 15-1 on scoreboard, if not it adds it and resets scores.
-         */
-
         for (int i = 1; i < elements.length; i++) {
             if (elements[i] == null) {
                 continue;
             }
-            Score score = obj.getScore(elements[i]);
-            if (score.getScore() != 16 - i) {
-                score.setScore(16 - i);
-                for (String string : scoreboard.getEntries()) {
-                    if (obj.getScore(string).getScore() == 16 - i && !string.equals(elements[i]))
-                        scoreboard.resetScores(string);
-                }
+            final var score = obj.getScore(elements[i]);
+            final var pos = 16 - i;
+            if (score.getScore() != pos) {
+                score.setScore(pos);
+                int finalI = i;
+                scoreboard.getEntries()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .filter(entry-> obj.getScore(entry).getScore() == pos && !entry.equalsIgnoreCase(elements[finalI]))
+                        .forEach(scoreboard::resetScores);
             }
         }
     }

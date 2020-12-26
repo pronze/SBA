@@ -8,7 +8,6 @@ import java.util.List;
 
 @Data
 public class PlayerData {
-
     private int kills;
     private int deaths;
     private int finalKills;

@@ -8,6 +8,7 @@ import io.pronze.hypixelify.utils.MessageUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Party implements io.pronze.hypixelify.api.party.Party {
 
@@ -34,19 +35,15 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
     }
 
     public List<Player> getOfflinePlayers() {
-        List<Player> offlinePlayers = new ArrayList<>();
-
-        players.forEach(player->{
-            if(player == null){
-                return;
-            }
-
+        final var offlinePlayers = new ArrayList<Player>();
+        players.stream()
+                .filter(Objects::nonNull)
+                .forEach(player->{
             if(!player.isOnline() || Bukkit.getPlayer(player.getUniqueId()) == null){
                 offlinePlayers.add(player);
             }
         });
         if (offlinePlayers.isEmpty()) return null;
-
         return offlinePlayers;
     }
 
@@ -71,8 +68,7 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
    public void addInvitedMember(Player pl) {
        if (!invitedMembers.contains(pl)) {
            invitedMembers.add(pl);
-           final PlayerWrapper wrapper = SBAHypixelify.getWrapperService().getWrapper(pl);
-
+           final var wrapper = SBAHypixelify.getWrapperService().getWrapper(pl);
            wrapper.setInvitedParty(this);
            wrapper.setInvited(true);
        }
@@ -81,7 +77,6 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
     @Override
     public List<Player> getInvitedMembers() {
         if(invitedMembers == null || invitedMembers.isEmpty()) return null;
-
         return invitedMembers;
     }
 
@@ -107,7 +102,7 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
     public List<Player> getPlayers() {
         if (leader == null)
             return null;
-        List<Player> list = getAllPlayers();
+        final var list = getAllPlayers();
         if (list == null)
             return null;
         list.remove(leader);
@@ -118,10 +113,10 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
 
     @Override
     public void removeMember(Player player) {
-
         if (player.equals(leader)) {
             getPlayers().forEach(pl->MessageUtils.sendMessage("party.message.disband-inactivity", pl));
-            Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), ()-> SBAHypixelify.getPartyManager().disband(player));
+            Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), ()->
+                    SBAHypixelify.getPartyManager().disband(player));
             return;
         }
         players.remove(player);
@@ -145,13 +140,14 @@ public class Party implements io.pronze.hypixelify.api.party.Party {
 
     @Override
     public List<Player> getAllPlayers(){
-        final List<Player> newPlayerList = new ArrayList<>();
+        final var newPlayerList = new ArrayList<Player>();
 
-        players.forEach(player->{
-            if(player == null || !player.isOnline()){
+        players.stream()
+                .filter(Objects::nonNull)
+                .forEach(player->{
+            if(!player.isOnline()){
                 return;
             }
-
             newPlayerList.add(player);
         });
 

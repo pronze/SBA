@@ -6,8 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.Plugin;
 import io.pronze.hypixelify.listener.LobbyScoreboard;
 import org.screamingsandals.bedwars.Main;
@@ -67,7 +65,6 @@ public class Configurator {
             e.printStackTrace();
         }
 
-
         shopFile = new File(dataFolder, "shop.yml");
         upgradeShop = new File(dataFolder, "upgradeShop.yml");
         legacyShop = new File(dataFolder, "legacy-shop.yml");
@@ -89,10 +86,9 @@ public class Configurator {
             main.saveResource("legacy-upgradeShop.yml", false);
         }
 
-        AtomicBoolean modify = new AtomicBoolean(false);
+        var modify = new AtomicBoolean(false);
 
         checkOrSetConfig(modify, "debug.enabled", false);
-
         checkOrSetConfig(modify, "permanent-items", true);
 
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
@@ -169,6 +165,7 @@ public class Configurator {
         checkOrSetConfig(modify, "message.respawned-message", "&eYou have respawned");
         checkOrSetConfig(modify, "message.respawn-subtitle", "&eYou will respawn in &c%time% &eseconds");
         checkOrSetConfig(modify, "message.respawned-title", "§aRESPAWNED!");
+        checkOrSetConfig(modify, "message.victory-title","§6§lVICTORY!");
         checkOrSetConfig(modify, "message.cannot-put-item-on-chest", "You cannot put this item onto this chest.");
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");

@@ -71,10 +71,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     public static void removeArena(String arenaName) { plugin.arenas.remove(arenaName); }
 
-    public static Map<String, Arena> getArenas() {
-        return plugin.arenas;
-    }
-
     public static Configurator getConfigurator() {
         return plugin.configurator;
     }
@@ -169,13 +165,14 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         pluginManager.registerEvents(new PartyListener(), this);
         pluginManager.registerEvents(new PlayerListener(), this);
         pluginManager.registerEvents(new LobbyScoreboard(), this);
-        pluginManager.registerEvents(new DragonListener(), this);
+       // pluginManager.registerEvents(new DragonListener(), this);
+        pluginManager.registerEvents(new TeamUpgradeListener(), this);
+
         if (configurator.config.getBoolean("main-lobby.enabled", false))
             pluginManager.registerEvents(new LobbyBoard(), this);
 
         pluginManager.registerEvents(gamesInventory, this);
         pluginManager.registerEvents(shop, this);
-
         //Do changes for legacy support.
         changeBedWarsConfig();
 
@@ -225,8 +222,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         //Do changes for legacy support.
         if (Main.isLegacy()) {
             boolean doneChanges = false;
-            if (Objects.requireNonNull(Main.getConfigurator()
-                    .config.getString("items.leavegame")).equalsIgnoreCase("RED_BED")) {
+            if (Objects.requireNonNull(Main.getConfigurator().config.getString("items.leavegame")).equalsIgnoreCase("RED_BED")) {
                 Main.getConfigurator().config.set("items.leavegame", "BED");
                 doneChanges = true;
             }

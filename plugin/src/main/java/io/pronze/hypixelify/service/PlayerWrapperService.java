@@ -3,16 +3,14 @@ package io.pronze.hypixelify.service;
 import io.pronze.hypixelify.SBAHypixelify;
 import io.pronze.hypixelify.api.party.PartyManager;
 import io.pronze.hypixelify.api.service.WrapperService;
+import io.pronze.hypixelify.game.PlayerData;
 import io.pronze.hypixelify.game.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class PlayerWrapperService implements WrapperService<Player> {
 
@@ -23,11 +21,10 @@ public class PlayerWrapperService implements WrapperService<Player> {
         Bukkit.getOnlinePlayers().stream().filter(Objects::nonNull).forEach(this::register);
     }
 
-
     public void handleOffline(Player player) {
         if (!playerData.containsKey(player.getUniqueId())) return;
-        final PartyManager partyManager = SBAHypixelify.getPartyManager();
-        final PlayerWrapper playerDatabase = getWrapper(player);
+        final var partyManager = SBAHypixelify.getPartyManager();
+        final var playerDatabase = getWrapper(player);
 
         if(partyManager == null){
             unregister(player);
@@ -35,9 +32,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
         }
 
         deletionTasks.put(player.getUniqueId(), Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
-
             partyManager.removeFromInvitedParty(player);
-
             if (playerDatabase.isInParty() && playerDatabase.getPartyLeader() != null) {
                 partyManager.databaseDeletionFromParty(player, playerDatabase.getPartyLeader());
             }
@@ -47,22 +42,16 @@ public class PlayerWrapperService implements WrapperService<Player> {
         }, 20L * 60));
     }
 
-
-
-    @NotNull
     public PlayerWrapper getWrapper(Player player) {
         return playerData.get(player.getUniqueId());
     }
-
 
     public void updateAll() {
         if (playerData.isEmpty()) return;
 
         Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), ()->{
-            for (PlayerWrapper db : playerData.values()) {
-                if (db == null) continue;
-                db.updateDatabase();
-            }
+            playerData.values()
+                    .forEach(PlayerWrapper::updateDatabase);
         });
 
     }
@@ -70,8 +59,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
     @Override
     public void register(Player player) {
         playerData.put(player.getUniqueId(), new PlayerWrapper(player));
-        SBAHypixelify.debug("Registered player: " +
-                player.getDisplayName());
+        SBAHypixelify.debug("Registered player: " + player.getName());
         cancelTasksIfExists(player);
     }
 
@@ -79,7 +67,7 @@ public class PlayerWrapperService implements WrapperService<Player> {
         final UUID playerUUID = player.getUniqueId();
 
         if(deletionTasks.containsKey(playerUUID)) {
-            BukkitTask deletionTask = deletionTasks.get(playerUUID);
+            final var deletionTask = deletionTasks.get(playerUUID);
             if(deletionTask != null && !deletionTask.isCancelled()) {
                 try {
                     deletionTask.cancel();
@@ -94,9 +82,6 @@ public class PlayerWrapperService implements WrapperService<Player> {
     @Override
     public void unregister(Player player) {
         playerData.remove(player.getUniqueId());
-        SBAHypixelify.debug("Unregistered player: " +
-                player.getDisplayName());
+        SBAHypixelify.debug("Unregistered player: " + player.getName());
     }
-
-
 }

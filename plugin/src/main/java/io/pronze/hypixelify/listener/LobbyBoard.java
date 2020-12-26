@@ -38,8 +38,6 @@ public class LobbyBoard implements Listener {
     public LobbyBoard() {
         board_body = SBAHypixelify.getConfigurator().getStringList("main-lobby.lines");
         lobbyChatOverride = SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.custom-chat", true);
-
-
         try {
             location = new Location(Bukkit.getWorld(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("main-lobby.world"))),
                     SBAHypixelify.getConfigurator().config.getDouble("main-lobby.x"),
@@ -58,11 +56,8 @@ public class LobbyBoard implements Listener {
                 return;
             }
         }
-
-
         Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(),
                 () -> Bukkit.getOnlinePlayers().forEach(this::createBoard), 3L);
-
     }
 
     public static boolean isInWorld(Location loc) {
@@ -80,8 +75,8 @@ public class LobbyBoard implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         if (!lobbyChatOverride) return;
-        final Player player = e.getPlayer();
-        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var player = e.getPlayer();
+        final var db = SBAHypixelify.getWrapperService().getWrapper(player);
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
                 && LobbyBoard.isInWorld(e.getPlayer().getLocation())) {
@@ -92,10 +87,10 @@ public class LobbyBoard implements Listener {
                         .replace("{message}", e.getMessage())
                         .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer()));
 
-                if(SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")){
+                if(SBAHypixelify.getInstance().getServer().getPluginManager()
+                        .isPluginEnabled("PlaceholderAPI")){
                     format = PlaceholderAPI.setPlaceholders(player, format);
                 }
-
                 e.setFormat(format);
             }
         }
@@ -111,14 +106,13 @@ public class LobbyBoard implements Listener {
                 e.printStackTrace();
             }
         });
-
         players.clear();
         HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
-        final Player player = e.getPlayer();
+        final var player = e.getPlayer();
 
         Bukkit.getServer().getScheduler().runTaskLater(SBAHypixelify.getInstance(),
                 () -> {
@@ -133,18 +127,15 @@ public class LobbyBoard implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         Player player = e.getPlayer();
-
         if (!isInWorld(player.getLocation())) {
             players.remove(player);
             if (player.getScoreboard() == null) return;
-
             if (hasMainLobbyObjective(player)) {
                 player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
                 return;
             }
             return;
         }
-
         createBoard(player);
     }
 
@@ -156,18 +147,13 @@ public class LobbyBoard implements Listener {
 
     public void createBoard(Player player) {
         if (players.contains(player)) return;
-
-
-        final PlayerWrapper playerData = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var playerData = SBAHypixelify.getWrapperService().getWrapper(player);
         if (playerData == null) {
             SBAHypixelify.debug("Player data of player: " + player.getDisplayName() + " is null," +
                     "skipping scoreboard creation");
             return;
         }
-
-
-        Scoreboard scoreboard = player.getScoreboard();
-
+        var scoreboard = player.getScoreboard();
         String bar = " §7[" + playerData.getCompletedBoxes() + "]";
 
 
@@ -197,12 +183,10 @@ public class LobbyBoard implements Listener {
                 try {
                     if(SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI"))
                         s = PlaceholderAPI.setPlaceholders(player, s);
-                } catch (Exception ignored) {
+                } catch (Exception ignored) {}
 
-                }
                 if (StringUtils.isEmpty(s))
                     s = Strings.repeat(" ", i);
-
 
                 s = s
                         .replace("{kills}", String.valueOf(playerData.getKills()))
@@ -227,6 +211,4 @@ public class LobbyBoard implements Listener {
     public void onBedWarsPlayerJoin(BedwarsPlayerJoinedEvent e) {
         players.remove(e.getPlayer());
     }
-
-
 }

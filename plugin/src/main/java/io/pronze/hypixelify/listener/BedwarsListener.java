@@ -57,8 +57,6 @@ public class BedwarsListener implements Listener {
         }
     }
 
-
-
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var game = e.getGame();
@@ -67,7 +65,7 @@ public class BedwarsListener implements Listener {
             arena.onTargetBlockDestroyed(e);
 
             Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
-                final ScoreBoard board = arena.getScoreboard();
+                final var board = arena.getScoreboard();
                 if (board != null) {
                     board.updateScoreboard();
                 }
@@ -75,7 +73,6 @@ public class BedwarsListener implements Listener {
         }
 
     }
-
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
@@ -126,11 +123,12 @@ public class BedwarsListener implements Listener {
                             if (buffer == seconds) return;
                             buffer = seconds;
                             if (seconds <= 10) {
-                                String message = ShopUtil
-                                        .translateColors(SBAHypixelify.getConfigurator().getString("message.game-starts-in")
+                                String message = ShopUtil.translateColors(SBAHypixelify.getConfigurator()
+                                                .getString("message.game-starts-in")
                                                 .replace("{seconds}", String.valueOf(seconds)));
 
-                                message = seconds == 1 ? message.replace("seconds", "second") : message;
+                                message = seconds == 1 ? message
+                                        .replace("seconds", "second") : message;
                                 player.sendMessage(message);
                                 sendTitle(player, ShopUtil
                                         .translateColors("&c" + seconds), "", 0, 20, 0);
@@ -150,7 +148,6 @@ public class BedwarsListener implements Listener {
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
-
 
         if (task != null) {
             if (Bukkit.getScheduler().isQueued(task.getTaskId()) ||

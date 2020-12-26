@@ -48,16 +48,11 @@ public class LobbyScoreboard implements Listener {
 
     public LobbyScoreboard() {
         date = new SimpleDateFormat(Configurator.date).format(new Date());
-        List<String> lobby_scoreboard = SBAHypixelify.getConfigurator()
-                .getStringList("lobby-scoreboard.title");
-
-        lobby_scoreboard_lines = SBAHypixelify.getConfigurator()
-                .getStringList("lobby_scoreboard.lines");
-
+        List<String> lobby_scoreboard = SBAHypixelify.getConfigurator().getStringList("lobby-scoreboard.title");
+        lobby_scoreboard_lines = SBAHypixelify.getConfigurator().getStringList("lobby_scoreboard.lines");
         countdown_message = format(SBAHypixelify.getConfigurator()
                 .getString("lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s"));
-        isEnabled = SBAHypixelify.getConfigurator().config
-                .getBoolean("lobby-scoreboard.enabled", true);
+        isEnabled = SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true);
 
         if(!isEnabled){
             disable();
@@ -68,25 +63,32 @@ public class LobbyScoreboard implements Listener {
 
         updateTask = new BukkitRunnable() {
             int tc = 0;
-            final BedwarsAPI bedwarsAPI = BedwarsAPI.getInstance();
-
             public void run() {
                     title = lobby_scoreboard.get(tc);
                     tc++;
                     if (tc >= lobby_scoreboard.size())
                         tc = 0;
 
-                    for (Player player : players) {
-                        if (player == null) continue;
-
-                        final Game game = bedwarsAPI.getGameOfPlayer(player);
-
-                        if (game != null && game.getStatus() == GameStatus.WAITING) {
-                            updateScoreboard(player, game);
-                        }
-                    }
+                    players.stream()
+                            .filter(LobbyScoreboard::isInLobby)
+                            .forEach(LobbyScoreboard.this::updateScoreboard);
             }
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
+    }
+
+    public static boolean isInLobby(Player player) {
+        if (player == null) {
+            return false;
+        }
+
+        final var game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+        if (game == null) {
+            return false;
+        }
+        if (game.getStatus() == GameStatus.WAITING) {
+            return true;
+        }
+        return false;
     }
 
     @EventHandler
@@ -116,7 +118,8 @@ public class LobbyScoreboard implements Listener {
         players.remove(e.getPlayer());
     }
 
-    private void updateScoreboard(Player player, Game game) {
+    public void updateScoreboard(Player player) {
+        final var game = BedwarsAPI.getInstance().getGameOfPlayer(player);
         List<String> ncelements = new ArrayList<>();
         ncelements.add(title.replace("{game}", game.getName()));
         ncelements.addAll(getLine(player, game));
@@ -131,10 +134,9 @@ public class LobbyScoreboard implements Listener {
     }
 
     private List<String> getLine(Player player, Game game) {
-        final List<String> line = new ArrayList<>();
-        String state = SBAHypixelify.getConfigurator().getString("message.waiting"
-                , "§fWaiting...");
-
+        final var lines = new ArrayList<String>();
+        String state = SBAHypixelify.getConfigurator()
+                .getString("message.waiting", "§fWaiting...");
         String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = Math.max(needplayers, 0);
@@ -157,28 +159,33 @@ public class LobbyScoreboard implements Listener {
                 mode = s +"v" +s +"v" + s + "v" +s;
         }
 
-        if (game.countConnectedPlayers() >= game.getMinPlayers() && game.getStatus() == GameStatus.WAITING) {
-            String time = Main.getGame(game.getName()).getFormattedTimeLeft();
+        if (game.countConnectedPlayers() >= game.getMinPlayers()
+                && game.getStatus() == GameStatus.WAITING) {
+            final var time = Main.getGame(game.getName()).getFormattedTimeLeft();
             if(!time.contains("0-1")) {
-                String[] units = time.split(":");
-                int seconds = Integer.parseInt(units[1]) + 1;
+                final var units = time.split(":");
+                var seconds = Integer.parseInt(units[1]) + 1;
                 state = countdown_message.replace("{countdown}", String.valueOf(seconds));
             }
         }
 
-        for (String li : lobby_scoreboard_lines) {
-            String l = li
-                    .replace("{date}", date).replace("{state}", state).replace("{game}", game.getName())
+        String finalState = state;
+        int finalNeedplayers = needplayers;
+        lobby_scoreboard_lines.forEach(line-> {
+            line = line
+                    .replace("{date}", date).replace("{state}", finalState)
+                    .replace("{game}", game.getName())
                     .replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
                     .replace("{maxplayers}", String.valueOf(game.getMaxPlayers()))
-                    .replace("{minplayers}", String.valueOf(game.getMinPlayers())).replace("{needplayers}", String.valueOf(needplayers))
+                    .replace("{minplayers}", String.valueOf(game.getMinPlayers()))
+                    .replace("{needplayers}", String.valueOf(finalNeedplayers))
                     .replace("{countdown}", countdown)
                     .replace("{mode}", mode);
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-                l = PlaceholderAPI.setPlaceholders(player, l);
-            line.add(l);
-        }
-        return line;
+                line = PlaceholderAPI.setPlaceholders(player, line);
+            lines.add(line);
+        });
+        return lines;
     }
 
 
