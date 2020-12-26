@@ -11,13 +11,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.*;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class ScoreboardUtil {
     public static final String GAME_OBJECTIVE_NAME = "bwa-game";
@@ -231,7 +229,8 @@ public class ScoreboardUtil {
                 }
 
                 final var finalTeam = team;
-                new HashSet<>(scoreboard.getEntries())
+
+                new HashSet<>(finalTeam.getEntries())
                         .stream()
                         .filter(Objects::nonNull)
                         .map(Bukkit::getPlayerExact)
