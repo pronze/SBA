@@ -2,6 +2,7 @@ package io.pronze.hypixelify.utils;
 
 import io.pronze.hypixelify.Configurator;
 import io.pronze.hypixelify.SBAHypixelify;
+import io.pronze.hypixelify.listener.TeamUpgradeListener;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -454,6 +455,22 @@ public class ShopUtil {
         } else {
             return "§7";
         }
+    }
+
+    public static Integer getSharpnessOrProtectionLevel(String property, ItemStack stack) {
+        if (stack == null || stack.getEnchantments().isEmpty()) {
+            return null;
+        }
+
+        final var enchant = property.equalsIgnoreCase("sharpness") ? Enchantment.DAMAGE_ALL :
+                Enchantment.PROTECTION_ENVIRONMENTAL;
+
+        if (!stack.getEnchantments().containsKey(enchant)) return null;
+
+        final var level = stack.getEnchantmentLevel(enchant);
+        if (level <= 0 || level >= 5) return null;
+
+        return TeamUpgradeListener.prices.get(level);
     }
 
 

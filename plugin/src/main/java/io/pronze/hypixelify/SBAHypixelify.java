@@ -10,10 +10,10 @@ import io.pronze.hypixelify.inventories.CustomShop;
 import io.pronze.hypixelify.inventories.GamesInventory;
 import io.pronze.hypixelify.listener.*;
 import io.pronze.hypixelify.game.RotatingGenerators;
-import io.pronze.hypixelify.specials.listener.DragonListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import io.pronze.hypixelify.game.Arena;
@@ -41,12 +41,10 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private io.pronze.hypixelify.manager.PartyManager partyManager;
     private Configurator configurator;
     private GamesInventory gamesInventory;
-
     private boolean debug = false;
     private boolean isSnapshot;
 
     private final Map<String, Arena> arenas = new HashMap<>();
-
 
     public static GameStorage getGamestorage(Game game) {
         if (plugin.arenas.containsKey(game.getName()))
@@ -159,22 +157,23 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registerCommand("shout", new ShoutCommand());
         registerCommand("bwaddon", new BWACommand());
 
-        final var pluginManager = Bukkit.getServer().getPluginManager();
-        pluginManager.registerEvents(new BedwarsListener(), this);
-        pluginManager.registerEvents(new ChatListener(), this);
-        pluginManager.registerEvents(new PartyListener(), this);
-        pluginManager.registerEvents(new PlayerListener(), this);
-        pluginManager.registerEvents(new LobbyScoreboard(), this);
+        registerListener(new BedwarsListener());
+        registerListener(new ChatListener());
+        registerListener(new PartyListener());
+        registerListener(new PlayerListener());
+        registerListener(new LobbyScoreboard());
+        registerListener(new TeamUpgradeListener());
        // pluginManager.registerEvents(new DragonListener(), this);
-        pluginManager.registerEvents(new TeamUpgradeListener(), this);
 
         if (configurator.config.getBoolean("main-lobby.enabled", false))
-            pluginManager.registerEvents(new LobbyBoard(), this);
+            registerListener(new LobbyBoard());
 
-        pluginManager.registerEvents(gamesInventory, this);
-        pluginManager.registerEvents(shop, this);
+        registerListener(gamesInventory);
+        registerListener(shop);
+
         //Do changes for legacy support.
         changeBedWarsConfig();
+        final var pluginManager = Bukkit.getServer().getPluginManager();
 
         try {
             if (pluginManager.isPluginEnabled("PlaceholderAPI")) {
@@ -194,11 +193,19 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             }
             RotatingGenerators.format = SBAHypixelify.getConfigurator().getStringList("floating-generator.holo-text");
             SBAUtil.destroySpawnerArmorStandEntities();
+            SBAHypixelify.debug("Scheduling Rotating Generators task!");
             RotatingGenerators.scheduleTask();
         }
 
+        SBAHypixelify.debug("Registering API service provider");
         getServer().getServicesManager().register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
         getLogger().info("Plugin has loaded");
+    }
+
+    public void registerListener(Listener listener){
+        final var plugMan = Bukkit.getServer().getPluginManager();
+        plugMan.registerEvents(listener, this);
+        SBAHypixelify.debug("Registered listener: " + listener.getClass().getSimpleName());
     }
 
     protected void showErrorMessage(String... messages) {

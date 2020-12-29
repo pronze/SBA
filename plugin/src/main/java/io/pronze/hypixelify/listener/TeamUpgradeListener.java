@@ -29,7 +29,7 @@ public class TeamUpgradeListener implements Listener {
         final var player = e.getPlayer();
         final var newItem = e.getUpgradedItem();
         final var team = e.getTeam();
-        final var name = e.getName();
+        final var name = e.getName().toLowerCase();
         final var game = e.getGame();
         final var gameStorage = SBAHypixelify.getGamestorage(game);
 

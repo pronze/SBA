@@ -100,7 +100,7 @@ public class GameStorage implements io.pronze.hypixelify.api.game.GameStorage {
 
     public boolean isPoolEnabled(RunningTeam team) {
         final var data = teamDataMap.get(team.getName());
-        return data.isPurchasedTrap();
+        return data.isPurchasedPool();
     }
 
     public boolean isDragonEnabled(RunningTeam team) {

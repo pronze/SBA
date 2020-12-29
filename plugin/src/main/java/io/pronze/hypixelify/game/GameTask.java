@@ -76,7 +76,7 @@ public class GameTask extends BukkitRunnable {
                     if (Main.getPlayerGameProfile(player).isSpectator) return;
 
                     game.getRunningTeams().forEach(team-> {
-                        if (!storage.isTrapEnabled(team) || team.isPlayerInTeam(player)) return;
+                        if (!storage.isTrapEnabled(team) || team.getConnectedPlayers().contains(player)) return;
 
                         if (storage.getTargetBlockLocation(team)
                                 .distanceSquared(player.getLocation()) <= arena.radius) {

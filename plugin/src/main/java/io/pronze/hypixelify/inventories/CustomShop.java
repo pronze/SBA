@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import io.pronze.hypixelify.SBAHypixelify;
-import io.pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import io.pronze.hypixelify.api.events.TeamUpgradePurchaseEvent;
 import io.pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
@@ -30,6 +29,7 @@ import org.screamingsandals.bedwars.lib.sgui.SimpleInventories;
 import org.screamingsandals.bedwars.lib.sgui.events.GenerateItemEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.PreActionEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.ShopTransactionEvent;
+import org.screamingsandals.bedwars.lib.sgui.inventory.GuiHolder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import org.screamingsandals.bedwars.lib.sgui.item.ItemProperty;
 import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
@@ -270,9 +270,6 @@ public class CustomShop implements Listener {
                         .forEach(property-> {
                             final var newItem = event.getStack();
                             final var applyPropertyEvent =
-                                    !const_properties.contains(property.getPropertyName().toLowerCase()) ?
-                                    new ApplyPropertyToItemEvent(game, player, newItem,
-                                            property.getReader(player, item).convertToMap(), reader) :
                                     new BedwarsApplyPropertyToDisplayedItem(game, player, newItem, property.getReader(player).convertToMap());
                             Main.getInstance().getServer().getPluginManager().callEvent(applyPropertyEvent);
                             event.setStack(newItem);
@@ -341,7 +338,7 @@ public class CustomShop implements Listener {
     }
 
     @EventHandler
-    public void onApplyPropertyToItem(ApplyPropertyToItemEvent event) {
+    public void onApplyPropertyToItem(BedwarsApplyPropertyToItem event) {
         String price = null;
         final var game = event.getGame();
         final var player = event.getPlayer();
@@ -350,9 +347,7 @@ public class CustomShop implements Listener {
         final var stack = event.getStack();
         final var gameStorage = SBAHypixelify.getGamestorage(game);
 
-        if (gameStorage == null) {
-            return;
-        }
+        if (gameStorage == null) return;
 
         if (propertyName.equalsIgnoreCase("sharpness")
         || propertyName.equalsIgnoreCase("protection")) {
@@ -370,7 +365,6 @@ public class CustomShop implements Listener {
             } else {
                 stack.addEnchantment(enchant, level);
                 price = Integer.toString(TeamUpgradeListener.prices.get(level));
-                event.setPrice(price);
                 event.setStack(stack);
             }
         }
@@ -385,7 +379,21 @@ public class CustomShop implements Listener {
         }
 
         if (price != null) {
-            event.setStack(setLores(event.getStack(), event.getReader(), price));
+            final var format = Main.isLegacy() ? shopMap.get("-legacy-upgradeShop") :
+                    shopMap.get("-upgradeShop");
+            final var guiHolder = format.getCurrentGuiHolder(player);
+            if (guiHolder == null) {
+                return;
+            }
+            final var itemOptional = guiHolder.getItems()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .filter(info -> stack.equals(info.getItem()))
+                    .findFirst();
+
+            if (itemOptional.isPresent()) {
+                event.setStack(setLores(event.getStack(), itemOptional.get().getReader(player), price));
+            }
         }
     }
 
@@ -441,7 +449,9 @@ public class CustomShop implements Listener {
         }
     }
 
-    public void sellstack(ItemStack newItem, ShopTransactionEvent event) { event.getPlayer().getInventory().removeItem(newItem); }
+    public void sellstack(ItemStack newItem, ShopTransactionEvent event) {
+        event.getPlayer().getInventory().removeItem(newItem);
+    }
 
     private void handleBuy(ShopTransactionEvent event) {
         final var player = event.getPlayer();
@@ -511,25 +521,21 @@ public class CustomShop implements Listener {
                         .filter(ItemProperty::hasName)
                         .forEach(property-> {
                             final var propertyName = property.getPropertyName().toLowerCase();
+                            SBAHypixelify.debug("Found property: " + propertyName + " for itemstack: "
+                                    + event.getStack().getType().name());
                             final var isCustomProperty = const_properties.contains(propertyName);
 
                             final var propertyData = property.getReader(player, event.getItem()).convertToMap();
 
-                            final var applyEvent = isCustomProperty ?
-                                    new ApplyPropertyToItemEvent(game, player, finalNewItem.get(), propertyData, mapReader) :
-                                    new BedwarsApplyPropertyToBoughtItem(game, player, finalNewItem.get(), propertyData);
+                            final var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player, finalNewItem.get(), propertyData);
+                            SBAHypixelify.debug("Calling event: " + applyEvent.getClass().getSimpleName());
                             SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(applyEvent);
-
-                            try {
-                                final var stack = (ItemStack) applyEvent.getClass().getMethod("getStack", null).invoke(applyEvent);
-                                finalNewItem.set(stack);
-
-                                if (isCustomProperty) {
-                                    final var appliedPrice = Integer.parseInt((String) applyEvent.getClass().getMethod("getPrice", null).invoke(applyEvent));
-                                    priceReference.set(appliedPrice);
-                                    propertyReference.set(propertyName);
-                                }
-                            } catch (Throwable ignored) {}
+                            final var stack = applyEvent.getStack();
+                            finalNewItem.set(stack);
+                            if (isCustomProperty) {
+                                priceReference.set(ShopUtil.getSharpnessOrProtectionLevel(propertyName, stack));
+                                propertyReference.set(propertyName);
+                            }
                         });
 
                 final var newItemFromReference = finalNewItem.get();
@@ -543,6 +549,8 @@ public class CustomShop implements Listener {
 
                 if (propertyReference.get() != null) {
                     propName = propertyReference.get();
+                    SBAHypixelify.debug("Property name for itemstack: " + newItem.getType()
+                            .name() + " is: " + propName);
                 }
             }
 
@@ -551,12 +559,13 @@ public class CustomShop implements Listener {
 
             if (propName != null) {
                 final var e = new TeamUpgradePurchaseEvent(player, newItem, propName, team, game, type);
+                SBAHypixelify.debug("Calling event: "  + e.getClass().getSimpleName());
                 Main.getInstance().getServer().getPluginManager().callEvent(e);
                 if (e.isCancelled()) {
                     return;
                 }
-                if (e.getPrice() != null)
-                    materialItem = type.getStack(Integer.parseInt(e.getPrice()));
+
+                materialItem = e.getPrice() != null ? type.getStack(Integer.parseInt(e.getPrice())) : materialItem;
 
                 //since we are  setting the price to a different one on upgrade, we do the check again
                 if (!event.hasPlayerInInventory(materialItem)
@@ -618,8 +627,6 @@ public class CustomShop implements Listener {
                 Sounds.playSound(player, player.getLocation(),
                         Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
             }
-
-
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
                 player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
