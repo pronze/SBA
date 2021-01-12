@@ -1,0 +1,212 @@
+package pronze.hypixelify.scoreboard;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.Team;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.game.TeamColor;
+import pronze.hypixelify.Configurator;
+import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.utils.ScoreboardUtil;
+import pronze.lib.scoreboards.Scoreboard;
+import pronze.lib.scoreboards.ScoreboardManager;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+public class ScoreBoard {
+
+    private final static String date = new SimpleDateFormat(Configurator.date).format(new Date());
+    private final Game game;
+    private final Arena arena;
+    private final Map<String, String> teamstatus = new HashMap<>();
+    private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+    private final List<String> scoreboard_lines = new ArrayList<>();
+
+    protected BukkitTask updateTask;
+
+    public ScoreBoard(Arena arena) {
+        this.arena = arena;
+        game = arena.getGame();
+
+        if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
+            scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("5"));
+        } else {
+            scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("default"));
+        }
+        game.getConnectedPlayers().forEach(this::createBoard);
+
+        new BukkitRunnable() {
+            public void run() {
+                if (game.getStatus() == GameStatus.RUNNING) {
+                    updateCustomObj();
+                } else {
+                    cancel();
+                }
+            }
+        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 5L);
+    }
+
+    private void createBoard(Player player) {
+        Logger.trace("Creating board for player: {}", player.getName());
+
+        final var scoreboardOptional = ScoreboardManager.getInstance()
+                .fromCache(player.getUniqueId());
+        scoreboardOptional.ifPresent(Scoreboard::destroy);
+
+        final var scoreboard = Scoreboard.builder()
+                .animate(true)
+                .player(player)
+                .async(false)
+                .displayObjective(ScoreboardUtil.GAME_OBJECTIVE_NAME)
+                .updateInterval(20L)
+                .animationInterval(2L)
+                .animatedTitle(SBAHypixelify
+                        .getConfigurator()
+                        .getStringList("lobby-scoreboard.title"))
+                .updateCallback(board -> {
+                    board.setLines(process(player, board));
+                    return true;
+                })
+                .build();
+        scoreboardMap.put(player.getUniqueId(), scoreboard);
+    }
+
+    public void updateCustomObj() {
+        game.getConnectedPlayers().forEach(p -> ScoreboardUtil.updateCustomObjective(p, game));
+    }
+
+    public List<String> process(Player player, Scoreboard board) {
+        final var lines = new ArrayList<String>();
+        final var playerData = arena.getPlayerData(player.getUniqueId());
+        final var playerTeam = game.getTeamOfPlayer(player);
+        final var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+
+        final var totalKills = String.valueOf(statistic.getKills());
+        final var currentKills = String.valueOf(playerData.getKills());
+        final var finalKills = String.valueOf(statistic.getKills());
+        final var currentDeaths = String.valueOf(playerData.getDeaths());
+        final var currentBedDestroys = String.valueOf(playerData.getBedDestroys());
+        final var teamName = playerTeam == null ? "" : playerTeam.getName();
+        final var teamStatus = playerTeam != null ? getTeamBedStatus(playerTeam) : null;
+
+        scoreboard_lines.forEach(line -> {
+            if (line.contains("{team_status}")) {
+                String finalLine = line;
+                game.getAvailableTeams().forEach(t -> {
+                    String you = "";
+                    if (playerTeam != null) {
+                        if (playerTeam.getName().equals(t.getName())) {
+                            you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
+                        }
+                    }
+                    if (teamstatus.containsKey(t.getName())) {
+                        lines.add(teamstatus.get(t.getName()).replace("{you}", you));
+                        return;
+                    }
+                    lines.add(finalLine.replace("{team_status}",
+                            getTeamStatusFormat(t).replace("{you}", you)));
+                });
+                return;
+            }
+            line = line
+                    .replace("{team}", teamName)
+                    .replace("{beds}", currentBedDestroys)
+                    .replace("{dies}", currentDeaths)
+                    .replace("{totalkills}", totalKills).replace("{finalkills}", finalKills)
+                    .replace("{kills}", currentKills)
+                    .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                    .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
+                    .replace("{game}", game.getName()).replace("{date}", date)
+                    .replace("{team_bed_status}", teamStatus)
+                    .replace("{tier}", arena.gameTask.getTier()
+                            .replace("-", " ")
+                            + " in §a" + arena.gameTask.getFormattedTimeLeft());
+            lines.add(line);
+        });
+
+        final var holder = board.getHolder();
+        game.getRunningTeams().forEach(team -> {
+            if (!holder.hasTeamEntry(team.getName())) {
+                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+            }
+            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+
+            new HashSet<>(scoreboardTeam.getEntries())
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .map(Bukkit::getPlayerExact)
+                    .filter(Objects::nonNull)
+                    .forEach(teamPlayer -> {
+                        if (!team.getConnectedPlayers().contains(teamPlayer)) {
+                            scoreboardTeam.removeEntry(teamPlayer.getName());
+                        }
+                    });
+
+            team.getConnectedPlayers()
+                    .stream()
+                    .map(Player::getName)
+                    .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
+                    .forEach(scoreboardTeam::addEntry);
+        });
+        return lines;
+    }
+
+    private String getTeamBedStatus(RunningTeam team) {
+        return team.isDead() ? "§c\u2717" :
+                "§a\u2713";
+    }
+
+    private String getTeamStatusFormat(RunningTeam team) {
+        String alive = "{color} {team} §a\u2713 §8{you}";
+        String destroyed = "{color} {team} §a§f{players}§8 {you}";
+
+        String status = team.isTargetBlockExists() ? alive : destroyed;
+
+        if (team.isDead() && team.getConnectedPlayers().size() <= 0)
+            status = "{color} {team} §c\u2717 {you}";
+
+        String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
+                + team.getName().charAt(0);
+        return status.replace("{bed_status}", getTeamBedStatus(team))
+                .replace("{color}", formattedTeam)
+                .replace("{team}", ChatColor.WHITE.toString() + team.getName() + ":")
+                .replace("{players}", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
+    }
+
+    private String getTeamStatusFormat(Team team) {
+        Optional<RunningTeam> rt = game.getRunningTeams().stream()
+                .filter(t -> t.getName().equalsIgnoreCase(team.getName()))
+                .findAny();
+
+        if (rt.isPresent()) {
+            return getTeamStatusFormat(rt.get());
+        }
+
+        final var destroyed = "{color} {team} §c\u2718 {you}";
+        final var formattedTeam = org.screamingsandals.bedwars.game.TeamColor
+                .valueOf(team.getColor().name()).chatColor.toString()
+                + team.getName().charAt(0);
+
+        return destroyed.replace("{bed_status}", "§c\u2718")
+                .replace("{color}", formattedTeam)
+                .replace("{team}", ChatColor.WHITE.toString()
+                        + team.getName() + ":");
+    }
+
+    public void cancelTask() {
+        if (updateTask != null) {
+            if (Bukkit.getScheduler().isQueued(updateTask.getTaskId()) || !updateTask.isCancelled()) {
+                updateTask.cancel();
+            }
+        }
+    }
+}
