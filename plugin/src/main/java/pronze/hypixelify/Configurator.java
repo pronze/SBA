@@ -49,8 +49,7 @@ public class Configurator {
         dataFolder.mkdirs();
 
         configFile = new File(dataFolder, "bwaconfig.yml");
-        langFolder = new File(dataFolder.toString(), "languages");
-
+        langFolder = new File(dataFolder, "languages");
 
         config = new YamlConfiguration();
 
@@ -59,20 +58,6 @@ public class Configurator {
                 configFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        }
-
-        if (!langFolder.exists()) {
-            langFolder.mkdirs();
-
-            File[] listOfFiles = dataFolder.listFiles();
-            if (listOfFiles != null && listOfFiles.length > 0) {
-                for (File file : listOfFiles) {
-                    if (file.isFile() && file.getName().startsWith("messages_") && file.getName().endsWith(".yml")) {
-                        File dest = new File(langFolder, "language_" + file.getName().substring(9));
-                        file.renameTo(dest);
-                    }
-                }
             }
         }
 
