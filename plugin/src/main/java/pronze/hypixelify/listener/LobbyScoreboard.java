@@ -37,7 +37,7 @@ public class LobbyScoreboard implements Listener {
     public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
         if (e.getGame().getStatus() == GameStatus.WAITING) {
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), task -> createBoard(player, e.getGame()), 3L);
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> createBoard(player, e.getGame()), 3L);
         }
     }
 
