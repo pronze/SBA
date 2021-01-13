@@ -104,10 +104,10 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
     public RotatingGenerators spawn(List<Player> players) {
         destroy();
 
-        final var holoHeight = (float) SBAHypixelify.getConfigurator()
+        final var holoHeight = SBAHypixelify.getConfigurator()
                 .config.getDouble("floating-generator.holo-height", 2.0);
 
-        final var itemHeight = (float) SBAHypixelify.getConfigurator()
+        final var itemHeight = SBAHypixelify.getConfigurator()
                 .config.getDouble("floating-generator.item-height", 0.25);
 
         hologram = Main.getHologramManager()

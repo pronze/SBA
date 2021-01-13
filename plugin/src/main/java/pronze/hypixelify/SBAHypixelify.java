@@ -90,6 +90,11 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public void onEnable() {
+        plugin = this;
+        version = this.getDescription().getVersion();
+        isSnapshot = version.toLowerCase().contains("snapshot");
+        protocolLib = plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib");
+
         if (getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
@@ -112,11 +117,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             showErrorMessage("Minecraft server is running versions below 1.9, please upgrade!");
             return;
         }
-
-        plugin = this;
-        version = this.getDescription().getVersion();
-        isSnapshot = version.toLowerCase().contains("snapshot");
-        protocolLib = plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib");
 
         /* initialize our custom ScoreboardManager library*/
         ScoreboardManager.init(this);
