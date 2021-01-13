@@ -24,6 +24,8 @@ import pronze.lib.scoreboards.ScoreboardManager;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static pronze.hypixelify.lib.lang.I.i18n;
+
 public class LobbyScoreboard implements Listener {
     private static final String date = new SimpleDateFormat(Configurator.date).format(new Date());
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
@@ -91,8 +93,7 @@ public class LobbyScoreboard implements Listener {
 
     private List<String> process(Player player, Game game, Scoreboard scoreboard) {
         final var lines = new ArrayList<String>();
-        String state = SBAHypixelify.getConfigurator()
-                .getString("message.waiting", "§fWaiting...");
+        String state = i18n("waiting");
         String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = Math.max(needplayers, 0);

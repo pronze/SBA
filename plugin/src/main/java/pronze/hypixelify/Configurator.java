@@ -8,14 +8,12 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.screamingsandals.bedwars.Main;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 
 public class Configurator {
 
@@ -27,7 +25,8 @@ public class Configurator {
     public static boolean tag_health;
     public final File dataFolder;
     public final SBAHypixelify main;
-    public File file, shopFile, upgradeShop, legacyShop, legacyUpgradeShop;
+
+    public File configFile, shopFile, upgradeShop, legacyShop, legacyUpgradeShop, langFolder;
     public FileConfiguration config;
 
     public Configurator(SBAHypixelify main) {
@@ -49,19 +48,36 @@ public class Configurator {
     public void loadDefaults() {
         dataFolder.mkdirs();
 
-        file = new File(dataFolder, "bwaconfig.yml");
+        configFile = new File(dataFolder, "bwaconfig.yml");
+        langFolder = new File(dataFolder.toString(), "languages");
+
+
         config = new YamlConfiguration();
 
-        if (!file.exists()) {
+        if (!configFile.exists()) {
             try {
-                file.createNewFile();
+                configFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        if (!langFolder.exists()) {
+            langFolder.mkdirs();
+
+            File[] listOfFiles = dataFolder.listFiles();
+            if (listOfFiles != null && listOfFiles.length > 0) {
+                for (File file : listOfFiles) {
+                    if (file.isFile() && file.getName().startsWith("messages_") && file.getName().endsWith(".yml")) {
+                        File dest = new File(langFolder, "language_" + file.getName().substring(9));
+                        file.renameTo(dest);
+                    }
+                }
+            }
+        }
+
         try {
-            config.load(file);
+            config.load(configFile);
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
@@ -89,6 +105,7 @@ public class Configurator {
 
         var modify = new AtomicBoolean(false);
 
+        checkOrSetConfig(modify, "locale", "en");
         checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "permanent-items", true);
 
@@ -138,36 +155,6 @@ public class Configurator {
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
         checkOrSetConfig(modify, "message.maximum-enchant-lore", Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
-        checkOrSetConfig(modify, "message.game-end", "Game End");
-        checkOrSetConfig(modify, "message.diamond", "Diamond");
-        checkOrSetConfig(modify, "message.emerald", "Emerald");
-        checkOrSetConfig(modify, "message.waiting", "&fWaiting...");
-        checkOrSetConfig(modify, "message.dragon-spawn", "&cDragons has been spawned!, good luck");
-        checkOrSetConfig(modify, "message.dragon-trap-purchased", "&6Dragon upgrade has been purchased!");
-        checkOrSetConfig(modify, "message.game-starts-in", "&eThe game starts in &c{seconds} &eseconds");
-        checkOrSetConfig(modify, "message.bed-destroyed.title", "&c&lBED DESTROYED!");
-        checkOrSetConfig(modify, "message.bed-destroyed.sub-title", "You will no longer respawn!");
-        checkOrSetConfig(modify, "message.already-purchased", "&c&lYou already purchased the same {thing}");
-        checkOrSetConfig(modify, "message.wait-trap", "&cYou already purchased this upgrade!, wait for it to wear out");
-        checkOrSetConfig(modify, "message.upgrade-team-protection", "&o&c{player}&e has upgraded team protection");
-        checkOrSetConfig(modify, "message.error-occured", "&c&lAN ERROR HAS OCCURED");
-        checkOrSetConfig(modify, "message.greatest-enchantment", "&c&lYou Already have the greatest enchantment");
-        checkOrSetConfig(modify, "message.generator-upgrade", "{MatName}&e generator has been upgraded to &c{tier}");
-        checkOrSetConfig(modify, "message.shout-format", "&6[SHOUT] {color}[{team}]&r {player}&7: &r{message}");
-        checkOrSetConfig(modify, "message.trap-triggered.message", "§eYou have been blinded by %team% team!");
-        checkOrSetConfig(modify, "message.trap-triggered.title", "&cTrap Triggered!");
-        checkOrSetConfig(modify, "message.trap-triggered.sub-title", "&eSomeone has entered your base!");
-        checkOrSetConfig(modify, "message.blindness-trap-purchased-title", "&6Blindness Trap has been purchased!");
-        checkOrSetConfig(modify, "message.purchase-heal-pool", "&bHeal Pool has been purchased by: {player}");
-        checkOrSetConfig(modify, "message.cannot-buy", "&cYou don't have enough {price}");
-        checkOrSetConfig(modify, "message.purchase", "&aYou purchased &e{item}");
-        checkOrSetConfig(modify, "message.respawn-title", "&cYOU DIED!");
-        checkOrSetConfig(modify, "message.respawn-message", "&eYou will respawn in &c%time% &eseconds");
-        checkOrSetConfig(modify, "message.respawned-message", "&eYou have respawned");
-        checkOrSetConfig(modify, "message.respawn-subtitle", "&eYou will respawn in &c%time% &eseconds");
-        checkOrSetConfig(modify, "message.respawned-title", "§aRESPAWNED!");
-        checkOrSetConfig(modify, "message.victory-title", "§6§lVICTORY!");
-        checkOrSetConfig(modify, "message.cannot-put-item-on-chest", "You cannot put this item onto this chest.");
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         checkOrSetConfig(modify, "games-inventory.enabled", true);
@@ -175,7 +162,6 @@ public class Configurator {
         checkOrSetConfig(modify, "games-inventory.stack-lore",
                 Arrays.asList("&8{mode}", "", "&7Available Servers: &a1", "&7Status: &a{status}"
                         , "&7Players:&a {players}", "", "&aClick to play", "&eRight click to toggle favorite!"));
-        checkOrSetConfig(modify, "message.upgrade", "Upgrade: ");
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
         checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
@@ -481,7 +467,7 @@ public class Configurator {
 
         if (modify.get()) {
             try {
-                config.save(file);
+                config.save(configFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -533,11 +519,9 @@ public class Configurator {
     }
 
     public void upgradeCustomFiles() {
-
         config.set("version", SBAHypixelify.getInstance().getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
-
         File file2 = new File(dataFolder, "config.yml");
         main.saveResource("config.yml", true);
         main.saveResource("shop.yml", true);
@@ -550,16 +534,13 @@ public class Configurator {
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
-
-
         Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
         Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
-
     }
 
     public void saveConfig() {
         try {
-            config.save(file);
+            config.save(configFile);
         } catch (IOException e) {
             e.printStackTrace();
         }

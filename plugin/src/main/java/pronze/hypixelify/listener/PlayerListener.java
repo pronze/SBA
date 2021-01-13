@@ -1,4 +1,5 @@
 package pronze.hypixelify.listener;
+import org.screamingsandals.lib.paperlib.PaperLib;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.RotatingGenerators;
 import pronze.hypixelify.utils.Logger;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
+import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class PlayerListener implements Listener {
 
@@ -141,15 +143,12 @@ public class PlayerListener implements Listener {
 
                     //send custom title because we disabled Bedwars from showing any title
                     if (livingTime > 0) {
-                        sendTitle(player, SBAHypixelify.getConfigurator()
-                                        .getString("message.respawn-title"),
-                                SBAHypixelify.getConfigurator()
-                                        .getString("message.respawn-subtitle")
+                        sendTitle(player, i18n("respawn-title"),
+                                i18n("respawn-subtitle")
                                         .replace("%time%", String.valueOf(livingTime)),
                                 0, 20, 0);
 
-                        player.sendMessage(SBAHypixelify.getConfigurator()
-                                .getString("message.respawn-message")
+                        player.sendMessage(i18n("respawn-message")
                                 .replace("%time%", String.valueOf(livingTime)));
                         livingTime--;
                     }
@@ -159,10 +158,8 @@ public class PlayerListener implements Listener {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {
-                            player.sendMessage(SBAHypixelify.getConfigurator()
-                                    .getString("message.respawned-message"));
-                            sendTitle(player, SBAHypixelify.getConfigurator()
-                                    .getString("message.respawned-title"), "",
+                            player.sendMessage(i18n("respawned-message"));
+                            sendTitle(player, i18n("respawned-title"), "",
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
                                     Main.getGame(game.getName()).getPlayerTeam(gamePlayer).getColor());
@@ -211,7 +208,7 @@ public class PlayerListener implements Listener {
                 && bottomSlot.getType() == InventoryType.PLAYER) {
             if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                player.sendMessage("§c§l" + SBAHypixelify.getConfigurator().getString("message.cannot-put-item-on-chest"));
+                player.sendMessage("§c§l" + i18n("cannot-put-item-on-chest"));
             }
         }
     }

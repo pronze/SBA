@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.lib.lang.I18n;
 import pronze.hypixelify.placeholderapi.SBAExpansion;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
@@ -127,7 +128,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         configurator.loadDefaults();
 
         Logger.init(configurator.config.getBoolean("debug.enabled", false));
-
+        I18n.load(this, configurator.config.getString("locale"));
+        
         playerWrapperService = new PlayerWrapperService();
         debug = configurator.config.getBoolean("debug.enabled", false);
 

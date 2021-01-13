@@ -47,7 +47,7 @@ subprojects{
         compileOnly paper("1.16.4")
         compileOnly 'org.screamingsandals.bedwars:BedWars:0.3.0-SNAPSHOT'
         compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.3.0-SNAPSHOT'
-        shade 'pronze.lib:scoreboard:1.0.0'
+        shade 'pronze.lib:scoreboard:1.0.1-SNAPSHOT'
     }
 
     sourceCompatibility = '11.0'

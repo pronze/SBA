@@ -41,6 +41,8 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static pronze.hypixelify.lib.lang.I.i18n;
+
 
 public class CustomShop implements Listener {
 
@@ -585,8 +587,7 @@ public class CustomShop implements Listener {
                 //since we are  setting the price to a different one on upgrade, we do the check again
                 if (!event.hasPlayerInInventory(materialItem)
                         && !Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(SBAHypixelify.getConfigurator()
-                            .getString("message.cannot-buy", "§cYou don't have enough {price}")
+                    player.sendMessage(i18n("cannot-buy")
                             .replace("{price}", priceType));
                     return;
                 }
@@ -607,13 +608,12 @@ public class CustomShop implements Listener {
                     buyStack(newItem, event);
                 } else {
                     shouldSellStack = false;
-                    player.sendMessage(SBAHypixelify.getConfigurator()
-                            .getString("message.already-purchased")
+                    player.sendMessage(i18n("already-purchased")
                             .replace("{thing}", "Sword"));
                 }
             } else if (player.getInventory().getBoots() != null
                     && newItem.getType().equals(player.getInventory().getBoots().getType())) {
-                player.sendMessage(SBAHypixelify.getConfigurator().getString("message.already-purchased")
+                player.sendMessage(i18n("already-purchased")
                         .replace("{thing}", "Armor"));
                 shouldSellStack = false;
             } else if (newItem.getType().name().contains("BOOTS")) {
@@ -623,8 +623,7 @@ public class CustomShop implements Listener {
                     ShopUtil.removeAxeOrPickaxe(player, newItem);
                     buyStack(newItem, event);
                 } else {
-                    player.sendMessage(SBAHypixelify.getConfigurator()
-                            .getString("message.already-purchased")
+                    player.sendMessage(i18n("already-purchased")
                             .replace("{thing}", newItem.getType().name()
                                     .substring(newItem.getType().name().indexOf("_")).substring(1)));
                     shouldSellStack = false;
@@ -635,8 +634,7 @@ public class CustomShop implements Listener {
             if (shouldSellStack) {
                 sellstack(materialItem, event);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(SBAHypixelify.getConfigurator()
-                            .getString("message.purchase", "§aYou purchased &e")
+                    player.sendMessage(i18n("purchase")
                             .replace("{item}", getNameOrCustomNameOfItem(newItem)));
                 }
                 Sounds.playSound(player, player.getLocation(),
@@ -644,7 +642,7 @@ public class CustomShop implements Listener {
             }
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
+                player.sendMessage(i18n("cannot-buy")
                         .replace("{price}", priceType));
             }
         }

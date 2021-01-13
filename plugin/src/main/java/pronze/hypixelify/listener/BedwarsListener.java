@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
+import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class BedwarsListener implements Listener {
 
@@ -120,9 +121,8 @@ public class BedwarsListener implements Listener {
                             if (buffer == seconds) return;
                             buffer = seconds;
                             if (seconds <= 10) {
-                                String message = ShopUtil.translateColors(SBAHypixelify.getConfigurator()
-                                        .getString("message.game-starts-in")
-                                        .replace("{seconds}", String.valueOf(seconds)));
+                                String message = i18n("game-starts-in")
+                                        .replace("{seconds}", String.valueOf(seconds));
 
                                 message = seconds == 1 ? message
                                         .replace("seconds", "second") : message;

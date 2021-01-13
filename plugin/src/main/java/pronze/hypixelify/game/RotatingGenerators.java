@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static pronze.hypixelify.lib.lang.I.i18n;
+
 @Data
 public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGenerators {
 
@@ -66,9 +68,8 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
 
                 final var newLines = new ArrayList<String>();
                 final var matName = getItemSpawner().getItemSpawnerType().getMaterial() ==
-                        Material.EMERALD ? "§a" + SBAHypixelify.getConfigurator().config
-                        .getString("message.emerald", "Emerald&e") :
-                        "§b" + SBAHypixelify.getConfigurator().config.getString("message.diamond");
+                        Material.EMERALD ? "§a" + i18n("emerald", "Emerald&e") :
+                        "§b" + i18n("diamond");
 
                 for (var line : RotatingGenerators.format) {
                     if (line == null) {

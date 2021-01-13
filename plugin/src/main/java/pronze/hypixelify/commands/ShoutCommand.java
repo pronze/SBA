@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static pronze.hypixelify.lib.lang.I.i18n;
+
 public class ShoutCommand extends AbstractCommand {
 
     public ShoutCommand() {
@@ -75,7 +77,7 @@ public class ShoutCommand extends AbstractCommand {
 
         Arrays.stream(args).forEach(st -> builder.append(st).append(" "));
 
-        String st = SBAHypixelify.getConfigurator().getString("message.shout-format")
+        String st = i18n("shout-format")
                 .replace("{color}", color)
                 .replace("{player}", player.getName())
                 .replace("{message}", builder.toString());

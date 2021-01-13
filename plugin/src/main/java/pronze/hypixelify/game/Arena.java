@@ -19,6 +19,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import java.util.*;
 
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
+import static pronze.hypixelify.lib.lang.I.i18n;
 
 @Getter
 public class Arena implements pronze.hypixelify.api.game.Arena {
@@ -99,10 +100,8 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var team = e.getTeam();
-        team.getConnectedPlayers().forEach(player -> sendTitle(player, SBAHypixelify.getConfigurator()
-                        .getString("message.bed-destroyed.title"),
-                SBAHypixelify.getConfigurator()
-                        .getString("message.bed-destroyed.sub-title"), 0, 40, 20));
+        team.getConnectedPlayers().forEach(player -> sendTitle(player, i18n("bed-destroyed.title"),
+                i18n("bed-destroyed.sub-title"), 0, 40, 20));
 
         final var destroyer = e.getPlayer();
         if (destroyer != null) {
@@ -190,7 +189,7 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
 
             winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
             winner.getConnectedPlayers().forEach(pl ->
-                    sendTitle(pl, SBAHypixelify.getConfigurator().getString("message.victory-title"),
+                    sendTitle(pl, i18n("victory-title"),
                             "", 0, 90, 0));
 
             for (Player player : game.getConnectedPlayers()) {
