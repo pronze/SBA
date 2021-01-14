@@ -1,8 +1,6 @@
 package pronze.hypixelify.api;
 
 import pronze.hypixelify.api.game.GameStorage;
-import pronze.hypixelify.api.manager.PartyManager;
-import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -56,21 +54,6 @@ public interface SBAHypixelifyAPI {
      * @return the version SBAHypixelify is currently running
      */
     String getVersion();
-
-    /**
-     *
-     * @param player the player object to lookup
-     * @return true if player is present in any party, false otherwise
-     */
-    boolean isInParty(Player player);
-
-    /**
-     * Return the party instance of which the player currently is in
-     * @see SBAHypixelifyAPI#isInParty(Player) 
-     * @param player the player object to lookup
-     * @return {@link Party} if player is in a party, null otherwise
-     */
-    Optional<Party> getParty(Player player);
 
     /**
      *

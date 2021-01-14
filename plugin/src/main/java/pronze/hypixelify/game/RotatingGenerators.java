@@ -159,10 +159,7 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
 
     public static boolean canBeUsed(ItemSpawner spawner) {
         final var type = spawner.getItemSpawnerType().getMaterial();
-        if (type == Material.DIAMOND || type == Material.EMERALD) {
-            return true;
-        }
-        return false;
+        return type == Material.DIAMOND || type == Material.EMERALD;
     }
 
     public void destroy() {

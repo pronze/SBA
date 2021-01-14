@@ -2,32 +2,19 @@ package pronze.hypixelify.game;
 
 import com.google.common.base.Strings;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.party.Party;
-import pronze.hypixelify.api.manager.PartyManager;
-import pronze.hypixelify.utils.ShopUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 
-import javax.annotation.Nullable;
 
 public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrapper {
 
     private final String name;
     private final Player instance;
     private final PlayerStatistic statistic;
-    private BukkitTask inviteTask;
-    private Party invitedParty;
-    private Party party;
     private int shout;
-
-
-    private boolean isInParty = false;
-    private boolean isInvited = false;
-    private boolean partyChat = false;
     private boolean shouted = false;
 
     public PlayerWrapper(Player player) {
@@ -35,7 +22,6 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
         instance = player;
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         statistic = Main.getPlayerStatisticsManager().getStatistic(instance);
-        init();
     }
 
     @Override
@@ -66,56 +52,8 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
         return !shouted;
     }
 
-    @Override
-    public boolean getPartyChatEnabled() {
-        return partyChat;
-    }
-
-    @Override
-    public void setPartyChatEnabled(boolean b) {
-        partyChat = b;
-    }
-
-    @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public void setIsInParty(boolean bool) {
-        isInParty = bool;
-    }
-
-    @Override
-    public boolean isPartyLeader() {
-        if (party == null || party.getLeader() == null)
-            return false;
-        return instance.getUniqueId().equals(party.getLeader().getUniqueId());
-    }
-
-    @Override
-    public Party getInvitedParty() {
-        return invitedParty;
-    }
-
-    @Override
-    public void setInvitedParty(Party party) {
-        invitedParty = party;
-    }
-
-
-    @Nullable
-    @Override
-    public Player getPartyLeader() {
-        if (party == null) {
-            return null;
-        }
-        return party.getLeader();
-    }
-
-    public void init() {
-        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(),
-                this::updateDatabase, 1L);
     }
 
     @Override
@@ -227,89 +165,8 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
     }
 
     @Override
-    public Party getParty() {
-        return party;
-    }
-
-    @Override
-    public void setParty(Player leader) {
-        party = SBAHypixelify.getPartyManager().getParty(leader);
-    }
-
-    @Override
     public double getKD() {
         return Main.getPlayerStatisticsManager().getStatistic(instance).getKD();
     }
-
-
-    @Override
-    public void updateDatabase() {
-        if (!isInParty || !isPartyLeader()) return;
-        final PartyManager partyManager = SBAHypixelify.getPartyManager();
-        if (party == null) return;
-        if (party.shouldDisband()) {
-            if (instance.isOnline()) {
-                SBAHypixelify.getConfigurator().getStringList("party.message.disband-inactivity")
-                        .forEach(st -> instance.sendMessage(ShopUtil.translateColors(st)));
-            }
-            setIsInParty(false);
-            party.disband();
-            Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), () -> partyManager.removeParty(party));
-            setParty(null);
-        }
-    }
-
-    @Override
-    public boolean isInParty() {
-        return isInParty;
-    }
-
-    @Override
-    public boolean isInvited() {
-        return isInvited;
-    }
-
-    @Override
-    public void setInvited(boolean bool) {
-        isInvited = bool;
-
-        if (bool) {
-            final PartyManager partyManager = SBAHypixelify.getPartyManager();
-            cancelInviteTask();
-            inviteTask = Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
-                if (isInvited) {
-                    final Party party = partyManager.getParty(invitedParty.getLeader());
-
-                    if (invitedParty != null && party != null) {
-                        party.removeInvitedMember(instance);
-                        final Player partyLeader = invitedParty.getLeader();
-
-                        if (partyLeader != null && partyLeader.isOnline())
-                            ShopUtil.sendMessage(partyLeader, SBAHypixelify.getConfigurator().getStringList("party.message.expired"));
-                        if (instance != null && instance.isOnline())
-                            ShopUtil.sendMessage(instance,SBAHypixelify.getConfigurator().getStringList("party.message.expired"));
-                    }
-                    setInvitedParty(null);
-                    SBAHypixelify.getWrapperService().updateAll();
-                    isInvited = false;
-                }
-            }, 20L * 60);
-        } else {
-            cancelInviteTask();
-        }
-
-    }
-
-    public void cancelInviteTask() {
-        try {
-            if (inviteTask != null && !inviteTask.isCancelled()) {
-                inviteTask.cancel();
-                inviteTask = null;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 
 }

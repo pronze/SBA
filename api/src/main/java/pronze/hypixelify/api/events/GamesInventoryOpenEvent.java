@@ -5,13 +5,13 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public class GameSelectorOpenEvent extends Event implements Cancellable {
+public class GamesInventoryOpenEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private Player player;
     private boolean isCancelled = false;
     private int mode;
 
-    public GameSelectorOpenEvent(Player player, int mode){
+    public GamesInventoryOpenEvent(Player player, int mode){
         this.player = player;
         this.mode = mode;
     }
@@ -36,10 +36,10 @@ public class GameSelectorOpenEvent extends Event implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return GameSelectorOpenEvent.handlers;
+        return GamesInventoryOpenEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return GameSelectorOpenEvent.handlers;
+        return GamesInventoryOpenEvent.handlers;
     }
 }

@@ -2,11 +2,9 @@ package pronze.hypixelify;
 
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 import org.screamingsandals.bedwars.Main;
 import pronze.hypixelify.utils.SBAUtil;
 
@@ -17,10 +15,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Configurator {
 
+    //TODO: remove the static shits later
+    public static HashMap<String, Integer> game_size;
     public static HashMap<String, List<String>> Scoreboard_Lines;
     public static List<String> overstats_message;
     public static List<String> gamestart_message;
-    public static HashMap<String, Integer> game_size;
     public static String date;
     public static boolean tag_health;
     public final File dataFolder;
@@ -72,21 +71,28 @@ public class Configurator {
         legacyShop = new File(dataFolder, "legacy-shop.yml");
         legacyUpgradeShop = new File(dataFolder, "legacy-upgradeShop.yml");
 
-        if (!shopFile.exists()) {
-            main.saveResource("shop.yml", false);
+        if (Main.isLegacy()) {
+            if (!legacyShop.exists()) {
+                main.saveResource("shops/legacy-shop.yml", false);
+            }
+
+            if (!legacyUpgradeShop.exists()) {
+                main.saveResource("shops/legacy-upgradeShop.yml", false);
+            }
+        } else {
+            if (!shopFile.exists()) {
+                main.saveResource("shops/shop.yml", false);
+            }
+
+            if (!upgradeShop.exists()) {
+                main.saveResource("shops/upgradeShop.yml", false);
+            }
         }
 
-        if (!upgradeShop.exists()) {
-            main.saveResource("upgradeShop.yml", false);
+        if (!langFolder.exists()) {
+            langFolder.mkdirs();
         }
 
-        if (!legacyShop.exists()) {
-            main.saveResource("legacy-shop.yml", false);
-        }
-
-        if (!legacyUpgradeShop.exists()) {
-            main.saveResource("legacy-upgradeShop.yml", false);
-        }
 
         var modify = new AtomicBoolean(false);
 
@@ -143,36 +149,11 @@ public class Configurator {
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
         checkOrSetConfig(modify, "games-inventory.enabled", true);
-        checkOrSetConfig(modify, "games-inventory.stack-material", "PAPER");
-        checkOrSetConfig(modify, "games-inventory.stack-lore",
-                Arrays.asList("&8{mode}", "", "&7Available Servers: &a1", "&7Status: &a{status}"
-                        , "&7Players:&a {players}", "", "&aClick to play", "&eRight click to toggle favorite!"));
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
         checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
         checkOrSetConfig(modify, "games-inventory.gui.squad-prefix", "Bed Wars Squads");
-        checkOrSetConfig(modify, "games-inventory.back-item.name", "&aGo Back");
-        checkOrSetConfig(modify, "games-inventory.back-item.lore", Arrays.asList("&7To Play Bed Wars"));
-        checkOrSetConfig(modify, "games-inventory.firework-name", "&aRandom Map");
-        checkOrSetConfig(modify, "games-inventory.firework-lore", Arrays.asList("&8{mode}", "", "&7Map Selections: &a{games}", "", "&aClick to Play"));
 
-        checkOrSetConfig(modify, "games-inventory.diamond-name", "&aRandom Favorite");
-        checkOrSetConfig(modify, "games-inventory.oak_sign-name", "&aMap Selector ({mode})");
-        checkOrSetConfig(modify, "games-inventory.oak_sign-lore", Arrays.asList(
-                "&7Pick which map you want to play"
-                , "&7from a list of available servers."
-                , " "
-                , "&eClick to browse!"));
-        checkOrSetConfig(modify, "games-inventory.barrier-name", "&cExit");
-        checkOrSetConfig(modify, "games-inventory.ender_pearl-name", "&cClick here to rejoin!");
-        checkOrSetConfig(modify, "games-inventory.ender_pearl-lore", Arrays.asList("&7Click here to rejoin the lastly joined game"));
-
-        checkOrSetConfig(modify, "games-inventory.bed-name", "&aBed Wars ({mode})");
-        checkOrSetConfig(modify, "games-inventory.bed-lore", Arrays.asList("&7Play Bed Wars {mode}", " ", "&eClick to play!"));
-        for (String game : Main.getGameNames()) {
-            String str = "lobby-scoreboard.player-size.games." + game;
-            checkOrSetConfig(modify, str, 4);
-        }
         checkOrSetConfig(modify, "game-start.message", Arrays.asList(
                 "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
                 , "                             &f&lBed Wars"
@@ -266,159 +247,6 @@ public class Configurator {
                 , ""
                 , "&ewww.sample.net"
         ));
-
-        checkOrSetConfig(modify, "party.leader-autojoin-autoleave", true);
-        checkOrSetConfig(modify, "party.size", 4);
-        checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou cannot invite this player to your party!",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.no-other-commands", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou cannot do other commands now",
-                "&6-----------------------------------------------------"
-        ));
-        checkOrSetConfig(modify, "party.message.leader-join-leave", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou have been teleported by the party leader",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.expired", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cThe party invite has been expired",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.invalid-command", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cInvalid command, do /p help for more.",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.access-denied", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou cannot access this command",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.notinparty", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou are currently not in a party!",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.invited", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&eYou have invited {player}&e to your party!",
-                "&ewait for them to accept it",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.alreadyInvited", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cThis player has already had pending invites!",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.warp", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&eYou have been warped by the leader",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.warping", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&eWarping players..",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.invite", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "{player}&e has invited you to join their party!",
-                "&eType /party accept to join. You have 60 seconds to accept.",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.accepted", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "{player} &ajoined the party!",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.offline-left", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "{player} &aleft the party due to inactivity",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.left", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou left the party!",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.offline-quit", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "{player} &cleft the party",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.declined", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "{player} &chas declined this party invite",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.kicked", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "{player} &cHas been kicked from party",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.disband-inactivity", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&aParty has been disbanded due to inactivity",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.disband", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cParty has been disbanded by the leader.",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.player-not-found", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cCould not find Player!",
-                "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.cannot-blank-yourself", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou can't {blank} yourself.",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.cannot-invite-yourself", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou can't invite yourself.",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.not-invited", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou are not invited to any party",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.got-kicked", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou have been kicked from party",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.decline-inc", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cTo invite, you must decline current invites.",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.declined-user", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou declined the invite!",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "message.not-in-game", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou are not in a game to do this command!",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "message.shout-wait", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou have to wait {seconds} seconds before doing this command!",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.chat-enable-disabled", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&aParty chat has been {mode}",
-                "&6-----------------------------------------------------"));
-
-        checkOrSetConfig(modify, "party.message.help", Arrays.asList(
-                "&1-----------------------------------------------------",
-                "&6Party commands",
-                "&e/p accept <player>&7 - Accept a party invite from a player",
-                "&e/p invite <player>&7 - Invite another player to your party",
-                "&e/p list&7 - Lists the players in your current party",
-                "&e/p leave&7 - Leaves your current party",
-                "&1-----------------------------------------------------"));
         checkOrSetConfig(modify, "main-lobby.enabled", false);
         checkOrSetConfig(modify, "main-lobby.title", "&e&lBED WARS");
         checkOrSetConfig(modify, "main-lobby.custom-chat", true);
@@ -447,8 +275,12 @@ public class Configurator {
         checkOrSetConfig(modify, "dragon.custom-name-enabled", true);
         checkOrSetConfig(modify, "commands.player-only", "[SBAHypixelify] &cOnly players can use this command!");
         checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]&cYou do not have permissions to do this command!");
-
         checkOrSetConfig(modify, "experimental.reset-item-meta-on-purchase", false);
+
+        for (String game : Main.getGameNames()) {
+            String str = "lobby-scoreboard.player-size.games." + game;
+            checkOrSetConfig(modify, str, 4);
+        }
 
         if (modify.get()) {
             try {
@@ -458,31 +290,11 @@ public class Configurator {
             }
         }
 
-        try {
-            String str = config.getString("games-inventory.stack-material");
-            assert str != null;
-            if (str.toLowerCase().contains("bed") || str.toLowerCase().contains("rocket") || str.toLowerCase().contains("sign")
-                    || str.toLowerCase().contains("pearl")) {
-                config.set("games-inventory.stack-material", "PAPER");
-                saveConfig();
-            }
-            Material mat = Material.valueOf(config.getString("games-inventory.stack-material"));
-        } catch (Exception ignored) {
-            config.set("games-inventory.stack-material", "PAPER");
-            saveConfig();
-        }
-
         date = config.getString("date.format");
         Scoreboard_Lines = new HashMap<>();
         for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
             Scoreboard_Lines.put(key,
                     SBAUtil.translateColors(getStringList("scoreboard.lines." + key)));
-
-        game_size = new HashMap<>();
-        for (String s : Main.getGameNames()) {
-            int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
-            game_size.put(s, size);
-        }
 
         tag_health = SBAHypixelify.getConfigurator().config.getBoolean("tag_health");
         overstats_message = SBAUtil.translateColors(getStringList("overstats.message"));
@@ -494,10 +306,10 @@ public class Configurator {
             upgradeCustomFiles();
             config.set("first_start", false);
             saveConfig();
-            Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("BedWars");
-            if (plugin != null) {
-                Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-                Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+            final var bw = Main.getInstance();
+            if (bw != null) {
+                Bukkit.getServer().getPluginManager().disablePlugin(bw);
+                Bukkit.getServer().getPluginManager().enablePlugin(bw);
                 Bukkit.getLogger().info("[SBAHypixelify]: &aMade changes to the config.yml file!");
             }
         }
@@ -510,9 +322,9 @@ public class Configurator {
         File file2 = new File(dataFolder, "config.yml");
         main.saveResource("config.yml", true);
         main.saveResource("shop.yml", true);
-        main.saveResource("upgradeShop.yml", true);
-        main.saveResource("legacy-shop.yml", true);
-        main.saveResource("legacy-upgradeShop.yml", true);
+        main.saveResource("shops/upgradeShop.yml", true);
+        main.saveResource("shops/legacy-shop.yml", true);
+        main.saveResource("shops/legacy-upgradeShop.yml", true);
         try {
             Main.getConfigurator().config.load(file2);
             Main.getConfigurator().saveConfig();
@@ -542,16 +354,21 @@ public class Configurator {
     }
 
     public String getString(String path) {
-        if (config.isSet(path) && config.getString(path) != null) {
-            return ChatColor.translateAlternateColorCodes('&', config.getString(path));
+        if (config.isSet(path)) {
+            final var val = config.getString(path);
+            if (val != null) {
+                return ChatColor.translateAlternateColorCodes('&', val);
+            }
         }
-
-
         return null;
     }
 
     public String getString(String path, String def) {
-        return ChatColor.translateAlternateColorCodes('&', config.getString(path, def));
+        final var str = getString(path);
+        if (str == null) {
+            return def;
+        }
+        return str;
     }
 
     private void checkOrSetConfig(AtomicBoolean modify, String path, Object value) {

@@ -1,0 +1,38 @@
+#This is in a example inventory file for games inventory GUI!
+
+# for legacy users (>1.13) please change {RED_BED to BED} and {SIGN to OAK_SIGN} and also {FIREWORK to FIREWORKS_ROCKET}
+
+data:
+- stack: "RED_BED;1;§aBed Wars (§7Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!"
+  row: 1
+  column: 3
+  properties: join_randomly
+
+- stack: "BARRIER;1;§cExit"
+  row: 3
+  column: 4
+  properties: exit
+
+- stack: "ENDER_PEARL;1;§cClick here to rejoin!;§7Click here to rejoin the lastly joined game."
+  properties: rejoin
+
+- stack: "OAK_SIGN;1;§aMap Selector (§7Solo);§7Pick which map you want to play;&7from a list of available servers.; ;§eClick to browse!"
+  row: 1
+  column: 5
+  options:
+   - rows: 6
+   - render_actual_rows: 6
+  items:
+   - stack: "FIREWORK;1;§7Random Map;&8Solo; ;§7Map Selections: §a{games}; ;§aClick to Play"
+     row: 4
+     column: 3
+     properties: randomly_join
+
+   - stack: "ARROW;1;§aGo Back;§7To Play Bed Wars"
+     row: 5
+     column: 4
+     locate: main
+
+   - stack: "PAPER;1;§aWaterfall;§8Solo; ;§7Available Servers: §a1;§7Status: §a{status}§7Players:§a {players}; ;§aClick to play;§eRight click to toggle favorite!"
+     game: WATERFALL
+    

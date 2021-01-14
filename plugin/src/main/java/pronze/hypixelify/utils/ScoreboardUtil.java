@@ -23,8 +23,6 @@ public class ScoreboardUtil {
     public static final String TAG_OBJECTIVE_NAME = "bwa-tag";
     public static final String TAB_OBJECTIVE_NAME = "bwa-tab";
     public static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");
-    public static final String BOARD_DISPLAY_NAME = "§e§lBED WARS";
-    public static final String PLAYERTAG_PREFIX = "{color}{team} ";
 
     private static final Map<Player, Map<Player, Integer>> player_health = new HashMap<>();
 

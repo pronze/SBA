@@ -1,6 +1,5 @@
 package pronze.hypixelify.inventories;
 
-import lombok.extern.java.Log;
 import pronze.hypixelify.listener.TeamUpgradeListener;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
@@ -420,7 +419,7 @@ public class CustomShop implements Listener {
             if (useParent) {
                 var shopFileName = "shop.yml";
                 if (Main.isLegacy()) {
-                    shopFileName = "legacy-shop.yml";
+                    shopFileName = "shops/legacy-shop.yml";
                 }
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
@@ -430,9 +429,9 @@ public class CustomShop implements Listener {
             if (fileName != null) {
                 if (Main.isLegacy()) {
                     if (fileName.equalsIgnoreCase("shop.yml"))
-                        fileName = "legacy-shop.yml";
-                    else if (fileName.equalsIgnoreCase("upgradeShop.yml"))
-                        fileName = "legacy-upgradeShop.yml";
+                        fileName = "shops/legacy-shop.yml";
+                    else if (fileName.equalsIgnoreCase("shops/upgradeShop.yml"))
+                        fileName = "shops/legacy-upgradeShop.yml";
                 }
                 format.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), fileName);
             }

@@ -3,11 +3,8 @@ package pronze.hypixelify;
 import org.bukkit.event.HandlerList;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.game.GameStorage;
-import pronze.hypixelify.api.party.Party;
-import pronze.hypixelify.api.manager.PartyManager;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.BWACommand;
-import pronze.hypixelify.commands.PartyCommand;
 import pronze.hypixelify.commands.ShoutCommand;
 import pronze.hypixelify.inventories.CustomShop;
 import pronze.hypixelify.inventories.GamesInventory;
@@ -56,10 +53,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     public static boolean isProtocolLib() { return plugin.protocolLib; }
 
-    public static PartyManager getPartyManager() {
-        return plugin.partyManager;
-    }
-
     public static SBAHypixelify getInstance() {
         return plugin;
     }
@@ -80,7 +73,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private CustomShop shop;
     private String version;
     private PlayerWrapperService playerWrapperService;
-    private pronze.hypixelify.manager.PartyManager partyManager;
     private Configurator configurator;
     private GamesInventory gamesInventory;
     private boolean debug = false;
@@ -137,15 +129,10 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         shop = new CustomShop();
         gamesInventory = new GamesInventory();
 
-        partyManager = new pronze.hypixelify.manager.PartyManager();
-
-        registerCommand("party", new PartyCommand());
         registerCommand("shout", new ShoutCommand());
         registerCommand("bwaddon", new BWACommand());
 
         registerListener(new BedwarsListener());
-        registerListener(new ChatListener());
-        registerListener(new PartyListener());
         registerListener(new PlayerListener());
         registerListener(new TeamUpgradeListener());
        // pluginManager.registerEvents(new DragonListener(), this);
@@ -282,16 +269,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public String getVersion() { return plugin.version; }
-
-    @Override
-    public boolean isInParty(Player player) {
-        return partyManager.isInParty(player);
-    }
-
-    @Override
-    public Optional<Party> getParty(Player player) {
-        return Optional.ofNullable(partyManager.getParty(player));
-    }
 
     @Override
     public Optional<pronze.hypixelify.api.game.GameStorage> getGameStorage(Game game){

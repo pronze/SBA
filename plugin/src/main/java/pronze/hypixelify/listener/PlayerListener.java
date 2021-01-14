@@ -252,7 +252,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
-        SBAHypixelify.getWrapperService().handleOffline(e.getPlayer());
+        SBAHypixelify.getWrapperService().unregister(e.getPlayer());
     }
 
 
