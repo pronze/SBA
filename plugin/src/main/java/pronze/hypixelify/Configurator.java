@@ -25,7 +25,10 @@ public class Configurator {
     public final File dataFolder;
     public final SBAHypixelify main;
 
-    public File configFile, shopFile, upgradeShop, legacyShop, legacyUpgradeShop, langFolder;
+    public File configFile,
+            langFolder,
+            shopFolder,
+            gamesInventoryFolder;
     public FileConfiguration config;
 
     public Configurator(SBAHypixelify main) {
@@ -49,6 +52,8 @@ public class Configurator {
 
         configFile = new File(dataFolder, "bwaconfig.yml");
         langFolder = new File(dataFolder, "languages");
+        gamesInventoryFolder = new File(dataFolder, "games-inventory");
+        shopFolder = new File(dataFolder, "shops");
 
         config = new YamlConfiguration();
 
@@ -66,36 +71,26 @@ public class Configurator {
             e.printStackTrace();
         }
 
-        shopFile = new File(dataFolder, "shop.yml");
-        upgradeShop = new File(dataFolder, "upgradeShop.yml");
-        legacyShop = new File(dataFolder, "legacy-shop.yml");
-        legacyUpgradeShop = new File(dataFolder, "legacy-upgradeShop.yml");
-
-        if (Main.isLegacy()) {
-            if (!legacyShop.exists()) {
-                main.saveResource("shops/legacy-shop.yml", false);
-            }
-
-            if (!legacyUpgradeShop.exists()) {
-                main.saveResource("shops/legacy-upgradeShop.yml", false);
-            }
-        } else {
-            if (!shopFile.exists()) {
-                main.saveResource("shops/shop.yml", false);
-            }
-
-            if (!upgradeShop.exists()) {
-                main.saveResource("shops/upgradeShop.yml", false);
-            }
+        if (!shopFolder.exists()) {
+            shopFolder.mkdirs();
         }
+        if (!gamesInventoryFolder.exists()) {
+            gamesInventoryFolder.mkdirs();
+        }
+
+        addFile("games-inventory/solo.yml");
+        addFile("games-inventory/double.yml");
+        addFile("games-inventory/triple.yml");
+        addFile("games-inventory/squad.yml");
+
+        addFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "shop.yml");
+        addFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "upgradeShop.yml");
 
         if (!langFolder.exists()) {
             langFolder.mkdirs();
         }
 
-
         var modify = new AtomicBoolean(false);
-
         checkOrSetConfig(modify, "locale", "en");
         checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "permanent-items", true);
@@ -313,6 +308,17 @@ public class Configurator {
                 Bukkit.getLogger().info("[SBAHypixelify]: &aMade changes to the config.yml file!");
             }
         }
+    }
+
+    private void addFile(String fileName, String saveTo) {
+        final var file = new File(dataFolder, fileName);
+        if (!file.exists()) {
+            main.saveResource(saveTo, false);
+        }
+    }
+
+    private void addFile(String fileName) {
+        addFile(fileName, fileName);
     }
 
     public void upgradeCustomFiles() {
