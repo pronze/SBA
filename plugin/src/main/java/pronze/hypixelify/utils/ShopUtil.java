@@ -188,7 +188,8 @@ public class ShopUtil {
 
     public static int getIntFromMode(String mode) {
         return mode.equalsIgnoreCase("Solo") ? 1 :
-                mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 :
+                       mode.equalsIgnoreCase("Double") ? 2 :
+                        mode.equalsIgnoreCase("Triples") ? 3 :
                         mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 

@@ -277,6 +277,12 @@ public class Configurator {
             checkOrSetConfig(modify, str, 4);
         }
 
+        game_size = new HashMap<>();
+        for (String s : Main.getGameNames()) {
+            int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
+            game_size.put(s, size);
+        }
+
         if (modify.get()) {
             try {
                 config.save(configFile);
@@ -325,14 +331,14 @@ public class Configurator {
         config.set("version", SBAHypixelify.getInstance().getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
-        File file2 = new File(dataFolder, "config.yml");
         main.saveResource("config.yml", true);
-        main.saveResource("shop.yml", true);
+        main.saveResource("shops/shop.yml", true);
         main.saveResource("shops/upgradeShop.yml", true);
         main.saveResource("shops/legacy-shop.yml", true);
         main.saveResource("shops/legacy-upgradeShop.yml", true);
         try {
-            Main.getConfigurator().config.load(file2);
+            File configReplacement = new File(dataFolder, "config.yml");
+            Main.getConfigurator().config.load(configReplacement);
             Main.getConfigurator().saveConfig();
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();

@@ -57,6 +57,9 @@ public class CustomShop implements Listener {
     );
 
     public CustomShop() {
+        /* Make sure BedWars does not open the shops */
+        BedwarsOpenShopEvent.getHandlerList().unregister(Main.getInstance());
+
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         ItemMeta backItemMeta = backItem.getItemMeta();
         backItemMeta.setDisplayName("back");
@@ -209,8 +212,8 @@ public class CustomShop implements Listener {
                 }
                 String name = (parent ? "+" : "-") + file;
                 if (!shopMap.containsKey(name)) {
-                    if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false) && new File(SBAHypixelify.getInstance().getDataFolder(), file + ".groovy").exists()) {
-                        loadNewShop(name, file + ".groovy", parent);
+                    if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false) && new File(SBAHypixelify.getInstance().getDataFolder(), "shops/" + file + ".groovy").exists()) {
+                        loadNewShop(name,  file + ".groovy", parent);
                     } else {
                         loadNewShop(name, file + ".yml", parent);
                     }
@@ -419,21 +422,21 @@ public class CustomShop implements Listener {
             if (useParent) {
                 var shopFileName = "shop.yml";
                 if (Main.isLegacy()) {
-                    shopFileName = "shops/legacy-shop.yml";
+                    shopFileName = "legacy-shop.yml";
                 }
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
-                format.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), shopFileName);
+                format.loadFromDataFolder(new File(SBAHypixelify.getInstance().getDataFolder() + "/shops"), shopFileName);
             }
             if (fileName != null) {
                 if (Main.isLegacy()) {
                     if (fileName.equalsIgnoreCase("shop.yml"))
-                        fileName = "shops/legacy-shop.yml";
-                    else if (fileName.equalsIgnoreCase("shops/upgradeShop.yml"))
-                        fileName = "shops/legacy-upgradeShop.yml";
+                        fileName = "legacy-shop.yml";
+                    else if (fileName.equalsIgnoreCase("upgradeShop.yml"))
+                        fileName = "legacy-upgradeShop.yml";
                 }
-                format.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), fileName);
+                format.loadFromDataFolder(new File(SBAHypixelify.getInstance().getDataFolder() + "/shops"), fileName);
             }
         } catch (Exception e) {
             Bukkit.getLogger().severe("Wrong shop.yml configuration!");
@@ -442,7 +445,7 @@ public class CustomShop implements Listener {
             SBAHypixelify.getInstance().getServer().getPluginManager().disablePlugin(SBAHypixelify.getInstance());
             return;
         }
-
+        Logger.trace("Successfully loaded shop: {}", name);
         format.generateData();
         shopMap.put(name, format);
     }

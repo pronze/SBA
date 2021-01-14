@@ -17,19 +17,18 @@ import pronze.hypixelify.api.events.GamesInventoryOpenEvent;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
-import java.util.List;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class GamesInventory implements Listener {
     private final HashMap<Integer, SimpleInventories> inventoryMap = new HashMap<>();
     private final HashMap<Integer, Options> option = new HashMap<>();
-    private final HashMap<Integer, List<Player>> players = new HashMap<>();
     private final HashMap<Integer, String> labels = new HashMap<>();
 
     public GamesInventory() {
+
         String soloprefix, doubleprefix, tripleprefix, squadprefix;
 
         soloprefix = SBAHypixelify.getConfigurator().getString("games-inventory.gui.solo-prefix");
@@ -66,8 +65,10 @@ public class GamesInventory implements Listener {
             labels.forEach((val, label) -> {
                 try {
                     final var siFormat = new SimpleInventories(option.get(val));
-                    siFormat.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), label.toLowerCase() + ".yml");
+                    siFormat.loadFromDataFolder(new File(SBAHypixelify.getInstance().getDataFolder() + "/games-inventory"), label.toLowerCase() + ".yml");
                     inventoryMap.put(val, siFormat);
+                    siFormat.generateData();
+                    Logger.trace("Successfully loaded games inventory for: {}", label);
                 } catch (Throwable T) {
                     Logger.trace("Could not initialize shop format for {}", label);
                 }
@@ -80,7 +81,6 @@ public class GamesInventory implements Listener {
     }
 
     public void destroy() {
-        players.clear();
         HandlerList.unregisterAll(this);
     }
 
@@ -90,30 +90,16 @@ public class GamesInventory implements Listener {
         if (event.isCancelled()) {
             return;
         }
-        if (inventoryMap.get(mode) == null)
-            return;
-        inventoryMap.get(mode).openForPlayer(player);
-        players.computeIfAbsent(mode, k -> new ArrayList<>());
-        players.get(mode).add(player);
-    }
-
-    public void repaint(int mode) {
-        for (Player player : players.get(mode)) {
-            var guiHolder = inventoryMap.get(mode).getCurrentGuiHolder(player);
-            if (guiHolder == null) {
-                return;
-            }
-            guiHolder.setFormat(inventoryMap.get(mode));
-            guiHolder.repaint();
+        final var format = inventoryMap.get(mode);
+        if (format != null) {
+            player.closeInventory();
+            format.openForPlayer(player);
         }
     }
 
     @EventHandler
     public void onPostAction(PostActionEvent event) {
-        if (event.getFormat() != inventoryMap.get(1) &&
-                event.getFormat() != inventoryMap.get(2) &&
-                event.getFormat() != inventoryMap.get(3) &&
-                event.getFormat() != inventoryMap.get(4)) {
+        if (!inventoryMap.containsValue(event.getFormat())) {
             return;
         }
 
@@ -131,13 +117,10 @@ public class GamesInventory implements Listener {
                 final var property = reader.getString("properties");
                 switch (property.toLowerCase()) {
                     case "exit":
-                        players.get(mode).remove(player);
                         player.closeInventory();
                         break;
                     case "join_randomly":
                         player.closeInventory();
-                        repaint(mode);
-                        players.get(mode).remove(player);
                         final var games = ShopUtil.getGamesWithSize(mode);
                         if (games == null || games.isEmpty())
                             return;
@@ -148,8 +131,6 @@ public class GamesInventory implements Listener {
                         break;
                     case "rejoin":
                         player.closeInventory();
-                        repaint(mode);
-                        players.get(mode).remove(player);
                         player.performCommand("bw rejoin");
                         break;
                     default:
@@ -162,11 +143,9 @@ public class GamesInventory implements Listener {
                 final var game = (Game) Main.getGame(reader.getString("game"));
                 Main.getGame(game.getName()).joinToGame(player);
             } catch (Throwable T) {
-                i18n("game_not_found");
+                player.sendMessage(i18n("game_not_found"));
             }
             player.closeInventory();
-            repaint(mode);
-            players.get(mode).remove(player);
         }
     }
 

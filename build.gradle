@@ -50,8 +50,10 @@ subprojects{
         shade 'pronze.lib:scoreboard:1.0.1-SNAPSHOT'
     }
 
+    shadowJar {
+        relocate 'pronze.lib', 'pronze.hypixelify.lib'
+    }
     sourceCompatibility = '11.0'
-
 }
 
 

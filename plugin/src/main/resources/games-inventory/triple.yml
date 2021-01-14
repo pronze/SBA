@@ -3,7 +3,7 @@
 # for legacy users (<1.13) please change {RED_BED to BED} and {SIGN to OAK_SIGN} and also {FIREWORK to FIREWORKS_ROCKET}
 
 data:
-  - stack: "RED_BED;1;§aBed Wars (§7Triples);§7Play Bed Wars {§7Triples}; ;§eClick to play!"
+  - stack: "RED_BED;1;§aBed Wars §7(Triples);§7Play Bed Wars {§7Triples}; ;§eClick to play!"
     row: 1
     column: 3
     properties: join_randomly
@@ -15,17 +15,24 @@ data:
 
   - stack: "ENDER_PEARL;1;§cClick here to rejoin!;§7Click here to rejoin the lastly joined game."
     properties: rejoin
+    row: 3
+    column: 8
 
-  - stack: "OAK_SIGN;1;§aMap Selector (§7Triples);§7Pick which map you want to play;&7from a list of available servers.; ;§eClick to browse!"
+  - stack: "OAK_SIGN;1;§aMap Selector §7(Triples);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!"
     row: 1
     column: 5
     options:
-      - rows: 6
-      - render_actual_rows: 6
+      rows: 6
+      render_actual_rows: 6
     items:
-      - stack: "FIREWORK;1;§7Random Map;&8Triples; ;§7Map Selections: §a{games}; ;§aClick to Play"
+      - stack: "FIREWORK;1;§7Random Map;§8Triples; ;§aClick to Play"
         row: 4
         column: 3
+        properties: randomly_join
+
+      - stack: "DIAMOND;1;§aRandom Favorite;§8Triples; ;§aClick to Play"
+        row: 4
+        column: 5
         properties: randomly_join
 
       - stack: "ARROW;1;§aGo Back;§7To Play Bed Wars"
@@ -33,5 +40,7 @@ data:
         column: 4
         locate: main
 
-      - stack: "PAPER;1;§aWaterfall;§8Triples; ;§7Available Servers: §a1;§7Status: §a{status}§7Players:§a {players}; ;§aClick to play;§eRight click to toggle favorite!"
+      - stack: "PAPER;1;§aWaterfall;§8Triples; ;§aClick to play"
+        row: 1
+        column: 2
         game: WATERFALL
