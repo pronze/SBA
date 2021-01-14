@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.screamingsandals.bedwars.Main;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -197,8 +198,10 @@ public class Configurator {
         ));
 
         checkOrSetConfig(modify, "lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s");
+
+        //TODO: Create an algorithm
         checkOrSetConfig(modify, "lobby-scoreboard.title", Arrays.asList(
-                "&e&lBED WARS"
+                  "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
@@ -301,7 +304,7 @@ public class Configurator {
         overstats_message = SBAUtil.translateColors(getStringList("overstats.message"));
         gamestart_message = SBAUtil.translateColors(getStringList("game-start.message"));
 
-
+        ShopUtil.initKeys();
         if (config.getBoolean("first_start")) {
             Bukkit.getLogger().info("[SBAHypixelify]: &a Detected first start");
             upgradeCustomFiles();

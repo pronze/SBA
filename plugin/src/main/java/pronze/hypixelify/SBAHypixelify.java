@@ -1,38 +1,45 @@
 package pronze.hypixelify;
 
-import org.bukkit.event.HandlerList;
-import pronze.hypixelify.api.SBAHypixelifyAPI;
-import pronze.hypixelify.api.game.GameStorage;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.commands.BWACommand;
-import pronze.hypixelify.commands.ShoutCommand;
-import pronze.hypixelify.inventories.CustomShop;
-import pronze.hypixelify.inventories.GamesInventory;
-import pronze.hypixelify.game.RotatingGenerators;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
-import pronze.hypixelify.game.Arena;
-import pronze.hypixelify.lib.lang.I18n;
-import pronze.hypixelify.placeholderapi.SBAExpansion;
-import pronze.hypixelify.service.PlayerWrapperService;
-import pronze.hypixelify.utils.Logger;
-import pronze.hypixelify.utils.SBAUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
+import pronze.hypixelify.api.SBAHypixelifyAPI;
+import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.commands.CommandManager;
+import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.game.RotatingGenerators;
+import pronze.hypixelify.inventories.CustomShop;
+import pronze.hypixelify.inventories.GamesInventory;
+import pronze.hypixelify.lib.lang.I18n;
 import pronze.hypixelify.listener.*;
+import pronze.hypixelify.placeholderapi.SBAExpansion;
+import pronze.hypixelify.service.PlayerWrapperService;
+import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.utils.SBAUtil;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
+    private final Map<String, Arena> arenas = new HashMap<>();
+    private final List<Listener> registeredListeners = new ArrayList<>();
+    private String version;
+    private PlayerWrapperService playerWrapperService;
+    private Configurator configurator;
+    private GamesInventory gamesInventory;
+    private boolean debug = false;
+    private boolean protocolLib;
+    private boolean isSnapshot;
 
     public static Optional<GameStorage> getStorage(Game game) {
         if (plugin.arenas.containsKey(game.getName()))
@@ -41,17 +48,25 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         return Optional.empty();
     }
 
-    public static Arena getArena(String arenaName) { return plugin.arenas.get(arenaName); }
+    public static Arena getArena(String arenaName) {
+        return plugin.arenas.get(arenaName);
+    }
 
-    public static void addArena(Arena arena) { plugin.arenas.put(arena.getGame().getName(), arena); }
+    public static void addArena(Arena arena) {
+        plugin.arenas.put(arena.getGame().getName(), arena);
+    }
 
-    public static void removeArena(String arenaName) { plugin.arenas.remove(arenaName); }
+    public static void removeArena(String arenaName) {
+        plugin.arenas.remove(arenaName);
+    }
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
     }
 
-    public static boolean isProtocolLib() { return plugin.protocolLib; }
+    public static boolean isProtocolLib() {
+        return plugin.protocolLib;
+    }
 
     public static SBAHypixelify getInstance() {
         return plugin;
@@ -69,17 +84,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         return !Objects.requireNonNull(getConfigurator()
                 .config.getString("version")).contains(SBAHypixelify.getInstance().getVersion());
     }
-
-    private CustomShop shop;
-    private String version;
-    private PlayerWrapperService playerWrapperService;
-    private Configurator configurator;
-    private GamesInventory gamesInventory;
-    private boolean debug = false;
-    private boolean protocolLib;
-    private boolean isSnapshot;
-    private final Map<String, Arena> arenas = new HashMap<>();
-    private final List<Listener> registeredListeners = new ArrayList<>();
 
     @Override
     public void onEnable() {
@@ -119,29 +123,31 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
+        new CommandManager().init(this);
+
         Logger.init(configurator.config.getBoolean("debug.enabled", false));
         I18n.load(this, configurator.config.getString("locale"));
-        
+
         playerWrapperService = new PlayerWrapperService();
         debug = configurator.config.getBoolean("debug.enabled", false);
 
         InventoryListener.init(this);
-        shop = new CustomShop();
-        gamesInventory = new GamesInventory();
+        CustomShop shop = new CustomShop();
 
-        registerCommand("shout", new ShoutCommand());
-        registerCommand("bwaddon", new BWACommand());
+        gamesInventory = new GamesInventory();
+        gamesInventory.loadInventory();
 
         registerListener(new BedwarsListener());
         registerListener(new PlayerListener());
         registerListener(new TeamUpgradeListener());
-       // pluginManager.registerEvents(new DragonListener(), this);
+        // pluginManager.registerEvents(new DragonListener(), this);
 
         if (configurator.config.getBoolean("main-lobby.enabled", false))
             registerListener(new MainLobbyBoard());
         if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             registerListener(new LobbyScoreboard());
 
+        registerListener(gamesInventory);
         registerListener(shop);
 
         //Do changes for legacy support.
@@ -156,8 +162,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             t.printStackTrace();
         }
 
-        if(configurator.config.getBoolean("floating-generator.enabled", true)) {
-            if(Main.getConfigurator().config.getBoolean("spawner-holograms", true)){
+        if (configurator.config.getBoolean("floating-generator.enabled", true)) {
+            if (Main.getConfigurator().config.getBoolean("spawner-holograms", true)) {
                 Main.getConfigurator().config.set("spawner-holograms", false);
                 Main.getConfigurator().saveConfig();
                 pluginManager.disablePlugin(Main.getInstance());
@@ -169,16 +175,16 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             SBAUtil.destroySpawnerArmorStandEntities();
         }
 
-        Logger.trace( "Registering API service provider");
+        Logger.trace("Registering API service provider");
         getServer().getServicesManager()
                 .register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
         getLogger().info("Plugin has loaded!");
     }
 
-    public void registerListener(Listener listener){
+    public void registerListener(Listener listener) {
         final var plugMan = Bukkit.getServer().getPluginManager();
         plugMan.registerEvents(listener, this);
-        Logger.trace( "Registered Listener: {}", listener.getClass().getSimpleName());
+        Logger.trace("Registered Listener: {}", listener.getClass().getSimpleName());
         registeredListeners.add(listener);
     }
 
@@ -190,13 +196,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 .forEach(getLogger()::severe);
         getLogger().severe("=============================");
         getServer().getPluginManager().disablePlugin(this);
-    }
-
-    public void registerCommand(String commandName, CommandExecutor executor) {
-        var pluginCommand = getCommand(commandName);
-        if (pluginCommand != null) {
-            pluginCommand.setExecutor(executor);
-        }
     }
 
     public void changeBedWarsConfig() {
@@ -212,9 +211,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 Main.getConfigurator().config.set("items.shopcosmetic", "STAINED_GLASS_PANE");
                 doneChanges = true;
             }
-
-            //TODO: test scoreboard for 1.9.4
-
             if (doneChanges) {
                 getLogger().info("[SBAHypixelify]: Making legacy changes");
                 Main.getConfigurator().saveConfig();
@@ -237,13 +233,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registeredListeners.clear();
 
         RotatingGenerators.destroy(RotatingGenerators.cache);
-
-        if (gamesInventory != null)
-            gamesInventory.destroy();
-
-        if(shop != null)
-            shop.destroy();
-
         Logger.trace("Cancelling tasks...");
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
@@ -267,10 +256,17 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     @Override
-    public String getVersion() { return plugin.version; }
+    public List<Listener> getRegisteredListeners() {
+        return List.copyOf(registeredListeners);
+    }
 
     @Override
-    public Optional<pronze.hypixelify.api.game.GameStorage> getGameStorage(Game game){
+    public String getVersion() {
+        return plugin.version;
+    }
+
+    @Override
+    public Optional<pronze.hypixelify.api.game.GameStorage> getGameStorage(Game game) {
         return SBAHypixelify.getStorage(game);
     }
 

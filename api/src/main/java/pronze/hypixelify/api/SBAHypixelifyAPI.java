@@ -1,11 +1,13 @@
 package pronze.hypixelify.api;
 
+import org.bukkit.event.Listener;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -63,4 +65,10 @@ public interface SBAHypixelifyAPI {
      * @return the object that has been searched using the key, returns def argument if key does not exist
      */
     <T> T getObject(String key, T def);
+
+    /**
+     *
+     * @return the list of listeners that were registered by the SBAHypixelify instance
+     */
+    List<Listener> getRegisteredListeners();
 }

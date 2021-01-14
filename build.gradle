@@ -2,7 +2,7 @@ defaultTasks 'clean', 'screamCompile'
 
 allprojects {
     group = 'pronze.hypixelify'
-    version = '1.4.4-SNAPSHOT'
+    version = '2.0.0-SNAPSHOT'
 }
 
 
@@ -10,6 +10,7 @@ buildscript {
     repositories {
         maven {url = 'https://repo.screamingsandals.org/public'}
     }
+
     dependencies {classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.30'}
 }
 subprojects{
@@ -20,6 +21,10 @@ subprojects{
       //  mavenLocal()
         maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
+        }
+
+        maven {
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
         }
 
         maven {
@@ -52,6 +57,7 @@ subprojects{
 
     shadowJar {
         relocate 'pronze.lib', 'pronze.hypixelify.lib'
+        relocate('cloud', 'pronze.hypixelify.lib.cloud')
     }
     sourceCompatibility = '11.0'
 }

@@ -1,4 +1,7 @@
 package pronze.hypixelify.commands;
+import cloud.commandframework.arguments.standard.StringArrayArgument;
+import cloud.commandframework.bukkit.BukkitCommandManager;
+import org.screamingsandals.bedwars.Main;
 import pronze.hypixelify.SBAHypixelify;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -16,94 +19,79 @@ import java.util.List;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
-public class ShoutCommand extends AbstractCommand {
+public class ShoutCommand {
+    private final BukkitCommandManager<CommandSender> manager;
 
-    public ShoutCommand() {
-        super(null, false, "shout");
+    public ShoutCommand(BukkitCommandManager<CommandSender> manager) {
+        this.manager = manager;
     }
 
-    public boolean hasPermission(Player player){
+    public boolean canByPass(Player player){
         return player.hasPermission("bwaddon.shout") || player.isOp();
     }
 
+    public void build() {
+        final var builder = this.manager.commandBuilder("shout");
+        manager.command(builder
+                .senderType(Player.class)
+                .argument(StringArrayArgument.ofType(String.class, "args"))
+                .handler(context -> manager.taskRecipe()
+                        .begin(context)
+                        .synchronous(c -> {
+                            final var player = (Player) c.getSender();
+                            final var game = BedwarsAPI.getInstance().getGameOfPlayer(player);
 
-    @Override
-    public boolean onPreExecute(CommandSender sender, String[] args) {
-        return true;
-    }
+                            if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
+                                player.sendMessage(i18n("not_in_game", true));
+                                return;
+                            }
 
-    @Override
-    public void onPostExecute() {
+                            if(Main.getPlayerGameProfile(player).isSpectator){
+                                player.sendMessage(i18n("command_spectator_disabled", true));
+                                return;
+                            }
 
-    }
+                            final var playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
+                            final var cancelShout = SBAHypixelify.getConfigurator()
+                                    .config.getInt("shout.time-out", 60) == 0;
 
-    @Override
-    public void execute(String[] args, CommandSender sender) {
-        final Player player = (Player) sender;
+                            if(!cancelShout && !canByPass(player)) {
+                                if (!playerWrapper.canShout()) {
+                                    final var shout = String.valueOf(playerWrapper.getShoutTimeOut());
+                                    player.sendMessage(i18n("shout_wait", true)
+                                            .replace("{seconds}", shout));
+                                    return;
+                                }
+                            }
 
-        if(!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)){
-            ShopUtil.sendMessage(player, SBAHypixelify.getConfigurator().getStringList("message.not-in-game"));
-            return;
-        }
+                            final var team = game.getTeamOfPlayer(player);
+                            String color = ChatColor.GRAY.toString();
+                            if(team != null) {
+                                color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
+                            }
 
-        final Game game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+                            final var strBuilder = new StringBuilder();
+                            final var args = (List<String>) c.get("args");
+                            if (args.isEmpty())
+                                player.sendMessage(i18n("command_shout_invalid_usage", true));
 
-        if(game.getTeamOfPlayer(player) == null){
-            player.sendMessage("§cYou cannot do this command while spectating");
-            return;
-        }
+                            args.forEach(st -> strBuilder.append(st).append(" "));
 
-        final PlayerWrapper playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
-        final boolean cancelShout = SBAHypixelify.getConfigurator()
-                .config.getInt("shout.time-out", 60) == 0;
+                            String st = i18n("shout-format")
+                                    .replace("{color}", color)
+                                    .replace("{player}", player.getName())
+                                    .replace("{message}", strBuilder.toString());
 
-        if(!cancelShout && !hasPermission(player)) {
-            if (!playerWrapper.canShout()) {
-                String shout = String.valueOf(playerWrapper.getShoutTimeOut());
-                for (String st : SBAHypixelify.getConfigurator().getStringList("message.shout-wait")) {
-                    player.sendMessage(ShopUtil.translateColors(st.replace("{seconds}", shout)));
-                }
-                return;
-            }
-        }
+                            if(team != null){
+                                st = st.replace("{team}", team.getName());
+                            }
 
-        final RunningTeam team = game.getTeamOfPlayer(player);
-        String color = ChatColor.GRAY.toString();
-        if(team != null) {
-            color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
-        }
+                            for(Player pl : game.getConnectedPlayers()){
+                                pl.sendMessage(st);
+                            }
 
-        final StringBuilder builder = new StringBuilder();
-
-        Arrays.stream(args).forEach(st -> builder.append(st).append(" "));
-
-        String st = i18n("shout-format")
-                .replace("{color}", color)
-                .replace("{player}", player.getName())
-                .replace("{message}", builder.toString());
-
-        if(team != null){
-            st = st.replace("{team}", team.getName());
-        }
-
-        for(Player pl : game.getConnectedPlayers()){
-            pl.sendMessage(st);
-        }
-
-        if(!cancelShout && !hasPermission(player))
-            playerWrapper.shout();
-    }
-
-    @Override
-    public void displayHelp(CommandSender sender) {
-        sender.sendMessage("§cInvalid usage, /shout {message} is the format!");
-    }
-
-    @Override
-    public List<String> tabCompletion(String[] args, CommandSender sender) {
-        if(args.length == 1){
-            return Collections.singletonList("help");
-        }
-        return null;
+                            if(!cancelShout && !canByPass(player))
+                                playerWrapper.shout();
+                        }).execute()));
     }
 }

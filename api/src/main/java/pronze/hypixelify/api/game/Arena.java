@@ -5,10 +5,9 @@ import java.util.List;
 
 public interface Arena {
 
-    /*
-        why ? extends RotatingGenerators?, because we need the impl itself not the API in example
-        using the destroy method, or clearing the RotatingGenerator cache.
-        Not necessary but makes it simpler for now
+    /**
+     *
+     * @return
      */
     List<? extends RotatingGenerators> getRotatingGenerators();
 

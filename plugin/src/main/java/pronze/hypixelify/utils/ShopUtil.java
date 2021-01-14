@@ -22,7 +22,7 @@ public class ShopUtil {
 
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
 
-    static {
+    public static void initKeys() {
         UpgradeKeys.put("STONE", 2);
         UpgradeKeys.put("IRON", 4);
         UpgradeKeys.put("DIAMOND", 5);
@@ -89,12 +89,15 @@ public class ShopUtil {
 
         if (!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name, enchantment)) return false;
 
-        team.getConnectedPlayers().forEach(player -> {
-            if (player == null) return;
-            player.sendMessage("§c" + buyer.getName() + "§e has upgraded team sword damage!");
-            if (player == buyer) return;
-            ShopUtil.addEnchantsToPlayerTools(player, stack, name, enchantment);
-        });
+        team.getConnectedPlayers()
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(player -> {
+                    player.sendMessage("§c" + buyer.getName() + "§e has upgraded team sword damage!");
+                    if (player != buyer) {
+                        ShopUtil.addEnchantsToPlayerTools(player, stack, name, enchantment);
+                    }
+                });
 
         return true;
     }
@@ -188,9 +191,9 @@ public class ShopUtil {
 
     public static int getIntFromMode(String mode) {
         return mode.equalsIgnoreCase("Solo") ? 1 :
-                       mode.equalsIgnoreCase("Double") ? 2 :
+                mode.equalsIgnoreCase("Double") ? 2 :
                         mode.equalsIgnoreCase("Triples") ? 3 :
-                        mode.equalsIgnoreCase("Squads") ? 4 : 0;
+                                mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
     public static Options generateOptions() {
