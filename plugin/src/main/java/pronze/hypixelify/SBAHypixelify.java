@@ -142,7 +142,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             registerListener(new LobbyScoreboard());
 
-        registerListener(gamesInventory);
         registerListener(shop);
 
         //Do changes for legacy support.

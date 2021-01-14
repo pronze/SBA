@@ -102,7 +102,6 @@ public class GamesInventory implements Listener {
         if (!inventoryMap.containsValue(event.getFormat())) {
             return;
         }
-
         int mode = event.getFormat() == inventoryMap.get(1) ? 1 :
                 event.getFormat() == inventoryMap.get(2) ? 2 :
                         event.getFormat() == inventoryMap.get(3) ? 3 :
