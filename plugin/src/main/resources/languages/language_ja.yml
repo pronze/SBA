@@ -46,3 +46,4 @@ command_shout_invalid_usage: "§c無効な使用法です。/shout {message} が
 gamesinv_disabled: "§cゲームのインベントリが無効になりました。有効にするにはサーバーのオーナーにお問い合わせください。"
 not_in_game: "§c このコマンドを実行するにはゲームに参加する必要があります！"
 shout_wait: "§c {seconds} がこのコマンドを使用するまで待つ必要があります！"
+countdown: "§fStarting in §a{countdown}s"
