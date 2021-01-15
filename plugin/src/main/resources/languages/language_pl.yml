@@ -33,7 +33,7 @@ victory-title: "§7§lWIRUS!"
 cannot-put-item-on-chest: "Nie możesz umieścić tego przedmiotu w tej skrzyni."
 upgrade: "Aktualizacja: "
 game_not_found: "[SBA]: &cNie można znaleźć gry!"
-reloaded: Wtyczka przeładowana!
+reloaded: "Wtyczka przeładowana!"
 command_set_lobby_location: "Pomyślnie ustawiono lokalizację lobby!"
 command_reset: "Pomyślnie zresetowane"
 command_resetting: "Resetowanie..."

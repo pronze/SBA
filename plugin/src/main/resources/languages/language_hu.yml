@@ -33,7 +33,7 @@ victory-title: "§6§IGYŐZELEM!"
 cannot-put-item-on-chest: "Ezt nem tudod belerakni ebbe a ládába."
 upgrade: "Upgrade: "
 game_not_found: "[SBA]: &cCould not find game!"
-reloaded: Plugin újratöltve!
+reloaded: "Plugin újratöltve!"
 command_set_lobby_location: "Successfully set Lobby location!"
 command_reset: "Sikeres alaphelyzetbe állítás"
 command_resetting: "Alaphelyzetbe állítás..."

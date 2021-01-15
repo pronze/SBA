@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORY!"
 cannot-put-item-on-chest: "Du kan ikke sætte dette emne på brystet."
 upgrade: "Upgradering: "
 game_not_found: "[SBA]: &cKunne ikke finde spillet!"
-reloaded: Plugin genindlæst!
+reloaded: "Plugin genindlæst!"
 command_set_lobby_location: "Lobbyplaceringen er nu angivet!"
 command_reset: "Nulstil succesfuldt"
 command_resetting: "Nulstil..."

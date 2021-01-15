@@ -33,7 +33,7 @@ victory-title: "§6§lПОБЕДА!"
 cannot-put-item-on-chest: "Вы не можете положить эту вещь в этот сундук."
 upgrade: "Обновление: "
 game_not_found: "[SBA]: &cНе удалось найти игру!"
-reloaded: Плагин перезагружен!
+reloaded: "Плагин перезагружен!"
 command_set_lobby_location: "Расположение Лобби успешно установлено!"
 command_reset: "Успешно сброшено"
 command_resetting: "Сброс..."

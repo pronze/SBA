@@ -33,7 +33,7 @@ victory-title: "&6&lVITTORIA!"
 cannot-put-item-on-chest: "Non puoi mettere questo item in questa cassa."
 upgrade: "Potenziamenti: "
 game_not_found: "[SBA]: &cPartita non trovata!"
-reloaded: Plugin ricaricato!
+reloaded: "Plugin ricaricato!"
 command_set_lobby_location: "Lobby impostata con successo!"
 command_reset: "Reset effettuato con successo"
 command_resetting: "Reset in corso..."

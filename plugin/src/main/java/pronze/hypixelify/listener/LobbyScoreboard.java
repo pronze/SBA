@@ -123,8 +123,7 @@ public class LobbyScoreboard implements Listener {
                 final var units = time.split(":");
                 var seconds = Integer.parseInt(units[1]) + 1;
                 state = SBAUtil.translateColors(SBAHypixelify.getConfigurator()
-                        .getString("lobby-scoreboard.state.countdown",
-                                "&fStarting in &a{countdown}s")).replace("{countdown}", String.valueOf(seconds));
+                        .getString(i18n("countdown"))).replace("{countdown}", String.valueOf(seconds));
             }
         }
 

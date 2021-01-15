@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORY!"
 cannot-put-item-on-chest: "Du kan ikke sette denne gjenstanden på denne kisten."
 upgrade: "Oppgradering: "
 game_not_found: "[SBA]: &cKunne ikke finne spill!"
-reloaded: Utvidelsen er oppdatert!
+reloaded: "Utvidelsen er oppdatert!"
 command_set_lobby_location: "Lobby plassering vellykket!"
 command_reset: "Tilbakestilling vellykket"
 command_resetting: "Nullstiller..."

@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORIA!"
 cannot-put-item-on-chest: "No puedes poner este objeto en este cofre."
 upgrade: "Actualizar: "
 game_not_found: "[SBA]: &cNo se pudo encontrar el juego!"
-reloaded: '¡Plugin recargado!'
+reloaded: "¡Plugin recargado!"
 command_set_lobby_location: "¡Ubicación exitosa de Lobby!"
 command_reset: "Reinicio exitoso"
 command_resetting: "Reiniciando..."

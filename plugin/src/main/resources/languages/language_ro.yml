@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORIE!"
 cannot-put-item-on-chest: "Nu poți pune acest obiect pe acest cufăr"
 upgrade: "Actualizare: "
 game_not_found: "[SBA]: &cNu s-a putut gasi jocul!"
-reloaded: Plugin reîncărcat!
+reloaded: "Plugin reîncărcat!"
 command_set_lobby_location: "Locatia Lobby a fost setata cu succes!"
 command_reset: "Resetare reusita"
 command_resetting: "Resetare..."

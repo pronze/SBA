@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORY§6."
 cannot-put-item-on-chest: "このチェストにはこのアイテムを置くことができません。"
 upgrade: "アップグレード: "
 game_not_found: "[SBA]: &cゲームが見つかりませんでした!"
-reloaded: プラグインを再読み込みしました！
+reloaded: "プラグインを再読み込みしました！"
 command_set_lobby_location: "ロビーの位置を正常に設定しました！"
 command_reset: "正常にリセットしました"
 command_resetting: "リセット中..."

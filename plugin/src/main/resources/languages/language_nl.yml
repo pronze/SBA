@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORY!"
 cannot-put-item-on-chest: "Je kunt dit voorwerp niet op deze kist plaatsen."
 upgrade: "Upgrade: "
 game_not_found: "[SBA]: &cKon spel niet vinden!"
-reloaded: Plugin herladen!
+reloaded: "Plugin herladen!"
 command_set_lobby_location: "Locatie van Lobby succesvol ingesteld!"
 command_reset: "Succesvol gereset"
 command_resetting: "Herstellen..."

@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORY!"
 cannot-put-item-on-chest: "Не можна покласти цей предмет до цієї скрині."
 upgrade: "Оновлення: "
 game_not_found: "[SBA]: &cНе вдалося знайти гру!"
-reloaded: Плагін перезавантажено!
+reloaded: "Плагін перезавантажено!"
 command_set_lobby_location: "Успішно встановлено місце лоббі!"
 command_reset: "Скидання виконано успішно"
 command_resetting: "Скидання..."

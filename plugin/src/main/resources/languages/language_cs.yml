@@ -33,7 +33,7 @@ victory-title: "§6§lVÍTĚZSTVÍ!"
 cannot-put-item-on-chest: "Nemůžeš vložit tento předmět do této truhly."
 upgrade: "Vylepšení: "
 game_not_found: "[SBA]: &cNelze najít hru!"
-reloaded: Plugin znovu načten!
+reloaded: "Plugin znovu načten!"
 command_set_lobby_location: "Poloha Lobby byla úspěšná!"
 command_reset: "Obnovení proběhlo úspěšně"
 command_resetting: "Obnovování..."

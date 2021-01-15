@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORIA!"
 cannot-put-item-on-chest: "Et voi laittaa tätä esinettä tähän rintaan."
 upgrade: "Parannus: "
 game_not_found: "[SBA]: &cPeliä ei löytynyt!"
-reloaded: Liitännäinen ladattu uudelleen!
+reloaded: "Liitännäinen ladattu uudelleen!"
 command_set_lobby_location: "Aulabyrin sijainti asetettu onnistuneesti!"
 command_reset: "Nollaus onnistui"
 command_resetting: "Palautetaan..."

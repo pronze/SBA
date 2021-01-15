@@ -33,7 +33,7 @@ victory-title: "§6§lVICTORY!"
 cannot-put-item-on-chest: "Δεν μπορείτε να βάλετε αυτό το αντικείμενο σε αυτό το στήθος."
 upgrade: "Αναβάθμιση: "
 game_not_found: "[SBA]: Δεν ήταν δυνατή η εύρεση παιχνιδιού!"
-reloaded: Το πρόσθετο επαναφορτώθηκε!
+reloaded: "Το πρόσθετο επαναφορτώθηκε!"
 command_set_lobby_location: "Ορίστηκε με επιτυχία η τοποθεσία Lobby!"
 command_reset: "Επιτυχής επαναφορά"
 command_resetting: "Επανεγκατάσταση..."
