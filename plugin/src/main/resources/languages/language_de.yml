@@ -46,3 +46,4 @@ command_shout_invalid_usage: "§cUngültige Nutzung, /shout {message} ist das Fo
 gamesinv_disabled: "§cSpiele-Inventar wurde deaktiviert, kontaktiere den Serverbesitzer, um es zu aktivieren."
 not_in_game: "§c Du musst in einem Spiel sein, um diesen Befehl auszuführen!"
 shout_wait: "§c Du musst warten, bis {seconds} diesen Befehl wieder verwendet!"
+countdown: "§fStarting in §a{countdown}s"
