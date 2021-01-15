@@ -46,4 +46,4 @@ command_shout_invalid_usage: "§cNieprawidłowe użycie, /shout {message} to for
 gamesinv_disabled: "§cZapasy Gier zostały wyłączone, skontaktuj się z właścicielem serwera, aby je włączyć."
 not_in_game: "§c Musisz być w grze, aby wykonać to polecenie!"
 shout_wait: "§c Musisz poczekać na {seconds} aby użyć tej komendy ponownie!"
-countdown: "§fStarting in §a{countdown}s"
+countdown: "§fRozpoczęcie za §a{countdown}s"
