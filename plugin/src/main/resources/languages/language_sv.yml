@@ -46,3 +46,4 @@ command_shout_invalid_usage: "§cOgiltig användning, /shout {message} är forma
 gamesinv_disabled: "§cSpel inventory har inaktiverats, Kontakta serverägaren för att aktivera det."
 not_in_game: "§c Du måste vara i ett spel för att göra detta kommando!"
 shout_wait: "§c Du måste vänta på att {seconds} ska använda detta kommando igen!"
+countdown: "§fStarting in §a{countdown}s"
