@@ -46,3 +46,4 @@ command_shout_invalid_usage: "§cНеправильное использован
 gamesinv_disabled: "§cИнвентарь игр отключен, свяжитесь с владельцем сервера, чтобы включить его."
 not_in_game: "§c Вы должны быть в игре, чтобы выполнить эту команду!"
 shout_wait: "§c Вы должны подождать пока {seconds} будет использовать эту команду снова!"
+countdown: "§fStarting in §a{countdown}s"
