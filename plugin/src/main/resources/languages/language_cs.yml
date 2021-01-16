@@ -46,3 +46,4 @@ command_shout_invalid_usage: "§cNeplatné využití, /shout {message} je formá
 gamesinv_disabled: "§cHerní inventář byl zakázán. Chcete-li jej povolit, kontaktujte vlastníka serveru."
 not_in_game: "§c Musíš být ve hře, abys mohl udělat tento příkaz!"
 shout_wait: "§c Musíš počkat na {seconds} , abys mohl použít tento příkaz!"
+countdown: "§fStarting in §a{countdown}s"
