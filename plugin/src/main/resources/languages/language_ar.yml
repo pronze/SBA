@@ -1,6 +1,5 @@
 ---
 lang_name: "الإنكليزية"
-prefix: "[SBAHypixelify]"
 game-end: "نهاية اللعبة"
 diamond: "الماس"
 emerald: "الزمردي"
@@ -46,4 +45,4 @@ command_shout_invalid_usage: "§cInvغير صالح، /shout {message} هو ال
 gamesinv_disabled: "تم تعطيل مخزون المباريات، اتصل بمالك الملقم لتفعيله."
 not_in_game: "§c يجب أن تكون في لعبة للقيام بهذا الأمر!"
 shout_wait: "§c عليك الانتظار حتى {seconds} لاستخدام هذا الأمر مرة أخرى!"
-countdown: "§fStarting in §a{countdown}s"
+countdown: "§fstarting في §a{countdown}s"

@@ -1,6 +1,5 @@
 ---
 lang_name: "Română"
-prefix: "[SBAHypixelify]"
 game-end: "Sfârșitul jocului"
 diamond: "Diamant"
 emerald: "Smarald"
@@ -46,4 +45,4 @@ command_shout_invalid_usage: "§cUtilizare invalida, /shout {message} este forma
 gamesinv_disabled: "§cInventarul jocurilor a fost dezactivat, Contacteaza proprietarul serverului pentru a-l activa."
 not_in_game: "§c Trebuie sa fii intr-un joc pentru a face aceasta comanda!"
 shout_wait: "§c Trebuie sa astepti ca {seconds} sa foloseasca aceasta comanda din nou!"
-countdown: "§fStarting in §a{countdown}s"
+countdown: "§fÎncepe în §a{countdown}s"

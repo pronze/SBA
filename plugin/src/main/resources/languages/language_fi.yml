@@ -1,6 +1,5 @@
 ---
 lang_name: "Englanti"
-prefix: "[SBAHypixelify]"
 game-end: "Pelin Loppu"
 diamond: "Timantti"
 emerald: "Smaragdi"
@@ -46,4 +45,4 @@ command_shout_invalid_usage: "§cVirheellinen käyttö, /huuto {message} on muot
 gamesinv_disabled: "§cGamesin tavaraluettelo on poistettu käytöstä, ota yhteyttä palvelimen omistajaan ottaaksesi se käyttöön."
 not_in_game: "§c Sinun täytyy olla pelissä tehdäksesi tämän komennon!"
 shout_wait: "§c Sinun täytyy odottaa {seconds} käyttääksesi tätä komentoa uudelleen!"
-countdown: "§fStarting in §a{countdown}s"
+countdown: "§fAloitetaan §a{countdown}s"

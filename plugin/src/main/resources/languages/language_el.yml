@@ -1,6 +1,5 @@
 ---
 lang_name: "Αγγλικά"
-prefix: "[SBAHypixelify]"
 game-end: "Τέλος Παιχνιδιού"
 diamond: "Διαμάντι"
 emerald: "Σμαράγδι"
@@ -46,4 +45,4 @@ command_shout_invalid_usage: "§cΆκυρη χρήση, /shout {message} είν�
 gamesinv_disabled: "§cGames inventory έχει απενεργοποιηθεί, Επικοινωνήστε με τον ιδιοκτήτη του διακομιστή για να το ενεργοποιήσετε."
 not_in_game: "§c Πρέπει να είσαι σε ένα παιχνίδι για να κάνεις αυτή την εντολή!"
 shout_wait: "§c You have to wait for {seconds} to use this command again!"
-countdown: "§fStarting in §a{countdown}s"
+countdown: "§fΞεκινώντας από §a{countdown}s"
