@@ -1,6 +1,5 @@
 ---
 lang_name: "Anglais"
-prefix: "[SBAHypixelify]"
 game-end: "Fin de partie"
 diamond: "Diamant"
 emerald: "Émeraude"
@@ -46,4 +45,4 @@ command_shout_invalid_usage: "§cUtilisation invalide, /shout {message} est au f
 gamesinv_disabled: "§cL'inventaire des jeux a été désactivé, contactez le propriétaire du serveur pour l'activer."
 not_in_game: "§c Vous devez être dans un jeu pour faire cette commande!"
 shout_wait: "§c Vous devez attendre que {seconds} réutilise cette commande !"
-countdown: "§fStarting in §a{countdown}s"
+countdown: "§fCommencer dans §a{countdown}s"
