@@ -93,6 +93,7 @@ public class Configurator {
 
         var modify = new AtomicBoolean(false);
         checkOrSetConfig(modify, "locale", "en");
+        checkOrSetConfig(modify, "prefix", "[SBAHypixelify]");
         checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "permanent-items", true);
 

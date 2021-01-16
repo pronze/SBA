@@ -1,6 +1,7 @@
 package pronze.hypixelify.lib.lang;
 
 import org.bukkit.ChatColor;
+import pronze.hypixelify.SBAHypixelify;
 
 public interface ITranslateContainer {
 	String getLocaleCode();
@@ -36,7 +37,7 @@ public interface ITranslateContainer {
 	}
 
 	default String getPrefix() {
-		return translate("prefix", "");
+		return SBAHypixelify.getConfigurator().getString("prefix");
 	}
 
 	default String translateWithPrefix(String key) {

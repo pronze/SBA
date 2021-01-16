@@ -122,8 +122,7 @@ public class LobbyScoreboard implements Listener {
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
                 var seconds = Integer.parseInt(units[1]) + 1;
-                state = SBAUtil.translateColors(SBAHypixelify.getConfigurator()
-                        .getString(i18n("countdown"))).replace("{countdown}", String.valueOf(seconds));
+                state = i18n("countdown").replace("{countdown}", String.valueOf(seconds));
             }
         }
 
