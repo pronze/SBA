@@ -9,7 +9,7 @@ public class I {
 	protected static ITranslateContainer fallbackContainer;
 
 	public static String i18n(String key) {
-		return i18n(key, null, true);
+		return i18n(key, null, false);
 	}
 
 	public static String i18nonly(String key) {

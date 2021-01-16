@@ -46,8 +46,8 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
                 .config.getInt("upgrades.trap-detection-range", 7), 2);
         this.game = game;
         storage = new GameStorage(game);
-        scoreboard = new ScoreBoard(this);
         gameTask = new GameTask(this);
+        scoreboard = new ScoreBoard(this);
 
         game.getConnectedPlayers()
                 .forEach(player -> playerDataMap.put(player.getUniqueId(), new PlayerData()));
