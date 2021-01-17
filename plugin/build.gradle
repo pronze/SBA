@@ -22,22 +22,4 @@ spigot {
             'PlaceholderAPI',
             'ProtocolLib'
     ]
-    commands {
-        bwaddon {
-            aliases = ['bwa']
-            description = 'Command of SBAHypixelify plugin'
-            usage = '/bwa [subcommand]'
-        }
-
-        party{
-            aliases = ['p']
-            description = 'Command of SBAHypixelify plugin used for parties'
-            usage = '/party [subcommand]'
-        }
-
-        shout{
-            description = 'Command of SBAHypixelify plugin used for shouts'
-            usage = '/shout [subcommand]'
-        }
-    }
 }

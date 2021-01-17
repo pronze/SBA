@@ -302,4 +302,3 @@ shop:
   items-on-row: 9
   show-page-numbers: true
   inventory-type: CHEST
-  citizens-enabled: true

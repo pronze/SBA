@@ -2,11 +2,11 @@ package pronze.hypixelify.commands;
 
 import cloud.commandframework.arguments.standard.StringArgument;
 import cloud.commandframework.bukkit.BukkitCommandManager;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 
 import java.util.List;
@@ -25,15 +25,14 @@ public class BWACommand {
 
 
     public void build() {
-        final var builder = this.manager.commandBuilder("bwa", "bwaddon");
+        final var builder = this.manager.commandBuilder("bwaddon", "bwa");
 
         manager.command(builder.literal("reload")
                 .permission("misat11.bw.admin")
                 .handler(context -> manager.taskRecipe()
                         .begin(context)
                         .synchronous(c -> {
-                            Bukkit.getServer().getPluginManager().disablePlugin(SBAHypixelify.getInstance());
-                            Bukkit.getServer().getPluginManager().enablePlugin(SBAHypixelify.getInstance());
+                            SBAUtil.reloadPlugin(SBAHypixelify.getInstance());
                         })
                         .execute(() -> context.getSender().sendMessage(i18n("reloaded")))));
 

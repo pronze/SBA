@@ -1,9 +1,16 @@
 package pronze.hypixelify.utils;
 
-import org.bukkit.*;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import lombok.NonNull;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameCreator;
@@ -12,7 +19,10 @@ import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.RotatingGenerators;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SBAUtil {
@@ -35,24 +45,24 @@ public class SBAUtil {
     };
 
     public static void removeScoreboardObjective(Player player) {
-    //if (SBAHypixelify.isProtocolLib()) {
-    //    try {
-    //        final var obj = new WrapperPlayServerScoreboardObjective();
-    //        obj.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
-    //        obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
-    //        obj.sendPacket(player);
-    //    } catch (Exception ex) {
-    //        ex.printStackTrace();
-    //    }
-    //    try {
-    //        final var obj = new WrapperPlayServerScoreboardObjective();
-    //        obj.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
-    //        obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
-    //        obj.sendPacket(player);
-    //    } catch (Exception ex) {
-    //        ex.printStackTrace();
-    //    }
-    //}
+        if (SBAHypixelify.isProtocolLib() && !Main.isLegacy()) {
+            try {
+                final var obj = new WrapperPlayServerScoreboardObjective();
+                obj.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
+                obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
+                obj.sendPacket(player);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            try {
+                final var obj = new WrapperPlayServerScoreboardObjective();
+                obj.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
+                obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
+                obj.sendPacket(player);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     public static void destroySpawnerArmorStandEntitiesFrom(Game game) {
@@ -100,7 +110,8 @@ public class SBAUtil {
                     try {
                         final var mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
                         materialList.add(mat);
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 });
         return materialList;
     }
@@ -122,7 +133,7 @@ public class SBAUtil {
 
     public static void cancelTask(BukkitTask task) {
         if (task != null) {
-            if (Bukkit.getScheduler().isQueued(task.getTaskId()) || !task.isCancelled()) {
+            if (Bukkit.getScheduler().isCurrentlyRunning(task.getTaskId()) || Bukkit.getScheduler().isQueued(task.getTaskId())) {
                 task.cancel();
             }
         }
@@ -133,7 +144,16 @@ public class SBAUtil {
                 .translateAlternateColorCodes('&', string)).collect(Collectors.toList());
     }
 
-    public static String translateColors(String toTranslate){
+    public static String translateColors(String toTranslate) {
         return ChatColor.translateAlternateColorCodes('&', toTranslate);
+    }
+
+    public static void reloadPlugin(@NonNull JavaPlugin plugin) {
+        if (!plugin.isEnabled()) {
+            return;
+        }
+        final var pluginManager = Bukkit.getServer().getPluginManager();
+        pluginManager.disablePlugin(plugin);
+        pluginManager.enablePlugin(plugin);
     }
 }

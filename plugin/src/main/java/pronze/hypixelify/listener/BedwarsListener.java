@@ -72,7 +72,6 @@ public class BedwarsListener implements Listener {
         final var game = e.getGame();
         final var arena = SBAHypixelify.getArena(game.getName());
         if (arena != null) {
-            arena.getScoreboard().cancelTask();
             SBAHypixelify.removeArena(game.getName());
         }
     }
@@ -91,69 +90,76 @@ public class BedwarsListener implements Listener {
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
         final var game = Main.getGame(e.getGame().getName());
-
         final var task = runnableCache.get(player.getUniqueId());
-
-
         if (task != null) {
-            if (!task.isCancelled()) {
-                try {
-                    task.cancel();
-                } catch (Throwable ignored) {
+            SBAUtil.cancelTask(task);
+        }
+
+        if (game.getStatus() == GameStatus.WAITING) {
+            runnableCache.put(player.getUniqueId(), new BukkitRunnable() {
+                int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
+
+                public void run() {
+                    if (player.isOnline() &&
+                            game.getConnectedPlayers().contains(player) &&
+                            game.getStatus() == GameStatus.WAITING) {
+
+                        if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
+                            String time = game.getFormattedTimeLeft();
+
+                            if (!time.contains("0-1")) {
+                                String[] units = time.split(":");
+                                int seconds = Integer.parseInt(units[1]) + 1;
+                                if (buffer == seconds) return;
+                                buffer = seconds;
+                                if (seconds <= 10) {
+                                    String message = i18n("game-starts-in")
+                                            .replace("{seconds}", String.valueOf(seconds));
+
+                                    message = seconds == 1 ? message
+                                            .replace("seconds", "second") : message;
+                                    player.sendMessage(message);
+                                    sendTitle(player, ShopUtil
+                                            .translateColors("&c" + seconds), "", 0, 20, 0);
+                                }
+                            }
+                        }
+                    } else {
+                        this.cancel();
+                        runnableCache.remove(player.getUniqueId());
+                    }
+                }
+            }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L));
+        }
+
+        /* Joined as spectator, let's give him a scoreboard*/
+        else if (game.getStatus() == GameStatus.RUNNING) {
+            final var arena = SBAHypixelify.getArena(game.getName());
+            if (arena != null) {
+                final var scoreboard = arena.getScoreboard();
+                if (scoreboard != null) {
+                    scoreboard.createBoard(player);
                 }
             }
         }
-
-        runnableCache.put(player.getUniqueId(), new BukkitRunnable() {
-            int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
-
-            public void run() {
-                if (player.isOnline() &&
-                        game.getConnectedPlayers().contains(player) &&
-                        game.getStatus() == GameStatus.WAITING) {
-
-                    if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
-                        String time = game.getFormattedTimeLeft();
-
-                        if (!time.contains("0-1")) {
-                            String[] units = time.split(":");
-                            int seconds = Integer.parseInt(units[1]) + 1;
-                            if (buffer == seconds) return;
-                            buffer = seconds;
-                            if (seconds <= 10) {
-                                String message = i18n("game-starts-in")
-                                        .replace("{seconds}", String.valueOf(seconds));
-
-                                message = seconds == 1 ? message
-                                        .replace("seconds", "second") : message;
-                                player.sendMessage(message);
-                                sendTitle(player, ShopUtil
-                                        .translateColors("&c" + seconds), "", 0, 20, 0);
-                            }
-                        }
-                    }
-                } else {
-                    this.cancel();
-                    runnableCache.remove(player.getUniqueId());
-                }
-            }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L));
     }
 
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
+        final var game = e.getGame();
+        final var arena = SBAHypixelify.getArena(game.getName());
 
-        if (task != null) {
-            if (Bukkit.getScheduler().isQueued(task.getTaskId()) ||
-                    !task.isCancelled()) {
-                try {
-                    task.cancel();
-                } catch (Throwable ignored) {
-                }
+        if (arena != null) {
+            final var scoreboard = arena.getScoreboard();
+            if (scoreboard != null) {
+                scoreboard.remove(player);
             }
+        }
+        if (task != null) {
+            SBAUtil.cancelTask(task);
         }
         runnableCache.remove(player.getUniqueId());
 

@@ -30,10 +30,6 @@ public class PlayerWrapperService implements WrapperService<Player> {
         Logger.trace("Registered player: {}", player.getName());
     }
 
-    public void register(UUID uuid) {
-        register(Objects.requireNonNull(Bukkit.getPlayer(uuid)));
-    }
-
     @Override
     public void unregister(Player player) {
         playerData.remove(player.getUniqueId());

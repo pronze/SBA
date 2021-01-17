@@ -1,7 +1,5 @@
 package pronze.hypixelify.utils;
 
-import org.bukkit.Bukkit;
-
 public class Logger {
     private static Logger instance;
     private java.util.logging.Logger logger;

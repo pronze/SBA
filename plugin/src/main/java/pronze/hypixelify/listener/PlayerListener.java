@@ -1,10 +1,5 @@
 package pronze.hypixelify.listener;
-import org.screamingsandals.lib.paperlib.PaperLib;
-import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.RotatingGenerators;
-import pronze.hypixelify.utils.Logger;
-import pronze.hypixelify.utils.SBAUtil;
-import pronze.hypixelify.utils.ShopUtil;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -25,6 +20,14 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
+import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.game.RotatingGenerators;
+import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.utils.SBAUtil;
+import pronze.hypixelify.utils.ScoreboardUtil;
+import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.scoreboards.Scoreboard;
+import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,7 +115,7 @@ public class PlayerListener implements Listener {
                     && killer.getGameMode() == GameMode.SURVIVAL) {
                 Arrays.stream(player.getInventory().getContents())
                         .filter(Objects::nonNull)
-                        .forEach(drop-> {
+                        .forEach(drop -> {
                             if (generatorDropItems.contains(drop.getType())) {
                                 killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name());
                                 killer.getInventory().addItem(drop);
@@ -252,20 +255,24 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
-        SBAHypixelify.getWrapperService().unregister(e.getPlayer());
+        final var player = e.getPlayer();
+        final var uuid = player.getUniqueId();
+
+        final var scoreboardOptional = ScoreboardManager.getInstance().fromCache(uuid);
+        scoreboardOptional.ifPresent(Scoreboard::destroy);
+        SBAHypixelify.getWrapperService().unregister(player);
+        ScoreboardUtil.removePlayer(player);
     }
 
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
-
-        SBAHypixelify.getWrapperService().register(e.getPlayer().getUniqueId());
+        SBAHypixelify.getWrapperService().register(player);
         if (!player.isOp())
             return;
 
-        if (!SBAHypixelify.getConfigurator().getString("version", SBAHypixelify.getInstance().getVersion())
-                .contains(SBAHypixelify.getInstance().getVersion())) {
+        if (SBAHypixelify.isUpgraded()) {
             Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                 player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                 player.sendMessage("Type /bwaddon upgrade to upgrade file");

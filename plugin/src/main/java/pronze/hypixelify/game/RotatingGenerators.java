@@ -1,7 +1,5 @@
 package pronze.hypixelify.game;
 
-import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.utils.SBAUtil;
 import lombok.Data;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,6 +14,8 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 import org.screamingsandals.lib.paperlib.PaperLib;
+import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.utils.SBAUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,18 +28,17 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
 
     public static final String entityName = "sba_rot_entity";
     public static List<RotatingGenerators> cache = new ArrayList<>();
-    private List<String> lines;
     public static List<String> format = new ArrayList<>();
+    private final ItemSpawner itemSpawner;
+    protected BukkitTask rotatingTask;
+    protected BukkitTask hologramTask;
+    private List<String> lines;
     private Hologram hologram;
     private ArmorStand armorStand;
     private Location location;
     private ItemStack itemStack;
-    private final ItemSpawner itemSpawner;
     private int time;
     private int tierLevel;
-
-    protected BukkitTask rotatingTask;
-    protected BukkitTask hologramTask;
 
     public RotatingGenerators(ItemSpawner spawner,
                               ItemStack itemStack,
@@ -50,6 +49,21 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
         this.itemSpawner = spawner;
         time = spawner.getItemSpawnerType().getInterval() + 1;
         cache.add(this);
+    }
+
+    public static void destroy(List<RotatingGenerators> rotatingGenerators) {
+        if (rotatingGenerators == null || rotatingGenerators.isEmpty()) {
+            return;
+        }
+        rotatingGenerators.stream()
+                .filter(Objects::nonNull)
+                .forEach(pronze.hypixelify.api.game.RotatingGenerators::destroy);
+        cache.removeAll(rotatingGenerators);
+    }
+
+    public static boolean canBeUsed(ItemSpawner spawner) {
+        final var type = spawner.getItemSpawnerType().getMaterial();
+        return type == Material.DIAMOND || type == Material.EMERALD;
     }
 
     public void scheduleTask() {
@@ -68,7 +82,7 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
 
                 final var newLines = new ArrayList<String>();
                 final var matName = getItemSpawner().getItemSpawnerType().getMaterial() ==
-                        Material.EMERALD ? "§a" + i18n("emerald", "Emerald&e") :
+                        Material.EMERALD ? "§a" + i18n("emerald") :
                         "§b" + i18n("diamond");
 
                 for (var line : RotatingGenerators.format) {
@@ -88,16 +102,6 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
     }
 
-    public static void destroy(List<RotatingGenerators> rotatingGenerators) {
-        if (rotatingGenerators == null || rotatingGenerators.isEmpty()) {
-            return;
-        }
-        rotatingGenerators.stream()
-                .filter(Objects::nonNull)
-                .forEach(pronze.hypixelify.api.game.RotatingGenerators::destroy);
-        cache.removeAll(rotatingGenerators);
-    }
-
     public ArmorStand getArmorStandEntity() {
         return armorStand;
     }
@@ -115,7 +119,8 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
                 .spawnHologram(players, location.clone().add(0, holoHeight, 0), lines.toArray(new String[0]));
 
         PaperLib.getChunkAtAsync(location)
-                .thenAccept(chunk-> {
+                .thenAccept(chunk -> {
+
                     armorStand = (ArmorStand) location.getWorld().
                             spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
                     armorStand.setCustomName(entityName);
@@ -124,10 +129,10 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
                     armorStand.setGravity(false);
 
                     //make sure there aren't any other rotating generator entities in the same area
-                    armorStand.getLocation().getWorld().getNearbyEntitiesByType(ArmorStand.class, armorStand.getLocation()
+                    armorStand.getLocation().getWorld().getNearbyEntities(armorStand.getLocation()
                             , 1, 1, 1)
                             .stream()
-                            .filter(entity->  entity.getLocation().getBlock().equals(armorStand.getLocation().getBlock()) && !entity.equals(armorStand))
+                            .filter(entity -> entity.getLocation().getBlock().equals(armorStand.getLocation().getBlock()) && !entity.equals(armorStand))
                             .forEach(Entity::remove);
                     scheduleTask();
                 });
@@ -155,11 +160,6 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
         if (lines != null) {
             lines.set(index, line);
         }
-    }
-
-    public static boolean canBeUsed(ItemSpawner spawner) {
-        final var type = spawner.getItemSpawnerType().getMaterial();
-        return type == Material.DIAMOND || type == Material.EMERALD;
     }
 
     public void destroy() {

@@ -1,7 +1,5 @@
 #This is in a example inventory file for games inventory GUI!
 
-# for legacy users (<1.13) please change {RED_BED to BED} and {SIGN to OAK_SIGN} and also {FIREWORK to FIREWORKS_ROCKET}
-
 data:
   - stack: "RED_BED;1;§aBed Wars §7(Triples);§7Play Bed Wars {§7Triples}; ;§eClick to play!"
     row: 1

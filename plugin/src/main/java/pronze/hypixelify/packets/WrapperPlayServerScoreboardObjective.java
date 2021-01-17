@@ -74,6 +74,8 @@ public class WrapperPlayServerScoreboardObjective extends AbstractPacket {
      */
     public void setName(String value) {
         handle.getStrings().write(0, value);
+        if (Main.isLegacy())
+            handle.getStrings().write(1, value);
     }
 
     /**
@@ -92,12 +94,12 @@ public class WrapperPlayServerScoreboardObjective extends AbstractPacket {
      *
      * @param value - new value.
      */
-    public void setDisplayName(WrappedChatComponent value) {
+    public void setDisplayName(String value) {
         if (Main.isLegacy()) {
-            handle.getStrings().write(1, value.toString());
+            handle.getStrings().write(1, value);
             return;
         }
-        handle.getChatComponents().write(0, value);
+        handle.getChatComponents().write(0, WrappedChatComponent.fromText(value));
     }
 
     /**

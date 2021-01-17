@@ -32,7 +32,7 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
 
     private final Game game;
 
-    private final ScoreBoard scoreboard;
+    private ScoreBoard scoreboard;
     private final GameStorage storage;
 
     private final List<RotatingGenerators> rotatingGenerators = new ArrayList<>();
@@ -113,7 +113,7 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
 
     public void onPreRebuildingEvent() {
         try {
-            if (gameTask != null && !gameTask.isCancelled()) {
+            if (gameTask != null) {
                 gameTask.cancel();
                 gameTask = null;
             }
@@ -132,7 +132,12 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
         }
 
         try {
-            if (gameTask != null && !gameTask.isCancelled()) {
+            if (scoreboard != null) {
+                scoreboard.destroy();
+                scoreboard.cancelTask();
+                scoreboard = null;
+            }
+            if (gameTask != null) {
                 gameTask.cancel();
                 gameTask = null;
             }

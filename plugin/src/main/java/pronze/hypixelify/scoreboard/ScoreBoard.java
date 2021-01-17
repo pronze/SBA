@@ -14,6 +14,8 @@ import org.screamingsandals.bedwars.game.TeamColor;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
+import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.lib.scoreboards.Scoreboard;
@@ -55,7 +57,7 @@ public class ScoreBoard {
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 5L);
     }
 
-    private void createBoard(Player player) {
+    public void createBoard(Player player) {
         Logger.trace("Creating board for player: {}", player.getName());
 
         final var scoreboardOptional = ScoreboardManager.getInstance()
@@ -77,7 +79,61 @@ public class ScoreBoard {
                     return true;
                 })
                 .build();
+        createCustomObjective(scoreboard);
         scoreboardMap.put(player.getUniqueId(), scoreboard);
+    }
+
+    public void remove(Player player) {
+        if (scoreboardMap.containsKey(player.getUniqueId())) {
+            final var scoreboard = scoreboardMap.get(player.getUniqueId());
+            if (scoreboard != null) {
+                scoreboard.destroy();
+                Logger.trace("Destroyed board of player: {}", player.getName());
+            }
+            scoreboardMap.remove(player.getUniqueId());
+        }
+    }
+
+    public void destroy() {
+        scoreboardMap.values().forEach(Scoreboard::destroy);
+        scoreboardMap.clear();
+        Logger.trace("Destroyed scoreboard for all players of arena: {}", arena.getGame().getName());
+    }
+
+    public void createCustomObjective(Scoreboard scoreboard) {
+        final var player = scoreboard.getHolder().getPlayer();
+
+        if (!SBAHypixelify.isProtocolLib() || Main.isLegacy()) {
+            return;
+        }
+        try {
+            if (SBAHypixelify.getConfigurator().config.getBoolean("game.tab-health", true)) {
+                final var tab_objective = new WrapperPlayServerScoreboardObjective();
+                tab_objective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
+                tab_objective.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
+                tab_objective.sendPacket(player);
+
+                final var tab_displayObjective = new WrapperPlayServerScoreboardDisplayObjective();
+                tab_displayObjective.setPosition(0);
+                tab_displayObjective.setScoreName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
+                tab_displayObjective.sendPacket(player);
+            }
+
+            if (SBAHypixelify.getConfigurator().config.getBoolean("game.tag-health", true)) {
+                final var tag_objective = new WrapperPlayServerScoreboardObjective();
+                tag_objective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
+                tag_objective.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
+                tag_objective.setDisplayName("§c♥");
+                tag_objective.sendPacket(player);
+
+                final var tag_displayObjective = new WrapperPlayServerScoreboardDisplayObjective();
+                tag_displayObjective.setPosition(2);
+                tag_displayObjective.setScoreName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
+                tag_displayObjective.sendPacket(player);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateCustomObj() {
@@ -90,6 +146,9 @@ public class ScoreBoard {
         final var playerTeam = game.getTeamOfPlayer(player);
         final var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
 
+        if (statistic == null)
+            return List.of();
+
         final var totalKills = String.valueOf(statistic.getKills());
         final var currentKills = String.valueOf(playerData.getKills());
         final var finalKills = String.valueOf(statistic.getKills());
@@ -98,40 +157,48 @@ public class ScoreBoard {
         final var teamName = playerTeam == null ? "" : playerTeam.getName();
         final var teamStatus = playerTeam != null ? getTeamBedStatus(playerTeam) : null;
 
-        scoreboard_lines.forEach(line -> {
-            if (line.contains("{team_status}")) {
-                String finalLine = line;
-                game.getAvailableTeams().forEach(t -> {
-                    String you = "";
-                    if (playerTeam != null) {
-                        if (playerTeam.getName().equals(t.getName())) {
-                            you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
-                        }
-                    }
-                    if (teamstatus.containsKey(t.getName())) {
-                        lines.add(teamstatus.get(t.getName()).replace("{you}", you));
+        scoreboard_lines.stream()
+                .filter(Objects::nonNull)
+                .forEach(line -> {
+                    if (line.contains("{team_status}")) {
+                        String finalLine = line;
+                        game.getAvailableTeams().forEach(t -> {
+                            String you = "";
+                            if (playerTeam != null) {
+                                if (playerTeam.getName().equals(t.getName())) {
+                                    you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
+                                }
+                            }
+                            if (teamstatus.containsKey(t.getName())) {
+                                lines.add(teamstatus.get(t.getName()).replace("{you}", you));
+                                return;
+                            }
+                            lines.add(finalLine.replace("{team_status}",
+                                    getTeamStatusFormat(t).replace("{you}", you)));
+                        });
                         return;
                     }
-                    lines.add(finalLine.replace("{team_status}",
-                            getTeamStatusFormat(t).replace("{you}", you)));
+                    line = line
+                            .replace("{team}", teamName)
+                            .replace("{beds}", currentBedDestroys)
+                            .replace("{dies}", currentDeaths)
+                            .replace("{totalkills}", totalKills)
+                            .replace("{finalkills}", finalKills)
+                            .replace("{kills}", currentKills)
+                            .replace("{time}", Main.getGame(game.getName())
+                                    .getFormattedTimeLeft())
+                            .replace("{formattime}", Main.getGame(game.getName())
+                                    .getFormattedTimeLeft())
+                            .replace("{game}", game.getName())
+                            .replace("{date}", date)
+                            .replace("{team_bed_status}", teamStatus == null ? "" : teamStatus);
+
+                    if (arena.gameTask != null) {
+                        line = line.replace("{tier}", arena.gameTask.getTier()
+                                .replace("-", "") + " in §a" + arena.gameTask.getFormattedTimeLeft());
+                    }
+                    lines.add(line);
                 });
-                return;
-            }
-            line = line
-                    .replace("{team}", teamName)
-                    .replace("{beds}", currentBedDestroys)
-                    .replace("{dies}", currentDeaths)
-                    .replace("{totalkills}", totalKills).replace("{finalkills}", finalKills)
-                    .replace("{kills}", currentKills)
-                    .replace("{time}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                    .replace("{formattime}", Main.getGame(game.getName()).getFormattedTimeLeft())
-                    .replace("{game}", game.getName()).replace("{date}", date)
-                    .replace("{team_bed_status}", teamStatus)
-                    .replace("{tier}", arena.gameTask.getTier()
-                            .replace("-", " ")
-                            + " in §a" + arena.gameTask.getFormattedTimeLeft());
-            lines.add(line);
-        });
 
         final var holder = board.getHolder();
         game.getRunningTeams().forEach(team -> {
@@ -140,7 +207,7 @@ public class ScoreBoard {
             }
             final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
 
-            new HashSet<>(scoreboardTeam.getEntries())
+            scoreboardTeam.getEntries()
                     .stream()
                     .filter(Objects::nonNull)
                     .map(Bukkit::getPlayerExact)
@@ -204,7 +271,7 @@ public class ScoreBoard {
 
     public void cancelTask() {
         if (updateTask != null) {
-            if (Bukkit.getScheduler().isQueued(updateTask.getTaskId()) || !updateTask.isCancelled()) {
+            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
                 updateTask.cancel();
             }
         }

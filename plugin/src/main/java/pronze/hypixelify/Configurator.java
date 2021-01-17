@@ -11,13 +11,14 @@ import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Configurator {
 
     //TODO: remove the static shits later
-    public static HashMap<String, Integer> game_size;
+    public static HashMap<String, Integer> game_size = new HashMap<>();
     public static HashMap<String, List<String>> Scoreboard_Lines;
     public static List<String> overstats_message;
     public static List<String> gamestart_message;
@@ -50,6 +51,9 @@ public class Configurator {
 
     public void loadDefaults() {
         dataFolder.mkdirs();
+
+        /* To avoid config confusions*/
+        deleteFile("config.yml");
 
         configFile = new File(dataFolder, "bwaconfig.yml");
         langFolder = new File(dataFolder, "languages");
@@ -96,7 +100,6 @@ public class Configurator {
         checkOrSetConfig(modify, "prefix", "[SBAHypixelify]");
         checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "permanent-items", true);
-
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
         checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "block-item-drops", true);
@@ -106,7 +109,6 @@ public class Configurator {
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", SBAHypixelify.getInstance().getVersion());
-        checkOrSetConfig(modify, "autoset-bw-config", true);
         checkOrSetConfig(modify, "floating-generator.enabled", true);
         checkOrSetConfig(modify, "floating-generator.holo-height", 2.0);
         checkOrSetConfig(modify, "floating-generator.item-height", 0.25);
@@ -145,6 +147,10 @@ public class Configurator {
         checkOrSetConfig(modify, "message.maximum-enchant-lore", Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
+
+        checkOrSetConfig(modify, "game.tab-health", true);
+        checkOrSetConfig(modify, "game.tag-health", true);
+
         checkOrSetConfig(modify, "games-inventory.enabled", true);
         checkOrSetConfig(modify, "games-inventory.gui.solo-prefix", "Bed Wars Solo");
         checkOrSetConfig(modify, "games-inventory.gui.double-prefix", "Bed Wars Doubles");
@@ -276,28 +282,20 @@ public class Configurator {
         checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]&cYou do not have permissions to do this command!");
         checkOrSetConfig(modify, "experimental.reset-item-meta-on-purchase", false);
 
-        for (String game : Main.getGameNames()) {
-            String str = "lobby-scoreboard.player-size.games." + game;
-            checkOrSetConfig(modify, str, 4);
-        }
-
-        game_size = new HashMap<>();
-        for (String s : Main.getGameNames()) {
-            int size = config.getInt("lobby-scoreboard.player-size.games." + s, 4);
-            game_size.put(s, size);
-        }
+        Main.getGameNames().forEach(gameName -> {
+            final var configKey = "lobby-scoreboard.player-size.games." + gameName;
+            checkOrSetConfig(modify, configKey, 4);
+            int size = config.getInt("lobby-scoreboard.player-size.games." + gameName, 4);
+            game_size.put(gameName, size);
+        });
 
         if (modify.get()) {
-            try {
-                config.save(configFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            saveConfig();
         }
 
         date = config.getString("date.format");
         Scoreboard_Lines = new HashMap<>();
-        for (String key : Objects.requireNonNull(config.getConfigurationSection("scoreboard.lines")).getKeys(false))
+        for (String key : config.getConfigurationSection("scoreboard.lines").getKeys(false))
             Scoreboard_Lines.put(key,
                     SBAUtil.translateColors(getStringList("scoreboard.lines." + key)));
 
@@ -307,16 +305,10 @@ public class Configurator {
 
         ShopUtil.initKeys();
         if (config.getBoolean("first_start")) {
-            Bukkit.getLogger().info("[SBAHypixelify]: &a Detected first start");
+            Bukkit.getLogger().info( "§aDetected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
             saveConfig();
-            final var bw = Main.getInstance();
-            if (bw != null) {
-                Bukkit.getServer().getPluginManager().disablePlugin(bw);
-                Bukkit.getServer().getPluginManager().enablePlugin(bw);
-                Bukkit.getLogger().info("[SBAHypixelify]: &aMade changes to the config.yml file!");
-            }
         }
     }
 
@@ -324,6 +316,13 @@ public class Configurator {
         final var file = new File(dataFolder, fileName);
         if (!file.exists()) {
             main.saveResource(saveTo, false);
+        }
+    }
+
+    private void deleteFile(String fileName) {
+        final var file = new File(fileName);
+        if (file.exists()) {
+            file.delete();
         }
     }
 
@@ -335,20 +334,20 @@ public class Configurator {
         config.set("version", SBAHypixelify.getInstance().getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
-        main.saveResource("config.yml", true);
+
         main.saveResource("shops/shop.yml", true);
         main.saveResource("shops/upgradeShop.yml", true);
         main.saveResource("shops/legacy-shop.yml", true);
         main.saveResource("shops/legacy-upgradeShop.yml", true);
-        try {
-            File configReplacement = new File(dataFolder, "config.yml");
-            Main.getConfigurator().config.load(configReplacement);
-            Main.getConfigurator().saveConfig();
+        try (final var inputStream = main.getResource("config.yml")){
+            if (inputStream != null) {
+                Main.getConfigurator().config.load(new InputStreamReader(inputStream));
+                Main.getConfigurator().saveConfig();
+            }
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
-        Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
-        Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
+        SBAUtil.reloadPlugin(Main.getInstance());
     }
 
     public void saveConfig() {
@@ -361,7 +360,7 @@ public class Configurator {
 
 
     public List<String> getStringList(String string) {
-        List<String> list = new ArrayList<>();
+        final var list = new ArrayList<String>();
         for (String s : config.getStringList(string)) {
             s = ChatColor.translateAlternateColorCodes('&', s);
             list.add(s);

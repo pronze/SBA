@@ -1,21 +1,15 @@
 package pronze.hypixelify.utils;
 
 import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
-import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
-import pronze.hypixelify.packets.WrapperPlayServerScoreboardScore;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.*;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.TeamColor;
+import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.packets.WrapperPlayServerScoreboardScore;
 
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ScoreboardUtil {
     public static final String GAME_OBJECTIVE_NAME = "bwa-game";
@@ -32,45 +26,47 @@ public class ScoreboardUtil {
     }
 
     public static void updateCustomObjective(Player p, Game game) {
-        if (!SBAHypixelify.isProtocolLib()) return;
+        if (!SBAHypixelify.isProtocolLib() || Main.isLegacy()) return;
 
         if (!player_health.containsKey(p))
             player_health.put(p, new HashMap<>());
 
-        //TODO: packets
-        if (true) {
-            return;
-        }
-
-        final Map<Player, Integer> map = player_health.get(p);
+        final var map = player_health.get(p);
 
         game.getConnectedPlayers()
                 .forEach(pl -> {
-            var playerHealth = Integer.parseInt(DECIMAL_FORMAT.format(pl.getHealth()));
-            if (map.getOrDefault(pl, 0) != playerHealth) {
-                try {
-                    final var packet = new WrapperPlayServerScoreboardScore();
-                    packet.setValue(playerHealth);
-                    packet.setScoreName(pl.getName());
-                    packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
-                    packet.setObjectiveName(TAG_OBJECTIVE_NAME);
-                    packet.sendPacket(p);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                try {
-                    final var packet = new WrapperPlayServerScoreboardScore();
-                    packet.setValue(playerHealth);
-                    packet.setScoreName(pl.getName());
-                    packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
-                    packet.setObjectiveName(TAB_OBJECTIVE_NAME);
-                    packet.sendPacket(p);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                map.put(pl, playerHealth);
-            }
-        });
+                    var playerHealth = Integer.parseInt(DECIMAL_FORMAT.format(pl.getHealth()));
+                    if (map.getOrDefault(pl, 0) != playerHealth) {
+                        if (SBAHypixelify.getConfigurator().config.getBoolean("game.tag-health", true)) {
+
+                            try {
+                                final var packet = new WrapperPlayServerScoreboardScore();
+                                packet.setValue(playerHealth);
+                                packet.setScoreName(pl.getName());
+                                packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
+                                packet.setObjectiveName(TAG_OBJECTIVE_NAME);
+                                packet.sendPacket(p);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        if (SBAHypixelify.getConfigurator().config.getBoolean("game.tab-health", true)) {
+
+                            try {
+                                final var packet = new WrapperPlayServerScoreboardScore();
+                                packet.setValue(playerHealth);
+                                packet.setScoreName(pl.getName());
+                                packet.setScoreboardAction(EnumWrappers.ScoreboardAction.CHANGE);
+                                packet.setObjectiveName(TAB_OBJECTIVE_NAME);
+                                packet.sendPacket(p);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        map.put(pl, playerHealth);
+                    }
+                });
     }
 
 }
