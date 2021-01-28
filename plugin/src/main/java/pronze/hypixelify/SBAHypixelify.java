@@ -11,6 +11,7 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
+import org.yaml.snakeyaml.Yaml;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -108,8 +109,9 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             return;
         }
 
-        if (!Main.getVersion().contains("0.3.")) {
-            showErrorMessage("You need at least a minimum of 0.3.0 version of Screaming-BedWars to run SBAHypixelify!",
+        if (!Main.getVersion().contains("0.3.") || !passedVersionChecks()) {
+            showErrorMessage("You need at least a minimum of 0.3.0 version snapshot 709+ version" +
+                            " of Screaming-BedWars to run SBAHypixelify!",
                     "Get the latest version from here: https://ci.screamingsandals.org/job/BedWars-0.x.x/");
             return;
         }
@@ -186,6 +188,18 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         getServer().getServicesManager()
                 .register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
         getLogger().info("Plugin has loaded!");
+    }
+
+    private boolean passedVersionChecks() {
+        try {
+            final var yaml = (Map<?, ?>) new Yaml().load(Main.getInstance().getClass()
+                    .getResourceAsStream("build_info.yml"));
+            if (Integer.parseInt(yaml.get("version").toString()) >= 710) {
+                return true;
+            }
+        } catch (Throwable t) {
+        }
+        return false;
     }
 
     public void registerListener(Listener listener) {
