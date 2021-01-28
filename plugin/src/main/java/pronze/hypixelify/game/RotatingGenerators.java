@@ -13,7 +13,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
-import org.screamingsandals.lib.paperlib.PaperLib;
+import org.screamingsandals.bedwars.lib.paperlib.PaperLib;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
 

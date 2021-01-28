@@ -7,9 +7,15 @@ import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.lib.debug.Debug;
-import org.screamingsandals.bedwars.lib.sgui.SimpleInventories;
-import org.screamingsandals.bedwars.lib.sgui.events.PostActionEvent;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.lib.sgui.SimpleInventoriesCore;
+import org.screamingsandals.bedwars.lib.sgui.events.PostClickEvent;
+import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
+import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
+import org.screamingsandals.bedwars.lib.sgui.inventory.Property;
+import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.GamesInventoryOpenEvent;
 import pronze.hypixelify.utils.Logger;
@@ -17,6 +23,7 @@ import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
@@ -29,18 +36,23 @@ public class GamesInventory implements Listener {
             put(4, "squad");
         }
     };
-    private final HashMap<Integer, SimpleInventories> inventoryMap = new HashMap<>();
+    private final HashMap<Integer, InventorySet> inventoryMap = new HashMap<>();
 
     public void loadInventory() {
         try {
             labels.forEach((val, label) -> {
                 try {
-                    final var options = ShopUtil.generateOptions();
-                    options.setPrefix(SBAHypixelify.getConfigurator().getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
-                    final var siFormat = new SimpleInventories(options);
-                    siFormat.loadFromDataFolder(new File(SBAHypixelify.getInstance().getDataFolder() + "/games-inventory"), label.toLowerCase() + ".yml");
+                    final var siFormat = SimpleInventoriesCore.builder()
+                            .categoryOptions(localOptionsBuilder -> {
+                                ShopUtil.generateOptions(localOptionsBuilder);
+                                localOptionsBuilder.prefix(SBAHypixelify.getConfigurator().getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
+                            })
+                            .call(categoryBuilder -> categoryBuilder.include(Include
+                                    .of(new File(SBAHypixelify.getInstance().getDataFolder() +
+                                            "/games-inventory"), label.toLowerCase() + ".yml")))
+                            .getInventorySet();
+
                     inventoryMap.put(val, siFormat);
-                    siFormat.generateData();
                     Logger.trace("Successfully loaded games inventory for: {}", label);
                 } catch (Throwable T) {
                     Logger.trace("Could not initialize shop format for {}", label);
@@ -62,12 +74,12 @@ public class GamesInventory implements Listener {
         final var format = inventoryMap.get(mode);
         if (format != null) {
             player.closeInventory();
-            format.openForPlayer(player);
+            PlayerMapper.wrapPlayer(player).openInventory(format);
         }
     }
 
     @EventHandler
-    public void onPostAction(PostActionEvent event) {
+    public void onPostAction(PostClickEvent event) {
         if (!inventoryMap.containsValue(event.getFormat())) {
             return;
         }
@@ -78,44 +90,54 @@ public class GamesInventory implements Listener {
                 .findFirst()
                 .orElse(1);
 
-        final var stack = event.getItem().getStack();
-        final var player = event.getPlayer();
-        final var reader = event.getItem().getReader();
+        final var item = event.getItem();
+        final var stack = item.getStack();
+        final var player = event.getPlayer().as(Player.class);
+        final var properties = item.getProperties();
 
         if (stack != null) {
-            if (reader.containsKey("properties")) {
-                final var property = reader.getString("properties");
-                switch (property.toLowerCase()) {
-                    case "exit":
-                        player.closeInventory();
-                        break;
-                    case "join_randomly":
-                        player.closeInventory();
-                        final var games = ShopUtil.getGamesWithSize(mode);
-                        if (games == null || games.isEmpty())
-                            return;
-                        games.stream()
-                                .filter(game -> game.getStatus() == GameStatus.WAITING)
-                                .findAny()
-                                .ifPresent(game -> game.joinToGame(player));
-                        break;
-                    case "rejoin":
-                        player.closeInventory();
-                        player.performCommand("bw rejoin");
-                        break;
-                    default:
-                        break;
-                }
+            if (item.hasProperties()) {
+                properties.stream()
+                        .filter(Property::hasName)
+                        .forEach(property -> {
+                            switch (property.getPropertyName().toLowerCase()) {
+                                case "exit":
+                                    player.closeInventory();
+                                    break;
+                                case "join_randomly":
+                                    player.closeInventory();
+                                    final var games = ShopUtil.getGamesWithSize(mode);
+                                    if (games == null || games.isEmpty())
+                                        return;
+                                    games.stream()
+                                            .filter(game -> game.getStatus() == GameStatus.WAITING)
+                                            .findAny()
+                                            .ifPresent(game -> game.joinToGame(player));
+                                    break;
+                                case "rejoin":
+                                    player.closeInventory();
+                                    player.performCommand("bw rejoin");
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            var converted = ConfigurateUtils.raw(property.getPropertyData());
+                            if (!(converted instanceof Map)) {
+                                converted = DumpCommand.nullValuesAllowingMap("value", converted);
+                            }
+                            final var propertyMap = (Map<?, ?>)converted;
+                            if (propertyMap.containsKey("gameName")) {
+                                try {
+                                    final var game = (Game) Main.getGame(propertyMap.get("gameName").toString());
+                                    Main.getGame(game.getName()).joinToGame(player);
+                                } catch (Throwable t) {
+                                    player.sendMessage(i18n("game_not_found"));
+                                }
+                                player.closeInventory();
+                            }
+                        });
             }
-        }
-        if (reader.containsKey("game")) {
-            try {
-                final var game = (Game) Main.getGame(reader.getString("game"));
-                Main.getGame(game.getName()).joinToGame(player);
-            } catch (Throwable T) {
-                player.sendMessage(i18n("game_not_found"));
-            }
-            player.closeInventory();
         }
     }
 

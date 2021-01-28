@@ -9,7 +9,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
+import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.listener.TeamUpgradeListener;
@@ -196,37 +196,28 @@ public class ShopUtil {
                                 mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
-    public static Options generateOptions() {
-        final var options = new Options(SBAHypixelify.getInstance());
-        options.setShowPageNumber(false);
-
+    public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
-        final var backItemMeta = backItem.getItemMeta();
-        backItemMeta.setDisplayName(i18n("shop_back", false));
-        backItem.setItemMeta(backItemMeta);
-        options.setBackItem(backItem);
+        backItem.setDisplayName(i18n("shop_back", false));
+        localOptionsBuilder.backItem(backItem);
 
         final var pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
-        final var pageBackItemMeta = backItem.getItemMeta();
-        pageBackItemMeta.setDisplayName(i18n("page_back", false));
-        pageBackItem.setItemMeta(pageBackItemMeta);
-        options.setPageBackItem(pageBackItem);
+        pageBackItem.setDisplayName(i18n("page_back", false));
+        localOptionsBuilder.pageBackItem(pageBackItem);
 
         final var pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
-        final var pageForwardItemMeta = backItem.getItemMeta();
-        pageForwardItemMeta.setDisplayName(i18n("page_forward", false));
-        pageForwardItem.setItemMeta(pageForwardItemMeta);
-        options.setPageForwardItem(pageForwardItem);
+        pageForwardItem.setDisplayName(i18n("page_forward", false));
+        localOptionsBuilder.pageForwardItem(pageForwardItem);
 
         final var cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
-        options.setCosmeticItem(cosmeticItem);
-        options.setRender_header_start(600);
-        options.setRender_footer_start(600);
-        options.setRender_offset(9);
-        options.setRows(4);
-        options.setRender_actual_rows(4);
-        options.setShowPageNumber(false);
-        return options;
+        localOptionsBuilder
+                .cosmeticItem(cosmeticItem)
+                .renderHeaderStart(600)
+                .renderFooterStart(600)
+                .renderOffset(9)
+                .rows(4)
+                .renderActualRows(4)
+                .showPageNumber(false);
     }
 
     public static String translateColors(String s) {

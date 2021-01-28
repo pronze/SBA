@@ -1,6 +1,5 @@
 package pronze.hypixelify.utils;
 
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,7 +13,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameCreator;
-import org.screamingsandals.lib.paperlib.PaperLib;
+import org.screamingsandals.bedwars.lib.paperlib.PaperLib;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.RotatingGenerators;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;

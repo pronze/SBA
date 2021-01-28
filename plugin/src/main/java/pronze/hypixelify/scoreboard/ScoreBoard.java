@@ -67,7 +67,6 @@ public class ScoreBoard {
         final var scoreboard = Scoreboard.builder()
                 .animate(true)
                 .player(player)
-                .async(false)
                 .displayObjective(ScoreboardUtil.GAME_OBJECTIVE_NAME)
                 .updateInterval(20L)
                 .animationInterval(2L)

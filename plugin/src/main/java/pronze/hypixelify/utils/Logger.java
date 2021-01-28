@@ -1,5 +1,7 @@
 package pronze.hypixelify.utils;
 
+import java.util.regex.Pattern;
+
 public class Logger {
     private static Logger instance;
     private java.util.logging.Logger logger;
@@ -14,7 +16,7 @@ public class Logger {
     public static void trace(String message, Object... params) {
         if (instance.debug) {
             for (Object obj : params) {
-                message = message.replaceFirst("\\{}", obj.toString());
+                message = message.replaceFirst(Pattern.quote("{}"), obj.toString());
             }
             instance.logger.info(message);
         }

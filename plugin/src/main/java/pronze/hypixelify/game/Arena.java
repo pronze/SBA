@@ -2,6 +2,7 @@ package pronze.hypixelify.game;
 
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.lib.lang.I;
 import pronze.hypixelify.scoreboard.ScoreBoard;
 import pronze.hypixelify.utils.SBAUtil;
 import lombok.Getter;
@@ -88,7 +89,8 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
                                 new ItemStack(Material.EMERALD_BLOCK);
 
                         final var genHolo = new ArrayList<String>();
-                        generatorHoloText.forEach(text -> genHolo.add(text.replace("{material}",
+                        generatorHoloText.forEach(text -> genHolo.add(text
+                                .replace("{material}",
                                 spawnerMaterial == Material.DIAMOND ? diamondHoloText
                                         : emeraldHoloText)));
 
@@ -125,12 +127,6 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
     }
 
     public void onOver(BedwarsGameEndingEvent e) {
-        final var game = e.getGame();
-
-        if (!this.game.equals(game)) {
-            return;
-        }
-
         try {
             if (scoreboard != null) {
                 scoreboard.destroy();
@@ -141,8 +137,7 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
                 gameTask.cancel();
                 gameTask = null;
             }
-        } catch (IllegalStateException ignored) {
-        }
+        } catch (IllegalStateException ignored) {}
 
         final var winner = e.getWinningTeam();
 
@@ -153,9 +148,8 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
                     .stream()
                     .map(Bukkit::getPlayer)
                     .filter(Objects::nonNull)
-                    .forEach((player) -> {
-                        dataKills.put(player.getDisplayName(), playerDataMap.get(player.getUniqueId()).getKills());
-                    });
+                    .forEach((player) -> dataKills.put(player.getDisplayName(),
+                            playerDataMap.get(player.getUniqueId()).getKills()));
 
 
             int kills_1 = 0;
@@ -229,7 +223,6 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
 
     public void onBedWarsPlayerKilled(BedwarsPlayerKilledEvent e) {
         final var game = e.getGame();
-
         final var victim = e.getPlayer();
         final var victimData = playerDataMap.get(victim.getUniqueId());
         victimData.setDeaths(victimData.getDeaths() + 1);
@@ -251,6 +244,4 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
             killerData.setFinalKills(killerData.getFinalKills() + 1);
         }
     }
-
-
 }

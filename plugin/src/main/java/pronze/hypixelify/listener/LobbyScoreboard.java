@@ -4,6 +4,7 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
@@ -53,7 +54,6 @@ public class LobbyScoreboard implements Listener {
         final var scoreboard = Scoreboard.builder()
                 .animate(true)
                 .player(player)
-                .async(false)
                 .displayObjective(ScoreboardUtil.LOBBY_OBJECTIVE_NAME)
                 .updateInterval(20L)
                 .animationInterval(2L)

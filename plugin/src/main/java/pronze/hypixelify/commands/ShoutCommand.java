@@ -30,6 +30,7 @@ public class ShoutCommand {
         return player.hasPermission("bwaddon.shout") || player.isOp();
     }
 
+    @SuppressWarnings("unchecked")
     public void build() {
         final var builder = this.manager.commandBuilder("shout");
         manager.command(builder

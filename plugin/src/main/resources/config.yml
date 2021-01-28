@@ -260,10 +260,10 @@ rewards:
 lore:
   generate-automatically: true
   text:
-    - '§7Price:'
-    - §7%price% %resource%
-    - '§7Amount:'
-    - §7%amount%
+    - '&7Price:'
+    - '&7%price% %resource%'
+    - '&7Amount:'
+    - '&7%amount%'
 sign:
   - §c§l[BedWars]
   - '%arena%'

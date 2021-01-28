@@ -23,7 +23,6 @@ public class BWACommand {
         gamesInvEnabled = SBAHypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true);
     }
 
-
     public void build() {
         final var builder = this.manager.commandBuilder("bwaddon", "bwa");
 

@@ -106,6 +106,4 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
         final var data = teamDataMap.get(team.getName());
         return data.isPurchasedDragonUpgrade();
     }
-
-
 }

@@ -337,8 +337,6 @@ public class Configurator {
 
         main.saveResource("shops/shop.yml", true);
         main.saveResource("shops/upgradeShop.yml", true);
-        main.saveResource("shops/legacy-shop.yml", true);
-        main.saveResource("shops/legacy-upgradeShop.yml", true);
         try (final var inputStream = main.getResource("config.yml")){
             if (inputStream != null) {
                 Main.getConfigurator().config.load(new InputStreamReader(inputStream));

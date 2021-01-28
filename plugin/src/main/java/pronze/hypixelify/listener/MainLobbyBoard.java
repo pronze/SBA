@@ -135,7 +135,6 @@ public class MainLobbyBoard implements Listener {
         final var scoreboard = Scoreboard.builder()
                 .animate(false)
                 .player(player)
-                .async(true)
                 .title(SBAHypixelify.getConfigurator().getString("main-lobby.title", "&e&lBED WARS"))
                 .displayObjective(MAIN_LOBBY_OBJECTIVE)
                 .updateInterval(20L)

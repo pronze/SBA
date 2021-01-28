@@ -8,17 +8,17 @@ allprojects {
 
 buildscript {
     repositories {
-        maven {url = 'https://repo.screamingsandals.org/public'}
+        maven { url = 'https://repo.screamingsandals.org/public' }
     }
 
-    dependencies {classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.30'}
+    dependencies { classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.30' }
 }
-subprojects{
+subprojects {
     apply plugin: 'java'
     apply plugin: 'org.screamingsandals.gradle.builder'
 
     repositories {
-      //  mavenLocal()
+        //  mavenLocal()
         maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
         }
@@ -48,16 +48,15 @@ subprojects{
         }
     }
 
-    dependencies{
+    dependencies {
         compileOnly paper("1.16.4")
         compileOnly 'org.screamingsandals.bedwars:BedWars:0.3.0-SNAPSHOT'
         compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.3.0-SNAPSHOT'
-        shade 'pronze.lib:scoreboard:1.0.1-SNAPSHOT'
     }
 
     shadowJar {
         relocate 'pronze.lib', 'pronze.hypixelify.lib'
-        relocate('cloud', 'pronze.hypixelify.lib.cloud')
+        relocate 'cloud', 'pronze.hypixelify.lib.cloud'
     }
     sourceCompatibility = '11.0'
 }

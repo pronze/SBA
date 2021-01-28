@@ -9,8 +9,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
-import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -85,6 +85,16 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 .config.getString("version")).contains(SBAHypixelify.getInstance().getVersion());
     }
 
+    public static void showErrorMessage(String... messages) {
+        Bukkit.getLogger().severe("======PLUGIN ERROR===========");
+        Bukkit.getLogger().severe("Plugin: SBAHypixelify is being disabled for the following error:");
+        Arrays.stream(messages)
+                .filter(Objects::nonNull)
+                .forEach(Bukkit.getLogger()::severe);
+        Bukkit.getLogger().severe("=============================");
+        Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+    }
+
     @Override
     public void onEnable() {
         plugin = this;
@@ -131,7 +141,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         playerWrapperService = new PlayerWrapperService();
         debug = configurator.config.getBoolean("debug.enabled", false);
 
-        InventoryListener.init(this);
         CustomShop shop = new CustomShop();
 
         gamesInventory = new GamesInventory();
@@ -140,7 +149,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registerListener(new BedwarsListener());
         registerListener(new PlayerListener());
         registerListener(new TeamUpgradeListener());
-        // pluginManager.registerEvents(new DragonListener(), this);
 
         if (configurator.config.getBoolean("main-lobby.enabled", false))
             registerListener(new MainLobbyBoard());
@@ -150,8 +158,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registerListener(gamesInventory);
         registerListener(shop);
 
-        //Do changes for legacy support.
-        changeBedWarsConfig();
         final var pluginManager = Bukkit.getServer().getPluginManager();
 
         try {
@@ -175,6 +181,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             SBAUtil.destroySpawnerArmorStandEntities();
         }
 
+        new Metrics(this, 79505);
         Logger.trace("Registering API service provider");
         getServer().getServicesManager()
                 .register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
@@ -186,38 +193,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         plugMan.registerEvents(listener, this);
         Logger.trace("Registered Listener: {}", listener.getClass().getSimpleName());
         registeredListeners.add(listener);
-    }
-
-    protected void showErrorMessage(String... messages) {
-        getLogger().severe("======PLUGIN ERROR===========");
-        getLogger().severe("Plugin: SBAHypixelify is being disabled for the following error:");
-        Arrays.stream(messages)
-                .filter(Objects::nonNull)
-                .forEach(getLogger()::severe);
-        getLogger().severe("=============================");
-        getServer().getPluginManager().disablePlugin(this);
-    }
-
-    public void changeBedWarsConfig() {
-        //Do changes for legacy support.
-        if (Main.isLegacy()) {
-            boolean doneChanges = false;
-            if (Objects.requireNonNull(Main.getConfigurator().config.getString("items.leavegame")).equalsIgnoreCase("RED_BED")) {
-                Main.getConfigurator().config.set("items.leavegame", "BED");
-                doneChanges = true;
-            }
-            if (Objects.requireNonNull(Main.getConfigurator()
-                    .config.getString("items.shopcosmetic")).equalsIgnoreCase("GRAY_STAINED_GLASS_PANE")) {
-                Main.getConfigurator().config.set("items.shopcosmetic", "STAINED_GLASS_PANE");
-                doneChanges = true;
-            }
-            if (doneChanges) {
-                getLogger().info("[SBAHypixelify]: Making legacy changes");
-                Main.getConfigurator().saveConfig();
-                Bukkit.getServer().getPluginManager().disablePlugin(this);
-                Bukkit.getServer().getPluginManager().enablePlugin(this);
-            }
-        }
     }
 
     @Override
@@ -237,6 +212,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
         arenas.clear();
+        Logger.trace("Successfully shutdown SBAHypixelify instance");
     }
 
     /*
