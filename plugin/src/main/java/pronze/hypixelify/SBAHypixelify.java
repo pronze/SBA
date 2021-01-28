@@ -26,6 +26,8 @@ import pronze.hypixelify.placeholderapi.SBAExpansion;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.lib.core.Core;
+import pronze.lib.core.auto.AutoInitializer;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
@@ -110,8 +112,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         }
 
         if (!Main.getVersion().contains("0.3.") || !passedVersionChecks()) {
-            showErrorMessage("You need at least a minimum of 0.3.0 version snapshot 709+ version" +
-                            " of Screaming-BedWars to run SBAHypixelify!",
+            showErrorMessage("You need at least a minimum of 0.3.0 snapshot 709+ version" +
+                            " of Screaming-BedWars to run SBAHypixelify v2.0!",
                     "Get the latest version from here: https://ci.screamingsandals.org/job/BedWars-0.x.x/");
             return;
         }
@@ -182,7 +184,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                     .getStringList("floating-generator.holo-text");
             SBAUtil.destroySpawnerArmorStandEntities();
         }
-
         new Metrics(this, 79505);
         Logger.trace("Registering API service provider");
         getServer().getServicesManager()
@@ -192,13 +193,10 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     private boolean passedVersionChecks() {
         try {
-            final var yaml = (Map<?, ?>) new Yaml().load(Main.getInstance().getClass()
-                    .getResourceAsStream("build_info.yml"));
-            if (Integer.parseInt(yaml.get("version").toString()) >= 710) {
-                return true;
-            }
-        } catch (Throwable t) {
-        }
+           if (Integer.parseInt(Main.getInstance().getBuildInfo()) >= 710) {
+               return true;
+           }
+        } catch (Throwable ignored) {}
         return false;
     }
 
