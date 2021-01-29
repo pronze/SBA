@@ -11,6 +11,10 @@ public interface GameStorage {
 
     Integer getProtection(String team);
 
+    Integer getEfficiency(String name);
+
+    void setEfficiency(RunningTeam rt, Integer level);
+
     void setTrap(RunningTeam rt, boolean b);
 
     void setPool(RunningTeam rt, boolean b);
@@ -28,4 +32,5 @@ public interface GameStorage {
     boolean isTrapEnabled(RunningTeam team);
 
     boolean isPoolEnabled(RunningTeam team);
+
 }

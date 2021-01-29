@@ -55,16 +55,7 @@ public class TeamUpgradeListener implements Listener {
                 }
                 e.setPrice(Integer.toString(price));
             }
-        }//else if (name.equalsIgnoreCase("dragon")) {
-        //  if (gameStorage.isTrapEnabled(team)) {
-        //      player.sendMessage(SBAHypixelify.getConfigurator().getString("message.wait-trap"));
-        //      e.setCancelled(true);
-        //  } else {
-        //      gameStorage.setDragon(team, true);
-        //      team.getConnectedPlayers().forEach(pl -> sendTitle(pl, SBAHypixelify.getConfigurator().getString("message.dragon-trap-purchased"), "", 20, 40, 20));
-        //  }
-        //  }
-
+        }
         else if (name.equalsIgnoreCase("efficiency")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
                 e.setCancelled(true);

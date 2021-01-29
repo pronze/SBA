@@ -9,6 +9,7 @@ import org.bukkit.Location;
 public class TeamData {
      private int sharpness;
      private int protection;
+     private int efficiency;
      private boolean purchasedPool;
      private boolean purchasedTrap;
      private boolean purchasedDragonUpgrade;

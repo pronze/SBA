@@ -11,11 +11,17 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
 
     private final Map<String, TeamData> teamDataMap = new HashMap<>();
 
-    public GameStorage(Game game){
-        game.getRunningTeams().forEach(team->{
-                    teamDataMap.put(team.getName(),
-                            new TeamData(0, 0, false, false, false,
-                            team.getTargetBlock())); });
+    public GameStorage(Game game) {
+        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(),
+                new TeamData(
+                        0,
+                        0,
+                        0,
+                        false,
+                        false,
+                        false,
+                        team.getTargetBlock()
+                )));
     }
 
 
@@ -30,6 +36,10 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
     public Integer getProtection(String team) {
         return teamDataMap.get(team).getProtection();
     }
+
+    public Integer getEfficiency(String team) { return teamDataMap.get(team).getEfficiency(); }
+
+    public void setEfficiency(RunningTeam rt, Integer level) {teamDataMap.get(rt.getName()).setEfficiency(level);}
 
     public void setTrap(RunningTeam rt, boolean b) {
         final var data = teamDataMap.get(rt.getName());
@@ -62,7 +72,7 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
     }
 
     public boolean areDragonsEnabled() {
-        for(var data : teamDataMap.values()) {
+        for (var data : teamDataMap.values()) {
             if (data == null) continue;
             if (data.isPurchasedDragonUpgrade()) {
                 return true;

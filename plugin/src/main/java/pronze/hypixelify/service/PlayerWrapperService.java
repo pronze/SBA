@@ -13,7 +13,6 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PlayerWrapperService implements WrapperService<Player> {
-
     private final Map<UUID, PlayerWrapper> playerData = new HashMap<>();
 
     public PlayerWrapperService() {

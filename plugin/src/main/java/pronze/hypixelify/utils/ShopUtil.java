@@ -9,9 +9,11 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.listener.TeamUpgradeListener;
 
 import java.util.*;
@@ -41,18 +43,11 @@ public class ShopUtil {
                 .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
     }
 
-    public static void buyArmor(Player player, Material mat_boots, String name, Game game) {
-        final var matName = name.substring(0, name.indexOf("_"));
+    public static void buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {
+        final var matName = mat_boots.name().substring(0, mat_boots.name().indexOf("_"));
         final var mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         final var boots = new ItemStack(mat_boots);
         final var leggings = new ItemStack(mat_leggings);
-        final var optionalGameStorage = SBAHypixelify.getStorage(game);
-
-        if (optionalGameStorage.isEmpty()) {
-            return;
-        }
-
-        final var gameStorage = optionalGameStorage.get();
 
         final var level = gameStorage.getProtection(game.getTeamOfPlayer(player).getName());
         if (level != 0) {
