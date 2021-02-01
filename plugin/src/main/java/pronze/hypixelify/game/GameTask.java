@@ -80,7 +80,7 @@ public class GameTask extends BukkitRunnable {
                         if (!storage.isTrapEnabled(team) || team.getConnectedPlayers().contains(player)) return;
 
                         if (storage.getTargetBlockLocation(team)
-                                .distanceSquared(player.getLocation()) <= arena.radius) {
+                                .distanceSquared(player.getLocation()) <= arena.getRadius()) {
                             final var triggeredEvent = new TeamTrapTriggeredEvent(player, team, arena);
                             SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
@@ -112,7 +112,7 @@ public class GameTask extends BukkitRunnable {
                     team.getConnectedPlayers().forEach(player-> {
                         if (Main.getPlayerGameProfile(player).isSpectator) return;
                         if (storage.getTargetBlockLocation(team)
-                                .distanceSquared(player.getLocation()) <= arena.radius) {
+                                .distanceSquared(player.getLocation()) <= arena.getRadius()) {
                             player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,
                                     30, 1));
                         }
@@ -148,17 +148,6 @@ public class GameTask extends BukkitRunnable {
                         for (final var generator : arena.getRotatingGenerators()) {
                             final var generatorMatType = generator.getItemStack().getType();
                             if (generatorMatType == type) {
-                                final var lines = RotatingGenerators.format;
-                                final var newLines = new ArrayList<String>();
-                                if (lines != null) {
-                                    lines.forEach(line-> {
-                                        newLines.add(line
-                                                .replace("{time}", String.valueOf(generator.getTime()))
-                                                .replace("{tier}", tierLevel)
-                                                .replace("{material}", generatorMatType.name()));
-                                    });
-                                }
-                                generator.update(newLines);
                                 generator.setTierLevel(generator.getTierLevel() + 1);
                             }
                         }
@@ -174,31 +163,6 @@ public class GameTask extends BukkitRunnable {
                     tier++;
                 }
             }
-
-         ////we have reached the ender dragon stage :)
-         //else {
-         //    if (storage.areDragonsEnabled()) {
-         //        game.getRunningTeams().forEach(team-> {
-         //            final var isEnabled = storage.isDragonEnabled(team);
-         //            final var firstPlayer = team.getConnectedPlayers().get(0);
-
-         //            //why? idk
-         //            if (firstPlayer == null) {
-         //                return;
-         //            }
-
-         //            if (isEnabled) {
-         //                new Dragon(game, firstPlayer, team, game.getSpectatorSpawn()).spawn();
-         //                storage.setDragon(team, false);
-         //            }
-         //        });
-
-         //        game.getConnectedPlayers().forEach(player-> {
-         //            player.sendMessage(SBAHypixelify.getConfigurator().getString("message.dragon-spawn"));
-         //        });
-         //    }
-         //}
-
             time++;
         } else {
             this.cancel();

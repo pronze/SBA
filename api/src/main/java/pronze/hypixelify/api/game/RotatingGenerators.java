@@ -11,23 +11,19 @@ import java.util.List;
 public interface RotatingGenerators {
 
 
-    public ArmorStand getArmorStandEntity();
+    ArmorStand getArmorStandEntity();
 
-    public void setLocation(Location location);
+    void setLocation(Location location);
 
-    public RotatingGenerators spawn(List<Player> players);
+    RotatingGenerators spawn(List<Player> players);
 
-    public void update(List<String> lines);
+    ItemStack getItemStack();
 
-    public ItemStack getItemStack();
+    void setItemStack(ItemStack itemStack);
 
-    public void setItemStack(ItemStack itemStack);
+    ItemSpawner getItemSpawner();
 
-    public ItemSpawner getItemSpawner();
-
-    public void setLine(int index, String line);
-
-    public void destroy();
+    void destroy();
 
 
 }

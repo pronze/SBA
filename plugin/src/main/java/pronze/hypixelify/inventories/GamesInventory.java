@@ -45,17 +45,20 @@ public class GamesInventory implements Listener {
                     final var siFormat = SimpleInventoriesCore.builder()
                             .categoryOptions(localOptionsBuilder -> {
                                 ShopUtil.generateOptions(localOptionsBuilder);
-                                localOptionsBuilder.prefix(SBAHypixelify.getConfigurator().getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
+                                localOptionsBuilder.prefix(SBAHypixelify.getConfigurator()
+                                        .getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
                             })
-                            .call(categoryBuilder -> categoryBuilder.include(Include
-                                    .of(new File(SBAHypixelify.getInstance().getDataFolder() +
-                                            "/games-inventory"), label.toLowerCase() + ".yml")))
+                          .call(categoryBuilder -> categoryBuilder.include(Include
+                                  .of(new File(SBAHypixelify.getInstance().getDataFolder()
+                                          , "games-inventory/" + label.toLowerCase() + ".yml"))))
+                            .click(this::onClick)
+                            .process()
                             .getInventorySet();
 
                     inventoryMap.put(val, siFormat);
                     Logger.trace("Successfully loaded games inventory for: {}", label);
                 } catch (Throwable T) {
-                    Logger.trace("Could not initialize shop format for {}", label);
+                    Logger.trace("Could not initialize games inventory format for {}", label);
                 }
             });
         } catch (Exception ex) {
@@ -73,17 +76,11 @@ public class GamesInventory implements Listener {
         }
         final var format = inventoryMap.get(mode);
         if (format != null) {
-            player.closeInventory();
             PlayerMapper.wrapPlayer(player).openInventory(format);
         }
     }
 
-    @EventHandler
-    public void onPostAction(PostClickEvent event) {
-        if (!inventoryMap.containsValue(event.getFormat())) {
-            return;
-        }
-
+    public void onClick(PostClickEvent event) {
         final var mode = inventoryMap.keySet()
                 .stream()
                 .filter(key -> event.getFormat() == inventoryMap.get(key))

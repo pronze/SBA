@@ -13,7 +13,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameCreator;
-import org.screamingsandals.bedwars.lib.paperlib.PaperLib;
+import org.screamingsandals.bedwars.lib.ext.paperlib.PaperLib;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.RotatingGenerators;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;

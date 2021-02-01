@@ -29,7 +29,6 @@ public class ScoreBoard {
     private final static String date = new SimpleDateFormat(Configurator.date).format(new Date());
     private final Game game;
     private final Arena arena;
-    private final Map<String, String> teamstatus = new HashMap<>();
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
     private final List<String> scoreboard_lines = new ArrayList<>();
 
@@ -39,7 +38,8 @@ public class ScoreBoard {
         this.arena = arena;
         game = arena.getGame();
 
-        if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
+        if (game.countAvailableTeams() >= 5 &&
+                Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("5"));
         } else {
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("default"));
@@ -164,13 +164,10 @@ public class ScoreBoard {
                         game.getAvailableTeams().forEach(t -> {
                             String you = "";
                             if (playerTeam != null) {
-                                if (playerTeam.getName().equals(t.getName())) {
-                                    you = SBAHypixelify.getConfigurator().getString("scoreboard.you", "§7YOU");
+                                if (playerTeam.getName().equalsIgnoreCase(t.getName())) {
+                                    you = SBAHypixelify.getConfigurator()
+                                            .getString("scoreboard.you", "§7YOU");
                                 }
-                            }
-                            if (teamstatus.containsKey(t.getName())) {
-                                lines.add(teamstatus.get(t.getName()).replace("{you}", you));
-                                return;
                             }
                             lines.add(finalLine.replace("{team_status}",
                                     getTeamStatusFormat(t).replace("{you}", you)));
@@ -192,9 +189,9 @@ public class ScoreBoard {
                             .replace("{date}", date)
                             .replace("{team_bed_status}", teamStatus == null ? "" : teamStatus);
 
-                    if (arena.gameTask != null) {
-                        line = line.replace("{tier}", arena.gameTask.getTier()
-                                .replace("-", "") + " in §a" + arena.gameTask.getFormattedTimeLeft());
+                    if (arena.getGameTask() != null) {
+                        line = line.replace("{tier}", arena.getGameTask().getTier()
+                                .replace("-", "") + " in §a" + arena.getGameTask().getFormattedTimeLeft());
                     }
                     lines.add(line);
                 });

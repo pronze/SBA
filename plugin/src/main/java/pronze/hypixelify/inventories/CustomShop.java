@@ -20,8 +20,8 @@ import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.game.GameStore;
-import org.screamingsandals.bedwars.lib.configurate.ConfigurationNode;
 import org.screamingsandals.bedwars.lib.debug.Debug;
+import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
@@ -43,7 +43,6 @@ import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.screamingsandals.bedwars.lib.lang.I.i18nc;
@@ -68,14 +67,10 @@ public class CustomShop implements Listener {
 
     public static File normalizeShopFile(String name) {
         if (name.split("\\.").length > 1) {
-            return new File(Main.getInstance().getDataFolder(), name);
+            return new File(SBAHypixelify.getInstance().getDataFolder().toString() + "/shops", name);
         }
 
-        var fileg = new File(Main.getInstance().getDataFolder(), name + ".groovy");
-        if (fileg.exists()) {
-            return fileg;
-        }
-        return new File(Main.getInstance().getDataFolder(), name + ".yml");
+        return new File(SBAHypixelify.getInstance().getDataFolder().toString() + "/shops", name + ".yml");
     }
 
     private static String getNameOrCustomNameOfItem(Item item) {
@@ -246,12 +241,11 @@ public class CustomShop implements Listener {
         }
     }
 
-    @SneakyThrows
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
         inventorySet.getMainSubInventory().getWaitingQueue()
                 .add(Include.of((new File(SBAHypixelify.getConfigurator()
-                        .dataFolder.toString() + "/shops", "shop.yml"))));
+                        .dataFolder, "/shops/shop.yml"))));
         inventorySet.getMainSubInventory().process();
     }
 
@@ -569,7 +563,7 @@ public class CustomShop implements Listener {
 
             final var typeName = newItem.getMaterial().as(Material.class).name();
             final var optionalStorage = SBAHypixelify.getStorage(game);
-            final AtomicBoolean shouldSell = new AtomicBoolean(true);
+            var shouldSell = true;
 
             if (optionalStorage.isPresent()) {
                 final var gameStorage = optionalStorage.get();
@@ -585,7 +579,7 @@ public class CustomShop implements Listener {
                         || typeName.endsWith("CHESTPLATE")
                         || typeName.endsWith("HELMET")
                         || typeName.endsWith("LEGGINGS")) {
-                    shouldSell.set(false);
+                    shouldSell = false;
                     ShopUtil.buyArmor(player, bukkitItem.getType(), gameStorage, game);
                 } else if (typeName.endsWith("PICKAXE")) {
                     bukkitItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiency);
@@ -594,10 +588,13 @@ public class CustomShop implements Listener {
                 newItem = ItemFactory.build(bukkitItem).orElse(newItem);
             }
 
-            if (shouldSell.get()) event.sellStack(materialItem);
-            List<Item> notFit = event.buyStack(newItem);
-            if (!notFit.isEmpty()) {
-                notFit.forEach(stack -> player.getLocation().getWorld().dropItem(player.getLocation(), stack.as(ItemStack.class)));
+            event.sellStack(materialItem);
+
+            if (shouldSell) {
+                List<Item> notFit = event.buyStack(newItem);
+                if (!notFit.isEmpty()) {
+                    notFit.forEach(stack -> player.getLocation().getWorld().dropItem(player.getLocation(), stack.as(ItemStack.class)));
+                }
             }
 
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {

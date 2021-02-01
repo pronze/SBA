@@ -9,9 +9,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.bstats.bukkit.Metrics;
+import org.screamingsandals.bedwars.lib.ext.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
-import org.yaml.snakeyaml.Yaml;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -27,7 +26,6 @@ import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.lib.core.Core;
-import pronze.lib.core.auto.AutoInitializer;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
@@ -138,7 +136,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         configurator.loadDefaults();
 
         new CommandManager().init(this);
-
         Logger.init(configurator.config.getBoolean("debug.enabled", false));
         I18n.load(this, configurator.config.getString("locale"));
 
@@ -150,7 +147,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         gamesInventory = new GamesInventory();
         gamesInventory.loadInventory();
 
-        registerListener(new BedwarsListener());
+        registerListener(new BedWarsListener());
         registerListener(new PlayerListener());
         registerListener(new TeamUpgradeListener());
 
@@ -159,7 +156,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             registerListener(new LobbyScoreboard());
 
-        registerListener(gamesInventory);
         registerListener(shop);
 
         final var pluginManager = Bukkit.getServer().getPluginManager();
@@ -172,23 +168,30 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             t.printStackTrace();
         }
 
-        if (configurator.config.getBoolean("floating-generator.enabled", true)) {
-            if (Main.getConfigurator().config.getBoolean("spawner-holograms", true)) {
-                Main.getConfigurator().config.set("spawner-holograms", false);
-                Main.getConfigurator().saveConfig();
-                pluginManager.disablePlugin(Main.getInstance());
-                pluginManager.enablePlugin(Main.getInstance());
-                return;
-            }
-            RotatingGenerators.format = SBAHypixelify.getConfigurator()
-                    .getStringList("floating-generator.holo-text");
-            SBAUtil.destroySpawnerArmorStandEntities();
-        }
+        preliminaryRotatingGeneratorChecks();
         new Metrics(this, 79505);
         Logger.trace("Registering API service provider");
-        getServer().getServicesManager()
-                .register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
+
+        getServer().getServicesManager().register(
+                SBAHypixelifyAPI.class,
+                this,
+                this,
+                ServicePriority.Normal
+        );
         getLogger().info("Plugin has loaded!");
+    }
+
+    private void preliminaryRotatingGeneratorChecks() {
+        if (configurator.config.getBoolean("floating-generator.enabled", true)) {
+            if (Main.getConfigurator().config.getBoolean("spawner-holograms", true)) {
+                Main.getConfigurator().config.set("spawner-holograms", true);
+                Main.getConfigurator().saveConfig();
+                Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
+                Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
+                return;
+            }
+            SBAUtil.destroySpawnerArmorStandEntities();
+        }
     }
 
     private boolean passedVersionChecks() {

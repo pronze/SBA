@@ -25,7 +25,7 @@ import java.util.UUID;
 import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
-public class BedwarsListener implements Listener {
+public class BedWarsListener implements Listener {
 
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
