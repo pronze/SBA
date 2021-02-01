@@ -138,23 +138,11 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
                             Main.getConfigurator().config.getDouble("spawner-holo-height", 0.25),
                             0
                     ).add(0, holoHeight, 0));
-
-            // destroy holograms so it will be recreated on the new position
-            countdownHologram.getViewers().forEach(player -> {
-                try {
-                    updateField.invoke(
-                            countdownHologram,
-                            player,
-                            List.of(destroyPacket),
-                            true
-                    );
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            });
-
+            countdownHologram.removeViewers(players);
+            countdownHologram.addViewers(players);
         } catch (Throwable t) {
             Logger.trace(t.getMessage());
+            return null;
         }
 
         final var itemHeight = SBAHypixelify.getConfigurator()
