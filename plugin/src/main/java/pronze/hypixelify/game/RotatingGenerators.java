@@ -95,38 +95,6 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
             final var countdownHologram = (Hologram) ((Map<?, ?>) countdownHologramField.get(game))
                     .get(itemSpawner);
 
-            final var entities = ((List<ArmorStandNMS>) countdownHologram
-                    .getClass()
-                    .getDeclaredField("entities")
-                    .get(holoHeight));
-
-            final var updateField = countdownHologram
-                    .getClass()
-                    .getDeclaredMethod("update",
-                            Player.class,
-                            List.class,
-                            boolean.class);
-
-            final var destroyPacketField = countdownHologram
-                    .getClass()
-                    .getDeclaredMethod("getFullDestroyPacket");
-
-            destroyPacketField.setAccessible(true);
-
-            updateField.setAccessible(true);
-
-            //destroy holograms here
-
-            final var destroyPacket = PacketPlayOutEntityDestroy
-                    .getConstructor(int[].class)
-                    .newInstance(
-                            (Object) entities
-                                    .stream()
-                                    .map(ArmorStandNMS::getId)
-                                    .mapToInt(i -> i)
-                                    .toArray()
-                    );
-
             //let's update positions first
             final var locationField = countdownHologram
                     .getClass()
