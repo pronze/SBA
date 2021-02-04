@@ -20,6 +20,11 @@ subprojects {
     repositories {
         //  mavenLocal()
         maven {
+            name 'screamingsandals'
+            url 'https://repo.screamingsandals.org/public'
+        }
+
+        maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
         }
 
@@ -32,7 +37,7 @@ subprojects {
         }
 
         maven {
-            url = uri('https://repo.screamingsandals.org/public')
+            url = uri('https://repo.hoznet.dev/public')
         }
 
         maven {
@@ -55,7 +60,6 @@ subprojects {
     }
 
     shadowJar {
-        relocate 'pronze.lib', 'pronze.hypixelify.lib'
         relocate 'cloud', 'pronze.hypixelify.lib.cloud'
     }
     sourceCompatibility = '11.0'
