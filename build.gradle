@@ -18,12 +18,6 @@ subprojects {
     apply plugin: 'org.screamingsandals.gradle.builder'
 
     repositories {
-        //  mavenLocal()
-        maven {
-            name 'screamingsandals'
-            url 'https://repo.screamingsandals.org/public'
-        }
-
         maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
         }
