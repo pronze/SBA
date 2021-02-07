@@ -48,9 +48,9 @@ public class GamesInventory implements Listener {
                                 localOptionsBuilder.prefix(SBAHypixelify.getConfigurator()
                                         .getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
                             })
-                          .call(categoryBuilder -> categoryBuilder.include(Include
-                                  .of(new File(SBAHypixelify.getInstance().getDataFolder()
-                                          , "games-inventory/" + label.toLowerCase() + ".yml"))))
+                            .call(categoryBuilder -> categoryBuilder.include(Include
+                                    .of(SBAHypixelify.getInstance().getDataFolder().toPath().resolve(
+                                             "games-inventory/" + label.toLowerCase() + ".yml").toAbsolutePath())))
                             .click(this::onClick)
                             .process()
                             .getInventorySet();

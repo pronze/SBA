@@ -179,7 +179,7 @@ public class CustomShop implements Listener {
         });
     }
 
-    public void setLore(Item item,
+    public Item setLore(Item item,
                         PlayerItemInfo itemInfo,
                         String price,
                         ItemSpawnerType type) {
@@ -199,6 +199,7 @@ public class CustomShop implements Listener {
 
             item.getLore().addAll(loreText);
         }
+        return item;
     }
 
     public void onPreAction(PreClickEvent event) {
@@ -244,8 +245,8 @@ public class CustomShop implements Listener {
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
         inventorySet.getMainSubInventory().getWaitingQueue()
-                .add(Include.of((new File(SBAHypixelify.getConfigurator()
-                        .dataFolder, "/shops/shop.yml"))));
+                .add(Include.of(SBAHypixelify.getConfigurator()
+                        .dataFolder.toPath().resolve("/shops/shop.yml").toAbsolutePath()));
         inventorySet.getMainSubInventory().process();
     }
 
@@ -353,17 +354,10 @@ public class CustomShop implements Listener {
                     return "";
                 })
                 .call(categoryBuilder -> {
-                    if (useParent) {
-                        var shopFileName = "shop.yml";
-                        categoryBuilder.include(Include.of(new
-                                File(SBAHypixelify.getConfigurator().dataFolder.toString() + "/shops", shopFileName)));
-                    }
-
-                    if (file != null) {
-                        categoryBuilder.include(Include.of(new
-                                File(SBAHypixelify.getConfigurator().dataFolder.toString() + "/shops", name)));
-                    }
-
+                    var shopFileName = useParent ? "shop.yml" : file != null ? name : "shop.yml";
+                    categoryBuilder.include(Include.of(SBAHypixelify.getConfigurator()
+                            .dataFolder.toPath()
+                            .resolve("shops/" + shopFileName).toAbsolutePath()));
                 })
                 .getInventorySet();
 
@@ -427,10 +421,10 @@ public class CustomShop implements Listener {
         }
 
         if (price != null) {
-            setLore(ItemFactory.build(stack).orElse(event.getStack()),
+            return Optional.of(setLore(ItemFactory.build(stack).orElse(event.getStack()),
                     itemInfo,
                     price,
-                    Main.getSpawnerType(event.getPrices().get(0).getCurrency().toLowerCase())
+                    Main.getSpawnerType(event.getPrices().get(0).getCurrency().toLowerCase()))
             );
         }
         return Optional.empty();
