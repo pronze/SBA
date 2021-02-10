@@ -58,8 +58,8 @@ data:
           enchants:
             DIG_SPEED: 2
 
-  - price: 4
-    price-type: iron
+  - price: 2
+    price-type: gold
     upgrade:
       entities:
         - type: spawner
@@ -75,7 +75,25 @@ data:
       meta:
         ==: ItemMeta
         meta-type: UNSPECIFIC
-        display-name: "Bronze upgrade of the team %team%"
+        display-name: "Iron upgrade of the team %team%"
+- price: 2
+    price-type: diamomond
+    upgrade:
+      entities:
+        - type: spawner
+          spawner-type: gold
+          add-levels: 0.5
+          shop-name: "Gold upgrade of the team %team%"
+          notify-team: true
+    stack:
+      ==: org.bukkit.inventory.ItemStack
+      v: 1519
+      type: FURNACE
+      amount: 1
+      meta:
+        ==: ItemMeta
+        meta-type: UNSPECIFIC
+        display-name: "Gold upgrade of the team %team%"
 
 
   - stack: "BEACON;1;§bHeal Pool;§7Triggers a pool around the base that heals you!"
