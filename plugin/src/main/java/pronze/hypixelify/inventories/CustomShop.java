@@ -32,6 +32,7 @@ import org.screamingsandals.bedwars.lib.sgui.events.PreClickEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
 import org.screamingsandals.bedwars.lib.sgui.inventory.PlayerItemInfo;
+import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import org.screamingsandals.bedwars.utils.Debugger;
 import org.screamingsandals.bedwars.utils.Sounds;
@@ -76,10 +77,10 @@ public class CustomShop implements Listener {
     private static String getNameOrCustomNameOfItem(Item item) {
         try {
             if (item.getDisplayName() != null) {
-                return item.getDisplayName();
+                return AdventureHelper.toLegacy(item.getDisplayName());
             }
             if (item.getLocalizedName() != null) {
-                return item.getLocalizedName();
+                return AdventureHelper.toLegacy(item.getLocalizedName());
             }
         } catch (Throwable ignored) {
         }
@@ -93,6 +94,7 @@ public class CustomShop implements Listener {
         }
         return stringBuilder.toString().trim();
     }
+
 
     public void show(Player player, GameStore store) {
         try {
@@ -185,16 +187,17 @@ public class CustomShop implements Listener {
                         ItemSpawnerType type) {
         var enabled = itemInfo.getFirstPropertyByName("generateLore")
                 .map(property -> property.getPropertyData().getBoolean())
-                .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
+                .orElseGet(() -> Main.getConfigurator().node("lore", "generate-automatically").getBoolean(true));
 
         if (enabled) {
             var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
                     .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
-                    .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
+                    .orElseGet(() -> Main.getConfigurator().node("lore", "text").childrenList().stream().map(ConfigurationNode::getString))
                     .map(s -> s
                             .replaceAll("%price%", price)
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
+                    .map(AdventureHelper::toComponent)
                     .collect(Collectors.toList());
 
             item.getLore().addAll(loreText);
@@ -236,7 +239,7 @@ public class CustomShop implements Listener {
             Player player = event.getPlayer();
             CurrentTeam team = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
 
-            if (Main.getConfigurator().config.getBoolean("automatic-coloring-in-shop")) {
+            if (Main.getConfigurator().node("automatic-coloring-in-shop").getBoolean()) {
                 event.setStack(Main.applyColor(team.teamInfo.color, event.getStack()));
             }
         }
@@ -267,14 +270,14 @@ public class CustomShop implements Listener {
                                         itemBuilder.name(i18nonly("page_forward"))
                                 )
                                 .cosmeticItem(Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR"))
-                                .rows(Main.getConfigurator().config.getInt("shop.rows", 4))
-                                .renderActualRows(Main.getConfigurator().config.getInt("shop.render-actual-rows", 6))
-                                .renderOffset(Main.getConfigurator().config.getInt("shop.render-offset", 9))
-                                .renderHeaderStart(Main.getConfigurator().config.getInt("shop.render-header-start", 0))
-                                .renderFooterStart(Main.getConfigurator().config.getInt("shop.render-footer-start", 45))
-                                .itemsOnRow(Main.getConfigurator().config.getInt("shop.items-on-row", 9))
-                                .showPageNumber(Main.getConfigurator().config.getBoolean("shop.show-page-numbers", true))
-                                .inventoryType(Main.getConfigurator().config.getString("shop.inventory-type", "CHEST"))
+                                .rows(Main.getConfigurator().node("shop", "rows").getInt(4))
+                                .renderActualRows(Main.getConfigurator().node("shop", "render-actual-rows").getInt(6))
+                                .renderOffset(Main.getConfigurator().node("shop", "render-offset").getInt(9))
+                                .renderHeaderStart(Main.getConfigurator().node("shop", "render-header-start").getInt(0))
+                                .renderFooterStart(Main.getConfigurator().node("shop", "render-footer-start").getInt(45))
+                                .itemsOnRow(Main.getConfigurator().node("shop", "items-on-row").getInt(9))
+                                .showPageNumber(Main.getConfigurator().node("shop", "show-page-numbers").getBoolean(true))
+                                .inventoryType(Main.getConfigurator().node("shop", "inventory-type").getString("CHEST"))
                                 .prefix(i18nonly("item_shop_name", "[BW] Shop"))
                 )
 
@@ -475,7 +478,7 @@ public class CustomShop implements Listener {
                     inInventory = inInventory + itemStack.getAmount();
                 }
             }
-            if (Main.getConfigurator().config.getBoolean("sell-max-64-per-click-in-shop")) {
+            if (Main.getConfigurator().node("sell-max-64-per-click-in-shop").getBoolean()) {
                 maxStackSize = Math.min(inInventory / priceOfOne, originalMaxStackSize);
             } else {
                 maxStackSize = inInventory / priceOfOne;
@@ -531,17 +534,17 @@ public class CustomShop implements Listener {
 
                         //since we are  setting the price to a different one on upgrade, we do the check again
                         if (!event.hasPlayerInInventory(materialItem)
-                                && !Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+                                && !Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                             player.sendMessage(i18n("cannot-buy"));
                             return;
                         }
 
                         event.sellStack(materialItem);
-                        if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+                        if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                             player.sendMessage("§aYou purchased §e" + getNameOrCustomNameOfItem(newItem));
                         }
                         Sounds.playSound(player, player.getLocation(),
-                                Main.getConfigurator().config.getString("sounds.on_item_buy"),
+                                Main.getConfigurator().node("sounds", "on_item_buy").getString(),
                                 Sounds.ENTITY_ITEM_PICKUP, 1, 1);
 
                         return;
@@ -591,14 +594,14 @@ public class CustomShop implements Listener {
                 }
             }
 
-            if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+            if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                 player.sendMessage(i18nc("buy_succes", game.getCustomPrefix()).replace("%item%", amount + "x " + getNameOrCustomNameOfItem(newItem))
                         .replace("%material%", priceAmount + " " + type.getItemName()));
             }
             Sounds.playSound(player, player.getLocation(),
-                    Main.getConfigurator().config.getString("sounds.on_item_buy"), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
+                    Main.getConfigurator().node("sounds", "on_item_buy").getString(), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
         } else {
-            if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+            if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                 player.sendMessage(i18nc("buy_failed", game.getCustomPrefix()).replace("%item%", amount + "x " + getNameOrCustomNameOfItem(newItem))
                         .replace("%material%", priceAmount + " " + type.getItemName()));
             }
@@ -696,26 +699,26 @@ public class CustomShop implements Listener {
 
                 if (sendToAll) {
                     for (Player player1 : game.getTeamOfPlayer(player).getConnectedPlayers()) {
-                        if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+                        if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                             player1.sendMessage(i18nc("buy_succes", game.getCustomPrefix()).replace("%item%", itemName).replace("%material%",
                                     priceAmount + " " + type.getItemName()));
                         }
                         Sounds.playSound(player1, player1.getLocation(),
-                                Main.getConfigurator().config.getString("sounds.on_upgrade_buy"),
+                                Main.getConfigurator().node("sounds", "on_upgrade_buy").getString(),
                                 Sounds.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
                     }
                 } else {
-                    if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+                    if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                         player.sendMessage(i18nc("buy_succes", game.getCustomPrefix()).replace("%item%", itemName).replace("%material%",
                                 priceAmount + " " + type.getItemName()));
                     }
                     Sounds.playSound(player, player.getLocation(),
-                            Main.getConfigurator().config.getString("sounds.on_upgrade_buy"),
+                            Main.getConfigurator().node("sounds", "on_upgrade_buy").getString(),
                             Sounds.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1);
                 }
             }
         } else {
-            if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
+            if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                 player.sendMessage(i18nc("buy_failed", game.getCustomPrefix()).replace("%item%", "UPGRADE").replace("%material%",
                         priceAmount + " " + type.getItemName()));
             }

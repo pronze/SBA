@@ -109,8 +109,7 @@ public class SBAUtil {
                     try {
                         final var mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
                         materialList.add(mat);
-                    } catch (Exception ignored) {
-                    }
+                    } catch (Exception ignored) {}
                 });
         return materialList;
     }

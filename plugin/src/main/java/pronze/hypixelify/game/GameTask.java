@@ -94,7 +94,7 @@ public class GameTask extends BukkitRunnable {
 
                                 team.getConnectedPlayers().forEach(pl -> {
                                     Sounds.playSound(pl, pl.getLocation(), Main.getConfigurator()
-                                                    .config.getString("sounds.on_trap_triggered"),
+                                                    .node("sounds", "on_trap_triggered").getString(),
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
                                     sendTitle(pl, i18n("trap-triggered.title"),
                                             i18n("trap-triggered.sub-title"), 20, 60, 0);

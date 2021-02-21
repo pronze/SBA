@@ -79,11 +79,13 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
                         final var rotationStack = spawnerMaterial == Material.DIAMOND ?
                                 new ItemStack(Material.DIAMOND_BLOCK) :
                                 new ItemStack(Material.EMERALD_BLOCK);
-                        rotatingGenerators.add(new RotatingGenerators(
+
+                        final var generator = new RotatingGenerators(
                                 spawner,
                                 rotationStack,
                                 Main.getGame(game.getName())
-                        ).spawn(game.getConnectedPlayers()));
+                        ).spawn(game.getConnectedPlayers());
+                        if (generator != null) rotatingGenerators.add(generator);
                     });
         }
     }

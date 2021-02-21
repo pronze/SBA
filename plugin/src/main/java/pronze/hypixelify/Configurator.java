@@ -6,10 +6,13 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.lib.ext.configurate.yaml.YamlConfigurationLoader;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
@@ -339,10 +342,20 @@ public class Configurator {
         main.saveResource("shops/upgradeShop.yml", true);
         try (final var inputStream = main.getResource("config.yml")){
             if (inputStream != null) {
-                Main.getConfigurator().config.load(new InputStreamReader(inputStream));
-                Main.getConfigurator().saveConfig();
-            }
-        } catch (IOException | InvalidConfigurationException e) {
+                final var configFile =
+                        new File(Main.getInstance().getDataFolder().getAbsolutePath(), "config.yml");
+                if (configFile.exists()) {
+                    Logger.trace("Replacing BedWars config.yml");
+                    Logger.trace("Deleting config file, status: {}", String.valueOf(configFile.delete()));;
+                }
+                Logger.trace("Creating config file, status: {}", String.valueOf(configFile.createNewFile()));
+                try (final var outputStream = new FileOutputStream(configFile)) {
+                    inputStream.transferTo(outputStream);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+             }
+        } catch (IOException e) {
             e.printStackTrace();
         }
         SBAUtil.reloadPlugin(Main.getInstance());

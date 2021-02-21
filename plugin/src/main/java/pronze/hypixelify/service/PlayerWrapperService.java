@@ -2,21 +2,19 @@ package pronze.hypixelify.service;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.game.PlayerWrapper;
 import pronze.hypixelify.utils.Logger;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerWrapperService implements WrapperService<Player> {
-    private final Map<UUID, PlayerWrapper> playerData = new HashMap<>();
+    private final Map<UUID, PlayerWrapper> playerData = new ConcurrentHashMap<>();
 
     public PlayerWrapperService() {
-        Bukkit.getOnlinePlayers().stream().filter(Objects::nonNull).forEach(this::register);
+        Bukkit.getOnlinePlayers().forEach(this::register);
     }
 
     public PlayerWrapper getWrapper(Player player) {

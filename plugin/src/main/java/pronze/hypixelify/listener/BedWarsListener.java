@@ -3,6 +3,7 @@ package pronze.hypixelify.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -42,9 +43,19 @@ public class BedWarsListener implements Listener {
         final var plugin = event.getPlugin().getName();
         final var pluginManager = Bukkit.getServer().getPluginManager();
 
+        //Register listeners again
         if (plugin.equalsIgnoreCase(Main.getInstance().getName())) {
-            pluginManager.disablePlugin(SBAHypixelify.getInstance());
-            pluginManager.enablePlugin(SBAHypixelify.getInstance());
+            SBAHypixelify
+                    .getInstance()
+                    .getRegisteredListeners()
+                    .forEach(HandlerList::unregisterAll);
+            SBAHypixelify
+                    .getInstance()
+                    .getRegisteredListeners()
+                    .forEach(listener -> Bukkit
+                            .getServer()
+                            .getPluginManager()
+                            .registerEvents(listener, SBAHypixelify.getInstance()));
         }
     }
 
@@ -96,40 +107,44 @@ public class BedWarsListener implements Listener {
         }
 
         if (game.getStatus() == GameStatus.WAITING) {
-            runnableCache.put(player.getUniqueId(), new BukkitRunnable() {
-                int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
+            runnableCache.put
+                    (player.getUniqueId(),
+                            new BukkitRunnable() {
+                                int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
 
-                public void run() {
-                    if (player.isOnline() &&
-                            game.getConnectedPlayers().contains(player) &&
-                            game.getStatus() == GameStatus.WAITING) {
+                                public void run() {
+                                    if (
+                                            player.isOnline() &&
+                                                    game.getConnectedPlayers().contains(player) &&
+                                                    game.getStatus() == GameStatus.WAITING
+                                    ) {
 
-                        if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
-                            String time = game.getFormattedTimeLeft();
+                                        if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
+                                            String time = game.getFormattedTimeLeft();
 
-                            if (!time.contains("0-1")) {
-                                String[] units = time.split(":");
-                                int seconds = Integer.parseInt(units[1]) + 1;
-                                if (buffer == seconds) return;
-                                buffer = seconds;
-                                if (seconds <= 10) {
-                                    String message = i18n("game-starts-in")
-                                            .replace("{seconds}", String.valueOf(seconds));
+                                            if (!time.contains("0-1")) {
+                                                String[] units = time.split(":");
+                                                int seconds = Integer.parseInt(units[1]) + 1;
+                                                if (buffer == seconds) return;
+                                                buffer = seconds;
+                                                if (seconds <= 10) {
+                                                    String message = i18n("game-starts-in")
+                                                            .replace("{seconds}", String.valueOf(seconds));
 
-                                    message = seconds == 1 ? message
-                                            .replace("seconds", "second") : message;
-                                    player.sendMessage(message);
-                                    sendTitle(player, ShopUtil
-                                            .translateColors("&c" + seconds), "", 0, 20, 0);
+                                                    message = seconds == 1 ? message
+                                                            .replace("seconds", "second") : message;
+                                                    player.sendMessage(message);
+                                                    sendTitle(player, ShopUtil
+                                                            .translateColors("&c" + seconds), "", 0, 20, 0);
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        this.cancel();
+                                        runnableCache.remove(player.getUniqueId());
+                                    }
                                 }
-                            }
-                        }
-                    } else {
-                        this.cancel();
-                        runnableCache.remove(player.getUniqueId());
-                    }
-                }
-            }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L));
+                            }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L));
         }
 
         /* Joined as spectator, let's give him a scoreboard*/
@@ -165,8 +180,13 @@ public class BedWarsListener implements Listener {
 
         ScoreboardUtil.removePlayer(player);
         SBAUtil.removeScoreboardObjective(player);
-        ScoreboardManager.getInstance().fromCache(player.getUniqueId()).ifPresent(Scoreboard::destroy);
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        ScoreboardManager
+                .getInstance()
+                .fromCache(player.getUniqueId())
+                .ifPresent(Scoreboard::destroy);
+        player.setScoreboard(
+                Bukkit.getScoreboardManager().getMainScoreboard()
+        );
     }
 
     @EventHandler

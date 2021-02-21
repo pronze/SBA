@@ -182,14 +182,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     private void preliminaryRotatingGeneratorChecks() {
-        if (configurator.config.getBoolean("floating-generator.enabled", true)) {
-            if (Main.getConfigurator().config.getBoolean("spawner-holograms", true)) {
-                Main.getConfigurator().config.set("spawner-holograms", true);
-                Main.getConfigurator().saveConfig();
-                Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
-                Bukkit.getServer().getPluginManager().enablePlugin(Main.getInstance());
-                return;
-            }
+        if (configurator.config.getBoolean("floating-generator.enabled", false)) {
             SBAUtil.destroySpawnerArmorStandEntities();
         }
     }

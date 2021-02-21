@@ -10,6 +10,7 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStore;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
@@ -126,23 +127,22 @@ public class ShopUtil {
     }
 
     public static <K, V> K getKey(Map<K, V> map, V value) {
-        for (K key : map.keySet()) {
-            if (value.equals(map.get(key))) {
-                return key;
-            }
-        }
-        return null;
+        return map.keySet()
+                .stream()
+                .filter(key -> value.equals(map.get(key)))
+                .findFirst()
+                .orElse(null);
     }
 
 
     public static void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
         if (itemStackList == null) return;
+        final var colorChanger = BedwarsAPI.getInstance().getColorChanger();
 
         itemStackList
                 .stream()
                 .filter(Objects::nonNull)
                 .forEach(itemStack -> {
-                    final var colorChanger = BedwarsAPI.getInstance().getColorChanger();
                     final var materialName = itemStack.getType().toString();
                     final var playerInventory = player.getInventory();
 
@@ -193,15 +193,15 @@ public class ShopUtil {
 
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
-        backItem.setDisplayName(i18n("shop_back", false));
+        backItem.setDisplayName(Component.text(i18n("shop_back", false)));
         localOptionsBuilder.backItem(backItem);
 
         final var pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
-        pageBackItem.setDisplayName(i18n("page_back", false));
+        pageBackItem.setDisplayName(Component.text(i18n("page_back", false)));
         localOptionsBuilder.pageBackItem(pageBackItem);
 
         final var pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
-        pageForwardItem.setDisplayName(i18n("page_forward", false));
+        pageForwardItem.setDisplayName(Component.text(i18n("page_forward", false)));
         localOptionsBuilder.pageForwardItem(pageForwardItem);
 
         final var cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");

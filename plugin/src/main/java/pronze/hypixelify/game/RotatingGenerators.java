@@ -13,17 +13,13 @@ import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.lib.nms.entity.ArmorStandNMS;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 import org.screamingsandals.bedwars.lib.ext.paperlib.PaperLib;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-
-import static org.screamingsandals.bedwars.lib.nms.utils.ClassStorage.NMS.PacketPlayOutEntityDestroy;
 
 @Data
 public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGenerators {
@@ -81,12 +77,11 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
     @SuppressWarnings("unchecked")
     public RotatingGenerators spawn(List<Player> players) {
         destroy();
+
         if (!itemSpawner.getHologramEnabled()) {
             return null;
         }
 
-        var holoHeight = SBAHypixelify.getConfigurator()
-                .config.getDouble("floating-generator.holo-height", 2.0);
         try {
             final var countdownHologramField = game.getClass()
                     .getDeclaredField("countdownHolograms");
@@ -95,17 +90,20 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
             final var countdownHologram = (Hologram) ((Map<?, ?>) countdownHologramField.get(game))
                     .get(itemSpawner);
 
-            //let's update positions first
             final var locationField = countdownHologram
                     .getClass()
                     .getDeclaredField("location");
             locationField.setAccessible(true);
             locationField.set(countdownHologram, location.clone()
-                    .subtract(
-                            0,
-                            Main.getConfigurator().config.getDouble("spawner-holo-height", 0.25),
-                            0
-                    ).add(0, holoHeight, 0));
+                    .subtract(0,
+                            Main.getConfigurator().node(
+                            "spawner-holo-height").getDouble(), 0
+                    ).add(0,
+                            SBAHypixelify.getConfigurator().config.getDouble(
+                                    "floating-generator.holo-height",
+                            2.0
+                    ), 0)
+            );
             countdownHologram.removeViewers(players);
             countdownHologram.addViewers(players);
         } catch (Throwable t) {
@@ -116,21 +114,31 @@ public class RotatingGenerators implements pronze.hypixelify.api.game.RotatingGe
         final var itemHeight = SBAHypixelify.getConfigurator()
                 .config.getDouble("floating-generator.item-height", 0.25);
 
-
         PaperLib.getChunkAtAsync(location)
                 .thenAccept(chunk -> {
-                    armorStand = (ArmorStand) location.getWorld().
-                            spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
+                    armorStand = (ArmorStand) location
+                            .getWorld()
+                            .spawnEntity(
+                                    location.clone().add(0, itemHeight, 0),
+                                    EntityType.ARMOR_STAND
+                            );
+
                     armorStand.setCustomName(entityName);
                     armorStand.setVisible(false);
                     armorStand.setHelmet(itemStack);
                     armorStand.setGravity(false);
 
                     //make sure there aren't any other rotating generator entities in the same area
-                    armorStand.getLocation().getWorld().getNearbyEntities(armorStand.getLocation()
-                            , 1, 1, 1)
+                    armorStand.getLocation()
+                            .getWorld()
+                            .getNearbyEntities(
+                                    armorStand.getLocation(), 1, 1, 1
+                            )
                             .stream()
-                            .filter(entity -> entity.getLocation().getBlock().equals(armorStand.getLocation().getBlock()) && !entity.equals(armorStand))
+                            .filter(entity -> entity.getLocation()
+                                    .getBlock()
+                                    .equals(armorStand.getLocation().getBlock()) &&
+                                    !entity.equals(armorStand))
                             .forEach(Entity::remove);
                     scheduleTask();
                 });
