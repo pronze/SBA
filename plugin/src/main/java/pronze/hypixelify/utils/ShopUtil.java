@@ -120,8 +120,8 @@ public class ShopUtil {
         final var gameList = new ArrayList<Game>();
 
         maps.stream()
-                .filter(Main.getGameNames()::contains)
-                .forEach(map -> gameList.add(Main.getGame(map)));
+                .filter(Main.getInstance().getGameManager().getGameNames()::contains)
+                .forEach(map -> gameList.add(Main.getInstance().getGameManager().getGame(map).get()));
 
         return gameList;
     }

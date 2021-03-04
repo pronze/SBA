@@ -5,7 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.lib.ext.configurate.yaml.YamlConfigurationLoader;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
@@ -285,7 +287,7 @@ public class Configurator {
         checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]&cYou do not have permissions to do this command!");
         checkOrSetConfig(modify, "experimental.reset-item-meta-on-purchase", false);
 
-        Main.getGameNames().forEach(gameName -> {
+        BedwarsAPI.getInstance().getGameManager().getGameNames().forEach(gameName -> {
             final var configKey = "lobby-scoreboard.player-size.games." + gameName;
             checkOrSetConfig(modify, configKey, 4);
             int size = config.getInt("lobby-scoreboard.player-size.games." + gameName, 4);
@@ -343,7 +345,7 @@ public class Configurator {
         try (final var inputStream = main.getResource("config.yml")){
             if (inputStream != null) {
                 final var configFile =
-                        new File(Main.getInstance().getDataFolder().getAbsolutePath(), "config.yml");
+                        new File(Main.getInstance().getDataFolder().toFile(), "config.yml");
                 if (configFile.exists()) {
                     Logger.trace("Replacing BedWars config.yml");
                     Logger.trace("Deleting config file, status: {}", String.valueOf(configFile.delete()));;
@@ -358,7 +360,7 @@ public class Configurator {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        SBAUtil.reloadPlugin(Main.getInstance());
+        SBAUtil.reloadPlugin(Main.getInstance().as(JavaPlugin.class));
     }
 
     public void saveConfig() {

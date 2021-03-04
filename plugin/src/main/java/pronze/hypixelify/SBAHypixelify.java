@@ -25,7 +25,6 @@ import pronze.hypixelify.placeholderapi.SBAExpansion;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.core.Core;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
@@ -109,7 +108,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             return;
         }
 
-        if (!Main.getVersion().contains("0.3.") || !passedVersionChecks()) {
+        if (!Main.getVersion().contains("0.3.")) {
             showErrorMessage("You need at least a minimum of 0.3.0 snapshot 709+ version" +
                             " of Screaming-BedWars to run SBAHypixelify v2.0!",
                     "Get the latest version from here: https://ci.screamingsandals.org/job/BedWars-0.x.x/");
@@ -185,15 +184,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         if (configurator.config.getBoolean("floating-generator.enabled", false)) {
             SBAUtil.destroySpawnerArmorStandEntities();
         }
-    }
-
-    private boolean passedVersionChecks() {
-        try {
-           if (Integer.parseInt(Main.getInstance().getBuildInfo()) >= 710) {
-               return true;
-           }
-        } catch (Throwable ignored) {}
-        return false;
     }
 
     public void registerListener(Listener listener) {

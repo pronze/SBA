@@ -83,7 +83,7 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
                         final var generator = new RotatingGenerators(
                                 spawner,
                                 rotationStack,
-                                Main.getGame(game.getName())
+                                (org.screamingsandals.bedwars.game.Game) Main.getInstance().getGameManager().getGame(game.getName()).get()
                         ).spawn(game.getConnectedPlayers());
                         if (generator != null) rotatingGenerators.add(generator);
                     });
@@ -217,12 +217,12 @@ public class Arena implements pronze.hypixelify.api.game.Arena {
         final var gVictim = Main.getPlayerGameProfile(victim);
         if (gVictim == null || gVictim.isSpectator) return;
 
-        final var team = Main.getGame(game.getName()).getPlayerTeam(gVictim);
+        final var team = e.getGame().getTeamOfPlayer(gVictim.player);
         if (team == null) return;
 
         final var killerData = playerDataMap.get(killer.getUniqueId());
         killerData.setKills(killerData.getKills() + 1);
 
-        if (!team.isBed) killerData.setFinalKills(killerData.getFinalKills() + 1);
+        if (!team.isAlive()) killerData.setFinalKills(killerData.getFinalKills() + 1);
     }
 }

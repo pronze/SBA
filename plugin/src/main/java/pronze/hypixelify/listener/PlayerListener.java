@@ -125,7 +125,7 @@ public class PlayerListener implements Listener {
         }
 
         final var gVictim = Main.getPlayerGameProfile(player);
-        final var victimTeam = Main.getGame(game.getName()).getPlayerTeam(gVictim);
+        final var victimTeam = Main.getInstance().getGameManager().getGame(game.getName()).get().getTeamOfPlayer(gVictim.player);
 
         if (respawnCooldown && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
                 game.getTeamOfPlayer(player).isTargetBlockExists()) {
@@ -165,7 +165,7 @@ public class PlayerListener implements Listener {
                             sendTitle(player, i18n("respawned-title"), "",
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
-                                    Main.getGame(game.getName()).getPlayerTeam(gamePlayer).getColor());
+                                    Main.getInstance().getGameManager().getGame(game.getName()).get().getTeamOfPlayer(gamePlayer.player).getColor());
                             this.cancel();
                         }
                     }

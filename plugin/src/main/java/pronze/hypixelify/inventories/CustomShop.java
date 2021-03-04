@@ -22,6 +22,7 @@ import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.lib.debug.Debug;
 import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
+import org.screamingsandals.bedwars.lib.ext.configurate.yaml.YamlConfigurationLoader;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
@@ -32,6 +33,7 @@ import org.screamingsandals.bedwars.lib.sgui.events.PreClickEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
 import org.screamingsandals.bedwars.lib.sgui.inventory.PlayerItemInfo;
+import org.screamingsandals.bedwars.lib.sgui.loaders.ConfigurateLoader;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import org.screamingsandals.bedwars.utils.Debugger;
@@ -43,6 +45,8 @@ import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -174,7 +178,7 @@ public class CustomShop implements Listener {
                 //noinspection unchecked
                 var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
                         player, finalItem.as(ItemStack.class), property.getPropertyName(), (Map<String, Object>) converted);
-                Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
+                SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(applyEvent);
 
                 event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(finalItem));
             }
@@ -248,8 +252,8 @@ public class CustomShop implements Listener {
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
         inventorySet.getMainSubInventory().getWaitingQueue()
-                .add(Include.of(SBAHypixelify.getConfigurator()
-                        .dataFolder.toPath().resolve("/shops/shop.yml").toAbsolutePath()));
+                .add(Include.of(SBAHypixelify.getInstance().getDataFolder()
+                        .toPath().resolve("/shops/shop.yml").toAbsolutePath()));
         inventorySet.getMainSubInventory().process();
     }
 
@@ -273,8 +277,8 @@ public class CustomShop implements Listener {
                                 .rows(Main.getConfigurator().node("shop", "rows").getInt(4))
                                 .renderActualRows(Main.getConfigurator().node("shop", "render-actual-rows").getInt(6))
                                 .renderOffset(Main.getConfigurator().node("shop", "render-offset").getInt(9))
-                                .renderHeaderStart(Main.getConfigurator().node("shop", "render-header-start").getInt(0))
-                                .renderFooterStart(Main.getConfigurator().node("shop", "render-footer-start").getInt(45))
+                                .renderHeaderStart(600)
+                                .renderFooterStart(600)
                                 .itemsOnRow(Main.getConfigurator().node("shop", "items-on-row").getInt(9))
                                 .showPageNumber(Main.getConfigurator().node("shop", "show-page-numbers").getBoolean(true))
                                 .inventoryType(Main.getConfigurator().node("shop", "inventory-type").getString("CHEST"))
@@ -357,10 +361,20 @@ public class CustomShop implements Listener {
                     return "";
                 })
                 .call(categoryBuilder -> {
-                    var shopFileName = useParent ? "shop.yml" : file != null ? name : "shop.yml";
-                    categoryBuilder.include(Include.of(SBAHypixelify.getConfigurator()
-                            .dataFolder.toPath()
-                            .resolve("shops/" + shopFileName).toAbsolutePath()));
+                    try {
+                        Logger.trace("File: {}", file != null ? file.getName() : "null");
+                        Logger.trace("Name: {}", name != null ? name : "null");
+                        var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath();
+                        Logger.trace("Path str: {}", pathStr);
+                        pathStr = pathStr + "/shops/shop.yml";
+                        Logger.trace("Path str: {}", pathStr);
+                        categoryBuilder
+                                .getClass()
+                                .getMethod("include", Include.class)
+                                .invoke(categoryBuilder, Include.of(Paths.get(pathStr)));
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
                 })
                 .getInventorySet();
 
@@ -374,6 +388,12 @@ public class CustomShop implements Listener {
         }
 
         shopMap.put(name, shopInventory);
+    }
+
+    @EventHandler
+    public void onShopOpen(BedwarsOpenShopEvent event) {
+        event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_THIRD_PARTY_SHOP);
+        show(event.getPlayer(), (GameStore) event.getStore());
     }
 
     private Optional<Item> upgradeItem(OnTradeEvent event, String propertyName) {
@@ -551,7 +571,7 @@ public class CustomShop implements Listener {
                     } else {
                         var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player,
                                 newItem.as(ItemStack.class), property.getPropertyName(), propertyData);
-                        Main.getInstance().getServer().getPluginManager().callEvent(applyEvent);
+                        SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(applyEvent);
 
                         newItem = ItemFactory.build(applyEvent.getStack()).orElse(newItem);
                     }

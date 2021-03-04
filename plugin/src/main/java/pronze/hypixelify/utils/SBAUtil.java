@@ -12,8 +12,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.lib.ext.paperlib.PaperLib;
+import org.screamingsandals.bedwars.utils.ArenaUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.RotatingGenerators;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
@@ -70,7 +70,7 @@ public class SBAUtil {
 
         gameWorld.getEntitiesByClass(ArmorStand.class)
                 .stream()
-                .filter(entity -> GameCreator.isInArea(entity.getLocation(), game.getPos1(), game.getPos2()))
+                .filter(entity -> ArenaUtils.isInArea(entity.getLocation(), game.getPos1(), game.getPos2()))
                 .filter(entity -> RotatingGenerators.entityName.equalsIgnoreCase(entity.getCustomName()))
                 .forEach(entity -> {
                     RotatingGenerators.cache.stream()
@@ -94,7 +94,7 @@ public class SBAUtil {
             return;
         }
 
-        final var games = BedwarsAPI.getInstance().getGames();
+        final var games = BedwarsAPI.getInstance().getGameManager().getGames();
         games.stream()
                 .filter(Objects::nonNull)
                 .forEach(SBAUtil::destroySpawnerArmorStandEntitiesFrom);

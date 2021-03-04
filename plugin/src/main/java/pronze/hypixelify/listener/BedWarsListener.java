@@ -6,11 +6,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.game.Game;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.Arena;
 import pronze.hypixelify.utils.SBAUtil;
@@ -44,7 +46,7 @@ public class BedWarsListener implements Listener {
         final var pluginManager = Bukkit.getServer().getPluginManager();
 
         //Register listeners again
-        if (plugin.equalsIgnoreCase(Main.getInstance().getName())) {
+        if (plugin.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
             SBAHypixelify
                     .getInstance()
                     .getRegisteredListeners()
@@ -100,7 +102,7 @@ public class BedWarsListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        final var game = Main.getGame(e.getGame().getName());
+        final var game = (Game) Main.getInstance().getGameManager().getGame(e.getGame().getName()).get();
         final var task = runnableCache.get(player.getUniqueId());
         if (task != null) {
             SBAUtil.cancelTask(task);

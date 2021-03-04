@@ -22,6 +22,7 @@ import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,9 +49,17 @@ public class GamesInventory implements Listener {
                                 localOptionsBuilder.prefix(SBAHypixelify.getConfigurator()
                                         .getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
                             })
-                            .call(categoryBuilder -> categoryBuilder.include(Include
-                                    .of(SBAHypixelify.getInstance().getDataFolder().toPath().resolve(
-                                             "games-inventory/" + label.toLowerCase() + ".yml").toAbsolutePath())))
+                            .call(categoryBuilder ->{
+                                try {
+                                    var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath() + "/games-inventory/" + label.toLowerCase() + ".yml";
+                                    categoryBuilder
+                                            .getClass()
+                                            .getMethod("include", Include.class)
+                                            .invoke(categoryBuilder,Include.of(Paths.get(pathStr)));
+                            }  catch (Throwable t) {
+                                    t.printStackTrace();
+                                }
+                            })
                             .click(this::onClick)
                             .process()
                             .getInventorySet();
@@ -126,8 +135,8 @@ public class GamesInventory implements Listener {
                             final var propertyMap = (Map<?, ?>)converted;
                             if (propertyMap.containsKey("gameName")) {
                                 try {
-                                    final var game = (Game) Main.getGame(propertyMap.get("gameName").toString());
-                                    Main.getGame(game.getName()).joinToGame(player);
+                                    final var game = (Game) Main.getInstance().getGameManager().getGame(propertyMap.get("gameName").toString()).get();
+                                    game.joinToGame(player);
                                 } catch (Throwable t) {
                                     player.sendMessage(i18n("game_not_found"));
                                 }

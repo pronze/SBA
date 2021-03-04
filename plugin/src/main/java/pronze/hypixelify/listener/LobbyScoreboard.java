@@ -118,7 +118,7 @@ public class LobbyScoreboard implements Listener {
 
         if (game.countConnectedPlayers() >= game.getMinPlayers()
                 && game.getStatus() == GameStatus.WAITING) {
-            final var time = Main.getGame(game.getName()).getFormattedTimeLeft();
+            final var time = ((org.screamingsandals.bedwars.game.Game)Main.getInstance().getGameManager().getGame(game.getName()).get()).getFormattedTimeLeft();
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
                 var seconds = Integer.parseInt(units[1]) + 1;

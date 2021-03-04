@@ -27,8 +27,8 @@ public class DragonListener implements Listener {
         }
 
         final var eventDragon = (EnderDragon) event.getEntity();
-        Main.getGameNames().forEach(name-> {
-            final var game = Main.getGame(name);
+        Main.getInstance().getGameManager().getGameNames().forEach(name-> {
+            final var game = Main.getInstance().getGameManager().getGame(name).get();
             if (game.getStatus() == GameStatus.RUNNING && eventDragon.getWorld().equals(game.getGameWorld())) {
                 List<SpecialItem> dragons = game.getActivedSpecialItems(Dragon.class);
                 for (var item : dragons) {
@@ -75,9 +75,9 @@ public class DragonListener implements Listener {
         final var enderDragon = (EnderDragon) event.getEntity();
 
 
-        Main.getGameNames().forEach(gameName-> {
-            final var game = Main.getGame(gameName);
-            if ((game.getStatus() == GameStatus.RUNNING || game.getStatus() == GameStatus.GAME_END_CELEBRATING) && enderDragon.getWorld().equals(game.getWorld())) {
+        Main.getInstance().getGameManager().getGameNames().forEach(gameName-> {
+            final var game = Main.getInstance().getGameManager().getGame(gameName).get();
+            if ((game.getStatus() == GameStatus.RUNNING || game.getStatus() == GameStatus.GAME_END_CELEBRATING) && enderDragon.getWorld().equals(game.getGameWorld())) {
                 List<SpecialItem> dragons = game.getActivedSpecialItems(Dragon.class);
                 dragons.forEach(item-> {
                     if (item instanceof Dragon) {
@@ -132,8 +132,8 @@ public class DragonListener implements Listener {
         }
 
         EnderDragon eventDragon = (EnderDragon) event.getEntity();
-        Main.getGameNames().forEach(name-> {
-            final var game = Main.getGame(name);
+        Main.getInstance().getGameManager().getGameNames().forEach(name-> {
+            final var game = Main.getInstance().getGameManager().getGame(name).get();
             if ((game.getStatus() == GameStatus.RUNNING || game.getStatus() == GameStatus.GAME_END_CELEBRATING) && eventDragon.getWorld().equals(game.getGameWorld())) {
                 List<SpecialItem> dragons = game.getActivedSpecialItems(Dragon.class);
                 for (SpecialItem item : dragons) {

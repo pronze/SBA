@@ -8,8 +8,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
@@ -36,7 +36,7 @@ public class ScoreBoard {
 
     public ScoreBoard(Arena arena) {
         this.arena = arena;
-        game = arena.getGame();
+        game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).get();
 
         if (game.countAvailableTeams() >= 5 &&
                 Configurator.Scoreboard_Lines.containsKey("5")) {
@@ -181,10 +181,8 @@ public class ScoreBoard {
                             .replace("{totalkills}", totalKills)
                             .replace("{finalkills}", finalKills)
                             .replace("{kills}", currentKills)
-                            .replace("{time}", Main.getGame(game.getName())
-                                    .getFormattedTimeLeft())
-                            .replace("{formattime}", Main.getGame(game.getName())
-                                    .getFormattedTimeLeft())
+                            .replace("{time}", game.getFormattedTimeLeft())
+                            .replace("{formattime}", game.getFormattedTimeLeft())
                             .replace("{game}", game.getName())
                             .replace("{date}", date)
                             .replace("{team_bed_status}", teamStatus == null ? "" : teamStatus);
