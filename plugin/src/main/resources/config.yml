@@ -20,15 +20,17 @@ spawner-holograms-countdown: true
 damage-when-player-is-not-in-arena: true
 remove-unused-target-blocks: true
 allow-block-falling: true
-game-start-items: true
-player-respawn-items: false
-gived-game-start-items:
-  - wooden_sword
-  - leather_helmet
-  - leather_boots
-  - leather_leggings
-  - leather_chestplate
-gived-player-respawn-items:
+game-start-items:
+  enabled: true
+  items:
+    - wooden_sword
+    - leather_helmet
+    - leather_boots
+    - leather_leggings
+    - leather_chestplate
+player-respawn-items:
+  enabled: false
+  items: []
 disable-hunger: true
 automatic-coloring-in-shop: true
 sell-max-64-per-click-in-shop: true
@@ -43,23 +45,28 @@ respawn-cooldown:
   enabled: true
   time: 5
 stop-team-spawners-on-die: false
-allowed-commands: []
-change-allowed-commands-to-blacklist: false
 bungee:
   enabled: false
   serverRestart: true
   serverStop: false
   server: hub
   auto-game-connect: false
-farmBlocks:
-  enable: false
-  blocks: []
+  kick-when-proxy-too-slow: true
+  motd:
+    enabled: false
+    waiting: '%name%: Waiting for players [%current%/%max%]'
+    waiting_full: '%name%: Game is full [%current%/%max%]'
+    running: '%name%: Game is running [%current%/%max%]'
+    rebuilding: '%name%: Rebuilding...'
+    disabled: '%name%: Game is disabled'
+farmBlocks: {}
 scoreboard:
-  enable: false
   title: §a%game%§r - %time%
   bedLost: §c✘
   bedExists: §a✔
   teamTitle: '%bed%%color%%team%'
+  enabled: false
+  anchorEmpty: §e✘
 title:
   enabled: false
   fadeIn: 0
@@ -75,10 +82,10 @@ items:
   pageforward: ARROW
   team-select: WHITE_WOOL
 vault:
-  enable: false
   reward:
     kill: 5
     win: 20
+  enabled: false
 resources:
   emerald:
     material: EMERALD
@@ -152,35 +159,39 @@ specials:
     turn-all-enderchests-to-teamchests: true
   throwable-fireball:
     explosion: 3.0
-tnt:
-  auto-ignite: true
-  explosion-time: 3
+    damage: 2
+  auto-igniteable-tnt:
+    explosion-time: 3
+    damage-placer: true
+tnt: {}
 sounds:
-  on_bed_destroyed: ENTITY_ENDER_DRAGON_GROWL
-  on_countdown: UI_BUTTON_CLICK
-  on_game_start: ENTITY_PLAYER_LEVELUP
-  on_team_kill: ENTITY_PLAYER_LEVELUP
-  on_player_kill: ENTITY_PLAYER_BIG_FALL
-  on_item_buy: ENTITY_ITEM_PICKUP
-  on_upgrade_buy: ENTITY_EXPERIENCE_ORB_PICKUP
-  on_respawn_cooldown_wait: UI_BUTTON_CLICK
-  on_respawn_cooldown_done: ENTITY_PLAYER_LEVELUP
   on_trap_triggered: ENTITY_ENDERMAN_TELEPORT
+  bed_destroyed: ENTITY_ENDER_DRAGON_GROWL
+  countdown: UI_BUTTON_CLICK
+  game_start: ENTITY_PLAYER_LEVELUP
+  team_kill: ENTITY_PLAYER_LEVELUP
+  player_kill: ENTITY_PLAYER_BIG_FALL
+  item_buy: ENTITY_ITEM_PICKUP
+  upgrade_buy: ENTITY_EXPERIENCE_ORB_PICKUP
+  respawn_cooldown_wait: UI_BUTTON_CLICK
+  respawn_cooldown_done: ENTITY_PLAYER_LEVELUP
 game-effects:
   end:
     effects:
-      - ==: Firework
-        flicker: false
-        trail: false
-        colors:
-          - &id002
-            ==: Color
-            RED: 255
-            BLUE: 255
-            GREEN: 255
-        fade-colors:
-          - *id002
-        type: BALL
+      -   ==: Firework
+          flicker: false
+          trail: false
+          colors:
+            -   ==: Color
+                RED: 255
+                BLUE: 255
+                GREEN: 255
+          fade-colors:
+            -   ==: Color
+                RED: 255
+                BLUE: 255
+                GREEN: 255
+          type: BALL
     power: 1
     type: Firework
   start: {}
@@ -199,7 +210,7 @@ lobby-scoreboard:
     - '§fMap: §2%arena%'
     - '§fPlayers: §2%players%§f/§2%maxplayers%'
     - ' '
-    - §fWaiting ...
+    - '§fWaiting ...'
     - ' '
 statistics:
   enabled: true
@@ -220,19 +231,24 @@ database:
   user: root
   password: secret
   table-prefix: bw_
+  useSSL: false
 bossbar:
   use-xp-bar: false
   lobby:
-    enable: true
     color: YELLOW
     style: SEGMENTED_20
+    enabled: true
   game:
-    enable: true
     color: GREEN
     style: SEGMENTED_20
+    enabled: true
 holograms:
   enabled: true
   headline: Your §eBEDWARS§f stats
+  leaderboard:
+    headline: '&6Bedwars Leaderboard'
+    format: '&l%order%. &7%name% - &a%score%'
+    size: 10
 chat:
   override: true
   format: '<%teamcolor%%name%§r> '
@@ -247,6 +263,7 @@ chat:
   all-chat: '[ALL] '
   team-chat: '[TEAM] '
   death-chat: '[DEATH] '
+  disable-all-chat-for-spectators: false
 rewards:
   enabled: false
   player-win:
@@ -264,11 +281,6 @@ lore:
     - '&7%price% %resource%'
     - '&7Amount:'
     - '&7%amount%'
-sign:
-  - §c§l[BedWars]
-  - '%arena%'
-  - '%status%'
-  - '%players%'
 hotbar:
   selector: 0
   color: 1
@@ -276,8 +288,8 @@ hotbar:
   leave: 8
 breakable:
   enabled: false
-  asblacklist: false
   blocks: []
+  blacklist-mode: false
 leaveshortcuts:
   enabled: false
   list:
@@ -286,7 +298,6 @@ mainlobby:
   enabled: false
   location: 5008.480952200986;122.0;5032.798965675137;-180.29222;10.652989
   world: Lobby
-version: 2
 turnOnExperimentalGroovyShop: false
 preventSpectatorFlyingAway: false
 removePurchaseMessages: false
@@ -302,3 +313,85 @@ shop:
   items-on-row: 9
   show-page-numbers: true
   inventory-type: CHEST
+  citizens-enabled: false
+keep-armor-on-death: false
+allow-fake-death: false
+commands:
+  list: []
+  blacklist-mode: false
+ignored-blocks:
+  enabled: false
+  blocks: []
+sign:
+  lines:
+    - §c§l[BedWars]
+    - '%arena%'
+    - '%status%'
+    - '%players%'
+  block-behind:
+    enabled: false
+    waiting: ORANGE_STAINED_GLASS
+    rebuilding: BROWN_STAINED_GLASS
+    in-game: GREEN_STAINED_GLASS
+    game-disabled: RED_STAINED_GLASS
+preventArenaFromGriefing: true
+update-checker:
+  console: true
+  admins: true
+target-block:
+  allow-destroying-with-explosions: false
+  respawn-anchor:
+    fill-on-start: true
+    enable-decrease: true
+    sound:
+      charge: BLOCK_RESPAWN_ANCHOR_CHARGE
+      used: BLOCK_GLASS_BREAK
+      deplete: BLOCK_RESPAWN_ANCHOR_DEPLETE
+  cake:
+    destroy-by-eating: true
+event-hacks:
+  damage: false
+  destroy: false
+  place: false
+tab:
+  enabled: false
+  header:
+    enabled: true
+    contents:
+      - '&aMy awesome BedWars server'
+      - '&bMap: %map%'
+      - '&cPlayers: %respawnable%/%max%'
+  footer:
+    enabled: true
+    contents:
+      - '&eexample.com'
+      - '&fWow!!'
+      - '§a%spectators% are watching this match'
+  hide-spectators: true
+  hide-foreign-players: false
+default-permissions:
+  join: true
+  leave: true
+  stats: true
+  list: true
+  rejoin: true
+  autojoin: true
+  leaderboard: true
+  party: true
+experimental:
+  new-scoreboard-system:
+    enabled: false
+    content:
+      - ' '
+      - '%team_status%'
+      - ''
+      - '§6www.screamingsandals.org'
+    teamTitle: '%bed%%color%%team% §7(%team_size%)'
+party:
+  enabled: false
+  autojoin-members: true
+  notify-when-warped: true
+floating-generator:
+  enabled: true
+  holo-height: 2.0
+  generator-height: 0.25

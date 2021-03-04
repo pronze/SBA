@@ -2,6 +2,7 @@ package pronze.hypixelify.inventories;
 
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -201,6 +202,7 @@ public class CustomShop implements Listener {
                             .replaceAll("%price%", price)
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
+                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
                     .map(AdventureHelper::toComponent)
                     .collect(Collectors.toList());
 
@@ -249,14 +251,6 @@ public class CustomShop implements Listener {
         }
     }
 
-    private void loadDefault(InventorySet inventorySet) {
-        inventorySet.getMainSubInventory().dropContents();
-        inventorySet.getMainSubInventory().getWaitingQueue()
-                .add(Include.of(SBAHypixelify.getInstance().getDataFolder()
-                        .toPath().resolve("/shops/shop.yml").toAbsolutePath()));
-        inventorySet.getMainSubInventory().process();
-    }
-
     private void loadNewShop(String name, File file, boolean useParent) {
         final var shopInventory = SimpleInventoriesCore.builder()
                 .genericShop(true)
@@ -274,13 +268,13 @@ public class CustomShop implements Listener {
                                         itemBuilder.name(i18nonly("page_forward"))
                                 )
                                 .cosmeticItem(Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR"))
-                                .rows(Main.getConfigurator().node("shop", "rows").getInt(4))
-                                .renderActualRows(Main.getConfigurator().node("shop", "render-actual-rows").getInt(6))
-                                .renderOffset(Main.getConfigurator().node("shop", "render-offset").getInt(9))
+                                .rows(6)
+                                .renderActualRows(6)
+                                .renderOffset(9)
                                 .renderHeaderStart(600)
                                 .renderFooterStart(600)
-                                .itemsOnRow(Main.getConfigurator().node("shop", "items-on-row").getInt(9))
-                                .showPageNumber(Main.getConfigurator().node("shop", "show-page-numbers").getBoolean(true))
+                                .itemsOnRow(9)
+                                .showPageNumber(false)
                                 .inventoryType(Main.getConfigurator().node("shop", "inventory-type").getString("CHEST"))
                                 .prefix(i18nonly("item_shop_name", "[BW] Shop"))
                 )
@@ -366,7 +360,7 @@ public class CustomShop implements Listener {
                         Logger.trace("Name: {}", name != null ? name : "null");
                         var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath();
                         Logger.trace("Path str: {}", pathStr);
-                        pathStr = pathStr + "/shops/shop.yml";
+                        pathStr = pathStr + "/shops/" + (file != null ? file.getName() : "shop.yml");
                         Logger.trace("Path str: {}", pathStr);
                         categoryBuilder
                                 .getClass()
@@ -384,7 +378,6 @@ public class CustomShop implements Listener {
             Debug.warn("Wrong shop.yml/shop.groovy configuration!", true);
             Debug.warn("Check validity of your YAML/Groovy!", true);
             ex.printStackTrace();
-            loadDefault(shopInventory);
         }
 
         shopMap.put(name, shopInventory);
@@ -588,7 +581,7 @@ public class CustomShop implements Listener {
                 final var team = game.getTeamOfPlayer(player);
                 final var sharpness = gameStorage.getSharpness(team.getName());
                 final var efficiency = gameStorage.getEfficiency(team.getName());
-                final var bukkitItem = materialItem.as(ItemStack.class);
+                final var bukkitItem = newItem.as(ItemStack.class);
 
                 if (typeName.endsWith("SWORD")) {
                     bukkitItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
@@ -619,7 +612,7 @@ public class CustomShop implements Listener {
                         .replace("%material%", priceAmount + " " + type.getItemName()));
             }
             Sounds.playSound(player, player.getLocation(),
-                    Main.getConfigurator().node("sounds", "on_item_buy").getString(), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
+                    Main.getConfigurator().node("sounds", "item_buy").getString(), Sounds.ENTITY_ITEM_PICKUP, 1, 1);
         } else {
             if (!Main.getConfigurator().node("removePurchaseMessages").getBoolean(false)) {
                 player.sendMessage(i18nc("buy_failed", game.getCustomPrefix()).replace("%item%", amount + "x " + getNameOrCustomNameOfItem(newItem))

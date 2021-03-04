@@ -189,7 +189,7 @@ public class ScoreBoard {
 
                     if (arena.getGameTask() != null) {
                         line = line.replace("{tier}", arena.getGameTask().getTier()
-                                .replace("-", "") + " in §a" + arena.getGameTask().getFormattedTimeLeft());
+                                .replace("-", " ") + " in §a" + arena.getGameTask().getFormattedTimeLeft());
                     }
                     lines.add(line);
                 });
