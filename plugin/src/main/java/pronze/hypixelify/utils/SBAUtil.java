@@ -5,23 +5,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.ext.paperlib.PaperLib;
-import org.screamingsandals.bedwars.utils.ArenaUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.RotatingGenerators;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SBAUtil {
@@ -62,42 +53,6 @@ public class SBAUtil {
                 ex.printStackTrace();
             }
         }
-    }
-
-    public static void destroySpawnerArmorStandEntitiesFrom(Game game) {
-        final var gameWorld = game.getGameWorld();
-        final var toDestroy = new ArrayList<RotatingGenerators>();
-
-        gameWorld.getEntitiesByClass(ArmorStand.class)
-                .stream()
-                .filter(entity -> ArenaUtils.isInArea(entity.getLocation(), game.getPos1(), game.getPos2()))
-                .filter(entity -> RotatingGenerators.entityName.equalsIgnoreCase(entity.getCustomName()))
-                .forEach(entity -> {
-                    RotatingGenerators.cache.stream()
-                            .filter(gen -> gen != null && gen.getArmorStandEntity() != null)
-                            .forEach(generator -> {
-                                if (generator.getArmorStandEntity().equals(entity)) {
-                                    toDestroy.add(generator);
-                                    generator.setArmorStand(null);
-                                }
-                            });
-
-                    PaperLib.getChunkAtAsync(entity.getLocation())
-                            .thenAccept(chunk -> entity.remove());
-                });
-
-        RotatingGenerators.destroy(toDestroy);
-    }
-
-    public static void destroySpawnerArmorStandEntities() {
-        if (BedwarsAPI.getInstance() == null) {
-            return;
-        }
-
-        final var games = BedwarsAPI.getInstance().getGameManager().getGames();
-        games.stream()
-                .filter(Objects::nonNull)
-                .forEach(SBAUtil::destroySpawnerArmorStandEntitiesFrom);
     }
 
     public static List<Material> parseMaterialFromConfig(String key) {
@@ -144,6 +99,10 @@ public class SBAUtil {
 
     public static String translateColors(String toTranslate) {
         return ChatColor.translateAlternateColorCodes('&', toTranslate);
+    }
+
+    public static Optional<Player> getPlayer(UUID uuid) {
+        return Optional.ofNullable(Bukkit.getPlayer(uuid));
     }
 
     public static void reloadPlugin(@NonNull JavaPlugin plugin) {

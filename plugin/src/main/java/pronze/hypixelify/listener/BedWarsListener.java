@@ -13,8 +13,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.game.ArenaImpl;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
@@ -25,7 +27,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class BedWarsListener implements Listener {
@@ -35,16 +36,14 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
         final var game = e.getGame();
-        final var arena = new Arena(game);
-        SBAHypixelify.addArena(arena);
-        arena.onGameStarted(e);
+        final var arena = new ArenaImpl(game);
+        SBAHypixelify.getInstance().getArenaManager().addArena(arena);
+        arena.onGameStarted();
     }
 
     @EventHandler
     public void onBwReload(PluginEnableEvent event) {
         final var plugin = event.getPlugin().getName();
-        final var pluginManager = Bukkit.getServer().getPluginManager();
-
         //Register listeners again
         if (plugin.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
             SBAHypixelify
@@ -61,41 +60,34 @@ public class BedWarsListener implements Listener {
         }
     }
 
-
-    @EventHandler
-    public void onPreRebuild(BedwarsPreRebuildingEvent e) {
-        final var game = e.getGame();
-        final var arena = SBAHypixelify.getArena(game.getName());
-        if (arena != null) {
-            arena.onPreRebuildingEvent();
-        }
-    }
-
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var game = e.getGame();
-        final var arena = SBAHypixelify.getArena(game.getName());
-        if (arena != null) {
-            arena.onTargetBlockDestroyed(e);
-        }
+        SBAHypixelify
+                .getInstance()
+                .getArenaManager()
+                .get(game.getName())
+                .ifPresent(arena -> arena.onTargetBlockDestroyed(e));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
         final var game = e.getGame();
-        final var arena = SBAHypixelify.getArena(game.getName());
-        if (arena != null) {
-            SBAHypixelify.removeArena(game.getName());
-        }
+        SBAHypixelify
+                .getInstance()
+                .getArenaManager()
+                .removeArena(game);
     }
 
 
     @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
         final var game = e.getGame();
-        final var arena = SBAHypixelify.getArena(game.getName());
-        if (arena != null)
-            arena.onOver(e);
+        SBAHypixelify
+                .getInstance()
+                .getArenaManager()
+                .get(game.getName())
+                .ifPresent(arena -> arena.onOver(e));
     }
 
 
@@ -136,7 +128,7 @@ public class BedWarsListener implements Listener {
                                                     message = seconds == 1 ? message
                                                             .replace("seconds", "second") : message;
                                                     player.sendMessage(message);
-                                                    sendTitle(player, ShopUtil
+                                                    TitleUtils.send(PlayerMapper.wrapPlayer(player), ShopUtil
                                                             .translateColors("&c" + seconds), "", 0, 20, 0);
                                                 }
                                             }
@@ -151,13 +143,16 @@ public class BedWarsListener implements Listener {
 
         /* Joined as spectator, let's give him a scoreboard*/
         else if (game.getStatus() == GameStatus.RUNNING) {
-            final var arena = SBAHypixelify.getArena(game.getName());
-            if (arena != null) {
-                final var scoreboard = arena.getScoreboard();
-                if (scoreboard != null) {
-                    scoreboard.createBoard(player);
-                }
-            }
+            SBAHypixelify
+                    .getInstance()
+                    .getArenaManager()
+                    .get(game.getName())
+                    .ifPresent(arena -> {
+                        final var scoreboardManager = arena.getScoreboardManager();
+                        if (scoreboardManager != null) {
+                            scoreboardManager.createBoard(player);
+                        }
+                    });
         }
     }
 
@@ -167,14 +162,17 @@ public class BedWarsListener implements Listener {
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
-        final var arena = SBAHypixelify.getArena(game.getName());
+        SBAHypixelify
+                .getInstance()
+                .getArenaManager()
+                .get(game.getName())
+                .ifPresent(arena -> {
+                    final var scoreboardManager = arena.getScoreboardManager();
+                    if (scoreboardManager != null) {
+                        scoreboardManager.removeBoard(player);
+                    }
+                });
 
-        if (arena != null) {
-            final var scoreboard = arena.getScoreboard();
-            if (scoreboard != null) {
-                scoreboard.remove(player);
-            }
-        }
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
@@ -194,10 +192,11 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onBedWarsPlayerKilledEvent(BedwarsPlayerKilledEvent e) {
         final var game = e.getGame();
-        final var arena = SBAHypixelify.getArena(game.getName());
-        if (arena != null) {
-            arena.onBedWarsPlayerKilled(e);
-        }
+        SBAHypixelify
+                .getInstance()
+                .getArenaManager()
+                .get(game.getName())
+                .ifPresent(arena -> arena.onBedWarsPlayerKilled(e));
     }
 
 }

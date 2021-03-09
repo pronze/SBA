@@ -1,4 +1,4 @@
-package pronze.hypixelify.listener;
+package pronze.hypixelify.scoreboard;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -16,6 +16,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.scoreboard.GameScoreboardManagerImpl;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
@@ -27,7 +28,7 @@ import java.util.*;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
-public class LobbyScoreboard implements Listener {
+public class LobbyScoreboardManagerImpl implements Listener {
     private static final String date = new SimpleDateFormat(Configurator.date).format(new Date());
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
 

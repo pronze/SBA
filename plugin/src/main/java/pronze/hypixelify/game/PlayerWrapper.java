@@ -1,6 +1,8 @@
 package pronze.hypixelify.game;
 
 import com.google.common.base.Strings;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -10,9 +12,8 @@ import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 
 
 public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrapper {
-
-    private final String name;
     private final Player instance;
+    private final String name;
     private final PlayerStatistic statistic;
     private int shout;
     private boolean shouted = false;
@@ -21,7 +22,7 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
         name = player.getDisplayName();
         instance = player;
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
-        statistic = Main.getPlayerStatisticsManager().getStatistic(instance);
+        statistic = PlayerStatisticManager.getInstance().getStatistic(PlayerMapper.wrapPlayer(player));
     }
 
     @Override
@@ -146,8 +147,7 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
         }
         if (progress < 1)
             progress = 1;
-        char i;
-        i = String.valueOf(Math.abs((long) progress)).charAt(0);
+        char i  =String.valueOf(Math.abs((long) progress)).charAt(0);
         if (progress < 10) {
             i = '1';
         }
@@ -156,17 +156,9 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
     }
 
     @Override
-    public void sendMessage(String message) {
-        if (!instance.isOnline()) {
-            return;
-        }
-
-        instance.sendMessage(message);
-    }
+    public void sendMessage(String message) { instance.sendMessage(message); }
 
     @Override
-    public double getKD() {
-        return Main.getPlayerStatisticsManager().getStatistic(instance).getKD();
-    }
+    public double getKD() { return statistic.getKD(); }
 
 }

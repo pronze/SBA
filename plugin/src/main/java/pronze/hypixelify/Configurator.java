@@ -8,7 +8,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.lib.ext.configurate.yaml.YamlConfigurationLoader;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
@@ -16,7 +15,6 @@ import pronze.hypixelify.utils.ShopUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,10 +23,7 @@ public class Configurator {
     //TODO: remove the static shits later
     public static HashMap<String, Integer> game_size = new HashMap<>();
     public static HashMap<String, List<String>> Scoreboard_Lines;
-    public static List<String> overstats_message;
-    public static List<String> gamestart_message;
     public static String date;
-    public static boolean tag_health;
     public final File dataFolder;
     public final SBAHypixelify main;
 
@@ -69,7 +64,7 @@ public class Configurator {
 
         if (!configFile.exists()) {
             try {
-                configFile.createNewFile();
+                Logger.trace("Creating config file, status: {}", configFile.createNewFile());;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -82,10 +77,10 @@ public class Configurator {
         }
 
         if (!shopFolder.exists()) {
-            shopFolder.mkdirs();
+            Logger.trace("Making shop directory, status: {}", shopFolder.mkdirs());
         }
         if (!gamesInventoryFolder.exists()) {
-            gamesInventoryFolder.mkdirs();
+            Logger.trace("Making directory GamesInv, status: {}", gamesInventoryFolder.mkdirs());;
         }
 
         addFile("games-inventory/solo.yml");
@@ -114,15 +109,9 @@ public class Configurator {
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", SBAHypixelify.getInstance().getVersion());
-        checkOrSetConfig(modify, "floating-generator.enabled", true);
-        checkOrSetConfig(modify, "floating-generator.holo-height", 2.0);
-        checkOrSetConfig(modify, "floating-generator.item-height", 0.25);
-        checkOrSetConfig(modify, "floating-generator.holo-text", Arrays.asList(
-                "§eTier §c{tier}",
-                "{material}",
-                "§eSpawns in §c{seconds} §eseconds"
-        ));
-
+        if (config.isSet("floating-generator")) {
+            config.set("floating-generator", null);
+        }
         checkOrSetConfig(modify, "upgrades.timer-upgrades-enabled", true);
         checkOrSetConfig(modify, "upgrades.show-upgrade-message", true);
         checkOrSetConfig(modify, "upgrades.trap-detection-range", 7);
@@ -163,7 +152,7 @@ public class Configurator {
         checkOrSetConfig(modify, "games-inventory.gui.squad-prefix", "Bed Wars Squads");
 
         checkOrSetConfig(modify, "game-start.message", Arrays.asList(
-                "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
+                "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
                 , "                             &f&lBed Wars"
                 , ""
                 , "    &e&lProtect your bed and destroy the enemy beds."
@@ -171,20 +160,26 @@ public class Configurator {
                 , "   &e&lIron, Gold, Emerald and Diamond from generators"
                 , "            &e&lto access powerful upgrades."
                 , ""
-                , "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
+                , "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         ));
+        if (config.isSet("overstats.message")) {
+            if (config.getStringList("overstats.message").stream().anyMatch(str -> str.contains("{win_team}"))) {
+                config.set("overstats.message", null);
+            }
+        }
+
         checkOrSetConfig(modify, "overstats.message", Arrays.asList(
-                "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
+                "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
                 , "                             &e&lBEDWARS"
                 , ""
-                , "                             {color}{win_team}"
-                , "                             {win_team_players}"
+                , "                             %color%%win_team%"
+                , "                             %winners%"
                 , ""
-                , "    &e&l1st&7 - &f{first_1_kills_player} &7- &f{first_1_kills}"
-                , "    &6&l2nd&7 - &f{first_2_kills_player} &7- &f{first_2_kills}"
-                , "    &c&l3rd&7 - &f{first_3_kills_player} &7- &f{first_3_kills}"
+                , "    &e&l1st&7 - &f%first_killer_name% &7- &f%first_killer_score"
+                , "    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"
+                , "    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"
                 , ""
-                , "&a\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac\u25ac"
+                , "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         ));
         checkOrSetConfig(modify, "scoreboard.you", "&7YOU");
         checkOrSetConfig(modify, "scoreboard.lines.default", Arrays.asList(
@@ -213,7 +208,7 @@ public class Configurator {
 
         //TODO: Create an algorithm
         checkOrSetConfig(modify, "lobby-scoreboard.title", Arrays.asList(
-                  "&e&lBED WARS"
+                "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
@@ -304,13 +299,10 @@ public class Configurator {
             Scoreboard_Lines.put(key,
                     SBAUtil.translateColors(getStringList("scoreboard.lines." + key)));
 
-        tag_health = SBAHypixelify.getConfigurator().config.getBoolean("tag_health");
-        overstats_message = SBAUtil.translateColors(getStringList("overstats.message"));
-        gamestart_message = SBAUtil.translateColors(getStringList("game-start.message"));
 
         ShopUtil.initKeys();
         if (config.getBoolean("first_start")) {
-            Bukkit.getLogger().info( "§aDetected first start");
+            Bukkit.getLogger().info("§aDetected first start");
             upgradeCustomFiles();
             config.set("first_start", false);
             saveConfig();
@@ -327,7 +319,7 @@ public class Configurator {
     private void deleteFile(String fileName) {
         final var file = new File(fileName);
         if (file.exists()) {
-            file.delete();
+            Logger.trace("Delete status: {} of file: {}", String.valueOf(file.delete()), fileName);
         }
     }
 
@@ -342,13 +334,13 @@ public class Configurator {
 
         main.saveResource("shops/shop.yml", true);
         main.saveResource("shops/upgradeShop.yml", true);
-        try (final var inputStream = main.getResource("config.yml")){
+        try (final var inputStream = main.getResource("config.yml")) {
             if (inputStream != null) {
                 final var configFile =
                         new File(Main.getInstance().getDataFolder().toFile(), "config.yml");
                 if (configFile.exists()) {
                     Logger.trace("Replacing BedWars config.yml");
-                    Logger.trace("Deleting config file, status: {}", String.valueOf(configFile.delete()));;
+                    Logger.trace("Deleting config file, status: {}", String.valueOf(configFile.delete()));
                 }
                 Logger.trace("Creating config file, status: {}", String.valueOf(configFile.createNewFile()));
                 try (final var outputStream = new FileOutputStream(configFile)) {
@@ -356,7 +348,7 @@ public class Configurator {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-             }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -402,5 +394,4 @@ public class Configurator {
     private void checkOrSetConfig(AtomicBoolean modify, String path, Object value) {
         checkOrSet(modify, this.config, path, value);
     }
-
 }

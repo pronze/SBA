@@ -1,9 +1,11 @@
 package pronze.hypixelify.game;
 
+import org.screamingsandals.bedwars.config.MainConfig;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
 import pronze.hypixelify.utils.SBAUtil;
-import org.bukkit.Material;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -13,11 +15,9 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.utils.Sounds;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class GameTask extends BukkitRunnable {
@@ -27,14 +27,14 @@ public class GameTask extends BukkitRunnable {
     private final SimpleDateFormat dateFormat;
     private final double multiplier;
     private final Game game;
-    private final Arena arena;
+    private final ArenaImpl arena;
     private final GameStorage storage;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
     private int time;
     private int tier = 1;
 
-    public GameTask(Arena arena) {
+    public GameTask(ArenaImpl arena) {
         this.arena = arena;
         this.game = arena.getGame();
         this.storage = arena.getStorage();
@@ -93,10 +93,10 @@ public class GameTask extends BukkitRunnable {
                                         .replace("%team%", team.getName()));
 
                                 team.getConnectedPlayers().forEach(pl -> {
-                                    Sounds.playSound(pl, pl.getLocation(), Main.getConfigurator()
+                                    Sounds.playSound(pl, pl.getLocation(), MainConfig.getInstance()
                                                     .node("sounds", "on_trap_triggered").getString(),
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                    sendTitle(pl, i18n("trap-triggered.title"),
+                                    TitleUtils.send(PlayerMapper.wrapPlayer(pl), i18n("trap-triggered.title"),
                                             i18n("trap-triggered.sub-title"), 20, 60, 0);
                                 });
                             }
@@ -118,50 +118,6 @@ public class GameTask extends BukkitRunnable {
                         }
                     });
                 });
-            }
-
-            if (!Tiers.get(tier).equals(Tiers.get(9))) {
-
-                if (time == tier_timer.get(tier)) {
-                    if (timerUpgrades) {
-                        String matName = null;
-                        Material type = null;
-                        for (final var itemSpawner : game.getItemSpawners()) {
-                            if (tier % 2 != 0) {
-                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND){
-                                    itemSpawner.addToCurrentLevel(multiplier);
-                                    matName = "§b" + i18n("diamond");
-                                    type = Material.DIAMOND_BLOCK;
-                                }
-                            } else {
-                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD) {
-                                    itemSpawner.addToCurrentLevel(multiplier);
-                                    matName = "§a" + i18n("emerald");
-                                    type = Material.EMERALD_BLOCK;
-                                }
-                            }
-                        }
-
-                        final var tierName = Tiers.get(tier);
-                        final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
-
-                        for (final var generator : arena.getRotatingGenerators()) {
-                            final var generatorMatType = generator.getItemStack().getType();
-                            if (generatorMatType == type) {
-                                generator.setTierLevel(generator.getTierLevel() + 1);
-                            }
-                        }
-
-                        if (showUpgradeMessage && matName != null) {
-                            String finalMatName = matName;
-                            game.getConnectedPlayers().forEach(player ->
-                                    player.sendMessage(i18n("generator-upgrade")
-                                            .replace("{MatName}", finalMatName)
-                                            .replace("{tier}", Tiers.get(tier))));
-                        }
-                    }
-                    tier++;
-                }
             }
             time++;
         } else {

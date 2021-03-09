@@ -1,5 +1,7 @@
 package pronze.hypixelify.listener;
 
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.TeamUpgradePurchaseEvent;
 import pronze.hypixelify.utils.ShopUtil;
@@ -10,7 +12,6 @@ import org.bukkit.event.Listener;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.screamingsandals.bedwars.lib.nms.title.Title.sendTitle;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class TeamUpgradeListener implements Listener {
@@ -32,7 +33,10 @@ public class TeamUpgradeListener implements Listener {
         final var team = e.getTeam();
         final var name = e.getName().toLowerCase();
         final var game = e.getGame();
-        final var optionalGameStorage = SBAHypixelify.getStorage(game);
+        final var optionalGameStorage = SBAHypixelify
+                .getInstance()
+                .getArenaManager()
+                .getGameStorage(game.getName());
 
         if (optionalGameStorage.isEmpty()) {
             e.setCancelled(true);
@@ -67,7 +71,7 @@ public class TeamUpgradeListener implements Listener {
                 e.setCancelled(true);
             } else {
                 gameStorage.setTrap(team, true);
-                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, i18n("blindness-trap-purchased-title"), "", 20, 40, 20));
+                team.getConnectedPlayers().forEach(pl -> TitleUtils.send(PlayerMapper.wrapPlayer(pl), i18n("blindness-trap-purchased-title"), "", 20, 40, 20));
             }
         } else if (name.equalsIgnoreCase("healpool")) {
             if (gameStorage.isPoolEnabled(team)) {

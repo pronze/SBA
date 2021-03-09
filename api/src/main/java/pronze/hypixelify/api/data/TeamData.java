@@ -1,10 +1,10 @@
-package pronze.hypixelify.game;
+package pronze.hypixelify.api.data;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Data
 public class TeamData {
      private int sharpness;
@@ -13,5 +13,5 @@ public class TeamData {
      private boolean purchasedPool;
      private boolean purchasedTrap;
      private boolean purchasedDragonUpgrade;
-     private Location targetBlockLoc;
+     private final Location targetBlockLoc;
 }

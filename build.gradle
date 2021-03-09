@@ -9,55 +9,58 @@ allprojects {
 buildscript {
     repositories {
         maven { url = 'https://repo.screamingsandals.org/public' }
+        dependencies {
+            classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.39'
+        }
     }
-
-    dependencies { classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.30' }
 }
-subprojects {
-    apply plugin: 'java'
-    apply plugin: 'org.screamingsandals.gradle.builder'
+    subprojects {
+        apply plugin: 'java'
+        apply plugin: 'org.screamingsandals.gradle.builder'
 
-    repositories {
-        maven {
-            url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
+        enableShadowPlugin()
+        configurations.all {
+            // Check for updates every build
+            resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+        }
+        repositories {
+            maven {
+                url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
+            }
+
+            maven {
+                url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            }
+
+            maven {
+                url 'https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven'
+            }
+
+            maven {
+                url = uri('https://repo.hoznet.dev/public')
+            }
+
+            maven {
+                url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+            }
+
+            maven {
+                url = uri('https://papermc.io/repo/repository/maven-public/')
+            }
+
+            maven {
+                url = uri('https://repo.maven.apache.org/maven2/')
+            }
         }
 
-        maven {
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        dependencies {
+            compileOnly paper("1.16.5")
+            compileOnly 'org.screamingsandals.bedwars:BedWars:0.3.0-SNAPSHOT'
+            compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.3.0-SNAPSHOT'
         }
 
-        maven {
-            url 'https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven'
+        shadowJar {
+            relocate 'cloud', 'pronze.hypixelify.lib.cloud'
         }
-
-        maven {
-            url = uri('https://repo.hoznet.dev/public')
-        }
-
-        maven {
-            url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
-        }
-
-        maven {
-            url = uri('https://papermc.io/repo/repository/maven-public/')
-        }
-
-        maven {
-            url = uri('https://repo.maven.apache.org/maven2/')
-        }
+        sourceCompatibility = '11.0'
     }
-
-    dependencies {
-        compileOnly paper("1.16.4")
-        compileOnly 'org.screamingsandals.bedwars:BedWars:0.3.0-SNAPSHOT'
-        compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.3.0-SNAPSHOT'
-    }
-
-    shadowJar {
-        relocate 'cloud', 'pronze.hypixelify.lib.cloud'
-    }
-    sourceCompatibility = '11.0'
-}
-
-
-

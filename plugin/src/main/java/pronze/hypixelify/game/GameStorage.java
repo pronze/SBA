@@ -3,27 +3,17 @@ package pronze.hypixelify.game;
 import org.bukkit.Location;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
+import pronze.hypixelify.api.data.TeamData;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
-
     private final Map<String, TeamData> teamDataMap = new HashMap<>();
 
     public GameStorage(Game game) {
-        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(),
-                new TeamData(
-                        0,
-                        0,
-                        0,
-                        false,
-                        false,
-                        false,
-                        team.getTargetBlock()
-                )));
+        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(), new TeamData(team.getTargetBlock())));
     }
-
 
     public Location getTargetBlockLocation(RunningTeam rt) {
         return teamDataMap.get(rt.getName()).getTargetBlockLoc();
@@ -64,11 +54,6 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
     public void setProtection(String teamName, Integer level) {
         final var data = teamDataMap.get(teamName);
         data.setProtection(level);
-    }
-
-    public void setTargetBlockLocation(RunningTeam rt) {
-        final var data = teamDataMap.get(rt.getName());
-        data.setTargetBlockLoc(rt.getTargetBlock());
     }
 
     public boolean areDragonsEnabled() {

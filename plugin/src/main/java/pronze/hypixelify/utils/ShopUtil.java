@@ -10,6 +10,7 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStore;
+import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
 import pronze.hypixelify.Configurator;
@@ -192,19 +193,19 @@ public class ShopUtil {
     }
 
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
-        final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
+        final var backItem = MainConfig.getInstance().readDefinedItem("shopback", "BARRIER");
         backItem.setDisplayName(Component.text(i18n("shop_back", false)));
         localOptionsBuilder.backItem(backItem);
 
-        final var pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
+        final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");
         pageBackItem.setDisplayName(Component.text(i18n("page_back", false)));
         localOptionsBuilder.pageBackItem(pageBackItem);
 
-        final var pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
+        final var pageForwardItem = MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
         pageForwardItem.setDisplayName(Component.text(i18n("page_forward", false)));
         localOptionsBuilder.pageForwardItem(pageForwardItem);
 
-        final var cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
+        final var cosmeticItem = MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");
         localOptionsBuilder
                 .cosmeticItem(cosmeticItem)
                 .renderHeaderStart(600)
@@ -232,7 +233,9 @@ public class ShopUtil {
                     .forEach(player.getInventory()::removeItem);
         }
 
-        final var optionalGameStorage = SBAHypixelify.getStorage(game);
+        final var optionalGameStorage = SBAHypixelify
+                .getInstance()
+                .getGameStorage(game);
 
         if (optionalGameStorage.isEmpty()) {
             return;

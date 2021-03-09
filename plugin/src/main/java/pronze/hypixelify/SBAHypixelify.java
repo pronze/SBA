@@ -12,16 +12,17 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.ext.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
-import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
-import pronze.hypixelify.game.Arena;
-import pronze.hypixelify.game.RotatingGenerators;
+import pronze.hypixelify.game.ArenaManagerImpl;
 import pronze.hypixelify.inventories.CustomShop;
 import pronze.hypixelify.inventories.GamesInventory;
 import pronze.hypixelify.lib.lang.I18n;
 import pronze.hypixelify.listener.*;
 import pronze.hypixelify.placeholderapi.SBAExpansion;
+import pronze.hypixelify.scoreboard.LobbyScoreboardManagerImpl;
+import pronze.hypixelify.scoreboard.MainLobbyScoreboardImpl;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
@@ -31,34 +32,15 @@ import java.util.*;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
-    private final Map<String, Arena> arenas = new HashMap<>();
     private final List<Listener> registeredListeners = new ArrayList<>();
     private String version;
+    private ArenaManagerImpl arenaManager;
     private PlayerWrapperService playerWrapperService;
     private Configurator configurator;
     private GamesInventory gamesInventory;
     private boolean debug = false;
     private boolean protocolLib;
     private boolean isSnapshot;
-
-    public static Optional<GameStorage> getStorage(Game game) {
-        if (plugin.arenas.containsKey(game.getName()))
-            return Optional.ofNullable(plugin.arenas.get(game.getName()).getStorage());
-
-        return Optional.empty();
-    }
-
-    public static Arena getArena(String arenaName) {
-        return plugin.arenas.get(arenaName);
-    }
-
-    public static void addArena(Arena arena) {
-        plugin.arenas.put(arena.getGame().getName(), arena);
-    }
-
-    public static void removeArena(String arenaName) {
-        plugin.arenas.remove(arenaName);
-    }
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
@@ -146,14 +128,16 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         gamesInventory = new GamesInventory();
         gamesInventory.loadInventory();
 
+        arenaManager = new ArenaManagerImpl();
+
         registerListener(new BedWarsListener());
         registerListener(new PlayerListener());
         registerListener(new TeamUpgradeListener());
 
         if (configurator.config.getBoolean("main-lobby.enabled", false))
-            registerListener(new MainLobbyBoard());
+            registerListener(new MainLobbyScoreboardImpl());
         if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
-            registerListener(new LobbyScoreboard());
+            registerListener(new LobbyScoreboardManagerImpl());
 
         registerListener(shop);
 
@@ -167,7 +151,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             t.printStackTrace();
         }
 
-        preliminaryRotatingGeneratorChecks();
         new Metrics(this, 79505);
         Logger.trace("Registering API service provider");
 
@@ -178,12 +161,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
                 ServicePriority.Normal
         );
         getLogger().info("Plugin has loaded!");
-    }
-
-    private void preliminaryRotatingGeneratorChecks() {
-        if (configurator.config.getBoolean("floating-generator.enabled", false)) {
-            SBAUtil.destroySpawnerArmorStandEntities();
-        }
     }
 
     public void registerListener(Listener listener) {
@@ -205,11 +182,9 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registeredListeners.forEach(HandlerList::unregisterAll);
         registeredListeners.clear();
 
-        RotatingGenerators.destroy(RotatingGenerators.cache);
         Logger.trace("Cancelling tasks...");
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
-        arenas.clear();
         Logger.trace("Successfully shutdown SBAHypixelify instance");
     }
 
@@ -235,13 +210,18 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     @Override
+    public ArenaManager getArenaManager() {
+        return arenaManager;
+    }
+
+    @Override
     public String getVersion() {
         return plugin.version;
     }
 
     @Override
     public Optional<pronze.hypixelify.api.game.GameStorage> getGameStorage(Game game) {
-        return SBAHypixelify.getStorage(game);
+        return arenaManager.getGameStorage(game.getName());
     }
 
     @Override

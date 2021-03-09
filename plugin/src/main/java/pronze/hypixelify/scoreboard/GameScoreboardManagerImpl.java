@@ -11,9 +11,11 @@ import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.game.ArenaImpl;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 import pronze.hypixelify.utils.Logger;
@@ -24,17 +26,17 @@ import pronze.lib.scoreboards.ScoreboardManager;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ScoreBoard {
+public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.ScoreboardManager {
 
     private final static String date = new SimpleDateFormat(Configurator.date).format(new Date());
     private final Game game;
-    private final Arena arena;
+    private final ArenaImpl arena;
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
     private final List<String> scoreboard_lines = new ArrayList<>();
 
     protected BukkitTask updateTask;
 
-    public ScoreBoard(Arena arena) {
+    public GameScoreboardManagerImpl(ArenaImpl arena) {
         this.arena = arena;
         game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).get();
 
@@ -82,7 +84,7 @@ public class ScoreBoard {
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
-    public void remove(Player player) {
+    public void removeBoard(Player player) {
         if (scoreboardMap.containsKey(player.getUniqueId())) {
             final var scoreboard = scoreboardMap.get(player.getUniqueId());
             if (scoreboard != null) {
@@ -97,6 +99,11 @@ public class ScoreBoard {
         scoreboardMap.values().forEach(Scoreboard::destroy);
         scoreboardMap.clear();
         Logger.trace("Destroyed scoreboard for all players of arena: {}", arena.getGame().getName());
+        if (updateTask != null) {
+            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
+                updateTask.cancel();
+            }
+        }
     }
 
     public void createCustomObjective(Scoreboard scoreboard) {
@@ -143,7 +150,7 @@ public class ScoreBoard {
         final var lines = new ArrayList<String>();
         final var playerData = arena.getPlayerData(player.getUniqueId());
         final var playerTeam = game.getTeamOfPlayer(player);
-        final var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+        final var statistic = PlayerStatisticManager.getInstance().getStatistic(PlayerMapper.wrapPlayer(player));
 
         if (statistic == null)
             return List.of();
@@ -261,13 +268,5 @@ public class ScoreBoard {
                 .replace("{color}", formattedTeam)
                 .replace("{team}", ChatColor.WHITE.toString()
                         + team.getName() + ":");
-    }
-
-    public void cancelTask() {
-        if (updateTask != null) {
-            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
-                updateTask.cancel();
-            }
-        }
     }
 }

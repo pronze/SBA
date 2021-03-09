@@ -52,10 +52,7 @@ public class GamesInventory implements Listener {
                             .call(categoryBuilder ->{
                                 try {
                                     var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath() + "/games-inventory/" + label.toLowerCase() + ".yml";
-                                    categoryBuilder
-                                            .getClass()
-                                            .getMethod("include", Include.class)
-                                            .invoke(categoryBuilder,Include.of(Paths.get(pathStr)));
+                                    categoryBuilder.include(Include.of(Paths.get(pathStr)));
                             }  catch (Throwable t) {
                                     t.printStackTrace();
                                 }

@@ -2,6 +2,7 @@ package pronze.hypixelify.api;
 
 import org.bukkit.event.Listener;
 import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -71,4 +72,10 @@ public interface SBAHypixelifyAPI {
      * @return the list of listeners that were registered by the SBAHypixelify instance
      */
     List<Listener> getRegisteredListeners();
+
+    /**
+     *
+     * @return
+     */
+    ArenaManager getArenaManager();
 }

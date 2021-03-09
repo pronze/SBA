@@ -1,4 +1,4 @@
-package pronze.hypixelify.listener;
+package pronze.hypixelify.scoreboard;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -24,12 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MainLobbyBoard implements Listener {
+public class MainLobbyScoreboardImpl implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
 
-    public MainLobbyBoard() {
+    public MainLobbyScoreboardImpl() {
         final var optionalLocation = SBAUtil.readLocationFromConfig("main-lobby");
         if (optionalLocation.isPresent()) {
             location = optionalLocation.get();
@@ -61,7 +61,7 @@ public class MainLobbyBoard implements Listener {
         final var db = SBAHypixelify.getWrapperService().getWrapper(player);
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
-                && MainLobbyBoard.isInWorld(e.getPlayer().getLocation())) {
+                && MainLobbyScoreboardImpl.isInWorld(e.getPlayer().getLocation())) {
 
             if (SBAHypixelify.getConfigurator().getString("main-lobby.chat-format") != null) {
                 String format = SBAHypixelify.getConfigurator()
