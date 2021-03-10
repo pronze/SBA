@@ -1,17 +1,26 @@
 package pronze.hypixelify.api.service;
 
-public interface WrapperService<T> {
+import java.util.Optional;
+
+public interface WrapperService<K, V> {
 
     /**
      *
      * @param param the object to register
      */
-    void register(T param);
+    void register(K param);
 
     /**
      *
      * @param param the object to unregister
      */
-    void unregister(T param);
+    void unregister(K param);
+
+    /**
+     *
+     * @param param the object to query
+     * @return
+     */
+    Optional<V> get(K param);
 
 }

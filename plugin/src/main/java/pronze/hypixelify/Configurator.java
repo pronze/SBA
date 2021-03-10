@@ -287,6 +287,10 @@ public class Configurator {
             game_size.put(gameName, size);
         });
 
+        checkOrSetConfig(modify, "party.enabled", true);
+        checkOrSetConfig(modify, "party.command", List.of("party", "p"));
+        checkOrSetConfig(modify, "party.chat.format", "&aParty >> %name% &f : &o%message%");
+
         if (modify.get()) {
             saveConfig();
         }

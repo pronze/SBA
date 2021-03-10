@@ -10,16 +10,19 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 
+import java.util.UUID;
 
-public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrapper {
+
+public class PlayerWrapperImpl implements pronze.hypixelify.api.wrapper.PlayerWrapper {
     private final Player instance;
     private final String name;
     private final PlayerStatistic statistic;
     private int shout;
     private boolean shouted;
+    private boolean isInParty;
 
-    public PlayerWrapper(Player player) {
-        name = player.getDisplayName();
+    public PlayerWrapperImpl(Player player) {
+        name = player.getName();
         instance = player;
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         statistic = PlayerStatisticManager.getInstance().getStatistic(PlayerMapper.wrapPlayer(player));
@@ -31,27 +34,31 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
     }
 
     @Override
-    public void shout() {
-        if (!shouted) {
-            shouted = true;
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    shout--;
-                    if (shout == 0) {
-                        shouted = false;
-                        shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
-                        this.cancel();
-                    }
-                }
-            }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
-        }
+    public void sendMessage(String message) { instance.sendMessage(message); }
+
+    @Override
+    public Player getInstance() { return instance; }
+
+    @Override
+    public boolean isInParty() {
+        return isInParty;
     }
+
+    @Override
+    public void setInParty(boolean isInParty) {
+        this.isInParty = isInParty;
+    }
+
+    @Override
+    public double getKD() { return statistic.getKD(); }
 
     @Override
     public boolean canShout() {
         return !shouted;
     }
+
+    @Override
+    public UUID getUUID() { return instance.getUniqueId(); }
 
     public String getName() {
         return name;
@@ -75,6 +82,27 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
     @Override
     public int getDeaths() {
         return statistic.getDeaths();
+    }
+
+    @Override
+    public void shout() {
+        if (!shouted) {
+            shouted = true;
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    shout--;
+                    if (shout == 0) {
+                        shouted = false;
+                        shout = SBAHypixelify
+                                .getConfigurator()
+                                .config
+                                .getInt("shout.time-out", 60);
+                        this.cancel();
+                    }
+                }
+            }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
+        }
     }
 
     @Override
@@ -155,10 +183,5 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
                 + "§7" + Strings.repeat("■", 10 - Integer.parseInt(String.valueOf(i))) + "]";
     }
 
-    @Override
-    public void sendMessage(String message) { instance.sendMessage(message); }
-
-    @Override
-    public double getKD() { return statistic.getKD(); }
 
 }

@@ -58,7 +58,7 @@ public class MainLobbyScoreboardImpl implements Listener {
         if (!SBAHypixelify.getConfigurator().config
                 .getBoolean("main-lobby.custom-chat", true)) return;
         final var player = e.getPlayer();
-        final var db = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var db = SBAHypixelify.getWrapperService().get(player).get();
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
                 && MainLobbyScoreboardImpl.isInWorld(e.getPlayer().getLocation())) {
@@ -131,7 +131,7 @@ public class MainLobbyScoreboardImpl implements Listener {
     }
 
     public void createBoard(Player player) {
-        final var playerData = SBAHypixelify.getWrapperService().getWrapper(player);
+        final var playerData = SBAHypixelify.getWrapperService().get(player).get();
         final var scoreboard = Scoreboard.builder()
                 .animate(false)
                 .player(player)
