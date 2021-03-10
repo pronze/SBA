@@ -94,13 +94,6 @@ public interface PlayerWrapper {
      * @return
      */
     String getCompletedBoxes();
-
-    /**
-     *
-     * @param message
-     */
-    void sendMessage(String message);
-
     /**
      *
      * @return
@@ -118,4 +111,16 @@ public interface PlayerWrapper {
      * @param isInParty
      */
     void setInParty(boolean isInParty);
+
+    /**
+     *
+     * @return true if player has recently been invited to a party, false otherwise.
+     */
+    boolean isInvitedToAParty();
+
+    /**
+     *
+     * @param isInvited
+     */
+    void setInvitedToAParty(boolean isInvited);
 }

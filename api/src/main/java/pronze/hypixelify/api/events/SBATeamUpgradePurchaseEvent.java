@@ -9,7 +9,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 
-public class TeamUpgradePurchaseEvent extends Event implements Cancellable {
+public class SBATeamUpgradePurchaseEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private Player player;
     private boolean isCancelled = false;
@@ -32,7 +32,7 @@ public class TeamUpgradePurchaseEvent extends Event implements Cancellable {
         return type.getStack(price);
     }
 
-    public TeamUpgradePurchaseEvent(Player player, ItemStack stack, String name, RunningTeam team, Game game, ItemSpawnerType type){
+    public SBATeamUpgradePurchaseEvent(Player player, ItemStack stack, String name, RunningTeam team, Game game, ItemSpawnerType type){
         this.player = player;
         this.stack = stack;
         this.name = name;
@@ -74,10 +74,10 @@ public class TeamUpgradePurchaseEvent extends Event implements Cancellable {
 
     @Override
     public HandlerList getHandlers() {
-        return TeamUpgradePurchaseEvent.handlers;
+        return SBATeamUpgradePurchaseEvent.handlers;
     }
 
     public static HandlerList getHandlerList() {
-        return TeamUpgradePurchaseEvent.handlers;
+        return SBATeamUpgradePurchaseEvent.handlers;
     }
 }

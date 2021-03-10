@@ -12,9 +12,9 @@ public interface PartyManager {
     /**
      *
      * @param leader the leader object that owns the party.
-     * @return the party instance that has been created.
+     * @return the party instance that has been created, returns {@link Optional#empty()} if {@link pronze.hypixelify.api.events.SBAPlayerPartyCreatedEvent} is cancelled.
      */
-    Party createParty(@NotNull PlayerWrapper leader);
+    Optional<Party> createParty(@NotNull PlayerWrapper leader);
 
     /**
      *
@@ -29,4 +29,11 @@ public interface PartyManager {
      * @return
      */
     Optional<Party> get(@NotNull UUID partyUUID);
+
+    /**
+     *
+     * @param player
+     * @return
+     */
+    Optional<Party> getPartyOf(@NotNull PlayerWrapper player);
 }

@@ -1,6 +1,9 @@
 package pronze.hypixelify.game;
 
 import com.google.common.base.Strings;
+import net.kyori.adventure.audience.ForwardingAudience;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.audience.Audience;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
@@ -9,19 +12,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 import java.util.UUID;
 
 
-public class PlayerWrapperImpl implements pronze.hypixelify.api.wrapper.PlayerWrapper {
+public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.PlayerWrapper implements PlayerWrapper {
     private final Player instance;
     private final String name;
     private final PlayerStatistic statistic;
     private int shout;
     private boolean shouted;
     private boolean isInParty;
+    private boolean isInvitedToParty;
 
     public PlayerWrapperImpl(Player player) {
+        super(player.getName(), player.getUniqueId());
         name = player.getName();
         instance = player;
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
@@ -47,6 +53,16 @@ public class PlayerWrapperImpl implements pronze.hypixelify.api.wrapper.PlayerWr
     @Override
     public void setInParty(boolean isInParty) {
         this.isInParty = isInParty;
+    }
+
+    @Override
+    public boolean isInvitedToAParty() {
+        return isInvitedToParty;
+    }
+
+    @Override
+    public void setInvitedToAParty(boolean isInvited) {
+        isInvitedToParty = isInvited;
     }
 
     @Override
@@ -182,6 +198,4 @@ public class PlayerWrapperImpl implements pronze.hypixelify.api.wrapper.PlayerWr
         return "§7[§b" + Strings.repeat("■", Integer.parseInt(String.valueOf(i)))
                 + "§7" + Strings.repeat("■", 10 - Integer.parseInt(String.valueOf(i))) + "]";
     }
-
-
 }

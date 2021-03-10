@@ -1,9 +1,8 @@
 package pronze.hypixelify.listener;
 
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.events.TeamUpgradePurchaseEvent;
+import pronze.hypixelify.api.events.SBATeamUpgradePurchaseEvent;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 import org.bukkit.enchantments.Enchantment;
@@ -28,7 +27,7 @@ public class TeamUpgradeListener implements Listener {
     }
 
     @EventHandler
-    public void onPlayerToolUpgrade(TeamUpgradePurchaseEvent e) {
+    public void onPlayerToolUpgrade(SBATeamUpgradePurchaseEvent e) {
         final var player = e.getPlayer();
         final var newItem = e.getUpgradedItem();
         final var team = e.getTeam();

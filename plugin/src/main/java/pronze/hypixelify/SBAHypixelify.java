@@ -17,6 +17,7 @@ import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
 import pronze.hypixelify.game.ArenaManagerImpl;
+import pronze.hypixelify.party.PartyManagerImpl;
 import pronze.hypixelify.store.SBAGameStore;
 import pronze.hypixelify.inventories.GamesInventory;
 import pronze.hypixelify.lib.lang.I18n;
@@ -38,9 +39,12 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private PlayerWrapperService playerWrapperService;
     private Configurator configurator;
     private GamesInventory gamesInventory;
+    private PartyManagerImpl partyManager;
     private boolean debug = false;
     private boolean protocolLib;
     private boolean isSnapshot;
+
+    public static PartyManagerImpl getPartyManager() { return plugin.partyManager; }
 
     public static Configurator getConfigurator() {
         return plugin.configurator;
@@ -121,6 +125,9 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         I18n.load(this, configurator.config.getString("locale"));
 
         playerWrapperService = new PlayerWrapperService();
+
+        partyManager = new PartyManagerImpl();
+
         debug = configurator.config.getBoolean("debug.enabled", false);
 
         SBAGameStore shop = new SBAGameStore();
@@ -226,7 +233,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public PlayerWrapper getPlayerWrapper(Player player) {
-        return playerWrapperService.getWrapper(player);
+        return playerWrapperService.get(player).orElseThrow();
     }
 
     @Override

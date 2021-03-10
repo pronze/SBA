@@ -16,7 +16,7 @@ import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.Sounds;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
+import pronze.hypixelify.api.events.SBATeamTrapTriggeredEvent;
 import pronze.hypixelify.utils.SBAUtil;
 
 import java.text.SimpleDateFormat;
@@ -114,7 +114,7 @@ public class GameTask extends BukkitRunnable {
 
                         if (storage.getTargetBlockLocation(team)
                                 .distanceSquared(player.getLocation()) <= arena.getRadius()) {
-                            final var triggeredEvent = new TeamTrapTriggeredEvent(player, team, arena);
+                            final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
                             SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
                             if (!triggeredEvent.isCancelled()) {

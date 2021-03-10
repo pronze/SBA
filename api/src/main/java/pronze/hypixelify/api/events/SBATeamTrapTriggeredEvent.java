@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.game.Arena;
 import org.screamingsandals.bedwars.api.RunningTeam;
 
-public class TeamTrapTriggeredEvent extends Event implements Cancellable {
+public class SBATeamTrapTriggeredEvent extends Event implements Cancellable {
     private static HandlerList handlerList = new HandlerList();
 
     private Player trapped;
@@ -16,16 +16,16 @@ public class TeamTrapTriggeredEvent extends Event implements Cancellable {
     private Arena arena;
     private boolean cancelled = false;
 
-    public TeamTrapTriggeredEvent(Player trapped,
-                                  RunningTeam team,
-                                  Arena arena) {
+    public SBATeamTrapTriggeredEvent(Player trapped,
+                                     RunningTeam team,
+                                     Arena arena) {
         this.trapped = trapped;
         this.team = team;
         this.arena = arena;
     }
 
     public static HandlerList getHandlerList() {
-        return TeamTrapTriggeredEvent.handlerList;
+        return SBATeamTrapTriggeredEvent.handlerList;
     }
 
     public Player getTrapped() {
@@ -42,7 +42,7 @@ public class TeamTrapTriggeredEvent extends Event implements Cancellable {
 
     @Override
     public @NotNull HandlerList getHandlers() {
-        return TeamTrapTriggeredEvent.handlerList;
+        return SBATeamTrapTriggeredEvent.handlerList;
     }
 
     @Override
