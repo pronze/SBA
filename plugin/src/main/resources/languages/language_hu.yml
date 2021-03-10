@@ -46,3 +46,4 @@ gamesinv_disabled: "§cGames inventory has been disabled, Contact the server own
 not_in_game: "§c You have to be in a game to do this command!"
 shout_wait: "§c You have to wait for {seconds} to use this command again!"
 countdown: "§fStarting in §a{countdown}s"
+none: "None"
