@@ -46,3 +46,4 @@ gamesinv_disabled: "§cSpiele-Inventar wurde deaktiviert, kontaktiere den Server
 not_in_game: "§c Du musst in einem Spiel sein, um diesen Befehl auszuführen!"
 shout_wait: "§c Du musst warten, bis {seconds} diesen Befehl wieder verwendet!"
 countdown: "§fStart in §a{countdown}s"
+none: "None"
