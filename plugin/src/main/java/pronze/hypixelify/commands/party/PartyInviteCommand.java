@@ -55,33 +55,18 @@ public class PartyInviteCommand {
 
                             SBAHypixelify
                                     .getPartyManager()
-                                    .getPartyOf(player)
-                                    .ifPresentOrElse(party -> invite(
-                                            invitedPlayer,
-                                            player,
-                                            party
-                                    ), () -> SBAHypixelify
-                                            .getPartyManager()
-                                            .createParty(player)
-                                            .ifPresent(party -> invite(
-                                                    invitedPlayer,
-                                                    player,
-                                                    party
-                                            )));
+                                    .getOrCreate(player)
+                                    .ifPresent(party -> {
+                                        final var inviteEvent = new SBAPlayerPartyInviteEvent(player, invitedPlayer);
+                                        SBAHypixelify
+                                                .getInstance()
+                                                .getServer()
+                                                .getPluginManager()
+                                                .callEvent(inviteEvent);
+                                        if (inviteEvent.isCancelled()) return;
+
+                                        party.invitePlayer(invitedPlayer);
+                                    });
                         }).execute()));
-    }
-
-    protected void invite(PlayerWrapperImpl invitee,
-                          PlayerWrapperImpl player,
-                          Party party) {
-        final var inviteEvent = new SBAPlayerPartyInviteEvent(player, invitee);
-        SBAHypixelify
-                .getInstance()
-                .getServer()
-                .getPluginManager()
-                .callEvent(inviteEvent);
-        if (inviteEvent.isCancelled()) return;
-
-        party.invitePlayer(invitee);
     }
 }

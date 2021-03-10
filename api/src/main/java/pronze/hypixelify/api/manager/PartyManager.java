@@ -35,5 +35,12 @@ public interface PartyManager {
      * @param player
      * @return
      */
+    Optional<Party> getOrCreate(@NotNull PlayerWrapper leader);
+
+    /**
+     *
+     * @param player
+     * @return
+     */
     Optional<Party> getPartyOf(@NotNull PlayerWrapper player);
 }

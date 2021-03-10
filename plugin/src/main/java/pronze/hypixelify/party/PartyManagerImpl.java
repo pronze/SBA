@@ -53,6 +53,11 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
+    public Optional<Party> getOrCreate(@NotNull PlayerWrapper leader) {
+        return get(leader).or(() -> createParty(leader));
+    }
+
+    @Override
     public Optional<Party> getPartyOf(@NotNull PlayerWrapper player) {
         return partyMap.values()
                 .stream()
