@@ -46,3 +46,4 @@ gamesinv_disabled: "§cSpel inventory har inaktiverats, Kontakta serverägaren f
 not_in_game: "§c Du måste vara i ett spel för att göra detta kommando!"
 shout_wait: "§c Du måste vänta på att {seconds} ska använda detta kommando igen!"
 countdown: "§fStartar om §a{countdown}s"
+none: "None"
