@@ -46,3 +46,4 @@ gamesinv_disabled: "§cInventarul jocurilor a fost dezactivat, Contacteaza propr
 not_in_game: "§c Trebuie sa fii intr-un joc pentru a face aceasta comanda!"
 shout_wait: "§c Trebuie sa astepti ca {seconds} sa foloseasca aceasta comanda din nou!"
 countdown: "§fÎncepe în §a{countdown}s"
+none: "None"
