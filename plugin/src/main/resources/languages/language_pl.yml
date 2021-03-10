@@ -46,3 +46,4 @@ gamesinv_disabled: "§cZapasy Gier zostały wyłączone, skontaktuj się z wła�
 not_in_game: "§c Musisz być w grze, aby wykonać to polecenie!"
 shout_wait: "§c Musisz poczekać na {seconds} aby użyć tej komendy ponownie!"
 countdown: "§fRozpoczęcie za §a{countdown}s"
+none: "None"
