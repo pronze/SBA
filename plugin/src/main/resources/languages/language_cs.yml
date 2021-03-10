@@ -46,3 +46,4 @@ gamesinv_disabled: "§cHerní inventář byl zakázán. Chcete-li jej povolit, k
 not_in_game: "§c Musíš být ve hře, abys mohl udělat tento příkaz!"
 shout_wait: "§c Musíš počkat {seconds}, abys mohl použít tento příkaz!"
 countdown: "§fZačíná za §a{countdown}s"
+none: "None"
