@@ -46,3 +46,4 @@ gamesinv_disabled: "§cEl inventario de juegos ha sido deshabilitado, Contacta c
 not_in_game: "§c ¡Tienes que estar en una partida para hacer este comando!"
 shout_wait: "§c ¡Tienes que esperar a que {seconds} vuelva a usar este comando!"
 countdown: "§fComenzando en §a{countdown}s"
+none: "None"
