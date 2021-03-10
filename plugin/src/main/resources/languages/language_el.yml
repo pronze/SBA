@@ -46,3 +46,4 @@ gamesinv_disabled: "§cGames inventory έχει απενεργοποιηθεί, 
 not_in_game: "§c Πρέπει να είσαι σε ένα παιχνίδι για να κάνεις αυτή την εντολή!"
 shout_wait: "§c You have to wait for {seconds} to use this command again!"
 countdown: "§fΞεκινώντας από §a{countdown}s"
+none: "None"
