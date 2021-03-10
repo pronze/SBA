@@ -46,3 +46,4 @@ gamesinv_disabled: "§cGamesin tavaraluettelo on poistettu käytöstä, ota yhte
 not_in_game: "§c Sinun täytyy olla pelissä tehdäksesi tämän komennon!"
 shout_wait: "§c Sinun täytyy odottaa {seconds} käyttääksesi tätä komentoa uudelleen!"
 countdown: "§fAloitetaan §a{countdown}s"
+none: "None"
