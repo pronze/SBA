@@ -1,18 +1,18 @@
 package pronze.hypixelify.commands;
 
-import cloud.commandframework.CommandTree;
-import cloud.commandframework.bukkit.BukkitCommandManager;
-import cloud.commandframework.bukkit.CloudBukkitCapabilities;
-import cloud.commandframework.execution.AsynchronousCommandExecutionCoordinator;
-import cloud.commandframework.execution.CommandExecutionCoordinator;
-import cloud.commandframework.minecraft.extras.MinecraftExceptionHandler;
-import cloud.commandframework.minecraft.extras.MinecraftHelp;
-import cloud.commandframework.paper.PaperCommandManager;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.screamingsandals.bedwars.lib.ext.cloud.CommandTree;
+import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
+import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.CloudBukkitCapabilities;
+import org.screamingsandals.bedwars.lib.ext.cloud.execution.AsynchronousCommandExecutionCoordinator;
+import org.screamingsandals.bedwars.lib.ext.cloud.execution.CommandExecutionCoordinator;
+import org.screamingsandals.bedwars.lib.ext.cloud.minecraft.extras.MinecraftExceptionHandler;
+import org.screamingsandals.bedwars.lib.ext.cloud.minecraft.extras.MinecraftHelp;
+import org.screamingsandals.bedwars.lib.ext.cloud.paper.PaperCommandManager;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.platform.bukkit.BukkitAudiences;
 
 import java.util.function.Function;
 
@@ -42,8 +42,8 @@ public class CommandManager {
         }
 
         this.bukkitAudiences = BukkitAudiences.create(plugin);
-               this.minecraftHelp = new MinecraftHelp<>(
-                 "/bwa help",
+        this.minecraftHelp = new MinecraftHelp<>(
+                "/bwa help",
                 this.bukkitAudiences::sender,
                 this.manager
         );
@@ -60,13 +60,7 @@ public class CommandManager {
                 .withNoPermissionHandler()
                 .withArgumentParsingHandler()
                 .withCommandExecutionHandler()
-                .withDecorator(
-                        component -> Component.text()
-                                .append(Component.text("[", NamedTextColor.DARK_GRAY))
-                                .append(Component.text("SBAHypixelify", NamedTextColor.RED))
-                                .append(Component.text("] ", NamedTextColor.DARK_GRAY))
-                                .append(component).build()
-                ).apply(manager, bukkitAudiences::sender);
+                .apply(manager, bukkitAudiences::sender);
 
         registerCommands();
     }

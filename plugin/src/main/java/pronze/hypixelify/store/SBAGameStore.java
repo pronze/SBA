@@ -1,4 +1,4 @@
-package pronze.hypixelify.inventories;
+package pronze.hypixelify.store;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 import static org.screamingsandals.bedwars.lib.lang.I.i18nc;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
-public class CustomShop extends AbstractStore {
+public class SBAGameStore extends AbstractStore {
 
     private final static List<String> upgradeProperties = Arrays.asList(
             "sharpness",
@@ -59,7 +59,7 @@ public class CustomShop extends AbstractStore {
             "dragon"
     );
 
-    public CustomShop() { super(); }
+    public SBAGameStore() { super(); }
 
     @Override
     public void onGeneratingItem(ItemRenderEvent event) {

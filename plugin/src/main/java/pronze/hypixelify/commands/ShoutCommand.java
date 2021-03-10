@@ -1,20 +1,13 @@
 package pronze.hypixelify.commands;
-import cloud.commandframework.arguments.standard.StringArrayArgument;
-import cloud.commandframework.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArrayArgument;
+import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import pronze.hypixelify.SBAHypixelify;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.bedwars.api.game.Game;
-
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static pronze.hypixelify.lib.lang.I.i18n;

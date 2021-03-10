@@ -35,7 +35,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
         gameTask = new GameTask(this);
         scoreboardManager = new GameScoreboardManagerImpl(this);
         game.getConnectedPlayers()
-                .forEach(player -> putPlayerData(player.getUniqueId(), new PlayerData(player.getName())));
+                .forEach(player -> putPlayerData(player.getUniqueId(), PlayerData.from(player)));
     }
 
     public void onGameStarted() {
@@ -50,8 +50,11 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var team = e.getTeam();
         team.getConnectedPlayers().forEach(player ->
-                TitleUtils.send(PlayerMapper.wrapPlayer(e.getPlayer()), i18n("bed-destroyed.title"),
-                i18n("bed-destroyed.sub-title"), 0, 40, 20));
+                SBAUtil.sendTitle(
+                        PlayerMapper.wrapPlayer(e.getPlayer()),
+                        i18n("bed-destroyed.title"),
+                        i18n("bed-destroyed.sub-title"), 0, 40, 20)
+        );
 
         final var destroyer = e.getPlayer();
         if (destroyer != null) {
@@ -66,7 +69,8 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
         gameTask.cancel();
         final var winner = e.getWinningTeam();
         if (winner != null) {
-            String firstKillerName = "null";
+            final var nullStr = i18n("none");
+            String firstKillerName = nullStr;
             int firstKillerScore = 0;
 
             for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
@@ -78,7 +82,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
                 }
             }
 
-            String secondKillerName = "null";
+            String secondKillerName = nullStr;
             int secondKillerScore = 0;
 
             for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
@@ -92,7 +96,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
                 }
             }
 
-            String thirdKillerName = "null";
+            String thirdKillerName = nullStr;
             int thirdKillerScore = 0;
             for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
@@ -109,7 +113,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
             final var WinTeamPlayers = new ArrayList<String>();
             winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
             winner.getConnectedPlayers().forEach(pl ->
-                    TitleUtils.send(PlayerMapper.wrapPlayer(pl), i18n("victory-title"),
+                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), i18n("victory-title"),
                             "", 0, 90, 0));
 
             for (var player : game.getConnectedPlayers()) {

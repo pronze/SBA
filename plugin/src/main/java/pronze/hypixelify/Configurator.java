@@ -278,8 +278,6 @@ public class Configurator {
 
         checkOrSetConfig(modify, "dragon.name-format", "%teamcolor%%team% Dragon");
         checkOrSetConfig(modify, "dragon.custom-name-enabled", true);
-        checkOrSetConfig(modify, "commands.player-only", "[SBAHypixelify] &cOnly players can use this command!");
-        checkOrSetConfig(modify, "commands.no-permissions", "[SBAHypixelify]&cYou do not have permissions to do this command!");
         checkOrSetConfig(modify, "experimental.reset-item-meta-on-purchase", false);
 
         BedwarsAPI.getInstance().getGameManager().getGameNames().forEach(gameName -> {

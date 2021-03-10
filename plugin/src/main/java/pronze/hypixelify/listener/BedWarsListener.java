@@ -13,6 +13,8 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
@@ -20,8 +22,6 @@ import pronze.hypixelify.game.ArenaImpl;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -128,7 +128,7 @@ public class BedWarsListener implements Listener {
                                                     message = seconds == 1 ? message
                                                             .replace("seconds", "second") : message;
                                                     player.sendMessage(message);
-                                                    TitleUtils.send(PlayerMapper.wrapPlayer(player), ShopUtil
+                                                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil
                                                             .translateColors("&c" + seconds), "", 0, 20, 0);
                                                 }
                                             }

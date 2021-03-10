@@ -2,6 +2,7 @@ package pronze.hypixelify.api.data;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -16,4 +17,8 @@ public class PlayerData {
     private int finalKills;
     private int bedDestroys;
     private List<ItemStack> inventory = new ArrayList<>();
+
+    public static PlayerData from(Player player) {
+        return new PlayerData(player.getName());
+    }
 }

@@ -15,10 +15,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
 
 import java.util.HashMap;
 import java.util.Map;

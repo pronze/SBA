@@ -1,10 +1,11 @@
 package pronze.hypixelify.commands;
 
-import cloud.commandframework.arguments.standard.StringArgument;
-import cloud.commandframework.bukkit.BukkitCommandManager;
+
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArgument;
+import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;

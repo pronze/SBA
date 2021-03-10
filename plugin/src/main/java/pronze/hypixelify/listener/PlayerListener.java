@@ -22,6 +22,8 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
@@ -30,8 +32,6 @@ import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -149,7 +149,7 @@ public class PlayerListener implements Listener {
 
                         //send custom title because we disabled Bedwars from showing any title
                         if (livingTime > 0) {
-                            TitleUtils.send(PlayerMapper.wrapPlayer(player), i18n("respawn-title"),
+                            SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), i18n("respawn-title"),
                                     i18n("respawn-subtitle")
                                             .replace("%time%", String.valueOf(livingTime)),
                                     0, 20, 0);
@@ -165,7 +165,7 @@ public class PlayerListener implements Listener {
                                 buffer--;
                             } else {
                                 player.sendMessage(i18n("respawned-message"));
-                                TitleUtils.send(PlayerMapper.wrapPlayer(player), i18n("respawned-title"), "",
+                                SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), i18n("respawned-title"), "",
                                         5, 40, 5);
                                 ShopUtil.giveItemToPlayer(itemArr, player,
                                         Main.getInstance().getGameManager().getGame(game.getName()).get().getTeamOfPlayer(gamePlayer.player).getColor());

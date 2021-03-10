@@ -11,6 +11,8 @@ import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.Configurator;
@@ -20,8 +22,6 @@ import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ScoreboardUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.text.SimpleDateFormat;
 import java.util.*;

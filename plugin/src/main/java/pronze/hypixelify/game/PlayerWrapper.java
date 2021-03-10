@@ -16,7 +16,7 @@ public class PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrappe
     private final String name;
     private final PlayerStatistic statistic;
     private int shout;
-    private boolean shouted = false;
+    private boolean shouted;
 
     public PlayerWrapper(Player player) {
         name = player.getDisplayName();

@@ -1,0 +1,10 @@
+name: "SBAHypixelify"
+main: "pronze.hypixelify.SBAHypixelify"
+version: "2.0.0-SNAPSHOT"
+api-version: 1.13
+load: POSTWORLD
+depend:
+  - 'BedWars'
+softdepend:
+  - 'ProtocolLib'
+  - 'PlaceholderAPI'

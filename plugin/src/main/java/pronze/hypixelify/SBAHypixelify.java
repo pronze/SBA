@@ -10,13 +10,14 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.ext.bstats.bukkit.Metrics;
+import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
 import pronze.hypixelify.game.ArenaManagerImpl;
-import pronze.hypixelify.inventories.CustomShop;
+import pronze.hypixelify.store.SBAGameStore;
 import pronze.hypixelify.inventories.GamesInventory;
 import pronze.hypixelify.lib.lang.I18n;
 import pronze.hypixelify.listener.*;
@@ -26,7 +27,6 @@ import pronze.hypixelify.scoreboard.MainLobbyScoreboardImpl;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 
@@ -123,7 +123,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         playerWrapperService = new PlayerWrapperService();
         debug = configurator.config.getBoolean("debug.enabled", false);
 
-        CustomShop shop = new CustomShop();
+        SBAGameStore shop = new SBAGameStore();
 
         gamesInventory = new GamesInventory();
         gamesInventory.loadInventory();

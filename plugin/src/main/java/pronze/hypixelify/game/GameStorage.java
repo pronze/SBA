@@ -12,7 +12,7 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
     private final Map<String, TeamData> teamDataMap = new HashMap<>();
 
     public GameStorage(Game game) {
-        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(), new TeamData(team.getTargetBlock())));
+        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(), TeamData.from(team)));
     }
 
     public Location getTargetBlockLocation(RunningTeam rt) {
@@ -32,72 +32,70 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
     public void setEfficiency(RunningTeam rt, Integer level) {teamDataMap.get(rt.getName()).setEfficiency(level);}
 
     public void setTrap(RunningTeam rt, boolean b) {
+        if (!teamDataMap.containsKey(rt.getName())) return;
         final var data = teamDataMap.get(rt.getName());
         data.setPurchasedTrap(b);
     }
 
     public void setPool(RunningTeam rt, boolean b) {
+        if (!teamDataMap.containsKey(rt.getName())) return;
         final var data = teamDataMap.get(rt.getName());
-        data.setPurchasedPool(b);
+        if (data != null) data.setPurchasedPool(b);
     }
 
     public void setDragon(RunningTeam rt, boolean b) {
+        if (!teamDataMap.containsKey(rt.getName())) return;
         final var data = teamDataMap.get(rt.getName());
         data.setPurchasedDragonUpgrade(b);
     }
 
     public void setSharpness(String teamName, Integer level) {
+        if (!teamDataMap.containsKey(teamName)) return;
         final var data = teamDataMap.get(teamName);
         data.setSharpness(level);
     }
 
     public void setProtection(String teamName, Integer level) {
+        if (!teamDataMap.containsKey(teamName)) return;
         final var data = teamDataMap.get(teamName);
         data.setProtection(level);
     }
 
     public boolean areDragonsEnabled() {
-        for (var data : teamDataMap.values()) {
-            if (data == null) continue;
-            if (data.isPurchasedDragonUpgrade()) {
-                return true;
-            }
-        }
-
-        return false;
+        return teamDataMap
+                .values()
+                .stream()
+                .anyMatch(TeamData::isPurchasedDragonUpgrade);
     }
 
     public boolean areTrapsEnabled() {
-        for (TeamData data : teamDataMap.values()) {
-            if (data == null) continue;
-            if (data.isPurchasedTrap()) {
-                return true;
-            }
-        }
-        return false;
+        return teamDataMap
+                .values()
+                .stream()
+                .anyMatch(TeamData::isPurchasedTrap);
     }
 
     public boolean arePoolEnabled() {
-        for (var data : teamDataMap.values()) {
-            if (data == null) continue;
-            if (data.isPurchasedPool()) {
-                return true;
-            }
-        }
-        return false;
+        return teamDataMap
+                .values()
+                .stream()
+                .anyMatch(TeamData::isPurchasedPool);
     }
 
     public boolean isTrapEnabled(RunningTeam team) {
+        if (!teamDataMap.containsKey(team.getName())) return false;
         final var data = teamDataMap.get(team.getName());
         return data.isPurchasedTrap();
     }
 
     public boolean isPoolEnabled(RunningTeam team) {
+        if (!teamDataMap.containsKey(team.getName())) return false;
         final var data = teamDataMap.get(team.getName());
         return data.isPurchasedPool();
     }
 
     public boolean isDragonEnabled(RunningTeam team) {
+        if (!teamDataMap.containsKey(team.getName())) return false;
         final var data = teamDataMap.get(team.getName());
         return data.isPurchasedDragonUpgrade();
     }

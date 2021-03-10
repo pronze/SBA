@@ -1,6 +1,7 @@
 package pronze.hypixelify.utils;
 
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -9,9 +10,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.config.MainConfig;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.title.Title;
+import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
+import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -112,5 +118,19 @@ public class SBAUtil {
         final var pluginManager = Bukkit.getServer().getPluginManager();
         pluginManager.disablePlugin(plugin);
         pluginManager.enablePlugin(plugin);
+    }
+
+    public static void sendTitle(PlayerWrapper player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        var titleComponent = org.screamingsandals.bedwars.lib.ext.kyori.adventure.title.Title.title(
+                AdventureHelper.toComponent(title),
+                AdventureHelper.toComponent(subtitle),
+                Title.Times.of(
+                        Duration.ofMillis(fadeIn * 50L),
+                        Duration.ofMillis(stay * 50L),
+                        Duration.ofMillis(fadeOut * 50L)
+                )
+        );
+
+        player.showTitle(titleComponent);
     }
 }
