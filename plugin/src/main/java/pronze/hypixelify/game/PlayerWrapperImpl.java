@@ -15,6 +15,7 @@ import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.PlayerWrapper implements PlayerWrapper {
@@ -23,8 +24,8 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     private final PlayerStatistic statistic;
     private int shout;
     private boolean shouted;
-    private boolean isInParty;
-    private boolean isInvitedToParty;
+    private final AtomicBoolean isInParty = new AtomicBoolean(false);
+    private final AtomicBoolean isInvitedToParty = new AtomicBoolean(false);
 
     public PlayerWrapperImpl(Player player) {
         super(player.getName(), player.getUniqueId());
@@ -47,26 +48,28 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
 
     @Override
     public boolean isInParty() {
-        return isInParty;
+        return isInParty.get();
     }
 
     @Override
     public void setInParty(boolean isInParty) {
-        this.isInParty = isInParty;
+        this.isInParty.set(isInParty);
     }
 
     @Override
     public boolean isInvitedToAParty() {
-        return isInvitedToParty;
+        return isInvitedToParty.get();
     }
 
     @Override
     public void setInvitedToAParty(boolean isInvited) {
-        isInvitedToParty = isInvited;
+        isInvitedToParty.set(isInvited);
     }
 
     @Override
-    public double getKD() { return statistic.getKD(); }
+    public double getKD() {
+        return statistic.getKD();
+    }
 
     @Override
     public boolean canShout() {

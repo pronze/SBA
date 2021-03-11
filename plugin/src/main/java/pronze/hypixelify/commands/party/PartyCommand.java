@@ -9,13 +9,18 @@ public class PartyCommand {
 
     public PartyCommand(BukkitCommandManager<CommandSender> manager) {
         this.manager = manager;
-        build();
     }
 
     public void build() {
         if (!SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true)) return;
         new PartyInviteCommand(manager);
         new PartyAcceptCommand(manager);
-
+        new PartyDeclineCommand(manager);
+        new PartyDebugCommand(manager);
+        new PartyDisbandCommand(manager);
+        new PartyLeaveCommand(manager);
+        new PartyPromoteCommand(manager);
+        new PartyKickCommand(manager);
+        new PartyWarpCommand(manager);
     }
 }

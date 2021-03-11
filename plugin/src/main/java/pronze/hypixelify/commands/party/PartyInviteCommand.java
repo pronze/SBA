@@ -24,13 +24,13 @@ public class PartyInviteCommand {
 
         manager.command(builder.literal("invite")
                 .senderType(Player.class)
-                .argument(PlayerArgument.ofType(Player.class, "args"))
+                .argument(PlayerArgument.of("party-participant"))
                 .handler(context -> manager
                         .taskRecipe()
                         .begin(context)
                         .asynchronous(ctx -> {
                             final var invitedPlayer = PlayerMapper
-                                    .wrapPlayer((Player) ctx.get("args"))
+                                    .wrapPlayer((Player) ctx.get("party-participant"))
                                     .as(PlayerWrapperImpl.class);
 
                             final var player = PlayerMapper
@@ -64,6 +64,23 @@ public class PartyInviteCommand {
                                     .getPartyManager()
                                     .getOrCreate(player)
                                     .ifPresent(party -> {
+                                        if (party.getInvitedPlayers().size() > 5) {
+                                            SBAHypixelify
+                                                    .getConfigurator()
+                                                    .getStringList("party.message.max-invite-size")
+                                                    .forEach(player::sendMessage);
+                                            return;
+                                        }
+
+                                        if ((party.getMembers().size() + party.getInvitedPlayers().size())
+                                                > SBAHypixelify.getConfigurator().config.getInt("party.size")) {
+                                            SBAHypixelify
+                                                    .getConfigurator()
+                                                    .getStringList("party.message.max-size")
+                                                    .forEach(player::sendMessage);
+                                            return;
+                                        }
+
                                         final var inviteEvent = new SBAPlayerPartyInviteEvent(player, invitedPlayer);
                                         SBAHypixelify
                                                 .getInstance()

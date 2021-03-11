@@ -1,21 +1,25 @@
 package pronze.hypixelify.api.events;
 
-import lombok.Generated;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
-@RequiredArgsConstructor
 @Getter
 public class SBAPlayerPartyInviteEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
     private final PlayerWrapper player;
     private final PlayerWrapper invited;
     private boolean cancelled;
+
+    public SBAPlayerPartyInviteEvent(PlayerWrapper player,
+                                     PlayerWrapper invited) {
+        super(true);
+        this.player = player;
+        this.invited = invited;
+    }
 
     @Override
     public @NotNull HandlerList getHandlers() {

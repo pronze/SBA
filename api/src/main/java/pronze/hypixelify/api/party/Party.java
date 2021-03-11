@@ -89,4 +89,9 @@ public interface Party {
      */
     Collection<InviteData> getInviteData();
 
+    /**
+     *
+     * @return string containing leader name and party UUID
+     */
+    String debugInfo();
 }

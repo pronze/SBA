@@ -9,19 +9,13 @@ import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
+@RequiredArgsConstructor
 @Getter
-public class SBAPlayerPartyInviteAcceptEvent extends Event implements Cancellable {
+public class SBAPlayerPartyInviteDeclineEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
     private final PlayerWrapper player;
     private final Party party;
     private boolean cancelled;
-
-    public SBAPlayerPartyInviteAcceptEvent(PlayerWrapper player,
-                                           Party party) {
-        super(true);
-        this.player = player;
-        this.party = party;
-    }
 
     @Override
     public @NotNull HandlerList getHandlers() {
@@ -29,7 +23,7 @@ public class SBAPlayerPartyInviteAcceptEvent extends Event implements Cancellabl
     }
 
     public static HandlerList getHandlerList() {
-        return SBAPlayerPartyInviteAcceptEvent.handlerList;
+        return SBAPlayerPartyInviteDeclineEvent.handlerList;
     }
 
     @Override

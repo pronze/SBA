@@ -87,6 +87,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
         protocolLib = plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib");
+        Logger.init(false);
 
         if (getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
@@ -125,7 +126,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         I18n.load(this, configurator.config.getString("locale"));
 
         playerWrapperService = new PlayerWrapperService();
-
         partyManager = new PartyManagerImpl();
 
         debug = configurator.config.getBoolean("debug.enabled", false);

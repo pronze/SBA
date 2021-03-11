@@ -169,7 +169,7 @@ public class Configurator {
         }
 
         checkOrSetConfig(modify, "overstats.message", Arrays.asList(
-                "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+                "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
                 , "                             &e&lBEDWARS"
                 , ""
                 , "                             %color%%win_team%"
@@ -179,7 +179,7 @@ public class Configurator {
                 , "    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"
                 , "    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"
                 , ""
-                , "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+                , "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         ));
         checkOrSetConfig(modify, "scoreboard.you", "&7YOU");
         checkOrSetConfig(modify, "scoreboard.lines.default", Arrays.asList(
@@ -296,6 +296,12 @@ public class Configurator {
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
                 "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.max-size", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cParty has reached max size!",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.no-other-commands", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou cannot do other commands now",
@@ -341,6 +347,11 @@ public class Configurator {
                 "&eWarping players..",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.promoted-leader", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&e{player} has been promoted to party leader!",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.invite", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "{player}&e has invited you to join their party!",
@@ -367,6 +378,11 @@ public class Configurator {
                 "{player} &cleft the party",
                 "&6-----------------------------------------------------"));
 
+        checkOrSetConfig(modify, "party.message.no-players-warp", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cThere are no players to warp!",
+                "&6-----------------------------------------------------"));
+
         checkOrSetConfig(modify, "party.message.declined", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "{player} &chas declined this party invite",
@@ -389,10 +405,6 @@ public class Configurator {
                 "&6-----------------------------------------------------",
                 "&cCould not find Player!",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.cannot-blank-yourself", Arrays.asList(
-                "&6-----------------------------------------------------",
-                "&cYou can't {blank} yourself.",
-                "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "party.message.cannot-invite-yourself", Arrays.asList(
                 "&6-----------------------------------------------------",
@@ -402,6 +414,11 @@ public class Configurator {
         checkOrSetConfig(modify, "party.message.not-invited", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou are not invited to any party",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.max-invite-size", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&cYou cannot invite more than 5 players at a time.",
                 "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "party.message.got-kicked", Arrays.asList(

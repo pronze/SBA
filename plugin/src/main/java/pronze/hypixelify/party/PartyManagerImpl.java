@@ -33,7 +33,6 @@ public class PartyManagerImpl implements PartyManager {
                 .getPluginManager()
                 .callEvent(partyCreateEvent);
         if (partyCreateEvent.isCancelled()) return Optional.empty();
-
         partyMap.put(party.getUUID(), party);
         return Optional.of(party);
     }
@@ -90,6 +89,7 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     private void disband(@NotNull Party party) {
+        Logger.trace("Disbandoning party: {}", party.debugInfo());
         final var disbandMessage = SBAHypixelify
                 .getConfigurator()
                 .getStringList("party.message.disband");

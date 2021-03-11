@@ -1,7 +1,4 @@
 package pronze.hypixelify.commands;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.lib.ext.cloud.CommandTree;
@@ -13,6 +10,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.minecraft.extras.MinecraftExce
 import org.screamingsandals.bedwars.lib.ext.cloud.minecraft.extras.MinecraftHelp;
 import org.screamingsandals.bedwars.lib.ext.cloud.paper.PaperCommandManager;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.platform.bukkit.BukkitAudiences;
+import pronze.hypixelify.commands.party.PartyCommand;
 
 import java.util.function.Function;
 
@@ -68,5 +66,6 @@ public class CommandManager {
     private void registerCommands() {
         new BWACommand(manager).build();
         new ShoutCommand(manager).build();
+        new PartyCommand(manager).build();
     }
 }
