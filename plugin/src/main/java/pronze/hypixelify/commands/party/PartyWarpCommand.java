@@ -26,7 +26,7 @@ public class PartyWarpCommand {
                 .handler(context -> manager
                         .taskRecipe()
                         .begin(context)
-                        .asynchronous(ctx -> {
+                        .synchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player) ctx.getSender())
                                     .as(PlayerWrapperImpl.class);
@@ -65,10 +65,13 @@ public class PartyWarpCommand {
 
                                         if (Main.isPlayerInGame(player.getInstance())) {
                                             final var game = Main.getInstance().getGameOfPlayer(player.getInstance());
-                                            party.getMembers().forEach(member -> {
-                                                final var memberGame = Main.getInstance().getGameOfPlayer(player.getInstance());
-                                                if (!game.equals(memberGame)) {
-                                                    memberGame.leaveFromGame(member.getInstance());
+                                            party.getMembers()
+                                                    .stream().filter(member -> !player.equals(member))
+                                                    .forEach(member -> {
+                                                final var memberGame = Main.getInstance().isPlayerPlayingAnyGame(member.getInstance()) ?
+                                                        Main.getInstance().getGameOfPlayer(member.getInstance()) : null;
+                                                if (game != memberGame) {
+                                                    if (memberGame != null) memberGame.leaveFromGame(member.getInstance());
                                                     game.joinToGame(member.getInstance());
                                                     SBAHypixelify
                                                             .getConfigurator()
@@ -78,7 +81,9 @@ public class PartyWarpCommand {
                                             });
                                         } else {
                                             final var leaderLocation = player.getInstance().getLocation();
-                                            party.getMembers().stream().map(PlayerWrapper::getInstance).forEach(member -> {
+                                            party.getMembers().stream()
+                                                    .filter(member -> !member.equals(player))
+                                                    .map(PlayerWrapper::getInstance).forEach(member -> {
                                                 if (Main.getInstance().isPlayerPlayingAnyGame(member)) {
                                                     Main.getInstance().getGameOfPlayer(member).leaveFromGame(member);
                                                 }

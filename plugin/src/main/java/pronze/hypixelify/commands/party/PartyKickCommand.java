@@ -6,6 +6,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.events.SBAPlayerPartyKickEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.game.PlayerWrapperImpl;
 
@@ -75,6 +76,16 @@ public class PartyKickCommand {
                                                     .forEach(player::sendMessage);
                                             return;
                                         }
+
+                                        final var kickEvent = new SBAPlayerPartyKickEvent(player, party);
+                                        SBAHypixelify
+                                                .getInstance()
+                                                .getServer()
+                                                .getPluginManager()
+                                                .callEvent(kickEvent);
+
+                                        if (kickEvent.isCancelled()) return;
+
                                         SBAHypixelify
                                                 .getConfigurator()
                                                 .getStringList("party.message.kicked")

@@ -28,6 +28,7 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.Permissions;
+import pronze.hypixelify.game.PlayerWrapperImpl;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
@@ -255,8 +256,37 @@ public class PlayerListener implements Listener {
                 .getInstance()
                 .fromCache(uuid)
                 .ifPresent(Scoreboard::destroy);
-        SBAHypixelify.getWrapperService().unregister(player);
         ScoreboardUtil.removePlayer(player);
+        final var wrappedPlayer =  PlayerMapper.wrapPlayer(player)
+                .as(PlayerWrapperImpl.class);
+        SBAHypixelify
+                .getPartyManager()
+                .getPartyOf(wrappedPlayer)
+                .ifPresent(party -> {
+                    party.removePlayer(wrappedPlayer);
+                    if (party.getMembers().size() == 1) {
+                        SBAHypixelify
+                                .getPartyManager()
+                                .disband(party.getUUID());
+                        return;
+                    }
+                    if (party.getPartyLeader().equals(wrappedPlayer)) {
+                        party
+                                .getMembers()
+                                .stream()
+                                .findAny()
+                                .ifPresentOrElse(member -> {
+                                    party.setPartyLeader(member);
+                                    SBAHypixelify
+                                            .getConfigurator()
+                                            .getStringList("party.message.promoted-leader")
+                                            .stream().map(str -> str.replace("{player}", member.getName()))
+                                            .forEach(str -> party.getMembers().forEach(m -> m.getInstance().sendMessage(str)));
+                                }, () -> SBAHypixelify.getPartyManager()
+                                        .disband(party.getUUID()));
+                    }
+                });
+        SBAHypixelify.getWrapperService().unregister(player);
     }
 
 
