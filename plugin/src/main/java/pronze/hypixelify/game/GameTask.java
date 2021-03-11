@@ -15,9 +15,8 @@ import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.events.TeamTrapTriggeredEvent;
+import pronze.hypixelify.api.events.SBATeamTrapTriggeredEvent;
 import pronze.hypixelify.utils.SBAUtil;
 
 import java.text.SimpleDateFormat;
@@ -31,7 +30,6 @@ import static pronze.hypixelify.lib.lang.I.i18n;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class GameTask extends BukkitRunnable {
-
     private final Map<Integer, String> Tiers = new HashMap<>();
     private final Map<Integer, Integer> tier_timer = new HashMap<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
@@ -116,7 +114,7 @@ public class GameTask extends BukkitRunnable {
 
                         if (storage.getTargetBlockLocation(team)
                                 .distanceSquared(player.getLocation()) <= arena.getRadius()) {
-                            final var triggeredEvent = new TeamTrapTriggeredEvent(player, team, arena);
+                            final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
                             SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
                             if (!triggeredEvent.isCancelled()) {

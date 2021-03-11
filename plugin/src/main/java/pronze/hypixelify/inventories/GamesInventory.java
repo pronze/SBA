@@ -2,7 +2,6 @@ package pronze.hypixelify.inventories;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -17,11 +16,10 @@ import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Property;
 import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.events.GamesInventoryOpenEvent;
+import pronze.hypixelify.api.events.SBAGamesInventoryOpenEvent;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
 
-import java.io.File;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,7 +73,7 @@ public class GamesInventory implements Listener {
     }
 
     public void openForPlayer(Player player, int mode) {
-        final var event = new GamesInventoryOpenEvent(player, mode);
+        final var event = new SBAGamesInventoryOpenEvent(player, mode);
         Bukkit.getServer().getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return;

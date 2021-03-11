@@ -1,10 +1,9 @@
 package pronze.hypixelify.placeholderapi;
 
-import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.PlayerWrapper;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import pronze.hypixelify.SBAHypixelify;
 
 public class SBAExpansion extends PlaceholderExpansion {
     @Override
@@ -30,11 +29,15 @@ public class SBAExpansion extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("player_")) {
-            final PlayerWrapper database = SBAHypixelify.getWrapperService().getWrapper(player);
-            switch (identifier.substring(10).toLowerCase()){
-                case "level":
-                    return Integer.toString(database.getLevel());
+            final var wrapperOptional = SBAHypixelify.getWrapperService().get(player);
+            if (wrapperOptional.isPresent()) {
+                final var database = wrapperOptional.get();
+                switch (identifier.substring(10).toLowerCase()) {
+                    case "level":
+                        return Integer.toString(database.getLevel());
+                }
             }
+
         }
 
         return super.onPlaceholderRequest(player, identifier);

@@ -35,9 +35,8 @@ import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import org.screamingsandals.bedwars.utils.Sounds;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAStoreOpenEvent;
-import pronze.hypixelify.api.events.TeamUpgradePurchaseEvent;
+import pronze.hypixelify.api.events.SBATeamUpgradePurchaseEvent;
 import pronze.hypixelify.listener.TeamUpgradeListener;
-import pronze.hypixelify.store.AbstractStore;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
 
@@ -350,7 +349,7 @@ public class SBAGameStore extends AbstractStore {
                         final var itemOptional = upgradeItem(event, propertyName);
                         newItem = itemOptional.orElse(newItem);
 
-                        final var teamUpgradeEvent = new TeamUpgradePurchaseEvent(
+                        final var teamUpgradeEvent = new SBATeamUpgradePurchaseEvent(
                                 player,
                                 newItem.as(ItemStack.class),
                                 propertyName,

@@ -45,7 +45,7 @@ public class ShoutCommand {
                                 return;
                             }
 
-                            final var playerWrapper = SBAHypixelify.getWrapperService().getWrapper(player);
+                            final var playerWrapper = SBAHypixelify.getWrapperService().get(player).get();
                             final var cancelShout = SBAHypixelify.getConfigurator()
                                     .config.getInt("shout.time-out", 60) == 0;
 
