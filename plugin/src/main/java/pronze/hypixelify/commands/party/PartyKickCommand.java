@@ -81,6 +81,11 @@ public class PartyKickCommand {
                                                 .stream().map(str -> str.replace("{player}", args.getName()))
                                                 .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
                                         party.removePlayer(args);
+                                        if (party.getMembers().size() == 1) {
+                                            SBAHypixelify
+                                                    .getPartyManager()
+                                                    .disband(party.getUUID());
+                                        }
                                     },() -> SBAHypixelify
                                             .getConfigurator()
                                             .getStringList("party.message.error")
