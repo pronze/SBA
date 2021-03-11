@@ -32,7 +32,7 @@ public interface PartyManager {
 
     /**
      *
-     * @param player
+     * @param leader
      * @return
      */
     Optional<Party> getOrCreate(@NotNull PlayerWrapper leader);
@@ -43,4 +43,23 @@ public interface PartyManager {
      * @return
      */
     Optional<Party> getPartyOf(@NotNull PlayerWrapper player);
+
+    /**
+     *
+     * @param player
+     * @return
+     */
+    Optional<Party> getInvitedPartyOf(@NotNull PlayerWrapper player);
+
+    /**
+     *
+     * @param partyUUID
+     */
+    void disband(@NotNull UUID partyUUID);
+
+    /**
+     *
+     * @param leader
+     */
+    void disband(@NotNull PlayerWrapper leader);
 }

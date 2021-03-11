@@ -291,6 +291,7 @@ public class Configurator {
         checkOrSetConfig(modify, "party.chat.format", "&aParty >> %name% &f : &o%message%");
         checkOrSetConfig(modify, "party.leader-autojoin-autoleave", true);
         checkOrSetConfig(modify, "party.size", 4);
+        checkOrSetConfig(modify, "party.invite-expiration-time", 60);
         checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
@@ -416,6 +417,11 @@ public class Configurator {
         checkOrSetConfig(modify, "party.message.declined-user", Arrays.asList(
                 "&6-----------------------------------------------------",
                 "&cYou declined the invite!",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.error", Arrays.asList(
+                "&6-----------------------------------------------------",
+                "&c&lAN ERROR OCCURRED!",
                 "&6-----------------------------------------------------"));
 
         checkOrSetConfig(modify, "message.not-in-game", Arrays.asList(

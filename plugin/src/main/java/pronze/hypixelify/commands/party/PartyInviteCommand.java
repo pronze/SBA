@@ -7,9 +7,9 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyInviteEvent;
-import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.hypixelify.party.PartyImpl;
+
+import java.util.stream.Collectors;
 
 public class PartyInviteCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -28,7 +28,7 @@ public class PartyInviteCommand {
                 .handler(context -> manager
                         .taskRecipe()
                         .begin(context)
-                        .synchronous(ctx -> {
+                        .asynchronous(ctx -> {
                             final var invitedPlayer = PlayerMapper
                                     .wrapPlayer((Player) ctx.get("args"))
                                     .as(PlayerWrapperImpl.class);
@@ -37,10 +37,17 @@ public class PartyInviteCommand {
                                     .wrapPlayer((Player) ctx.getSender())
                                     .as(PlayerWrapperImpl.class);
 
+                            if (invitedPlayer.equals(player)) {
+                                SBAHypixelify
+                                        .getConfigurator()
+                                        .getStringList("party.message.cannot-invite-yourself")
+                                        .forEach(player::sendMessage);
+                                return;
+                            }
                             if (invitedPlayer.isInvitedToAParty()) {
                                 SBAHypixelify
                                         .getConfigurator()
-                                        .getStringList("party.message.cannotinvite")
+                                        .getStringList("party.message.alreadyInvited")
                                         .forEach(player::sendMessage);
                                 return;
                             }
@@ -65,7 +72,23 @@ public class PartyInviteCommand {
                                                 .callEvent(inviteEvent);
                                         if (inviteEvent.isCancelled()) return;
 
-                                        party.invitePlayer(invitedPlayer);
+                                        party.invitePlayer(invitedPlayer, player);
+
+                                        SBAHypixelify
+                                                .getConfigurator()
+                                                .getStringList("party.message.invited")
+                                                .stream()
+                                                .map(str -> str.replace("{player}", invitedPlayer.getName()))
+                                                .collect(Collectors.toList())
+                                                .forEach(player::sendMessage);
+
+                                        SBAHypixelify
+                                                .getConfigurator()
+                                                .getStringList("party.message.invite")
+                                                .stream()
+                                                .map(str -> str.replace("{player}", player.getName()))
+                                                .collect(Collectors.toList())
+                                                .forEach(invitedPlayer::sendMessage);
                                     });
                         }).execute()));
     }

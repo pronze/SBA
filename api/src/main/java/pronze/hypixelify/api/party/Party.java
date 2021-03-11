@@ -2,8 +2,10 @@ package pronze.hypixelify.api.party;
 
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
+import pronze.hypixelify.api.data.InviteData;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,17 +48,45 @@ public interface Party {
     PlayerWrapper getPartyLeader();
 
     /**
+     *
+     * @param player the player instance to be made the leader of this party.
+     */
+    void setPartyLeader(@NotNull PlayerWrapper player);
+
+    /**
      * @return the unique id associated with this party object.
      */
     UUID getUUID();
 
     /**
-     * @param invitee the player instance to be invited to this party.
+     * @param invited the player instance to be invited to this party.
+     * @param player the player who invited.
      */
-    void invitePlayer(@NotNull PlayerWrapper invitee);
+    void invitePlayer(@NotNull PlayerWrapper invited,
+                      @NotNull PlayerWrapper player);
+
+    /**
+     *
+     * @param player the player instance to check
+     * @return true if this player has been invited to the party, false otherwise.
+     */
+    boolean isInvited(@NotNull PlayerWrapper player);
+
+    /**
+     *
+     * @return true if party is about to be disbanded, false otherwise.
+     */
+    boolean shouldDisband();
 
     /**
      * @param invitee the player instance to cancel the invite.
      */
     void removeInvitedPlayer(@NotNull PlayerWrapper invitee);
+
+    /**
+     *
+     * @return {@link InviteData} of all players invited to this party.
+     */
+    Collection<InviteData> getInviteData();
+
 }

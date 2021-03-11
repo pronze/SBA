@@ -15,5 +15,7 @@ public class PartyCommand {
     public void build() {
         if (!SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true)) return;
         new PartyInviteCommand(manager);
+        new PartyAcceptCommand(manager);
+
     }
 }
