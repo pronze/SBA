@@ -93,6 +93,6 @@ public class PartyWarpCommand {
                                             .getConfigurator()
                                             .getStringList("party.message.error")
                                             .forEach(player::sendMessage));
-                        })));
+                        }).execute()));
     }
 }
