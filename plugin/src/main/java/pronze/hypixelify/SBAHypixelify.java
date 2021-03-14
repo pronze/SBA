@@ -14,6 +14,7 @@ import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.manager.ArenaManager;
+import pronze.hypixelify.api.store.GameStore;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
 import pronze.hypixelify.game.ArenaManagerImpl;
@@ -40,6 +41,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private Configurator configurator;
     private GamesInventory gamesInventory;
     private PartyManagerImpl partyManager;
+    private GameStore SBAStore;
     private boolean debug = false;
     private boolean protocolLib;
     private boolean isSnapshot;
@@ -83,6 +85,9 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public void onEnable() {
+        Arrays.stream(org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage.NMS.PacketPlayOutEntityEquipment.getConstructors()).forEach(constructor -> {
+            Bukkit.getLogger().info(constructor.toString());
+        });
         plugin = this;
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
@@ -130,7 +135,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
         debug = configurator.config.getBoolean("debug.enabled", false);
 
-        SBAGameStore shop = new SBAGameStore();
+        SBAStore = new SBAGameStore();
 
         gamesInventory = new GamesInventory();
         gamesInventory.loadInventory();
@@ -146,10 +151,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             registerListener(new LobbyScoreboardManagerImpl());
 
-        registerListener(shop);
-
         final var pluginManager = Bukkit.getServer().getPluginManager();
-
         try {
             if (pluginManager.isPluginEnabled("PlaceholderAPI")) {
                 new SBAExpansion().register();
@@ -196,9 +198,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     /*
-    ======================
      * API implementations
-     =====================
      */
 
     @SuppressWarnings("unchecked")
@@ -222,8 +222,13 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     @Override
+    public GameStore getGameStore() {
+        return SBAStore;
+    }
+
+    @Override
     public String getVersion() {
-        return plugin.version;
+        return version;
     }
 
     @Override

@@ -8,7 +8,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.*;
+import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
+import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
+import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.upgrades.Upgrade;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
@@ -42,7 +45,10 @@ import pronze.hypixelify.utils.ShopUtil;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.screamingsandals.bedwars.lib.lang.I.i18nc;
@@ -58,7 +64,9 @@ public class SBAGameStore extends AbstractStore {
             "dragon"
     );
 
-    public SBAGameStore() { super(); }
+    public SBAGameStore() {
+        super();
+    }
 
     @Override
     public void onGeneratingItem(ItemRenderEvent event) {
@@ -100,41 +108,16 @@ public class SBAGameStore extends AbstractStore {
         Item finalItem = item;
         itemInfo.getProperties().stream()
                 .filter(Property::hasName).forEach(property -> {
-                var converted = ConfigurateUtils.raw(property.getPropertyData());
-                if (!(converted instanceof Map)) {
-                    converted = DumpCommand.nullValuesAllowingMap("value", converted);
-                }
-                //noinspection unchecked
-                var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
-                        player, finalItem.as(ItemStack.class), property.getPropertyName(), (Map<String, Object>) converted);
-                SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(applyEvent);
-                event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(finalItem));
+            var converted = ConfigurateUtils.raw(property.getPropertyData());
+            if (!(converted instanceof Map)) {
+                converted = DumpCommand.nullValuesAllowingMap("value", converted);
+            }
+            //noinspection unchecked
+            var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
+                    player, finalItem.as(ItemStack.class), property.getPropertyName(), (Map<String, Object>) converted);
+            SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(applyEvent);
+            event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(finalItem));
         });
-    }
-
-    public Item setLore(Item item,
-                        PlayerItemInfo itemInfo,
-                        String price,
-                        ItemSpawnerType type) {
-        var enabled = itemInfo.getFirstPropertyByName("generateLore")
-                .map(property -> property.getPropertyData().getBoolean())
-                .orElseGet(() -> MainConfig.getInstance().node("lore", "generate-automatically").getBoolean(true));
-
-        if (enabled) {
-            var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
-                    .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
-                    .orElseGet(() -> MainConfig.getInstance().node("lore", "text").childrenList().stream().map(ConfigurationNode::getString))
-                    .map(s -> s
-                            .replaceAll("%price%", price)
-                            .replaceAll("%resource%", type.getItemName())
-                            .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
-                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
-                    .map(AdventureHelper::toComponent)
-                    .collect(Collectors.toList());
-
-            item.getLore().addAll(loreText);
-        }
-        return item;
     }
 
     @Override
@@ -181,35 +164,6 @@ public class SBAGameStore extends AbstractStore {
         }
     }
 
-    @EventHandler
-    public void onApplyPropertyToBoughtItem(BedwarsApplyPropertyToItem event) {
-        if (event.getPropertyName().equalsIgnoreCase("applycolorbyteam")
-                || event.getPropertyName().equalsIgnoreCase("transform::applycolorbyteam")) {
-            Player player = event.getPlayer();
-            CurrentTeam team = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
-
-            if (MainConfig.getInstance().node("automatic-coloring-in-shop").getBoolean()) {
-                event.setStack(Main.applyColor(team.teamInfo.color, event.getStack()));
-            }
-        }
-    }
-
-    @EventHandler
-    public void onShopOpen(BedwarsOpenShopEvent event) {
-        if (SBAHypixelify.getConfigurator().config.getBoolean("store.replace-store-with-hypixelstore", true)) {
-            event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_THIRD_PARTY_SHOP);
-            final var player = event.getPlayer();
-            final var store = event.getStore();
-            final var shopOpenEvent = new SBAStoreOpenEvent(player, store);
-            SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(shopOpenEvent);
-            if (shopOpenEvent.isCancelled()) {
-                return;
-            }
-            show(event.getPlayer(), (GameStore) event.getStore());
-        }
-
-    }
-
     private Optional<Item> upgradeItem(OnTradeEvent event, String propertyName) {
         final var player = event.getPlayer().as(Player.class);
         final var stack = event.getStack().as(ItemStack.class);
@@ -239,8 +193,8 @@ public class SBAGameStore extends AbstractStore {
                 stack.removeEnchantment(enchant);
                 stack.setLore(
                         SBAHypixelify
-                        .getConfigurator()
-                        .getStringList("message.maximum-enchant-lore")
+                                .getConfigurator()
+                                .getStringList("message.maximum-enchant-lore")
                 );
                 stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             } else {
@@ -514,5 +468,59 @@ public class SBAGameStore extends AbstractStore {
             }
             return "";
         });
+    }
+
+
+    @EventHandler
+    public void onApplyPropertyToBoughtItem(BedwarsApplyPropertyToItem event) {
+        if (event.getPropertyName().equalsIgnoreCase("applycolorbyteam")
+                || event.getPropertyName().equalsIgnoreCase("transform::applycolorbyteam")) {
+            Player player = event.getPlayer();
+            CurrentTeam team = (CurrentTeam) event.getGame().getTeamOfPlayer(player);
+
+            if (MainConfig.getInstance().node("automatic-coloring-in-shop").getBoolean()) {
+                event.setStack(Main.applyColor(team.teamInfo.color, event.getStack()));
+            }
+        }
+    }
+
+    @EventHandler
+    public void onShopOpen(BedwarsOpenShopEvent event) {
+        if (SBAHypixelify.getConfigurator().config.getBoolean("store.replace-store-with-hypixelstore", true)) {
+            event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_THIRD_PARTY_SHOP);
+            final var player = event.getPlayer();
+            final var store = event.getStore();
+            final var shopOpenEvent = new SBAStoreOpenEvent(player, store);
+            SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(shopOpenEvent);
+            if (shopOpenEvent.isCancelled()) {
+                return;
+            }
+            show(event.getPlayer(), (GameStore) event.getStore());
+        }
+    }
+
+    public Item setLore(Item item,
+                        PlayerItemInfo itemInfo,
+                        String price,
+                        ItemSpawnerType type) {
+        var enabled = itemInfo.getFirstPropertyByName("generateLore")
+                .map(property -> property.getPropertyData().getBoolean())
+                .orElseGet(() -> MainConfig.getInstance().node("lore", "generate-automatically").getBoolean(true));
+
+        if (enabled) {
+            var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
+                    .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
+                    .orElseGet(() -> MainConfig.getInstance().node("lore", "text").childrenList().stream().map(ConfigurationNode::getString))
+                    .map(s -> s
+                            .replaceAll("%price%", price)
+                            .replaceAll("%resource%", type.getItemName())
+                            .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
+                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
+                    .map(AdventureHelper::toComponent)
+                    .collect(Collectors.toList());
+
+            item.getLore().addAll(loreText);
+        }
+        return item;
     }
 }

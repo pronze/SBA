@@ -26,6 +26,7 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     private boolean shouted;
     private final AtomicBoolean isInParty = new AtomicBoolean(false);
     private final AtomicBoolean isInvitedToParty = new AtomicBoolean(false);
+    private final AtomicBoolean isPartyChatEnabled = new AtomicBoolean(false);
 
     public PlayerWrapperImpl(Player player) {
         super(player.getName(), player.getUniqueId());
@@ -64,6 +65,16 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     @Override
     public void setInvitedToAParty(boolean isInvited) {
         isInvitedToParty.set(isInvited);
+    }
+
+    @Override
+    public boolean isPartyChatEnabled() {
+        return isPartyChatEnabled.get();
+    }
+
+    @Override
+    public void setPartyChatEnabled(boolean bool) {
+        isPartyChatEnabled.set(bool);
     }
 
     @Override

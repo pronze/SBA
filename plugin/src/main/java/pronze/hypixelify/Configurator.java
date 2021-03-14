@@ -50,7 +50,7 @@ public class Configurator {
     }
 
     public void loadDefaults() {
-        dataFolder.mkdirs();
+        Logger.trace("Creating data directory: {}", String.valueOf(dataFolder.mkdirs()));
 
         /* To avoid config confusions*/
         deleteFile("config.yml");
@@ -101,9 +101,9 @@ public class Configurator {
         checkOrSetConfig(modify, "debug.enabled", false);
         checkOrSetConfig(modify, "permanent-items", true);
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
-        checkOrSetConfig(modify, "running-generator-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
+        checkOrSetConfig(modify, "running-generator-drops", List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "block-item-drops", true);
-        checkOrSetConfig(modify, "allowed-item-drops", Arrays.asList("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN", "TNT"));
+        checkOrSetConfig(modify, "allowed-item-drops", List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN", "TNT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
         checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
@@ -138,7 +138,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.waiting", "&fWaiting...");
         checkOrSetConfig(modify, "first_start", true);
         checkOrSetConfig(modify, "shout.time-out", 60);
-        checkOrSetConfig(modify, "message.maximum-enchant-lore", Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
+        checkOrSetConfig(modify, "message.maximum-enchant-lore", List.of("Maximum Enchant", "Your team already has maximum Enchant."));
         checkOrSetConfig(modify, "disable-sword-armor-damage", true);
         checkOrSetConfig(modify, "shop-name", "[SBAHypixelify] shop");
 
@@ -151,7 +151,7 @@ public class Configurator {
         checkOrSetConfig(modify, "games-inventory.gui.triple-prefix", "Bed Wars Triples");
         checkOrSetConfig(modify, "games-inventory.gui.squad-prefix", "Bed Wars Squads");
 
-        checkOrSetConfig(modify, "game-start.message", Arrays.asList(
+        checkOrSetConfig(modify, "game-start.message", List.of(
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
                 , "                             &f&lBed Wars"
                 , ""
@@ -168,7 +168,7 @@ public class Configurator {
             }
         }
 
-        checkOrSetConfig(modify, "overstats.message", Arrays.asList(
+        checkOrSetConfig(modify, "overstats.message", List.of(
                 "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
                 , "                             &e&lBEDWARS"
                 , ""
@@ -182,7 +182,7 @@ public class Configurator {
                 , "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
         ));
         checkOrSetConfig(modify, "scoreboard.you", "&7YOU");
-        checkOrSetConfig(modify, "scoreboard.lines.default", Arrays.asList(
+        checkOrSetConfig(modify, "scoreboard.lines.default", List.of(
                 "&7{date}"
                 , ""
                 , "{tier}"
@@ -194,7 +194,7 @@ public class Configurator {
                 , ""
                 , "&ewww.minecraft.net"
         ));
-        checkOrSetConfig(modify, "scoreboard.lines.5", Arrays.asList(
+        checkOrSetConfig(modify, "scoreboard.lines.5", List.of(
                 "&7{date}"
                 , ""
                 , "{tier}"
@@ -207,7 +207,7 @@ public class Configurator {
         checkOrSetConfig(modify, "lobby-scoreboard.state.countdown", "&fStarting in &a{countdown}s");
 
         //TODO: Create an algorithm
-        checkOrSetConfig(modify, "lobby-scoreboard.title", Arrays.asList(
+        checkOrSetConfig(modify, "lobby-scoreboard.title", List.of(
                 "&e&lBED WARS"
                 , "&e&lBED WARS"
                 , "&e&lBED WARS"
@@ -239,7 +239,7 @@ public class Configurator {
                 , "&e&lBED WARS"
                 , "&f&lBED WARS"));
 
-        checkOrSetConfig(modify, "lobby_scoreboard.lines", Arrays.asList(
+        checkOrSetConfig(modify, "lobby_scoreboard.lines", List.of(
                 "&7{date}"
                 , ""
                 , "&fMap: &a{game}"
@@ -256,7 +256,7 @@ public class Configurator {
         checkOrSetConfig(modify, "main-lobby.title", "&e&lBED WARS");
         checkOrSetConfig(modify, "main-lobby.custom-chat", true);
         checkOrSetConfig(modify, "main-lobby.chat-format", "{color}[{level}✫] {name}: {message}");
-        checkOrSetConfig(modify, "main-lobby.lines", Arrays.asList(
+        checkOrSetConfig(modify, "main-lobby.lines", List.of(
                 "",
                 "Your Level: &a{level}",
                 "",
@@ -292,171 +292,176 @@ public class Configurator {
         checkOrSetConfig(modify, "party.leader-autojoin-autoleave", true);
         checkOrSetConfig(modify, "party.size", 4);
         checkOrSetConfig(modify, "party.invite-expiration-time", 60);
-        checkOrSetConfig(modify, "party.message.cannotinvite", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.cannotinvite", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite this player to your party!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.max-size", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.max-size", List.of(
                 "&6-----------------------------------------------------",
                 "&cParty has reached max size!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.no-other-commands", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.no-other-commands", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou cannot do other commands now",
                 "&6-----------------------------------------------------"
         ));
-        checkOrSetConfig(modify, "party.message.leader-join-leave", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.leader-join-leave", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou have been teleported by the party leader",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.expired", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.expired", List.of(
                 "&6-----------------------------------------------------",
                 "&cThe party invite has been expired",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.invalid-command", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.invalid-command", List.of(
                 "&6-----------------------------------------------------",
                 "&cInvalid command, do /p help for more.",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.access-denied", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.access-denied", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou cannot access this command",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.notinparty", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.notinparty", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou are currently not in a party!",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.invited", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.invited", List.of(
                 "&6-----------------------------------------------------",
                 "&eYou have invited {player}&e to your party!",
                 "&ewait for them to accept it",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.alreadyInvited", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.alreadyInvited", List.of(
                 "&6-----------------------------------------------------",
                 "&cThis player has already had pending invites!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.warp", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.warp", List.of(
                 "&6-----------------------------------------------------",
                 "&eYou have been warped by the leader",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.warping", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.warping", List.of(
                 "&6-----------------------------------------------------",
                 "&eWarping players..",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.promoted-leader", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.promoted-leader", List.of(
                 "&6-----------------------------------------------------",
                 "&e{player} has been promoted to party leader!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.invite", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.invite", List.of(
                 "&6-----------------------------------------------------",
                 "{player}&e has invited you to join their party!",
                 "&eType /party accept to join. You have 60 seconds to accept.",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.accepted", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.accepted", List.of(
                 "&6-----------------------------------------------------",
                 "{player} &ajoined the party!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.offline-left", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.offline-left", List.of(
                 "&6-----------------------------------------------------",
                 "{player} &aleft the party due to inactivity",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.left", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.left", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou left the party!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.offline-quit", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.offline-quit", List.of(
                 "&6-----------------------------------------------------",
                 "{player} &cleft the party",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.no-players-warp", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.no-players-warp", List.of(
                 "&6-----------------------------------------------------",
                 "&cThere are no players to warp!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.declined", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.declined", List.of(
                 "&6-----------------------------------------------------",
                 "{player} &chas declined this party invite",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.kicked", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.kicked", List.of(
                 "&6-----------------------------------------------------",
                 "{player} &cHas been kicked from party",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.disband-inactivity", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.disband-inactivity", List.of(
                 "&6-----------------------------------------------------",
                 "&aParty has been disbanded due to inactivity",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.disband", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.disband", List.of(
                 "&6-----------------------------------------------------",
                 "&cParty has been disbanded by the leader.",
                 "&6-----------------------------------------------------"));
-        checkOrSetConfig(modify, "party.message.player-not-found", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.player-not-found", List.of(
                 "&6-----------------------------------------------------",
                 "&cCould not find Player!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.cannot-invite-yourself", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.cannot-invite-yourself", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou can't invite yourself.",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.not-invited", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.already-muted", List.of(
+                "&6-----------------------------------------------------",
+                "&cThe party is already {isMuted}.",
+                "&6-----------------------------------------------------"));
+
+        checkOrSetConfig(modify, "party.message.not-invited", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou are not invited to any party",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.max-invite-size", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.max-invite-size", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou cannot invite more than 5 players at a time.",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.got-kicked", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.got-kicked", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou have been kicked from party",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.decline-inc", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.decline-inc", List.of(
                 "&6-----------------------------------------------------",
                 "&cTo invite, you must decline current invites.",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.declined-user", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.declined-user", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou declined the invite!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.error", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.error", List.of(
                 "&6-----------------------------------------------------",
                 "&c&lAN ERROR OCCURRED!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "message.not-in-game", Arrays.asList(
+        checkOrSetConfig(modify, "message.not-in-game", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou are not in a game to do this command!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "message.shout-wait", Arrays.asList(
+        checkOrSetConfig(modify, "message.shout-wait", List.of(
                 "&6-----------------------------------------------------",
                 "&cYou have to wait {seconds} seconds before doing this command!",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.chat-enable-disabled", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.chat-enable-disabled", List.of(
                 "&6-----------------------------------------------------",
                 "&aParty chat has been {mode}",
                 "&6-----------------------------------------------------"));
 
-        checkOrSetConfig(modify, "party.message.help", Arrays.asList(
+        checkOrSetConfig(modify, "party.message.help", List.of(
                 "&1-----------------------------------------------------",
                 "&6Party commands",
                 "&e/p accept <player>&7 - Accept a party invite from a player",
@@ -471,9 +476,7 @@ public class Configurator {
         date = config.getString("date.format");
         Scoreboard_Lines = new HashMap<>();
         for (String key : config.getConfigurationSection("scoreboard.lines").getKeys(false))
-            Scoreboard_Lines.put(key,
-                    SBAUtil.translateColors(getStringList("scoreboard.lines." + key)));
-
+            Scoreboard_Lines.put(key, SBAUtil.translateColors(getStringList("scoreboard.lines." + key)));
 
         ShopUtil.initKeys();
         if (config.getBoolean("first_start")) {

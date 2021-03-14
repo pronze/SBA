@@ -91,7 +91,14 @@ public interface Party {
 
     /**
      *
-     * @return string containing leader name and party UUID
+     * Formatted like [leader="", uuid=""]
+     * @return string containing leader name and party UUID,
      */
     String debugInfo();
+
+    /**
+     *
+     * @return {@link PartySetting} object that manages the settings of this party instance.
+     */
+    PartySetting getSettings();
 }

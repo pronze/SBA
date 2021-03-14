@@ -1,11 +1,18 @@
 package pronze.hypixelify.store;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.config.MainConfig;
+import org.screamingsandals.bedwars.game.CurrentTeam;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.lib.debug.Debug;
+import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.sgui.SimpleInventoriesCore;
@@ -15,16 +22,19 @@ import org.screamingsandals.bedwars.lib.sgui.events.ItemRenderEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.OnTradeEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.PreClickEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
+import org.screamingsandals.bedwars.lib.sgui.inventory.PlayerItemInfo;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.events.SBAStoreOpenEvent;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.screamingsandals.bedwars.lib.lang.I.i18nonly;
 
-public abstract class AbstractStore implements Listener {
+public abstract class AbstractStore implements pronze.hypixelify.api.store.GameStore, Listener {
     private final Map<String, InventorySet> shopMap = new HashMap<>();
 
     public AbstractStore() {

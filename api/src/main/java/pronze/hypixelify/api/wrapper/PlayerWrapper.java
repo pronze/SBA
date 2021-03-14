@@ -123,4 +123,16 @@ public interface PlayerWrapper {
      * @param isInvited
      */
     void setInvitedToAParty(boolean isInvited);
+
+    /**
+     *
+     * @return
+     */
+    boolean isPartyChatEnabled();
+
+    /**
+     *
+     * @param bool
+     */
+    void setPartyChatEnabled(boolean bool);
 }

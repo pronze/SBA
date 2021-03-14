@@ -22,5 +22,7 @@ public class PartyCommand {
         new PartyPromoteCommand(manager);
         new PartyKickCommand(manager);
         new PartyWarpCommand(manager);
+        new PartyChatCommand(manager);
+        new PartySettingsCommand(manager);
     }
 }

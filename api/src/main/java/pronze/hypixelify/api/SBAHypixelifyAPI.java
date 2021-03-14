@@ -1,8 +1,12 @@
 package pronze.hypixelify.api;
 
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.manager.ArenaManager;
+import pronze.hypixelify.api.manager.PartyManager;
+import pronze.hypixelify.api.party.Party;
+import pronze.hypixelify.api.store.GameStore;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -16,7 +20,6 @@ import java.util.Optional;
  * Represents the API for SBAHypixelify
  */
 public interface SBAHypixelifyAPI {
-
     /**
      *
      * @return registered instance of SBAHypixelify
@@ -69,13 +72,19 @@ public interface SBAHypixelifyAPI {
 
     /**
      *
-     * @return the list of listeners that were registered by the SBAHypixelify instance
+     * @return a {@link List} of listeners that were registered by the SBAHypixelify instance.
      */
     List<Listener> getRegisteredListeners();
 
     /**
      *
-     * @return
+     * @return the {@link ArenaManager} instance that handles the creation or destruction of arenas.
      */
     ArenaManager getArenaManager();
+
+    /**
+     *
+     * @return a {@link GameStore} instance that can be shown to players.
+     */
+    GameStore getGameStore();
 }

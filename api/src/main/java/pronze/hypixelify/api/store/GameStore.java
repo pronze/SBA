@@ -8,5 +8,5 @@ public interface GameStore {
      * @param player
      * @param store
      */
-    void show(Player player, GameStore store);
+    void show(Player player, org.screamingsandals.bedwars.game.GameStore store);
 }

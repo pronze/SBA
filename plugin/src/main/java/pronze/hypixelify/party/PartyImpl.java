@@ -7,6 +7,7 @@ import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.data.InviteData;
 import pronze.hypixelify.api.party.Party;
+import pronze.hypixelify.api.party.PartySetting;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
@@ -17,10 +18,11 @@ import java.util.stream.Collectors;
 
 public class PartyImpl implements Party {
     private final UUID uuid = UUID.randomUUID();
-    private @NotNull PlayerWrapper leader;
+    private  @NotNull volatile PlayerWrapper leader;
     private final List<PlayerWrapper> members = Collections.synchronizedList(new LinkedList<>());
     private final List<PlayerWrapper> invitedPlayers = Collections.synchronizedList(new LinkedList<>());
     private final Map<UUID, InviteData> inviteDataMap = new ConcurrentHashMap<>();
+    private final PartySetting settings = new PartySetting();
 
     public PartyImpl(@NotNull PlayerWrapper leader) {
         this.leader = leader;
@@ -44,7 +46,6 @@ public class PartyImpl implements Party {
         Logger.trace(
                 "Sending message: {} to party: {}",
                 AdventureHelper.toLegacy(message),
-                leader.getName(),
                 debugInfo()
         );
         final var formattedMessage = SBAHypixelify
@@ -80,12 +81,12 @@ public class PartyImpl implements Party {
 
     @NotNull
     @Override
-    public PlayerWrapper getPartyLeader() {
+    public synchronized PlayerWrapper getPartyLeader() {
         return leader;
     }
 
     @Override
-    public void setPartyLeader(@NotNull PlayerWrapper player) {
+    public synchronized void setPartyLeader(@NotNull PlayerWrapper player) {
         if (player.equals(leader)) return;
         Logger.trace("Replacing leader: {} with: {} in party of uuid: {}",
                 leader.getName(), player.getName(), debugInfo());
@@ -157,7 +158,6 @@ public class PartyImpl implements Party {
         return List.copyOf(inviteDataMap.values());
     }
 
-
     @Override
     public String toString() {
         return "PartyImpl{" +
@@ -170,5 +170,10 @@ public class PartyImpl implements Party {
 
     public String debugInfo() {
         return "[leader=" + leader.getName() + ", uuid=" + uuid.toString() + "]";
+    }
+
+    @Override
+    public synchronized PartySetting getSettings() {
+        return settings;
     }
 }
