@@ -47,3 +47,4 @@ not_in_game: "§c Вам необхідно бути в грі, щоб вико�
 shout_wait: "§c Вам необхідно почекати на {seconds} щоб використати цю команду знову!"
 countdown: "§fПочинаючи з §a{countdown}с"
 none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
