@@ -47,3 +47,4 @@ not_in_game: "§c يجب أن تكون في لعبة للقيام بهذا ال�
 shout_wait: "§c عليك الانتظار حتى {seconds} لاستخدام هذا الأمر مرة أخرى!"
 countdown: "§fstarting في §a{countdown}s"
 none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
