@@ -2,7 +2,7 @@ package pronze.hypixelify.api.party;
 
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
-import pronze.hypixelify.api.data.InviteData;
+import pronze.hypixelify.api.data.PartyInviteData;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 import java.util.Collection;
@@ -85,9 +85,9 @@ public interface Party {
 
     /**
      *
-     * @return {@link InviteData} of all players invited to this party.
+     * @return {@link PartyInviteData} of all players invited to this party.
      */
-    Collection<InviteData> getInviteData();
+    Collection<PartyInviteData> getInviteData();
 
     /**
      *

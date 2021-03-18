@@ -49,6 +49,7 @@ public class PartySettingsCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
@@ -109,6 +110,7 @@ public class PartySettingsCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {

@@ -38,6 +38,7 @@ public class PartyAcceptCommand {
                             }
 
                             final var optionalParty = SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getInvitedPartyOf(player);
 

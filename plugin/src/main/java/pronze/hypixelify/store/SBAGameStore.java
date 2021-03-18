@@ -68,23 +68,11 @@ public class SBAGameStore extends AbstractStore {
         super();
     }
 
-    @Override
-    public void onGeneratingItem(ItemRenderEvent event) {
-        var itemInfo = event.getItem();
-        var item = itemInfo.getStack();
-        var player = event.getPlayer().as(Player.class);
-        var game = Main.getPlayerGameProfile(player).getGame();
-        var prices = itemInfo.getOriginal().getPrices();
-        if (!prices.isEmpty()) {
-            var priceObject = prices.get(0);
-            var price = priceObject.getAmount();
-            var type = Main.getSpawnerType(priceObject.getCurrency().toLowerCase());
-            if (type == null) {
-                return;
-            }
-            setLore(item, itemInfo, String.valueOf(price), type);
-        }
 
+    public Item onPreItemProcess(Item partiallyProcessedItem, ItemRenderEvent event) {
+        var item = partiallyProcessedItem;
+        final var player = event.getPlayer().as(Player.class);
+        var game = Main.getPlayerGameProfile(player).getGame();
         final var optionalStorage = SBAHypixelify.getInstance().getGameStorage(game);
         if (optionalStorage.isPresent()) {
             final var storage = optionalStorage.get();
@@ -104,8 +92,27 @@ public class SBAGameStore extends AbstractStore {
             }
             item = ItemFactory.build(bukkitItemStack).orElse(item);
         }
+        return item;
+    }
 
-        Item finalItem = item;
+    @Override
+    public void onGeneratingItem(ItemRenderEvent event) {
+        var itemInfo = event.getItem();
+        var item = itemInfo.getStack();
+        var player = event.getPlayer().as(Player.class);
+        var game = Main.getPlayerGameProfile(player).getGame();
+        var prices = itemInfo.getOriginal().getPrices();
+        if (!prices.isEmpty()) {
+            var priceObject = prices.get(0);
+            var price = priceObject.getAmount();
+            var type = Main.getSpawnerType(priceObject.getCurrency().toLowerCase());
+            if (type == null) {
+                return;
+            }
+            setLore(item, itemInfo, String.valueOf(price), type);
+        }
+
+        Item finalItem = onPreItemProcess(item, event);
         itemInfo.getProperties().stream()
                 .filter(Property::hasName).forEach(property -> {
             var converted = ConfigurateUtils.raw(property.getPropertyData());

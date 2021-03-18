@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.PlayerWrapper implements PlayerWrapper {
-    private final Player instance;
     private final String name;
     private final PlayerStatistic statistic;
     private int shout;
@@ -31,7 +30,6 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     public PlayerWrapperImpl(Player player) {
         super(player.getName(), player.getUniqueId());
         name = player.getName();
-        instance = player;
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
         statistic = PlayerStatisticManager.getInstance().getStatistic(PlayerMapper.wrapPlayer(player));
     }
@@ -42,10 +40,10 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     }
 
     @Override
-    public void sendMessage(String message) { instance.sendMessage(message); }
+    public void sendMessage(String message) { getInstance().sendMessage(message); }
 
     @Override
-    public Player getInstance() { return instance; }
+    public Player getInstance() { return (Player)getWrappedPlayer().get(); }
 
     @Override
     public boolean isInParty() {
@@ -88,8 +86,6 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     }
 
     @Override
-    public UUID getUUID() { return instance.getUniqueId(); }
-
     public String getName() {
         return name;
     }

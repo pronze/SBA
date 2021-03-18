@@ -6,6 +6,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -13,10 +14,15 @@ import org.screamingsandals.bedwars.lib.ext.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
+import pronze.hypixelify.api.config.ConfiguratorAPI;
+import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.manager.ArenaManager;
+import pronze.hypixelify.api.manager.PartyManager;
+import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.api.store.GameStore;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
+import pronze.hypixelify.exception.ExceptionManager;
 import pronze.hypixelify.game.ArenaManagerImpl;
 import pronze.hypixelify.party.PartyManagerImpl;
 import pronze.hypixelify.store.SBAGameStore;
@@ -29,69 +35,46 @@ import pronze.hypixelify.scoreboard.MainLobbyScoreboardImpl;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.lib.core.Core;
+import pronze.lib.core.plugin.AbstractPlugin;
 
 import java.util.*;
+
+import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
     private final List<Listener> registeredListeners = new ArrayList<>();
+    private ExceptionManager exceptionManager;
     private String version;
     private ArenaManagerImpl arenaManager;
     private PlayerWrapperService playerWrapperService;
     private Configurator configurator;
-    private GamesInventory gamesInventory;
     private PartyManagerImpl partyManager;
     private GameStore SBAStore;
     private boolean debug = false;
-    private boolean protocolLib;
     private boolean isSnapshot;
-
-    public static PartyManagerImpl getPartyManager() { return plugin.partyManager; }
-
-    public static Configurator getConfigurator() {
-        return plugin.configurator;
-    }
-
-    public static boolean isProtocolLib() {
-        return plugin.protocolLib;
-    }
+    private GamesInventory gamesInventory;
 
     public static SBAHypixelify getInstance() {
         return plugin;
     }
 
-    public static GamesInventory getGamesInventory() {
-        return plugin.gamesInventory;
+    public static Configurator getConfigurator() {
+        return plugin.configurator;
     }
 
-    public static PlayerWrapperService getWrapperService() {
-        return plugin.playerWrapperService;
-    }
-
-    public static boolean isUpgraded() {
-        return !Objects.requireNonNull(getConfigurator()
-                .config.getString("version")).contains(SBAHypixelify.getInstance().getVersion());
-    }
-
-    public static void showErrorMessage(String... messages) {
-        Bukkit.getLogger().severe("======PLUGIN ERROR===========");
-        Bukkit.getLogger().severe("Plugin: SBAHypixelify is being disabled for the following error:");
-        Arrays.stream(messages)
-                .filter(Objects::nonNull)
-                .forEach(Bukkit.getLogger()::severe);
-        Bukkit.getLogger().severe("=============================");
-        Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+    public static ExceptionManager getExceptionManager() {
+        return plugin.exceptionManager;
     }
 
     @Override
     public void onEnable() {
-        Arrays.stream(org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage.NMS.PacketPlayOutEntityEquipment.getConstructors()).forEach(constructor -> {
-            Bukkit.getLogger().info(constructor.toString());
-        });
+        exceptionManager = new ExceptionManager();
+        Core.init(this);
         plugin = this;
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
-        protocolLib = plugin.getServer().getPluginManager().isPluginEnabled("ProtocolLib");
         Logger.init(false);
 
         if (getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
@@ -179,17 +162,23 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registeredListeners.add(listener);
     }
 
+    public void unregisterListener(Listener listener) {
+        if (registeredListeners.contains(listener)) {
+            HandlerList.unregisterAll(listener);
+            registeredListeners.remove(listener);
+        }
+    }
+
     @Override
     public void onDisable() {
-        if (SBAHypixelify.isProtocolLib()) {
+        if (SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
             Bukkit.getOnlinePlayers()
                     .stream()
                     .filter(Objects::nonNull)
                     .forEach(SBAUtil::removeScoreboardObjective);
         }
 
-        registeredListeners.forEach(HandlerList::unregisterAll);
-        registeredListeners.clear();
+        getRegisteredListeners().forEach(this::unregisterListener);
 
         Logger.trace("Cancelling tasks...");
         this.getServer().getScheduler().cancelTasks(plugin);
@@ -197,18 +186,17 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         Logger.trace("Successfully shutdown SBAHypixelify instance");
     }
 
+    public GamesInventory getGamesInventory() {
+        return gamesInventory;
+    }
+
     /*
      * API implementations
      */
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T getObject(String key, T def) {
-        try {
-            return (T) getConfigurator().config.get(key, def);
-        } catch (Throwable t) {
-            return def;
-        }
+    public ConfiguratorAPI getConfigurator0() {
+        return configurator;
     }
 
     @Override
@@ -224,6 +212,21 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public GameStore getGameStore() {
         return SBAStore;
+    }
+
+    @Override
+    public void setExceptionHandler(@NotNull ExceptionHandler handler) {
+        exceptionManager.setExceptionHandler(handler);
+    }
+
+    @Override
+    public PartyManager getPartyManager() {
+        return partyManager;
+    }
+
+    @Override
+    public WrapperService<Player, ? extends PlayerWrapper> getPlayerWrapperService() {
+        return playerWrapperService;
     }
 
     @Override
@@ -249,6 +252,12 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public boolean isSnapshot() {
         return isSnapshot;
+    }
+
+    @Override
+    public boolean isUpgraded() {
+        return !Objects.requireNonNull(plugin.configurator.config.getString("version"))
+                .contains(SBAHypixelify.getInstance().getVersion());
     }
 }
 

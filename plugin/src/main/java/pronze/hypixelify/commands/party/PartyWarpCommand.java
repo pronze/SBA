@@ -40,6 +40,7 @@ public class PartyWarpCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {

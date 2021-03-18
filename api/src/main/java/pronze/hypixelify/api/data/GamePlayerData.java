@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @RequiredArgsConstructor
-public class PlayerData {
+public class GamePlayerData {
     private final String name;
     private int kills;
     private int deaths;
@@ -18,7 +18,7 @@ public class PlayerData {
     private int bedDestroys;
     private List<ItemStack> inventory = new ArrayList<>();
 
-    public static PlayerData from(Player player) {
-        return new PlayerData(player.getName());
+    public static GamePlayerData from(Player player) {
+        return new GamePlayerData(player.getName());
     }
 }

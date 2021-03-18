@@ -26,7 +26,7 @@ public class ScoreboardUtil {
     }
 
     public static void updateCustomObjective(Player p, Game game) {
-        if (!SBAHypixelify.isProtocolLib() || Main.isLegacy()) return;
+        if (!SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib") || Main.isLegacy()) return;
 
         if (!player_health.containsKey(p))
             player_health.put(p, new HashMap<>());
@@ -47,7 +47,7 @@ public class ScoreboardUtil {
                                 packet.setObjectiveName(TAG_OBJECTIVE_NAME);
                                 packet.sendPacket(p);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                SBAHypixelify.getExceptionManager().handleException(e);
                             }
                         }
 
@@ -61,7 +61,7 @@ public class ScoreboardUtil {
                                 packet.setObjectiveName(TAB_OBJECTIVE_NAME);
                                 packet.sendPacket(p);
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                SBAHypixelify.getExceptionManager().handleException(e);
                             }
                         }
                         map.put(pl, playerHealth);

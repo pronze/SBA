@@ -31,6 +31,7 @@ public class PartyKickCommand {
                                     .wrapPlayer((Player)ctx.getSender())
                                     .as(PlayerWrapperImpl.class);
                             final var optionalParty = SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player);
                             if (optionalParty.isEmpty() || !player.isInParty() || !player.equals(optionalParty.get().getPartyLeader())) {
@@ -58,6 +59,7 @@ public class PartyKickCommand {
                                     .as(PlayerWrapperImpl.class);
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
@@ -94,6 +96,7 @@ public class PartyKickCommand {
                                         party.removePlayer(args);
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getPartyManager()
                                                     .disband(party.getUUID());
                                         }

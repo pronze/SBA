@@ -179,7 +179,8 @@ public class ShopUtil {
                 temp.addEnchantments(enchant);
                 return temp;
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
+            SBAHypixelify.getExceptionManager().handleException(e);
             e.printStackTrace();
         }
         return newItem;
@@ -257,7 +258,7 @@ public class ShopUtil {
     }
 
     public static String ChatColorChanger(Player player) {
-        final var db = SBAHypixelify.getWrapperService().get(player).get();
+        final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
         if (db.getLevel() > 100 || player.isOp()) {
             return "§f";
         } else {

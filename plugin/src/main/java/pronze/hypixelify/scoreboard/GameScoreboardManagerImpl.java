@@ -109,7 +109,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
     public void createCustomObjective(Scoreboard scoreboard) {
         final var player = scoreboard.getHolder().getPlayer();
 
-        if (!SBAHypixelify.isProtocolLib() || Main.isLegacy()) {
+        if (!SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib") || Main.isLegacy()) {
             return;
         }
         try {

@@ -5,7 +5,7 @@ import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.data.InviteData;
+import pronze.hypixelify.api.data.PartyInviteData;
 import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.api.party.PartySetting;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -21,7 +21,7 @@ public class PartyImpl implements Party {
     private  @NotNull volatile PlayerWrapper leader;
     private final List<PlayerWrapper> members = Collections.synchronizedList(new LinkedList<>());
     private final List<PlayerWrapper> invitedPlayers = Collections.synchronizedList(new LinkedList<>());
-    private final Map<UUID, InviteData> inviteDataMap = new ConcurrentHashMap<>();
+    private final Map<UUID, PartyInviteData> inviteDataMap = new ConcurrentHashMap<>();
     private final PartySetting settings = new PartySetting();
 
     public PartyImpl(@NotNull PlayerWrapper leader) {
@@ -62,12 +62,12 @@ public class PartyImpl implements Party {
         invitedPlayers.remove(player);
         members.add(player);
         player.setInParty(true);
-        if (inviteDataMap.containsKey(player.getUUID())) {
-            final var inviteData = inviteDataMap.get(player.getUUID());
+        if (inviteDataMap.containsKey(player.getInstance().getUniqueId())) {
+            final var inviteData = inviteDataMap.get(player.getInstance().getUniqueId());
             if (inviteData != null) {
                 SBAUtil.cancelTask(inviteData.getInviteTask());
                 player.setInvitedToAParty(false);
-                inviteDataMap.remove(player.getUUID());
+                inviteDataMap.remove(player.getInstance().getUniqueId());
             }
         }
     }
@@ -104,7 +104,7 @@ public class PartyImpl implements Party {
     @Override
     public void invitePlayer(@NotNull PlayerWrapper invitee,
                              @NotNull PlayerWrapper player) {
-        if (inviteDataMap.containsKey(invitee.getUUID())) return;
+        if (inviteDataMap.containsKey(invitee.getInstance().getUniqueId())) return;
         Logger.trace("Player: {} has invited: {} to party: {}", player.getName(),
                 invitee.getName(), debugInfo());
         invitedPlayers.add(invitee);
@@ -115,9 +115,10 @@ public class PartyImpl implements Party {
             public void run() {
                 Logger.trace("Party invitation expired for: {} of party: {}", invitee.getName(), debugInfo());
                 invitee.setInvitedToAParty(false);
-                inviteDataMap.remove(invitee.getUUID());
+                inviteDataMap.remove(invitee.getInstance().getUniqueId());
                 if (shouldDisband()) {
                     SBAHypixelify
+                            .getInstance()
                             .getPartyManager()
                             .disband(uuid);
                     Logger.trace("Disbanding party: {}", uuid);
@@ -129,13 +130,13 @@ public class PartyImpl implements Party {
                         .config
                         .getInt("party.invite-expiration-time"));
 
-        final var inviteData = new InviteData(invitee, player, inviteTask);
-        inviteDataMap.put(invitee.getUUID(), inviteData);
+        final var inviteData = new PartyInviteData(invitee, player, inviteTask);
+        inviteDataMap.put(invitee.getInstance().getUniqueId(), inviteData);
     }
 
     @Override
     public boolean isInvited(@NotNull PlayerWrapper player) {
-        return inviteDataMap.containsKey(player.getUUID());
+        return inviteDataMap.containsKey(player.getInstance().getUniqueId());
     }
 
     @Override
@@ -154,7 +155,7 @@ public class PartyImpl implements Party {
     }
 
     @Override
-    public List<InviteData> getInviteData() {
+    public List<PartyInviteData> getInviteData() {
         return List.copyOf(inviteDataMap.values());
     }
 

@@ -7,7 +7,14 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.TextComponent;
+import org.screamingsandals.bedwars.lib.hologram.Hologram;
+import org.screamingsandals.bedwars.lib.hologram.HologramManager;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
+import org.screamingsandals.bedwars.lib.utils.visual.TextEntry;
+import org.screamingsandals.bedwars.lib.world.LocationMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.game.Arena;
 
@@ -38,14 +45,17 @@ public class RotatingGenerator {
                 .getConfigurator()
                 .config
                 .getDouble("floating-generator.holo-height", 2.0);
-        hologram = Main.getHologramManager()
-                .spawnHologram(
-                        arena.getGame().getConnectedPlayers(),
-                        spawner.getLocation().clone().add(0, holoHeight, 0),
-                        SBAHypixelify
-                                .getConfigurator()
-                                .getStringList("floating-generator.holo-text").toArray(new String[0])
-                );
+
+        hologram = Hologram.of(LocationMapper.wrapLocation(spawner.getLocation().clone().add(0, holoHeight, 0)));
+        arena.getGame().getConnectedPlayers().forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
+        final var holoText = SBAHypixelify
+                .getConfigurator()
+                .getStringList("floating-generator.holo-text");
+
+        for (int i = 0; i < holoText.size(); i++) {
+            hologram.addLine(i, TextEntry.of(holoText.get(i)));
+        }
+        hologram.show();
 
         new BukkitRunnable() {
             @Override
@@ -71,7 +81,7 @@ public class RotatingGenerator {
                             .replace("{seconds}", String.valueOf(time)));
                 }
                 update(newLines);
-                if (time <= 0) {
+                if (time < 0) {
                     time = spawner.getItemSpawnerType().getInterval();
                 }
             }
@@ -89,7 +99,7 @@ public class RotatingGenerator {
             if (lines.get(i) == null) {
                 continue;
             }
-            hologram.setLine(i, lines.get(i));
+            hologram.setLine(i, TextEntry.of(lines.get(i)));
         }
         this.lines = new ArrayList<>(lines);
     }

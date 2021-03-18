@@ -19,6 +19,7 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.ArenaImpl;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
@@ -43,9 +44,10 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onBwReload(PluginEnableEvent event) {
-        final var plugin = event.getPlugin().getName();
+        final var pluginName = event.getPlugin().getName();
         //Register listeners again
-        if (plugin.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
+        if (pluginName.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
+            Logger.trace("Reregistering listeners");
             SBAHypixelify
                     .getInstance()
                     .getRegisteredListeners()
@@ -57,6 +59,7 @@ public class BedWarsListener implements Listener {
                             .getServer()
                             .getPluginManager()
                             .registerEvents(listener, SBAHypixelify.getInstance()));
+            Logger.trace("Registration complete");
         }
     }
 

@@ -61,6 +61,7 @@ public class PartyInviteCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getOrCreate(player)
                                     .ifPresent(party -> {

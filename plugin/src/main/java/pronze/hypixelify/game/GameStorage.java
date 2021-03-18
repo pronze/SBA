@@ -3,16 +3,16 @@ package pronze.hypixelify.game;
 import org.bukkit.Location;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
-import pronze.hypixelify.api.data.TeamData;
+import pronze.hypixelify.api.data.GameTeamData;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
-    private final Map<String, TeamData> teamDataMap = new HashMap<>();
+    private final Map<String, GameTeamData> teamDataMap = new HashMap<>();
 
     public GameStorage(Game game) {
-        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(), TeamData.from(team)));
+        game.getRunningTeams().forEach(team -> teamDataMap.put(team.getName(), GameTeamData.from(team)));
     }
 
     public Location getTargetBlockLocation(RunningTeam rt) {
@@ -65,21 +65,21 @@ public class GameStorage implements pronze.hypixelify.api.game.GameStorage {
         return teamDataMap
                 .values()
                 .stream()
-                .anyMatch(TeamData::isPurchasedDragonUpgrade);
+                .anyMatch(GameTeamData::isPurchasedDragonUpgrade);
     }
 
     public boolean areTrapsEnabled() {
         return teamDataMap
                 .values()
                 .stream()
-                .anyMatch(TeamData::isPurchasedTrap);
+                .anyMatch(GameTeamData::isPurchasedTrap);
     }
 
     public boolean arePoolEnabled() {
         return teamDataMap
                 .values()
                 .stream()
-                .anyMatch(TeamData::isPurchasedPool);
+                .anyMatch(GameTeamData::isPurchasedPool);
     }
 
     public boolean isTrapEnabled(RunningTeam team) {

@@ -30,6 +30,7 @@ public class PartyDeclineCommand {
 
                             if (!player.isInvitedToAParty()) {
                                 SBAHypixelify
+                                        .getInstance()
                                         .getConfigurator()
                                         .getStringList("party.message.not-invited")
                                         .forEach(player::sendMessage);
@@ -37,6 +38,7 @@ public class PartyDeclineCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getInvitedPartyOf(player)
                                     .ifPresentOrElse(party -> {
@@ -53,11 +55,13 @@ public class PartyDeclineCommand {
                                         party.removeInvitedPlayer(player);
                                         player.setInvitedToAParty(false);
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getConfigurator()
                                                 .getStringList("party.message.declined-user")
                                                 .forEach(player::sendMessage);
 
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getConfigurator()
                                                 .getStringList("party.message.declined")
                                                 .stream()
@@ -66,10 +70,12 @@ public class PartyDeclineCommand {
 
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getPartyManager()
                                                     .disband(party.getUUID());
                                         }
                                      }, () -> SBAHypixelify
+                                            .getInstance()
                                             .getConfigurator()
                                             .getStringList("party.message.error")
                                             .forEach(player::sendMessage));

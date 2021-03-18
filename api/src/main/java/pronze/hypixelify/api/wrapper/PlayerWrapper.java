@@ -10,12 +10,6 @@ public interface PlayerWrapper {
      *
      * @return
      */
-    UUID getUUID();
-
-    /**
-     *
-     * @return
-     */
     String getName();
 
     /**

@@ -29,6 +29,7 @@ public class PartyPromoteCommand {
                 .argument(PlayerArgument.<CommandSender>newBuilder("party-participant")
                         .withSuggestionsProvider((ctx, str) -> {
                             final var optionalParty = SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(PlayerMapper
                                             .wrapPlayer((Player)ctx.getSender())
@@ -65,6 +66,7 @@ public class PartyPromoteCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {

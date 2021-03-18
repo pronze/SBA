@@ -7,7 +7,7 @@ import org.screamingsandals.bedwars.api.Team;
 
 @RequiredArgsConstructor
 @Data
-public class TeamData {
+public class GameTeamData {
      private int sharpness;
      private int protection;
      private int efficiency;
@@ -16,7 +16,7 @@ public class TeamData {
      private boolean purchasedDragonUpgrade;
      private final Location targetBlockLoc;
 
-     public static TeamData from(Team team) {
-          return new TeamData(team.getTargetBlock());
+     public static GameTeamData from(Team team) {
+          return new GameTeamData(team.getTargetBlock());
      }
 }

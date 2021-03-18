@@ -1,14 +1,11 @@
 package pronze.hypixelify.api.game;
-import org.bukkit.scoreboard.Scoreboard;
-import org.screamingsandals.bedwars.api.events.BedwarsGameEndEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import pronze.hypixelify.api.data.PlayerData;
+import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 
-import java.util.List;
 import java.util.UUID;
 
 public interface Arena {
@@ -53,5 +50,5 @@ public interface Arena {
      * @param playerUUID
      * @return
      */
-    PlayerData getPlayerData(UUID playerUUID);
+    GamePlayerData getPlayerData(UUID playerUUID);
 }

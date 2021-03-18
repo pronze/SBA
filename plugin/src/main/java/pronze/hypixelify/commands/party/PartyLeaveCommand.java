@@ -38,6 +38,7 @@ public class PartyLeaveCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
@@ -64,6 +65,7 @@ public class PartyLeaveCommand {
 
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getPartyManager()
                                                     .disband(party.getUUID());
                                             return;
@@ -80,7 +82,9 @@ public class PartyLeaveCommand {
                                                                 .getStringList("party.message.promoted-leader")
                                                                 .stream().map(str -> str.replace("{player}", member.getName()))
                                                                 .forEach(str -> party.getMembers().forEach(m -> m.getInstance().sendMessage(str)));
-                                                    }, () -> SBAHypixelify.getPartyManager()
+                                                    }, () -> SBAHypixelify
+                                                            .getInstance()
+                                                            .getPartyManager()
                                                             .disband(party.getUUID()));
                                         }
                                     }, () -> SBAHypixelify

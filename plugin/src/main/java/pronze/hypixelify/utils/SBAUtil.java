@@ -15,6 +15,7 @@ import org.screamingsandals.bedwars.lib.ext.kyori.adventure.title.Title;
 import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.exception.ExceptionManager;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 
 import java.time.Duration;
@@ -41,14 +42,14 @@ public class SBAUtil {
     };
 
     public static void removeScoreboardObjective(Player player) {
-        if (SBAHypixelify.isProtocolLib() && !Main.isLegacy()) {
+        if (SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib") && !Main.isLegacy()) {
             try {
                 final var obj = new WrapperPlayServerScoreboardObjective();
                 obj.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
                 obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
                 obj.sendPacket(player);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                SBAHypixelify.getExceptionManager().handleException(ex);
             }
             try {
                 final var obj = new WrapperPlayServerScoreboardObjective();
@@ -56,7 +57,7 @@ public class SBAUtil {
                 obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
                 obj.sendPacket(player);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                SBAHypixelify.getExceptionManager().handleException(ex);
             }
         }
     }
@@ -70,7 +71,9 @@ public class SBAUtil {
                     try {
                         final var mat = Material.valueOf(material.toUpperCase().replace(" ", "_"));
                         materialList.add(mat);
-                    } catch (Exception ignored) {}
+                    } catch (Exception ex) {
+                        SBAHypixelify.getExceptionManager().handleException(ex);
+                    }
                 });
         return materialList;
     }
@@ -85,7 +88,8 @@ public class SBAUtil {
                     (float) SBAHypixelify.getConfigurator().config.getDouble(section + ".yaw"),
                     (float) SBAHypixelify.getConfigurator().config.getDouble(section + ".pitch")
             ));
-        } catch (Throwable t) {
+        } catch (Exception e) {
+            SBAHypixelify.getExceptionManager().handleException(e);
             return Optional.empty();
         }
     }

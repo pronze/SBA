@@ -7,7 +7,7 @@ import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 @RequiredArgsConstructor
 @Getter
-public class InviteData {
+public class PartyInviteData {
     private final PlayerWrapper player;
     private final PlayerWrapper invited;
     private final BukkitTask inviteTask;

@@ -29,7 +29,7 @@ public class SBAExpansion extends PlaceholderExpansion {
         }
 
         if (identifier.startsWith("player_")) {
-            final var wrapperOptional = SBAHypixelify.getWrapperService().get(player);
+            final var wrapperOptional = SBAHypixelify.getInstance().getPlayerWrapperService().get(player);
             if (wrapperOptional.isPresent()) {
                 final var database = wrapperOptional.get();
                 switch (identifier.substring(10).toLowerCase()) {

@@ -21,7 +21,7 @@ public class BWACommand {
 
     public BWACommand(BukkitCommandManager<CommandSender> manager) {
         this.manager = manager;
-        gamesInvEnabled = SBAHypixelify.getConfigurator().config.getBoolean("games-inventory.enabled", true);
+        gamesInvEnabled = SBAHypixelify.getInstance().getConfigurator().getBoolean("games-inventory.enabled", true);
     }
 
     public void build() {
@@ -63,7 +63,7 @@ public class BWACommand {
                         .begin(context)
                         .synchronous(c -> {
                             c.getSender().sendMessage(i18n("command_resetting"));
-                            SBAHypixelify.getConfigurator().upgradeCustomFiles();
+                            SBAHypixelify.getConfigurator().upgrade();
                         }).execute(() -> context.getSender().sendMessage(i18n("command_reset")))));
 
 
@@ -87,7 +87,7 @@ public class BWACommand {
                                 player.sendMessage(i18n("command_unknown", true));
                                 return;
                             }
-                            SBAHypixelify.getGamesInventory().openForPlayer(player, mode);
+                            SBAHypixelify.getInstance().getGamesInventory().openForPlayer(player, mode);
                         }).execute()));
 
         manager.command(builder.literal("upgrade")
@@ -95,10 +95,10 @@ public class BWACommand {
                 .handler(context -> manager.taskRecipe()
                         .begin(context)
                         .synchronous(c -> {
-                            if (!SBAHypixelify.isUpgraded()) {
+                            if (!SBAHypixelify.getInstance().isUpgraded()) {
                                 c.getSender().sendMessage(i18n("command_cannot_do", true));
                             }
-                            SBAHypixelify.getConfigurator().upgradeCustomFiles();
+                            SBAHypixelify.getConfigurator().upgrade();
                         }).execute(() -> context.getSender().sendMessage(i18n("command_upgraded", true)))));
 
         manager.command(builder.literal("cancel")
@@ -106,7 +106,7 @@ public class BWACommand {
                 .handler(context -> manager.taskRecipe()
                         .begin(context)
                         .synchronous(c -> {
-                            if (!SBAHypixelify.isUpgraded()) {
+                            if (!SBAHypixelify.getInstance().isUpgraded()) {
                                 c.getSender().sendMessage(i18n("command_cannot_do", true));
                             }
 

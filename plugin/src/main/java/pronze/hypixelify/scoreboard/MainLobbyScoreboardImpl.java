@@ -58,7 +58,7 @@ public class MainLobbyScoreboardImpl implements Listener {
         if (!SBAHypixelify.getConfigurator().config
                 .getBoolean("main-lobby.custom-chat", true)) return;
         final var player = e.getPlayer();
-        final var db = SBAHypixelify.getWrapperService().get(player).get();
+        final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
                 && MainLobbyScoreboardImpl.isInWorld(e.getPlayer().getLocation())) {
@@ -131,7 +131,7 @@ public class MainLobbyScoreboardImpl implements Listener {
     }
 
     public void createBoard(Player player) {
-        final var playerData = SBAHypixelify.getWrapperService().get(player).get();
+        final var playerData = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
         final var scoreboard = Scoreboard.builder()
                 .animate(false)
                 .player(player)
@@ -141,7 +141,7 @@ public class MainLobbyScoreboardImpl implements Listener {
                 .lines(SBAHypixelify.getConfigurator().getStringList("main-lobby.lines"))
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
-                    final var progress = playerData.getStringProgress();
+                    final var progress = playerData.getProgress();
                     return hook.getLine()
                             .replace("{kills}", String.valueOf(playerData.getKills()))
                             .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))

@@ -2,10 +2,13 @@ package pronze.hypixelify.api;
 
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import pronze.hypixelify.api.config.ConfiguratorAPI;
+import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.manager.PartyManager;
 import pronze.hypixelify.api.party.Party;
+import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.api.store.GameStore;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
@@ -22,7 +25,7 @@ import java.util.Optional;
 public interface SBAHypixelifyAPI {
     /**
      *
-     * @return registered instance of SBAHypixelify
+     * @return Registered instance of SBAHypixelify
      */
     static SBAHypixelifyAPI getInstance(){
         return Objects.requireNonNull(Bukkit.getServer()
@@ -31,14 +34,14 @@ public interface SBAHypixelifyAPI {
 
     /**
      *
-     * @param game the game associated with the storage
+     * @param game The game associated with the storage.
      * @return {@link GameStorage} of game if exists, null otherwise
      */
     Optional<GameStorage> getGameStorage(Game game);
 
     /**
      *
-     * @param player the player instance to obtain the wrapper from
+     * @param player The player instance to obtain the wrapper from.
      * @return the {@link PlayerWrapper} object linked to the specific player
      */
     PlayerWrapper getPlayerWrapper(Player player);
@@ -57,34 +60,57 @@ public interface SBAHypixelifyAPI {
 
     /**
      *
-     * @return the version SBAHypixelify is currently running
+     * @return The version SBAHypixelify is currently running.
      */
     String getVersion();
 
     /**
      *
-     * @param key the key to search from the config
-     * @param def the default value to be returned if the key does not contain a mapped value or if it does not exist
-     * @param <T> the type of the object to return
-     * @return the object that has been searched using the key, returns def argument if key does not exist
-     */
-    <T> T getObject(String key, T def);
-
-    /**
-     *
-     * @return a {@link List} of listeners that were registered by the SBAHypixelify instance.
+     * @return A {@link List} of listeners that were registered by the SBAHypixelify instance.
      */
     List<Listener> getRegisteredListeners();
 
     /**
      *
-     * @return the {@link ArenaManager} instance that handles the creation or destruction of arenas.
+     * @return The {@link ArenaManager} instance that handles the creation or destruction of arenas.
      */
     ArenaManager getArenaManager();
 
     /**
      *
-     * @return a {@link GameStore} instance that can be shown to players.
+     * @return A {@link GameStore} instance that can be shown to players.
      */
     GameStore getGameStore();
+
+    /**
+     *
+     * @param handler The {@link ExceptionHandler} instance that will handle exceptions thrown by the plugin.
+     */
+    void setExceptionHandler(@NotNull ExceptionHandler handler);
+
+    /**
+     *
+     * <b>NOTE: This class is thread safe</b>
+     * @return {@link PartyManager} instance that handles the creation and destruction of parties
+     */
+    PartyManager getPartyManager();
+
+    /**
+     *
+     * @return an instance of the PlayerWrapperService that is associated with wrapping player
+     * instances into objects that contain additional data
+     */
+    WrapperService<Player, ? extends PlayerWrapper> getPlayerWrapperService();
+
+    /**
+     * Look into ConfiguratorAPI getter methods to get certain settings from the config.
+     * @return an instance of an Configurator which helps in the configuration of file based data.
+     */
+    ConfiguratorAPI getConfigurator0();
+
+    /**
+     *
+     * @return true if recently has been upgraded, false otherwise.
+     */
+    boolean isUpgraded();
 }

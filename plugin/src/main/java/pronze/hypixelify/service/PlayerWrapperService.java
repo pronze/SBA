@@ -36,7 +36,6 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
                 });
     }
 
-
     @Override
     public void register(Player player) {
         final var playerWrapper = new PlayerWrapperImpl(player);

@@ -61,6 +61,7 @@ buildscript {
 
         shadowJar {
             relocate 'cloud', 'pronze.hypixelify.lib.cloud'
+            relocate 'pronze.lib', 'pronze.hypixelify.lib'
         }
         sourceCompatibility = '11.0'
     }

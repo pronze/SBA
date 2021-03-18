@@ -12,7 +12,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
+import org.screamingsandals.bedwars.lib.hologram.Hologram;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.utils.Sounds;
 import pronze.hypixelify.SBAHypixelify;
@@ -48,28 +48,30 @@ public class GameTask extends BukkitRunnable {
         this.arena = arena;
         this.game = arena.getGame();
         try {
-            final var gameHolosField = game
-                    .getClass()
-                    .getDeclaredField("countdownHolograms");
-            gameHolosField.setAccessible(true);
-            final var gameHolos = (Map<ItemSpawner, Hologram>) gameHolosField.get(game);
-            final var copy = Map.copyOf(gameHolos);
-            copy.forEach((spawner, holo) -> {
-                if (spawner.getFloatingEnabled()) {
-                    final var mat = spawner.getItemSpawnerType().getMaterial();
-                    final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
-                            mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
-                    if (convertedMat != null) {
-                        holo.destroy();
-                        gameHolos.remove(spawner);
-                        rotatingGenerators.add(new RotatingGenerator(arena, spawner,new ItemStack(convertedMat)));
+            if (SBAHypixelify.getConfigurator().config.getBoolean("floating-generator.enabled")) {
+                final var gameHoloField = game
+                        .getClass()
+                        .getDeclaredField("countdownHolograms");
+                gameHoloField.setAccessible(true);
+                final var gameHoloMap = (Map<ItemSpawner, Hologram>) gameHoloField.get(game);
+                final var copy = Map.copyOf(gameHoloMap);
+                copy.forEach((spawner, holo) -> {
+                    if (spawner.getFloatingEnabled()) {
+                        final var mat = spawner.getItemSpawnerType().getMaterial();
+                        final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
+                                mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
+                        if (convertedMat != null) {
+                            holo.destroy();
+                            gameHoloMap.remove(spawner);
+                            rotatingGenerators.add(new RotatingGenerator(arena, spawner,new ItemStack(convertedMat)));
+                        }
                     }
-                }
-            });
+                });
+                gameHoloField.set(game, copy);
+            }
 
-            gameHolosField.set(game, copy);
         } catch (Exception e) {
-            e.printStackTrace();
+            SBAHypixelify.getExceptionManager().handleException(e);
         }
         this.storage = arena.getStorage();
         timerUpgrades = SBAHypixelify.getConfigurator().config
@@ -186,12 +188,10 @@ public class GameTask extends BukkitRunnable {
                                         .getStringList("floating-generator.holo-text");
                                 final var newLines = new ArrayList<String>();
                                 if (lines != null) {
-                                    lines.forEach(line-> {
-                                        newLines.add(line
-                                                .replace("{time}", String.valueOf(generator.getTime()))
-                                                .replace("{tier}", tierLevel)
-                                                .replace("{material}", generatorMatType.name()));
-                                    });
+                                    lines.forEach(line-> newLines.add(line
+                                            .replace("{time}", String.valueOf(generator.getTime()))
+                                            .replace("{tier}", tierLevel)
+                                            .replace("{material}", generatorMatType.name())));
                                 }
                                 generator.update(newLines);
                                 generator.setTierLevel(generator.getTierLevel() + 1);

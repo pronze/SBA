@@ -14,11 +14,10 @@ import org.screamingsandals.bedwars.special.SpecialItem;
 
 @Getter
 public class Dragon extends SpecialItem {
-    @Getter private LivingEntity entity;
+    private LivingEntity entity;
     private final Location location;
     private final Team team;
     private final Game game;
-
 
     public Dragon(Game game, Player player, Team team,
                   Location location) {

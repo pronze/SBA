@@ -6,8 +6,10 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
+import pronze.hypixelify.api.config.ConfiguratorAPI;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
@@ -18,35 +20,17 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Configurator {
-
-    //TODO: remove the static shits later
+public class Configurator implements ConfiguratorAPI {
     public static HashMap<String, Integer> game_size = new HashMap<>();
     public static HashMap<String, List<String>> Scoreboard_Lines;
     public static String date;
     public final File dataFolder;
-    public final SBAHypixelify main;
 
-    public File configFile,
-            langFolder,
-            shopFolder,
-            gamesInventoryFolder;
+    public File configFile, langFolder, shopFolder, gamesInventoryFolder;
     public FileConfiguration config;
 
     public Configurator(SBAHypixelify main) {
         this.dataFolder = main.getDataFolder();
-        this.main = main;
-    }
-
-    private static void checkOrSet(AtomicBoolean modify, FileConfiguration config, String path, Object value) {
-        if (!config.isSet(path)) {
-            if (value instanceof Map) {
-                config.createSection(path, (Map<?, ?>) value);
-            } else {
-                config.set(path, value);
-            }
-            modify.set(true);
-        }
     }
 
     public void loadDefaults() {
@@ -83,13 +67,13 @@ public class Configurator {
             Logger.trace("Making directory GamesInv, status: {}", gamesInventoryFolder.mkdirs());
         }
 
-        addFile("games-inventory/solo.yml");
-        addFile("games-inventory/double.yml");
-        addFile("games-inventory/triple.yml");
-        addFile("games-inventory/squad.yml");
+        saveFile("games-inventory/solo.yml");
+        saveFile("games-inventory/double.yml");
+        saveFile("games-inventory/triple.yml");
+        saveFile("games-inventory/squad.yml");
 
-        addFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "shop.yml");
-        addFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "upgradeShop.yml");
+        saveFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "shop.yml");
+        saveFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "upgradeShop.yml");
 
         if (!langFolder.exists()) {
             langFolder.mkdirs();
@@ -109,9 +93,13 @@ public class Configurator {
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);
         checkOrSetConfig(modify, "disable-armor-inventory-movement", true);
         checkOrSetConfig(modify, "version", SBAHypixelify.getInstance().getVersion());
-        if (config.isSet("floating-generator")) {
-            config.set("floating-generator", null);
-        }
+        checkOrSetConfig(modify, "floating-generator.enabled", true);
+        checkOrSetConfig(modify, "floating-generator.holo-height", 2.0);
+        checkOrSetConfig(modify, "floating-generator.holo-text", Arrays.asList(
+                "§eTier §c{tier}",
+                "{material}",
+                "§eSpawns in §c{seconds} §eseconds"
+        ));
         checkOrSetConfig(modify, "upgrades.timer-upgrades-enabled", true);
         checkOrSetConfig(modify, "upgrades.show-upgrade-message", true);
         checkOrSetConfig(modify, "upgrades.trap-detection-range", 7);
@@ -481,16 +469,16 @@ public class Configurator {
         ShopUtil.initKeys();
         if (config.getBoolean("first_start")) {
             Bukkit.getLogger().info("§aDetected first start");
-            upgradeCustomFiles();
+            upgrade();
             config.set("first_start", false);
             saveConfig();
         }
     }
 
-    private void addFile(String fileName, String saveTo) {
+    private void saveFile(String fileName, String saveTo) {
         final var file = new File(dataFolder, fileName);
         if (!file.exists()) {
-            main.saveResource(saveTo, false);
+            SBAHypixelify.getInstance().saveResource(saveTo, false);
         }
     }
 
@@ -501,18 +489,20 @@ public class Configurator {
         }
     }
 
-    private void addFile(String fileName) {
-        addFile(fileName, fileName);
+    private void saveFile(String fileName) {
+        saveFile(fileName, fileName);
     }
 
-    public void upgradeCustomFiles() {
+    @Override
+    public void upgrade() {
         config.set("version", SBAHypixelify.getInstance().getVersion());
         config.set("autoset-bw-config", false);
         saveConfig();
 
-        main.saveResource("shops/shop.yml", true);
-        main.saveResource("shops/upgradeShop.yml", true);
-        try (final var inputStream = main.getResource("config.yml")) {
+        config.getString("tt", "");
+        SBAHypixelify.getInstance().saveResource("shops/shop.yml", true);
+        SBAHypixelify.getInstance().saveResource("shops/upgradeShop.yml", true);
+        try (final var inputStream = SBAHypixelify.getInstance().getResource("config.yml")) {
             if (inputStream != null) {
                 final var configFile =
                         new File(Main.getInstance().getDataFolder().toFile(), "config.yml");
@@ -551,6 +541,24 @@ public class Configurator {
         return list;
     }
 
+    @Override
+    public Integer getInt(String path, Integer def) {
+        return config.getInt(path, def);
+    }
+
+    @Override
+    public Byte getByte(String path, Byte def) {
+        final var val = config.getInt(path, def);
+        if (val > 127 || val < -128)
+            return def;
+        return (byte) val;
+    }
+
+    @Override
+    public Boolean getBoolean(String path, boolean def) {
+        return config.getBoolean(path, def);
+    }
+
     public String getString(String path) {
         if (config.isSet(path)) {
             final var val = config.getString(path);
@@ -569,7 +577,18 @@ public class Configurator {
         return str;
     }
 
-    private void checkOrSetConfig(AtomicBoolean modify, String path, Object value) {
+    public void checkOrSetConfig(AtomicBoolean modify, String path, @NotNull Object value) {
         checkOrSet(modify, this.config, path, value);
+    }
+
+    private static void checkOrSet(AtomicBoolean modify, FileConfiguration config, String path, Object value) {
+        if (!config.isSet(path)) {
+            if (value instanceof Map) {
+                config.createSection(path, (Map<?, ?>) value);
+            } else {
+                config.set(path, value);
+            }
+            modify.set(true);
+        }
     }
 }

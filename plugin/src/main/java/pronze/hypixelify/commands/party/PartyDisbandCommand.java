@@ -38,6 +38,7 @@ public class PartyDisbandCommand {
                             }
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
@@ -58,6 +59,7 @@ public class PartyDisbandCommand {
                                         if (disbandEvent.isCancelled()) return;
 
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getPartyManager()
                                                 .disband(party.getUUID());
                                     }, () -> SBAHypixelify

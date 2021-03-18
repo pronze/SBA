@@ -260,12 +260,14 @@ public class PlayerListener implements Listener {
         final var wrappedPlayer =  PlayerMapper.wrapPlayer(player)
                 .as(PlayerWrapperImpl.class);
         SBAHypixelify
+                .getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
                 .ifPresent(party -> {
                     party.removePlayer(wrappedPlayer);
                     if (party.getMembers().size() == 1) {
                         SBAHypixelify
+                                .getInstance()
                                 .getPartyManager()
                                 .disband(party.getUUID());
                         return;
@@ -282,20 +284,20 @@ public class PlayerListener implements Listener {
                                             .getStringList("party.message.promoted-leader")
                                             .stream().map(str -> str.replace("{player}", member.getName()))
                                             .forEach(str -> party.getMembers().forEach(m -> m.getInstance().sendMessage(str)));
-                                }, () -> SBAHypixelify.getPartyManager()
+                                }, () -> SBAHypixelify.getInstance().getPartyManager()
                                         .disband(party.getUUID()));
                     }
                 });
-        SBAHypixelify.getWrapperService().unregister(player);
+        SBAHypixelify.getInstance().getPlayerWrapperService().unregister(player);
     }
 
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
-        SBAHypixelify.getWrapperService().register(player);
+        SBAHypixelify.getInstance().getPlayerWrapperService().register(player);
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
-            if (SBAHypixelify.isUpgraded()) {
+            if (SBAHypixelify.getInstance().isUpgraded()) {
                 Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                     player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                     player.sendMessage("Type /bwaddon upgrade to upgrade file");

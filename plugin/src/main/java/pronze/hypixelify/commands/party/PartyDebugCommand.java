@@ -33,6 +33,7 @@ public class PartyDebugCommand {
                             final var sender = (Player)ctx.getSender();
 
                             SBAHypixelify
+                                    .getInstance()
                                     .getPartyManager()
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> sender.sendMessage(party.toString()), () ->

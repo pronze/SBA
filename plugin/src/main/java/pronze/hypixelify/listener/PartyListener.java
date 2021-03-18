@@ -21,6 +21,7 @@ public class PartyListener implements Listener {
 
         if (player.isPartyChatEnabled() && player.isInParty()) {
             SBAHypixelify
+                    .getInstance()
                     .getPartyManager()
                     .getPartyOf(player)
                     .ifPresent(party -> {

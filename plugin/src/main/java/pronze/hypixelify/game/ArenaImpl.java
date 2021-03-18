@@ -7,9 +7,8 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.data.PlayerData;
+import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 import pronze.hypixelify.scoreboard.GameScoreboardManagerImpl;
 import pronze.hypixelify.utils.SBAUtil;
@@ -24,7 +23,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
     private final Game game;
     private final GameScoreboardManagerImpl scoreboardManager;
     private final GameStorage storage;
-    private final Map<UUID, PlayerData> playerDataMap = new HashMap<>();
+    private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final GameTask gameTask;
 
     public ArenaImpl(Game game) {
@@ -35,7 +34,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
         gameTask = new GameTask(this);
         scoreboardManager = new GameScoreboardManagerImpl(this);
         game.getConnectedPlayers()
-                .forEach(player -> putPlayerData(player.getUniqueId(), PlayerData.from(player)));
+                .forEach(player -> putPlayerData(player.getUniqueId(), GamePlayerData.from(player)));
     }
 
     public void onGameStarted() {
@@ -73,7 +72,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
             String firstKillerName = nullStr;
             int firstKillerScore = 0;
 
-            for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
+            for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
                 final var kills = playerData.getKills();
                 if (kills > 0 && kills > firstKillerScore) {
@@ -85,7 +84,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
             String secondKillerName = nullStr;
             int secondKillerScore = 0;
 
-            for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
+            for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
                 final var kills = playerData.getKills();
                 final var name = playerData.getName();
@@ -98,7 +97,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
 
             String thirdKillerName = nullStr;
             int thirdKillerScore = 0;
-            for (Map.Entry<UUID, PlayerData> entry : playerDataMap.entrySet()) {
+            for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
                 final var kills = playerData.getKills();
                 final var name = playerData.getName();
@@ -136,11 +135,11 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
 
     }
 
-    public void putPlayerData(UUID uuid, PlayerData data) {
+    public void putPlayerData(UUID uuid, GamePlayerData data) {
         playerDataMap.put(uuid, data);
     }
 
-    public PlayerData getPlayerData(UUID uuid) {
+    public GamePlayerData getPlayerData(UUID uuid) {
         return playerDataMap.get(uuid);
     }
 
