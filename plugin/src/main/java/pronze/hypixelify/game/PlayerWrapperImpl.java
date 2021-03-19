@@ -1,37 +1,32 @@
 package pronze.hypixelify.game;
 
 import com.google.common.base.Strings;
-import net.kyori.adventure.audience.ForwardingAudience;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.audience.Audience;
+import org.bukkit.ChatColor;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.statistics.PlayerStatistic;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
-import java.util.UUID;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static pronze.hypixelify.lib.lang.I.i18n;
 
 
 public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.PlayerWrapper implements PlayerWrapper {
-    private final String name;
-    private final PlayerStatistic statistic;
     private int shout;
-    private boolean shouted;
+    private boolean shoutCooldown;
     private final AtomicBoolean isInParty = new AtomicBoolean(false);
     private final AtomicBoolean isInvitedToParty = new AtomicBoolean(false);
     private final AtomicBoolean isPartyChatEnabled = new AtomicBoolean(false);
 
     public PlayerWrapperImpl(Player player) {
         super(player.getName(), player.getUniqueId());
-        name = player.getName();
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
-        statistic = PlayerStatisticManager.getInstance().getStatistic(PlayerMapper.wrapPlayer(player));
     }
 
     @Override
@@ -76,65 +71,43 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     }
 
     @Override
-    public double getKD() {
-        return statistic.getKD();
-    }
-
-    @Override
     public boolean canShout() {
-        return !shouted;
+        return !shoutCooldown;
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
+    public void shout(String message, Game game) {
+        if (!shoutCooldown) {
+            shoutCooldown = true;
+            game.getConnectedPlayers().forEach(pl -> pl.sendMessage(message));
+            if (getInstance().hasPermission("hypixelify.shout.unlimited")
+                    || SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60) == 0)
+                shoutCooldown = false;
 
-    @Override
-    public int getKills() {
-        return statistic.getKills();
-    }
-
-    @Override
-    public int getWins() {
-        return statistic.getWins();
-    }
-
-    @Override
-    public int getBedDestroys() {
-        return statistic.getDestroyedBeds();
-    }
-
-    @Override
-    public int getDeaths() {
-        return statistic.getDeaths();
-    }
-
-    @Override
-    public void shout() {
-        if (!shouted) {
-            shouted = true;
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     shout--;
                     if (shout == 0) {
-                        shouted = false;
-                        shout = SBAHypixelify
-                                .getConfigurator()
-                                .config
-                                .getInt("shout.time-out", 60);
+                        shoutCooldown = false;
+                        shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
                         this.cancel();
                     }
                 }
             }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
+        } else {
+            final var shout = String.valueOf(getShoutTimeOut());
+            sendMessage(i18n("shout_wait", true).replace("{seconds}", shout));
         }
     }
 
     @Override
     public int getXP() {
         try {
-            return statistic.getScore();
+            return PlayerStatisticManager
+                    .getInstance()
+                    .getStatistic(PlayerMapper.wrapPlayer(getInstance()))
+                    .getScore();
         } catch (Exception e) {
             return 1;
         }
@@ -142,12 +115,7 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
 
     @Override
     public int getLevel() {
-        int xp = getXP();
-
-        if (xp < 50)
-            return 1;
-
-        return getXP() / 500;
+        return (getXP() < 50 ? 1 : getXP() / 500);
     }
 
     @Override
@@ -174,6 +142,7 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
         return progress;
     }
 
+    @Override
     public String getStringProgress() {
         String progress = null;
         try {

@@ -55,8 +55,8 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
-    public Optional<Party> getOrCreate(@NotNull PlayerWrapper leader) {
-        return get(leader).or(() -> createParty(leader));
+    public Optional<Party> getOrCreate(@NotNull PlayerWrapper player) {
+        return getPartyOf(player).or(() -> createParty(player));
     }
 
     @Override

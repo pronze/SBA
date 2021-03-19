@@ -8,6 +8,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.game.TeamColor;
+import pronze.hypixelify.api.Permissions;
+
 import java.util.List;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
@@ -17,10 +19,6 @@ public class ShoutCommand {
 
     public ShoutCommand(BukkitCommandManager<CommandSender> manager) {
         this.manager = manager;
-    }
-
-    public boolean canByPass(Player player){
-        return player.hasPermission("bwaddon.shout") || player.isOp();
     }
 
     @SuppressWarnings("unchecked")
@@ -49,7 +47,7 @@ public class ShoutCommand {
                             final var cancelShout = SBAHypixelify.getConfigurator()
                                     .config.getInt("shout.time-out", 60) == 0;
 
-                            if(!cancelShout && !canByPass(player)) {
+                            if(!cancelShout && !player.hasPermission(Permissions.SHOUT_BYPASS.getKey())) {
                                 if (!playerWrapper.canShout()) {
                                     final var shout = String.valueOf(playerWrapper.getShoutTimeOut());
                                     player.sendMessage(i18n("shout_wait", true)
@@ -80,12 +78,7 @@ public class ShoutCommand {
                                 st = st.replace("{team}", team.getName());
                             }
 
-                            for(Player pl : game.getConnectedPlayers()){
-                                pl.sendMessage(st);
-                            }
-
-                            if(!cancelShout && !canByPass(player))
-                                playerWrapper.shout();
+                            playerWrapper.shout(st, game);
                         }).execute()));
     }
 }

@@ -1,6 +1,7 @@
 package pronze.hypixelify.api.wrapper;
 
 import org.bukkit.entity.Player;
+import org.screamingsandals.bedwars.api.game.Game;
 
 import java.util.UUID;
 
@@ -8,50 +9,26 @@ public interface PlayerWrapper {
 
     /**
      *
-     * @return
+     * @return A string instance containing the player's name
      */
     String getName();
 
     /**
      *
-     * @return
+     * @return true if player can shout and is not in cool down, false otherwise
      */
     boolean canShout();
 
     /**
-     *
+     * Shouts a message to all the players of a particular game.
      */
-    void shout();
+    void shout(String message, Game game);
 
     /**
      *
      * @return
      */
     int getShoutTimeOut();
-
-    /**
-     *
-     * @return
-     */
-    int getKills();
-
-    /**
-     *
-     * @return
-     */
-    int getBedDestroys();
-
-    /**
-     *
-     * @return
-     */
-    int getDeaths();
-
-    /**
-     *
-     * @return
-     */
-    double getKD();
 
     /**
      *
@@ -64,12 +41,6 @@ public interface PlayerWrapper {
      * @return
      */
     int getLevel();
-
-    /**
-     *
-     * @return
-     */
-    int getWins();
 
     /**
      *
@@ -129,4 +100,10 @@ public interface PlayerWrapper {
      * @param bool
      */
     void setPartyChatEnabled(boolean bool);
+
+    /**
+     *
+     * @return
+     */
+    String getStringProgress();
 }

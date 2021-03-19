@@ -6,7 +6,8 @@ import lombok.Getter;
 
 @Getter
 public enum Permissions {
-    UPGRADE("hypixelify.upgrade");
+    UPGRADE("hypixelify.upgrade"),
+    SHOUT_BYPASS("hypixelify.shout.unlimited");
 
     private final String key;
 

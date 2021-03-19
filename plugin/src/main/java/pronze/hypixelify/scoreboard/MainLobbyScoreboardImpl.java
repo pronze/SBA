@@ -16,6 +16,9 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
+import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
@@ -141,16 +144,20 @@ public class MainLobbyScoreboardImpl implements Listener {
                 .lines(SBAHypixelify.getConfigurator().getStringList("main-lobby.lines"))
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
-                    final var progress = playerData.getProgress();
+                    final var progress = playerData.getStringProgress();
+                    final var playerStatistic  = PlayerStatisticManager
+                            .getInstance()
+                            .getStatistic(PlayerMapper.wrapPlayer(player));
+
                     return hook.getLine()
-                            .replace("{kills}", String.valueOf(playerData.getKills()))
-                            .replace("{beddestroys}", String.valueOf(playerData.getBedDestroys()))
-                            .replace("{deaths}", String.valueOf(playerData.getDeaths()))
+                            .replace("{kills}", String.valueOf(playerStatistic.getKills()))
+                            .replace("{beddestroys}", String.valueOf(playerStatistic.getDestroyedBeds()))
+                            .replace("{deaths}", String.valueOf(playerStatistic.getDeaths()))
                             .replace("{level}", "§7" + playerData.getLevel() + "✫")
                             .replace("{progress}", progress)
                             .replace("{bar}", bar)
-                            .replace("{wins}", String.valueOf(playerData.getWins()))
-                            .replace("{k/d}", String.valueOf(playerData.getKD()));
+                            .replace("{wins}", String.valueOf(playerStatistic.getWins())
+                            .replace("{k/d}", String.valueOf(playerStatistic.getKD())));
                 }).build();
 
         scoreboardMap.put(player, scoreboard);
