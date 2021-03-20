@@ -48,3 +48,4 @@ shout_wait: "§c {seconds} がこのコマンドを使用するまで待つ必�
 countdown: "§a{countdown}秒後に§f開始"
 none: "None"
 command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"
