@@ -1,6 +1,7 @@
 package pronze.hypixelify.game;
 
 import com.google.common.base.Strings;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
@@ -38,7 +39,7 @@ public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.P
     public void sendMessage(String message) { getInstance().sendMessage(message); }
 
     @Override
-    public Player getInstance() { return (Player)getWrappedPlayer().get(); }
+    public Player getInstance() { return Bukkit.getPlayer(getUuid()); }
 
     @Override
     public boolean isInParty() {

@@ -270,7 +270,7 @@ public class ShopInventoryListener implements Listener {
 
         if (!MainConfig.getInstance().node("removePurchaseMessages").getBoolean(false)) {
             player.sendMessage(i18nc("buy_succes", game.getCustomPrefix()).replace("%item%", newItem.getAmount() + "x " + getNameOrCustomNameOfItem(newItem))
-                    .replace("%material%", event.getTradeEvent().getPrices().get(9) + " " + type.getItemName()));
+                    .replace("%material%", event.getTradeEvent().getPrices().get(0) + " " + type.getItemName()));
         }
         Sounds.playSound(player, player.getLocation(),
                 MainConfig.getInstance().node("sounds", "item_buy").getString(), Sounds.ENTITY_ITEM_PICKUP, 1, 1);

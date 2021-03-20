@@ -12,10 +12,11 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.hologram.Hologram;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.lib.utils.visual.TextEntry;
 import org.screamingsandals.bedwars.utils.Sounds;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.data.GeneratorData;
 import pronze.hypixelify.api.events.SBATeamTrapTriggeredEvent;
 import pronze.hypixelify.utils.SBAUtil;
 
@@ -41,44 +42,23 @@ public class GameTask extends BukkitRunnable {
     private final boolean showUpgradeMessage;
     private int time;
     private int tier = 1;
-    private final List<RotatingGenerator> rotatingGenerators = new ArrayList<>();
+    private final List<GeneratorData> generatorData = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
     public GameTask(ArenaImpl arena) {
         this.arena = arena;
         this.game = arena.getGame();
-        try {
-            if (SBAHypixelify.getConfigurator().config.getBoolean("floating-generator.enabled")) {
-                final var gameHoloField = game
-                        .getClass()
-                        .getDeclaredField("countdownHolograms");
-                gameHoloField.setAccessible(true);
-                final var gameHoloMap = (Map<ItemSpawner, Hologram>) gameHoloField.get(game);
-                final var copy = Map.copyOf(gameHoloMap);
-                copy.forEach((spawner, holo) -> {
-                    if (spawner.getFloatingEnabled()) {
-                        final var mat = spawner.getItemSpawnerType().getMaterial();
-                        final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
-                                mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
-                        if (convertedMat != null) {
-                            holo.destroy();
-                            gameHoloMap.remove(spawner);
-                            rotatingGenerators.add(new RotatingGenerator(arena, spawner,new ItemStack(convertedMat)));
-                        }
-                    }
-                });
-                gameHoloField.set(game, copy);
-            }
-
-        } catch (Exception e) {
-            SBAHypixelify.getExceptionManager().handleException(e);
-        }
         this.storage = arena.getStorage();
         timerUpgrades = SBAHypixelify.getConfigurator().config
                 .getBoolean("upgrades.timer-upgrades-enabled", true);
         showUpgradeMessage = SBAHypixelify.getConfigurator().config
                 .getBoolean("upgrades.show-upgrade-message", true);
+        multiplier = SBAHypixelify.getConfigurator().config.getDouble("upgrades.multiplier", 0.25);
+        linkSpawnerData();
+        loadTierSettings();
+        runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
+    }
 
+    private void loadTierSettings() {
         byte inc = 1;
         for (int i = 1; i < 9; i++) {
             final var romanNumeral = SBAUtil.romanNumerals.get(inc);
@@ -99,8 +79,21 @@ public class GameTask extends BukkitRunnable {
 
         Tiers.put(9, i18n("game-end"));
         tier_timer.put(9, game.getGameTime());
-        multiplier = SBAHypixelify.getConfigurator().config.getDouble("upgrades.multiplier", 0.25);
-        runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
+    }
+
+    private void linkSpawnerData() {
+        if (SBAHypixelify.getConfigurator().config.getBoolean("floating-generator.enabled")) {
+            game.getItemSpawners().forEach((spawner) -> {
+                if (spawner.getFloatingEnabled()) {
+                    final var mat = spawner.getItemSpawnerType().getMaterial();
+                    final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
+                            mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
+                    if (convertedMat != null) {
+                        generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
+                    }
+                }
+            });
+        }
     }
 
     @Override
@@ -180,20 +173,10 @@ public class GameTask extends BukkitRunnable {
                         final var tierName = Tiers.get(tier);
                         final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
 
-                        for (final var generator : rotatingGenerators) {
+                        for (final var generator : generatorData) {
                             final var generatorMatType = generator.getItemStack().getType();
                             if (generatorMatType == type) {
-                                final var lines = SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("floating-generator.holo-text");
-                                final var newLines = new ArrayList<String>();
-                                if (lines != null) {
-                                    lines.forEach(line-> newLines.add(line
-                                            .replace("{time}", String.valueOf(generator.getTime()))
-                                            .replace("{tier}", tierLevel)
-                                            .replace("{material}", generatorMatType.name())));
-                                }
-                                generator.update(newLines);
+                                generator.getItemSpawner().getHologram().replaceLine(2, TextEntry.of(i18n("spawner_holo_tier_format").replace("{tier}", tierLevel)));
                                 generator.setTierLevel(generator.getTierLevel() + 1);
                             }
                         }

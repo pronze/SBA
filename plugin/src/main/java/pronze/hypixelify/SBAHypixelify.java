@@ -34,7 +34,6 @@ import pronze.hypixelify.scoreboard.MainLobbyScoreboardImpl;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.core.Core;
 
 import java.util.*;
 
@@ -68,7 +67,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public void onEnable() {
         exceptionManager = new ExceptionManager();
-        Core.init(this);
         plugin = this;
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
