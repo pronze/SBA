@@ -81,6 +81,7 @@ public class ShopInventoryListener implements Listener {
     @EventHandler
     public void onIncludeEvent(BedwarsStoreIncludeEvent event) {
         try {
+            event.setCancelled(true);
             var file = event.getFile();
             var name = event.getName();
             var builder = event.getBuilder();
@@ -155,7 +156,7 @@ public class ShopInventoryListener implements Listener {
     }
 
     @EventHandler
-    public void onPrePurchaseEvent(BedwarsStorePrePurchaseEvent event) throws NoSuchFieldException, IllegalAccessException {
+    public void onPrePurchaseEvent(BedwarsStorePrePurchaseEvent event)  {
         event.setCancelled(true);
         if (event.getType() != PurchaseType.NORMAL_ITEM) return;
 
