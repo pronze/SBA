@@ -89,6 +89,9 @@ public class GameTask extends BukkitRunnable {
                     final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
                             mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
                     if (convertedMat != null) {
+
+                        ((ItemSpawner)spawner).getHologram().replaceLine(2, TextEntry.of(i18n("spawner_holo_tier_format").replace("{tier}", String.valueOf(1))));
+
                         generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
                     }
                 }
@@ -176,7 +179,7 @@ public class GameTask extends BukkitRunnable {
                         for (final var generator : generatorData) {
                             final var generatorMatType = generator.getItemStack().getType();
                             if (generatorMatType == type) {
-                                generator.getItemSpawner().getHologram().replaceLine(2, TextEntry.of(i18n("spawner_holo_tier_format").replace("{tier}", tierLevel)));
+                                generator.getItemSpawner().getHologram().bottomLine(TextEntry.of(i18n("spawner_holo_tier_format").replace("{tier}", tierLevel)));
                                 generator.setTierLevel(generator.getTierLevel() + 1);
                             }
                         }
