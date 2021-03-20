@@ -48,3 +48,4 @@ shout_wait: "§c Du måste vänta på att {seconds} ska använda detta kommando 
 countdown: "§fStartar om §a{countdown}s"
 none: "None"
 command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"
