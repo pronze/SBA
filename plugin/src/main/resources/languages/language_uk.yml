@@ -48,3 +48,4 @@ shout_wait: "§c Вам необхідно почекати на {seconds} що�
 countdown: "§fПочинаючи з §a{countdown}с"
 none: "None"
 command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"
