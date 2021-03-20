@@ -7,9 +7,7 @@ import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.manager.PartyManager;
-import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.api.service.WrapperService;
-import pronze.hypixelify.api.store.GameStore;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -75,12 +73,6 @@ public interface SBAHypixelifyAPI {
      * @return The {@link ArenaManager} instance that handles the creation or destruction of arenas.
      */
     ArenaManager getArenaManager();
-
-    /**
-     *
-     * @return A {@link GameStore} instance that can be shown to players.
-     */
-    GameStore getGameStore();
 
     /**
      *

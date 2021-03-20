@@ -4,15 +4,10 @@ import lombok.Data;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.TextComponent;
 import org.screamingsandals.bedwars.lib.hologram.Hologram;
-import org.screamingsandals.bedwars.lib.hologram.HologramManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.visual.TextEntry;
 import org.screamingsandals.bedwars.lib.world.LocationMapper;
 import pronze.hypixelify.SBAHypixelify;
@@ -53,7 +48,7 @@ public class RotatingGenerator {
                 .getStringList("floating-generator.holo-text");
 
         for (int i = 0; i < holoText.size(); i++) {
-            hologram.addLine(i, TextEntry.of(holoText.get(i)));
+            hologram.replaceLine(i, TextEntry.of(holoText.get(i)));
         }
         hologram.show();
 
@@ -99,7 +94,7 @@ public class RotatingGenerator {
             if (lines.get(i) == null) {
                 continue;
             }
-            hologram.setLine(i, TextEntry.of(lines.get(i)));
+            hologram.replaceLine(i, TextEntry.of(lines.get(i)));
         }
         this.lines = new ArrayList<>(lines);
     }

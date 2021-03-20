@@ -55,7 +55,10 @@ public class BWACommand {
                             SBAHypixelify.getConfigurator().config.set("main-lobby.pitch", location.getPitch());
                             SBAHypixelify.getConfigurator().saveConfig();
                         })
-                        .execute(() -> context.getSender().sendMessage(i18n("command_set_lobby_location")))));
+                        .execute(() -> {
+                            context.getSender().sendMessage(i18n("command_set_lobby_location"));
+                            SBAUtil.reloadPlugin(SBAHypixelify.getInstance());
+                        })));
 
         manager.command(builder.literal("reset")
                 .permission("misat11.bw.admin")

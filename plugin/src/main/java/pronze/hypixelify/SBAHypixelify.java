@@ -19,13 +19,12 @@ import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.manager.ArenaManager;
 import pronze.hypixelify.api.manager.PartyManager;
 import pronze.hypixelify.api.service.WrapperService;
-import pronze.hypixelify.api.store.GameStore;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
 import pronze.hypixelify.exception.ExceptionManager;
 import pronze.hypixelify.game.ArenaManagerImpl;
 import pronze.hypixelify.party.PartyManagerImpl;
-import pronze.hypixelify.store.SBAGameStore;
+import pronze.hypixelify.listener.ShopInventoryListener;
 import pronze.hypixelify.inventories.GamesInventory;
 import pronze.hypixelify.lib.lang.I18n;
 import pronze.hypixelify.listener.*;
@@ -36,7 +35,6 @@ import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.lib.core.Core;
-import pronze.lib.core.plugin.AbstractPlugin;
 
 import java.util.*;
 
@@ -51,7 +49,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private PlayerWrapperService playerWrapperService;
     private Configurator configurator;
     private PartyManagerImpl partyManager;
-    private GameStore SBAStore;
     private boolean debug = false;
     private boolean isSnapshot;
     private GamesInventory gamesInventory;
@@ -110,21 +107,20 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         configurator.loadDefaults();
 
         new CommandManager().init(this);
-        Logger.init(configurator.config.getBoolean("debug.enabled", false));
+        debug = configurator.config.getBoolean("debug.enabled", false);
+        Logger.init(debug);
         I18n.load(this, configurator.config.getString("locale"));
 
         playerWrapperService = new PlayerWrapperService();
         partyManager = new PartyManagerImpl();
 
-        debug = configurator.config.getBoolean("debug.enabled", false);
-
-        SBAStore = new SBAGameStore();
 
         gamesInventory = new GamesInventory();
         gamesInventory.loadInventory();
 
         arenaManager = new ArenaManagerImpl();
 
+        registerListener(new ShopInventoryListener());
         registerListener(new BedWarsListener());
         registerListener(new PlayerListener());
         registerListener(new TeamUpgradeListener());
@@ -207,11 +203,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     @Override
     public ArenaManager getArenaManager() {
         return arenaManager;
-    }
-
-    @Override
-    public GameStore getGameStore() {
-        return SBAStore;
     }
 
     @Override
