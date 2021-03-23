@@ -46,3 +46,6 @@ gamesinv_disabled: "§cGamesin tavaraluettelo on poistettu käytöstä, ota yhte
 not_in_game: "§c Sinun täytyy olla pelissä tehdäksesi tämän komennon!"
 shout_wait: "§c Sinun täytyy odottaa {seconds} käyttääksesi tätä komentoa uudelleen!"
 countdown: "§fAloitetaan §a{countdown}s"
+none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"

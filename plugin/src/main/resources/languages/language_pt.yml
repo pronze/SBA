@@ -46,3 +46,6 @@ gamesinv_disabled: "O inventário de §cGames foi desativado, contate o propriet
 not_in_game: "§c Você tem que estar em um jogo para fazer este comando!"
 shout_wait: "§c Você precisa esperar {seconds} para usar este comando novamente!"
 countdown: "§fComeçando em §a{countdown}s"
+none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"

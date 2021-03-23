@@ -46,3 +46,6 @@ gamesinv_disabled: "§cL'inventaire des jeux a été désactivé, contactez le p
 not_in_game: "§c Vous devez être dans un jeu pour faire cette commande!"
 shout_wait: "§c Vous devez attendre que {seconds} réutilise cette commande !"
 countdown: "§fCommencer dans §a{countdown}s"
+none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"

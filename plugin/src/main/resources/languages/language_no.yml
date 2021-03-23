@@ -46,3 +46,6 @@ gamesinv_disabled: "§cSpillbeholdning har blitt deaktivert, Kontakt servereiere
 not_in_game: "§c Du må være i et spill for å utføre denne kommandoen!"
 shout_wait: "§c Du må vente på at {seconds} skal bruke denne kommandoen igjen!"
 countdown: "§fStarter om §a{countdown}s"
+none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"

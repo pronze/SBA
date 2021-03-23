@@ -46,3 +46,6 @@ gamesinv_disabled: "§cSpellen inventaris is uitgeschakeld. Neem contact op met 
 not_in_game: "§c Je moet in een spel zijn om dit commando uit te voeren!"
 shout_wait: "§c Je moet wachten tot {seconds} deze opdracht opnieuw gebruikt!"
 countdown: "§fStart in §a{countdown}s"
+none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"
