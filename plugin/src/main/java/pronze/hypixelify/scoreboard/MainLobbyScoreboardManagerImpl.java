@@ -17,7 +17,6 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
@@ -27,12 +26,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class MainLobbyScoreboardImpl implements Listener {
+public class MainLobbyScoreboardManagerImpl implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
 
-    public MainLobbyScoreboardImpl() {
+    public MainLobbyScoreboardManagerImpl() {
         final var optionalLocation = SBAUtil.readLocationFromConfig("main-lobby");
         if (optionalLocation.isPresent()) {
             location = optionalLocation.get();
@@ -64,7 +63,7 @@ public class MainLobbyScoreboardImpl implements Listener {
         final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
 
         if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
-                && MainLobbyScoreboardImpl.isInWorld(e.getPlayer().getLocation())) {
+                && MainLobbyScoreboardManagerImpl.isInWorld(e.getPlayer().getLocation())) {
 
             if (SBAHypixelify.getConfigurator().getString("main-lobby.chat-format") != null) {
                 String format = SBAHypixelify.getConfigurator()

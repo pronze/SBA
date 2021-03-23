@@ -17,9 +17,12 @@ import org.screamingsandals.bedwars.api.events.BedwarsStorePrePurchaseEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.config.MainConfig;
+import org.screamingsandals.bedwars.lang.LangKeys;
 import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
+import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
+import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.sgui.events.OnTradeEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.PlayerItemInfo;
@@ -38,7 +41,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.screamingsandals.bedwars.lib.lang.I.i18nc;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class ShopInventoryListener implements Listener {
@@ -269,8 +271,11 @@ public class ShopInventoryListener implements Listener {
         }
 
         if (!MainConfig.getInstance().node("removePurchaseMessages").getBoolean(false)) {
-            player.sendMessage(i18nc("buy_succes", game.getCustomPrefix()).replace("%item%", newItem.getAmount() + "x " + getNameOrCustomNameOfItem(newItem))
-                    .replace("%material%", event.getTradeEvent().getPrices().get(0) + " " + type.getItemName()));
+            Message.of(LangKeys.IN_GAME_SHOP_BUY_SUCCESS)
+                    .prefixOrDefault(game.getCustomPrefixComponent())
+                    .placeholder("item", AdventureHelper.toComponent(newItem.getAmount() + "x " + getNameOrCustomNameOfItem(newItem)))
+                    .placeholder("material", AdventureHelper.toComponent(event.getTradeEvent().getPrices().get(0) + " " + type.getItemName()))
+                    .send(PlayerMapper.wrapPlayer(player));
         }
         Sounds.playSound(player, player.getLocation(),
                 MainConfig.getInstance().node("sounds", "item_buy").getString(), Sounds.ENTITY_ITEM_PICKUP, 1, 1);

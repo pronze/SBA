@@ -1,6 +1,7 @@
 package pronze.hypixelify.game;
 
 import lombok.Getter;
+import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
@@ -19,35 +20,31 @@ import static pronze.hypixelify.lib.lang.I.i18n;
 
 @Getter
 public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
+    private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
+    private final GameScoreboardManagerImpl scoreboardManager;
     private final double radius;
     private final Game game;
-    private final GameScoreboardManagerImpl scoreboardManager;
     private final GameStorage storage;
-    private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final GameTask gameTask;
 
     public ArenaImpl(Game game) {
-        radius = Math.pow(SBAHypixelify.getConfigurator().config.getInt(
-                "upgrades.trap-detection-range", 7), 2);
+        radius = Math.pow(SBAHypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
         this.game = game;
         storage = new GameStorage(game);
         gameTask = new GameTask(this);
         scoreboardManager = new GameScoreboardManagerImpl(this);
-        game.getConnectedPlayers()
-                .forEach(player -> putPlayerData(player.getUniqueId(), GamePlayerData.from(player)));
+        registerPlayerData(game.getConnectedPlayers().toArray(Player[]::new));
     }
 
-    public void onGameStarted() {
-        game.getConnectedPlayers().forEach(player -> SBAUtil.translateColors(SBAHypixelify.getConfigurator()
-                .getStringList("game-start.message"))
-                .stream()
-                .filter(Objects::nonNull)
-                .forEach(player::sendMessage));
+    private void registerPlayerData(Player... players) {
+        for (var player : players) {
+            putPlayerData(player.getUniqueId(), GamePlayerData.from(player));
+        }
     }
-
 
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var team = e.getTeam();
+        // send bed destroyed message to all players of the team
         team.getConnectedPlayers().forEach(player ->
                 SBAUtil.sendTitle(
                         PlayerMapper.wrapPlayer(e.getPlayer()),
@@ -57,13 +54,16 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
 
         final var destroyer = e.getPlayer();
         if (destroyer != null) {
-            final var data = playerDataMap.get(destroyer.getUniqueId());
-            final var currentDestroys = data.getBedDestroys();
-            data.setBedDestroys(currentDestroys + 1);
+            // increment bed destroy data for the destroyer
+            getPlayerData(destroyer.getUniqueId())
+                    .ifPresent(destroyerData ->
+                            destroyerData.setBedDestroys(destroyerData.getBedDestroys() + 1)
+                    );
         }
     }
 
     public void onOver(BedwarsGameEndingEvent e) {
+        // destroy scoreboard manager instance and GameTask, we do not need these anymore
         scoreboardManager.destroy();
         gameTask.cancel();
         final var winner = e.getWinningTeam();
@@ -135,31 +135,14 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
 
     }
 
+    @Override
     public void putPlayerData(UUID uuid, GamePlayerData data) {
         playerDataMap.put(uuid, data);
     }
 
-    public GamePlayerData getPlayerData(UUID uuid) {
-        return playerDataMap.get(uuid);
-    }
-
-    public void onBedWarsPlayerKilled(BedwarsPlayerKilledEvent e) {
-        final var victim = e.getPlayer();
-        final var victimData = playerDataMap.get(victim.getUniqueId());
-        victimData.setDeaths(victimData.getDeaths() + 1);
-
-        final var killer = e.getKiller();
-        if (killer != null) {
-            final var gVictim = Main.getPlayerGameProfile(victim);
-            if (gVictim == null || gVictim.isSpectator) return;
-
-            final var team = game.getTeamOfPlayer(gVictim.player);
-            if (team != null) {
-                final var killerData = playerDataMap.get(killer.getUniqueId());
-                killerData.setKills(killerData.getKills() + 1);
-                if (!team.isAlive()) killerData.setFinalKills(killerData.getFinalKills() + 1);
-            }
-        }
+    @Override
+    public Optional<GamePlayerData> getPlayerData(UUID uuid) {
+        return Optional.ofNullable(playerDataMap.get(uuid));
     }
 
     @Override

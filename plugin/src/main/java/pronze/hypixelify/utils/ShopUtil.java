@@ -9,9 +9,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.config.MainConfig;
+import org.screamingsandals.bedwars.lang.LangKeys;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
+import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
@@ -20,7 +21,6 @@ import pronze.hypixelify.listener.TeamUpgradeListener;
 
 import java.util.*;
 
-import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
 public class ShopUtil {
 
@@ -195,15 +195,15 @@ public class ShopUtil {
 
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = MainConfig.getInstance().readDefinedItem("shopback", "BARRIER");
-        backItem.setDisplayName(Component.text(i18n("shop_back", false)));
+        backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
         localOptionsBuilder.backItem(backItem);
 
         final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");
-        pageBackItem.setDisplayName(Component.text(i18n("page_back", false)));
+        pageBackItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_BACK).asComponent());
         localOptionsBuilder.pageBackItem(pageBackItem);
 
         final var pageForwardItem = MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
-        pageForwardItem.setDisplayName(Component.text(i18n("page_forward", false)));
+        pageForwardItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_FORWARD).asComponent());
         localOptionsBuilder.pageForwardItem(pageForwardItem);
 
         final var cosmeticItem = MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");

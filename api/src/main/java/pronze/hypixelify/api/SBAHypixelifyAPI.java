@@ -13,6 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -105,4 +106,16 @@ public interface SBAHypixelifyAPI {
      * @return true if recently has been upgraded, false otherwise.
      */
     boolean isUpgraded();
+
+    /**
+     *
+     * @return an {@link SimpleDateFormat} instance that has been configured from the bwaconfig.yml
+     */
+    SimpleDateFormat getSimpleDateFormat();
+
+    /**
+     *
+     * @return A formatted Date instance from {@link SimpleDateFormat} instance.
+     */
+    String getFormattedDate();
 }

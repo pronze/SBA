@@ -26,6 +26,7 @@ import pronze.hypixelify.utils.ShopUtil;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
@@ -39,7 +40,11 @@ public class BedWarsListener implements Listener {
         final var game = e.getGame();
         final var arena = new ArenaImpl(game);
         SBAHypixelify.getInstance().getArenaManager().addArena(arena);
-        arena.onGameStarted();
+        game.getConnectedPlayers().forEach(player -> SBAUtil.translateColors(SBAHypixelify.getConfigurator()
+                .getStringList("game-start.message"))
+                .stream()
+                .filter(Objects::nonNull)
+                .forEach(player::sendMessage));
     }
 
     @EventHandler
@@ -187,19 +192,44 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .fromCache(player.getUniqueId())
                 .ifPresent(Scoreboard::destroy);
-        player.setScoreboard(
-                Bukkit.getScoreboardManager().getMainScoreboard()
-        );
+        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
     @EventHandler
     public void onBedWarsPlayerKilledEvent(BedwarsPlayerKilledEvent e) {
         final var game = e.getGame();
+        // query arena instance for access to Victim/Killer data
         SBAHypixelify
                 .getInstance()
                 .getArenaManager()
                 .get(game.getName())
-                .ifPresent(arena -> arena.onBedWarsPlayerKilled(e));
+                .ifPresent(arena -> {
+                    final var victim = e.getPlayer();
+                    // player has died, increment death counter
+                    arena.getPlayerData(victim.getUniqueId())
+                            .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
+
+                    final var killer = e.getKiller();
+                    //killer is present
+                    if (killer != null) {
+                        // get victim game profile
+                        final var gVictim = Main.getPlayerGameProfile(victim);
+                        if (gVictim == null || gVictim.isSpectator) return;
+
+                        // get victim team to check if it was a final kill or not
+                        final var victimTeam = game.getTeamOfPlayer(victim);
+                        if (victimTeam != null) {
+                            arena.getPlayerData(killer.getUniqueId())
+                                    .ifPresent(killerData -> {
+                                        // increment kill counter for killer
+                                        killerData.setKills(killerData.getKills() + 1);
+                                        if (!victimTeam.isAlive())
+                                            // increment final kill counter for killer
+                                            killerData.setFinalKills(killerData.getFinalKills() + 1);
+                                    });
+                        }
+                    }
+                });
     }
 
 }

@@ -7,7 +7,8 @@ import lombok.Getter;
 @Getter
 public enum Permissions {
     UPGRADE("hypixelify.upgrade"),
-    SHOUT_BYPASS("hypixelify.shout.unlimited");
+    SHOUT_BYPASS("hypixelify.shout.unlimited"),
+    GENERATE_GAMES_INV("hypixelify.generate.gamesinv");
 
     private final String key;
 

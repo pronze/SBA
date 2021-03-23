@@ -90,8 +90,14 @@ public class GameTask extends BukkitRunnable {
                             mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
                     if (convertedMat != null) {
 
-                        ((ItemSpawner)spawner).getHologram().replaceLine(2, TextEntry.of(i18n("spawner_holo_tier_format").replace("{tier}", String.valueOf(1))));
-
+                        ((ItemSpawner)spawner)
+                                .getHologram()
+                                .replaceLine(
+                                        2,
+                                        TextEntry.of(i18n("spawner_holo_tier_format")
+                                                .replace("{tier}", "I")
+                                        )
+                                );
                         generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
                     }
                 }

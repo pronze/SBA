@@ -22,13 +22,9 @@ import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ScoreboardUtil;
-
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.ScoreboardManager {
-
-    private final static String date = new SimpleDateFormat(Configurator.date).format(new Date());
     private final Game game;
     private final ArenaImpl arena;
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
@@ -40,8 +36,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
         this.arena = arena;
         game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).get();
 
-        if (game.countAvailableTeams() >= 5 &&
-                Configurator.Scoreboard_Lines.containsKey("5")) {
+        if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("5"));
         } else {
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("default"));
@@ -148,9 +143,14 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
 
     public List<String> process(Player player, Scoreboard board) {
         final var lines = new ArrayList<String>();
-        final var playerData = arena.getPlayerData(player.getUniqueId());
+        final var optionalPlayerData = arena.getPlayerData(player.getUniqueId());
+
+        if (optionalPlayerData.isEmpty()) return List.of();
+        final var playerData = optionalPlayerData.get();
         final var playerTeam = game.getTeamOfPlayer(player);
-        final var statistic = PlayerStatisticManager.getInstance().getStatistic(PlayerMapper.wrapPlayer(player));
+        final var statistic = PlayerStatisticManager
+                .getInstance()
+                .getStatistic(PlayerMapper.wrapPlayer(player));
 
         if (statistic == null)
             return List.of();
@@ -191,7 +191,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                             .replace("{time}", game.getFormattedTimeLeft())
                             .replace("{formattime}", game.getFormattedTimeLeft())
                             .replace("{game}", game.getName())
-                            .replace("{date}", date)
+                            .replace("{date}", SBAHypixelify.getInstance().getFormattedDate())
                             .replace("{team_bed_status}", teamStatus == null ? "" : teamStatus);
 
                     if (arena.getGameTask() != null) {

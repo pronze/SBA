@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.exception.ExceptionHandler;
 
 public class ExceptionManager {
-    private ExceptionHandler handler;
+    private volatile ExceptionHandler handler;
 
     public ExceptionManager() {
         handler = (Throwable::printStackTrace);

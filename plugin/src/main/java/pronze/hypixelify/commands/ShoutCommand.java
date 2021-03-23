@@ -26,7 +26,7 @@ public class ShoutCommand {
         final var builder = this.manager.commandBuilder("shout");
         manager.command(builder
                 .senderType(Player.class)
-                .argument(StringArrayArgument.ofType(String.class, "args"))
+                .argument(StringArrayArgument.of( "args", (ctx, s) -> List.of()))
                 .handler(context -> manager.taskRecipe()
                         .begin(context)
                         .synchronous(c -> {

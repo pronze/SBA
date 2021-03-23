@@ -102,6 +102,15 @@ public class GamesInventory implements Listener {
                         .filter(Property::hasName)
                         .forEach(property -> {
                             switch (property.getPropertyName().toLowerCase()) {
+                                case "gamename":
+                                    try {
+                                        final var game = (Game) Main.getInstance().getGameManager().getGame(property.getPropertyData().getString()).get();
+                                        game.joinToGame(player);
+                                    } catch (Throwable t) {
+                                        player.sendMessage(i18n("game_not_found"));
+                                    }
+                                    player.closeInventory();
+                                    break;
                                 case "exit":
                                     player.closeInventory();
                                     break;
@@ -121,21 +130,6 @@ public class GamesInventory implements Listener {
                                     break;
                                 default:
                                     break;
-                            }
-
-                            var converted = ConfigurateUtils.raw(property.getPropertyData());
-                            if (!(converted instanceof Map)) {
-                                converted = DumpCommand.nullValuesAllowingMap("value", converted);
-                            }
-                            final var propertyMap = (Map<?, ?>)converted;
-                            if (propertyMap.containsKey("gameName")) {
-                                try {
-                                    final var game = (Game) Main.getInstance().getGameManager().getGame(propertyMap.get("gameName").toString()).get();
-                                    game.joinToGame(player);
-                                } catch (Throwable t) {
-                                    player.sendMessage(i18n("game_not_found"));
-                                }
-                                player.closeInventory();
                             }
                         });
             }

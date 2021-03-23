@@ -41,6 +41,4 @@ data:
       - stack: "PAPER;1;§aWaterfall;§8Squads; ;§aClick to play"
         row: 1
         column: 2
-        properties:
-          - name: game
-            gameName: test
+        gameName: test

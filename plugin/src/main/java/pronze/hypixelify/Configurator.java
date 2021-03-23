@@ -87,7 +87,7 @@ public class Configurator implements ConfiguratorAPI {
         checkOrSetConfig(modify, "store.replace-store-with-hypixelstore", true);
         checkOrSetConfig(modify, "running-generator-drops", List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"));
         checkOrSetConfig(modify, "block-item-drops", true);
-        checkOrSetConfig(modify, "allowed-item-drops", List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "ENDER_PEAL", "OBSIDIAN", "TNT"));
+        checkOrSetConfig(modify, "allowed-item-drops", List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "OBSIDIAN", "TNT"));
         checkOrSetConfig(modify, "give-killer-resources", true);
         checkOrSetConfig(modify, "remove-sword-on-upgrade", true);
         checkOrSetConfig(modify, "block-players-putting-certain-items-onto-chest", true);

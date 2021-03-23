@@ -25,7 +25,6 @@ import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.Permissions;
 import pronze.hypixelify.game.PlayerWrapperImpl;
@@ -42,25 +41,12 @@ import java.util.Objects;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class PlayerListener implements Listener {
-
-
-    private final List<Material> allowed;
+    private final List<Material> allowedDropItems;
     private final List<Material> generatorDropItems;
-    private final boolean giveKillerResources, respawnCooldown, disableArmorInventoryMovement,
-            disableArmorDamage, blockItemOnChest, blockItemDrops;
 
 
     public PlayerListener() {
-        final var config = SBAHypixelify.getConfigurator().config;
-
-        blockItemDrops = config.getBoolean("block-item-drops", true);
-        giveKillerResources = config.getBoolean("give-killer-resources", true);
-        respawnCooldown = config.getBoolean("respawn-cooldown.enabled", true);
-        disableArmorInventoryMovement = config.getBoolean("disable-armor-inventory-movement", true);
-        disableArmorDamage = config.getBoolean("disable-sword-armor-damage", true);
-        blockItemOnChest = config.getBoolean("block-players-putting-certain-items-onto-chest", true);
-
-        allowed = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
+        allowedDropItems = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
         generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
     }
 
@@ -88,31 +74,31 @@ public class PlayerListener implements Listener {
                         .filter(Objects::nonNull)
                         .forEach(stack -> {
                             final String name = stack.getType().name();
-
-                            if (name.endsWith("SWORD"))
-                                sword.addEnchantments(stack.getEnchantments());
-
-                            else if (name.endsWith("AXE"))
-                                itemArr.add(ShopUtil.checkifUpgraded(stack));
-
-                            else if (name.endsWith("LEGGINGS")
-                                    || name.endsWith("BOOTS")
-                                    || name.endsWith("CHESTPLATE")
-                                    || name.endsWith("HELMET"))
-                                itemArr.add(stack);
-
-                            else if (name.contains("SHEARS"))
-                                itemArr.add(stack);
-
+                            var endStr = name.substring(name.contains("_") ? name.indexOf("_") : name.length());
+                            switch (endStr) {
+                                case "SWORD":
+                                    sword.addEnchantments(stack.getEnchantments());
+                                    break;
+                                case "AXE":
+                                    itemArr.add(ShopUtil.checkifUpgraded(stack));
+                                    break;
+                                case "SHEARS":
+                                case "LEGGINGS":
+                                case "BOOTS":
+                                case "CHESTPLATE":
+                                case "HELMET":
+                                    itemArr.add(stack);
+                                    break;
+                            }
                         });
 
                 itemArr.add(sword);
-                final var playerData = arena.getPlayerData(player.getUniqueId());
-                playerData.setInventory(itemArr);
+                arena.getPlayerData(player.getUniqueId())
+                        .ifPresent(playerData -> playerData.setInventory(itemArr));
             }
 
 
-            if (giveKillerResources) {
+            if (SBAHypixelify.getConfigurator().config.getBoolean("give-killer-resources", true)) {
                 final var killer = e.getEntity().getKiller();
 
                 if (killer != null && BedwarsAPI.getInstance().isPlayerPlayingAnyGame(killer)
@@ -131,7 +117,8 @@ public class PlayerListener implements Listener {
             final var gVictim = Main.getPlayerGameProfile(player);
             final var victimTeam = Main.getInstance().getGameManager().getGame(game.getName()).get().getTeamOfPlayer(gVictim.player);
 
-            if (respawnCooldown && victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
+            if (SBAHypixelify.getConfigurator().config.getBoolean("respawn-cooldown.enabled", true) &&
+                    victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
                     game.getTeamOfPlayer(player).isTargetBlockExists()) {
 
                 new BukkitRunnable() {
@@ -194,7 +181,8 @@ public class PlayerListener implements Listener {
 
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
 
-        if (disableArmorInventoryMovement && event.getSlotType() == SlotType.ARMOR)
+        if (SBAHypixelify.getConfigurator().config.getBoolean("disable-armor-inventory-movement", true) &&
+                event.getSlotType() == SlotType.ARMOR)
             event.setCancelled(true);
 
         final var topSlot = event.getView().getTopInventory();
@@ -204,7 +192,7 @@ public class PlayerListener implements Listener {
 
         if (clickedInventory == null) return;
 
-        if (clickedInventory.equals(bottomSlot) && blockItemOnChest
+        if (clickedInventory.equals(bottomSlot) && SBAHypixelify.getConfigurator().config.getBoolean("block-players-putting-certain-items-onto-chest", true)
                 && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST)
                 && bottomSlot.getType() == InventoryType.PLAYER) {
             if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
@@ -218,13 +206,13 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(evt.getPlayer())) return;
-        if (!blockItemDrops) return;
+        if (!SBAHypixelify.getConfigurator().config.getBoolean("block-item-drops", true)) return;
 
         final var player = evt.getPlayer();
         final var ItemDrop = evt.getItemDrop().getItemStack();
         final var type = ItemDrop.getType();
 
-        if (!allowed.contains(type) && !type.name().endsWith("WOOL")) {
+        if (!allowedDropItems.contains(type) && !type.name().endsWith("WOOL")) {
             evt.setCancelled(true);
             player.getInventory().remove(ItemDrop);
         }
@@ -233,7 +221,7 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void itemDamage(PlayerItemDamageEvent e) {
-        if (!disableArmorDamage) return;
+        if (!SBAHypixelify.getConfigurator().config.getBoolean("disable-sword-armor-damage", true)) return;
         var player = e.getPlayer();
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
         if (Main.getPlayerGameProfile(player).isSpectator) return;

@@ -30,11 +30,12 @@ import pronze.hypixelify.lib.lang.I18n;
 import pronze.hypixelify.listener.*;
 import pronze.hypixelify.placeholderapi.SBAExpansion;
 import pronze.hypixelify.scoreboard.LobbyScoreboardManagerImpl;
-import pronze.hypixelify.scoreboard.MainLobbyScoreboardImpl;
+import pronze.hypixelify.scoreboard.MainLobbyScoreboardManagerImpl;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
@@ -51,6 +52,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private boolean debug = false;
     private boolean isSnapshot;
     private GamesInventory gamesInventory;
+    private Metrics metrics;
 
     public static SBAHypixelify getInstance() {
         return plugin;
@@ -124,20 +126,17 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         registerListener(new TeamUpgradeListener());
 
         if (configurator.config.getBoolean("main-lobby.enabled", false))
-            registerListener(new MainLobbyScoreboardImpl());
+            registerListener(new MainLobbyScoreboardManagerImpl());
         if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
             registerListener(new LobbyScoreboardManagerImpl());
 
-        final var pluginManager = Bukkit.getServer().getPluginManager();
-        try {
-            if (pluginManager.isPluginEnabled("PlaceholderAPI")) {
-                new SBAExpansion().register();
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
+        if (Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI"))
+            new SBAExpansion().register();
 
-        new Metrics(this, 79505);
+        metrics = new Metrics(this, 79505);
+        metrics.addCustomChart(new Metrics.SimplePie("build", () -> isSnapshot ? "snapshot" : "stable"));
+        metrics.addCustomChart(new Metrics.SimplePie("version", () -> version));
+
         Logger.trace("Registering API service provider");
 
         getServer().getServicesManager().register(
@@ -247,6 +246,16 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     public boolean isUpgraded() {
         return !Objects.requireNonNull(plugin.configurator.config.getString("version"))
                 .contains(SBAHypixelify.getInstance().getVersion());
+    }
+
+    @Override
+    public SimpleDateFormat getSimpleDateFormat() {
+        return new SimpleDateFormat(configurator.getString("date.format", "MM/dd/yy"));
+    }
+
+    @Override
+    public String getFormattedDate() {
+        return getSimpleDateFormat().format(new Date());
     }
 }
 

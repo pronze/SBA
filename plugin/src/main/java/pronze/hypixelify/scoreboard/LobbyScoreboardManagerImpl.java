@@ -26,7 +26,6 @@ import java.util.*;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 public class LobbyScoreboardManagerImpl implements Listener {
-    private static final String date = new SimpleDateFormat(Configurator.date).format(new Date());
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
 
     public static boolean isInLobby(Player player) {
@@ -130,7 +129,8 @@ public class LobbyScoreboardManagerImpl implements Listener {
         SBAHypixelify.getConfigurator()
                 .getStringList("lobby_scoreboard.lines").forEach(line -> {
             line = line
-                    .replace("{date}", date).replace("{state}", finalState)
+                    .replace("{date}", SBAHypixelify.getInstance().getFormattedDate())
+                    .replace("{state}", finalState)
                     .replace("{game}", game.getName())
                     .replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
                     .replace("{maxplayers}", String.valueOf(game.getMaxPlayers()))
