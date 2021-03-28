@@ -8,26 +8,19 @@ import pronze.hypixelify.api.manager.PartyManager;
 import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.core.Core;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.utils.Logger;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@AutoInitialize
 public class PartyManagerImpl implements PartyManager {
     private final Map<UUID, Party> partyMap = new ConcurrentHashMap<>();
 
     public PartyManagerImpl() {
         Logger.trace("PartyManager has been initialized!");
-    }
-
-    public static PartyManagerImpl getInstance() {
-        return Core.getObjectFromClass(PartyManagerImpl.class);
     }
 
     @Override

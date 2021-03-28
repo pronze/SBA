@@ -4,6 +4,7 @@ package pronze.hypixelify.commands;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.GameManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArgument;
 import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArrayArgument;
@@ -13,11 +14,9 @@ import org.screamingsandals.bedwars.lib.ext.configurate.hocon.HoconConfiguration
 import org.screamingsandals.bedwars.lib.ext.geantyref.TypeToken;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.Permissions;
-import pronze.hypixelify.inventories.GamesInventory;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.core.Core;
-import pronze.lib.core.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,7 +107,8 @@ public class BWACommand {
                             try {
                                 var root = loader.load();
 
-                                root.node("data").setList(new TypeToken<>() {}, List.of(
+                                root.node("data").setList(new TypeToken<>() {
+                                }, List.of(
                                         Map.of("stack", "RED_BED;1;§aBed Wars §7(Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!",
                                                 "row", "1",
                                                 "column", "1",
@@ -145,10 +145,11 @@ public class BWACommand {
                                                                     }
                                                                     if (row.get() >= 5) return;
 
-                                                                    add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + String.valueOf(arg.charAt(0)).toUpperCase() + arg.substring(1) + "; ;§aClick to play"),
-                                                                            "row", String.valueOf(row.get()),
-                                                                            "column", String.valueOf(col.get()),
-                                                                            "gameName",  game.getName()
+                                                                    add(
+                                                                            Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + String.valueOf(arg.charAt(0)).toUpperCase() + arg.substring(1) + "; ;§aClick to play"),
+                                                                                        "row", String.valueOf(row.get()),
+                                                                                    "column", String.valueOf(col.get()),
+                                                                                    "gameName",  game.getName()
                                                                             )
                                                                     );
                                                                 });
@@ -186,7 +187,7 @@ public class BWACommand {
                                 player.sendMessage(i18n("command_unknown", true));
                                 return;
                             }
-                            Core.getObjectFromClass(GamesInventory.class).openForPlayer(player, mode);
+                            SBAHypixelify.getInstance().getGamesInventory().openForPlayer(player, mode);
                         }).execute()));
 
         manager.command(builder.literal("upgrade")

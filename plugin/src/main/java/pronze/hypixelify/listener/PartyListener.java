@@ -10,9 +10,7 @@ import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyChatEvent;
 import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.lib.core.annotations.AutoInitialize;
 
-@AutoInitialize(listener = true)
 public class PartyListener implements Listener {
 
     @EventHandler

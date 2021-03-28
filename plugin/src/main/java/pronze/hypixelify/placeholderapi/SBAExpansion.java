@@ -4,9 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.lib.core.annotations.AutoInitialize;
 
-@AutoInitialize
 public class SBAExpansion extends PlaceholderExpansion {
     @Override
     public @NotNull String getIdentifier() {

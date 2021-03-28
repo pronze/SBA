@@ -52,6 +52,7 @@ public class ScoreboardUtil {
                         }
 
                         if (SBAHypixelify.getConfigurator().config.getBoolean("game.tab-health", true)) {
+
                             try {
                                 final var packet = new WrapperPlayServerScoreboardScore();
                                 packet.setValue(playerHealth);

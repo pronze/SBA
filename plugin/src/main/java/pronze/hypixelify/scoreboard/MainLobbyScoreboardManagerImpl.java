@@ -21,11 +21,9 @@ import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.core.Core;
 
 import java.util.HashMap;
 import java.util.Map;
-
 
 public class MainLobbyScoreboardManagerImpl implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
@@ -33,9 +31,6 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
 
     public MainLobbyScoreboardManagerImpl() {
-        if (!SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false))
-            return;
-        Core.registerListener(this);
         final var optionalLocation = SBAUtil.readLocationFromConfig("main-lobby");
         if (optionalLocation.isPresent()) {
             location = optionalLocation.get();

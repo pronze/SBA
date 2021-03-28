@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -16,10 +17,10 @@ import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ScoreboardUtil;
-import pronze.lib.core.Core;
-import pronze.lib.core.utils.Logger;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
@@ -27,10 +28,9 @@ import static pronze.hypixelify.lib.lang.I.i18n;
 public class LobbyScoreboardManagerImpl implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
 
-    public LobbyScoreboardManagerImpl() {
-        if (!SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
-            return;
-        Core.registerListener(this);
+    public static boolean isInLobby(Player player) {
+        final var game = BedwarsAPI.getInstance().getGameOfPlayer(player);
+        return game != null && game.getStatus() == GameStatus.WAITING;
     }
 
     @EventHandler

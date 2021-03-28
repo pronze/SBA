@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.lib.debug.Debug;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.sgui.SimpleInventoriesCore;
@@ -13,18 +14,18 @@ import org.screamingsandals.bedwars.lib.sgui.events.PostClickEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Property;
+import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAGamesInventoryOpenEvent;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.utils.Logger;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
-@AutoInitialize
 public class GamesInventory implements Listener {
     private final static HashMap<Integer, String> labels = new HashMap<>() {
         {
@@ -35,11 +36,6 @@ public class GamesInventory implements Listener {
         }
     };
     private final HashMap<Integer, InventorySet> inventoryMap = new HashMap<>();
-
-    public GamesInventory() {
-        SBAHypixelify.getInstance().registerListener(this);
-        loadInventory();
-    }
 
     public void loadInventory() {
         try {
@@ -65,9 +61,8 @@ public class GamesInventory implements Listener {
 
                     inventoryMap.put(val, siFormat);
                     Logger.trace("Successfully loaded games inventory for: {}", label);
-                } catch (Throwable t) {
+                } catch (Throwable T) {
                     Logger.trace("Could not initialize games inventory format for {}", label);
-                    t.printStackTrace();
                 }
             });
         } catch (Exception ex) {

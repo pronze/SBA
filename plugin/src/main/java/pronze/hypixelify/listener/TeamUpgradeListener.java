@@ -8,14 +8,12 @@ import pronze.hypixelify.utils.ShopUtil;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import pronze.lib.core.annotations.AutoInitialize;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
-@AutoInitialize(listener = true)
 public class TeamUpgradeListener implements Listener {
 
     public static Map<Integer, Integer> prices = new HashMap<>();

@@ -20,9 +20,8 @@ import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.ArenaImpl;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ScoreboardUtil;
-import pronze.lib.core.utils.Logger;
-
 import java.util.*;
 
 public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.ScoreboardManager {
@@ -35,7 +34,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
 
     public GameScoreboardManagerImpl(ArenaImpl arena) {
         this.arena = arena;
-        game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).orElseThrow();
+        game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).get();
 
         if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("5"));
