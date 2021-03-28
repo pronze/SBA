@@ -46,3 +46,6 @@ gamesinv_disabled: "§cGames inventory έχει απενεργοποιηθεί, 
 not_in_game: "§c Πρέπει να είσαι σε ένα παιχνίδι για να κάνεις αυτή την εντολή!"
 shout_wait: "§c You have to wait for {seconds} to use this command again!"
 countdown: "§fΞεκινώντας από §a{countdown}s"
+none: "None"
+command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
+spawner_holo_tier_format: "§eTier §c{tier}"
