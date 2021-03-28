@@ -11,7 +11,6 @@ import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.lang.LangKeys;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
 import pronze.hypixelify.Configurator;
@@ -27,6 +26,7 @@ public class ShopUtil {
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
 
     public static void initKeys() {
+        if (!UpgradeKeys.isEmpty()) return;
         UpgradeKeys.put("STONE", 2);
         UpgradeKeys.put("IRON", 4);
         UpgradeKeys.put("DIAMOND", 5);
@@ -40,7 +40,9 @@ public class ShopUtil {
     }
 
     public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
-        Arrays.stream(player.getInventory().getArmorContents())
+        Arrays.stream(player
+                .getInventory()
+                .getArmorContents())
                 .filter(Objects::nonNull)
                 .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
     }
@@ -64,7 +66,6 @@ public class ShopUtil {
 
     public static boolean addEnchantsToPlayerTools(Player buyer, ItemStack newItem, String name, Enchantment enchantment) {
         final var newItemEnchantLevel = newItem.getEnchantmentLevel(enchantment);
-
         for (final var item : buyer.getInventory().getContents()) {
             if (item == null) continue;
 
@@ -146,26 +147,34 @@ public class ShopUtil {
                 .forEach(itemStack -> {
                     final var materialName = itemStack.getType().toString();
                     final var playerInventory = player.getInventory();
+                    final var endStr = materialName.substring(materialName.contains("_") ? materialName.indexOf("_") : 0);
 
-                    if (materialName.contains("HELMET")) {
-                        playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
-                    } else if (materialName.contains("CHESTPLATE")) {
-                        playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
-                    } else if (materialName.contains("LEGGINGS")) {
-                        playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
-                    } else if (materialName.contains("BOOTS")) {
-                        playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
-                    } else if (materialName.contains("PICKAXE")) {
-                        playerInventory.setItem(7, itemStack);
-                    } else if (materialName.contains("AXE")) {
-                        playerInventory.setItem(8, itemStack);
-                    } else if (materialName.contains("SWORD")) {
-                        playerInventory.setItem(0, itemStack);
-                    } else {
-                        playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
+                    switch (endStr.toLowerCase()) {
+                        case "helmet":
+                            playerInventory.setHelmet(colorChanger.applyColor(teamColor, itemStack));
+                            break;
+                        case "chestplate":
+                            playerInventory.setChestplate(colorChanger.applyColor(teamColor, itemStack));
+                            break;
+                        case "leggings":
+                            playerInventory.setLeggings(colorChanger.applyColor(teamColor, itemStack));
+                            break;
+                        case "boots":
+                            playerInventory.setBoots(colorChanger.applyColor(teamColor, itemStack));
+                            break;
+                        case "pickaxe":
+                            playerInventory.setItem(7, itemStack);
+                            break;
+                        case "axe":
+                            playerInventory.setItem(8, itemStack);
+                            break;
+                        case "sword":
+                            playerInventory.setItem(0, itemStack);
+                            break;
+                        default:
+                            playerInventory.addItem(colorChanger.applyColor(teamColor, itemStack));
                     }
                 });
-
     }
 
     public static ItemStack checkifUpgraded(ItemStack newItem) {
@@ -233,18 +242,14 @@ public class ShopUtil {
                     .filter(stack -> stack.getType().name().endsWith("SWORD"))
                     .forEach(player.getInventory()::removeItem);
         }
-
-        final var optionalGameStorage = SBAHypixelify
+        SBAHypixelify
                 .getInstance()
-                .getGameStorage(game);
-
-        if (optionalGameStorage.isEmpty()) {
-            return;
-        }
-
-        int level = optionalGameStorage.get().getSharpness(game.getTeamOfPlayer(player).getName());
-        if (level != 0)
-            newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
+                .getGameStorage(game)
+                .map(gameStorage -> gameStorage.getSharpness(game.getTeamOfPlayer(player).getName()))
+                .stream()
+                .filter(level -> level != 0)
+                .findFirst()
+                .ifPresent(level -> newItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, level));
     }
 
 
@@ -280,6 +285,4 @@ public class ShopUtil {
         if (level <= 0 || level >= 5) return null;
         return TeamUpgradeListener.prices.get(level);
     }
-
-
 }

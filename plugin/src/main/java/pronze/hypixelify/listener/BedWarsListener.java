@@ -16,13 +16,14 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.ArenaImpl;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,8 +32,8 @@ import java.util.UUID;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
+@AutoInitialize(listener = true)
 public class BedWarsListener implements Listener {
-
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
     @EventHandler
@@ -52,18 +53,10 @@ public class BedWarsListener implements Listener {
         final var pluginName = event.getPlugin().getName();
         //Register listeners again
         if (pluginName.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
-            Logger.trace("Reregistering listeners");
-            SBAHypixelify
-                    .getInstance()
-                    .getRegisteredListeners()
-                    .forEach(HandlerList::unregisterAll);
-            SBAHypixelify
-                    .getInstance()
-                    .getRegisteredListeners()
-                    .forEach(listener -> Bukkit
-                            .getServer()
-                            .getPluginManager()
-                            .registerEvents(listener, SBAHypixelify.getInstance()));
+            Logger.trace("Re registering listeners");
+            final var listeners = Core.getRegisteredListeners();
+            listeners.forEach(Core::unregisterListener);
+            listeners.forEach(Core::registerListener);
             Logger.trace("Registration complete");
         }
     }

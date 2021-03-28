@@ -107,10 +107,6 @@ public class SBAUtil {
                 .translateAlternateColorCodes('&', string)).collect(Collectors.toList());
     }
 
-    public static String translateColors(String toTranslate) {
-        return ChatColor.translateAlternateColorCodes('&', toTranslate);
-    }
-
     public static Optional<Player> getPlayer(UUID uuid) {
         return Optional.ofNullable(Bukkit.getPlayer(uuid));
     }

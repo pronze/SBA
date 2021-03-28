@@ -10,15 +10,21 @@ import org.screamingsandals.bedwars.lib.ext.cloud.minecraft.extras.MinecraftExce
 import org.screamingsandals.bedwars.lib.ext.cloud.minecraft.extras.MinecraftHelp;
 import org.screamingsandals.bedwars.lib.ext.cloud.paper.PaperCommandManager;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.platform.bukkit.BukkitAudiences;
+import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.commands.party.PartyCommand;
+import pronze.lib.core.annotations.AutoInitialize;
 
 import java.util.function.Function;
 
+@AutoInitialize
 public class CommandManager {
     private BukkitCommandManager<CommandSender> manager;
     private BukkitAudiences bukkitAudiences;
     private MinecraftHelp<CommandSender> minecraftHelp;
 
+    public CommandManager() {
+        init(SBAHypixelify.getInstance());
+    }
 
     public void init(JavaPlugin plugin) {
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =

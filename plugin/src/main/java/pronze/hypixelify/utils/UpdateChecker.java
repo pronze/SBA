@@ -1,4 +1,4 @@
-package pronze.hypixelify;
+package pronze.hypixelify.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,8 +14,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import pronze.hypixelify.SBAHypixelify;
+import pronze.lib.core.annotations.AutoInitialize;
 
+@AutoInitialize
 public class UpdateChecker {
+
+    public UpdateChecker() {
+        run(SBAHypixelify.getInstance());
+    }
 
     public static void run(SBAHypixelify plugin) {
         if (plugin.isSnapshot()) return;

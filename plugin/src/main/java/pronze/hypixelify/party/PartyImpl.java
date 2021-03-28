@@ -9,8 +9,8 @@ import pronze.hypixelify.api.data.PartyInviteData;
 import pronze.hypixelify.api.party.Party;
 import pronze.hypixelify.api.party.PartySetting;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.lib.core.utils.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

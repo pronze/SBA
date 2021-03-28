@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import pronze.hypixelify.api.config.ConfiguratorAPI;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 
@@ -31,11 +30,10 @@ public class Configurator implements ConfiguratorAPI {
 
     public Configurator(SBAHypixelify main) {
         this.dataFolder = main.getDataFolder();
+        loadDefaults();
     }
 
     public void loadDefaults() {
-        Logger.trace("Creating data directory: {}", String.valueOf(dataFolder.mkdirs()));
-
         /* To avoid config confusions*/
         deleteFile("config.yml");
 
@@ -48,7 +46,7 @@ public class Configurator implements ConfiguratorAPI {
 
         if (!configFile.exists()) {
             try {
-                Logger.trace("Creating config file, status: {}", configFile.createNewFile());
+                configFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -61,10 +59,10 @@ public class Configurator implements ConfiguratorAPI {
         }
 
         if (!shopFolder.exists()) {
-            Logger.trace("Making shop directory, status: {}", shopFolder.mkdirs());
+            shopFolder.mkdirs();
         }
         if (!gamesInventoryFolder.exists()) {
-            Logger.trace("Making directory GamesInv, status: {}", gamesInventoryFolder.mkdirs());
+            gamesInventoryFolder.mkdirs();
         }
 
         saveFile("games-inventory/solo.yml");
@@ -485,7 +483,7 @@ public class Configurator implements ConfiguratorAPI {
     private void deleteFile(String fileName) {
         final var file = new File(fileName);
         if (file.exists()) {
-            Logger.trace("Delete status: {} of file: {}", String.valueOf(file.delete()), fileName);
+            file.delete();
         }
     }
 
@@ -507,10 +505,9 @@ public class Configurator implements ConfiguratorAPI {
                 final var configFile =
                         new File(Main.getInstance().getDataFolder().toFile(), "config.yml");
                 if (configFile.exists()) {
-                    Logger.trace("Replacing BedWars config.yml");
-                    Logger.trace("Deleting config file, status: {}", String.valueOf(configFile.delete()));
+                    configFile.delete();
                 }
-                Logger.trace("Creating config file, status: {}", String.valueOf(configFile.createNewFile()));
+               configFile.createNewFile();
                 try (final var outputStream = new FileOutputStream(configFile)) {
                     inputStream.transferTo(outputStream);
                 } catch (Exception e) {

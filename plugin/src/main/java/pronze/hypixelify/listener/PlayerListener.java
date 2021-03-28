@@ -28,10 +28,11 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.Permissions;
 import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +41,10 @@ import java.util.Objects;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
+@AutoInitialize(listener = true)
 public class PlayerListener implements Listener {
     private final List<Material> allowedDropItems;
     private final List<Material> generatorDropItems;
-
 
     public PlayerListener() {
         allowedDropItems = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
@@ -74,7 +75,7 @@ public class PlayerListener implements Listener {
                         .filter(Objects::nonNull)
                         .forEach(stack -> {
                             final String name = stack.getType().name();
-                            var endStr = name.substring(name.contains("_") ? name.indexOf("_") : name.length());
+                            var endStr = name.substring(name.contains("_") ? name.indexOf("_") : 0);
                             switch (endStr) {
                                 case "SWORD":
                                     sword.addEnchantments(stack.getEnchantments());
@@ -125,7 +126,6 @@ public class PlayerListener implements Listener {
                     final GamePlayer gamePlayer = gVictim;
                     final Player player = gamePlayer.player;
                     int livingTime = SBAHypixelify.getConfigurator().config.getInt("respawn-cooldown.time", 5);
-
                     byte buffer = 2;
 
                     @Override
@@ -226,13 +226,17 @@ public class PlayerListener implements Listener {
         if (!BedwarsAPI.getInstance().isPlayerPlayingAnyGame(player)) return;
         if (Main.getPlayerGameProfile(player).isSpectator) return;
 
-        final String typeName = e.getItem().getType().toString();
-        if (typeName.contains("BOOTS")
-                || typeName.contains("HELMET")
-                || typeName.contains("LEGGINGS")
-                || typeName.contains("CHESTPLATE")
-                || typeName.contains("SWORD")) {
-            e.setCancelled(true);
+        final String typeName = e.getItem().getType().name();
+        final var lastName = typeName.substring(
+                typeName.contains("_") ? typeName.indexOf("_") : typeName.length()
+        );
+        switch (lastName) {
+            case "BOOTS":
+            case "HELMET":
+            case "CHESTPLATE":
+            case "SWORD":
+                e.setCancelled(true);
+                break;
         }
     }
 

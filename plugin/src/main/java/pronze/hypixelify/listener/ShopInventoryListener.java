@@ -31,8 +31,9 @@ import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import org.screamingsandals.bedwars.utils.Sounds;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBATeamUpgradePurchaseEvent;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
+@AutoInitialize(listener = true)
 public class ShopInventoryListener implements Listener {
 
     private final static List<String> upgradeProperties = Arrays.asList(

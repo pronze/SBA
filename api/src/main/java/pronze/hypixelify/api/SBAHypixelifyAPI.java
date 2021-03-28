@@ -65,12 +65,6 @@ public interface SBAHypixelifyAPI {
 
     /**
      *
-     * @return A {@link List} of listeners that were registered by the SBAHypixelify instance.
-     */
-    List<Listener> getRegisteredListeners();
-
-    /**
-     *
      * @return The {@link ArenaManager} instance that handles the creation or destruction of arenas.
      */
     ArenaManager getArenaManager();

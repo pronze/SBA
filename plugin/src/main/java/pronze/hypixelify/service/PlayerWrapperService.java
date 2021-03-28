@@ -11,19 +11,26 @@ import pronze.hypixelify.api.events.SBAPlayerWrapperPreUnregisterEvent;
 import pronze.hypixelify.api.events.SBAPlayerWrapperRegisteredEvent;
 import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.hypixelify.utils.Logger;
+import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+@AutoInitialize
 public class PlayerWrapperService implements WrapperService<Player, PlayerWrapperImpl> {
     private final Map<UUID, PlayerWrapperImpl> playerData = new ConcurrentHashMap<>();
 
     public PlayerWrapperService() {
         Bukkit.getOnlinePlayers().forEach(this::register);
         registerMapping();
+    }
+
+    public static PlayerWrapperService getInstance() {
+        return Core.getObjectFromClass(PlayerWrapperService.class);
     }
 
     private void registerMapping() {
