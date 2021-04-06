@@ -6,17 +6,17 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.data.PartyInviteData;
-import pronze.hypixelify.api.party.Party;
+import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.party.PartySetting;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.lib.core.utils.Logger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class PartyImpl implements Party {
+public class Party implements IParty {
     private final UUID uuid = UUID.randomUUID();
     private  @NotNull volatile PlayerWrapper leader;
     private final List<PlayerWrapper> members = Collections.synchronizedList(new LinkedList<>());
@@ -24,7 +24,7 @@ public class PartyImpl implements Party {
     private final Map<UUID, PartyInviteData> inviteDataMap = new ConcurrentHashMap<>();
     private final PartySetting settings = new PartySetting();
 
-    public PartyImpl(@NotNull PlayerWrapper leader) {
+    public Party(@NotNull PlayerWrapper leader) {
         this.leader = leader;
         leader.setInParty(true);
         members.add(leader);
@@ -113,7 +113,7 @@ public class PartyImpl implements Party {
         final var inviteTask = new BukkitRunnable() {
             @Override
             public void run() {
-                Logger.trace("Party invitation expired for: {} of party: {}", invitee.getName(), debugInfo());
+                Logger.trace("IParty invitation expired for: {} of party: {}", invitee.getName(), debugInfo());
                 invitee.setInvitedToAParty(false);
                 inviteDataMap.remove(invitee.getInstance().getUniqueId());
                 if (shouldDisband()) {
@@ -161,7 +161,7 @@ public class PartyImpl implements Party {
 
     @Override
     public String toString() {
-        return "PartyImpl{" +
+        return "Party{" +
                 "uuid=" + uuid +
                 ", leader=" + leader.getName() +
                 ", members=" + members.stream().map(PlayerWrapper::getName).collect(Collectors.toList()).toString() +

@@ -41,27 +41,6 @@ public class SBAUtil {
         }
     };
 
-    public static void removeScoreboardObjective(Player player) {
-        if (SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib") && !Main.isLegacy()) {
-            try {
-                final var obj = new WrapperPlayServerScoreboardObjective();
-                obj.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
-                obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
-                obj.sendPacket(player);
-            } catch (Exception ex) {
-                SBAHypixelify.getExceptionManager().handleException(ex);
-            }
-            try {
-                final var obj = new WrapperPlayServerScoreboardObjective();
-                obj.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
-                obj.setMode(WrapperPlayServerScoreboardObjective.Mode.REMOVE_OBJECTIVE);
-                obj.sendPacket(player);
-            } catch (Exception ex) {
-                SBAHypixelify.getExceptionManager().handleException(ex);
-            }
-        }
-    }
-
     public static List<Material> parseMaterialFromConfig(String key) {
         final var materialList = new ArrayList<Material>();
         final var materialNames = SBAHypixelify.getConfigurator().getStringList(key);

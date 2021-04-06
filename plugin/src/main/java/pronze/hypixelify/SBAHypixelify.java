@@ -2,57 +2,41 @@ package pronze.hypixelify;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.ext.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
-import pronze.hypixelify.api.config.ConfiguratorAPI;
+import pronze.hypixelify.api.config.IConfigurator;
 import pronze.hypixelify.api.exception.ExceptionHandler;
-import pronze.hypixelify.api.manager.ArenaManager;
-import pronze.hypixelify.api.manager.PartyManager;
+import pronze.hypixelify.api.manager.IArenaManager;
+import pronze.hypixelify.api.manager.IPartyManager;
 import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.commands.CommandManager;
 import pronze.hypixelify.exception.ExceptionManager;
-import pronze.hypixelify.game.ArenaManagerImpl;
-import pronze.hypixelify.party.PartyManagerImpl;
-import pronze.hypixelify.listener.ShopInventoryListener;
-import pronze.hypixelify.inventories.GamesInventory;
+import pronze.hypixelify.game.ArenaManager;
+import pronze.hypixelify.party.PartyManager;
 import pronze.hypixelify.lib.lang.I18n;
-import pronze.hypixelify.listener.*;
-import pronze.hypixelify.placeholderapi.SBAExpansion;
-import pronze.hypixelify.scoreboard.LobbyScoreboardManagerImpl;
-import pronze.hypixelify.scoreboard.MainLobbyScoreboardManagerImpl;
 import pronze.hypixelify.service.PlayerWrapperService;
-import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.lib.core.Core;
+import pronze.lib.core.utils.Logger;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
-    private final List<Listener> registeredListeners = new ArrayList<>();
     private ExceptionManager exceptionManager;
     private String version;
-    private ArenaManagerImpl arenaManager;
-    private PlayerWrapperService playerWrapperService;
     private Configurator configurator;
-    private PartyManagerImpl partyManager;
-    private boolean debug = false;
+    private boolean debug;
     private boolean isSnapshot;
-    private GamesInventory gamesInventory;
-    private Metrics metrics;
 
     public static SBAHypixelify getInstance() {
         return plugin;
@@ -68,11 +52,10 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public void onEnable() {
-        exceptionManager = new ExceptionManager();
         plugin = this;
         version = this.getDescription().getVersion();
         isSnapshot = version.toLowerCase().contains("snapshot");
-        Logger.init(false);
+        exceptionManager = new ExceptionManager();
 
         if (getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
@@ -80,9 +63,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             return;
         }
 
-        if (!Main.getVersion().contains("0.3.")) {
-            showErrorMessage("You need at least a minimum of 0.3.0 snapshot 709+ version" +
-                            " of Screaming-BedWars to run SBAHypixelify v2.0!",
+        if (!Main.getVersion().contains("0.3.0")) {
+            showErrorMessage("You need ScreamingBedWars v0.3.0 to run SBAHypixelify v2.0!",
                     "Get the latest version from here: https://ci.screamingsandals.org/job/BedWars-0.x.x/");
             return;
         }
@@ -98,108 +80,40 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             return;
         }
 
-        /* initialize our custom ScoreboardManager library*/
         ScoreboardManager.init(this);
-
-        UpdateChecker.run(this);
 
         configurator = new Configurator(this);
         configurator.loadDefaults();
 
-        new CommandManager().init(this);
         debug = configurator.config.getBoolean("debug.enabled", false);
-        Logger.init(debug);
+        Core.init(this, debug);
         I18n.load(this, configurator.config.getString("locale"));
 
-        playerWrapperService = new PlayerWrapperService();
-        partyManager = new PartyManagerImpl();
-
-
-        gamesInventory = new GamesInventory();
-        gamesInventory.loadInventory();
-
-        arenaManager = new ArenaManagerImpl();
-
-        registerListener(new ShopInventoryListener());
-        registerListener(new BedWarsListener());
-        registerListener(new PlayerListener());
-        registerListener(new TeamUpgradeListener());
-
-        if (configurator.config.getBoolean("main-lobby.enabled", false))
-            registerListener(new MainLobbyScoreboardManagerImpl());
-        if (SBAHypixelify.getConfigurator().config.getBoolean("lobby-scoreboard.enabled", true))
-            registerListener(new LobbyScoreboardManagerImpl());
-
-        if (Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI"))
-            new SBAExpansion().register();
-
-        metrics = new Metrics(this, 79505);
-        metrics.addCustomChart(new Metrics.SimplePie("build", () -> isSnapshot ? "snapshot" : "stable"));
-        metrics.addCustomChart(new Metrics.SimplePie("version", () -> version));
-
         Logger.trace("Registering API service provider");
-
-        getServer().getServicesManager().register(
-                SBAHypixelifyAPI.class,
-                this,
-                this,
-                ServicePriority.Normal
-        );
+        getServer().getServicesManager().register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
         getLogger().info("Plugin has loaded!");
-    }
-
-    public void registerListener(Listener listener) {
-        final var plugMan = Bukkit.getServer().getPluginManager();
-        plugMan.registerEvents(listener, this);
-        Logger.trace("Registered Listener: {}", listener.getClass().getSimpleName());
-        registeredListeners.add(listener);
-    }
-
-    public void unregisterListener(Listener listener) {
-        if (registeredListeners.contains(listener)) {
-            HandlerList.unregisterAll(listener);
-            registeredListeners.remove(listener);
-        }
     }
 
     @Override
     public void onDisable() {
-        if (SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib")) {
-            Bukkit.getOnlinePlayers()
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .forEach(SBAUtil::removeScoreboardObjective);
-        }
-
-        getRegisteredListeners().forEach(this::unregisterListener);
-
         Logger.trace("Cancelling tasks...");
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
+        Core.destroy();
         Logger.trace("Successfully shutdown SBAHypixelify instance");
     }
-
-    public GamesInventory getGamesInventory() {
-        return gamesInventory;
-    }
-
     /*
      * API implementations
      */
 
     @Override
-    public ConfiguratorAPI getConfigurator0() {
+    public IConfigurator getConfigurator0() {
         return configurator;
     }
 
     @Override
-    public List<Listener> getRegisteredListeners() {
-        return List.copyOf(registeredListeners);
-    }
-
-    @Override
-    public ArenaManager getArenaManager() {
-        return arenaManager;
+    public IArenaManager getArenaManager() {
+        return Core.getObjectFromClass(ArenaManager.class);
     }
 
     @Override
@@ -208,13 +122,13 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     @Override
-    public PartyManager getPartyManager() {
-        return partyManager;
+    public IPartyManager getPartyManager() {
+        return Core.getObjectFromClass(PartyManager.class);
     }
 
     @Override
     public WrapperService<Player, ? extends PlayerWrapper> getPlayerWrapperService() {
-        return playerWrapperService;
+        return Core.getObjectFromClass(PlayerWrapperService.class);
     }
 
     @Override
@@ -224,12 +138,12 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public Optional<pronze.hypixelify.api.game.GameStorage> getGameStorage(Game game) {
-        return arenaManager.getGameStorage(game.getName());
+        return getArenaManager().getGameStorage(game.getName());
     }
 
     @Override
     public PlayerWrapper getPlayerWrapper(Player player) {
-        return playerWrapperService.get(player).orElseThrow();
+        return getPlayerWrapperService().get(player).orElseThrow();
     }
 
     @Override
@@ -243,19 +157,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     }
 
     @Override
-    public boolean isUpgraded() {
-        return !Objects.requireNonNull(plugin.configurator.config.getString("version"))
-                .contains(SBAHypixelify.getInstance().getVersion());
-    }
-
-    @Override
-    public SimpleDateFormat getSimpleDateFormat() {
-        return new SimpleDateFormat(configurator.getString("date.format", "MM/dd/yy"));
-    }
-
-    @Override
-    public String getFormattedDate() {
-        return getSimpleDateFormat().format(new Date());
+    public boolean isPendingUpgrade() {
+        return !version.contains(configurator.getString("version"));
     }
 }
 

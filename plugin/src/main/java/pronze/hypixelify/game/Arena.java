@@ -2,14 +2,13 @@ package pronze.hypixelify.game;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.data.GamePlayerData;
+import pronze.hypixelify.api.game.IArena;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 import pronze.hypixelify.scoreboard.GameScoreboardManagerImpl;
 import pronze.hypixelify.utils.SBAUtil;
@@ -19,7 +18,7 @@ import java.util.*;
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 @Getter
-public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
+public class Arena implements IArena {
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final GameScoreboardManagerImpl scoreboardManager;
     private final double radius;
@@ -27,7 +26,7 @@ public class ArenaImpl implements pronze.hypixelify.api.game.Arena {
     private final GameStorage storage;
     private final GameTask gameTask;
 
-    public ArenaImpl(Game game) {
+    public Arena(Game game) {
         radius = Math.pow(SBAHypixelify.getConfigurator().config.getInt("upgrades.trap-detection-range", 7), 2);
         this.game = game;
         storage = new GameStorage(game);

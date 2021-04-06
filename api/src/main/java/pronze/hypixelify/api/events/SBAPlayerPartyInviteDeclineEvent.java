@@ -6,7 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import pronze.hypixelify.api.party.Party;
+import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 @RequiredArgsConstructor
@@ -14,7 +14,7 @@ import pronze.hypixelify.api.wrapper.PlayerWrapper;
 public class SBAPlayerPartyInviteDeclineEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
     private final PlayerWrapper player;
-    private final Party party;
+    private final IParty party;
     private boolean cancelled;
 
     @Override

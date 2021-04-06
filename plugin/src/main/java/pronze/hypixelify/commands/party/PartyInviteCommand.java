@@ -7,7 +7,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyInviteEvent;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 import java.util.stream.Collectors;
 
@@ -31,11 +31,11 @@ public class PartyInviteCommand {
                         .asynchronous(ctx -> {
                             final var invitedPlayer = PlayerMapper
                                     .wrapPlayer((Player) ctx.get("party-participant"))
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             final var player = PlayerMapper
                                     .wrapPlayer((Player) ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             if (invitedPlayer.equals(player)) {
                                 SBAHypixelify

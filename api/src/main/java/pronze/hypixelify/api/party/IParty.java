@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public interface Party {
+public interface IParty {
 
     /**
      * @return a {@link List} of players as {@link PlayerWrapper} objects.

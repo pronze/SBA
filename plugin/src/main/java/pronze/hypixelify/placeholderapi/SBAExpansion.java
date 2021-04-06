@@ -4,8 +4,16 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.service.PlayerWrapperService;
+import pronze.lib.core.annotations.AutoInitialize;
 
+@AutoInitialize
 public class SBAExpansion extends PlaceholderExpansion {
+
+    public SBAExpansion() {
+        register();
+    }
+
     @Override
     public @NotNull String getIdentifier() {
         return "sba";
@@ -23,21 +31,22 @@ public class SBAExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
-
         if (player == null) {
             return " ";
         }
 
         if (identifier.startsWith("player_")) {
-            final var wrapperOptional = SBAHypixelify.getInstance().getPlayerWrapperService().get(player);
-            if (wrapperOptional.isPresent()) {
-                final var database = wrapperOptional.get();
-                switch (identifier.substring(10).toLowerCase()) {
-                    case "level":
-                        return Integer.toString(database.getLevel());
-                }
+            final var playerWrapper = PlayerWrapperService.getInstance().get(player).orElseThrow();
+            switch (identifier.substring(10).toLowerCase()) {
+                case "level":
+                    return Integer.toString(playerWrapper.getLevel());
+                case "xp":
+                    return Integer.toString(playerWrapper.getXP());
+                case "progress":
+                    return playerWrapper.getStringProgress();
+                case "shout_timeout":
+                    return Integer.toString(playerWrapper.getShoutTimeOut());
             }
-
         }
 
         return super.onPlaceholderRequest(player, identifier);

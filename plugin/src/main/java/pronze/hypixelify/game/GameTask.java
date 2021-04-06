@@ -36,7 +36,7 @@ public class GameTask extends BukkitRunnable {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
     private final double multiplier;
     private final Game game;
-    private final ArenaImpl arena;
+    private final Arena arena;
     private final GameStorage storage;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
@@ -44,7 +44,7 @@ public class GameTask extends BukkitRunnable {
     private int tier = 1;
     private final List<GeneratorData> generatorData = new ArrayList<>();
 
-    public GameTask(ArenaImpl arena) {
+    public GameTask(Arena arena) {
         this.arena = arena;
         this.game = arena.getGame();
         this.storage = arena.getStorage();

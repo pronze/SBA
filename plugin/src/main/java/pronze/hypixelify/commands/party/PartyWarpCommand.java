@@ -7,8 +7,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 public class PartyWarpCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -29,7 +28,7 @@ public class PartyWarpCommand {
                         .synchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player) ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
                                 SBAHypixelify
@@ -84,7 +83,7 @@ public class PartyWarpCommand {
                                             final var leaderLocation = player.getInstance().getLocation();
                                             party.getMembers().stream()
                                                     .filter(member -> !member.equals(player))
-                                                    .map(PlayerWrapper::getInstance).forEach(member -> {
+                                                    .map(pronze.hypixelify.api.wrapper.PlayerWrapper::getInstance).forEach(member -> {
                                                 if (Main.getInstance().isPlayerPlayingAnyGame(member)) {
                                                     Main.getInstance().getGameOfPlayer(member).leaveFromGame(member);
                                                 }

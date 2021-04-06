@@ -7,8 +7,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyPromoteEvent;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,14 +32,14 @@ public class PartyPromoteCommand {
                                     .getPartyManager()
                                     .getPartyOf(PlayerMapper
                                             .wrapPlayer((Player)ctx.getSender())
-                                            .as(PlayerWrapperImpl.class));
+                                            .as(PlayerWrapper.class));
                             if (optionalParty.isEmpty()) {
                                 return List.of();
                             }
                             return optionalParty.get()
                                     .getMembers()
                                     .stream()
-                                    .map(PlayerWrapper::getName)
+                                    .map(pronze.hypixelify.api.wrapper.PlayerWrapper::getName)
                                     .collect(Collectors.toList());
                         })
                         .asRequired()
@@ -51,11 +50,11 @@ public class PartyPromoteCommand {
                         .asynchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player)ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             final var args = PlayerMapper
                                     .wrapPlayer((Player) ctx.get("party-participant"))
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
                                 SBAHypixelify

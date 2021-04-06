@@ -4,28 +4,29 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyCreatedEvent;
-import pronze.hypixelify.api.manager.PartyManager;
-import pronze.hypixelify.api.party.Party;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.api.manager.IPartyManager;
+import pronze.hypixelify.api.party.IParty;
+import pronze.hypixelify.game.PlayerWrapper;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PartyManagerImpl implements PartyManager {
-    private final Map<UUID, Party> partyMap = new ConcurrentHashMap<>();
+@AutoInitialize
+public class PartyManager implements IPartyManager {
+    private final Map<UUID, IParty> partyMap = new ConcurrentHashMap<>();
 
-    public PartyManagerImpl() {
-        Logger.trace("PartyManager has been initialized!");
+    public PartyManager() {
+        Logger.trace("IPartyManager has been initialized!");
     }
 
     @Override
-    public Optional<Party> createParty(@NotNull PlayerWrapper leader) {
-        final var party = new PartyImpl(leader);
+    public Optional<IParty> createParty(@NotNull pronze.hypixelify.api.wrapper.PlayerWrapper leader) {
+        final var party = new Party(leader);
         final var partyCreateEvent = new SBAPlayerPartyCreatedEvent(leader, party);
         SBAHypixelify
                 .getInstance()
@@ -38,7 +39,7 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
-    public Optional<Party> get(@NotNull PlayerWrapper leader) {
+    public Optional<IParty> get(@NotNull pronze.hypixelify.api.wrapper.PlayerWrapper leader) {
         return partyMap
                 .values()
                 .stream()
@@ -47,7 +48,7 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
-    public Optional<Party> get(@NotNull UUID partyUUID) {
+    public Optional<IParty> get(@NotNull UUID partyUUID) {
         if (!partyMap.containsKey(partyUUID)) {
             return Optional.empty();
         }
@@ -55,12 +56,12 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
-    public Optional<Party> getOrCreate(@NotNull PlayerWrapper player) {
+    public Optional<IParty> getOrCreate(@NotNull pronze.hypixelify.api.wrapper.PlayerWrapper player) {
         return getPartyOf(player).or(() -> createParty(player));
     }
 
     @Override
-    public Optional<Party> getPartyOf(@NotNull PlayerWrapper player) {
+    public Optional<IParty> getPartyOf(@NotNull pronze.hypixelify.api.wrapper.PlayerWrapper player) {
         return partyMap.values()
                 .stream()
                 .filter(party -> party.getMembers().contains(player))
@@ -68,7 +69,7 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
-    public Optional<Party> getInvitedPartyOf(@NotNull PlayerWrapper player) {
+    public Optional<IParty> getInvitedPartyOf(@NotNull pronze.hypixelify.api.wrapper.PlayerWrapper player) {
         return partyMap.values()
                 .stream()
                 .filter(party -> party.isInvited(player))
@@ -84,11 +85,11 @@ public class PartyManagerImpl implements PartyManager {
     }
 
     @Override
-    public void disband(@NotNull PlayerWrapper leader) {
+    public void disband(@NotNull pronze.hypixelify.api.wrapper.PlayerWrapper leader) {
         getPartyOf(leader).ifPresent(this::disband);
     }
 
-    private void disband(@NotNull Party party) {
+    private void disband(@NotNull IParty party) {
         Logger.trace("Disbandoning party: {}", party.debugInfo());
         final var disbandMessage = SBAHypixelify
                 .getConfigurator()
@@ -99,7 +100,7 @@ public class PartyManagerImpl implements PartyManager {
             party.removePlayer(member);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(member.getInstance())
-                    .as(PlayerWrapperImpl.class);
+                    .as(PlayerWrapper.class);
             disbandMessage
                     .forEach(wrapperImpl::sendMessage);
         });
@@ -109,7 +110,7 @@ public class PartyManagerImpl implements PartyManager {
             party.removeInvitedPlayer(invitedPlayer);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(invitedPlayer.getInstance())
-                    .as(PlayerWrapperImpl.class);
+                    .as(PlayerWrapper.class);
             SBAHypixelify
                     .getConfigurator()
                     .getStringList("party.message.expired")

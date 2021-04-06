@@ -8,7 +8,7 @@ import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyMutedEvent;
 import pronze.hypixelify.api.events.SBAPlayerPartyUnmutedEvent;
 import pronze.hypixelify.api.party.PartySetting;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
@@ -38,7 +38,7 @@ public class PartySettingsCommand {
                         .asynchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player) ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
                                 SBAHypixelify
@@ -99,7 +99,7 @@ public class PartySettingsCommand {
                         .asynchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player) ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
                                 SBAHypixelify

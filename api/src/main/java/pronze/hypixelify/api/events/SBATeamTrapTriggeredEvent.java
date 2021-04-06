@@ -5,7 +5,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import pronze.hypixelify.api.game.Arena;
+import pronze.hypixelify.api.game.IArena;
 import org.screamingsandals.bedwars.api.RunningTeam;
 
 public class SBATeamTrapTriggeredEvent extends Event implements Cancellable {
@@ -13,12 +13,12 @@ public class SBATeamTrapTriggeredEvent extends Event implements Cancellable {
 
     private Player trapped;
     private RunningTeam team;
-    private Arena arena;
+    private IArena arena;
     private boolean cancelled = false;
 
     public SBATeamTrapTriggeredEvent(Player trapped,
                                      RunningTeam team,
-                                     Arena arena) {
+                                     IArena arena) {
         this.trapped = trapped;
         this.team = team;
         this.arena = arena;
@@ -32,7 +32,7 @@ public class SBATeamTrapTriggeredEvent extends Event implements Cancellable {
         return trapped;
     }
 
-    public Arena getArena() {
+    public IArena getArena() {
         return arena;
     }
 

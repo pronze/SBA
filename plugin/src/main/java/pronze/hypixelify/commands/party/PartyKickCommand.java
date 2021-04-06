@@ -7,8 +7,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyKickEvent;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,7 +28,7 @@ public class PartyKickCommand {
                         .withSuggestionsProvider((ctx, str) -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player)ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
                             final var optionalParty = SBAHypixelify
                                     .getInstance()
                                     .getPartyManager()
@@ -40,7 +39,7 @@ public class PartyKickCommand {
                             return optionalParty.get()
                                     .getMembers()
                                     .stream()
-                                    .map(PlayerWrapper::getName)
+                                    .map(pronze.hypixelify.api.wrapper.PlayerWrapper::getName)
                                     .filter(name -> !player.getName().equalsIgnoreCase(name))
                                     .collect(Collectors.toList());
                         })
@@ -53,10 +52,10 @@ public class PartyKickCommand {
                         .asynchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player)ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
                             final var args = PlayerMapper
                                     .wrapPlayer((Player) ctx.get("party-participant"))
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             SBAHypixelify
                                     .getInstance()

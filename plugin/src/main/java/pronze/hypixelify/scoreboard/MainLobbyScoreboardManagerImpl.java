@@ -21,16 +21,24 @@ import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@AutoInitialize
 public class MainLobbyScoreboardManagerImpl implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
 
     public MainLobbyScoreboardManagerImpl() {
+        if (!SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)) {
+           return;
+        }
+        Core.registerListener(this);
+
         final var optionalLocation = SBAUtil.readLocationFromConfig("main-lobby");
         if (optionalLocation.isPresent()) {
             location = optionalLocation.get();
@@ -38,6 +46,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
             disable();
             Bukkit.getServer().getLogger().warning("Could not find lobby world!");
         }
+
         Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> Bukkit
                 .getOnlinePlayers().forEach(this::createBoard), 3L);
     }

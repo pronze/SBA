@@ -6,7 +6,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyLeaveEvent;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 public class PartyLeaveCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -27,7 +27,7 @@ public class PartyLeaveCommand {
                         .asynchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer((Player) ctx.getSender())
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
                                 SBAHypixelify

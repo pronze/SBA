@@ -2,18 +2,18 @@ package pronze.hypixelify.api.manager;
 
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
-import pronze.hypixelify.api.game.Arena;
+import pronze.hypixelify.api.game.IArena;
 import pronze.hypixelify.api.game.GameStorage;
 
 import java.util.Optional;
 
-public interface ArenaManager {
+public interface IArenaManager {
 
     /**
      *
      * @param arena
      */
-    void addArena(Arena arena);
+    void createArena(Game arena);
 
     /**
      *
@@ -26,7 +26,7 @@ public interface ArenaManager {
      * @param name
      * @return
      */
-    Optional<Arena> get(String name);
+    Optional<IArena> get(String name);
 
     /**
      *

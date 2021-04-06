@@ -3,12 +3,10 @@ package pronze.hypixelify.scoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
-import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
@@ -17,24 +15,22 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.Configurator;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.ArenaImpl;
-import pronze.hypixelify.packets.WrapperPlayServerScoreboardDisplayObjective;
-import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
-import pronze.hypixelify.utils.Logger;
-import pronze.hypixelify.utils.ScoreboardUtil;
+import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.utils.DateUtils;
+import pronze.lib.core.utils.Logger;
+
 import java.util.*;
 
 public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.ScoreboardManager {
     private final Game game;
-    private final ArenaImpl arena;
+    private final Arena arena;
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
     private final List<String> scoreboard_lines = new ArrayList<>();
-
     protected BukkitTask updateTask;
 
-    public GameScoreboardManagerImpl(ArenaImpl arena) {
+    public GameScoreboardManagerImpl(Arena arena) {
         this.arena = arena;
-        game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).get();
+        game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).orElseThrow();
 
         if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("5"));
@@ -42,16 +38,6 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
             scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("default"));
         }
         game.getConnectedPlayers().forEach(this::createBoard);
-
-        new BukkitRunnable() {
-            public void run() {
-                if (game.getStatus() == GameStatus.RUNNING) {
-                    updateCustomObj();
-                } else {
-                    cancel();
-                }
-            }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 5L);
     }
 
     public void createBoard(Player player) {
@@ -64,7 +50,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
         final var scoreboard = Scoreboard.builder()
                 .animate(true)
                 .player(player)
-                .displayObjective(ScoreboardUtil.GAME_OBJECTIVE_NAME)
+                .displayObjective("bwa-game")
                 .updateInterval(20L)
                 .animationInterval(2L)
                 .animatedTitle(SBAHypixelify
@@ -75,7 +61,6 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                     return true;
                 })
                 .build();
-        createCustomObjective(scoreboard);
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
@@ -99,46 +84,6 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                 updateTask.cancel();
             }
         }
-    }
-
-    public void createCustomObjective(Scoreboard scoreboard) {
-        final var player = scoreboard.getHolder().getPlayer();
-
-        if (!SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("ProtocolLib") || Main.isLegacy()) {
-            return;
-        }
-        try {
-            if (SBAHypixelify.getConfigurator().config.getBoolean("game.tab-health", true)) {
-                final var tab_objective = new WrapperPlayServerScoreboardObjective();
-                tab_objective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
-                tab_objective.setName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
-                tab_objective.sendPacket(player);
-
-                final var tab_displayObjective = new WrapperPlayServerScoreboardDisplayObjective();
-                tab_displayObjective.setPosition(0);
-                tab_displayObjective.setScoreName(ScoreboardUtil.TAB_OBJECTIVE_NAME);
-                tab_displayObjective.sendPacket(player);
-            }
-
-            if (SBAHypixelify.getConfigurator().config.getBoolean("game.tag-health", true)) {
-                final var tag_objective = new WrapperPlayServerScoreboardObjective();
-                tag_objective.setMode(WrapperPlayServerScoreboardObjective.Mode.ADD_OBJECTIVE);
-                tag_objective.setName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
-                tag_objective.setDisplayName("§c♥");
-                tag_objective.sendPacket(player);
-
-                final var tag_displayObjective = new WrapperPlayServerScoreboardDisplayObjective();
-                tag_displayObjective.setPosition(2);
-                tag_displayObjective.setScoreName(ScoreboardUtil.TAG_OBJECTIVE_NAME);
-                tag_displayObjective.sendPacket(player);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void updateCustomObj() {
-        game.getConnectedPlayers().forEach(p -> ScoreboardUtil.updateCustomObjective(p, game));
     }
 
     public List<String> process(Player player, Scoreboard board) {
@@ -191,7 +136,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                             .replace("{time}", game.getFormattedTimeLeft())
                             .replace("{formattime}", game.getFormattedTimeLeft())
                             .replace("{game}", game.getName())
-                            .replace("{date}", SBAHypixelify.getInstance().getFormattedDate())
+                            .replace("{date}", DateUtils.getFormattedDate())
                             .replace("{team_bed_status}", teamStatus == null ? "" : teamStatus);
 
                     if (arena.getGameTask() != null) {

@@ -2,30 +2,25 @@ package pronze.hypixelify.game;
 
 import com.google.common.base.Strings;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
-
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
 
-public class PlayerWrapperImpl extends org.screamingsandals.bedwars.lib.player.PlayerWrapper implements PlayerWrapper {
+public class PlayerWrapper extends org.screamingsandals.bedwars.lib.player.PlayerWrapper implements pronze.hypixelify.api.wrapper.PlayerWrapper {
     private int shout;
     private boolean shoutCooldown;
     private final AtomicBoolean isInParty = new AtomicBoolean(false);
     private final AtomicBoolean isInvitedToParty = new AtomicBoolean(false);
     private final AtomicBoolean isPartyChatEnabled = new AtomicBoolean(false);
 
-    public PlayerWrapperImpl(Player player) {
+    public PlayerWrapper(Player player) {
         super(player.getName(), player.getUniqueId());
         shout = SBAHypixelify.getConfigurator().config.getInt("shout.time-out", 60);
     }

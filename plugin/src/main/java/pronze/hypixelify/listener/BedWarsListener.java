@@ -3,7 +3,6 @@ package pronze.hypixelify.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,16 +12,17 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.bedwars.game.GameManager;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.utils.TitleUtils;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.ArenaImpl;
-import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.game.ArenaManager;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,15 +31,17 @@ import java.util.UUID;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
+@AutoInitialize(listener = true)
 public class BedWarsListener implements Listener {
-
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
         final var game = e.getGame();
-        final var arena = new ArenaImpl(game);
-        SBAHypixelify.getInstance().getArenaManager().addArena(arena);
+        ArenaManager
+                .getInstance()
+                .createArena(game);
+
         game.getConnectedPlayers().forEach(player -> SBAUtil.translateColors(SBAHypixelify.getConfigurator()
                 .getStringList("game-start.message"))
                 .stream()
@@ -52,18 +54,10 @@ public class BedWarsListener implements Listener {
         final var pluginName = event.getPlugin().getName();
         //Register listeners again
         if (pluginName.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
-            Logger.trace("Reregistering listeners");
-            SBAHypixelify
-                    .getInstance()
-                    .getRegisteredListeners()
-                    .forEach(HandlerList::unregisterAll);
-            SBAHypixelify
-                    .getInstance()
-                    .getRegisteredListeners()
-                    .forEach(listener -> Bukkit
-                            .getServer()
-                            .getPluginManager()
-                            .registerEvents(listener, SBAHypixelify.getInstance()));
+            Logger.trace("Re-registering listeners");
+            final var listeners = Core.getRegisteredListeners();
+            listeners.forEach(Core::unregisterListener);
+            listeners.forEach(Core::registerListener);
             Logger.trace("Registration complete");
         }
     }
@@ -71,9 +65,8 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var game = e.getGame();
-        SBAHypixelify
+        ArenaManager
                 .getInstance()
-                .getArenaManager()
                 .get(game.getName())
                 .ifPresent(arena -> arena.onTargetBlockDestroyed(e));
     }
@@ -81,9 +74,8 @@ public class BedWarsListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
         final var game = e.getGame();
-        SBAHypixelify
+        ArenaManager
                 .getInstance()
-                .getArenaManager()
                 .removeArena(game);
     }
 
@@ -91,9 +83,8 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
         final var game = e.getGame();
-        SBAHypixelify
+        ArenaManager
                 .getInstance()
-                .getArenaManager()
                 .get(game.getName())
                 .ifPresent(arena -> arena.onOver(e));
     }
@@ -102,65 +93,50 @@ public class BedWarsListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        final var game = (Game) Main.getInstance().getGameManager().getGame(e.getGame().getName()).get();
+        final var game = (Game) GameManager.getInstance().getGame(e.getGame().getName()).orElseThrow();
         final var task = runnableCache.get(player.getUniqueId());
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
 
-        if (game.getStatus() == GameStatus.WAITING) {
-            runnableCache.put
-                    (player.getUniqueId(),
-                            new BukkitRunnable() {
-                                int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
+        switch (game.getStatus()) {
+            case WAITING:
+                var bukkitTask = new BukkitRunnable() {
+                    int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
+                    @Override
+                    public void run() {
+                        if (game.getStatus() == GameStatus.WAITING) {
+                            if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
+                                String time = game.getFormattedTimeLeft();
 
-                                public void run() {
-                                    if (
-                                            player.isOnline() &&
-                                                    game.getConnectedPlayers().contains(player) &&
-                                                    game.getStatus() == GameStatus.WAITING
-                                    ) {
-
-                                        if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
-                                            String time = game.getFormattedTimeLeft();
-
-                                            if (!time.contains("0-1")) {
-                                                String[] units = time.split(":");
-                                                int seconds = Integer.parseInt(units[1]) + 1;
-                                                if (buffer == seconds) return;
-                                                buffer = seconds;
-                                                if (seconds <= 10) {
-                                                    String message = i18n("game-starts-in")
-                                                            .replace("{seconds}", String.valueOf(seconds));
-
-                                                    message = seconds == 1 ? message
-                                                            .replace("seconds", "second") : message;
-                                                    player.sendMessage(message);
-                                                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil
-                                                            .translateColors("&c" + seconds), "", 0, 20, 0);
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        this.cancel();
-                                        runnableCache.remove(player.getUniqueId());
+                                if (!time.contains("0-1")) {
+                                    String[] units = time.split(":");
+                                    int seconds = Integer.parseInt(units[1]) + 1;
+                                    if (buffer == seconds) return;
+                                    buffer = seconds;
+                                    if (seconds <= 10) {
+                                        String message = i18n("game-starts-in")
+                                                .replace("{seconds}", String.valueOf(seconds));
+                                        message = seconds == 1 ? message.replace("seconds", "second") : message;
+                                        player.sendMessage(message);
+                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
                                     }
                                 }
-                            }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L));
-        }
-
-        /* Joined as spectator, let's give him a scoreboard*/
-        else if (game.getStatus() == GameStatus.RUNNING) {
-            SBAHypixelify
-                    .getInstance()
-                    .getArenaManager()
-                    .get(game.getName())
-                    .ifPresent(arena -> {
-                        final var scoreboardManager = arena.getScoreboardManager();
-                        if (scoreboardManager != null) {
-                            scoreboardManager.createBoard(player);
+                            }
+                        } else {
+                            this.cancel();
+                            runnableCache.remove(player.getUniqueId());
                         }
-                    });
+                    }
+                }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L);
+                runnableCache.put(player.getUniqueId(), bukkitTask);
+                break;
+            case RUNNING:
+                ArenaManager
+                        .getInstance()
+                        .get(game.getName())
+                        .ifPresent(arena -> arena.getScoreboardManager().createBoard(player));
+                break;
         }
     }
 
@@ -170,9 +146,8 @@ public class BedWarsListener implements Listener {
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
-        SBAHypixelify
+        ArenaManager
                 .getInstance()
-                .getArenaManager()
                 .get(game.getName())
                 .ifPresent(arena -> {
                     final var scoreboardManager = arena.getScoreboardManager();
@@ -186,8 +161,6 @@ public class BedWarsListener implements Listener {
         }
         runnableCache.remove(player.getUniqueId());
 
-        ScoreboardUtil.removePlayer(player);
-        SBAUtil.removeScoreboardObjective(player);
         ScoreboardManager
                 .getInstance()
                 .fromCache(player.getUniqueId())
@@ -199,9 +172,8 @@ public class BedWarsListener implements Listener {
     public void onBedWarsPlayerKilledEvent(BedwarsPlayerKilledEvent e) {
         final var game = e.getGame();
         // query arena instance for access to Victim/Killer data
-        SBAHypixelify
+        ArenaManager
                 .getInstance()
-                .getArenaManager()
                 .get(game.getName())
                 .ifPresent(arena -> {
                     final var victim = e.getPlayer();
@@ -223,9 +195,10 @@ public class BedWarsListener implements Listener {
                                     .ifPresent(killerData -> {
                                         // increment kill counter for killer
                                         killerData.setKills(killerData.getKills() + 1);
-                                        if (!victimTeam.isAlive())
+                                        if (!victimTeam.isAlive()) {
                                             // increment final kill counter for killer
                                             killerData.setFinalKills(killerData.getFinalKills() + 1);
+                                        }
                                     });
                         }
                     }

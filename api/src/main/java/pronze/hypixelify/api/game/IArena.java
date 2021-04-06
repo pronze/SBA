@@ -10,7 +10,7 @@ import pronze.hypixelify.api.manager.ScoreboardManager;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface Arena {
+public interface IArena {
     /**
      *
      * @return game storage

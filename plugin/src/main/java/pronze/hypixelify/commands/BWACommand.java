@@ -4,7 +4,6 @@ package pronze.hypixelify.commands;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.GameManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArgument;
 import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArrayArgument;
@@ -14,9 +13,10 @@ import org.screamingsandals.bedwars.lib.ext.configurate.hocon.HoconConfiguration
 import org.screamingsandals.bedwars.lib.ext.geantyref.TypeToken;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.Permissions;
-import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.inventories.GamesInventory;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.utils.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -187,7 +187,7 @@ public class BWACommand {
                                 player.sendMessage(i18n("command_unknown", true));
                                 return;
                             }
-                            SBAHypixelify.getInstance().getGamesInventory().openForPlayer(player, mode);
+                            GamesInventory.getInstance().openForPlayer(player, mode);
                         }).execute()));
 
         manager.command(builder.literal("upgrade")
@@ -195,7 +195,7 @@ public class BWACommand {
                 .handler(context -> manager.taskRecipe()
                         .begin(context)
                         .synchronous(c -> {
-                            if (!SBAHypixelify.getInstance().isUpgraded()) {
+                            if (!SBAHypixelify.getInstance().isPendingUpgrade()) {
                                 c.getSender().sendMessage(i18n("command_cannot_do", true));
                             }
                             SBAHypixelify.getConfigurator().upgrade();
@@ -206,7 +206,7 @@ public class BWACommand {
                 .handler(context -> manager.taskRecipe()
                         .begin(context)
                         .synchronous(c -> {
-                            if (!SBAHypixelify.getInstance().isUpgraded()) {
+                            if (!SBAHypixelify.getInstance().isPendingUpgrade()) {
                                 c.getSender().sendMessage(i18n("command_cannot_do", true));
                             }
 

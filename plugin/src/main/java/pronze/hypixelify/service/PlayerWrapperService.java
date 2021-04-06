@@ -3,23 +3,29 @@ package pronze.hypixelify.service;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
 import org.screamingsandals.bedwars.lib.player.SenderWrapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerWrapperPostUnregisterEvent;
 import pronze.hypixelify.api.events.SBAPlayerWrapperPreUnregisterEvent;
 import pronze.hypixelify.api.events.SBAPlayerWrapperRegisteredEvent;
 import pronze.hypixelify.api.service.WrapperService;
-import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.game.PlayerWrapper;
+import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class PlayerWrapperService implements WrapperService<Player, PlayerWrapperImpl> {
-    private final Map<UUID, PlayerWrapperImpl> playerData = new ConcurrentHashMap<>();
+@AutoInitialize
+public class PlayerWrapperService implements WrapperService<Player, PlayerWrapper> {
+    private final Map<UUID, PlayerWrapper> playerData = new ConcurrentHashMap<>();
+
+    public static PlayerWrapperService getInstance() {
+        return Core.getObjectFromClass(PlayerWrapperService.class);
+    }
 
     public PlayerWrapperService() {
         Bukkit.getOnlinePlayers().forEach(this::register);
@@ -28,9 +34,9 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
 
     private void registerMapping() {
         PlayerMapper.UNSAFE_getPlayerConverter()
-                .registerW2P(PlayerWrapperImpl.class, wrapper -> {
+                .registerW2P(PlayerWrapper.class, wrapper -> {
                     if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
-                        return playerData.get(wrapper.as(PlayerWrapper.class).getUuid());
+                        return playerData.get(wrapper.as(org.screamingsandals.bedwars.lib.player.PlayerWrapper.class).getUuid());
                     }
                     return null;
                 });
@@ -38,7 +44,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
 
     @Override
     public void register(Player player) {
-        final var playerWrapper = new PlayerWrapperImpl(player);
+        final var playerWrapper = new PlayerWrapper(player);
         playerData.put(player.getUniqueId(), playerWrapper);
         Logger.trace("Registered player: {}", player.getName());
         SBAHypixelify
@@ -71,10 +77,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
     }
 
     @Override
-    public Optional<PlayerWrapperImpl> get(Player param) {
-        if (!playerData.containsKey(param.getUniqueId())) {
-            return Optional.empty();
-        }
-        return Optional.of(playerData.get(param.getUniqueId()));
+    public Optional<PlayerWrapper> get(Player param) {
+        return Optional.ofNullable(playerData.get(param.getUniqueId()));
     }
 }

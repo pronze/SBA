@@ -27,11 +27,11 @@ import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.Permissions;
-import pronze.hypixelify.game.PlayerWrapperImpl;
-import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.game.PlayerWrapper;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.hypixelify.utils.ScoreboardUtil;
 import pronze.hypixelify.utils.ShopUtil;
+import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +40,10 @@ import java.util.Objects;
 
 import static pronze.hypixelify.lib.lang.I.i18n;
 
+@AutoInitialize(listener = true)
 public class PlayerListener implements Listener {
     private final List<Material> allowedDropItems;
     private final List<Material> generatorDropItems;
-
 
     public PlayerListener() {
         allowedDropItems = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
@@ -244,9 +244,8 @@ public class PlayerListener implements Listener {
                 .getInstance()
                 .fromCache(uuid)
                 .ifPresent(Scoreboard::destroy);
-        ScoreboardUtil.removePlayer(player);
         final var wrappedPlayer =  PlayerMapper.wrapPlayer(player)
-                .as(PlayerWrapperImpl.class);
+                .as(PlayerWrapper.class);
         SBAHypixelify
                 .getInstance()
                 .getPartyManager()
@@ -285,7 +284,7 @@ public class PlayerListener implements Listener {
         final var player = e.getPlayer();
         SBAHypixelify.getInstance().getPlayerWrapperService().register(player);
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
-            if (SBAHypixelify.getInstance().isUpgraded()) {
+            if (SBAHypixelify.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
                     player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                     player.sendMessage("Type /bwaddon upgrade to upgrade file");

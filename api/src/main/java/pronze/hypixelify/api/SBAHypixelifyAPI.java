@@ -1,34 +1,33 @@
 package pronze.hypixelify.api;
 
-import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
-import pronze.hypixelify.api.config.ConfiguratorAPI;
+import pronze.hypixelify.api.config.IConfigurator;
 import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.game.GameStorage;
-import pronze.hypixelify.api.manager.ArenaManager;
-import pronze.hypixelify.api.manager.PartyManager;
+import pronze.hypixelify.api.manager.IArenaManager;
+import pronze.hypixelify.api.manager.IPartyManager;
 import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.game.Game;
-
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
  * Represents the API for SBAHypixelify
  */
 public interface SBAHypixelifyAPI {
+
     /**
      *
      * @return Registered instance of SBAHypixelify
      */
     static SBAHypixelifyAPI getInstance(){
-        return Objects.requireNonNull(Bukkit.getServer()
-                .getServicesManager().getRegistration(SBAHypixelifyAPI.class)).getProvider();
+        var instance = Bukkit.getServer().getServicesManager().getRegistration(SBAHypixelifyAPI.class);
+        if (instance == null) {
+            throw new UnsupportedOperationException("SBAHypixelify has not been initialized properly yet!");
+        }
+        return instance.getProvider();
     }
 
     /**
@@ -65,15 +64,9 @@ public interface SBAHypixelifyAPI {
 
     /**
      *
-     * @return A {@link List} of listeners that were registered by the SBAHypixelify instance.
+     * @return The {@link IArenaManager} instance that handles the creation or destruction of arenas.
      */
-    List<Listener> getRegisteredListeners();
-
-    /**
-     *
-     * @return The {@link ArenaManager} instance that handles the creation or destruction of arenas.
-     */
-    ArenaManager getArenaManager();
+    IArenaManager getArenaManager();
 
     /**
      *
@@ -84,9 +77,9 @@ public interface SBAHypixelifyAPI {
     /**
      *
      * <b>NOTE: This class is thread safe</b>
-     * @return {@link PartyManager} instance that handles the creation and destruction of parties
+     * @return {@link IPartyManager} instance that handles the creation and destruction of parties
      */
-    PartyManager getPartyManager();
+    IPartyManager getPartyManager();
 
     /**
      *
@@ -96,26 +89,15 @@ public interface SBAHypixelifyAPI {
     WrapperService<Player, ? extends PlayerWrapper> getPlayerWrapperService();
 
     /**
-     * Look into ConfiguratorAPI getter methods to get certain settings from the config.
+     * Look into IConfigurator getter methods to get certain settings from the config.
      * @return an instance of an Configurator which helps in the configuration of file based data.
      */
-    ConfiguratorAPI getConfigurator0();
+    IConfigurator getConfigurator0();
 
     /**
      *
      * @return true if recently has been upgraded, false otherwise.
      */
-    boolean isUpgraded();
+    boolean isPendingUpgrade();
 
-    /**
-     *
-     * @return an {@link SimpleDateFormat} instance that has been configured from the bwaconfig.yml
-     */
-    SimpleDateFormat getSimpleDateFormat();
-
-    /**
-     *
-     * @return A formatted Date instance from {@link SimpleDateFormat} instance.
-     */
-    String getFormattedDate();
 }

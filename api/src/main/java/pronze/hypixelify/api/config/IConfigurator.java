@@ -5,7 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public interface ConfiguratorAPI {
+public interface IConfigurator {
 
     /**
      * Loads the default configuration of the plugin.
@@ -63,5 +63,10 @@ public interface ConfiguratorAPI {
      * @return an boolean that was found, returns def otherwise.
      */
     Boolean getBoolean(String path, boolean def);
+
+    /**
+     * Saves the loaded configuration to the yaml file config.yml
+     */
+    void saveConfig();
 }
 

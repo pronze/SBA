@@ -6,7 +6,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.PlayerWrapperImpl;
+import pronze.hypixelify.game.PlayerWrapper;
 
 public class PartyDebugCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -28,7 +28,7 @@ public class PartyDebugCommand {
                         .asynchronous(ctx -> {
                             final var player = PlayerMapper
                                     .wrapPlayer(ctx.get("party-participant"))
-                                    .as(PlayerWrapperImpl.class);
+                                    .as(PlayerWrapper.class);
 
                             final var sender = (Player)ctx.getSender();
 
