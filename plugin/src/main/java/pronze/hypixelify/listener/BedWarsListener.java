@@ -18,6 +18,7 @@ import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
@@ -47,13 +48,10 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .createArena(game);
 
-
-        game.getConnectedPlayers().forEach(player -> SBAUtil.translateColors(SBAConfig.getInstance()
-                .getStringList("game-start.message"))
-                .stream()
-                .filter(Objects::nonNull)
-                .forEach(player::sendMessage));
-
+        LanguageService
+                .getInstance()
+                .get(MessageKeys.GAME_START_MESSAGE)
+                .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
     }
 
     @EventHandler

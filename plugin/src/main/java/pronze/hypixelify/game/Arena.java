@@ -20,6 +20,7 @@ import pronze.hypixelify.scoreboard.GameScoreboardManagerImpl;
 import pronze.hypixelify.utils.SBAUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Getter
@@ -128,26 +129,20 @@ public class Arena implements IArena {
             winner.getConnectedPlayers().forEach(pl ->
                     SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, "", 0, 90, 0));
 
-            for (var player : game.getConnectedPlayers()) {
-                try {
-                    for (var message : SBAUtil.translateColors(SBAConfig.getInstance().node("overstats", "message").getList(String.class))) {
-                        if (message != null) {
-                            player.sendMessage(message.replace("{color}",
-                                    org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
-                                    .replace("%win_team%", winner.getName())
-                                    .replace("%winners%", WinTeamPlayers.toString())
-                                    .replace("%first_killer_name%", firstKillerName)
-                                    .replace("%second_killer_name%", secondKillerName)
-                                    .replace("%third_killer_name%", thirdKillerName)
-                                    .replace("%first_killer_score%", String.valueOf(firstKillerScore))
-                                    .replace("%second_killer_score%", String.valueOf(secondKillerScore))
-                                    .replace("%third_killer_score%", String.valueOf(thirdKillerScore)));
-                        }
-                    }
-                } catch (SerializationException serializationException) {
-                    SBAHypixelify.getExceptionManager().handleException(serializationException);
-                }
-            }
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.OVERSTATS_MESSAGE)
+                    .replace("{color}",
+                            org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
+                    .replace("%win_team%", winner.getName())
+                    .replace("%winners%", WinTeamPlayers.toString())
+                    .replace("%first_killer_name%", firstKillerName)
+                    .replace("%second_killer_name%", secondKillerName)
+                    .replace("%third_killer_name%", thirdKillerName)
+                    .replace("%first_killer_score%", String.valueOf(firstKillerScore))
+                    .replace("%second_killer_score%", String.valueOf(secondKillerScore))
+                    .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
+                    .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
         }
 
     }

@@ -6,8 +6,10 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyKickEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,20 +65,18 @@ public class PartyKickCommand {
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
                                         if (!party.getPartyLeader().equals(player)) {
-                                            SBAHypixelify
+                                            LanguageService
                                                     .getInstance()
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.access-denied")
-                                                    .forEach(player::sendMessage);
+                                                    .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                    .send(player);
                                             return;
                                         }
 
                                         if (!party.getMembers().contains(args)) {
-                                            SBAHypixelify
+                                            LanguageService
                                                     .getInstance()
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.player-not-found")
-                                                    .forEach(player::sendMessage);
+                                                    .get(MessageKeys.PARTY_MESSAGE_PLAYER_NOT_FOUND)
+                                                    .send(player);
                                             return;
                                         }
 
@@ -89,12 +89,12 @@ public class PartyKickCommand {
 
                                         if (kickEvent.isCancelled()) return;
 
-                                        SBAHypixelify
+                                        LanguageService
                                                 .getInstance()
-                                                .getConfigurator()
-                                                .getStringList("party.message.kicked")
-                                                .stream().map(str -> str.replace("{player}", args.getName()))
-                                                .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
+                                                .get(MessageKeys.PARTY_MESSAGE_KICKED)
+                                                .replace("%player%", args.getName())
+                                                .send(party.getMembers().toArray(PlayerWrapper[]::new));
+
                                         party.removePlayer(args);
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify
@@ -102,11 +102,11 @@ public class PartyKickCommand {
                                                     .getPartyManager()
                                                     .disband(party.getUUID());
                                         }
-                                    },() -> SBAHypixelify
-                                            .getInstance()
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                    },() -> LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                    .send(player)
+                                            );
                         }).execute()));
     }
 }

@@ -2,10 +2,14 @@ package pronze.hypixelify.commands.party;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.intellij.lang.annotations.Language;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
+import pronze.hypixelify.api.lang.Message;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartyChatCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -29,13 +33,11 @@ public class PartyChatCommand {
                                     .as(PlayerWrapper.class);
 
                             player.setPartyChatEnabled(!player.isPartyChatEnabled());
-                            SBAHypixelify
+                            LanguageService
                                     .getInstance()
-                                    .getConfigurator()
-                                    .getStringList("party.message.chat-enable-disabled")
-                                    .stream()
-                                    .map(str -> str.replace("{mode}", player.isPartyChatEnabled() ? "enabled" : "disabled"))
-                                    .forEach(player::sendMessage);
+                                    .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
+                                    .replace("%mode%", player.isPartyChatEnabled() ? "enabled" : "disabled")
+                                    .send(player);
                         }).execute()));
     }
 }

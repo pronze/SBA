@@ -5,8 +5,10 @@ import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyDisbandEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartyDisbandCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -30,11 +32,10 @@ public class PartyDisbandCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
-                                SBAHypixelify
+                                LanguageService
                                         .getInstance()
-                                        .getConfigurator()
-                                        .getStringList("party.message.not-in-party")
-                                        .forEach(player::sendMessage);
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                                 return;
                             }
 
@@ -44,11 +45,10 @@ public class PartyDisbandCommand {
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
                                         if (!party.getPartyLeader().equals(player)) {
-                                            SBAHypixelify
+                                            LanguageService
                                                     .getInstance()
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.access-denied")
-                                                    .forEach(player::sendMessage);
+                                                    .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                    .send(player);
                                             return;
                                         }
 
@@ -64,11 +64,10 @@ public class PartyDisbandCommand {
                                                 .getInstance()
                                                 .getPartyManager()
                                                 .disband(party.getUUID());
-                                    }, () -> SBAHypixelify
+                                    }, () -> LanguageService
                                             .getInstance()
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                            .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                            .send(player));
                         }).execute()));
     }
 }

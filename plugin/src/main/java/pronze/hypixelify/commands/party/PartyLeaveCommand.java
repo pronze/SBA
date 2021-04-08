@@ -3,10 +3,13 @@ package pronze.hypixelify.commands.party;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
+import org.screamingsandals.bedwars.lib.lang.Lang;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyLeaveEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartyLeaveCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -30,11 +33,10 @@ public class PartyLeaveCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
-                                SBAHypixelify
+                                LanguageService
                                         .getInstance()
-                                        .getConfigurator()
-                                        .getStringList("party.message.not-in-party")
-                                        .forEach(player::sendMessage);
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                                 return;
                             }
 
@@ -53,18 +55,16 @@ public class PartyLeaveCommand {
 
                                         player.setInParty(false);
                                         party.removePlayer(player);
-                                        SBAHypixelify
+                                        LanguageService
                                                 .getInstance()
-                                                .getConfigurator()
-                                                .getStringList("party.message.offline-quit")
-                                                .stream()
-                                                .map(str -> str.replace("{player}", player.getName()))
-                                                .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
-                                        SBAHypixelify
+                                                .get(MessageKeys.PARTY_MESSAGE_OFFLINE_QUIT)
+                                                .replace("%player%", player.getName())
+                                                .send(party.getMembers().toArray(new PlayerWrapper[0]));
+
+                                        LanguageService
                                                 .getInstance()
-                                                .getConfigurator()
-                                                .getStringList("party.message.left")
-                                                .forEach(player::sendMessage);
+                                                .get(MessageKeys.PARTY_MESSAGE_LEFT)
+                                                .send(player);
 
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify
@@ -80,22 +80,19 @@ public class PartyLeaveCommand {
                                                     .findAny()
                                                     .ifPresentOrElse(member -> {
                                                         party.setPartyLeader(member);
-                                                        SBAHypixelify
+                                                        LanguageService
                                                                 .getInstance()
-                                                                .getConfigurator()
-                                                                .getStringList("party.message.promoted-leader")
-                                                                .stream().map(str -> str.replace("{player}", member.getName()))
-                                                                .forEach(str -> party.getMembers().forEach(m -> m.getInstance().sendMessage(str)));
+                                                                .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
+                                                                .replace("%player%", member.getName())
+                                                                .send(player);
                                                     }, () -> SBAHypixelify
                                                             .getInstance()
                                                             .getPartyManager()
                                                             .disband(party.getUUID()));
                                         }
-                                    }, () -> SBAHypixelify
+                                    }, () -> LanguageService
                                             .getInstance()
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                            .get(MessageKeys.PARTY_MESSAGE_ERROR));
                         }).execute()));
     }
 }

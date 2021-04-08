@@ -6,8 +6,10 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyPromoteEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,11 +59,10 @@ public class PartyPromoteCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
-                                SBAHypixelify
+                                LanguageService
                                         .getInstance()
-                                        .getConfigurator()
-                                        .getStringList("party.message.not-in-party")
-                                        .forEach(player::sendMessage);
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                                 return;
                             }
 
@@ -71,11 +72,10 @@ public class PartyPromoteCommand {
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
                                         if (!party.getPartyLeader().equals(player)) {
-                                            SBAHypixelify
+                                            LanguageService
                                                     .getInstance()
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.access-denied")
-                                                    .forEach(player::sendMessage);
+                                                    .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                    .send(player);
                                             return;
                                         }
 
@@ -89,17 +89,16 @@ public class PartyPromoteCommand {
                                         if (partyPromoteEvent.isCancelled()) return;
 
                                         party.setPartyLeader(args);
-                                        SBAHypixelify
+                                        LanguageService
                                                 .getInstance()
-                                                .getConfigurator()
-                                                .getStringList("party.message.promoted-leader")
-                                                .stream().map(str -> str.replace("{player}", args.getName()))
-                                                .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
-                                    }, () -> SBAHypixelify
+                                                .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
+                                                .replace("%player%", args.getName())
+                                                .send(party.getMembers().toArray(new PlayerWrapper[0]));
+
+                                    }, () -> LanguageService
                                             .getInstance()
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                            .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                            .send(player));
 
 
                         }).execute()));
