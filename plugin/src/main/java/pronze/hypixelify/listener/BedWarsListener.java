@@ -13,11 +13,17 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GameManager;
+import org.screamingsandals.bedwars.lang.LangKeys;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
+import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
+import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.game.ArenaManager;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.Core;
@@ -29,7 +35,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-import static pronze.hypixelify.lib.lang.I.i18n;
 
 @AutoInitialize(listener = true)
 public class BedWarsListener implements Listener {
@@ -42,11 +47,13 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .createArena(game);
 
-        game.getConnectedPlayers().forEach(player -> SBAUtil.translateColors(SBAHypixelify.getConfigurator()
+
+        game.getConnectedPlayers().forEach(player -> SBAUtil.translateColors(SBAConfig.getInstance()
                 .getStringList("game-start.message"))
                 .stream()
                 .filter(Objects::nonNull)
                 .forEach(player::sendMessage));
+
     }
 
     @EventHandler
@@ -115,9 +122,14 @@ public class BedWarsListener implements Listener {
                                     if (buffer == seconds) return;
                                     buffer = seconds;
                                     if (seconds <= 10) {
-                                        String message = i18n("game-starts-in")
-                                                .replace("{seconds}", String.valueOf(seconds));
-                                        message = seconds == 1 ? message.replace("seconds", "second") : message;
+                                        var message = LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.GAME_STARTS_IN_MESSAGE)
+                                                .replace("%seconds%", String.valueOf(seconds))
+                                                .toString();
+
+                                        message = seconds == 1 ? message
+                                                .replace("seconds", "second") : message;
                                         player.sendMessage(message);
                                         SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
                                     }
@@ -185,7 +197,11 @@ public class BedWarsListener implements Listener {
                     //killer is present
                     if (killer != null) {
                         // get victim game profile
-                        final var gVictim = Main.getPlayerGameProfile(victim);
+                        final var gVictim = PlayerManager
+                                .getInstance()
+                                .getPlayer(victim.getUniqueId())
+                                .orElse(null);
+
                         if (gVictim == null || gVictim.isSpectator) return;
 
                         // get victim team to check if it was a final kill or not

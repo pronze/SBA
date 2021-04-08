@@ -11,6 +11,7 @@ import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.special.SpecialItem;
+import pronze.hypixelify.config.SBAConfig;
 
 @Getter
 public class Dragon extends SpecialItem {
@@ -31,10 +32,10 @@ public class Dragon extends SpecialItem {
     public void spawn() {
         final var color = TeamColor.fromApiColor(team.getColor());
         final var dragon = (org.bukkit.entity.EnderDragon) location.getWorld().spawnEntity(location, EntityType.ENDER_DRAGON);
-        dragon.setCustomName(SBAHypixelify.getConfigurator().config.getString("dragon.name-format")
+        dragon.setCustomName(SBAConfig.getInstance().getString("dragon.name-format")
                 .replace("%teamcolor%", color.chatColor.toString())
                 .replace("%team%", team.getName()));
-        dragon.setCustomNameVisible(SBAHypixelify.getConfigurator().config.getBoolean("dragon.custom-name-enabled", true));
+        dragon.setCustomNameVisible(SBAConfig.getInstance().getBoolean("dragon.custom-name-enabled", true));
 
         try {
             dragon.setInvulnerable(false);

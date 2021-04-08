@@ -15,6 +15,7 @@ import org.screamingsandals.bedwars.lib.ext.kyori.adventure.title.Title;
 import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.exception.ExceptionManager;
 import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 
@@ -43,7 +44,7 @@ public class SBAUtil {
 
     public static List<Material> parseMaterialFromConfig(String key) {
         final var materialList = new ArrayList<Material>();
-        final var materialNames = SBAHypixelify.getConfigurator().getStringList(key);
+        final var materialNames = SBAConfig.getInstance().getStringList(key);
         materialNames.stream()
                 .filter(mat -> mat != null && !mat.isEmpty())
                 .forEach(material -> {
@@ -60,12 +61,12 @@ public class SBAUtil {
     public static Optional<Location> readLocationFromConfig(String section) {
         try {
             return Optional.of(new Location(Bukkit.getWorld(Objects
-                    .requireNonNull(SBAHypixelify.getConfigurator().getString(section + ".world"))),
-                    SBAHypixelify.getConfigurator().config.getDouble(section + ".x"),
-                    SBAHypixelify.getConfigurator().config.getDouble(section + ".y"),
-                    SBAHypixelify.getConfigurator().config.getDouble(section + ".z"),
-                    (float) SBAHypixelify.getConfigurator().config.getDouble(section + ".yaw"),
-                    (float) SBAHypixelify.getConfigurator().config.getDouble(section + ".pitch")
+                    .requireNonNull(SBAConfig.getInstance().getString(section + ".world"))),
+                    SBAConfig.getInstance().getDouble(section + ".x", 0),
+                    SBAConfig.getInstance().getDouble(section + ".y", 0),
+                    SBAConfig.getInstance().getDouble(section + ".z", 0),
+                    (float) SBAConfig.getInstance().getDouble(section + ".yaw", 0),
+                    (float) SBAConfig.getInstance().getDouble(section + ".pitch", 0)
             ));
         } catch (Exception e) {
             SBAHypixelify.getExceptionManager().handleException(e);

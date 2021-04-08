@@ -6,8 +6,12 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.MessageKeys;
+import pronze.hypixelify.api.SBAHypixelifyAPI;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartyWarpCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -31,10 +35,10 @@ public class PartyWarpCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.notinparty")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                                 return;
                             }
 
@@ -44,60 +48,71 @@ public class PartyWarpCommand {
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
                                         if (!player.equals(party.getPartyLeader())) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.access-denied")
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                    .send(player);
                                             return;
                                         }
                                         if (party.getMembers().size() == 1) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.no-players-warp")
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_NO_PLAYERS_TO_WARP)
+                                                    .send(player);
                                             return;
                                         }
 
-                                        SBAHypixelify
-                                                .getConfigurator()
-                                                .getStringList("party.message.warping")
-                                                .forEach(player::sendMessage);
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                .send(player);
 
-                                        if (Main.isPlayerInGame(player.getInstance())) {
-                                            final var game = Main.getInstance().getGameOfPlayer(player.getInstance());
+                                        final var bwPlayerOptional = PlayerManager
+                                                .getInstance()
+                                                .getPlayer(player.getUuid());
+
+                                        if (bwPlayerOptional.isPresent()) {
+                                            final var game = bwPlayerOptional.get().getGame();
+
                                             party.getMembers()
                                                     .stream().filter(member -> !player.equals(member))
                                                     .forEach(member -> {
-                                                final var memberGame = Main.getInstance().isPlayerPlayingAnyGame(member.getInstance()) ?
-                                                        Main.getInstance().getGameOfPlayer(member.getInstance()) : null;
-                                                if (game != memberGame) {
-                                                    if (memberGame != null) memberGame.leaveFromGame(member.getInstance());
-                                                    game.joinToGame(member.getInstance());
-                                                    SBAHypixelify
-                                                            .getConfigurator()
-                                                            .getStringList("party.message.warp")
-                                                            .forEach(str -> member.getInstance().sendMessage(str));
-                                                }
-                                            });
+                                                        final var memberGame = PlayerManager
+                                                                .getInstance()
+                                                                .getGameOfPlayer(player.getUuid())
+                                                                .orElse(null);
+
+                                                        if (game != memberGame) {
+                                                            if (memberGame != null)
+                                                                memberGame.leaveFromGame(member.getInstance());
+                                                            game.joinToGame(member.getInstance());
+                                                            LanguageService
+                                                                    .getInstance()
+                                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                                    .send(member);
+                                                        }
+                                                    });
                                         } else {
                                             final var leaderLocation = player.getInstance().getLocation();
-                                            party.getMembers().stream()
+                                            party.getMembers()
+                                                    .stream()
                                                     .filter(member -> !member.equals(player))
-                                                    .map(pronze.hypixelify.api.wrapper.PlayerWrapper::getInstance).forEach(member -> {
-                                                if (Main.getInstance().isPlayerPlayingAnyGame(member)) {
-                                                    Main.getInstance().getGameOfPlayer(member).leaveFromGame(member);
-                                                }
-                                                PlayerUtils.teleportPlayer(member, leaderLocation);
-                                                SBAHypixelify
-                                                        .getConfigurator()
-                                                        .getStringList("party.message.warp")
-                                                        .forEach(member::sendMessage);
-                                            });
+                                                    .forEach(member -> {
+                                                        PlayerManager
+                                                                .getInstance()
+                                                                .getGameOfPlayer(member.getUuid())
+                                                                .ifPresent(game -> game.leaveFromGame(player.getInstance()));
+                                                        PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
+                                                        LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                                .send(PlayerMapper.wrapPlayer(member));
+                                                    });
                                         }
-                                    }, () -> SBAHypixelify
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                    }, () -> LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                    .send(player));
                         }).execute()));
     }
 }

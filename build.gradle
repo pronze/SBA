@@ -33,7 +33,7 @@ buildscript {
             }
 
             maven {
-                url 'https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven'
+                url = uri('https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven')
             }
 
             maven {
@@ -62,6 +62,7 @@ buildscript {
         shadowJar {
             relocate 'cloud', 'pronze.hypixelify.lib.cloud'
             relocate 'pronze.lib', 'pronze.hypixelify.lib'
+            relocate 'io.projectreactor', 'pronze.hypixelify.lib.reactor'
         }
         sourceCompatibility = '11.0'
     }

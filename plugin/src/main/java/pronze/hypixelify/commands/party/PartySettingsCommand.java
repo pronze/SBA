@@ -5,12 +5,12 @@ import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyMutedEvent;
 import pronze.hypixelify.api.events.SBAPlayerPartyUnmutedEvent;
 import pronze.hypixelify.api.party.PartySetting;
-import pronze.hypixelify.game.PlayerWrapper;
-
-import static pronze.hypixelify.lib.lang.I.i18n;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartySettingsCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -28,7 +28,10 @@ public class PartySettingsCommand {
                         .taskRecipe()
                         .begin(context)
                         .asynchronous(ctx -> {
-                            ctx.getSender().sendMessage(i18n("command_party_settings_get_help", false));
+                            LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.COMMAND_PARTY_SETTINGS_GET_HELP)
+                                    .send(PlayerMapper.wrapPlayer(ctx.getSender()));
                         }))
                 .literal("mute")
                 .senderType(Player.class)
@@ -41,10 +44,10 @@ public class PartySettingsCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.notinparty")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                                 return;
                             }
 
@@ -54,20 +57,19 @@ public class PartySettingsCommand {
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
                                         if (!player.equals(party.getPartyLeader())) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.access-denied")
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                    .send(player);
                                             return;
                                         }
 
                                         if (party.getSettings().getChat() == PartySetting.Chat.UNMUTE) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.already-muted")
-                                                    .stream()
-                                                    .map(str -> str.replace("{isMuted}", "unmuted"))
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ALREADY_MUTED)
+                                                    .replace("%isMuted%", "unmuted")
+                                                    .send(player);
                                         }
 
                                         final var muteEvent = new SBAPlayerPartyMutedEvent(player, party);
@@ -79,18 +81,15 @@ public class PartySettingsCommand {
                                         if (muteEvent.isCancelled()) return;
 
                                         party.getSettings().setChat(PartySetting.Chat.MUTED);
-                                        party.getMembers().forEach(member -> {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.chat-enable-disabled")
-                                                    .stream()
-                                                    .map(str -> str.replace("{mode}", "muted"))
-                                                    .forEach(str -> member.getInstance().sendMessage(str));
-                                        });
-                                    }, () -> SBAHypixelify
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                        party.getMembers().forEach(member -> LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
+                                                .replace("%mode%", "muted")
+                                                .send(member));
+                                    }, () -> LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                            .send(player));
                         }).execute())
                 .literal("unmute")
                 .handler(context -> manager
@@ -102,10 +101,10 @@ public class PartySettingsCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInParty()) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.notinparty")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                                 return;
                             }
 
@@ -115,19 +114,19 @@ public class PartySettingsCommand {
                                     .getPartyOf(player)
                                     .ifPresentOrElse(party -> {
                                         if (!player.equals(party.getPartyLeader())) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.access-denied")
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                    .send(player);
                                             return;
                                         }
+
                                         if (party.getSettings().getChat() == PartySetting.Chat.MUTED) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.already-muted")
-                                                    .stream()
-                                                    .map(str -> str.replace("{isMuted}", "unmuted"))
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_ALREADY_MUTED)
+                                                    .replace("%isMuted%", "unmuted")
+                                                    .send(player);
                                             return;
                                         }
 
@@ -140,17 +139,15 @@ public class PartySettingsCommand {
                                         if (unmuteEvent.isCancelled()) return;
 
                                         party.getSettings().setChat(PartySetting.Chat.MUTED);
-                                        party.getMembers().forEach(member -> SBAHypixelify
-                                                .getConfigurator()
-                                                .getStringList("party.message.chat-enable-disabled")
-                                                .stream()
-                                                .map(str -> str.replace("{mode}", "unmuted"))
-                                                .forEach(str -> member.getInstance().sendMessage(str)));
-
-                                    }, () -> SBAHypixelify
-                                            .getConfigurator()
-                                            .getStringList("party.message.error")
-                                            .forEach(player::sendMessage));
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
+                                                .replace("%mode%", "unmuted")
+                                                .send(party.getMembers().toArray(new PlayerWrapper[0]));
+                                    }, () -> LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                            .send(player));
                         }).execute()));
     }
 }

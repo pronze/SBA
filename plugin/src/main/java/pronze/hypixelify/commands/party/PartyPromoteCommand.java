@@ -7,7 +7,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyPromoteEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,8 +58,9 @@ public class PartyPromoteCommand {
 
                             if (!player.isInParty()) {
                                 SBAHypixelify
+                                        .getInstance()
                                         .getConfigurator()
-                                        .getStringList("party.message.notinparty")
+                                        .getStringList("party.message.not-in-party")
                                         .forEach(player::sendMessage);
                                 return;
                             }
@@ -71,6 +72,7 @@ public class PartyPromoteCommand {
                                     .ifPresentOrElse(party -> {
                                         if (!party.getPartyLeader().equals(player)) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getConfigurator()
                                                     .getStringList("party.message.access-denied")
                                                     .forEach(player::sendMessage);
@@ -88,11 +90,13 @@ public class PartyPromoteCommand {
 
                                         party.setPartyLeader(args);
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getConfigurator()
                                                 .getStringList("party.message.promoted-leader")
                                                 .stream().map(str -> str.replace("{player}", args.getName()))
                                                 .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
                                     }, () -> SBAHypixelify
+                                            .getInstance()
                                             .getConfigurator()
                                             .getStringList("party.message.error")
                                             .forEach(player::sendMessage));

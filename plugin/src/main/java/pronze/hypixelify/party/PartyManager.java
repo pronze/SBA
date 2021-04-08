@@ -6,7 +6,7 @@ import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyCreatedEvent;
 import pronze.hypixelify.api.manager.IPartyManager;
 import pronze.hypixelify.api.party.IParty;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.utils.Logger;
@@ -92,6 +92,7 @@ public class PartyManager implements IPartyManager {
     private void disband(@NotNull IParty party) {
         Logger.trace("Disbandoning party: {}", party.debugInfo());
         final var disbandMessage = SBAHypixelify
+                .getInstance()
                 .getConfigurator()
                 .getStringList("party.message.disband");
 
@@ -112,8 +113,9 @@ public class PartyManager implements IPartyManager {
                     .wrapPlayer(invitedPlayer.getInstance())
                     .as(PlayerWrapper.class);
             SBAHypixelify
+                    .getInstance()
                     .getConfigurator()
-                    .getStringList("party.message.expired")
+                    .getStringList("party.message.invite-expired")
                     .forEach(wrapperImpl::sendMessage);
         });
 

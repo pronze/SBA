@@ -6,7 +6,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 public class PartyDebugCommand {
     private final BukkitCommandManager<CommandSender> manager;

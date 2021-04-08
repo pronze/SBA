@@ -3,6 +3,7 @@ package pronze.hypixelify.commands.party;
 import org.bukkit.command.CommandSender;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.config.SBAConfig;
 
 public class PartyCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -12,7 +13,7 @@ public class PartyCommand {
     }
 
     public void build() {
-        if (!SBAHypixelify.getConfigurator().config.getBoolean("party.enabled", true)) return;
+        if (!SBAConfig.getInstance().node("party","enabled").getBoolean(true)) return;
         new PartyInviteCommand(manager);
         new PartyAcceptCommand(manager);
         new PartyDeclineCommand(manager);

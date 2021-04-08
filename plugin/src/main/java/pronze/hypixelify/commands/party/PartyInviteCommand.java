@@ -6,8 +6,11 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyInviteEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.config.SBAConfig;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 import java.util.stream.Collectors;
 
@@ -38,25 +41,25 @@ public class PartyInviteCommand {
                                     .as(PlayerWrapper.class);
 
                             if (invitedPlayer.equals(player)) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.cannot-invite-yourself")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_CANNOT_INVITE_YOURSELF)
+                                        .send(player);
                                 return;
                             }
                             if (invitedPlayer.isInvitedToAParty()) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.alreadyInvited")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_ALREADY_INVITED)
+                                        .send(player);
                                 return;
                             }
 
                             if (invitedPlayer.isInParty()) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.cannotinvite")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_CANNOT_INVITE)
+                                        .send(player);
                                 return;
                             }
 
@@ -66,19 +69,19 @@ public class PartyInviteCommand {
                                     .getOrCreate(player)
                                     .ifPresent(party -> {
                                         if (party.getInvitedPlayers().size() > 5) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.max-invite-size")
-                                                    .forEach(player::sendMessage);
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_MAX_INVITE_SIZE_REACHED)
+                                                    .send(player);
                                             return;
                                         }
 
                                         if ((party.getMembers().size() + party.getInvitedPlayers().size())
-                                                > SBAHypixelify.getConfigurator().config.getInt("party.size")) {
-                                            SBAHypixelify
-                                                    .getConfigurator()
-                                                    .getStringList("party.message.max-size")
-                                                    .forEach(player::sendMessage);
+                                                > SBAConfig.getInstance().getInt("party.size", 4)) {
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_MAX_INVITE_SIZE_REACHED)
+                                                    .send(player);
                                             return;
                                         }
 
@@ -92,21 +95,17 @@ public class PartyInviteCommand {
 
                                         party.invitePlayer(invitedPlayer, player);
 
-                                        SBAHypixelify
-                                                .getConfigurator()
-                                                .getStringList("party.message.invited")
-                                                .stream()
-                                                .map(str -> str.replace("{player}", invitedPlayer.getName()))
-                                                .collect(Collectors.toList())
-                                                .forEach(player::sendMessage);
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_INVITE_SENT)
+                                                .replace("%player%", invitedPlayer.getName())
+                                                .send(player);
 
-                                        SBAHypixelify
-                                                .getConfigurator()
-                                                .getStringList("party.message.invite")
-                                                .stream()
-                                                .map(str -> str.replace("{player}", player.getName()))
-                                                .collect(Collectors.toList())
-                                                .forEach(invitedPlayer::sendMessage);
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_INVITE_RECEIVED)
+                                                .replace("%player%", player.getName())
+                                                .send(invitedPlayer);
                                     });
                         }).execute()));
     }

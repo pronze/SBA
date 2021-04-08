@@ -1,7 +1,6 @@
 package pronze.hypixelify.api.events;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.bukkit.event.Event;

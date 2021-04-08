@@ -13,9 +13,11 @@ import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
-import pronze.hypixelify.Configurator;
+import pronze.hypixelify.api.MessageKeys;
+import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.Arena;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.DateUtils;
 import pronze.lib.core.utils.Logger;
 
@@ -32,10 +34,20 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
         this.arena = arena;
         game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).orElseThrow();
 
-        if (game.countAvailableTeams() >= 5 && Configurator.Scoreboard_Lines.containsKey("5")) {
-            scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("5"));
+        var mDef = LanguageService
+                .getInstance()
+                .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
+                .toStringList();
+
+        var m5 = LanguageService
+                .getInstance()
+                .get(MessageKeys.SCOREBOARD_LINES_5)
+                .toStringList();
+
+        if (game.countAvailableTeams() >= 5) {
+            scoreboard_lines.addAll(m5);
         } else {
-            scoreboard_lines.addAll(Configurator.Scoreboard_Lines.get("default"));
+            scoreboard_lines.addAll(mDef);
         }
         game.getConnectedPlayers().forEach(this::createBoard);
     }
@@ -46,6 +58,10 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
         final var scoreboardOptional = ScoreboardManager.getInstance()
                 .fromCache(player.getUniqueId());
         scoreboardOptional.ifPresent(Scoreboard::destroy);
+        final var title = LanguageService
+                .getInstance()
+                .get(MessageKeys.ANIMATED_BEDWARS_TITLE)
+                .toStringList();
 
         final var scoreboard = Scoreboard.builder()
                 .animate(true)
@@ -53,9 +69,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                 .displayObjective("bwa-game")
                 .updateInterval(20L)
                 .animationInterval(2L)
-                .animatedTitle(SBAHypixelify
-                        .getConfigurator()
-                        .getStringList("lobby-scoreboard.title"))
+                .animatedTitle(title)
                 .updateCallback(board -> {
                     board.setLines(process(player, board));
                     return true;
@@ -117,8 +131,10 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                             String you = "";
                             if (playerTeam != null) {
                                 if (playerTeam.getName().equalsIgnoreCase(t.getName())) {
-                                    you = SBAHypixelify.getConfigurator()
-                                            .getString("scoreboard.you", "§7YOU");
+                                    you = LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.SCOREBOARD_YOU_MESSAGE)
+                                    .toString();
                                 }
                             }
                             lines.add(finalLine.replace("{team_status}",
@@ -127,20 +143,20 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                         return;
                     }
                     line = line
-                            .replace("{team}", teamName)
-                            .replace("{beds}", currentBedDestroys)
-                            .replace("{dies}", currentDeaths)
-                            .replace("{totalkills}", totalKills)
-                            .replace("{finalkills}", finalKills)
-                            .replace("{kills}", currentKills)
-                            .replace("{time}", game.getFormattedTimeLeft())
-                            .replace("{formattime}", game.getFormattedTimeLeft())
-                            .replace("{game}", game.getName())
-                            .replace("{date}", DateUtils.getFormattedDate())
-                            .replace("{team_bed_status}", teamStatus == null ? "" : teamStatus);
+                            .replace("%team%", teamName)
+                            .replace("%beds%", currentBedDestroys)
+                            .replace("%dies%", currentDeaths)
+                            .replace("%totalkills%", totalKills)
+                            .replace("%finalkills%", finalKills)
+                            .replace("%kills%", currentKills)
+                            .replace("%time%", game.getFormattedTimeLeft())
+                            .replace("%formattime%", game.getFormattedTimeLeft())
+                            .replace("%game%", game.getName())
+                            .replace("%date%", DateUtils.getFormattedDate())
+                            .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus);
 
                     if (arena.getGameTask() != null) {
-                        line = line.replace("{tier}", arena.getGameTask().getTier()
+                        line = line.replace("%tier%", arena.getGameTask().getTier()
                                 .replace("-", " ") + " in §a" + arena.getGameTask().getFormattedTimeLeft());
                     }
                     lines.add(line);

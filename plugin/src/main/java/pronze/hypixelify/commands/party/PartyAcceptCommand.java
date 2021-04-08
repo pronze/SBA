@@ -5,8 +5,10 @@ import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyInviteAcceptEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartyAcceptCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -30,10 +32,10 @@ public class PartyAcceptCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInvitedToAParty()) {
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.not-invited")
-                                        .forEach(player::sendMessage);
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_INVITED)
+                                        .send(player);
                                 return;
                             }
 
@@ -44,7 +46,8 @@ public class PartyAcceptCommand {
 
                             optionalParty.ifPresentOrElse(party -> {
                                 final var acceptEvent = new SBAPlayerPartyInviteAcceptEvent(player, party);
-                                SBAHypixelify.getInstance()
+                                SBAHypixelify
+                                        .getInstance()
                                         .getServer()
                                         .getPluginManager()
                                         .callEvent(acceptEvent);
@@ -54,18 +57,16 @@ public class PartyAcceptCommand {
                                 player.setInvitedToAParty(false);
                                 player.setInParty(true);
                                 party.addPlayer(player);
-                                SBAHypixelify
-                                        .getConfigurator()
-                                        .getStringList("party.message.accepted")
-                                        .stream()
-                                        .map(str -> str.replace("{player}", player.getName()))
-                                        .forEach(str -> party
-                                                .getMembers()
-                                                .forEach(member -> member.getInstance().sendMessage(str)));
-                            }, () -> SBAHypixelify
-                                    .getConfigurator()
-                                    .getStringList("party.message.error")
-                                    .forEach(player::sendMessage));
+
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_ACCEPTED)
+                                        .replace("%player%", player.getName())
+                                        .send(party.getMembers().toArray(PlayerWrapper[]::new));
+                            }, () -> LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                    .send(player));
                         }).execute()));
     }
 }

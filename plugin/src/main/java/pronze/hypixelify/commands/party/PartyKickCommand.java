@@ -7,7 +7,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.parsers.PlayerArgument;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyKickEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,6 +64,7 @@ public class PartyKickCommand {
                                     .ifPresentOrElse(party -> {
                                         if (!party.getPartyLeader().equals(player)) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getConfigurator()
                                                     .getStringList("party.message.access-denied")
                                                     .forEach(player::sendMessage);
@@ -72,6 +73,7 @@ public class PartyKickCommand {
 
                                         if (!party.getMembers().contains(args)) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getConfigurator()
                                                     .getStringList("party.message.player-not-found")
                                                     .forEach(player::sendMessage);
@@ -88,6 +90,7 @@ public class PartyKickCommand {
                                         if (kickEvent.isCancelled()) return;
 
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getConfigurator()
                                                 .getStringList("party.message.kicked")
                                                 .stream().map(str -> str.replace("{player}", args.getName()))
@@ -100,6 +103,7 @@ public class PartyKickCommand {
                                                     .disband(party.getUUID());
                                         }
                                     },() -> SBAHypixelify
+                                            .getInstance()
                                             .getConfigurator()
                                             .getStringList("party.message.error")
                                             .forEach(player::sendMessage));

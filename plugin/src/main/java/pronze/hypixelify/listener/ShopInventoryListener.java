@@ -28,9 +28,12 @@ import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.PlayerItemInfo;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
+import org.screamingsandals.bedwars.player.PlayerManager;
 import org.screamingsandals.bedwars.utils.Sounds;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBATeamUpgradePurchaseEvent;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.utils.Logger;
@@ -40,9 +43,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static pronze.hypixelify.lib.lang.I.i18n;
 
 @AutoInitialize(listener = true)
 public class ShopInventoryListener implements Listener {
@@ -57,29 +59,37 @@ public class ShopInventoryListener implements Listener {
 
     @EventHandler
     public Item onPreItemProcess(BedwarsPrePropertyScanEvent event) {
-        var item = event.getEvent().getStack();
+        final var item = event.getEvent().getStack();
+
         final var player = event.getEvent().getPlayer().as(Player.class);
-        var game = Main.getPlayerGameProfile(player).getGame();
+        final var game = PlayerManager.getInstance().getGameOfPlayer(player.getUniqueId()).orElseThrow();
         final var optionalStorage = SBAHypixelify.getInstance().getGameStorage(game);
-        if (optionalStorage.isPresent()) {
-            final var storage = optionalStorage.get();
+        AtomicReference<Item> itemReference = new AtomicReference<>();
+
+        optionalStorage.ifPresent(storage -> {
             final var bukkitItemStack = item.as(ItemStack.class);
             final var typeName = bukkitItemStack.getType().name();
             final var runningTeam = game.getTeamOfPlayer(player);
 
-            if (typeName.endsWith("SWORD")) {
-                int sharpness = storage.getSharpness(runningTeam.getName());
-                bukkitItemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
-            } else if (typeName.endsWith("BOOTS")) {
-                int protection = storage.getProtection(runningTeam.getName());
-                bukkitItemStack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protection);
-            } else if (typeName.endsWith("PICKAXE")) {
-                final int efficiency = storage.getEfficiency(runningTeam.getName());
-                bukkitItemStack.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiency);
+            final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
+            switch (afterUnderscore.toLowerCase()) {
+                case "sword":
+                    int sharpness = storage.getSharpness(runningTeam.getName());
+                    bukkitItemStack.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+                    break;
+                case "boots":
+                    int protection = storage.getProtection(runningTeam.getName());
+                    bukkitItemStack.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protection);
+                    break;
+                case "pickaxe":
+                    final int efficiency = storage.getEfficiency(runningTeam.getName());
+                    bukkitItemStack.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiency);
+                    break;
             }
-            item = ItemFactory.build(bukkitItemStack).orElse(item);
-        }
-        return item;
+            itemReference.set(ItemFactory.build(bukkitItemStack).orElse(item));
+        });
+
+        return itemReference.get();
     }
 
     @EventHandler
@@ -104,7 +114,7 @@ public class ShopInventoryListener implements Listener {
     private Optional<Item> upgradeItem(OnTradeEvent event, String propertyName) {
         final var player = event.getPlayer().as(Player.class);
         final var stack = event.getStack().as(ItemStack.class);
-        final var game = Main.getPlayerGameProfile(player).getGame();
+        final var game = PlayerManager.getInstance().getGameOfPlayer(player.getUniqueId()).orElseThrow();
         final var itemInfo = event.getItem();
         final var team = game.getTeamOfPlayer(player);
         final var optionalGameStorage = SBAHypixelify.getInstance().getGameStorage(game);
@@ -130,6 +140,7 @@ public class ShopInventoryListener implements Listener {
                 stack.removeEnchantment(enchant);
                 stack.setLore(
                         SBAHypixelify
+                                .getInstance()
                                 .getConfigurator()
                                 .getStringList("message.maximum-enchant-lore")
                 );
@@ -167,7 +178,7 @@ public class ShopInventoryListener implements Listener {
         var newItem = event.getNewItem();
         var itemInfo = event.getTradeEvent().getItem();
         var player = event.getTradeEvent().getPlayer().as(Player.class);
-        var game = Main.getPlayerGameProfile(player).getGame();
+        var game = PlayerManager.getInstance().getGameOfPlayer(player.getUniqueId()).orElseThrow();
         var type = event.getSpawnerType();
 
         var materialItem = event.getMaterialItem();
@@ -213,7 +224,10 @@ public class ShopInventoryListener implements Listener {
                     //since we are  setting the price to a different one on upgrade, we do the check again
                     if (!event.getTradeEvent().hasPlayerInInventory(materialItem)
                             && !MainConfig.getInstance().node("removePurchaseMessages").getBoolean(false)) {
-                        player.sendMessage(i18n("cannot-buy"));
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.CANNOT_BUY)
+                                .send(PlayerMapper.wrapPlayer(player));
                         return;
                     }
 

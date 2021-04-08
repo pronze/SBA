@@ -1,4 +1,5 @@
 package pronze.hypixelify.utils;
+import org.screamingsandals.bedwars.config.MainConfig;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
@@ -15,7 +16,7 @@ public class DateUtils {
     }
 
     public DateUtils() {
-        format = new SimpleDateFormat(SBAHypixelifyAPI.getInstance().getConfigurator0().getString("date.format", "MM/dd/yy"));
+        format = new SimpleDateFormat(MainConfig.getInstance().node("date", "format").getString("MM/dd/yy"));
     }
 
     public static SimpleDateFormat getSimpleDateFormat() {

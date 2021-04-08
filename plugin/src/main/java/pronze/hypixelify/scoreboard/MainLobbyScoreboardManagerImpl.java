@@ -17,8 +17,12 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.player.PlayerManager;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
+import pronze.hypixelify.config.SBAConfig;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.Core;
@@ -34,7 +38,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
 
     public MainLobbyScoreboardManagerImpl() {
-        if (!SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)) {
+        if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
            return;
         }
         Core.registerListener(this);
@@ -65,21 +69,25 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-        if (!SBAHypixelify.getConfigurator().config
-                .getBoolean("main-lobby.custom-chat", true)) return;
+        if (!SBAConfig.getInstance().getBoolean("main-lobby.custom-chat", true)) return;
         final var player = e.getPlayer();
         final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
 
-        if (SBAHypixelify.getConfigurator().config.getBoolean("main-lobby.enabled", false)
+        if (SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)
                 && MainLobbyScoreboardManagerImpl.isInWorld(e.getPlayer().getLocation())) {
 
-            if (SBAHypixelify.getConfigurator().getString("main-lobby.chat-format") != null) {
-                String format = SBAHypixelify.getConfigurator()
+            var chatFormat = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MAIN_LOBBY_CHAT_FORMAT)
+                    .toString();
+
+            if (chatFormat != null) {
+                String format = SBAConfig.getInstance()
                         .getString("main-lobby.chat-format")
-                        .replace("{level}", String.valueOf(db.getLevel()))
-                        .replace("{name}", e.getPlayer().getName())
-                        .replace("{message}", e.getMessage())
-                        .replace("{color}", ShopUtil.ChatColorChanger(e.getPlayer()));
+                        .replace("%level%", String.valueOf(db.getLevel()))
+                        .replace("%name%", e.getPlayer().getName())
+                        .replace("%message%", e.getMessage())
+                        .replace("%color%", ShopUtil.ChatColorChanger(e.getPlayer()));
 
                 if (SBAHypixelify.getInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                     format = PlaceholderAPI.setPlaceholders(player, format);
@@ -106,8 +114,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
         Bukkit.getServer().getScheduler()
                 .runTaskLater(SBAHypixelify.getInstance(), () -> {
                     if (hasMainLobbyObjective(player)) return;
-                    if (isInWorld(player.getLocation()) && !BedwarsAPI.getInstance()
-                            .isPlayerPlayingAnyGame(player)) {
+                    if (isInWorld(player.getLocation()) && !PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
                         createBoard(player);
                     }
                 }, 3L);
@@ -145,10 +152,10 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
         final var scoreboard = Scoreboard.builder()
                 .animate(false)
                 .player(player)
-                .title(SBAHypixelify.getConfigurator().getString("main-lobby.title", "&e&lBED WARS"))
+                .title(SBAConfig.getInstance().getString("main-lobby.title", "&e&lBED WARS"))
                 .displayObjective(MAIN_LOBBY_OBJECTIVE)
                 .updateInterval(20L)
-                .lines(SBAHypixelify.getConfigurator().getStringList("main-lobby.lines"))
+                .lines(SBAConfig.getInstance().getStringList("main-lobby.lines"))
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
                     final var progress = playerData.getStringProgress();
@@ -157,14 +164,14 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
                             .getStatistic(PlayerMapper.wrapPlayer(player));
 
                     return hook.getLine()
-                            .replace("{kills}", String.valueOf(playerStatistic.getKills()))
-                            .replace("{beddestroys}", String.valueOf(playerStatistic.getDestroyedBeds()))
-                            .replace("{deaths}", String.valueOf(playerStatistic.getDeaths()))
-                            .replace("{level}", "§7" + playerData.getLevel() + "✫")
-                            .replace("{progress}", progress)
-                            .replace("{bar}", bar)
-                            .replace("{wins}", String.valueOf(playerStatistic.getWins())
-                            .replace("{k/d}", String.valueOf(playerStatistic.getKD())));
+                            .replace("%kills%", String.valueOf(playerStatistic.getKills()))
+                            .replace("%beddestroys%", String.valueOf(playerStatistic.getDestroyedBeds()))
+                            .replace("%deaths%", String.valueOf(playerStatistic.getDeaths()))
+                            .replace("%level%", "§7" + playerData.getLevel() + "✫")
+                            .replace("%progress%", progress)
+                            .replace("%bar%", bar)
+                            .replace("%wins%", String.valueOf(playerStatistic.getWins())
+                            .replace("%k/d%", String.valueOf(playerStatistic.getKD())));
                 }).build();
 
         scoreboardMap.put(player, scoreboard);

@@ -6,7 +6,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyLeaveEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 public class PartyLeaveCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -31,8 +31,9 @@ public class PartyLeaveCommand {
 
                             if (!player.isInParty()) {
                                 SBAHypixelify
+                                        .getInstance()
                                         .getConfigurator()
-                                        .getStringList("party.message.notinparty")
+                                        .getStringList("party.message.not-in-party")
                                         .forEach(player::sendMessage);
                                 return;
                             }
@@ -53,12 +54,14 @@ public class PartyLeaveCommand {
                                         player.setInParty(false);
                                         party.removePlayer(player);
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getConfigurator()
                                                 .getStringList("party.message.offline-quit")
                                                 .stream()
                                                 .map(str -> str.replace("{player}", player.getName()))
                                                 .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
                                         SBAHypixelify
+                                                .getInstance()
                                                 .getConfigurator()
                                                 .getStringList("party.message.left")
                                                 .forEach(player::sendMessage);
@@ -78,6 +81,7 @@ public class PartyLeaveCommand {
                                                     .ifPresentOrElse(member -> {
                                                         party.setPartyLeader(member);
                                                         SBAHypixelify
+                                                                .getInstance()
                                                                 .getConfigurator()
                                                                 .getStringList("party.message.promoted-leader")
                                                                 .stream().map(str -> str.replace("{player}", member.getName()))
@@ -88,6 +92,7 @@ public class PartyLeaveCommand {
                                                             .disband(party.getUUID()));
                                         }
                                     }, () -> SBAHypixelify
+                                            .getInstance()
                                             .getConfigurator()
                                             .getStringList("party.message.error")
                                             .forEach(player::sendMessage));

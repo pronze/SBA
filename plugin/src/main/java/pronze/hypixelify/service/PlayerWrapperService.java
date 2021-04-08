@@ -9,9 +9,10 @@ import pronze.hypixelify.api.events.SBAPlayerWrapperPostUnregisterEvent;
 import pronze.hypixelify.api.events.SBAPlayerWrapperPreUnregisterEvent;
 import pronze.hypixelify.api.events.SBAPlayerWrapperRegisteredEvent;
 import pronze.hypixelify.api.service.WrapperService;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.annotations.OnInit;
 import pronze.lib.core.utils.Logger;
 
 import java.util.Map;
@@ -29,9 +30,9 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
 
     public PlayerWrapperService() {
         Bukkit.getOnlinePlayers().forEach(this::register);
-        registerMapping();
     }
 
+    @OnInit
     private void registerMapping() {
         PlayerMapper.UNSAFE_getPlayerConverter()
                 .registerW2P(PlayerWrapper.class, wrapper -> {

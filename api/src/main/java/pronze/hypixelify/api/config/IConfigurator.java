@@ -1,9 +1,5 @@
 package pronze.hypixelify.api.config;
-
-import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public interface IConfigurator {
 
@@ -19,12 +15,11 @@ public interface IConfigurator {
 
     /**
      *
-     * @param modify if true, the config will be overwritten to the default value.
-     * @param path Path of the Object to look up
-     * @param defValue The default value to return if the path is not found
+     * @param path Path of the double to look up
+     * @param def The default value to return if the path is not found
+     * @return
      */
-    void checkOrSetConfig(AtomicBoolean modify, String path, @NotNull Object defValue);
-
+    double getDouble(String path, double def);
     /**
      *
      * @param path Path of the String to look up

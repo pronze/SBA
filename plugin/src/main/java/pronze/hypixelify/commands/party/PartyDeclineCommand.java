@@ -5,8 +5,10 @@ import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyInviteDeclineEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.lib.lang.LanguageService;
 
 public class PartyDeclineCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -29,11 +31,10 @@ public class PartyDeclineCommand {
                                     .as(PlayerWrapper.class);
 
                             if (!player.isInvitedToAParty()) {
-                                SBAHypixelify
+                                LanguageService
                                         .getInstance()
-                                        .getConfigurator()
-                                        .getStringList("party.message.not-invited")
-                                        .forEach(player::sendMessage);
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_INVITED)
+                                        .send(player);
                                 return;
                             }
 
@@ -54,19 +55,18 @@ public class PartyDeclineCommand {
 
                                         party.removeInvitedPlayer(player);
                                         player.setInvitedToAParty(false);
-                                        SBAHypixelify
-                                                .getInstance()
-                                                .getConfigurator()
-                                                .getStringList("party.message.declined-user")
-                                                .forEach(player::sendMessage);
 
-                                        SBAHypixelify
+                                        LanguageService
                                                 .getInstance()
-                                                .getConfigurator()
-                                                .getStringList("party.message.declined")
-                                                .stream()
-                                                .map(str -> str.replace("{player}", player.getName()))
-                                                .forEach(str -> party.getMembers().forEach(member -> member.getInstance().sendMessage(str)));
+                                                .get(MessageKeys.PARTY_MESSAGE_DECLINE_OUTGOING)
+                                                .send(player);
+
+                                        var message = LanguageService
+                                                        .getInstance()
+                                                        .get(MessageKeys.PARTY_MESSAGE_DECLINE_INCOMING)
+                                                        .replace("%player%", player.getName());
+
+                                        party.getMembers().forEach(member-> message.send((PlayerWrapper)member));
 
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify

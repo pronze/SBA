@@ -1,9 +1,7 @@
 package pronze.hypixelify.api.game;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerKilledEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.GamePlayer;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 

@@ -6,7 +6,7 @@ import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyDisbandEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 public class PartyDisbandCommand {
     private final BukkitCommandManager<CommandSender> manager;
@@ -31,8 +31,9 @@ public class PartyDisbandCommand {
 
                             if (!player.isInParty()) {
                                 SBAHypixelify
+                                        .getInstance()
                                         .getConfigurator()
-                                        .getStringList("party.message.notinparty")
+                                        .getStringList("party.message.not-in-party")
                                         .forEach(player::sendMessage);
                                 return;
                             }
@@ -44,6 +45,7 @@ public class PartyDisbandCommand {
                                     .ifPresentOrElse(party -> {
                                         if (!party.getPartyLeader().equals(player)) {
                                             SBAHypixelify
+                                                    .getInstance()
                                                     .getConfigurator()
                                                     .getStringList("party.message.access-denied")
                                                     .forEach(player::sendMessage);
@@ -63,6 +65,7 @@ public class PartyDisbandCommand {
                                                 .getPartyManager()
                                                 .disband(party.getUUID());
                                     }, () -> SBAHypixelify
+                                            .getInstance()
                                             .getConfigurator()
                                             .getStringList("party.message.error")
                                             .forEach(player::sendMessage));

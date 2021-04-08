@@ -9,7 +9,7 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyChatEvent;
-import pronze.hypixelify.game.PlayerWrapper;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.lib.core.annotations.AutoInitialize;
 
 @AutoInitialize(listener = true)
@@ -30,40 +30,27 @@ public class PartyListener implements Listener {
                         final var chatEvent = new SBAPlayerPartyChatEvent(player, party);
                         chatEvent.setMessage(Component.text(event.getMessage()));
 
+                        Runnable runnable = () -> {
+                                SBAHypixelify
+                                        .getInstance()
+                                        .getServer()
+                                        .getPluginManager()
+                                        .callEvent(chatEvent);
+                                if (chatEvent.isCancelled()) {
+                                    return;
+                                }
+
+                                party.sendMessage(
+                                        AdventureHelper.toComponent(event.getMessage()),
+                                        player
+                                );
+                        };
+
                         if (Bukkit.isPrimaryThread()) {
-                            Bukkit.getScheduler()
-                                    .runTaskAsynchronously(SBAHypixelify.getInstance(),
-                                            () -> {
-                                                SBAHypixelify
-                                                        .getInstance()
-                                                        .getServer()
-                                                        .getPluginManager()
-                                                        .callEvent(chatEvent);
-                                                if (chatEvent.isCancelled()) {
-                                                    return;
-                                                }
-
-                                                party.sendMessage(
-                                                        AdventureHelper.toComponent(event.getMessage()),
-                                                        player
-                                                );
-
-                                            });
-                            return;
+                            Bukkit.getScheduler().runTaskAsynchronously(SBAHypixelify.getInstance(), runnable);
+                        } else {
+                            runnable.run();
                         }
-                        SBAHypixelify
-                                .getInstance()
-                                .getServer()
-                                .getPluginManager()
-                                .callEvent(chatEvent);
-                        if (chatEvent.isCancelled()) {
-                            return;
-                        }
-
-                        party.sendMessage(
-                                AdventureHelper.toComponent(event.getMessage()),
-                                player
-                        );
                     });
         }
     }

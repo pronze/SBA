@@ -14,16 +14,18 @@ import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Property;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAGamesInventoryOpenEvent;
+import pronze.hypixelify.config.SBAConfig;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.annotations.OnInit;
 import pronze.lib.core.utils.Logger;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
-
-import static pronze.hypixelify.lib.lang.I.i18n;
 
 @AutoInitialize(listener = true)
 public class GamesInventory implements Listener {
@@ -42,10 +44,7 @@ public class GamesInventory implements Listener {
     };
     private final HashMap<Integer, InventorySet> inventoryMap = new HashMap<>();
 
-    public GamesInventory() {
-        loadInventory();
-    }
-
+    @OnInit
     public void loadInventory() {
         try {
             labels.forEach((val, label) -> {
@@ -53,8 +52,8 @@ public class GamesInventory implements Listener {
                     final var siFormat = SimpleInventoriesCore.builder()
                             .categoryOptions(localOptionsBuilder -> {
                                 ShopUtil.generateOptions(localOptionsBuilder);
-                                localOptionsBuilder.prefix(SBAHypixelify.getConfigurator()
-                                        .getString("games-inventory.gui." + label.toLowerCase() + "-prefix"));
+                                localOptionsBuilder.prefix(SBAConfig.getInstance()
+                                        .node("games-inventory", "gui", label.toLowerCase() + "-prefix").getString());
                             })
                             .call(categoryBuilder ->{
                                 try {
@@ -116,7 +115,10 @@ public class GamesInventory implements Listener {
                                         final var game = (Game) Main.getInstance().getGameManager().getGame(property.getPropertyData().getString()).get();
                                         game.joinToGame(player);
                                     } catch (Throwable t) {
-                                        player.sendMessage(i18n("game_not_found"));
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.GAME_NOT_FOUND_MESSAGE)
+                                                .send(PlayerMapper.wrapPlayer(player));
                                     }
                                     player.closeInventory();
                                     break;

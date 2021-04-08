@@ -11,20 +11,24 @@ import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.lang.LangKeys;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
-import pronze.hypixelify.Configurator;
+import org.screamingsandals.bedwars.player.PlayerManager;
+import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.listener.TeamUpgradeListener;
+import pronze.lib.core.annotations.AutoInitialize;
 
 import java.util.*;
 
-
+@AutoInitialize
 public class ShopUtil {
-
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
+
+    public ShopUtil() {
+        initKeys();
+    }
 
     public static void initKeys() {
         UpgradeKeys.put("STONE", 2);
@@ -82,7 +86,11 @@ public class ShopUtil {
     }
 
     public static boolean addEnchantsToTeamTools(Player buyer, ItemStack stack, String name, Enchantment enchantment) {
-        final var team = BedwarsAPI.getInstance().getGameOfPlayer(buyer).getTeamOfPlayer(buyer);
+        final var team = PlayerManager
+                .getInstance()
+                .getGameOfPlayer(buyer.getUniqueId())
+                .orElseThrow()
+                .getTeamOfPlayer(buyer);
 
         if (!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name, enchantment)) return false;
 
@@ -114,7 +122,7 @@ public class ShopUtil {
     }
 
     public static List<Game> getGamesWithSize(int c) {
-        final var maps = getAllKeysForValue(Configurator.game_size, c);
+        final var maps = getAllKeysForValue(SBAConfig.game_size, c);
         if (maps == null || maps.isEmpty())
             return null;
 
@@ -227,7 +235,7 @@ public class ShopUtil {
     }
 
     public static void upgradeSwordOnPurchase(Player player, ItemStack newItem, Game game) {
-        if (SBAHypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
+        if (SBAConfig.getInstance().getBoolean("remove-sword-on-upgrade", true)) {
             Arrays.stream(player.getInventory().getContents())
                     .filter(Objects::nonNull)
                     .filter(stack -> stack.getType().name().endsWith("SWORD"))

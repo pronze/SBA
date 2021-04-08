@@ -9,6 +9,7 @@ import pronze.hypixelify.api.data.PartyInviteData;
 import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.party.PartySetting;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.lib.core.utils.Logger;
 
@@ -48,9 +49,10 @@ public class Party implements IParty {
                 AdventureHelper.toLegacy(message),
                 debugInfo()
         );
-        final var formattedMessage = SBAHypixelify
-                .getConfigurator()
-                .getString("party.chat.format")
+        final var formattedMessage = SBAConfig
+                .getInstance()
+                .node("party", "chat-format")
+                .getString()
                 .replace("%name%", sender.getName())
                 .replace("%message%", AdventureHelper.toLegacy(message));
         members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
@@ -126,9 +128,9 @@ public class Party implements IParty {
             }
         }.runTaskLater(SBAHypixelify.getInstance(),
                 20L * SBAHypixelify
+                        .getInstance()
                         .getConfigurator()
-                        .config
-                        .getInt("party.invite-expiration-time"));
+                        .getInt("party.invite-expiration-time", 60));
 
         final var inviteData = new PartyInviteData(invitee, player, inviteTask);
         inviteDataMap.put(invitee.getInstance().getUniqueId(), inviteData);

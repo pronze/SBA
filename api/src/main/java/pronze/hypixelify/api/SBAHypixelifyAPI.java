@@ -4,13 +4,15 @@ import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.config.IConfigurator;
 import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.api.lang.ILanguageService;
 import pronze.hypixelify.api.manager.IArenaManager;
 import pronze.hypixelify.api.manager.IPartyManager;
 import pronze.hypixelify.api.service.WrapperService;
-import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.game.Game;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
+
 import java.util.Optional;
 
 /**
@@ -86,13 +88,13 @@ public interface SBAHypixelifyAPI {
      * @return an instance of the PlayerWrapperService that is associated with wrapping player
      * instances into objects that contain additional data
      */
-    WrapperService<Player, ? extends PlayerWrapper> getPlayerWrapperService();
+    WrapperService<Player, PlayerWrapper> getPlayerWrapperService();
 
     /**
      * Look into IConfigurator getter methods to get certain settings from the config.
      * @return an instance of an Configurator which helps in the configuration of file based data.
      */
-    IConfigurator getConfigurator0();
+    IConfigurator getConfigurator();
 
     /**
      *
@@ -100,4 +102,9 @@ public interface SBAHypixelifyAPI {
      */
     boolean isPendingUpgrade();
 
+    /**
+     *
+     * @return The language service instance for retrieving language related information.
+     */
+    ILanguageService getLanguageService();
 }

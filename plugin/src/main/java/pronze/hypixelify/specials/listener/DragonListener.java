@@ -1,4 +1,5 @@
 package pronze.hypixelify.specials.listener;
+import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.specials.Dragon;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Player;
@@ -37,7 +38,7 @@ public class DragonListener implements Listener {
                         if (dragon.getEntity().equals(eventDragon)) {
                             if (event.getDamager() instanceof Player) {
                                 Player player = (Player) event.getDamager();
-                                if (Main.isPlayerInGame(player)) {
+                                if (PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
                                     if (dragon.getTeam() != game.getTeamOfPlayer(player)) {
                                         return;
                                     }
@@ -46,7 +47,7 @@ public class DragonListener implements Listener {
                                 ProjectileSource shooter = ((Projectile) event.getDamager()).getShooter();
                                 if (shooter instanceof Player) {
                                     Player player = (Player) shooter;
-                                    if (Main.isPlayerInGame(player)) {
+                                    if (PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
                                         if (dragon.getTeam() != game.getTeamOfPlayer(player)) {
                                             return;
                                         }
@@ -90,7 +91,7 @@ public class DragonListener implements Listener {
                                     return;
                                 }
 
-                                if (Main.isPlayerInGame(player)) {
+                                if (PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
                                     if (dragon.getTeam() == game.getTeamOfPlayer(player)) {
                                         event.setCancelled(true);
 
@@ -111,8 +112,11 @@ public class DragonListener implements Listener {
 
     @EventHandler
     public void onDragonTargetDeath(PlayerDeathEvent event) {
-        if (Main.isPlayerInGame(event.getEntity())) {
-            final var game = Main.getPlayerGameProfile(event.getEntity()).getGame();
+        if (PlayerManager.getInstance().isPlayerInGame(event.getEntity().getUniqueId())) {
+            final var game = PlayerManager
+                    .getInstance()
+                    .getGameOfPlayer(event.getEntity().getUniqueId())
+                    .orElseThrow();
 
             final var dragons = game.getActivedSpecialItems(Dragon.class);
             for (var item : dragons) {
