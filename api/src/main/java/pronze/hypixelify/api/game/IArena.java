@@ -1,4 +1,5 @@
 package pronze.hypixelify.api.game;
+import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -52,4 +53,23 @@ public interface IArena {
      * @param data the value of the uuid key to be used.
      */
     void putPlayerData(UUID uuid, GamePlayerData data);
+
+    /**
+     *
+     * @param player
+     * @return
+     */
+    boolean isPlayerHidden(Player player);
+
+    /**
+     *
+     * @param player
+     */
+    void removeHiddenPlayer(Player player);
+
+    /**
+     *
+     * @param player
+     */
+    void addHiddenPlayer(Player player);
 }

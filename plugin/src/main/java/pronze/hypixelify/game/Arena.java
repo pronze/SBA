@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class Arena implements IArena {
+    private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final GameScoreboardManagerImpl scoreboardManager;
     private final double radius;
@@ -39,6 +40,26 @@ public class Arena implements IArena {
         gameTask = new GameTask(this);
         scoreboardManager = new GameScoreboardManagerImpl(this);
         game.getConnectedPlayers().forEach(this::registerPlayerData);
+    }
+
+    @Override
+    public void addHiddenPlayer(Player player, int duration) {
+        if (invisiblePlayers.containsKey(player.getUniqueId())) return;
+        invisiblePlayers.put(player.getUniqueId(), new InvisiblePlayer(player, this, duration));
+    }
+
+    @Override
+    public void removeHiddenPlayer(Player player) {
+        final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());
+        if (invisiblePlayer != null) {
+            invisiblePlayer.setHidden(false);
+            invisiblePlayers.remove(player.getUniqueId());
+        }
+    }
+
+    @Override
+    public boolean isPlayerHidden(Player player) {
+        return invisiblePlayers.containsKey(player.getUniqueId());
     }
 
     private void registerPlayerData(Player player) {

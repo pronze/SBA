@@ -125,7 +125,7 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
         scoreboard_lines.stream()
                 .filter(Objects::nonNull)
                 .forEach(line -> {
-                    if (line.contains("{team_status}")) {
+                    if (line.contains("%team_status%")) {
                         String finalLine = line;
                         game.getAvailableTeams().forEach(t -> {
                             String you = "";
@@ -137,8 +137,8 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                                     .toString();
                                 }
                             }
-                            lines.add(finalLine.replace("{team_status}",
-                                    getTeamStatusFormat(t).replace("{you}", you)));
+                            lines.add(finalLine.replace("%team_status%",
+                                    getTeamStatusFormat(t).replace("%you%", you)));
                         });
                         return;
                     }
@@ -156,7 +156,8 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus);
 
                     if (arena.getGameTask() != null) {
-                        line = line.replace("%tier%", arena.getGameTask().getTier()
+                        line = line
+                                .replace("%tier%", arena.getGameTask().getTier()
                                 .replace("-", " ") + " in §a" + arena.getGameTask().getFormattedTimeLeft());
                     }
                     lines.add(line);
@@ -190,44 +191,58 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
     }
 
     private String getTeamBedStatus(RunningTeam team) {
-        return team.isDead() ? "§c\u2717" :
-                "§a\u2713";
+        return team.isDead() ?
+                SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717") :
+                SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
     }
 
     private String getTeamStatusFormat(RunningTeam team) {
-        String alive = "{color} {team} §a\u2713 §8{you}";
-        String destroyed = "{color} {team} §a§f{players}§8 {you}";
+        String alive = SBAConfig
+                .getInstance()
+                .node("team-status", "alive")
+                .getString("%color% %team% §a\u2713 §8%you%");
+
+        String destroyed = SBAConfig
+                .getInstance()
+                .node("team-status", "destroyed")
+                .getString("%color% %team% §a§f%players%§8 %you%");
 
         String status = team.isTargetBlockExists() ? alive : destroyed;
 
-        if (team.isDead() && team.getConnectedPlayers().size() <= 0)
-            status = "{color} {team} §c\u2717 {you}";
-
-        String formattedTeam = org.screamingsandals.bedwars.game.TeamColor.valueOf(team.getColor().name()).chatColor.toString()
+        String formattedTeam = org.screamingsandals.bedwars.game.TeamColor
+                .valueOf(team.getColor().name())
+                .chatColor
+                .toString()
                 + team.getName().charAt(0);
-        return status.replace("{bed_status}", getTeamBedStatus(team))
-                .replace("{color}", formattedTeam)
-                .replace("{team}", ChatColor.WHITE.toString() + team.getName() + ":")
-                .replace("{players}", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
+
+        return status
+                .replace("%bed_status%", getTeamBedStatus(team))
+                .replace("%color%", formattedTeam)
+                .replace("%team%", ChatColor.WHITE + team.getName() + ":")
+                .replace("%players%", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
     }
 
     private String getTeamStatusFormat(Team team) {
-        Optional<RunningTeam> rt = game.getRunningTeams().stream()
+        return game
+                .getRunningTeams()
+                .stream()
                 .filter(t -> t.getName().equalsIgnoreCase(team.getName()))
-                .findAny();
+                .map(this::getTeamStatusFormat)
+                .findAny()
+                .orElseGet(() -> {
+                    final var destroyed = SBAConfig
+                            .getInstance()
+                            .node("team-status", "eliminated")
+                            .getString("%color% %team% §c\u2718 %you%");
 
-        if (rt.isPresent()) {
-            return getTeamStatusFormat(rt.get());
-        }
+                    final var formattedTeam = org.screamingsandals.bedwars.game.TeamColor
+                            .valueOf(team.getColor().name()).chatColor.toString()
+                            + team.getName().charAt(0);
 
-        final var destroyed = "{color} {team} §c\u2718 {you}";
-        final var formattedTeam = org.screamingsandals.bedwars.game.TeamColor
-                .valueOf(team.getColor().name()).chatColor.toString()
-                + team.getName().charAt(0);
-
-        return destroyed.replace("{bed_status}", "§c\u2718")
-                .replace("{color}", formattedTeam)
-                .replace("{team}", ChatColor.WHITE.toString()
-                        + team.getName() + ":");
+                    return destroyed
+                            .replace("%color%", formattedTeam)
+                            .replace("%team%", ChatColor.WHITE
+                                    + team.getName() + ":");
+                });
     }
 }

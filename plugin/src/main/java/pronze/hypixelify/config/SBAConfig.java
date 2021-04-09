@@ -144,7 +144,15 @@ public class SBAConfig implements IConfigurator {
                     .section("party")
                         .key("enabled").defValue(true)
                         .key("leader-autojoin-autoleave").defValue(true)
-                        .key("invite-expiration-time").defValue(60);
+                        .key("invite-expiration-time").defValue(60)
+                        .back()
+                    .section("team-status")
+                        .key("target-destroyed").defValue("§c\u2717")
+                        .key("target-exists").defValue("§a\u2713")
+                        .key("alive").defValue("%color% %team% §a\u2713 §8%you%")
+                        .key("destroyed").defValue("%color% %team% §a§f%players%§8 %you%")
+                        .key("eliminated").defValue("%color% %team% §c\u2718 %you%")
+                        .back();
 
             var gameSection = generator
                     .start()

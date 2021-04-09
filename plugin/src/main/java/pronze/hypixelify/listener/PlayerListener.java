@@ -8,15 +8,16 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -129,7 +130,7 @@ public class PlayerListener implements Listener {
                             .getPlayer(player.getUniqueId())
                             .orElseThrow();
 
-                    final var victimTeam =  game.getTeamOfPlayer((Player) gVictim.getWrappedPlayer().get());
+                    final var victimTeam = game.getTeamOfPlayer((Player) gVictim.getWrappedPlayer().get());
 
                     if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
                             victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
@@ -318,6 +319,47 @@ public class PlayerListener implements Listener {
         SBAHypixelify.getInstance().getPlayerWrapperService().unregister(player);
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerDamage(EntityDamageEvent event) {
+        final var entity = event.getEntity();
+        if (entity instanceof Player) {
+            final var player = (Player) entity;
+            PlayerManager
+                    .getInstance()
+                    .getGameOfPlayer(player.getUniqueId())
+                    .flatMap(game -> ArenaManager
+                            .getInstance()
+                            .get(game.getName())).ifPresent(arena -> arena.removeHiddenPlayer(player));
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerItemConsume(PlayerItemConsumeEvent event) {
+        final var item = event.getItem();
+        final var player = event.getPlayer();
+
+        if (!PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) return;
+
+        if (item.getType() == Material.POTION) {
+            final var potionMeta = (PotionMeta) item.getItemMeta();
+            boolean isInvis = potionMeta
+                    .getCustomEffects()
+                    .stream()
+                    .anyMatch(potionEffect -> potionEffect.getType() == PotionEffectType.INVISIBILITY);
+
+            if (isInvis) {
+                final var playerGame = PlayerManager
+                        .getInstance()
+                        .getGameOfPlayer(player.getUniqueId())
+                        .orElseThrow();
+
+                ArenaManager
+                        .getInstance()
+                        .get(playerGame.getName())
+                        .ifPresent(arena -> arena.addHiddenPlayer(player));
+            }
+        }
+    }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
