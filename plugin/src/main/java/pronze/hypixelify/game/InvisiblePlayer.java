@@ -10,11 +10,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
 import org.screamingsandals.bedwars.lib.utils.Pair;
+import org.screamingsandals.bedwars.lib.utils.math.Vector3D;
 import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
@@ -31,7 +30,7 @@ public class InvisiblePlayer {
     private int ticksPassed;
     private int timePassed;
     private boolean isHidden;
-    private CachedLocationModal lastLocation;
+    private Vector3D lastLocation;
     protected BukkitTask footStepSoundTracker;
     protected BukkitTask armorHider;
 
@@ -40,7 +39,11 @@ public class InvisiblePlayer {
         isHidden = true;
         hideArmor();
 
-        lastLocation = CachedLocationModal.from(player.getLocation());
+        lastLocation = new Vector3D(
+                player.getLocation().getX(),
+                player.getLocation().getY(),
+                player.getLocation().getZ()
+        );
         footStepSoundTracker = new BukkitRunnable() {
             @Override
             public void run() {
@@ -50,13 +53,15 @@ public class InvisiblePlayer {
                     this.cancel();
                     return;
                 }
-                if (ticksPassed % 20 == 0) {
-                    timePassed++;
-                }
-                if (lastLocation.isSimilarTo(player.getLocation())) {
+                final var currentLocation = new Vector3D(
+                        player.getLocation().getX(),
+                        player.getLocation().getY(),
+                        player.getLocation().getZ()
+                );
+                if (currentLocation.equals(lastLocation)) {
                     return;
                 }
-                lastLocation = CachedLocationModal.from(player.getLocation());
+
                 Location location = player.getLocation();
                 location.setY(Math.floor(location.getY()));
 
@@ -181,22 +186,5 @@ public class InvisiblePlayer {
 
     private Object stackAsNMS(ItemStack item) {
         return Reflect.getMethod(ClassStorage.NMS.CraftItemStack, "asNMSCopy", ItemStack.class).invokeStatic(item);
-    }
-
-
-    @Data
-    @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
-    private static final class CachedLocationModal {
-        private final double x;
-        private final double y;
-        private final double z;
-
-        public static CachedLocationModal from(Location location) {
-            return new CachedLocationModal(location.getX(), location.getY(), location.getZ());
-        }
-
-        public boolean isSimilarTo(@NotNull Location location) {
-            return location.getX() == x && location.getY() == y && location.getZ() == z;
-        }
     }
 }
