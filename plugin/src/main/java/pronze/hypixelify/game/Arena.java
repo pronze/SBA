@@ -45,7 +45,9 @@ public class Arena implements IArena {
     @Override
     public void addHiddenPlayer(Player player) {
         if (invisiblePlayers.containsKey(player.getUniqueId())) return;
-        invisiblePlayers.put(player.getUniqueId(), new InvisiblePlayer(player, this));
+        final var invisiblePlayer = new InvisiblePlayer(player, this);
+        invisiblePlayer.vanish();
+        invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
     }
 
     @Override

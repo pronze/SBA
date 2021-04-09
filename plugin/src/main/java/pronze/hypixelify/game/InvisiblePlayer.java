@@ -27,8 +27,6 @@ public class InvisiblePlayer {
     private final Player player;
     private final Arena arena;
 
-    private int ticksPassed;
-    private int timePassed;
     private boolean isHidden;
     private Vector3D lastLocation;
     protected BukkitTask footStepSoundTracker;
@@ -68,7 +66,6 @@ public class InvisiblePlayer {
                 if (!player.getLocation().clone().subtract(0, 1, 0).getBlock().isEmpty()) {
                     //TODO: play effect
                 }
-                ticksPassed += 10;
             }
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 10L);
 
@@ -94,8 +91,6 @@ public class InvisiblePlayer {
 
 
     private void showArmor() {
-        final var packets = new ArrayList<>();
-
         final var boots = player.getInventory().getBoots();
         final var helmet = player.getInventory().getHelmet();
         final var chestplate = player.getInventory().getChestplate();
@@ -105,6 +100,24 @@ public class InvisiblePlayer {
         final var nmsChestPlate = stackAsNMS(chestplate == null ? new ItemStack(Material.AIR) : boots);
         final var nmsLeggings = stackAsNMS(leggings == null ? new ItemStack(Material.AIR) : leggings);
         final var nmsHelmet = stackAsNMS(boots == null ? new ItemStack(Material.AIR) : helmet);
+
+        arena
+                .getGame()
+                .getConnectedPlayers()
+                .forEach(pl -> ClassStorage.sendPacket(pl, getPackets(nmsBoot, nmsChestPlate, nmsLeggings, nmsHelmet)));
+    }
+
+    private void hideArmor() {
+        final var airStack = stackAsNMS(new ItemStack(Material.AIR));
+        arena
+                .getGame()
+                .getConnectedPlayers()
+                .stream().filter(pl -> !pl.equals(player))
+                .forEach(pl -> ClassStorage.sendPacket(pl, getPackets(airStack, airStack, airStack, airStack)));
+    }
+
+    private List<Object> getPackets(Object nmsBoot, Object nmsChestPlate, Object nmsLeggings, Object nmsHelmet) {
+        final var packets = new ArrayList<>();
 
         final var headSlot = Reflect
                 .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
@@ -125,42 +138,7 @@ public class InvisiblePlayer {
         packets.add(getEquipmentPacket(player, nmsChestPlate, chestplateSlot));
         packets.add(getEquipmentPacket(player, nmsLeggings, legsSlot));
         packets.add(getEquipmentPacket(player, nmsBoot, feetSlot));
-
-        arena
-                .getGame()
-                .getConnectedPlayers()
-                .forEach(pl -> ClassStorage.sendPacket(pl, packets));
-    }
-
-    private void hideArmor() {
-        final var airStack = stackAsNMS(new ItemStack(Material.AIR));
-        final var packets = new ArrayList<>();
-
-        final var headSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.HEAD);
-        final var chestplateSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.CHEST);
-
-        final var legsSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.LEGS);
-
-        final var feetSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.FEET);
-
-        packets.add(getEquipmentPacket(player, airStack, headSlot));
-        packets.add(getEquipmentPacket(player, airStack, chestplateSlot));
-        packets.add(getEquipmentPacket(player, airStack, legsSlot));
-        packets.add(getEquipmentPacket(player, airStack, feetSlot));
-
-        arena
-                .getGame()
-                .getConnectedPlayers()
-                .stream().filter(pl -> !pl.equals(player))
-                .forEach(pl -> ClassStorage.sendPacket(pl, packets));
+        return packets;
     }
 
     private Object getEquipmentPacket(Player entity, Object stack, Object chestplateSlot) {
