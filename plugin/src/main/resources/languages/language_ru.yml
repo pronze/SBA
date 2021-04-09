@@ -6,30 +6,31 @@ emerald: "Изумруд"
 waiting: "&fОжидание..."
 dragon-spawn: "&cДраконы появились, удачи"
 dragon-trap-purchased: "&6Улучшение дракона приобретено!"
-game-starts-in: "&eИгра начнётся через &c{seconds} &eс."
-bed-destroyed.title: "&c&lКРОВАТЬ РАЗРУШЕНА!"
-bed-destroyed.sub-title: "Вы больше не появитесь!"
-already-purchased: "&c&l{thing} уже был куплен"
+game-starts-in: "&eThe game starts in &c%seconds% &eseconds"
+bed-destroyed:
+  title: "&c&lBED DESTROYED!"
+  sub-title: "You will no longer respawn!"
+already-purchased: "&c&lYou already purchased the same %thing%"
 wait-trap: "&cВы уже купили это обновление!, дождитесь его выноса"
-upgrade-team-protection: "&o&c{player}&e обновил командную защиту"
-error-occured: "&c&lПРОИЗОШЛА ОШИБКА"
+upgrade-team-protection: "&o&c%player%&e has upgraded team protection"
+error-occured: "&c&lAN ERROR HAS OCCURRED"
 greatest-enchantment: "&c&lУ вас уже максимальное зачарование"
-generator-upgrade: "&eГенератор {MatName}&e был обновлен до &c{tier}"
-shout-format: "&6[SHOUT] {color}[{team}]&r {player}&7: &r{message}"
+generator-upgrade: "%MatName%&e generator has been upgraded to &c%tier%"
+shout-format: "&6[SHOUT] %color%[%team%]&r %player%&7: &r%message%"
 trap-triggered.message: "§eВас ослепила команда %team%!"
 trap-triggered.title: "&cСработала ловушка!"
 trap-triggered.sub-title: "&eКто-то проник на вашу базу!"
 blindness-trap-purchased-title: "&6Ловушка Слепоты куплена!"
-purchase-heal-pool: "&bПул Исцеления был приобретен: {player}"
-cannot-buy: "&cУ вас недостаточно {price}"
-purchase: "&aВы купили &e{item}"
+purchase-heal-pool: "&bHeal Pool has been purchased by: %player%"
+cannot-buy: "&cYou don't have enough %price%"
+purchase: "&aYou purchased &e%item%"
 respawn-title: "&cВЫ УМЕРЛИ!"
 respawn-message: "&eСекунд до возрождения: &c%time%"
 respawn-subtitle: "&eСекунд до возрождения: &c%time%"
 respawned-message: "&eВы возродились"
 respawned-title: "§aВОЗРОЖДЕН!"
 victory-title: "§6§lПОБЕДА!"
-cannot-put-item-on-chest: "Вы не можете положить эту вещь в этот сундук."
+cannot-put-item-on-chest: "§c§lYou cannot put this item onto this chest."
 upgrade: "Обновление: "
 game_not_found: "[SBA]: &cНе удалось найти игру!"
 reloaded: "Плагин перезагружен!"
@@ -41,11 +42,289 @@ command_cannot_do: "Не удается сделать это прямо сей�
 command_cancel_upgrade: "Изменения в магазине и обновлении магазина"
 command_unknown: "§cНеизвестная команда, выполнить /bwaddon справку."
 command_spectator_disabled: "§cВы не можете выполнять эту команду во время наблюдения"
-command_shout_invalid_usage: "§cНеправильное использование, /shout {message} - формат!"
+command_shout_invalid_usage: "§cInvalid usage, /shout %message% is the format!"
 gamesinv_disabled: "§cИнвентарь игр отключен, свяжитесь с владельцем сервера, чтобы включить его."
+gamesinv_generated: "§aGames Inventory file has been successfully generated!"
 not_in_game: "§c Вы должны быть в игре, чтобы выполнить эту команду!"
-shout_wait: "§c Вы должны подождать пока {seconds} будет использовать эту команду снова!"
-countdown: "§fНачинаем через §a{countdown}с"
-none: "None"
-command_party_settings_get_help: "§cDo /p settings help for help regarding party settings"
-spawner_holo_tier_format: "§eTier §c{tier}"
+shout_wait: "§c You have to wait for %seconds% to use this command again!"
+countdown: "§fStarting in §a%countdown%s"
+none: "Ничего"
+command_party_settings_get_help: "§cВведите /p settings help для помощи по настройке группы"
+spawner_holo_tier_format: "§eЭтап §c{tier}"
+date:
+  format: "MM/dd/yy"
+shop-name: "[SBAHypixelify] shop"
+floating-generator:
+  holo-text:
+    - '"§eTier §c{tier}",'
+    - '"{material}",'
+    - "§eSpawns in §c{seconds} §eseconds"
+lobby-scoreboard:
+  solo-prefix: "Solo"
+  doubles-prefix: "Doubles"
+  triples-prefix: "Triples"
+  squads-prefix: "Squads"
+  lines:
+    - "&7%date%"
+    - ""
+    - "&fMap: &a%game%"
+    - "&fPlayers: &a%players%/%maxplayers%"
+    - ""
+    - "%state%"
+    - ""
+    - "&fMode: &a%mode%"
+    - "&fVersion: &7v1.1"
+    - ""
+    - "&ewww.screamingsandals.org"
+  state:
+    waiting: "&fWaiting..."
+    countdown: "&fStarting in &a%countdown%s"
+maximum-enchant-lore:
+  - "Maximum Enchant"
+  - "Your team already has maximum Enchant."
+games-inventory:
+  gui:
+    solo-prefix: "Bed Wars Solo"
+    double-prefix: "Bed Wars Doubles"
+    triple-prefix: "Bed Wars Triples"
+    squad-prefix: "Bed Wars Squads"
+game-start:
+  message:
+    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - "                             &f&lBed Wars"
+    - ""
+    - "    &e&lProtect your bed and destroy the enemy beds."
+    - "     &e&lUpgrade yourself and your team by collecting"
+    - "   &e&lIron, Gold, Emerald and Diamond from generators"
+    - "            &e&lto access powerful upgrades."
+    - ""
+    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+overstats:
+  message:
+    - '"                             %color%%win_team%"'
+    - '"                             %winners%"'
+    - '"    &e&l1st&7 - &f%first_killer_name% &7- &f%first_killer_score"'
+    - '"    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"'
+    - '"    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"'
+    - '"&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"'
+scoreboard:
+  you: "&7YOU"
+  title:
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&e&lBED WARS"
+    - "&6&lB&e&lED WARS"
+    - "&f&lB&6&lE&e&lD WARS"
+    - "&f&lBE&6&lD&e&l WARS"
+    - "&f&lBED&6&l &e&lWARS"
+    - "&f&lBED &6&lW&e&lARS"
+    - "&f&lBED W&6&lA&e&lRS"
+    - "&f&lBED WA&6&lR&e&lS"
+    - "&f&lBED WAR&6&lS"
+    - "&f&lBED WARS"
+    - "&e&lBED WARS"
+    - "&f&lBED WARS"
+  lines:
+    default:
+      - "&7%date%"
+      - ""
+      - "%tier%"
+      - ""
+      - "%team_status%"
+      - ""
+      - "&fKills: &a%kills%"
+      - "&fBed Broken: &a%beds%"
+      - ""
+      - "&ewww.screamingsandals.org"
+    5:
+      - "&7%date%"
+      - ""
+      - "%tier%"
+      - ""
+      - "%team_status%"
+      - ""
+      - "&ewww.screamingsandals.org"
+main-lobby:
+  chat-format: "%color%[%level%✫] %name%: %message%"
+  scoreboard:
+    title: "&e&lBED WARS"
+    lines:
+      - ""
+      - "Your Level: &a%level%"
+      - ""
+      - "Progress: %progress%"
+      - "%bar%"
+      - ""
+      - "Loot Chests: &60"
+      - ""
+      - "Total Kills: &a%kills%"
+      - "Total Wins: &a%deaths%"
+      - ""
+      - "K/D ratio: &6%k/d%"
+      - ""
+      - "&ewww.screamingsandals.org"
+party:
+  chat-format: "&aParty >> %name% &f : &o%message%"
+  message:
+    cannot-invite:
+      - "&6-----------------------------------------------------"
+      - '"&cYou cannot invite this player to your party!",'
+      - "&6-----------------------------------------------------"
+    limit-reached:
+      - "&6-----------------------------------------------------"
+      - '"&cParty has reached max size!",'
+      - "&6-----------------------------------------------------"
+    leader-join-leave:
+      - "&6-----------------------------------------------------"
+      - '"&cYou have been teleported by the party leader",'
+      - "&6-----------------------------------------------------"
+    invite-expired:
+      - "&6-----------------------------------------------------"
+      - '"&cThe party invite has been expired",'
+      - "&6-----------------------------------------------------"
+    invalid-command:
+      - "&6-----------------------------------------------------"
+      - '"&cInvalid command, do /p help for more.",'
+      - "&6-----------------------------------------------------"
+    access-denied:
+      - "&6-----------------------------------------------------"
+      - '"&cYou cannot access this command",'
+      - "&6-----------------------------------------------------"
+    not-in-party:
+      - "&6-----------------------------------------------------"
+      - '"&cYou are currently not in a party!",'
+      - "&6-----------------------------------------------------"
+    invited:
+      - "&6-----------------------------------------------------"
+      - '"&eYou have invited %player%&e to your party!",'
+      - '"&ewait for them to accept it",'
+      - "&6-----------------------------------------------------"
+    already-invited:
+      - "&6-----------------------------------------------------"
+      - '"&cThis player has already had pending invites!",'
+      - "&6-----------------------------------------------------"
+    warp:
+      - "&6-----------------------------------------------------"
+      - '"&eYou have been warped by the leader",'
+      - "&6-----------------------------------------------------"
+    warping:
+      - "&6-----------------------------------------------------"
+      - '"&eWarping players..",'
+      - "&6-----------------------------------------------------"
+    promoted-leader:
+      - "&6-----------------------------------------------------"
+      - '"&e%player% has been promoted to party leader!",'
+      - "&6-----------------------------------------------------"
+    invite:
+      - "&6-----------------------------------------------------"
+      - "%player%&e has invited you to join their party!"
+      - "&eType /party accept to join. You have 60 seconds to accept."
+      - "&6-----------------------------------------------------"
+    accepted:
+      - "&6-----------------------------------------------------"
+      - '"%player% &ajoined the party!",'
+      - "&6-----------------------------------------------------"
+    offline-left:
+      - "&6-----------------------------------------------------"
+      - '"%player% &aleft the party due to inactivity",'
+      - "&6-----------------------------------------------------"
+    left:
+      - "&6-----------------------------------------------------"
+      - '"&cYou left the party!",'
+      - "&6-----------------------------------------------------"
+    offline-quit:
+      - "&6-----------------------------------------------------"
+      - '"%player% &cleft the party",'
+      - "&6-----------------------------------------------------"
+    no-players-warp:
+      - "&6-----------------------------------------------------"
+      - '"&cThere are no players to warp!",'
+      - "&6-----------------------------------------------------"
+    declined:
+      - "&6-----------------------------------------------------"
+      - '"%player% &chas declined this party invite",'
+      - "&6-----------------------------------------------------"
+    kicked:
+      - "&6-----------------------------------------------------"
+      - '"{player} &cHas been kicked from party",'
+      - "&6-----------------------------------------------------"
+    disband-inactivity:
+      - "&6-----------------------------------------------------"
+      - '"&aParty has been disbanded due to inactivity",'
+      - "&6-----------------------------------------------------"
+    disband:
+      - "&6-----------------------------------------------------"
+      - '"&cParty has been disbanded by the leader.",'
+      - "&6-----------------------------------------------------"
+    player-not-found:
+      - "&6-----------------------------------------------------"
+      - '"&cCould not find Player!",'
+      - "&6-----------------------------------------------------"
+    cannot-invite-yourself:
+      - "&6-----------------------------------------------------"
+      - '"&cYou can''t invite yourself.",'
+      - "&6-----------------------------------------------------"
+    already-muted:
+      - "&6-----------------------------------------------------"
+      - '"&cThe party is already %isMuted%.",'
+      - "&6-----------------------------------------------------"
+    not-invited:
+      - "&6-----------------------------------------------------"
+      - '"&cYou are not invited to any party",'
+      - "&6-----------------------------------------------------"
+    max-invite-size:
+      - "&6-----------------------------------------------------"
+      - '"&cYou cannot invite more than 5 players at a time.",'
+      - "&6-----------------------------------------------------"
+    got-kicked:
+      - "&6-----------------------------------------------------"
+      - '"&cYou have been kicked from party",'
+      - "&6-----------------------------------------------------"
+    decline-inc:
+      - "&6-----------------------------------------------------"
+      - '"&cTo invite, you must decline current invites.",'
+      - "&6-----------------------------------------------------"
+    declined-user:
+      - "&6-----------------------------------------------------"
+      - '"&cYou declined the invite!",'
+      - "&6-----------------------------------------------------"
+    error:
+      - "&6-----------------------------------------------------"
+      - '"&c&lAN ERROR OCCURRED!",'
+      - "&6-----------------------------------------------------"
+    not-in-game:
+      - "&6-----------------------------------------------------"
+      - '"&cYou are not in a game to do this command!",'
+      - "&6-----------------------------------------------------"
+    shout-wait:
+      - "&6-----------------------------------------------------"
+      - "&cYou have to wait %seconds% seconds before doing this command!"
+      - "&6-----------------------------------------------------"
+    chat-enable-disabled:
+      - "&6-----------------------------------------------------"
+      - '"&aParty chat has been %mode%",'
+      - "&6-----------------------------------------------------"
+    help:
+      - "&1-----------------------------------------------------"
+      - "&6Party commands"
+      - "&e/p accept <player>&7 - Accept a party invite from a player"
+      - "&e/p invite <player>&7 - Invite another player to your party"
+      - "&e/p list&7 - Lists the players in your current party"
+      - "&e/p leave&7 - Leaves your current party"
+      - "&1-----------------------------------------------------"
