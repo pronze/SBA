@@ -109,34 +109,42 @@ public class GamesInventory implements Listener {
 
         if (stack != null) {
             if (item.hasProperties()) {
+                var couldNotFindGameMessage = LanguageService
+                        .getInstance()
+                        .get(MessageKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
+                final var playerWrapper = PlayerMapper.wrapPlayer(player);
+
                 properties.stream()
                         .filter(Property::hasName)
                         .forEach(property -> {
                             switch (property.getPropertyName().toLowerCase()) {
-                                case "gamename":
+                                case "game":
                                     try {
-                                        final var game = (Game) Main.getInstance().getGameManager().getGame(property.getPropertyData().getString()).get();
+                                        final var game = (Game) Main
+                                                .getInstance()
+                                                .getGameManager()
+                                                .getGame(property.getPropertyData().node("gameName").getString())
+                                                .orElseThrow();
                                         game.joinToGame(player);
                                     } catch (Throwable t) {
-                                        LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.GAME_NOT_FOUND_MESSAGE)
-                                                .send(PlayerMapper.wrapPlayer(player));
+                                        couldNotFindGameMessage.send(playerWrapper);
                                     }
                                     player.closeInventory();
                                     break;
                                 case "exit":
                                     player.closeInventory();
                                     break;
-                                case "join_randomly":
+                                case "randomly_join":
                                     player.closeInventory();
                                     final var games = ShopUtil.getGamesWithSize(mode);
-                                    if (games == null || games.isEmpty())
+                                    if (games == null || games.isEmpty()) {
+                                        couldNotFindGameMessage.send(playerWrapper);
                                         return;
+                                    }
                                     games.stream()
                                             .filter(game -> game.getStatus() == GameStatus.WAITING)
                                             .findAny()
-                                            .ifPresent(game -> game.joinToGame(player));
+                                            .ifPresentOrElse(game -> game.joinToGame(player), () -> couldNotFindGameMessage.send(playerWrapper));
                                     break;
                                 case "rejoin":
                                     player.closeInventory();

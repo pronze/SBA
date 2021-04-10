@@ -4,15 +4,18 @@ data:
 - stack: "RED_BED;1;§aBed Wars §7(Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!"
   row: 1
   column: 3
-  properties: join_randomly
+  properties:
+    - name: randomly_join
 
 - stack: "BARRIER;1;§cExit"
   row: 3
   column: 4
-  properties: exit
+  properties:
+    - name: exit
 
 - stack: "ENDER_PEARL;1;§cClick here to rejoin!;§7Click here to rejoin the lastly joined game."
-  properties: rejoin
+  properties:
+    - name: rejoin
   row: 3
   column: 8
 
@@ -26,12 +29,14 @@ data:
    - stack: "FIREWORK;1;§7Random Map;§8Solo; ;§aClick to Play"
      row: 4
      column: 3
-     properties: randomly_join
+     properties:
+       - name: randomly_join
 
    - stack: "DIAMOND;1;§aRandom Favorite;§8Solo; ;§aClick to Play"
      row: 4
      column: 5
-     properties: randomly_join
+     properties:
+       - name: randomly_join
 
    - stack: "ARROW;1;§aGo Back;§7To Play Bed Wars"
      row: 5
@@ -41,6 +46,8 @@ data:
    - stack: "PAPER;1;§aWaterfall;§8Solo; ;§aClick to play"
      row: 1
      column: 2
-     gameName: test
+     properties:
+       - name: game
+       - gameName: test
 
     

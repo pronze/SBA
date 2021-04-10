@@ -110,4 +110,5 @@ public class MessageKeys {
     public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard.title"};
     public static final String[] COUNTDOWN = {"countdown"};
     public static final String[] CANNOT_BUY = {"cannot-buy"};
+    public static final String[] GAMES_INVENTORY_CANNOT_FIND_GAME = {"games-inventory", "could-not-find-game"};
 }
