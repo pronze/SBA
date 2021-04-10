@@ -4,7 +4,6 @@ import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.minimessage.MiniMessage;
 import org.screamingsandals.bedwars.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,11 @@ public class Message {
     }
 
     public List<String> toStringList() {
-        return original;
+        return original
+                .stream()
+                .map(MiniMessage.get()::parse)
+                .map(AdventureHelper::toLegacy)
+                .collect(Collectors.toList());
     }
 
     public void send(CommandSenderWrapper... wrapper) {

@@ -74,7 +74,7 @@ lobby-scoreboard:
     - "<white>Mode: <green>%mode%"
     - "<white>Version: <gray>v1.1"
     - ""
-    - "<yellow>www.screamingsandals.org"
+    - "<yellow>SBAHypixelify v2"
   state:
     waiting: "<white>Waiting..."
     countdown: "<white>Starting in <green>%countdown%s"
@@ -156,7 +156,7 @@ scoreboard:
       - "<white>Kills: <green>%kills%"
       - "<white>Bed Broken: <green>%beds%"
       - ""
-      - "<yellow>www.screamingsandals.org"
+      - "<yellow>SBAHypixelify v2"
     5:
       - "<gray>%date%"
       - ""
@@ -164,7 +164,7 @@ scoreboard:
       - ""
       - "%team_status%"
       - ""
-      - "<yellow>www.screamingsandals.org"
+      - "<yellow>SBAHypixelify v2"
 main-lobby:
   chat-format: "%color%[%level%✫] %name%: %message%"
   scoreboard:
@@ -181,9 +181,9 @@ main-lobby:
       - "Total Kills: <green>%kills%"
       - "Total Wins: <green>%deaths%"
       - ""
-      - "K/D ratio: <gold>%k/d%"
+      - "K/D ratio: <gold>%kdr%"
       - ""
-      - "<yellow>www.screamingsandals.org"
+      - "<yellow>SBAHypixelify v2"
 party:
   chat-format: "<green>Party >> %name% <white> : %message%"
   message:

@@ -69,11 +69,11 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-        if (!SBAConfig.getInstance().getBoolean("main-lobby.custom-chat", true)) return;
+        if (!SBAConfig.getInstance().node("main-lobby","custom-chat").getBoolean(true)) return;
         final var player = e.getPlayer();
         final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
-        if (SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)
+        if (SBAConfig.getInstance().node("main-lobby", "enabled").getBoolean(false)
                 && MainLobbyScoreboardManagerImpl.isInWorld(e.getPlayer().getLocation())) {
 
             var chatFormat = LanguageService
@@ -82,8 +82,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
                     .toString();
 
             if (chatFormat != null) {
-                String format = SBAConfig.getInstance()
-                        .getString("main-lobby.chat-format")
+                var format = chatFormat
                         .replace("%level%", String.valueOf(db.getLevel()))
                         .replace("%name%", e.getPlayer().getName())
                         .replace("%message%", e.getMessage())
@@ -148,14 +147,25 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
     }
 
     public void createBoard(Player player) {
-        final var playerData = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
+        final var playerData = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).orElseThrow();
+
+        var title = LanguageService
+                .getInstance()
+                .get(MessageKeys.MAIN_LOBBY_SCOREBOARD_TITLE)
+                .toString();
+
+        var lines = LanguageService
+                .getInstance()
+                .get(MessageKeys.MAIN_LOBBY_SCOREBOARD_LINES)
+                .toStringList();
+
         final var scoreboard = Scoreboard.builder()
                 .animate(false)
                 .player(player)
-                .title(SBAConfig.getInstance().getString("main-lobby.title", "&e&lBED WARS"))
+                .title(title)
                 .displayObjective(MAIN_LOBBY_OBJECTIVE)
                 .updateInterval(20L)
-                .lines(SBAConfig.getInstance().getStringList("main-lobby.lines"))
+                .lines(lines)
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
                     final var progress = playerData.getStringProgress();
@@ -171,7 +181,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
                             .replace("%progress%", progress)
                             .replace("%bar%", bar)
                             .replace("%wins%", String.valueOf(playerStatistic.getWins())
-                            .replace("%k/d%", String.valueOf(playerStatistic.getKD())));
+                            .replace("%kdr%", String.valueOf(playerStatistic.getKD())));
                 }).build();
 
         scoreboardMap.put(player, scoreboard);

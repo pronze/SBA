@@ -109,16 +109,28 @@ public class LobbyScoreboardManagerImpl implements Listener {
         String mode;
         switch (s) {
             case 1:
-                mode = SBAConfig.getInstance().getString("lobby-scoreboard.solo-prefix", "Solo");
+                mode = LanguageService
+                        .getInstance()
+                        .get("lobby-scoreboard", "solo-prefix")
+                        .toString();
                 break;
             case 2:
-                mode = SBAConfig.getInstance().getString("lobby-scoreboard.doubles-prefix", "Doubles");
+                mode = LanguageService
+                        .getInstance()
+                        .get("lobby-scoreboard", "doubles-prefix")
+                        .toString();
                 break;
             case 3:
-                mode = SBAConfig.getInstance().getString("lobby-scoreboard.triples-prefix", "Triples");
+                mode = LanguageService
+                        .getInstance()
+                        .get("lobby-scoreboard", "triples-prefix")
+                        .toString();
                 break;
             case 4:
-                mode = SBAConfig.getInstance().getString("lobby-scoreboard.squads-prefix", "Squads");
+                mode = LanguageService
+                        .getInstance()
+                        .get("lobby-scoreboard", "squads-prefix")
+                        .toString();
                 break;
             default:
                 mode = s + "v" + s + "v" + s + "v" + s;
@@ -141,8 +153,12 @@ public class LobbyScoreboardManagerImpl implements Listener {
         final var finalState = state;
         final var finalNeedplayers = needplayers;
 
-        SBAConfig.getInstance()
-                .getStringList("lobby-scoreboard.lines").forEach(line -> {
+        var lobbyScoreboardLines = LanguageService
+                .getInstance()
+                .get(MessageKeys.LOBBY_SCOREBOARD_LINES)
+                .toStringList();
+
+        lobbyScoreboardLines.forEach(line -> {
             line = line
                     .replace("%date%", DateUtils.getFormattedDate())
                     .replace("%state%", finalState)
