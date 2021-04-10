@@ -73,6 +73,7 @@ public class GameChatListener implements Listener {
                 }
             } else if (game.getStatus() == GameStatus.WAITING) {
                 if (SBAConfig.getInstance().node("chat-format", "lobby-chat", "enabled").getBoolean()) {
+                    event.setCancelled(true);
                     var lobbyChatFormat = SBAConfig
                             .getInstance()
                             .node("chat-format", "lobby-chat", "format")
