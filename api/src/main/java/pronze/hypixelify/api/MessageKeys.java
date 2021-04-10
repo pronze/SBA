@@ -107,7 +107,7 @@ public class MessageKeys {
     public static final String[] BLINDNESS_TRAP_PURCHASED_TITLE = {"blindness-trap-purchased-title"};
     public static final String[] PURCHASED_HEAL_POOL_MESSAGE = {"purchase-heal-pool"};
     public static final String[] UPGRADE_TEAM_PROTECTION = {"upgrade-team-protection"};
-    public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard.title"};
+    public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard", "title"};
     public static final String[] COUNTDOWN = {"countdown"};
     public static final String[] CANNOT_BUY = {"cannot-buy"};
     public static final String[] GAMES_INVENTORY_CANNOT_FIND_GAME = {"games-inventory", "could-not-find-game"};

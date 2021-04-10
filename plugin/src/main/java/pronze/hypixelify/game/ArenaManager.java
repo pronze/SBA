@@ -6,11 +6,13 @@ import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.game.IArena;
 import pronze.hypixelify.api.manager.IArenaManager;
 import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@AutoInitialize
 public class ArenaManager implements IArenaManager {
     private final Map<String, IArena> arenaMap = new HashMap<>();
 

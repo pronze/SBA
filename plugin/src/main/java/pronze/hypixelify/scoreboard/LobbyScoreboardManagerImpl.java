@@ -168,7 +168,7 @@ public class LobbyScoreboardManagerImpl implements Listener {
                     .replace("%minplayers%", String.valueOf(game.getMinPlayers()))
                     .replace("%needplayers%", String.valueOf(finalNeedplayers))
                     .replace("%countdown%", countdown)
-                    .replace("%mode}", mode);
+                    .replace("%mode%", mode);
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
                 line = PlaceholderAPI.setPlaceholders(player, line);
             lines.add(line);
