@@ -56,8 +56,8 @@ date:
 shop-name: "[SBAHypixelify] shop"
 floating-generator:
   holo-text:
-    - '"§eTier §c{tier}"
-    - '"{material}"
+    - "§eTier §c{tier}"
+    - "{material}"
     - "§eSpawns in §c{seconds} §eseconds"
 lobby-scoreboard:
   solo-prefix: "Solo"
@@ -101,13 +101,17 @@ game-start:
     - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
 overstats:
   message:
-    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-    - "                             %color%%win_team%"'
-    - "                             %winners%"'
-    - "    &e&l1st&7 - &f%first_killer_name% &7- &f%first_killer_score"'
-    - "    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"'
-    - "    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"'
-    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"'
+    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - "                             &e&lBed Wars"
+    - ""
+    - "                             %color%%win_team%"
+    - "                             %winners%"
+    - ""
+    - "    &e&l1st&7 - &f%first_killer_name% &7- &f%first_killer_score"
+    - "    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"
+    - "    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"
+    - ""
+    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
 scoreboard:
   you: "&7YOU"
   title:
@@ -180,7 +184,6 @@ main-lobby:
       - "K/D ratio: &6%k/d%"
       - ""
       - "&ewww.screamingsandals.org"
-
 party:
   chat-format: "&aParty >> %name% &f : &o%message%"
   message:
