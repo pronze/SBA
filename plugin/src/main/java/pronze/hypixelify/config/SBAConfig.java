@@ -152,6 +152,18 @@ public class SBAConfig implements IConfigurator {
                         .key("alive").defValue("%color% %team% §a\u2713 §8%you%")
                         .key("destroyed").defValue("%color% %team% §a§f%players%§8 %you%")
                         .key("eliminated").defValue("%color% %team% §c\u2718 %you%")
+                        .back()
+                    .section("chat-format")
+                        .section("game-chat")
+                            .key("enabled").defValue(true)
+                            .key("format").defValue("§7[%color%%team%&7] %color%%player% §f> %message%")
+                            .key("format-spectator").defValue("§7[§fSpectator§7] §f%player% > %message%")
+                            .key("all-chat-prefix").defValue("@")
+                            .key("all-chat-format").defValue("§7[§fALL§7] §7[%color%%team%§7] %color%player% §f> %message%")
+                            .back()
+                        .section("lobby-chat")
+                            .key("enabled").defValue(true)
+                            .key("format").defValue("%color%%player% §f> %message%")
                         .back();
 
             var gameSection = generator
