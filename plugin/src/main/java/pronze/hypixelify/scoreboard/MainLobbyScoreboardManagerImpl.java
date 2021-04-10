@@ -71,7 +71,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
     public void onChat(AsyncPlayerChatEvent e) {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.custom-chat", true)) return;
         final var player = e.getPlayer();
-        final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).get();
+        final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
         if (SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)
                 && MainLobbyScoreboardManagerImpl.isInWorld(e.getPlayer().getLocation())) {

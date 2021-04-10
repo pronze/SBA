@@ -28,7 +28,6 @@ public class GameChatListener implements Listener {
                 if (SBAConfig.getInstance().node("chat-format", "game-chat", "enabled").getBoolean(true)) {
                     event.setCancelled(true);
 
-
                     final var bedwarsPlayer = PlayerManager
                             .getInstance()
                             .getPlayer(player.getUniqueId())
