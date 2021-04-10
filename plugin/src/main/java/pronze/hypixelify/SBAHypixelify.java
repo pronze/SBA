@@ -98,7 +98,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public IConfigurator getConfigurator() {
-        return Core.getObjectFromClass(SBAConfig.class);
+        return getMainConfigurator();
     }
 
     @Override

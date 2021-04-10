@@ -55,8 +55,8 @@ date:
 shop-name: "[SBAHypixelify] shop"
 floating-generator:
   holo-text:
-    - "§eTier §c{tier}",
-    - "{material}",
+    - "§eTier §c{tier}"
+    - "{material}"
     - "§eSpawns in §c{seconds} §eseconds"
 lobby-scoreboard:
   solo-prefix: "Solo"
@@ -100,17 +100,17 @@ game-start:
     - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
 overstats:
   message:
-      "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
-      "                             &e&lBed Wars"
-      ""
-      "                             %color%%win_team%"
-      "                             %winners%"
-      ""
-      "    &e&l1st&7 - &f%first_killer_name% &7- &f%first_killer_score"
-      "    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"
-      "    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"
-      ""
-      "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - "                             &e&lBed Wars"
+    - ""
+    - "                             %color%%win_team%"
+    - "                             %winners%"
+    - ""
+    - "    &e&l1st&7 - &f%first_killer_name% &7- &f%first_killer_score"
+    - "    &6&l2nd&7 - &f%second_killer_name% &7- &f%second_killer_score"
+    - "    &c&l3rd&7 - &f%third_killer_name% &7- &f%third_killer_score"
+    - ""
+    - "&a▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
 scoreboard:
   you: "&7YOU"
   title:
@@ -188,52 +188,52 @@ party:
   message:
     cannot-invite:
       - "&6-----------------------------------------------------"
-      - "&cYou cannot invite this player to your party!",
+      - "&cYou cannot invite this player to your party!"
       - "&6-----------------------------------------------------"
     limit-reached:
       - "&6-----------------------------------------------------"
-      - "&cParty has reached max size!",
+      - "&cParty has reached max size!"
       - "&6-----------------------------------------------------"
     leader-join-leave:
       - "&6-----------------------------------------------------"
-      - "&cYou have been teleported by the party leader",
+      - "&cYou have been teleported by the party leader"
       - "&6-----------------------------------------------------"
     invite-expired:
       - "&6-----------------------------------------------------"
-      - "&cThe party invite has been expired",
+      - "&cThe party invite has been expired"
       - "&6-----------------------------------------------------"
     invalid-command:
       - "&6-----------------------------------------------------"
-      - "&cInvalid command, do /p help for more.",
+      - "&cInvalid command, do /p help for more."
       - "&6-----------------------------------------------------"
     access-denied:
       - "&6-----------------------------------------------------"
-      - "&cYou cannot access this command",
+      - "&cYou cannot access this command"
       - "&6-----------------------------------------------------"
     not-in-party:
       - "&6-----------------------------------------------------"
-      - "&cYou are currently not in a party!",
+      - "&cYou are currently not in a party!"
       - "&6-----------------------------------------------------"
     invited:
       - "&6-----------------------------------------------------"
-      - "&eYou have invited %player%&e to your party!",
-      - "&ewait for them to accept it",
+      - "&eYou have invited %player%&e to your party!"
+      - "&ewait for them to accept it"
       - "&6-----------------------------------------------------"
     already-invited:
       - "&6-----------------------------------------------------"
-      - "&cThis player has already had pending invites!",
+      - "&cThis player has already had pending invites!"
       - "&6-----------------------------------------------------"
     warp:
       - "&6-----------------------------------------------------"
-      - "&eYou have been warped by the leader",
+      - "&eYou have been warped by the leader"
       - "&6-----------------------------------------------------"
     warping:
       - "&6-----------------------------------------------------"
-      - "&eWarping players..",
+      - "&eWarping players.."
       - "&6-----------------------------------------------------"
     promoted-leader:
       - "&6-----------------------------------------------------"
-      - "&e%player% has been promoted to party leader!",
+      - "&e%player% has been promoted to party leader!"
       - "&6-----------------------------------------------------"
     invite:
       - "&6-----------------------------------------------------"
@@ -242,79 +242,79 @@ party:
       - "&6-----------------------------------------------------"
     accepted:
       - "&6-----------------------------------------------------"
-      - "%player% &ajoined the party!",
+      - "%player% &ajoined the party!"
       - "&6-----------------------------------------------------"
     offline-left:
       - "&6-----------------------------------------------------"
-      - "%player% &aleft the party due to inactivity",
+      - "%player% &aleft the party due to inactivity"
       - "&6-----------------------------------------------------"
     left:
       - "&6-----------------------------------------------------"
-      - "&cYou left the party!",
+      - "&cYou left the party!"
       - "&6-----------------------------------------------------"
     offline-quit:
       - "&6-----------------------------------------------------"
-      - "%player% &cleft the party",
+      - "%player% &cleft the party"
       - "&6-----------------------------------------------------"
     no-players-warp:
       - "&6-----------------------------------------------------"
-      - "&cThere are no players to warp!",
+      - "&cThere are no players to warp!"
       - "&6-----------------------------------------------------"
     declined:
       - "&6-----------------------------------------------------"
-      - "%player% &chas declined this party invite",
+      - "%player% &chas declined this party invite"
       - "&6-----------------------------------------------------"
     kicked:
       - "&6-----------------------------------------------------"
-      - "{player} &cHas been kicked from party",
+      - "{player} &cHas been kicked from party"
       - "&6-----------------------------------------------------"
     disband-inactivity:
       - "&6-----------------------------------------------------"
-      - "&aParty has been disbanded due to inactivity",
+      - "&aParty has been disbanded due to inactivity"
       - "&6-----------------------------------------------------"
     disband:
       - "&6-----------------------------------------------------"
-      - "&cParty has been disbanded by the leader.",
+      - "&cParty has been disbanded by the leader."
       - "&6-----------------------------------------------------"
     player-not-found:
       - "&6-----------------------------------------------------"
-      - "&cCould not find Player!",
+      - "&cCould not find Player!"
       - "&6-----------------------------------------------------"
     cannot-invite-yourself:
       - "&6-----------------------------------------------------"
-      - "&cYou can't invite yourself.",
+      - "&cYou can't invite yourself."
       - "&6-----------------------------------------------------"
     already-muted:
       - "&6-----------------------------------------------------"
-      - "&cThe party is already %isMuted%.",
+      - "&cThe party is already %isMuted%."
       - "&6-----------------------------------------------------"
     not-invited:
       - "&6-----------------------------------------------------"
-      - "&cYou are not invited to any party",
+      - "&cYou are not invited to any party"
       - "&6-----------------------------------------------------"
     max-invite-size:
       - "&6-----------------------------------------------------"
-      - "&cYou cannot invite more than 5 players at a time.",
+      - "&cYou cannot invite more than 5 players at a time."
       - "&6-----------------------------------------------------"
     got-kicked:
       - "&6-----------------------------------------------------"
-      - "&cYou have been kicked from party",
+      - "&cYou have been kicked from party"
       - "&6-----------------------------------------------------"
     decline-inc:
       - "&6-----------------------------------------------------"
-      - "&cTo invite, you must decline current invites.",
+      - "&cTo invite, you must decline current invites."
       - "&6-----------------------------------------------------"
     declined-user:
       - "&6-----------------------------------------------------"
-      - "&cYou declined the invite!",
+      - "&cYou declined the invite!"
       - "&6-----------------------------------------------------"
     error:
       - "&6-----------------------------------------------------"
-      - "&c&lAN ERROR OCCURRED!",
+      - "&c&lAN ERROR OCCURRED!"
       - "&6-----------------------------------------------------"
     not-in-game:
       - "&6-----------------------------------------------------"
-      - "&cYou are not in a game to do this command!",
+      - "&cYou are not in a game to do this command!"
       - "&6-----------------------------------------------------"
     shout-wait:
       - "&6-----------------------------------------------------"
@@ -322,7 +322,7 @@ party:
       - "&6-----------------------------------------------------"
     chat-enable-disabled:
       - "&6-----------------------------------------------------"
-      - "&aParty chat has been %mode%",
+      - "&aParty chat has been %mode%"
       - "&6-----------------------------------------------------"
     help:
       - "&1-----------------------------------------------------"

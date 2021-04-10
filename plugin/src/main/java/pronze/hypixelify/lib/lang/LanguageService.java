@@ -44,7 +44,7 @@ public class LanguageService implements ILanguageService {
         var argumentNode = configurationNode.node((Object[]) arguments);
         try {
             if (argumentNode == null || argumentNode.empty()) {
-                throw new UnsupportedOperationException();
+                throw new UnsupportedOperationException("Could not find key for: " + Arrays.toString(arguments));
             }
             if (argumentNode.isList()) {
                 return Message.of(new ArrayList<>(argumentNode.getList(String.class)));

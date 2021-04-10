@@ -44,6 +44,7 @@ public class SBAConfig implements IConfigurator {
         this.dataFolder = main.getDataFolder();
         /* To avoid config confusions*/
         deleteFile("config.yml");
+        deleteFile("bwaconfig.yml");
     }
 
     @OnInit
@@ -63,6 +64,7 @@ public class SBAConfig implements IConfigurator {
                 langFolder.mkdirs();
             }
 
+            saveFile("languages/language_en.yml");
             saveFile("games-inventory/solo.yml");
             saveFile("games-inventory/double.yml");
             saveFile("games-inventory/triple.yml");
@@ -76,6 +78,7 @@ public class SBAConfig implements IConfigurator {
 
             var generator = new ConfigGenerator(loader, configurationNode);
             generator.start()
+                    .key("version").defValue(SBAHypixelify.getInstance().getVersion())
                     .key("locale").defValue("en")
                     .key("prefix").defValue("[SBAHypixelify]")
                     .section("debug")
