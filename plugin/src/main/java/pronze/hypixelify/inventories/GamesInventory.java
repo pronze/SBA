@@ -26,8 +26,11 @@ import pronze.lib.core.utils.Logger;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Locale;
 
-@AutoInitialize(listener = true)
+@AutoInitialize(listener = true, depends = {
+        LanguageService.class
+})
 public class GamesInventory implements Listener {
 
     public static GamesInventory getInstance() {
@@ -52,8 +55,7 @@ public class GamesInventory implements Listener {
                     final var siFormat = SimpleInventoriesCore.builder()
                             .categoryOptions(localOptionsBuilder -> {
                                 ShopUtil.generateOptions(localOptionsBuilder);
-                                localOptionsBuilder.prefix(SBAConfig.getInstance()
-                                        .node("games-inventory", "gui", label.toLowerCase() + "-prefix").getString());
+                                localOptionsBuilder.prefix(LanguageService.getInstance().get("games-inventory", "gui", label.toLowerCase() + "-prefix").toString());
                             })
                             .call(categoryBuilder ->{
                                 try {
@@ -69,8 +71,9 @@ public class GamesInventory implements Listener {
 
                     inventoryMap.put(val, siFormat);
                     Logger.trace("Successfully loaded games inventory for: {}", label);
-                } catch (Throwable T) {
+                } catch (Throwable t) {
                     Logger.trace("Could not initialize games inventory format for {}", label);
+                    t.printStackTrace();
                 }
             });
         } catch (Exception ex) {

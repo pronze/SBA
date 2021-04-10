@@ -37,7 +37,7 @@ public class SBAConfig implements IConfigurator {
     }
 
     public static SBAConfig getInstance() {
-        return Core.getObjectFromClass(SBAConfig.class);
+        return SBAHypixelify.getMainConfigurator();
     }
 
     public SBAConfig(SBAHypixelify main) {

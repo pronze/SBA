@@ -33,7 +33,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
     }
 
     @OnInit
-    private void registerMapping() {
+    public void registerMapping() {
         PlayerMapper.UNSAFE_getPlayerConverter()
                 .registerW2P(PlayerWrapper.class, wrapper -> {
                     if (wrapper.getType() == SenderWrapper.Type.PLAYER) {

@@ -31,6 +31,7 @@ import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
+    private SBAConfig config;
     private ExceptionManager exceptionManager;
 
     public static SBAHypixelify getInstance() {
@@ -40,6 +41,8 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     public static ExceptionManager getExceptionManager() {
         return plugin.exceptionManager;
     }
+
+    public static SBAConfig getMainConfigurator() {return plugin.config;}
 
     @Override
     public void onEnable() {
@@ -69,12 +72,11 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             return;
         }
 
-        var config = new SBAConfig(this);
-
+        config = new SBAConfig(this);
+        config.loadDefaults();
         ScoreboardManager.init(this);
         Core.init(this);
         Core.setDebugEnabled(config.node("debug", "enabled").getBoolean(false));
-        Core.getInitializer().inject(config);
 
         Logger.trace("Registering API service provider");
 
