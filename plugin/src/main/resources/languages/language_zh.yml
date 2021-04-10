@@ -56,8 +56,8 @@ date:
 shop-name: "[SBAHypixelify] shop"
 floating-generator:
   holo-text:
-    - '"§eTier §c{tier}"
-    - '"{material}"
+    - "§eTier §c{tier}"
+    - "{material}"
     - "§eSpawns in §c{seconds} §eseconds"
 lobby-scoreboard:
   solo-prefix: "Solo"
@@ -184,7 +184,6 @@ main-lobby:
       - "K/D ratio: &6%k/d%"
       - ""
       - "&ewww.screamingsandals.org"
-
 party:
   chat-format: "&aParty >> %name% &f : &o%message%"
   message:
