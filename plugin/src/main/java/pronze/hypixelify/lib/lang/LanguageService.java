@@ -11,13 +11,14 @@ import pronze.hypixelify.api.lang.Message;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.auto.InitializationPriority;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@AutoInitialize
+@AutoInitialize(initPriority = InitializationPriority.HIGH)
 @Getter
 public class LanguageService implements ILanguageService {
     private final String prefix;

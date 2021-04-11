@@ -72,14 +72,9 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
             return;
         }
 
-        config = new SBAConfig(this);
-        config.loadDefaults();
         ScoreboardManager.init(this);
         Core.init(this);
-        Core.setDebugEnabled(config.node("debug", "enabled").getBoolean(false));
-
         Logger.trace("Registering API service provider");
-
         getServer().getServicesManager().register(SBAHypixelifyAPI.class, this, this, ServicePriority.Normal);
         getLogger().info("Plugin has loaded!");
     }

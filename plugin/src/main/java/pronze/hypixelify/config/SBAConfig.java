@@ -17,12 +17,15 @@ import pronze.hypixelify.utils.SBAUtil;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnInit;
+import pronze.lib.core.auto.InitializationPriority;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+@AutoInitialize(initPriority = InitializationPriority.HIGHEST)
 public class SBAConfig implements IConfigurator {
     public static HashMap<String, Integer> game_size = new HashMap<>();
 
@@ -40,11 +43,15 @@ public class SBAConfig implements IConfigurator {
         return SBAHypixelify.getMainConfigurator();
     }
 
-    public SBAConfig(SBAHypixelify main) {
-        this.dataFolder = main.getDataFolder();
+    public SBAConfig() {
+        this.dataFolder = SBAHypixelify
+                .getInstance()
+                .getDataFolder();
+
         /* To avoid config confusions*/
         deleteFile("config.yml");
         deleteFile("bwaconfig.yml");
+        loadDefaults();
     }
 
     @OnInit
@@ -198,6 +205,7 @@ public class SBAConfig implements IConfigurator {
             }
             saveConfig();
         }
+        Core.setDebugEnabled(node("debug", "enabled").getBoolean(false));
     }
 
     private void saveFile(String fileName, String saveTo) {
