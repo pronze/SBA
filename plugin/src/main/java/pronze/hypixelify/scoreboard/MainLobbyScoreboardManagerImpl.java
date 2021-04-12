@@ -12,7 +12,6 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
@@ -173,15 +172,16 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
                             .getInstance()
                             .getStatistic(PlayerMapper.wrapPlayer(player));
 
-                    return hook.getLine()
+                    return hook
+                            .getLine()
                             .replace("%kills%", String.valueOf(playerStatistic.getKills()))
                             .replace("%beddestroys%", String.valueOf(playerStatistic.getDestroyedBeds()))
                             .replace("%deaths%", String.valueOf(playerStatistic.getDeaths()))
                             .replace("%level%", "§7" + playerData.getLevel() + "✫")
                             .replace("%progress%", progress)
                             .replace("%bar%", bar)
-                            .replace("%wins%", String.valueOf(playerStatistic.getWins())
-                            .replace("%kdr%", String.valueOf(playerStatistic.getKD())));
+                            .replace("%wins%", String.valueOf(playerStatistic.getWins()))
+                            .replace("%kdr%", String.valueOf(playerStatistic.getKD()));
                 }).build();
 
         scoreboardMap.put(player, scoreboard);

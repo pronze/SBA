@@ -176,8 +176,6 @@ main-lobby:
       - "Progress: %progress%"
       - "%bar%"
       - ""
-      - "Loot Chests: <gold>0"
-      - ""
       - "Total Kills: <green>%kills%"
       - "Total Wins: <green>%deaths%"
       - ""
