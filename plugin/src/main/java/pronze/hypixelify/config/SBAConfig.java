@@ -40,7 +40,7 @@ public class SBAConfig implements IConfigurator {
     }
 
     public static SBAConfig getInstance() {
-        return SBAHypixelify.getMainConfigurator();
+        return Core.getObjectFromClass(SBAConfig.class);
     }
 
     public SBAConfig() {
@@ -105,6 +105,7 @@ public class SBAConfig implements IConfigurator {
                     .section("floating-generator")
                         .key("enabled").defValue(true)
                         .key("holo-height").defValue(2.0)
+                        .back()
                     .section("upgrades")
                         .key("timer-upgrades-enabled").defValue(true)
                         .key("show-upgrade-message").defValue(true)
@@ -145,6 +146,8 @@ public class SBAConfig implements IConfigurator {
                     .section("games-inventory")
                         .key("enabled").defValue(true)
                         .back()
+                    .key("show-health-in-tablist").defValue(true)
+                    .key("show-health-under-player-name").defValue(true)
                     .section("main-lobby")
                         .key("enabled").defValue(false)
                         .key("custom-chat").defValue(true)

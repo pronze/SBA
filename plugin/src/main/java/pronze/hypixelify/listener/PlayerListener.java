@@ -130,7 +130,7 @@ public class PlayerListener implements Listener {
                             .getPlayer(player.getUniqueId())
                             .orElseThrow();
 
-                    final var victimTeam = game.getTeamOfPlayer((Player) gVictim.getWrappedPlayer().get());
+                    final var victimTeam = game.getTeamOfPlayer(player);
 
                     if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
                             victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
@@ -361,7 +361,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
         SBAHypixelify.getInstance().getPlayerWrapperService().register(player);

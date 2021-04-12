@@ -122,7 +122,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         final var player = e.getPlayer();
-        if (isInWorld(player.getLocation())) {
+        if (isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
             createBoard(player);
         } else {
             final var scoreboard = scoreboardMap.get(player);

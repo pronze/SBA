@@ -34,20 +34,16 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
         this.arena = arena;
         game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).orElseThrow();
 
-        var mDef = LanguageService
-                .getInstance()
-                .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
-                .toStringList();
-
-        var m5 = LanguageService
-                .getInstance()
-                .get(MessageKeys.SCOREBOARD_LINES_5)
-                .toStringList();
-
         if (game.countAvailableTeams() >= 5) {
-            scoreboard_lines.addAll(m5);
+            scoreboard_lines.addAll(LanguageService
+                    .getInstance()
+                    .get(MessageKeys.SCOREBOARD_LINES_5)
+                    .toStringList());
         } else {
-            scoreboard_lines.addAll(mDef);
+            scoreboard_lines.addAll(LanguageService
+                    .getInstance()
+                    .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
+                    .toStringList());
         }
         game.getConnectedPlayers().forEach(this::createBoard);
     }

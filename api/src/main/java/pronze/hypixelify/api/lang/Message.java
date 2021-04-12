@@ -41,17 +41,23 @@ public class Message {
     }
 
     public List<String> toStringList() {
-        return original
+        return toComponentList()
                 .stream()
-                .map(MiniMessage.get()::parse)
                 .map(AdventureHelper::toLegacy)
                 .collect(Collectors.toList());
     }
 
+    public List<Component> toComponentList() {
+        return original
+                .stream()
+                .map(MiniMessage.get()::parse)
+                .collect(Collectors.toList());
+    }
+
     public void send(CommandSenderWrapper... wrapper) {
-        var component = toComponent();
+        var message = toComponentList();
         for (var sender : wrapper) {
-            sender.sendMessage(component);
+            message.forEach(sender::sendMessage);
         }
     }
 }

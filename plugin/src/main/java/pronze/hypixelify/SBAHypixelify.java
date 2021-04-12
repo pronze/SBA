@@ -31,7 +31,6 @@ import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
 
 public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     private static SBAHypixelify plugin;
-    private SBAConfig config;
     private ExceptionManager exceptionManager;
 
     public static SBAHypixelify getInstance() {
@@ -41,8 +40,6 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
     public static ExceptionManager getExceptionManager() {
         return plugin.exceptionManager;
     }
-
-    public static SBAConfig getMainConfigurator() {return plugin.config;}
 
     @Override
     public void onEnable() {
@@ -93,7 +90,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
 
     @Override
     public IConfigurator getConfigurator() {
-        return getMainConfigurator();
+        return SBAConfig.getInstance();
     }
 
     @Override

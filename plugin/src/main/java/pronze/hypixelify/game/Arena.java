@@ -155,7 +155,7 @@ public class Arena implements IArena {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.OVERSTATS_MESSAGE)
-                    .replace("{color}",
+                    .replace("%color%",
                             org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
                     .replace("%win_team%", winner.getName())
                     .replace("%winners%", WinTeamPlayers.toString())

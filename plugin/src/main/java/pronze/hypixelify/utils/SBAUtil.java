@@ -17,7 +17,6 @@ import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.exception.ExceptionManager;
-import pronze.hypixelify.packets.WrapperPlayServerScoreboardObjective;
 
 import java.time.Duration;
 import java.util.*;
