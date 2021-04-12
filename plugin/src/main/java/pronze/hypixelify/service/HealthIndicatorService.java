@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.craftbukkit.MinecraftComponentSerializer;
@@ -53,7 +54,11 @@ public class HealthIndicatorService implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                update(game);
+                if (game.getStatus() == GameStatus.WAITING) {
+                    update(game);
+                } else {
+                    this.cancel();
+                }
             }
         }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
     }
