@@ -179,10 +179,24 @@ public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.
 
             team.getConnectedPlayers()
                     .stream()
+                    .filter(player1 -> !arena.isPlayerHidden(player1))
                     .map(Player::getName)
                     .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
                     .forEach(scoreboardTeam::addEntry);
         });
+
+        if (!arena.getInvisiblePlayers().isEmpty()) {
+            arena.getInvisiblePlayers().forEach(invisiblePlayer -> {
+                final var team = game.getTeamOfPlayer(invisiblePlayer);
+                if (team != null && playerTeam != team) {
+                    board.getHolder().getTeamEntry(teamName).ifPresent(teamEntry -> {
+                        if (teamEntry.hasEntry(invisiblePlayer.getName())) {
+                            teamEntry.removeEntry(invisiblePlayer.getName());
+                        }
+                    });
+                }
+            });
+        }
         return lines;
     }
 

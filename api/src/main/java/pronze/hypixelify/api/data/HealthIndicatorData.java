@@ -9,7 +9,5 @@ import java.util.UUID;
 @Data
 public class HealthIndicatorData {
     private final UUID playerUUID;
-    private final String tabData;
-    private final String listData;
     private double health;
 }

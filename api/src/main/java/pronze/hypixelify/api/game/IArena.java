@@ -6,6 +6,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -72,4 +73,10 @@ public interface IArena {
      * @param player
      */
     void addHiddenPlayer(Player player);
+
+    /**
+     *
+     * @return
+     */
+    List<Player> getInvisiblePlayers();
 }

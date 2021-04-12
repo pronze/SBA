@@ -43,6 +43,15 @@ public class Arena implements IArena {
     }
 
     @Override
+    public List<Player> getInvisiblePlayers() {
+        return invisiblePlayers
+                .values()
+                .stream()
+                .map(InvisiblePlayer::getPlayer)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void addHiddenPlayer(Player player) {
         if (invisiblePlayers.containsKey(player.getUniqueId())) return;
         final var invisiblePlayer = new InvisiblePlayer(player, this);

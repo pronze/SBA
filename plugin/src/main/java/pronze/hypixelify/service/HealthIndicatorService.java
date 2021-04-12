@@ -22,8 +22,6 @@ import pronze.hypixelify.api.data.HealthIndicatorData;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnDestroy;
-
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -31,6 +29,9 @@ import java.util.*;
 public class HealthIndicatorService implements Listener {
     private final Map<UUID, HealthIndicatorData> dataMap = new HashMap<>();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");
+
+    private static final String TAB_IDENTIFIER = "sba-tab";
+    private static final String TAG_IDENTIFIER = "sba-tag";
 
     private final boolean tabEnabled;
     private final boolean tagEnabled;
@@ -83,10 +84,10 @@ public class HealthIndicatorService implements Listener {
         final var playerData = dataMap.get(player.getUniqueId());
         if (playerData != null) {
             if (tabEnabled) {
-                ClassStorage.sendPacket(player, destroyObjective(playerData.getTabData()));
+                ClassStorage.sendPacket(player, destroyObjective(TAB_IDENTIFIER));
             }
             if (tagEnabled) {
-                ClassStorage.sendPacket(player, destroyObjective(playerData.getListData()));
+                ClassStorage.sendPacket(player, destroyObjective(TAG_IDENTIFIER));
             }
             dataMap.remove(player.getUniqueId());
         }
@@ -109,38 +110,26 @@ public class HealthIndicatorService implements Listener {
     }
 
     public void update(Player player, @NotNull String playerName, int health) {
-        var data = dataMap.get(player.getUniqueId());
-        var tabData = data.getTabData();
-        var listData = data.getListData();
         if (tabEnabled) {
-            ClassStorage.sendPacket(player, createOrUpdateScorePacket(tabData, health, playerName));
+            ClassStorage.sendPacket(player, createOrUpdateScorePacket(TAB_IDENTIFIER, health, playerName));
         }
         if (tagEnabled) {
-            ClassStorage.sendPacket(player, createOrUpdateScorePacket(listData, health, playerName));
+            ClassStorage.sendPacket(player, createOrUpdateScorePacket(TAG_IDENTIFIER, health, playerName));
         }
     }
 
     public void create(Player player) {
-        byte[] tabArr = new byte[16];
-        new Random().nextBytes(tabArr);
-        String gs1 = new String(tabArr, StandardCharsets.UTF_8);
-
-        byte[] listArr = new byte[16];
-        new Random().nextBytes(listArr);
-        String gs2 = new String(listArr, StandardCharsets.UTF_8);
-
-        var indicatorData = HealthIndicatorData.of(player.getUniqueId(), gs1, gs2);
-
+        var indicatorData = HealthIndicatorData.of(player.getUniqueId());
         dataMap.put(player.getUniqueId(), indicatorData);
 
         if (tabEnabled) {
-            ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(gs1, Component.text("healthIndicator")));
-            ClassStorage.sendPacket(player, getScoreboardDisplayObjective(gs1, 0));
+            ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(TAB_IDENTIFIER, Component.text("healthIndicator")));
+            ClassStorage.sendPacket(player, getScoreboardDisplayObjective(TAB_IDENTIFIER, 0));
         }
 
         if (tagEnabled) {
-            ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(gs2, Component.text("§c♥")));
-            ClassStorage.sendPacket(player, getScoreboardDisplayObjective(gs2, 2));
+            ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(TAG_IDENTIFIER, Component.text("§c♥")));
+            ClassStorage.sendPacket(player, getScoreboardDisplayObjective(TAG_IDENTIFIER, 2));
         }
     }
 
