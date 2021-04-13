@@ -1,4 +1,4 @@
-package pronze.hypixelify.scoreboard;
+package pronze.hypixelify.visuals;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,7 +15,6 @@ import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
-import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.Arena;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.DateUtils;
@@ -23,14 +22,14 @@ import pronze.lib.core.utils.Logger;
 
 import java.util.*;
 
-public class GameScoreboardManagerImpl implements pronze.hypixelify.api.manager.ScoreboardManager {
+public class GameScoreboardManager implements pronze.hypixelify.api.manager.ScoreboardManager {
     private final Game game;
     private final Arena arena;
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
     private final List<String> scoreboard_lines = new ArrayList<>();
     protected BukkitTask updateTask;
 
-    public GameScoreboardManagerImpl(Arena arena) {
+    public GameScoreboardManager(Arena arena) {
         this.arena = arena;
         game = (Game) Main.getInstance().getGameManager().getGame(arena.getGame().getName()).orElseThrow();
 

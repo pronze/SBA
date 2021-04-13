@@ -5,18 +5,15 @@ import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.ext.configurate.serialize.SerializationException;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
-import org.screamingsandals.bedwars.utils.TitleUtils;
-import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.game.IArena;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.lib.lang.LanguageService;
-import pronze.hypixelify.scoreboard.GameScoreboardManagerImpl;
+import pronze.hypixelify.visuals.GameScoreboardManager;
 import pronze.hypixelify.utils.SBAUtil;
 
 import java.util.*;
@@ -27,7 +24,7 @@ import java.util.stream.Collectors;
 public class Arena implements IArena {
     private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
-    private final GameScoreboardManagerImpl scoreboardManager;
+    private final GameScoreboardManager scoreboardManager;
     private final double radius;
     private final Game game;
     private final GameStorage storage;
@@ -38,7 +35,7 @@ public class Arena implements IArena {
         this.game = game;
         storage = new GameStorage(game);
         gameTask = new GameTask(this);
-        scoreboardManager = new GameScoreboardManagerImpl(this);
+        scoreboardManager = new GameScoreboardManager(this);
         game.getConnectedPlayers().forEach(this::registerPlayerData);
     }
 

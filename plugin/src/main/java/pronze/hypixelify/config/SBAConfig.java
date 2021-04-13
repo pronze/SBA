@@ -155,6 +155,8 @@ public class SBAConfig implements IConfigurator {
                     .section("main-lobby")
                         .key("enabled").defValue(false)
                         .key("custom-chat").defValue(true)
+                        .key("tablist-modifications").defValue(true)
+                        .back()
                     .section("experimental")
                         .key("reset-item-meta-on-purchase").defValue(false)
                         .back()

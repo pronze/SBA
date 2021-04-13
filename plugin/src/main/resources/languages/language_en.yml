@@ -167,6 +167,11 @@ scoreboard:
       - "<yellow>SBAHypixelify v2"
 main-lobby:
   chat-format: "%color%[%level%✫] %name%: %message%"
+  tablist:
+    header:
+      - "<aqua>You are playing on <yellow><bold>WWW.SAMPLE.NET"
+    footer:
+      - '<yellow><bold>SBAHypixelify v2'
   scoreboard:
     title: "<yellow><bold>BED WARS</bold>"
     lines:

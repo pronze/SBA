@@ -27,10 +27,13 @@ public class Message {
     }
 
     public Component toComponent() {
-        var component = Component.text();
-        for (var str : original) {
+        final var component = Component.text();
+        original.forEach(str -> {
             component.append(MiniMessage.get().parse(str));
-        }
+            if (original.indexOf(str) + 1 != original.size()) {
+                component.append(Component.text("\n"));
+            }
+        });
         return component.build();
     }
 

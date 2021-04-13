@@ -1,4 +1,4 @@
-package pronze.hypixelify.scoreboard;
+package pronze.hypixelify.visuals;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -14,6 +14,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.player.PlayerManager;
@@ -26,32 +27,31 @@ import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.annotations.OnDestroy;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @AutoInitialize
-public class MainLobbyScoreboardManagerImpl implements Listener {
+public class MainLobbyVisualsManager implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
+    private final List<UUID> registeredTabInstances = new ArrayList<>();
 
-    public MainLobbyScoreboardManagerImpl() {
+    public MainLobbyVisualsManager() {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
            return;
         }
         Core.registerListener(this);
 
-        final var optionalLocation = SBAUtil.readLocationFromConfig("main-lobby");
-        if (optionalLocation.isPresent()) {
-            location = optionalLocation.get();
-        } else {
+        SBAUtil.readLocationFromConfig("main-lobby").ifPresentOrElse(location -> {
+            MainLobbyVisualsManager.location = location;
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> Bukkit
+                    .getOnlinePlayers().forEach(this::create), 3L);
+        }, () -> {
             disable();
             Bukkit.getServer().getLogger().warning("Could not find lobby world!");
-        }
-
-        Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> Bukkit
-                .getOnlinePlayers().forEach(this::createBoard), 3L);
+        });
     }
 
     public static boolean isInWorld(Location loc) {
@@ -73,7 +73,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
         final var db = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
         if (SBAConfig.getInstance().node("main-lobby", "enabled").getBoolean(false)
-                && MainLobbyScoreboardManagerImpl.isInWorld(e.getPlayer().getLocation())) {
+                && MainLobbyVisualsManager.isInWorld(e.getPlayer().getLocation())) {
 
             var chatFormat = LanguageService
                     .getInstance()
@@ -95,12 +95,9 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
         }
     }
 
-    protected void disable() {
-        scoreboardMap.keySet().forEach(pl -> {
-            if (hasMainLobbyObjective(pl)) {
-                pl.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-            }
-        });
+    @OnDestroy
+    public void disable() {
+        scoreboardMap.keySet().forEach(this::remove);
         scoreboardMap.clear();
         HandlerList.unregisterAll(this);
     }
@@ -113,7 +110,7 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
                 .runTaskLater(SBAHypixelify.getInstance(), () -> {
                     if (hasMainLobbyObjective(player)) return;
                     if (isInWorld(player.getLocation()) && !PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
-                        createBoard(player);
+                        create(player);
                     }
                 }, 3L);
     }
@@ -122,31 +119,33 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
     public void onWorldChange(PlayerChangedWorldEvent e) {
         final var player = e.getPlayer();
         if (isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
-            createBoard(player);
+            create(player);
         } else {
-            final var scoreboard = scoreboardMap.get(player);
-            if (scoreboard != null) {
-                scoreboard.destroy();
-                scoreboardMap.remove(player);
-            }
-            if (hasMainLobbyObjective(player)) {
-                player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-            }
+            remove(player);
         }
     }
 
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
-        final var player = e.getPlayer();
-        final var scoreboard = scoreboardMap.get(player);
-        if (scoreboard != null) {
-            scoreboard.destroy();
-            scoreboardMap.remove(player);
-        }
+        remove(e.getPlayer());
     }
 
-    public void createBoard(Player player) {
+    public void create(Player player) {
         final var playerData = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).orElseThrow();
+
+        if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
+            var header = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MAIN_LOBBY_TABLIST_HEADER)
+                    .toComponent();
+
+            var footer = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MAIN_LOBBY_TABLIST_FOOTER)
+                    .toComponent();
+
+            playerData.sendPlayerListHeaderAndFooter(header, footer);
+        }
 
         var title = LanguageService
                 .getInstance()
@@ -187,9 +186,8 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
         scoreboardMap.put(player, scoreboard);
     }
 
-    @EventHandler
-    public void onBedWarsPlayerJoin(BedwarsPlayerJoinedEvent e) {
-        final var player = e.getPlayer();
+    public void remove(Player player) {
+        if (player == null) return;
         final var scoreboard = scoreboardMap.get(player);
         if (scoreboard != null) {
             scoreboard.destroy();
@@ -198,13 +196,21 @@ public class MainLobbyScoreboardManagerImpl implements Listener {
         if (hasMainLobbyObjective(player)) {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
+        if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
+            PlayerMapper.wrapPlayer(player).sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBedWarsPlayerJoin(BedwarsPlayerJoinedEvent e) {
+        remove(e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
         if (isInWorld(player.getLocation())) {
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> createBoard(player), 3L);
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player), 3L);
         }
     }
 }

@@ -42,6 +42,8 @@ public class MessageKeys {
     public static final String[] MAIN_LOBBY_SCOREBOARD_TITLE = {"main-lobby", "scoreboard", "title"};
     public static final String[] MAIN_LOBBY_SCOREBOARD_LINES = {"main-lobby", "scoreboard", "lines"};
     public static final String[] MAIN_LOBBY_CHAT_FORMAT = {"main-lobby", "chat-format"};
+    public static final String[] MAIN_LOBBY_TABLIST_HEADER = {"main-lobby", "tablist", "header"};
+    public static final String[] MAIN_LOBBY_TABLIST_FOOTER = {"main-lobby", "tablist", "footer"};
     public static final String[] PARTY_MESSAGE_CANNOT_INVITE = {"party", "message", "cannot-invite"};
     public static final String[] PARTY_MESSAGE_LIMIT_REACHED = {"party", "message", "limit-reached"};
     public static final String[] PARTY_MESSAGE_LEADER_JOIN_LEAVE = {"party", "message", "leader-join-leave"};
@@ -76,7 +78,6 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_SHOUT_WAIT = {"party", "message", "shout-wait"};
     public static final String[] PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED = {"party", "message", "chat-enable-disabled"};
     public static final String[] PARTY_MESSAGE_HELP = {"party", "message", "help"};
-    public static final String[] UNKNOWN_COMMAND = {"command_unknown"};
     public static final String[] COMMAND_CANNOT_EXECUTE = {"command_cannot_do"};
     public static final String[] COMMAND_SUCCESSFULLY_UPGRADED = {"command_upgraded"};
     public static final String[] GAMESINV_GENERATED = {"gamesinv_generated"};
@@ -95,7 +96,6 @@ public class MessageKeys {
     public static final String[] TEAM_TRAP_TRIGGERED_TITLE = {"trap-triggered", "title"};
     public static final String[] TEAM_TRAP_TRIGGERED_SUBTITLE = {"trap-triggered", "subtitle"};
     public static final String[] GENERATOR_UPGRADE_MESSAGE = {"generator-upgrade"};
-    public static final String[] GAME_NOT_FOUND_MESSAGE = {"game_not_found"};
     public static final String[] RESPAWN_COUNTDOWN_TITLE = {"respawn-title"};
     public static final String[] RESPAWN_COUNTDOWN_SUBTITLE = {"respawn-subtitle"};
     public static final String[] RESPAWN_COUNTDOWN_MESSAGE = {"respawn-message"};

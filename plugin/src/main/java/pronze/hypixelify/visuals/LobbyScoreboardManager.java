@@ -1,4 +1,4 @@
-package pronze.hypixelify.scoreboard;
+package pronze.hypixelify.visuals;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -26,10 +26,10 @@ import pronze.lib.core.utils.Logger;
 import java.util.*;
 
 @AutoInitialize
-public class LobbyScoreboardManagerImpl implements Listener {
+public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
 
-    public LobbyScoreboardManagerImpl() {
+    public LobbyScoreboardManager() {
         if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
             return;
         }
