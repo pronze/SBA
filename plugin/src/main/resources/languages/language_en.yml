@@ -49,7 +49,7 @@ shout_wait: "<red>You have to wait for %seconds% to use this command again!"
 countdown: "<white>Starting in <green>%countdown%s"
 none: "None"
 command_party_settings_get_help: "<red>Do /p settings help for help regarding party settings"
-spawner_holo_tier_format: "<yellow>Tier <red>{tier}"
+spawner_holo_tier_format: "<yellow>Tier <red>%tier%"
 date:
   format: "MM/dd/yy"
 shop-name: "[SBAHypixelify] shop"

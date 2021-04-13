@@ -88,7 +88,8 @@ public class GameTask extends BukkitRunnable {
             Tiers.put(i, str);
 
             final var configMat = i % 2 == 0 ? "Emerald" : "Diamond";
-            final var m_Time = SBAConfig.getInstance()
+            final var m_Time = SBAConfig
+                    .getInstance()
                     .getInt("upgrades.time." + configMat + "-" + romanNumeral, Integer.MAX_VALUE);
             tier_timer.put(i, m_Time);
 
@@ -106,22 +107,23 @@ public class GameTask extends BukkitRunnable {
 
     private void linkSpawnerData() {
         if (SBAConfig.getInstance().getBoolean("floating-generator.enabled", true)) {
-            game.getItemSpawners().forEach((spawner) -> {
-                if (spawner.getFloatingEnabled()) {
-                    final var mat = spawner.getItemSpawnerType().getMaterial();
-                    final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
-                            mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
-                    if (convertedMat != null) {
-                        ((ItemSpawner)spawner)
-                                .getHologram()
-                                .replaceLine(2, TextEntry.of(LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
-                                                .toString()));
-                        generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
-                    }
-                }
-            });
+            game.getItemSpawners()
+                    .stream()
+                    .filter(org.screamingsandals.bedwars.api.game.ItemSpawner::getFloatingEnabled)
+                    .forEach((spawner) -> {
+                        final var mat = spawner.getItemSpawnerType().getMaterial();
+                        final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
+                                mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
+                        if (convertedMat != null) {
+                            ((ItemSpawner) spawner)
+                                    .getHologram()
+                                    .replaceLine(2, TextEntry.of(LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
+                                            .toString()));
+                            generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
+                        }
+                    });
         }
     }
 
@@ -206,7 +208,7 @@ public class GameTask extends BukkitRunnable {
                         Material type = null;
                         for (final var itemSpawner : game.getItemSpawners()) {
                             if (tier % 2 != 0) {
-                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND){
+                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND) {
                                     itemSpawner.addToCurrentLevel(multiplier);
                                     matName = "§b" + diamond;
                                     type = Material.DIAMOND_BLOCK;

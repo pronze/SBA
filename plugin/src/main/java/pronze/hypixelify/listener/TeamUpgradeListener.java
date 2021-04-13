@@ -20,14 +20,21 @@ import java.util.Map;
 @AutoInitialize(listener = true)
 public class TeamUpgradeListener implements Listener {
 
-    public static Map<Integer, Integer> prices = new HashMap<>();
+    public static Map<Integer, Integer> sharpnessPrices = new HashMap<>();
+    public static Map<Integer, Integer> protectionPrices = new HashMap<>();
 
     public TeamUpgradeListener() {
-        prices.put(0, SBAConfig.getInstance().node("upgrades","prices","Sharpness-Prot-I").getInt(4));
-        prices.put(1, SBAConfig.getInstance().node("upgrades","prices","Sharpness-Prot-I").getInt( 4));
-        prices.put(2, SBAConfig.getInstance().node("upgrades","prices","Sharpness-Prot-II").getInt(8));
-        prices.put(3, SBAConfig.getInstance().node("upgrades","prices","Sharpness-Prot-III").getInt(12));
-        prices.put(4, SBAConfig.getInstance().node("upgrades","prices","Sharpness-Prot-IV").getInt(16));
+        sharpnessPrices.put(0, SBAConfig.getInstance().node("upgrades","prices","Sharpness-I").getInt(4));
+        sharpnessPrices.put(1, SBAConfig.getInstance().node("upgrades","prices","Sharpness-I").getInt( 4));
+        sharpnessPrices.put(2, SBAConfig.getInstance().node("upgrades","prices","Sharpness-II").getInt(8));
+        sharpnessPrices.put(3, SBAConfig.getInstance().node("upgrades","prices","Sharpness-III").getInt(12));
+        sharpnessPrices.put(4, SBAConfig.getInstance().node("upgrades","prices","Sharpness-IV").getInt(16));
+
+        protectionPrices.put(0, SBAConfig.getInstance().node("upgrades","prices","Prot-I").getInt(4));
+        protectionPrices.put(1, SBAConfig.getInstance().node("upgrades","prices","Prot-I").getInt( 4));
+        protectionPrices.put(2, SBAConfig.getInstance().node("upgrades","prices","Prot-II").getInt(8));
+        protectionPrices.put(3, SBAConfig.getInstance().node("upgrades","prices","Prot-III").getInt(12));
+        protectionPrices.put(4, SBAConfig.getInstance().node("upgrades","prices","Prot-IV").getInt(16));
     }
 
     @EventHandler
@@ -55,7 +62,7 @@ public class TeamUpgradeListener implements Listener {
                             .send(wrappedPlayer);
                 } else {
                     var level = newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
-                    var price = prices.get(level);
+                    var price = sharpnessPrices.get(level);
                     var materialItem = e.getStackFromPrice(price);
                     if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
                         gameStorage.setSharpness(team.getName(), level);
@@ -120,7 +127,7 @@ public class TeamUpgradeListener implements Listener {
                     e.setCancelled(true);
                 } else {
                     var level = newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
-                    var price = prices.get(level);
+                    var price = protectionPrices.get(level);
                     var materialItem = e.getStackFromPrice(price);
 
                     if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {

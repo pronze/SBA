@@ -147,7 +147,7 @@ public class ShopInventoryListener implements Listener {
                 stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             } else {
                 stack.addEnchantment(enchant, level);
-                price = Integer.toString(TeamUpgradeListener.prices.get(level));
+                price = Integer.toString(isSharp ? TeamUpgradeListener.sharpnessPrices.get(level) : TeamUpgradeListener.protectionPrices.get(level));
             }
         }
 

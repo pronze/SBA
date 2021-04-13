@@ -44,7 +44,8 @@ public class ShopUtil {
     }
 
     public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
-        Arrays.stream(player.getInventory().getArmorContents())
+        Arrays.stream(player.getInventory()
+                .getArmorContents())
                 .filter(Objects::nonNull)
                 .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
     }
@@ -272,21 +273,6 @@ public class ShopUtil {
         } else {
             return "§7";
         }
-    }
-
-    public static Integer getSharpnessOrProtectionLevel(String property, ItemStack stack) {
-        if (stack == null || stack.getEnchantments().isEmpty()) {
-            return null;
-        }
-
-        final var enchant = property.equalsIgnoreCase("sharpness") ? Enchantment.DAMAGE_ALL :
-                Enchantment.PROTECTION_ENVIRONMENTAL;
-
-        if (!stack.getEnchantments().containsKey(enchant)) return null;
-
-        final var level = stack.getEnchantmentLevel(enchant);
-        if (level <= 0 || level >= 5) return null;
-        return TeamUpgradeListener.prices.get(level);
     }
 
 
