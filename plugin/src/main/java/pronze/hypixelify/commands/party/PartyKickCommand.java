@@ -89,13 +89,20 @@ public class PartyKickCommand {
 
                                         if (kickEvent.isCancelled()) return;
 
+
+
+                                        party.removePlayer(args);
                                         LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.PARTY_MESSAGE_KICKED)
                                                 .replace("%player%", args.getName())
                                                 .send(party.getMembers().toArray(PlayerWrapper[]::new));
 
-                                        party.removePlayer(args);
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_KICKED_RECEIVED)
+                                                .send(args);
+
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify
                                                     .getInstance()

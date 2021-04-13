@@ -70,7 +70,10 @@ public class ShopInventoryListener implements Listener {
             final var bukkitItemStack = item.as(ItemStack.class);
             final var typeName = bukkitItemStack.getType().name();
             final var runningTeam = game.getTeamOfPlayer(player);
-
+            /*
+                Add shop inventory enchants here
+                Note: only visible to user
+             */
             final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
             switch (afterUnderscore.toLowerCase()) {
                 case "sword":
@@ -139,10 +142,7 @@ public class ShopInventoryListener implements Listener {
             if (level >= 5) {
                 stack.removeEnchantment(enchant);
                 stack.setLore(
-                        SBAHypixelify
-                                .getInstance()
-                                .getConfigurator()
-                                .getStringList("message.maximum-enchant-lore")
+                        LanguageService.getInstance().get(MessageKeys.MAXIMUM_ENCHANT_LORE).toStringList()
                 );
                 stack.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             } else {
@@ -262,16 +262,52 @@ public class ShopInventoryListener implements Listener {
             final var efficiency = gameStorage.getEfficiency(team.getName());
             final var bukkitItem = newItem.as(ItemStack.class);
 
-            if (typeName.endsWith("SWORD")) {
-                bukkitItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
-            } else if (typeName.endsWith("BOOTS")
-                    || typeName.endsWith("CHESTPLATE")
-                    || typeName.endsWith("HELMET")
-                    || typeName.endsWith("LEGGINGS")) {
-                shouldSell = false;
-                ShopUtil.buyArmor(player, bukkitItem.getType(), gameStorage, game);
-            } else if (typeName.endsWith("PICKAXE")) {
-                bukkitItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiency);
+            final var pos = typeName.contains("_") ? typeName.indexOf("_") + 1: 0;
+            final var afterUnderscore = typeName.substring(pos);
+            final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
+
+            switch (afterUnderscore.toLowerCase()) {
+                case "sword":
+                    if (player.getInventory().contains(bukkitItem.getType())) {
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.ALREADY_PURCHASED)
+                                .replace("%thing%", LanguageService.getInstance().get(MessageKeys.SWORD).toString())
+                                .send(wrappedPlayer);
+                    }
+                    bukkitItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+                    break;
+                case "boots":
+                    shouldSell = false;
+                    var playerBoots = player.getInventory().getBoots();
+                    if (playerBoots != null && playerBoots.getType() == bukkitItem.getType()) {
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.ALREADY_PURCHASED)
+                                .replace("%thing%", LanguageService.getInstance().get(MessageKeys.ARMOR).toString())
+                                .send(wrappedPlayer);
+                        break;
+                    }
+                    ShopUtil.buyArmor(player, bukkitItem.getType(), gameStorage, game);
+                    break;
+                case "axe":
+                    shouldSell = false;
+                    if (player.getInventory().contains(bukkitItem.getType())) {
+                        var name = bukkitItem.getType().name().substring
+                                (bukkitItem.getType().name().indexOf("_")).substring(1);
+                        name = name.toLowerCase();
+
+                        String str = name.equals("pickaxe") ? LanguageService.getInstance().get(MessageKeys.PICKAXE).toString()
+                                : LanguageService.getInstance().get(MessageKeys.AXE).toString();
+
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.ALREADY_PURCHASED)
+                                .replace("%thing%", str)
+                                .send(wrappedPlayer);
+                    }
+                    bukkitItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiency);
+                    break;
             }
 
             newItem = ItemFactory.build(bukkitItem).orElse(newItem);

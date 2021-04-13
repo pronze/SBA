@@ -61,12 +61,11 @@ public class PartyDeclineCommand {
                                                 .get(MessageKeys.PARTY_MESSAGE_DECLINE_OUTGOING)
                                                 .send(player);
 
-                                        var message = LanguageService
+                                        LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_DECLINE_INCOMING)
-                                                        .replace("%player%", player.getName());
-
-                                        party.getMembers().forEach(member-> message.send((PlayerWrapper)member));
+                                                        .replace("%player%", player.getName())
+                                                        .send(party.getMembers().toArray(new PlayerWrapper[0]));
 
                                         if (party.getMembers().size() == 1) {
                                             SBAHypixelify

@@ -51,7 +51,6 @@ public class TeamUpgradeListener implements Listener {
                 .getGameStorage(game.getName())
                 .orElseThrow();
 
-
         switch (name) {
             case "sharpness":
                 if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {

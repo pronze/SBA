@@ -105,7 +105,7 @@ public class PartyWarpCommand {
                                                         PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
                                                         LanguageService
                                                                 .getInstance()
-                                                                .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                                .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
                                                                 .send(PlayerMapper.wrapPlayer(member));
                                                     });
                                         }

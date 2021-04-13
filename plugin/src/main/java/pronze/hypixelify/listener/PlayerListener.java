@@ -306,15 +306,20 @@ public class PlayerListener implements Listener {
                                 .findAny()
                                 .ifPresentOrElse(member -> {
                                     party.setPartyLeader(member);
-                                    SBAHypixelify
+                                    LanguageService
                                             .getInstance()
-                                            .getConfigurator()
-                                            .getStringList("party.message.promoted-leader")
-                                            .stream().map(str -> str.replace("{player}", member.getName()))
-                                            .forEach(str -> party.getMembers().forEach(m -> m.getInstance().sendMessage(str)));
+                                            .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
+                                            .replace("%player%", member.getName())
+                                            .send(party.getMembers().toArray(new PlayerWrapper[0]));
+
                                 }, () -> SBAHypixelify.getInstance().getPartyManager()
                                         .disband(party.getUUID()));
                     }
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
+                            .replace("%player%", player.getName())
+                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).toArray(PlayerWrapper[]::new));
                 });
         SBAHypixelify.getInstance().getPlayerWrapperService().unregister(player);
     }

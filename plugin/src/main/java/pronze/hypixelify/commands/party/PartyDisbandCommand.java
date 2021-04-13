@@ -60,6 +60,11 @@ public class PartyDisbandCommand {
                                                 .callEvent(disbandEvent);
                                         if (disbandEvent.isCancelled()) return;
 
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_DISBAND)
+                                                .send(party.getMembers().toArray(PlayerWrapper[]::new));
+
                                         SBAHypixelify
                                                 .getInstance()
                                                 .getPartyManager()

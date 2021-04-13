@@ -21,7 +21,6 @@ import java.util.List;
 @AutoInitialize(initPriority = InitializationPriority.HIGH)
 @Getter
 public class LanguageService implements ILanguageService {
-    private final String prefix;
     private final String locale;
     private static final List<String> validLocale = List.of(
             "af", "ar", "ca", "cs", "da", "de", "el", "en", "es", "fi", "fr", "he", "hu", "it", "ja", "ko", "nl", "no", "pl",
@@ -35,7 +34,6 @@ public class LanguageService implements ILanguageService {
     }
 
     public LanguageService() {
-        prefix = SBAConfig.getInstance().node("prefix").getString();
         locale = SBAConfig.getInstance().node("locale").getString("en");
         loadConfigurationNode();
     }
