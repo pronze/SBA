@@ -36,7 +36,6 @@ public class MainLobbyVisualsManager implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
-    private final List<UUID> registeredTabInstances = new ArrayList<>();
 
     public MainLobbyVisualsManager() {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
