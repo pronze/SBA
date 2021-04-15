@@ -3,7 +3,10 @@ lang_name: "Englisch"
 game-end: "Spielende"
 diamond: "Diamant"
 emerald: "Smaragd"
-waiting: "<white>Waiting..."
+armor: "armor"
+sword: "sword"
+pickaxe: "pickaxe"
+axe: "axe"
 dragon-spawn: "<red>Dragons has been spawned!, good luck"
 dragon-trap-purchased: "<gold>Dragon upgrade has been purchased!"
 game-starts-in: "<yellow>The game starts in <red>%seconds% <yellow>seconds"
@@ -47,13 +50,9 @@ gamesinv_disabled: "<red>Games inventory has been disabled, Contact the server o
 gamesinv_generated: "<green>Games Inventory file has been successfully generated!"
 not_in_game: "<red>You have to be in a game to do this command!"
 shout_wait: "<red>You have to wait for %seconds% to use this command again!"
-countdown: "<white>Starting in <green>%countdown%s"
 none: "None"
 command_party_settings_get_help: "<red>Do /p settings help for help regarding party settings"
 spawner_holo_tier_format: "<yellow>Tier <red>%tier%"
-date:
-  format: "MM/dd/yy"
-shop-name: "[SBAHypixelify] shop"
 floating-generator:
   holo-text:
     - "<yellow>Tier <red>%tier%"
@@ -168,6 +167,11 @@ scoreboard:
       - "<yellow>SBAHypixelify v2"
 main-lobby:
   chat-format: "%color%[%level%✫] %name%: %message%"
+  tablist:
+    header:
+      - "<aqua>You are playing on <yellow><bold>WWW.SAMPLE.NET"
+    footer:
+      - '<yellow><bold>SBAHypixelify v2'
   scoreboard:
     title: "<yellow><bold>BED WARS</bold>"
     lines:
@@ -300,10 +304,6 @@ party:
       - "<gold>-----------------------------------------------------"
       - "<red>You have been kicked from party"
       - "<gold>-----------------------------------------------------"
-    decline-inc:
-      - "<gold>-----------------------------------------------------"
-      - "<red>To invite, you must decline current invites."
-      - "<gold>-----------------------------------------------------"
     declined-user:
       - "<gold>-----------------------------------------------------"
       - "<red>You declined the invite!"
@@ -315,10 +315,6 @@ party:
     not-in-game:
       - "<gold>-----------------------------------------------------"
       - "<red>You are not in a game to do this command!"
-      - "<gold>-----------------------------------------------------"
-    shout-wait:
-      - "<gold>-----------------------------------------------------"
-      - "<red>You have to wait %seconds% seconds before doing this command!"
       - "<gold>-----------------------------------------------------"
     chat-enable-disabled:
       - "<gold>-----------------------------------------------------"
@@ -332,3 +328,15 @@ party:
       - "<yellow>/p list<gray> - Lists the players in your current party"
       - "<yellow>/p leave<gray> - Leaves your current party"
       - "&1-----------------------------------------------------"
+shop:
+  name: "[SBAHypixelify] shop"
+  page_back: "Page back"
+  page_forward: "Page forward"
+  shop_back: "<red>Back to category list"
+  price: "Price:"
+  amount: "Amount:"
+  buy_success: "<green>Successfully purchased <gray><item><green> for <gray><material><green>!"
+  buy_failed: "<red>Lack of material to buy <gray><item><red>! Needed <gray><material><red>!"
+  max-enchant:
+    - "Maximum Enchant"
+    - "Your team already has maximum Enchant."
