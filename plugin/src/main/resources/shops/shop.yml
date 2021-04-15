@@ -1,5 +1,4 @@
 data:
-
   - locate: '$blocks'
     stack: WHITE_WOOL;1;§aBlocks;§eClick to view!
     skip: 1

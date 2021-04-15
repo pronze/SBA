@@ -2,7 +2,15 @@ package pronze.hypixelify.api;
 
 public class MessageKeys {
     public static final String[] LANG_NAME = {"lang_name"};
-    public static final String[] SHOP_NAME = {"shop-name"};
+    public static final String[] SHOP_NAME = {"shop", "name"};
+    public static final String[] SHOP_PAGE_BACK = {"shop", "page_back"};
+    public static final String[] SHOP_PAGE_FORWARD = {"shop", "page_forward"};
+    public static final String[] SHOP_BACK = {"shop", "shop_back"};
+    public static final String[] SHOP_PRICE = {"shop", "price"};
+    public static final String[] SHOP_AMOUNT = {"shop", "amount"};
+    public static final String[] SHOP_MAX_ENCHANT = {"shop", "max-enchant"};
+    public static final String[] SHOP_PURCHASE_SUCCESS = {"shop", "buy_success"};
+    public static final String[] SHOP_PURCHASE_FAILED = {"shop", "buy_failed"};
     public static final String[] DRAGON_SPAWNED = {"dragon-spawn"};
     public static final String[] DRAGON_TRAP_PURCHASED_MESSAGE = {"dragon-trap-purchased"};
     public static final String[] PARTY_MESSAGE_INVALID_COMMAND = {"party", "message", "invalid-command"};

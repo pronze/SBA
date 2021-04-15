@@ -3,9 +3,12 @@ package pronze.hypixelify.commands;
 
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.game.GameManager;
 import org.screamingsandals.bedwars.lang.LangKeys;
+import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
 import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArgument;
 import org.screamingsandals.bedwars.lib.ext.cloud.arguments.standard.StringArrayArgument;
 import org.screamingsandals.bedwars.lib.ext.cloud.bukkit.BukkitCommandManager;
@@ -52,7 +55,7 @@ public class BWACommand {
                         .execute(() -> LanguageService
                                 .getInstance()
                                 .get(MessageKeys.RELOADED)
-                                .send(PlayerMapper.wrapPlayer((Player)context.getSender())))));
+                                .send(PlayerMapper.wrapPlayer((Player) context.getSender())))));
 
         manager.command(builder.literal("setlobby")
                 .permission("misat11.bw.admin")
@@ -77,7 +80,7 @@ public class BWACommand {
                         })
                         .execute(() -> {
                             var wrapper = PlayerMapper
-                                    .wrapPlayer((Player)context.getSender());
+                                    .wrapPlayer((Player) context.getSender());
 
                             LanguageService
                                     .getInstance()
@@ -92,7 +95,7 @@ public class BWACommand {
                         .begin(context)
                         .synchronous(c -> {
                             var wrapper = PlayerMapper
-                                    .wrapPlayer((Player)c.getSender());
+                                    .wrapPlayer((Player) c.getSender());
                             LanguageService
                                     .getInstance()
                                     .get(MessageKeys.COMMAND_RESETTING)
@@ -124,13 +127,25 @@ public class BWACommand {
                             } catch (IOException ex) {
                                 SBAHypixelify.getExceptionManager().handleException(ex);
                             }
+                            var mode = (String) ctx.get("gamemode");
+                            var arguments = Arrays.asList((String[]) ctx.get("maps"));
+                            var node = SBAConfig.getInstance().node("lobby-scoreboard", "player-size", "games");
+                            arguments.forEach(arg -> {
+                                try {
+                                    node.node(arg).set(Integer.class, ShopUtil.getIntFromMode(mode));
+                                } catch (Exception ex) {
+                                    SBAHypixelify.getExceptionManager().handleException(ex);
+                                }
+                            });
+
                             final var loader = HoconConfigurationLoader.builder()
                                     .path(file.getAbsoluteFile().toPath())
                                     .build();
                             try {
                                 var root = loader.load();
 
-                                root.node("data").setList(new TypeToken<>() {}, List.of(
+                                root.node("data").setList(new TypeToken<>() {
+                                }, List.of(
                                         Map.of("stack", "RED_BED;1;§aBed Wars §7(Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!",
                                                 "row", "1",
                                                 "column", "1",
@@ -147,9 +162,10 @@ public class BWACommand {
                                                 "column", "8")
                                 ));
 
+
                                 //why does it work this way?, no clue
                                 root.node("data").appendListNode().set(Map.of("stack", "OAK_SIGN;1;§aMap Selector §7(Solo);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!",
-                                        "row" , "1",
+                                        "row", "1",
                                         "column", "5",
                                         "options", Map.of("rows", "6",
                                                 "render_actual_rows", "6"),
@@ -157,9 +173,8 @@ public class BWACommand {
                                             {
                                                 final var col = new AtomicInteger(1);
                                                 final var row = new AtomicInteger(1);
-                                                var arg = (String) ctx.get("gamemode");
-                                                String[] maps = ctx.get("maps");
-                                                Arrays.stream(maps)
+                                                arguments
+                                                        .stream()
                                                         .map(mapName -> GameManager.getInstance().getGame(mapName).orElseThrow())
                                                         .forEach(game -> {
                                                             col.set(col.get() + 1);
@@ -169,10 +184,10 @@ public class BWACommand {
                                                             }
                                                             if (row.get() >= 5) return;
 
-                                                            add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + String.valueOf(arg.charAt(0)).toUpperCase() + arg.substring(1) + "; ;§aClick to play"),
-                                                                            "row", String.valueOf(row.get()),
-                                                                            "column", String.valueOf(col.get()),
-                                                                            "gameName",  game.getName())
+                                                            add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + String.valueOf(mode.charAt(0)).toUpperCase() + mode.substring(1) + "; ;§aClick to play"),
+                                                                    "row", String.valueOf(row.get()),
+                                                                    "column", String.valueOf(col.get()),
+                                                                    "gameName", game.getName())
                                                             );
                                                         });
                                             }
@@ -182,11 +197,13 @@ public class BWACommand {
                                 LanguageService
                                         .getInstance()
                                         .get(MessageKeys.GAMESINV_GENERATED)
-                                        .send(PlayerMapper.wrapPlayer(ctx.getSender()));
+                                        .send(PlayerMapper.wrapPlayer((Player) ctx.getSender()));
                             } catch (IOException ex) {
                                 SBAHypixelify.getExceptionManager().handleException(ex);
                             }
-                        }).execute())).command(builder.literal("gamesinv")
+                        }).execute()));
+
+        manager.command(builder.literal("gamesinv")
                 .senderType(Player.class)
                 .argument(StringArgument.<CommandSender>newBuilder("gamemode")
                         .withSuggestionsProvider((ctx, s) -> List.of("solo", "double", "triples", "squads"))
@@ -200,7 +217,7 @@ public class BWACommand {
                                 LanguageService
                                         .getInstance()
                                         .get(MessageKeys.GAMES_INV_DISABLED)
-                                        .send(PlayerMapper.wrapPlayer(c.getSender()));
+                                        .send(PlayerMapper.wrapPlayer((Player) (c.getSender())));
                                 return;
                             }
                             final var player = (Player) c.getSender();

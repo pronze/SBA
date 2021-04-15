@@ -1,5 +1,6 @@
 package pronze.hypixelify.specials;
 
+import org.bukkit.entity.EnderDragon;
 import pronze.hypixelify.SBAHypixelify;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -32,6 +33,7 @@ public class Dragon extends SpecialItem {
     public void spawn() {
         final var color = TeamColor.fromApiColor(team.getColor());
         final var dragon = (org.bukkit.entity.EnderDragon) location.getWorld().spawnEntity(location, EntityType.ENDER_DRAGON);
+        dragon.setPhase(EnderDragon.Phase.CIRCLING);
         dragon.setCustomName(SBAConfig.getInstance().getString("dragon.name-format")
                 .replace("%teamcolor%", color.chatColor.toString())
                 .replace("%team%", team.getName()));
