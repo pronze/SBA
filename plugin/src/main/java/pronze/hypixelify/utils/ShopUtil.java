@@ -12,14 +12,16 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.lang.LangKeys;
 import org.screamingsandals.bedwars.lib.lang.Message;
+import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
+import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.game.GameStorage;
-import pronze.hypixelify.listener.TeamUpgradeListener;
 import pronze.lib.core.annotations.AutoInitialize;
 
+import java.io.File;
 import java.util.*;
 
 @AutoInitialize
@@ -42,6 +44,41 @@ public class ShopUtil {
             UpgradeKeys.put("GOLD", 3);
         }
     }
+
+    public static File normalizeShopFile(String name) {
+        if (name.split("\\.").length > 1) {
+            return SBAHypixelify.getInstance().getDataFolder().toPath().resolve(name).toFile();
+        }
+
+        var fileg = SBAHypixelify.getInstance().getDataFolder().toPath().resolve(name + ".groovy").toFile();
+        if (fileg.exists()) {
+            return fileg;
+        }
+        return SBAHypixelify.getInstance().getDataFolder().toPath().resolve(name + ".yml").toFile();
+    }
+
+
+    public static String getNameOrCustomNameOfItem(Item item) {
+        try {
+            if (item.getDisplayName() != null) {
+                return AdventureHelper.toLegacy(item.getDisplayName());
+            }
+            if (item.getLocalizedName() != null) {
+                return AdventureHelper.toLegacy(item.getLocalizedName());
+            }
+        } catch (Throwable ignored) {
+        }
+
+        var normalItemName = item.getMaterial().getPlatformName().replace("_", " ").toLowerCase();
+        var sArray = normalItemName.split(" ");
+        var stringBuilder = new StringBuilder();
+
+        for (var s : sArray) {
+            stringBuilder.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
+        }
+        return stringBuilder.toString().trim();
+    }
+
 
     public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
         Arrays.stream(player.getInventory()
