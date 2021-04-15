@@ -11,6 +11,8 @@ import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
 import org.screamingsandals.bedwars.lib.ext.configurate.serialize.SerializationException;
 import org.screamingsandals.bedwars.lib.ext.configurate.yaml.NodeStyle;
 import org.screamingsandals.bedwars.lib.ext.configurate.yaml.YamlConfigurationLoader;
+import org.screamingsandals.bedwars.lib.material.Item;
+import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.config.IConfigurator;
 import pronze.hypixelify.utils.SBAUtil;
@@ -77,10 +79,17 @@ public class SBAConfig implements IConfigurator {
             saveFile("games-inventory/triple.yml");
             saveFile("games-inventory/squad.yml");
 
+            SBAHypixelify.getInstance().saveResource("languages/language_fallback.yml", true);
+
             saveFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "shop.yml");
             saveFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "upgradeShop.yml");
 
-            loader = YamlConfigurationLoader.builder().path(dataFolder.toPath().resolve("sbaconfig.yml")).nodeStyle(NodeStyle.BLOCK).build();
+            loader = YamlConfigurationLoader
+                    .builder()
+                    .path(dataFolder.toPath().resolve("sbaconfig.yml"))
+                    .nodeStyle(NodeStyle.BLOCK)
+                    .build();
+
             configurationNode = loader.load();
 
             var generator = new ConfigGenerator(loader, configurationNode);
@@ -155,6 +164,8 @@ public class SBAConfig implements IConfigurator {
                     .section("main-lobby")
                         .key("enabled").defValue(false)
                         .key("custom-chat").defValue(true)
+                        .key("tablist-modifications").defValue(true)
+                        .back()
                     .section("experimental")
                         .key("reset-item-meta-on-purchase").defValue(false)
                         .back()
@@ -181,7 +192,37 @@ public class SBAConfig implements IConfigurator {
                         .section("lobby-chat")
                             .key("enabled").defValue(true)
                             .key("format").defValue("%color%%player% §f> %message%")
+                            .back()
+                       .back()
+                    .section("shop")
+                        .key("removePurchaseMessages").defValue(true)
+                        .key("shopback").defValue("BARRIER")
+                        .key("pageback").defValue("ARROW")
+                        .key("pageforward").defValue("BARRIER")
+                        .key("shopcosmetic").defValue("AIR")
+                        .section("normal-shop")
+                            .key("rows").defValue(4)
+                            .key("render-actual-rows").defValue(6)
+                            .key("render-offset").defValue(9)
+                            .key("render-header-start").defValue(0)
+                            .key("render-footer-start").defValue(45)
+                            .key("items-on-row").defValue(9)
+                            .key("show-page-numbers").defValue(true)
+                            .key("enabled").defValue(true)
+                            .back()
+                        .section("upgrade-shop")
+                            .key("rows").defValue(4)
+                            .key("render-actual-rows").defValue(6)
+                            .key("render-offset").defValue(9)
+                            .key("render-header-start").defValue(0)
+                            .key("render-footer-start").defValue(45)
+                            .key("items-on-row").defValue(9)
+                            .key("show-page-numbers").defValue(true)
+                            .key("enabled").defValue(true)
+                            .back()
                         .back();
+
+
 
             var gameSection = generator
                     .start()
@@ -324,4 +365,12 @@ public class SBAConfig implements IConfigurator {
         return str;
     }
 
+    public Item readDefinedItem(ConfigurationNode node, String def) {
+        if (!node.empty()) {
+            var obj = node.raw();
+            return ItemFactory.build(obj).orElse(ItemFactory.getAir());
+        }
+
+        return ItemFactory.build(def).orElse(ItemFactory.getAir());
+    }
 }

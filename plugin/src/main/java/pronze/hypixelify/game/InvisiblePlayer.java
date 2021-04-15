@@ -1,8 +1,7 @@
 package pronze.hypixelify.game;
 
-import lombok.AccessLevel;
+
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EquipmentSlot;
@@ -17,7 +16,6 @@ import org.screamingsandals.bedwars.lib.utils.math.Vector3D;
 import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -112,7 +110,7 @@ public class InvisiblePlayer {
         arena
                 .getGame()
                 .getConnectedPlayers()
-                .stream().filter(pl -> !pl.equals(player))
+          //      .stream().filter(pl -> !pl.equals(player))
                 .forEach(pl -> ClassStorage.sendPacket(pl, getPackets(airStack, airStack, airStack, airStack)));
     }
 

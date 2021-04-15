@@ -90,6 +90,11 @@ public class PartyLeaveCommand {
                                                             .getPartyManager()
                                                             .disband(party.getUUID()));
                                         }
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
+                                                .replace("%player%", player.getName())
+                                                .send(party.getMembers().stream().filter(member -> !player.equals(member)).toArray(PlayerWrapper[]::new));
                                     }, () -> LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_ERROR));

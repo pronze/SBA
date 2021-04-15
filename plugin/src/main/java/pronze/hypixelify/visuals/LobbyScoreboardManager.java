@@ -1,4 +1,4 @@
-package pronze.hypixelify.scoreboard;
+package pronze.hypixelify.visuals;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
@@ -26,10 +26,10 @@ import pronze.lib.core.utils.Logger;
 import java.util.*;
 
 @AutoInitialize
-public class LobbyScoreboardManagerImpl implements Listener {
+public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
 
-    public LobbyScoreboardManagerImpl() {
+    public LobbyScoreboardManager() {
         if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
             return;
         }
@@ -73,19 +73,15 @@ public class LobbyScoreboardManagerImpl implements Listener {
 
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e) {
-        final var player = e.getPlayer();
-        if (scoreboardMap.containsKey(player.getUniqueId())) {
-            final var scoreboard = scoreboardMap.get(player.getUniqueId());
-            if (scoreboard != null) {
-                scoreboard.destroy();
-                scoreboardMap.remove(player.getUniqueId());
-            }
-        }
+        remove(e.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent e) {
-        final var player = e.getPlayer();
+        remove(e.getPlayer());
+    }
+
+    private void remove(Player player) {
         if (scoreboardMap.containsKey(player.getUniqueId())) {
             final var scoreboard = scoreboardMap.get(player.getUniqueId());
             if (scoreboard != null) {
@@ -99,10 +95,9 @@ public class LobbyScoreboardManagerImpl implements Listener {
         final var lines = new ArrayList<String>();
         String state = LanguageService
                 .getInstance()
-                .get(MessageKeys.WAITING)
+                .get(MessageKeys.LOBBY_SCOREBOARD_STATE_WAITING)
                 .toString();
 
-        String countdown = "null";
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = Math.max(needplayers, 0);
         int s = SBAConfig.game_size.getOrDefault(game.getName(), 4);
@@ -111,25 +106,25 @@ public class LobbyScoreboardManagerImpl implements Listener {
             case 1:
                 mode = LanguageService
                         .getInstance()
-                        .get("lobby-scoreboard", "solo-prefix")
+                        .get(MessageKeys.LOBBY_SCOREBOARD_SOLO_PREFIX)
                         .toString();
                 break;
             case 2:
                 mode = LanguageService
                         .getInstance()
-                        .get("lobby-scoreboard", "doubles-prefix")
+                        .get(MessageKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX)
                         .toString();
                 break;
             case 3:
                 mode = LanguageService
                         .getInstance()
-                        .get("lobby-scoreboard", "triples-prefix")
+                        .get(MessageKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX)
                         .toString();
                 break;
             case 4:
                 mode = LanguageService
                         .getInstance()
-                        .get("lobby-scoreboard", "squads-prefix")
+                        .get(MessageKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX)
                         .toString();
                 break;
             default:
@@ -138,13 +133,13 @@ public class LobbyScoreboardManagerImpl implements Listener {
 
         if (game.countConnectedPlayers() >= game.getMinPlayers()
                 && game.getStatus() == GameStatus.WAITING) {
-            final var time = ((org.screamingsandals.bedwars.game.Game)Main.getInstance().getGameManager().getGame(game.getName()).get()).getFormattedTimeLeft();
+            final var time = ((org.screamingsandals.bedwars.game.Game)Main.getInstance().getGameManager().getGame(game.getName()).orElseThrow()).getFormattedTimeLeft();
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
                 var seconds = Integer.parseInt(units[1]) + 1;
                 state = LanguageService
                         .getInstance()
-                        .get(MessageKeys.COUNTDOWN)
+                        .get(MessageKeys.LOBBY_SCOREBOARD_STATE)
                         .replace("%countdown%", String.valueOf(seconds))
                         .toString();
             }
@@ -167,7 +162,6 @@ public class LobbyScoreboardManagerImpl implements Listener {
                     .replace("%maxplayers%", String.valueOf(game.getMaxPlayers()))
                     .replace("%minplayers%", String.valueOf(game.getMinPlayers()))
                     .replace("%needplayers%", String.valueOf(finalNeedplayers))
-                    .replace("%countdown%", countdown)
                     .replace("%mode%", mode);
             if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
                 line = PlaceholderAPI.setPlaceholders(player, line);

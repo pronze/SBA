@@ -250,7 +250,7 @@ holograms:
     format: '&l%order%. &7%name% - &a%score%'
     size: 10
 chat:
-  override: true
+  override: false
   format: '<%teamcolor%%name%§r> '
   separate-chat:
     lobby: false
@@ -366,7 +366,7 @@ tab:
     contents:
       - '&eexample.com'
       - '&fWow!!'
-      - '§a%spectators% are watching this match'
+      - §a%spectators% are watching this match
   hide-spectators: true
   hide-foreign-players: false
 default-permissions:
@@ -395,3 +395,9 @@ floating-generator:
   enabled: true
   holo-height: 2.0
   generator-height: 0.25
+prefix: '[BW]'
+tnt-jump:
+  enabled: true
+  source-damage: 0.5
+  team-damage: false
+  launch-power: 1.5
