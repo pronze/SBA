@@ -129,7 +129,7 @@ public class ShopUtil {
             if (item.getEnchantments() != null) {
                 item.getEnchantments().clear();
             }
-        } else {
+        } else if (level > 0){
             item.addEnchant(
                     new EnchantmentHolder(EnchantmentMapping.resolve(enchantment).orElseThrow().getPlatformName(), level));
         }

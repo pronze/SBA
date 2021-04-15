@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
@@ -18,7 +17,6 @@ import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.gson
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
-import pronze.hypixelify.api.data.HealthIndicatorData;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnDestroy;
@@ -27,7 +25,7 @@ import java.util.*;
 
 @AutoInitialize(listener = true)
 public class HealthIndicatorService implements Listener {
-    private final Map<UUID, HealthIndicatorData> dataMap = new HashMap<>();
+    private final Map<UUID, Map<UUID, Double>> dataMap = new HashMap<>();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");
 
     private static final String TAB_IDENTIFIER = "sba-tab";
@@ -55,7 +53,7 @@ public class HealthIndicatorService implements Listener {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (game.getStatus() == GameStatus.WAITING) {
+                if (game.getStatus() == GameStatus.RUNNING) {
                     update(game);
                 } else {
                     this.cancel();
@@ -96,16 +94,16 @@ public class HealthIndicatorService implements Listener {
     public void update(Game game) {
         game.getConnectedPlayers()
                 .forEach(player -> {
-                    var playerData = dataMap.get(player.getUniqueId());
-                    if (playerData != null) {
-                        var cachedHealth = playerData.getHealth();
-                        var currentHealth = player.getHealth();
-                        if (cachedHealth != currentHealth) {
-                            playerData.setHealth(player.getHealth());
-                            game.getConnectedPlayers()
-                                   .forEach(pl -> update(pl, player.getName(), Integer.parseInt(DECIMAL_FORMAT.format(player.getHealth()))));
-                       }
-                    }
+                    if (!dataMap.containsKey(player.getUniqueId()))
+                        dataMap.put(player.getUniqueId(), new HashMap<>());
+
+                    final var data = dataMap.get(player.getUniqueId());
+                    game.getConnectedPlayers().forEach(p -> {
+                        if (p.getHealth() != data.getOrDefault(p.getUniqueId(), Double.MAX_VALUE)) {
+                            update(player, p.getName(), Integer.parseInt(DECIMAL_FORMAT.format(player.getHealth())));
+                            data.put(p.getUniqueId(), player.getHealth());
+                        }
+                    });
                 });
     }
 
@@ -119,8 +117,7 @@ public class HealthIndicatorService implements Listener {
     }
 
     public void create(Player player) {
-        var indicatorData = HealthIndicatorData.of(player.getUniqueId());
-        dataMap.put(player.getUniqueId(), indicatorData);
+        dataMap.put(player.getUniqueId(), new HashMap<>());
 
         if (tabEnabled) {
             ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(TAB_IDENTIFIER, Component.text("healthIndicator")));

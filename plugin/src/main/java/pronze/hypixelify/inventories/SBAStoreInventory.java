@@ -47,6 +47,7 @@ import pronze.lib.core.utils.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @AutoInitialize(listener = true)
@@ -211,13 +212,9 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                     return "";
                 })
                 .call(categoryBuilder -> {
-                    if (useParent) {
-                        var shopFileName = "shop.yml";
-                        categoryBuilder.include(shopFileName);
-                    }
-                    if (file != null) {
-                        categoryBuilder.include(Include.of(file));
-                    }
+                    var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath();
+                    pathStr = pathStr + "/shops/" + (file != null ? file.getName() : "shop.yml");
+                    categoryBuilder.include(Include.of(Paths.get(pathStr)));
                 })
                 .getInventorySet();
 

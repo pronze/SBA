@@ -195,7 +195,7 @@ public class SBAConfig implements IConfigurator {
                             .back()
                        .back()
                     .section("shop")
-                        .key("removePurchaseMessages").defValue(true)
+                        .key("removePurchaseMessages").defValue(false)
                         .key("shopback").defValue("BARRIER")
                         .key("pageback").defValue("ARROW")
                         .key("pageforward").defValue("BARRIER")

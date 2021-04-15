@@ -49,6 +49,7 @@ import pronze.lib.core.utils.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -244,13 +245,9 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
                     return "";
                 })
                 .call(categoryBuilder -> {
-                    if (useParent) {
-                        var shopFileName = "upgradeShop.yml";
-                        categoryBuilder.include(shopFileName);
-                    }
-                    if (file != null) {
-                        categoryBuilder.include(Include.of(file));
-                    }
+                    var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath();
+                    pathStr = pathStr + "/shops/" + (file != null ? file.getName() : "upgradeShop.yml");
+                    categoryBuilder.include(Include.of(Paths.get(pathStr)));
                 })
                 .getInventorySet();
 
