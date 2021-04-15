@@ -9,9 +9,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
-import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.events.ApplyPropertyToDisplayedItemEvent;
+import org.screamingsandals.bedwars.api.events.OpenShopEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.upgrades.Upgrade;
@@ -19,7 +18,12 @@ import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.config.MainConfig;
+import org.screamingsandals.bedwars.events.ApplyPropertyToBoughtItemEventImpl;
+import org.screamingsandals.bedwars.events.ApplyPropertyToDisplayedItemEventImpl;
 import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.bedwars.lib.entity.EntityBasic;
+import org.screamingsandals.bedwars.lib.entity.EntityLiving;
+import org.screamingsandals.bedwars.lib.event.EventManager;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import org.screamingsandals.bedwars.lib.material.meta.EnchantmentHolder;
@@ -33,6 +37,7 @@ import org.screamingsandals.bedwars.lib.sgui.events.PreClickEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
 import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
+import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
@@ -316,12 +321,11 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 }
                 //noinspection unchecked
                 var propertyData = (Map<String, Object>) converted;
-                var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player, newItem.as(ItemStack.class), property.getPropertyName(), propertyData);
-                Bukkit.getServer().getPluginManager().callEvent(applyEvent);
+                var applyEvent = new ApplyPropertyToBoughtItemEventImpl(game, PlayerMapper.wrapPlayer(player).as(BedWarsPlayer.class), property.getPropertyName(), propertyData , newItem);
+                EventManager.fire(applyEvent);
                 newItem = ItemFactory
                         .build(applyEvent.getStack())
                         .orElse(newItem);
-
             }
         }
 
@@ -374,8 +378,8 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                    .replace("%item%", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
-                    .replace("%material%", priceAmount + " " + type.getItemName())
+                    .replace("<item>", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
+                    .replace("<material>", priceAmount + " " + type.getItemName())
                     .send(event.getPlayer());
         }
     }
@@ -435,9 +439,9 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 }
 
                 //noinspection unchecked
-                var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game.orElse(null),
-                        player, item.as(ItemStack.class), property.getPropertyName(), (Map<String, Object>) converted);
-                Bukkit.getServer().getPluginManager().callEvent(applyEvent);
+                var applyEvent = new ApplyPropertyToDisplayedItemEventImpl(game.orElse(null),
+                        event.getPlayer().as(BedWarsPlayer.class), property.getPropertyName(), (Map<String, Object>) converted, item);
+                EventManager.fire(applyEvent);
 
                 event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(item));
             }
@@ -445,13 +449,13 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
     }
 
     @EventHandler
-    public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
-        final var shopFile = event.getStore().getShopFile();
-        if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml") )|| event.getStore().getUseParent()) {
+    public void onBedWarsOpenShop(OpenShopEvent<org.screamingsandals.bedwars.game.Game, EntityBasic, BedWarsPlayer, GameStore> event) {
+        final var shopFile = event.getGameStore().getShopFile();
+        if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml") )|| event.getGameStore().getUseParent()) {
             if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
-                event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
+                event.setResult(OpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened store!", event.getPlayer().getName());
-                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()), (GameStore) event.getStore());
+                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()), event.getGameStore());
             }
         }
     }

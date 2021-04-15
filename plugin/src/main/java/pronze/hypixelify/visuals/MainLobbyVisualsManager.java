@@ -12,11 +12,14 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.events.PlayerJoinedEvent;
+import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
@@ -201,15 +204,15 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onBedWarsPlayerJoin(BedwarsPlayerJoinedEvent e) {
-        remove(e.getPlayer());
+    public void onBedWarsPlayerJoin(PlayerJoinedEvent<Game, BedWarsPlayer, RunningTeam> e) {
+        remove(e.getPlayer().as(Player.class));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent e) {
+    public void onBedWarsPlayerLeaveEvent(PlayerLeaveEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
         final var player = e.getPlayer();
-        if (isInWorld(player.getLocation())) {
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player), 3L);
+        if (isInWorld(player.as(Player.class).getLocation())) {
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player.as(Player.class)), 3L);
         }
     }
 }

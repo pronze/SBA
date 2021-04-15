@@ -7,13 +7,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.events.PlayerJoinedEvent;
+import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
+import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
@@ -37,10 +40,10 @@ public class LobbyScoreboardManager implements Listener {
     }
 
     @EventHandler
-    public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
+    public void onPlayerJoin(PlayerJoinedEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
         final var player = e.getPlayer();
         if (e.getGame().getStatus() == GameStatus.WAITING) {
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> createBoard(player, e.getGame()), 3L);
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> createBoard(player.as(Player.class), e.getGame()), 3L);
         }
     }
 
@@ -72,8 +75,8 @@ public class LobbyScoreboardManager implements Listener {
     }
 
     @EventHandler
-    public void onPlayerLeave(BedwarsPlayerLeaveEvent e) {
-        remove(e.getPlayer());
+    public void onPlayerLeave(PlayerLeaveEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
+        remove(e.getPlayer().as(Player.class));
     }
 
     @EventHandler

@@ -1,8 +1,10 @@
 package pronze.hypixelify.api.game;
 import org.bukkit.entity.Player;
-import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.events.GameEndingEvent;
+import org.screamingsandals.bedwars.api.events.TargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 
@@ -27,13 +29,13 @@ public interface IArena {
      *
      * @param event
      */
-    void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent event);
+    void onTargetBlockDestroyed(TargetBlockDestroyedEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> event);
 
     /**
      *
      * @param event
      */
-    void onOver(BedwarsGameEndingEvent event);
+    void onOver(GameEndingEvent<org.screamingsandals.bedwars.game.Game, RunningTeam> event);
 
     /**
      *

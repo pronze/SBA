@@ -2,11 +2,13 @@ package pronze.hypixelify.game;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
-import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.events.GameEndingEvent;
+import org.screamingsandals.bedwars.api.events.TargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
+import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.game.IArena;
@@ -74,7 +76,7 @@ public class Arena implements IArena {
         putPlayerData(player.getUniqueId(), GamePlayerData.from(player));
     }
 
-    public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
+    public void onTargetBlockDestroyed(TargetBlockDestroyedEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
         final var team = e.getTeam();
         // send bed destroyed message to all players of the team
         final var title = LanguageService
@@ -87,10 +89,10 @@ public class Arena implements IArena {
                 .toString();
 
         team.getConnectedPlayers().forEach(player ->
-                SBAUtil.sendTitle(PlayerMapper.wrapPlayer(e.getPlayer()), title, subtitle, 0, 40, 20)
+                SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), title, subtitle, 0, 40, 20)
         );
 
-        final var destroyer = e.getPlayer();
+        final var destroyer = e.getBroker().as(Player.class);
         if (destroyer != null) {
             // increment bed destroy data for the destroyer
             getPlayerData(destroyer.getUniqueId())
@@ -98,7 +100,7 @@ public class Arena implements IArena {
         }
     }
 
-    public void onOver(BedwarsGameEndingEvent e) {
+    public void onOver(GameEndingEvent<org.screamingsandals.bedwars.game.Game, RunningTeam> e) {
         // destroy scoreboard manager instance and GameTask, we do not need these anymore
         scoreboardManager.destroy();
         gameTask.cancel();

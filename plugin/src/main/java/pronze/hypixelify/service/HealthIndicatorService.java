@@ -6,8 +6,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.events.GameStartedEvent;
+import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
@@ -16,6 +17,7 @@ import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.craf
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
+import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.lib.core.annotations.AutoInitialize;
@@ -47,7 +49,7 @@ public class HealthIndicatorService implements Listener {
     }
 
     @EventHandler
-    public void onGameStart(BedwarsGameStartedEvent event) {
+    public void onGameStart(GameStartedEvent<org.screamingsandals.bedwars.game.Game> event) {
         final Game game = event.getGame();
         game.getConnectedPlayers().forEach(this::create);
         new BukkitRunnable() {
@@ -73,9 +75,9 @@ public class HealthIndicatorService implements Listener {
     }
 
     @EventHandler
-    public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
+    public void onPlayerLeave(PlayerLeaveEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> event) {
         final var player = event.getPlayer();
-        removePlayer(player);
+        removePlayer(player.as(Player.class));
     }
 
     public void removePlayer(Player player) {
