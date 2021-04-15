@@ -2,7 +2,6 @@ package pronze.hypixelify.inventories;
 
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -21,7 +20,6 @@ import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.game.GameStore;
-import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import org.screamingsandals.bedwars.lib.material.meta.EnchantmentHolder;
@@ -34,7 +32,6 @@ import org.screamingsandals.bedwars.lib.sgui.events.OnTradeEvent;
 import org.screamingsandals.bedwars.lib.sgui.events.PreClickEvent;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Include;
 import org.screamingsandals.bedwars.lib.sgui.inventory.InventorySet;
-import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.ConfigurateUtils;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
@@ -51,18 +48,9 @@ import pronze.lib.core.utils.Logger;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @AutoInitialize(listener = true)
 public class SBAStoreInventory implements IStoreInventory, Listener {
-
-    private final static List<String> upgradeProperties = List.of(
-            "sharpness",
-            "protection",
-            "blindtrap",
-            "healpool",
-            "dragon"
-    );
     private final Map<String, InventorySet> shopMap = new HashMap<>();
 
     public static SBAStoreInventory getInstance() {
@@ -86,21 +74,8 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             SBAHypixelify
                     .getInstance()
                     .saveResource("shops/shop.yml", false);
+            loadNewShop("default", null, true);
         }
-
-        var upgradeShopFile = SBAHypixelify
-                .getInstance()
-                .getDataFolder()
-                .toPath()
-                .resolve("shops/upgradeShop.yml")
-                .toFile();
-
-        if (!upgradeShopFile.exists()) {
-            SBAHypixelify
-                    .getInstance()
-                    .saveResource("shops/upgradeShop.yml", false);
-        }
-
     }
 
     @Override
@@ -140,16 +115,16 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 .animationsEnabled(true)
                 .categoryOptions(localOptionsBuilder ->
                         localOptionsBuilder
-                                .backItem(SBAConfig.getInstance().readDefinedItem(MainConfig.getInstance().node("shop", "shopback"), "BARRIER"), itemBuilder ->
+                                .backItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "shopback"), "BARRIER"), itemBuilder ->
                                         itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
                                 )
-                                .pageBackItem(SBAConfig.getInstance().readDefinedItem(MainConfig.getInstance().node("shop", "pageback"), "ARROW"), itemBuilder ->
+                                .pageBackItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "pageback"), "ARROW"), itemBuilder ->
                                         itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
                                 )
-                                .pageForwardItem(SBAConfig.getInstance().readDefinedItem(MainConfig.getInstance().node("shop", "pageforward"), "BARRIER"), itemBuilder ->
+                                .pageForwardItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "pageforward"), "BARRIER"), itemBuilder ->
                                         itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_FORWARD).toComponent())
                                 )
-                                .cosmeticItem(SBAConfig.getInstance().readDefinedItem(MainConfig.getInstance().node("shop", "shopcosmetic"), "AIR"))
+                                .cosmeticItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "shopcosmetic"), "AIR"))
                                 .rows(SBAConfig.getInstance().node("shop", "normal-shop", "rows").getInt(4))
                                 .renderActualRows(SBAConfig.getInstance().node("shop", "normal-shop", "render-actual-rows").getInt(6))
                                 .renderOffset(SBAConfig.getInstance().node("shop", "normal-shop", "render-offset").getInt(9))
@@ -249,8 +224,8 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
         try {
             inventorySet.getMainSubInventory().process();
         } catch (Exception ex) {
-            Bukkit.getLogger().warning("Wrong shop.yml/shop.groovy configuration!");
-            Bukkit.getLogger().warning("Check validity of your YAML/Groovy!");
+            Bukkit.getLogger().warning("Wrong shop.yml configuration!");
+            Bukkit.getLogger().warning("Check validity of your YAML!");
             ex.printStackTrace();
             loadDefault(inventorySet);
         }
@@ -450,27 +425,10 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             if (type == null) {
                 return;
             }
-
-            var enabled = itemInfo.getFirstPropertyByName("generateLore")
-                    .map(property -> property.getPropertyData().getBoolean())
-                    .orElseGet(() -> MainConfig.getInstance().node("lore", "generate-automatically").getBoolean(true));
-
-            if (enabled) {
-                var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
-                        .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
-                        .orElseGet(() -> MainConfig.getInstance().node("lore", "text").childrenList().stream().map(ConfigurationNode::getString).map(str -> ChatColor.translateAlternateColorCodes('&', str)))
-                        .filter(Objects::nonNull)
-                        .map(s -> s.replaceAll("%price%", Integer.toString(price))
-                                .replaceAll("%resource%", type.getItemName())
-                                .replaceAll("%amount%", Integer.toString(item.getAmount())))
-                        .map(AdventureHelper::toComponent)
-                        .collect(Collectors.toList());
-
-                item.getLore().addAll(loreText);
-            }
+            ShopUtil.setLore(item, itemInfo, String.valueOf(price), type);
         }
 
-        applyTeamUpgradeEnchantsToItem(item, event);
+        ShopUtil.applyTeamUpgradeEnchantsToItem(item, event);
 
         itemInfo.getProperties().forEach(property -> {
             if (property.hasName()) {
@@ -489,65 +447,15 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
         });
     }
 
-    /**
-     * Applies enchants to displayed items in SBAHypixelify store inventory.
-     * Enchants are applied and are dependent on the team upgrades the player's team has.
-     *
-     * @param item
-     * @param event
-     */
-    private void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event) {
-        final var player = event.getPlayer().as(Player.class);
-        final var game = PlayerManager
-                .getInstance()
-                .getGameOfPlayer(player.getUniqueId())
-                .orElseThrow();
-        final var typeName = item.getMaterial().getPlatformName();
-        final var runningTeam = game.getTeamOfPlayer(player);
-
-        SBAHypixelify
-                .getInstance()
-                .getGameStorage(game)
-                .ifPresent(gameStorage -> {
-                    final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
-                    switch (afterUnderscore.toLowerCase()) {
-                        case "sword":
-                            int sharpness = gameStorage.getSharpness(runningTeam.getName());
-                            item.addEnchant(
-                                    new EnchantmentHolder(EnchantmentMapping
-                                            .resolve(Enchantment.DAMAGE_ALL)
-                                            .orElseThrow()
-                                            .getPlatformName(), sharpness)
-                            );
-                            break;
-                        case "boots":
-                            int protection = gameStorage.getProtection(runningTeam.getName());
-                            item.addEnchant(
-                                    new EnchantmentHolder(EnchantmentMapping
-                                            .resolve(Enchantment.PROTECTION_ENVIRONMENTAL)
-                                            .orElseThrow()
-                                            .getPlatformName(), protection)
-                            );
-                            break;
-                        case "pickaxe":
-                            final int efficiency = gameStorage.getEfficiency(runningTeam.getName());
-                            item.addEnchant(
-                                    new EnchantmentHolder(EnchantmentMapping
-                                            .resolve(Enchantment.DIG_SPEED)
-                                            .orElseThrow()
-                                            .getPlatformName(), efficiency));
-                            break;
-                    }
-                });
-    }
-
-
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
-        if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
-            event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
-            Logger.trace("Player: {} has opened store!", event.getPlayer().getName());
-            openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()), (GameStore) event.getStore());
+        final var shopFile = event.getStore().getShopFile();
+        if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml") )|| event.getStore().getUseParent()) {
+            if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
+                event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
+                Logger.trace("Player: {} has opened store!", event.getPlayer().getName());
+                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()), (GameStore) event.getStore());
+            }
         }
     }
 }

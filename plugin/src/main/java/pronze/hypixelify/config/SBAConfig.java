@@ -210,7 +210,17 @@ public class SBAConfig implements IConfigurator {
                             .key("show-page-numbers").defValue(true)
                             .key("enabled").defValue(true)
                             .back()
-                        .section("upgrade-shop");
+                        .section("upgrade-shop")
+                            .key("rows").defValue(4)
+                            .key("render-actual-rows").defValue(6)
+                            .key("render-offset").defValue(9)
+                            .key("render-header-start").defValue(0)
+                            .key("render-footer-start").defValue(45)
+                            .key("items-on-row").defValue(9)
+                            .key("show-page-numbers").defValue(true)
+                            .key("enabled").defValue(true)
+                            .back()
+                        .back();
 
 
 

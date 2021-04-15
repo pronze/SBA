@@ -336,3 +336,6 @@ shop:
   amount: "Amount:"
   buy_success: "<green>Successfully purchased <gray><item><green> for <gray><material><green>!"
   buy_failed: "<red>Lack of material to buy <gray><item><red>! Needed <gray><material><red>!"
+  max-enchant:
+    - "Maximum Enchant"
+    - "Your team already has maximum Enchant."

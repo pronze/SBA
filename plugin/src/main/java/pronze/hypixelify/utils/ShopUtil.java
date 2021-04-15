@@ -5,24 +5,34 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.intellij.lang.annotations.Language;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.lang.LangKeys;
+import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
 import org.screamingsandals.bedwars.lib.lang.Message;
 import org.screamingsandals.bedwars.lib.material.Item;
+import org.screamingsandals.bedwars.lib.material.meta.EnchantmentHolder;
+import org.screamingsandals.bedwars.lib.material.meta.EnchantmentMapping;
 import org.screamingsandals.bedwars.lib.sgui.builder.LocalOptionsBuilder;
+import org.screamingsandals.bedwars.lib.sgui.events.ItemRenderEvent;
+import org.screamingsandals.bedwars.lib.sgui.inventory.PlayerItemInfo;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.player.PlayerManager;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.lib.core.annotations.AutoInitialize;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @AutoInitialize
 public class ShopUtil {
@@ -85,6 +95,83 @@ public class ShopUtil {
                 .getArmorContents())
                 .filter(Objects::nonNull)
                 .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
+    }
+
+
+    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type) {
+        var enabled = itemInfo.getFirstPropertyByName("generateLore")
+                .map(property -> property.getPropertyData().getBoolean())
+                .orElseGet(() -> MainConfig.getInstance().node("lore", "generate-automatically").getBoolean(true));
+
+        if (enabled) {
+            var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
+                    .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
+                    .orElseGet(() -> MainConfig.getInstance().node("lore", "text").childrenList().stream().map(ConfigurationNode::getString))
+                    .map(s -> s
+                            .replaceAll("%price%", price)
+                            .replaceAll("%resource%", type.getItemName())
+                            .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
+                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
+                    .map(AdventureHelper::toComponent)
+                    .collect(Collectors.toList());
+
+            item.getLore().addAll(loreText);
+        }
+    }
+
+    public static boolean clampOrApplyEnchants(Item item, int level, Enchantment enchantment) {
+        if (level >= 5) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.SHOP_MAX_ENCHANT)
+                    .toComponentList()
+                    .forEach(item::addLore);
+            if (item.getEnchantments() != null) {
+                item.getEnchantments().clear();
+            }
+        } else {
+            item.addEnchant(
+                    new EnchantmentHolder(EnchantmentMapping.resolve(enchantment).orElseThrow().getPlatformName(), level));
+        }
+        return false;
+    }
+
+    /**
+     * Applies enchants to displayed items in SBAHypixelify store inventory.
+     * Enchants are applied and are dependent on the team upgrades the player's team has.
+     *
+     * @param item
+     * @param event
+     */
+    public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event) {
+        final var player = event.getPlayer().as(Player.class);
+        final var game = PlayerManager
+                .getInstance()
+                .getGameOfPlayer(player.getUniqueId())
+                .orElseThrow();
+        final var typeName = item.getMaterial().getPlatformName();
+        final var runningTeam = game.getTeamOfPlayer(player);
+
+        SBAHypixelify
+                .getInstance()
+                .getGameStorage(game)
+                .ifPresent(gameStorage -> {
+                    final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
+                    switch (afterUnderscore.toLowerCase()) {
+                        case "sword":
+                            int sharpness = gameStorage.getSharpness(runningTeam.getName());
+                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL);
+                            break;
+                        case "boots":
+                            int protection = gameStorage.getProtection(runningTeam.getName());
+                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL);
+                            break;
+                        case "pickaxe":
+                            final int efficiency = gameStorage.getEfficiency(runningTeam.getName());
+                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED);
+                            break;
+                    }
+                });
     }
 
     public static void buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {

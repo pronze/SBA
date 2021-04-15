@@ -8,6 +8,7 @@ public class MessageKeys {
     public static final String[] SHOP_BACK = {"shop", "shop_back"};
     public static final String[] SHOP_PRICE = {"shop", "price"};
     public static final String[] SHOP_AMOUNT = {"shop", "amount"};
+    public static final String[] SHOP_MAX_ENCHANT = {"shop", "max-enchant"};
     public static final String[] SHOP_PURCHASE_SUCCESS = {"shop", "buy_success"};
     public static final String[] SHOP_PURCHASE_FAILED = {"shop", "buy_failed"};
     public static final String[] DRAGON_SPAWNED = {"dragon-spawn"};
