@@ -3,7 +3,9 @@ package pronze.hypixelify.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.entity.Explosive;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -276,6 +279,24 @@ public class PlayerListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onTNTDamage(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Explosive) {
+            if (event.getDamager() instanceof Explosive) {
+                final var tnt = (TNTPrimed) event.getDamager();
+                final var entity = event.getEntity();
+                if (entity instanceof Player) {
+                    event.setDamage(0.5);
+                    final var player = (Player) entity;
+                    Vector vector = player.getLocation().clone().add(0, 1 ,0).toVector()
+                            .subtract(tnt.getLocation().toVector()).normalize();
+                    vector.setY(vector.getY() /  2);
+                    vector.multiply(3);
+                    player.setVelocity(vector);
+                }
+            }
+        }
+    }
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         final var player = e.getPlayer();

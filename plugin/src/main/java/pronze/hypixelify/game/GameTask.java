@@ -7,13 +7,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.intellij.lang.annotations.Language;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.lang.Lang;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.utils.visual.TextEntry;
 import org.screamingsandals.bedwars.player.PlayerManager;
@@ -22,6 +19,7 @@ import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GeneratorData;
 import pronze.hypixelify.api.events.SBATeamTrapTriggeredEvent;
+import pronze.hypixelify.api.game.GameEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.lib.lang.LanguageService;
@@ -29,15 +27,12 @@ import pronze.hypixelify.utils.SBAUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class GameTask extends BukkitRunnable {
-    private final Map<Integer, String> Tiers = new HashMap<>();
-    private final Map<Integer, Integer> tier_timer = new HashMap<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
     private final String diamond;
     private final String emerald;
@@ -47,11 +42,14 @@ public class GameTask extends BukkitRunnable {
     private final GameStorage storage;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
-    private int time;
-    private int tier = 1;
+    private GameEvent nextEvent;
+    private int elapsedTime;
+    private int tier = 2;
     private final List<GeneratorData> generatorData = new ArrayList<>();
 
     public GameTask(Arena arena) {
+        nextEvent = GameEvent.DIAMOND_GEN_UPGRADE_TIER_II;
+
         diamond = LanguageService
                 .getInstance()
                 .get(MessageKeys.DIAMOND)
@@ -74,35 +72,7 @@ public class GameTask extends BukkitRunnable {
 
         multiplier = SBAConfig.getInstance().getDouble("upgrades.multiplier", 0.25);
         linkSpawnerData();
-        loadTierSettings();
         runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
-    }
-
-    private void loadTierSettings() {
-        byte inc = 1;
-        for (int i = 1; i < 9; i++) {
-            final var romanNumeral = SBAUtil.romanNumerals.get(inc);
-            final var material = i % 2 == 0 ? emerald : diamond;
-
-            final var str = material + "-" + romanNumeral;
-            Tiers.put(i, str);
-
-            final var configMat = i % 2 == 0 ? "Emerald" : "Diamond";
-            final var m_Time = SBAConfig
-                    .getInstance()
-                    .getInt("upgrades.time." + configMat + "-" + romanNumeral, Integer.MAX_VALUE);
-            tier_timer.put(i, m_Time);
-
-            if (i % 2 == 0) inc += 1;
-        }
-
-        var gameEndMessage = LanguageService
-                .getInstance()
-                .get(MessageKeys.GAME_END_MESSAGE)
-                .toString();
-
-        Tiers.put(9, gameEndMessage);
-        tier_timer.put(9, game.getGameTime());
     }
 
     private void linkSpawnerData() {
@@ -130,14 +100,12 @@ public class GameTask extends BukkitRunnable {
     @Override
     public void run() {
         if (game.getStatus() == GameStatus.RUNNING) {
-
             if (storage.areTrapsEnabled()) {
                 game.getConnectedPlayers().forEach(player -> {
                     final var bwPlayer = PlayerManager
                             .getInstance()
                             .getPlayer(player.getUniqueId())
                             .orElseThrow();
-
                     if (bwPlayer.isSpectator) return;
 
                     game.getRunningTeams().forEach(team -> {
@@ -200,34 +168,35 @@ public class GameTask extends BukkitRunnable {
                 });
             }
 
-            if (!Tiers.get(tier).equals(Tiers.get(9))) {
-
-                if (time == tier_timer.get(tier)) {
+            // Only proceed if the next event is not GameEnd.
+            if (!nextEvent.getKey().equals("GameEnd")) {
+                if (elapsedTime == nextEvent.getTime()) {
                     if (timerUpgrades) {
-                        String matName = null;
-                        Material type = null;
-                        for (final var itemSpawner : game.getItemSpawners()) {
-                            if (tier % 2 != 0) {
+                        final AtomicReference<String> matName = new AtomicReference<>();
+                        final AtomicReference<Material> type = new AtomicReference<>();
+
+                        game.getItemSpawners().forEach(itemSpawner -> {
+                            if (nextEvent.getKey().contains("Diamond")) {
                                 if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND) {
                                     itemSpawner.addToCurrentLevel(multiplier);
-                                    matName = "§b" + diamond;
-                                    type = Material.DIAMOND_BLOCK;
+                                    matName.set("§b" + diamond);
+                                    type.set(Material.DIAMOND_BLOCK);
                                 }
-                            } else {
+                            } else if (nextEvent.getKey().contains("Emerald")) {
                                 if (itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD) {
                                     itemSpawner.addToCurrentLevel(multiplier);
-                                    matName = "§a" + emerald;
-                                    type = Material.EMERALD_BLOCK;
+                                    matName.set("§a" + emerald);
+                                    type.set(Material.EMERALD_BLOCK);
                                 }
                             }
-                        }
+                        });
 
-                        final var tierName = Tiers.get(tier);
+                        final var tierName = nextEvent.getKey();
                         final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
 
-                        for (final var generator : generatorData) {
+                        generatorData.forEach(generator -> {
                             final var generatorMatType = generator.getItemStack().getType();
-                            if (generatorMatType == type) {
+                            if (generatorMatType == type.get()) {
                                 generator
                                         .getItemSpawner()
                                         .getHologram()
@@ -238,14 +207,14 @@ public class GameTask extends BukkitRunnable {
                                                 .replace("%tier%", tierLevel)));
                                 generator.setTierLevel(generator.getTierLevel() + 1);
                             }
-                        }
+                        });
 
-                        if (showUpgradeMessage && matName != null) {
+                        if (showUpgradeMessage && matName.get() != null) {
                             LanguageService
                                     .getInstance()
                                     .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
-                                    .replace("%MatName%", matName)
-                                    .replace("%tier%", Tiers.get(tier))
+                                    .replace("%MatName%", matName.get())
+                                    .replace("%tier%", tierName)
                                     .send(game
                                             .getConnectedPlayers()
                                             .stream()
@@ -254,23 +223,26 @@ public class GameTask extends BukkitRunnable {
                         }
                     }
                     tier++;
+                    nextEvent = GameEvent.ofOrdinal(nextEvent.ordinal() + 1);
                 }
             }
-            time++;
+            elapsedTime++;
         } else {
             this.cancel();
         }
     }
 
-    public int getTime() {
-        return time;
+    public String getTimeLeftForNextEvent() {
+        return dateFormat.format((nextEvent.getTime() - elapsedTime) * 1000);
     }
 
-    public String getFormattedTimeLeft() {
-        return dateFormat.format((tier_timer.get(tier) - time) * 1000);
-    }
-
-    public String getTier() {
-        return Tiers.get(tier);
+    public String getNextTierName() {
+        if (nextEvent.getKey().equals("GameEnd")) {
+            return LanguageService
+                    .getInstance()
+                    .get(MessageKeys.GAME_END_MESSAGE)
+                    .toString();
+        }
+        return nextEvent.getKey();
     }
 }

@@ -3,7 +3,6 @@ package pronze.hypixelify.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -14,9 +13,12 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.events.*;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GameManager;
 import org.screamingsandals.bedwars.lang.LangKeys;
+import org.screamingsandals.bedwars.lib.event.EventPriority;
+import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.lang.Message;
@@ -27,6 +29,7 @@ import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
+import pronze.hypixelify.game.Arena;
 import pronze.hypixelify.game.ArenaManager;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.SBAUtil;
@@ -40,13 +43,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-
 @AutoInitialize(listener = true)
 public class BedWarsListener implements Listener {
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
-    @EventHandler
-    public void onStarted(GameStartedEvent<Game> e) {
+    @OnEvent
+    public void onStarted(GameStartedEventImpl e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -71,17 +73,17 @@ public class BedWarsListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onTargetBlockDestroyed(TargetBlockDestroyedEvent<Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent
+    public void onTargetBlockDestroyed(TargetBlockDestroyedEventImpl e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
                 .get(game.getName())
-                .ifPresent(arena -> arena.onTargetBlockDestroyed(e));
+                .ifPresent(arena -> ((Arena)arena).onTargetBlockDestroyed(e));
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPostRebuildingEvent(PostRebuildingEvent<Game> e) {
+    @OnEvent(priority = EventPriority.HIGHEST)
+    public void onPostRebuildingEvent(PostRebuildingEventImpl e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -89,18 +91,18 @@ public class BedWarsListener implements Listener {
     }
 
 
-    @EventHandler
-    public void onOver(GameEndingEvent<Game, RunningTeam> e) {
+    @OnEvent
+    public void onOver(GameEndingEventImpl e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
                 .get(game.getName())
-                .ifPresent(arena -> arena.onOver(e));
+                .ifPresent(arena -> ((Arena)arena).onOver(e));
     }
 
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBWLobbyJoin(PlayerJoinedEvent<Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent(priority = org.screamingsandals.bedwars.lib.event.EventPriority.HIGHEST)
+    public void onBWLobbyJoin(PlayerJoinedEventImpl e) {
         final var player = e.getPlayer().as(Player.class);
         final var game = (Game) GameManager.getInstance().getGame(e.getGame().getName()).orElseThrow();
         final var task = runnableCache.get(player.getUniqueId());
@@ -155,8 +157,8 @@ public class BedWarsListener implements Listener {
     }
 
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBedWarsPlayerLeave(PlayerLeaveEvent<Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent(priority = org.screamingsandals.bedwars.lib.event.EventPriority.LOWEST)
+    public void onBedWarsPlayerLeave(PlayerLeaveEventImpl e) {
         final var player = e.getPlayer().as(Player.class);
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
@@ -182,8 +184,8 @@ public class BedWarsListener implements Listener {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
-    @EventHandler
-    public void onBedWarsPlayerKilledEvent(PlayerKilledEvent<Game, BedWarsPlayer, ?> e) {
+    @OnEvent
+    public void onBedWarsPlayerKilledEvent(PlayerKilledEventImpl e) {
         final var game = e.getGame();
         // query arena instance for access to Victim/Killer data
         ArenaManager

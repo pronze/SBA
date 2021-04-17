@@ -13,7 +13,10 @@ import org.screamingsandals.bedwars.api.events.PlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.events.PlayerJoinedEventImpl;
+import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.player.BedWarsPlayer;
@@ -39,8 +42,8 @@ public class LobbyScoreboardManager implements Listener {
         Core.registerListener(this);
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinedEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent
+    public void onPlayerJoin(PlayerJoinedEventImpl e) {
         final var player = e.getPlayer();
         if (e.getGame().getStatus() == GameStatus.WAITING) {
             Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> createBoard(player.as(Player.class), e.getGame()), 3L);
@@ -74,8 +77,8 @@ public class LobbyScoreboardManager implements Listener {
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
-    @EventHandler
-    public void onPlayerLeave(PlayerLeaveEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent
+    public void onPlayerLeave(PlayerLeaveEventImpl e) {
         remove(e.getPlayer().as(Player.class));
     }
 

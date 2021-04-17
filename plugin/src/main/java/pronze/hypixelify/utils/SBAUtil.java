@@ -24,23 +24,6 @@ import java.util.stream.Collectors;
 
 public class SBAUtil {
 
-    //lazy solution but fine for now xdd
-    public static List<String> romanNumerals = new ArrayList<>() {
-        {
-            add("null");
-            add("I");
-            add("II");
-            add("III");
-            add("IV");
-            add("V");
-            add("VI");
-            add("VII");
-            add("VIII");
-            add("IX");
-            add("X");
-        }
-    };
-
     public static List<Material> parseMaterialFromConfig(String key) {
         final var materialList = new ArrayList<Material>();
         final var materialNames = SBAConfig.getInstance().getStringList(key);

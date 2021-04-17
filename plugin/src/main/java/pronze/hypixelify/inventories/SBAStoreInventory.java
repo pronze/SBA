@@ -5,11 +5,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.ApplyPropertyToDisplayedItemEvent;
 import org.screamingsandals.bedwars.api.events.OpenShopEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
@@ -20,10 +18,12 @@ import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.events.ApplyPropertyToBoughtItemEventImpl;
 import org.screamingsandals.bedwars.events.ApplyPropertyToDisplayedItemEventImpl;
+import org.screamingsandals.bedwars.events.OpenShopEventImpl;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.lib.entity.EntityBasic;
 import org.screamingsandals.bedwars.lib.entity.EntityLiving;
 import org.screamingsandals.bedwars.lib.event.EventManager;
+import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import org.screamingsandals.bedwars.lib.material.meta.EnchantmentHolder;
@@ -448,8 +448,8 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
         });
     }
 
-    @EventHandler
-    public void onBedWarsOpenShop(OpenShopEvent<org.screamingsandals.bedwars.game.Game, EntityBasic, BedWarsPlayer, GameStore> event) {
+    @OnEvent
+    public void onBedWarsOpenShop(OpenShopEventImpl event) {
         final var shopFile = event.getGameStore().getShopFile();
         if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml") )|| event.getGameStore().getUseParent()) {
             if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {

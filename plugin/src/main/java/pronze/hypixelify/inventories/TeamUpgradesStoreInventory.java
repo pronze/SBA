@@ -20,8 +20,10 @@ import org.screamingsandals.bedwars.commands.DumpCommand;
 import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.events.ApplyPropertyToBoughtItemEventImpl;
 import org.screamingsandals.bedwars.events.ApplyPropertyToDisplayedItemEventImpl;
+import org.screamingsandals.bedwars.events.OpenShopEventImpl;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.lib.event.EventManager;
+import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.material.Item;
 import org.screamingsandals.bedwars.lib.material.builder.ItemFactory;
 import org.screamingsandals.bedwars.lib.material.meta.EnchantmentHolder;
@@ -595,8 +597,8 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
         inventorySet.getMainSubInventory().process();
     }
 
-    @EventHandler
-    public void onBedWarsOpenShop(OpenShopEvent<org.screamingsandals.bedwars.game.Game, ?, BedWarsPlayer, GameStore> event) {
+    @OnEvent
+    public void onBedWarsOpenShop(OpenShopEventImpl event) {
         final var shopFile = event.getGameStore().getShopFile();
         if (shopFile != null && shopFile.equalsIgnoreCase("upgradeShop.yml")) {
             if (SBAConfig.getInstance().node("shop", "upgrade-shop", "enabled").getBoolean()) {

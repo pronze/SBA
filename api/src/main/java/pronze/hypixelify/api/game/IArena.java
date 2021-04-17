@@ -27,18 +27,6 @@ public interface IArena {
 
     /**
      *
-     * @param event
-     */
-    void onTargetBlockDestroyed(TargetBlockDestroyedEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> event);
-
-    /**
-     *
-     * @param event
-     */
-    void onOver(GameEndingEvent<org.screamingsandals.bedwars.game.Game, RunningTeam> event);
-
-    /**
-     *
      * @return the {@link ScoreboardManager} instance that manages scoreboard activity for this arena.
      */
     ScoreboardManager getScoreboardManager();

@@ -152,8 +152,8 @@ public class GameScoreboardManager implements pronze.hypixelify.api.manager.Scor
 
                     if (arena.getGameTask() != null) {
                         line = line
-                                .replace("%tier%", arena.getGameTask().getTier()
-                                .replace("-", " ") + " in §a" + arena.getGameTask().getFormattedTimeLeft());
+                                .replace("%tier%", arena.getGameTask().getNextTierName()
+                                .replace("-", " ") + " in §a" + arena.getGameTask().getTimeLeftForNextEvent());
                     }
                     lines.add(line);
                 });

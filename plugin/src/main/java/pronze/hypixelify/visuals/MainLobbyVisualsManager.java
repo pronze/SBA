@@ -16,6 +16,9 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.PlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.events.PlayerJoinedEventImpl;
+import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
+import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
@@ -203,13 +206,13 @@ public class MainLobbyVisualsManager implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBedWarsPlayerJoin(PlayerJoinedEvent<Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent(priority = org.screamingsandals.bedwars.lib.event.EventPriority.LOWEST)
+    public void onBedWarsPlayerJoin(PlayerJoinedEventImpl e) {
         remove(e.getPlayer().as(Player.class));
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onBedWarsPlayerLeaveEvent(PlayerLeaveEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
+    @OnEvent(priority = org.screamingsandals.bedwars.lib.event.EventPriority.HIGHEST)
+    public void onBedWarsPlayerLeaveEvent(PlayerLeaveEventImpl e) {
         final var player = e.getPlayer();
         if (isInWorld(player.as(Player.class).getLocation())) {
             Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player.as(Player.class)), 3L);

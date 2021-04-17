@@ -2,7 +2,6 @@ package pronze.hypixelify.service;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -11,13 +10,15 @@ import org.screamingsandals.bedwars.api.events.GameStartedEvent;
 import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.events.GameStartedEventImpl;
+import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
 import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.craftbukkit.MinecraftComponentSerializer;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
 import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
-import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.lib.core.annotations.AutoInitialize;
@@ -48,8 +49,8 @@ public class HealthIndicatorService implements Listener {
                 .getBoolean();
     }
 
-    @EventHandler
-    public void onGameStart(GameStartedEvent<org.screamingsandals.bedwars.game.Game> event) {
+    @OnEvent
+    public void onGameStart(GameStartedEventImpl event) {
         final Game game = event.getGame();
         game.getConnectedPlayers().forEach(this::create);
         new BukkitRunnable() {
@@ -74,8 +75,8 @@ public class HealthIndicatorService implements Listener {
                 .forEach(this::removePlayer);
     }
 
-    @EventHandler
-    public void onPlayerLeave(PlayerLeaveEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> event) {
+    @OnEvent
+    public void onPlayerLeave(PlayerLeaveEventImpl event) {
         final var player = event.getPlayer();
         removePlayer(player.as(Player.class));
     }

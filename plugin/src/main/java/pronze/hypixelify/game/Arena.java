@@ -6,6 +6,8 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.GameEndingEvent;
 import org.screamingsandals.bedwars.api.events.TargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.events.GameEndingEventImpl;
+import org.screamingsandals.bedwars.events.TargetBlockDestroyedEventImpl;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
 import org.screamingsandals.bedwars.player.BedWarsPlayer;
@@ -76,7 +78,7 @@ public class Arena implements IArena {
         putPlayerData(player.getUniqueId(), GamePlayerData.from(player));
     }
 
-    public void onTargetBlockDestroyed(TargetBlockDestroyedEvent<org.screamingsandals.bedwars.game.Game, BedWarsPlayer, RunningTeam> e) {
+    public void onTargetBlockDestroyed(TargetBlockDestroyedEventImpl e) {
         final var team = e.getTeam();
         // send bed destroyed message to all players of the team
         final var title = LanguageService
@@ -100,7 +102,7 @@ public class Arena implements IArena {
         }
     }
 
-    public void onOver(GameEndingEvent<org.screamingsandals.bedwars.game.Game, RunningTeam> e) {
+    public void onOver(GameEndingEventImpl e) {
         // destroy scoreboard manager instance and GameTask, we do not need these anymore
         scoreboardManager.destroy();
         gameTask.cancel();
