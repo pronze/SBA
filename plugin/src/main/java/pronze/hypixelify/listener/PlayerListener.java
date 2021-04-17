@@ -280,24 +280,6 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onTNTDamage(EntityDamageByEntityEvent event) {
-        if (event.getDamager() instanceof Explosive) {
-            if (event.getDamager() instanceof Explosive) {
-                final var tnt = (TNTPrimed) event.getDamager();
-                final var entity = event.getEntity();
-                if (entity instanceof Player) {
-                    event.setDamage(0.5);
-                    final var player = (Player) entity;
-                    Vector vector = player.getLocation().clone().add(0, 1 ,0).toVector()
-                            .subtract(tnt.getLocation().toVector()).normalize();
-                    vector.setY(vector.getY() /  2);
-                    vector.multiply(3);
-                    player.setVelocity(vector);
-                }
-            }
-        }
-    }
-    @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         final var player = e.getPlayer();
         final var uuid = player.getUniqueId();
