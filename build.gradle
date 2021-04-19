@@ -8,9 +8,9 @@ allprojects {
 
 buildscript {
     repositories {
-        maven { url = 'https://repo.screamingsandals.org/public' }
+        maven { url = 'https://repo.screamingsandals.org/repository/maven-public' }
         dependencies {
-            classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.39'
+            classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.41'
         }
     }
 }
@@ -30,6 +30,10 @@ buildscript {
 
             maven {
                 url = "https://oss.sonatype.org/content/repositories/snapshots/"
+            }
+
+            maven {
+                url = uri('https://oss.sonatype.org/content/groups/public/')
             }
 
             maven {
@@ -63,6 +67,7 @@ buildscript {
             relocate 'cloud', 'pronze.hypixelify.lib.cloud'
             relocate 'pronze.lib', 'pronze.hypixelify.lib'
             relocate 'io.projectreactor', 'pronze.hypixelify.lib.reactor'
+            relocate 'net.jitse.npclib', 'pronze.hypixelify.lib.npclib'
         }
         sourceCompatibility = '11.0'
     }

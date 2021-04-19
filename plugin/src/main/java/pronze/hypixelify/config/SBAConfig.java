@@ -163,6 +163,7 @@ public class SBAConfig implements IConfigurator {
                         .key("enabled").defValue(false)
                         .key("custom-chat").defValue(true)
                         .key("tablist-modifications").defValue(true)
+                        .key("progress-format").defValue("§b%progress%§7/§%total%")
                         .back()
                     .section("experimental")
                         .key("reset-item-meta-on-purchase").defValue(false)
@@ -218,8 +219,11 @@ public class SBAConfig implements IConfigurator {
                             .key("show-page-numbers").defValue(true)
                             .key("enabled").defValue(true)
                             .back()
-                        .back();
-
+                        .back()
+                    .section("player-statistics")
+                        .key("xp-to-level-up").defValue(500)
+                        .back()
+                    .key("npc-enabled").defValue(true);
 
 
             var gameSection = generator

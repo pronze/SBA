@@ -3,6 +3,8 @@ package pronze.hypixelify.api;
 public class MessageKeys {
     public static final String[] LANG_NAME = {"lang_name"};
     public static final String[] SHOP_NAME = {"shop", "name"};
+    public static final String[] NPC_SHOP_DISPLAY_NAME = {"shop", "npc", "normal-shop-display-name"};
+    public static final String[] NPC_UPGRADE_SHOP_DISPLAY_NAME = {"shop", "npc", "upgrade-shop-display-name"};
     public static final String[] SHOP_PAGE_BACK = {"shop", "page_back"};
     public static final String[] SHOP_PAGE_FORWARD = {"shop", "page_forward"};
     public static final String[] SHOP_BACK = {"shop", "shop_back"};

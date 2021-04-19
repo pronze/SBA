@@ -95,40 +95,42 @@ public class PlayerWrapper extends org.screamingsandals.bedwars.lib.player.Playe
     }
 
     public int getXP() {
-        try {
-            return PlayerStatisticManager
-                    .getInstance()
-                    .getStatistic(PlayerMapper.wrapPlayer(getInstance()))
-                    .getScore();
-        } catch (Exception e) {
+        var statistic = PlayerStatisticManager
+                .getInstance()
+                .getStatistic(PlayerMapper.wrapPlayer(getInstance()));
+        if (statistic == null) {
             return 1;
         }
+        return statistic.getScore();
     }
 
     public int getLevel() {
-        return (getXP() < 50 ? 1 : getXP() / 500);
+        var xp = getXP();
+        if (xp < 50) {
+            return 1;
+        }
+        return xp / SBAHypixelifyAPI.getInstance().getConfigurator().getInt("player-statistics.xp-to-level-up", 500);
     }
 
     public String getProgress() {
-        String p = "§b{p}§7/§a500";
-        int progress;
-        try {
-            progress = getXP() - (getLevel() * 500);
-        } catch (Exception e) {
-            progress = 1;
-        }
-        return p
-                .replace("{p}", String.valueOf(progress));
+        var maxLimit  = SBAHypixelifyAPI
+                .getInstance()
+                .getConfigurator()
+                .getInt("player-statistics.xp-to-level-up", 500);
+
+        final var format = SBAHypixelifyAPI
+                .getInstance()
+                .getConfigurator()
+                .getString("main-lobby.progress-format", "§b%progress%§7/§%total%")
+                .replace("%total%", String.valueOf(maxLimit));
+
+        int progress = getXP() - (getLevel() * 500);
+
+        return format.replace("%progress%", String.valueOf(progress));
     }
 
     public int getIntegerProgress() {
-        int progress;
-        try {
-            progress = getXP() - (getLevel() * 500);
-        } catch (Exception e) {
-            progress = 1;
-        }
-        return progress;
+        return getXP() - (getLevel() * 500);
     }
 
     public String getStringProgress() {
@@ -149,14 +151,10 @@ public class PlayerWrapper extends org.screamingsandals.bedwars.lib.player.Playe
     }
 
     public String getCompletedBoxes() {
-        int progress;
-        try {
-            progress = (getXP() - (getLevel() * 500)) / 5;
-        } catch (Exception e) {
-            progress = 1;
-        }
+        int progress = (getXP() - (getLevel() * 500)) / 5;;
         if (progress < 1)
             progress = 1;
+
         char i  =String.valueOf(Math.abs((long) progress)).charAt(0);
         if (progress < 10) {
             i = '1';

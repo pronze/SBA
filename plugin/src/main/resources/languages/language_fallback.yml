@@ -52,7 +52,6 @@ shout_wait: "<red>You have to wait for %seconds% to use this command again!"
 none: "None"
 command_party_settings_get_help: "<red>Do /p settings help for help regarding party settings"
 spawner_holo_tier_format: "<yellow>Tier <red>%tier%"
-shop-name: "[SBAHypixelify] shop"
 floating-generator:
   holo-text:
     - "<yellow>Tier <red>%tier%"
@@ -328,3 +327,23 @@ party:
       - "<yellow>/p list<gray> - Lists the players in your current party"
       - "<yellow>/p leave<gray> - Leaves your current party"
       - "&1-----------------------------------------------------"
+shop:
+  npc:
+    normal-shop-display-name:
+      - "<aqua>ITEM SHOP"
+      - "<yellow><bold>RIGHT CLICK"
+    upgrade-shop-display-name:
+      - "<aqua>UPGRADES SHOP"
+      - "<yellow><bold>RIGHT CLICK"
+  name: "[SBAHypixelify] shop"
+  page_back: "Page back"
+  page_forward: "Page forward"
+  shop_back: "<red>Back to category list"
+  price: "Price:"
+  amount: "Amount:"
+  buy_success: "<green>Successfully purchased <gray><item><green> for <gray><material><green>!"
+  buy_failed: "<red>Lack of material to buy <gray><item><red>! Needed <gray><material><red>!"
+  max-enchant:
+    - "Maximum Enchant"
+    - "Your team already has maximum Enchant."
+    -
