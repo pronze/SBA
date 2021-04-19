@@ -223,7 +223,10 @@ public class SBAConfig implements IConfigurator {
                     .section("player-statistics")
                         .key("xp-to-level-up").defValue(500)
                         .back()
-                    .key("npc-enabled").defValue(true);
+                    .section("npc")
+                        .key("enabled").defValue(true)
+                        .key("shop-skin").defValue(561657710)
+                        .key("upgrade-shop-skin").defValue(779554483);
 
 
             var gameSection = generator

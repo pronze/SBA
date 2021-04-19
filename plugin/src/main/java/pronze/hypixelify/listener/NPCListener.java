@@ -1,11 +1,14 @@
 package pronze.hypixelify.listener;
 import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
+import net.jitse.npclib.api.skin.MineSkinFetcher;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.events.GameStartedEventImpl;
 import org.screamingsandals.bedwars.events.OpenShopEventImpl;
 import org.screamingsandals.bedwars.events.PlayerJoinedEventImpl;
@@ -17,6 +20,7 @@ import org.screamingsandals.bedwars.lib.event.EventManager;
 import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import org.screamingsandals.bedwars.player.PlayerManager;
+import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.game.StoreWrapper;
@@ -32,7 +36,7 @@ public class NPCListener implements Listener {
     @OnEvent
     public void onBedWarsGameStarted(GameStartedEventImpl event) {
         final var game = event.getGame();
-        if (SBAConfig.getInstance().node("npc-enabled").getBoolean(true)) {
+        if (SBAConfig.getInstance().node("npc", "enabled").getBoolean(true)) {
             var npcs = new ArrayList<StoreWrapper>();
             var shopDisplayName = LanguageService
                     .getInstance()
@@ -48,6 +52,7 @@ public class NPCListener implements Listener {
                 if (shop == null) return;
                 if (shop.equalsIgnoreCase("shop.yml") || shop.equalsIgnoreCase("upgradeShop.yml")) {
                     final var storeEntity = gameStore.getEntity();
+                    var storeType = StoreWrapper.Type.of(shop);
                     gameStore.kill();
                     try {
                         var field = gameStore.getClass().getDeclaredField("entity");
@@ -55,10 +60,26 @@ public class NPCListener implements Listener {
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-                    var title = shop.equalsIgnoreCase("shop.yml") ? shopDisplayName : upgradeShopDisplayName;
+                    var title = storeType == StoreWrapper.Type.NORMAL ? shopDisplayName : upgradeShopDisplayName;
                     NPC npc = NPCProviderService.getInstance().getLibrary().createNPC(title);
-                    npc.create();
-                    game.getConnectedPlayers().forEach(npc::show);
+                    npc.setLocation(gameStore.getStoreLocation());
+                    int skinId;
+                    switch (storeType) {
+                        case NORMAL:
+                            skinId = MainConfig.getInstance().node("npc", "shop-skin").getInt();
+                            break;
+                        case UPGRADES:
+                            skinId = MainConfig.getInstance().node("npc", "upgrade-shop-skin").getInt();
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected value: " + storeType);
+                    }
+
+                    MineSkinFetcher.fetchSkinFromIdAsync(skinId, skin -> Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), () -> {
+                        npc.setSkin(skin);
+                        npc.create();
+                        game.getConnectedPlayers().forEach(npc::show);
+                    }));
                     var wrapper = StoreWrapper.of(storeEntity, npc, gameStore, StoreWrapper.Type.of(shop));
                     npcs.add(wrapper);
                 }
