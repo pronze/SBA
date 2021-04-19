@@ -80,7 +80,7 @@ public class NPCListener implements Listener {
                         npc.create();
                         game.getConnectedPlayers().forEach(npc::show);
                     }));
-                    var wrapper = StoreWrapper.of(storeEntity, npc, gameStore, StoreWrapper.Type.of(shop));
+                    var wrapper = StoreWrapper.of(storeEntity, npc, gameStore, storeType);
                     npcs.add(wrapper);
                 }
                 NPCProviderService

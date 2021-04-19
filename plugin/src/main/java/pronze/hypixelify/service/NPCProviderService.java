@@ -6,9 +6,10 @@ import org.screamingsandals.bedwars.lib.utils.annotations.Service;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.registry.NPCRegistry;
 import pronze.lib.core.Core;
+import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnInit;
 
-@Service
+@AutoInitialize
 @Getter
 public class NPCProviderService {
     private NPCLib library;
