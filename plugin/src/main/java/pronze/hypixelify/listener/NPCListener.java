@@ -109,14 +109,18 @@ public class NPCListener implements Listener {
             BedWarsPlayer gPlayer = PlayerManager.getInstance().getPlayer(player.getUniqueId()).orElseThrow();
             final var npc = event.getNPC();
             if (!gPlayer.isSpectator && gPlayer.getGame().getStatus() == GameStatus.RUNNING) {
-                NPCProviderService
+                var wrappers = NPCProviderService
                         .getInstance()
                         .getRegistry()
-                        .get(gPlayer.getGame().getName())
-                        .stream()
-                        .filter(wrapper -> wrapper.getNpc().equals(npc))
-                        .findFirst()
-                        .ifPresent(wrapper -> open(player, wrapper.getStore(), wrapper.getEntity(), gPlayer.getGame()));
+                        .get(gPlayer.getGame().getName());
+
+                if (wrappers != null) {
+                    wrappers
+                            .stream()
+                            .filter(wrapper -> wrapper.getNpc().equals(npc))
+                            .findFirst()
+                            .ifPresent(wrapper -> open(player, wrapper.getStore(), wrapper.getEntity(), gPlayer.getGame()));
+                }
             }
         }
     }

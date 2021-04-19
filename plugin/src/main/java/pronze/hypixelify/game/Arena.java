@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class Arena implements IArena {
     private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
-    private final Map<Game, List<NPC>> npcsIngame = new HashMap<>();
     private final GameScoreboardManager scoreboardManager;
     private final double radius;
     private final Game game;
