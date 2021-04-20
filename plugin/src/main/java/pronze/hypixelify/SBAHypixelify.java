@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.config.IConfigurator;
@@ -24,6 +23,7 @@ import pronze.hypixelify.party.PartyManager;
 import pronze.hypixelify.service.PlayerWrapperService;
 import pronze.lib.core.Core;
 import pronze.lib.core.utils.Logger;
+import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 

@@ -100,6 +100,7 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
 
         loadNewShop("default", null, true);
         loadPrices();
+        EventManager.getDefaultEventManager().register(OpenShopEventImpl.class, this::onBedWarsOpenShop);
     }
 
     private void loadPrices() {
@@ -597,7 +598,6 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
         inventorySet.getMainSubInventory().process();
     }
 
-    @OnEvent
     public void onBedWarsOpenShop(OpenShopEventImpl event) {
         final var shopFile = event.getGameStore().getShopFile();
         if (shopFile != null && shopFile.equalsIgnoreCase("upgradeShop.yml")) {

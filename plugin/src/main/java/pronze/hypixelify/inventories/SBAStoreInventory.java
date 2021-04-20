@@ -82,6 +82,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                     .saveResource("shops/shop.yml", false);
             loadNewShop("default", null, true);
         }
+        EventManager.getDefaultEventManager().register(OpenShopEventImpl.class, this::onBedWarsOpenShop);
     }
 
     @Override
@@ -448,7 +449,6 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
         });
     }
 
-    @OnEvent
     public void onBedWarsOpenShop(OpenShopEventImpl event) {
         final var shopFile = event.getGameStore().getShopFile();
         if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml") )|| event.getGameStore().getUseParent()) {

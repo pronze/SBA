@@ -17,7 +17,6 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.lib.entity.EntityMapper;
 import org.screamingsandals.bedwars.lib.event.EventManager;
-import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import pronze.hypixelify.SBAHypixelify;
@@ -27,13 +26,20 @@ import pronze.hypixelify.game.StoreWrapper;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.service.NPCProviderService;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.annotations.OnInit;
 
 import java.util.ArrayList;
 
 @AutoInitialize(listener = true)
 public class NPCListener implements Listener {
 
-    @OnEvent
+    @OnInit
+    public void registerSLibEvents() {
+        EventManager.getDefaultEventManager().register(GameStartedEventImpl.class, this::onBedWarsGameStarted);
+        EventManager.getDefaultEventManager().register(PlayerJoinedEventImpl.class, this::onBWPlayerJoin);
+        EventManager.getDefaultEventManager().register(PostRebuildingEventImpl.class, this::onBWRebuild);
+    }
+
     public void onBedWarsGameStarted(GameStartedEventImpl event) {
         final var game = event.getGame();
         if (SBAConfig.getInstance().node("npc", "enabled").getBoolean(true)) {
@@ -91,7 +97,7 @@ public class NPCListener implements Listener {
         }
     }
 
-    @OnEvent
+
     public void onBWPlayerJoin(PlayerJoinedEventImpl event) {
         final var game = event.getGame();
         // spectator has joined, let's show him the npc's
@@ -106,7 +112,6 @@ public class NPCListener implements Listener {
         }
     }
 
-    @OnEvent
     public void onBWRebuild(PostRebuildingEventImpl event) {
         final var game = event.getGame();
         final var npcs = NPCProviderService
@@ -121,6 +126,10 @@ public class NPCListener implements Listener {
                 }
             });
         }
+        NPCProviderService
+                .getInstance()
+                .getRegistry()
+                .unregister(game.getName());
     }
 
     @EventHandler

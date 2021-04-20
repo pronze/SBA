@@ -9,8 +9,6 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.api.MessageKeys;
@@ -19,6 +17,8 @@ import pronze.hypixelify.game.Arena;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.DateUtils;
 import pronze.lib.core.utils.Logger;
+import pronze.lib.scoreboards.Scoreboard;
+import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 

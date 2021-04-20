@@ -18,11 +18,10 @@ import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.events.PlayerJoinedEventImpl;
 import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
+import org.screamingsandals.bedwars.lib.event.EventManager;
 import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
@@ -34,6 +33,8 @@ import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnDestroy;
+import pronze.lib.core.annotations.OnInit;
+import pronze.lib.scoreboards.Scoreboard;
 
 import java.util.*;
 
@@ -42,6 +43,12 @@ public class MainLobbyVisualsManager implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
+
+    @OnInit
+    public void registerSLibEvents() {
+        EventManager.getDefaultEventManager().register(PlayerJoinedEventImpl.class, this::onBedWarsPlayerJoin, org.screamingsandals.bedwars.lib.event.EventPriority.LOWEST);
+        EventManager.getDefaultEventManager().register(PlayerLeaveEventImpl.class, this::onBedWarsPlayerLeaveEvent, org.screamingsandals.bedwars.lib.event.EventPriority.HIGHEST);
+    }
 
     public MainLobbyVisualsManager() {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
@@ -206,12 +213,10 @@ public class MainLobbyVisualsManager implements Listener {
         }
     }
 
-    @OnEvent(priority = org.screamingsandals.bedwars.lib.event.EventPriority.LOWEST)
     public void onBedWarsPlayerJoin(PlayerJoinedEventImpl e) {
         remove(e.getPlayer().as(Player.class));
     }
 
-    @OnEvent(priority = org.screamingsandals.bedwars.lib.event.EventPriority.HIGHEST)
     public void onBedWarsPlayerLeaveEvent(PlayerLeaveEventImpl e) {
         final var player = e.getPlayer();
         if (isInWorld(player.as(Player.class).getLocation())) {

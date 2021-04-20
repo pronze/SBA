@@ -37,4 +37,8 @@ public class NPCRegistry<T> {
         }
         register(identifier, List.of(npc));
     }
+
+    public void unregister(T identifier) {
+        registry.remove(identifier);
+    }
 }

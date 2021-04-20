@@ -13,6 +13,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.events.GameStartedEventImpl;
 import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
 import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.bedwars.lib.event.EventManager;
 import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.craftbukkit.MinecraftComponentSerializer;
@@ -47,9 +48,12 @@ public class HealthIndicatorService implements Listener {
                 .getInstance()
                 .node("show-health-under-player-name")
                 .getBoolean();
+
+        EventManager.getDefaultEventManager().register(GameStartedEventImpl.class, this::onGameStart);
+        EventManager.getDefaultEventManager().register(PlayerLeaveEventImpl.class, this::onPlayerLeave);
+
     }
 
-    @OnEvent
     public void onGameStart(GameStartedEventImpl event) {
         final Game game = event.getGame();
         game.getConnectedPlayers().forEach(this::create);
@@ -75,7 +79,6 @@ public class HealthIndicatorService implements Listener {
                 .forEach(this::removePlayer);
     }
 
-    @OnEvent
     public void onPlayerLeave(PlayerLeaveEventImpl event) {
         final var player = event.getPlayer();
         removePlayer(player.as(Player.class));

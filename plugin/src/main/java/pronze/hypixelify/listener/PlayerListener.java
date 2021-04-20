@@ -25,8 +25,6 @@ import org.bukkit.util.Vector;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
 import org.screamingsandals.bedwars.lib.lang.Lang;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.player.BedWarsPlayer;
@@ -42,6 +40,8 @@ import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.utils.Logger;
+import pronze.lib.scoreboards.Scoreboard;
+import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -141,7 +141,7 @@ public class PlayerListener implements Listener {
 
                         new BukkitRunnable() {
                             final BedWarsPlayer gamePlayer = gVictim;
-                            final Player player = gamePlayer.player;
+                            final Player player = gamePlayer.as(Player.class);
                             int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
 
                             byte buffer = 2;
@@ -196,7 +196,7 @@ public class PlayerListener implements Listener {
                                         SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
                                                 5, 40, 5);
                                         ShopUtil.giveItemToPlayer(itemArr, player,
-                                                Main.getInstance().getGameManager().getGame(game.getName()).get().getTeamOfPlayer(gamePlayer.player).getColor());
+                                                Main.getInstance().getGameManager().getGame(game.getName()).orElseThrow().getTeamOfPlayer(gamePlayer.as(Player.class)).getColor());
                                         this.cancel();
                                     }
                                 }

@@ -16,10 +16,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.events.PlayerJoinedEventImpl;
 import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.bedwars.lib.event.OnEvent;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.Scoreboard;
-import org.screamingsandals.bedwars.lib.ext.pronze.scoreboards.ScoreboardManager;
-import org.screamingsandals.bedwars.player.BedWarsPlayer;
+import org.screamingsandals.bedwars.lib.event.EventManager;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
@@ -27,13 +24,23 @@ import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.DateUtils;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.annotations.OnInit;
 import pronze.lib.core.utils.Logger;
+import pronze.lib.scoreboards.Scoreboard;
+import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 
 @AutoInitialize
 public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+
+    @OnInit
+    public void registerSLibEvents() {
+        EventManager.getDefaultEventManager().register(PlayerJoinedEventImpl.class, this::onPlayerJoin);
+        EventManager.getDefaultEventManager().register(PlayerLeaveEventImpl.class, this::onPlayerLeave);
+
+    }
 
     public LobbyScoreboardManager() {
         if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
@@ -42,7 +49,6 @@ public class LobbyScoreboardManager implements Listener {
         Core.registerListener(this);
     }
 
-    @OnEvent
     public void onPlayerJoin(PlayerJoinedEventImpl e) {
         final var player = e.getPlayer();
         if (e.getGame().getStatus() == GameStatus.WAITING) {
@@ -77,7 +83,6 @@ public class LobbyScoreboardManager implements Listener {
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
-    @OnEvent
     public void onPlayerLeave(PlayerLeaveEventImpl e) {
         remove(e.getPlayer().as(Player.class));
     }
