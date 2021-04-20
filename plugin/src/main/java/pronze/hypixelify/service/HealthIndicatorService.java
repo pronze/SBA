@@ -106,8 +106,8 @@ public class HealthIndicatorService implements Listener {
                     final var data = dataMap.get(player.getUniqueId());
                     game.getConnectedPlayers().forEach(p -> {
                         if (p.getHealth() != data.getOrDefault(p.getUniqueId(), Double.MAX_VALUE)) {
-                            update(player, p.getName(), Integer.parseInt(DECIMAL_FORMAT.format(player.getHealth())));
-                            data.put(p.getUniqueId(), player.getHealth());
+                            update(player, p.getName(), Integer.parseInt(DECIMAL_FORMAT.format(p.getHealth())));
+                            data.put(p.getUniqueId(), p.getHealth());
                         }
                     });
                 });

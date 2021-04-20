@@ -12,14 +12,9 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.screamingsandals.bedwars.api.RunningTeam;
-import org.screamingsandals.bedwars.api.events.PlayerJoinedEvent;
-import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.events.PlayerJoinedEventImpl;
 import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
 import org.screamingsandals.bedwars.lib.event.EventManager;
-import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.player.PlayerManager;
@@ -214,13 +209,14 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void onBedWarsPlayerJoin(PlayerJoinedEventImpl e) {
-        remove(e.getPlayer().as(Player.class));
+        final var player = e.getPlayer().as(Player.class);
+        remove(player);
     }
 
     public void onBedWarsPlayerLeaveEvent(PlayerLeaveEventImpl e) {
-        final var player = e.getPlayer();
-        if (isInWorld(player.as(Player.class).getLocation())) {
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player.as(Player.class)), 3L);
+        final var player = e.getPlayer().as(Player.class);
+        if (isInWorld(player.getLocation())) {
+            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player), 3L);
         }
     }
 }
