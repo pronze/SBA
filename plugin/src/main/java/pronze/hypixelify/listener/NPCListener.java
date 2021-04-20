@@ -27,8 +27,10 @@ import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.service.NPCProviderService;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnInit;
+import pronze.lib.core.utils.Logger;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @AutoInitialize(listener = true)
 public class NPCListener implements Listener {
@@ -43,7 +45,6 @@ public class NPCListener implements Listener {
     public void onBedWarsGameStarted(GameStartedEventImpl event) {
         final var game = event.getGame();
         if (SBAConfig.getInstance().node("npc", "enabled").getBoolean(true)) {
-            var npcs = new ArrayList<StoreWrapper>();
             var shopDisplayName = LanguageService
                     .getInstance()
                     .get(MessageKeys.NPC_SHOP_DISPLAY_NAME)
@@ -56,43 +57,53 @@ public class NPCListener implements Listener {
             game.getGameStoreList().forEach(gameStore -> {
                 final var shop = gameStore.getShopFile();
                 if (shop == null) return;
+
+                Logger.trace("Found Game Store: {} replacing it with NPCLib npc's!", gameStore);
                 if (shop.equalsIgnoreCase("shop.yml") || shop.equalsIgnoreCase("upgradeShop.yml")) {
                     final var storeEntity = gameStore.getEntity();
-                    var storeType = StoreWrapper.Type.of(shop);
                     gameStore.kill();
+
                     try {
                         var field = gameStore.getClass().getDeclaredField("entity");
+                        field.setAccessible(true);
                         field.set(gameStore, null);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
-                    var title = storeType == StoreWrapper.Type.NORMAL ? shopDisplayName : upgradeShopDisplayName;
-                    NPC npc = NPCProviderService.getInstance().getLibrary().createNPC(title);
-                    npc.setLocation(gameStore.getStoreLocation());
+
+                    var storeType = StoreWrapper.Type.of(shop);
                     int skinId;
+                    List<String> title;
                     switch (storeType) {
                         case NORMAL:
-                            skinId = MainConfig.getInstance().node("npc", "shop-skin").getInt();
+                            skinId = MainConfig.getInstance().node("npc", "shop-skin").getInt(1);
+                            title = shopDisplayName;
                             break;
                         case UPGRADES:
-                            skinId = MainConfig.getInstance().node("npc", "upgrade-shop-skin").getInt();
+                            skinId = MainConfig.getInstance().node("npc", "upgrade-shop-skin").getInt(1);
+                            title = upgradeShopDisplayName;
                             break;
                         default:
                             throw new IllegalStateException("Unexpected value: " + storeType);
                     }
 
+                    Logger.trace("Store type: {}", storeType.name());
+
                     MineSkinFetcher.fetchSkinFromIdAsync(skinId, skin -> Bukkit.getScheduler().runTask(SBAHypixelify.getInstance(), () -> {
+                        NPC npc = NPCProviderService
+                                .getInstance()
+                                .getLibrary()
+                                .createNPC(title);
+                        npc.setLocation(gameStore.getStoreLocation());
                         npc.setSkin(skin);
                         npc.create();
                         game.getConnectedPlayers().forEach(npc::show);
+                        NPCProviderService
+                                .getInstance()
+                                .getRegistry()
+                                .register(game.getName(), StoreWrapper.of(storeEntity, npc, gameStore, storeType));
                     }));
-                    var wrapper = StoreWrapper.of(storeEntity, npc, gameStore, storeType);
-                    npcs.add(wrapper);
                 }
-                NPCProviderService
-                        .getInstance()
-                        .getRegistry()
-                        .register(game.getName(), npcs);
             });
         }
     }

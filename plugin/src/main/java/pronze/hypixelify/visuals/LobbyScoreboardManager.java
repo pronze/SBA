@@ -39,7 +39,6 @@ public class LobbyScoreboardManager implements Listener {
     public void registerSLibEvents() {
         EventManager.getDefaultEventManager().register(PlayerJoinedEventImpl.class, this::onPlayerJoin);
         EventManager.getDefaultEventManager().register(PlayerLeaveEventImpl.class, this::onPlayerLeave);
-
     }
 
     public LobbyScoreboardManager() {

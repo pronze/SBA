@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.event.EventManager;
 import org.screamingsandals.bedwars.lib.nms.utils.ClassStorage;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.config.IConfigurator;
@@ -81,6 +82,7 @@ public class SBAHypixelify extends JavaPlugin implements SBAHypixelifyAPI {
         Logger.trace("Cancelling tasks...");
         this.getServer().getScheduler().cancelTasks(plugin);
         this.getServer().getServicesManager().unregisterAll(plugin);
+        EventManager.getDefaultEventManager().unregisterAll();
         Core.destroy();
         Logger.trace("Successfully shutdown SBAHypixelify instance");
     }

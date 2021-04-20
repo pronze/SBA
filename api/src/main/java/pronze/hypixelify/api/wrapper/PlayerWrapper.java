@@ -121,7 +121,7 @@ public class PlayerWrapper extends org.screamingsandals.bedwars.lib.player.Playe
         final var format = SBAHypixelifyAPI
                 .getInstance()
                 .getConfigurator()
-                .getString("main-lobby.progress-format", "§b%progress%§7/§%total%")
+                .getString("main-lobby.progress-format", "§b%progress%§7/§e%total%")
                 .replace("%total%", String.valueOf(maxLimit));
 
         int progress = getXP() - (getLevel() * 500);

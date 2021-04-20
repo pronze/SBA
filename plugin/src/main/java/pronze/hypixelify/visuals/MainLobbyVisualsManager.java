@@ -104,7 +104,7 @@ public class MainLobbyVisualsManager implements Listener {
 
     @OnDestroy
     public void disable() {
-        scoreboardMap.keySet().forEach(this::remove);
+        Set.copyOf(scoreboardMap.keySet()).forEach(this::remove);
         scoreboardMap.clear();
         HandlerList.unregisterAll(this);
     }

@@ -71,8 +71,8 @@ public class HealthIndicatorService implements Listener {
 
     @OnDestroy
     public void onDestroy() {
-        dataMap
-                .keySet()
+        Set.copyOf(dataMap
+                .keySet())
                 .stream()
                 .map(Bukkit::getPlayer)
                 .filter(Objects::nonNull)

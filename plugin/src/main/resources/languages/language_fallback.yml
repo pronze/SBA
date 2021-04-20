@@ -106,9 +106,9 @@ overstats:
     - "                             %color%%win_team%"
     - "                             %winners%"
     - ""
-    - "    <yellow><bold>1st<gray> - <white>%first_killer_name% <gray>- <white>%first_killer_score</bold>"
-    - "    <gold><bold>2nd<gray> - <white>%second_killer_name% <gray>- <white>%second_killer_score</bold>"
-    - "    <red><bold>3rd<gray> - <white>%third_killer_name% <gray>- <white>%third_killer_score</bold>"
+    - "    <yellow><bold>1st<gray> - <white>%first_killer_name% <gray>- <white>%first_killer_score%</bold>"
+    - "    <gold><bold>2nd<gray> - <white>%second_killer_name% <gray>- <white>%second_killer_score%</bold>"
+    - "    <red><bold>3rd<gray> - <white>%third_killer_name% <gray>- <white>%third_killer_score%</bold>"
     - ""
     - "<green>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
 scoreboard:

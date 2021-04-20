@@ -561,7 +561,10 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
         var itemInfo = event.getItem();
         var item = itemInfo.getStack();
         var player = event.getPlayer().as(Player.class);
-        var game = PlayerManager.getInstance().getGameOfPlayer(event.getPlayer()).orElseThrow();
+        var game = PlayerManager
+                .getInstance()
+                .getGameOfPlayer(event.getPlayer())
+                .orElseThrow();
         var prices = itemInfo.getOriginal().getPrices();
         if (!prices.isEmpty()) {
             var priceObject = prices.get(0);
@@ -582,7 +585,7 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
 
                     //noinspection unchecked
                     var applyEvent = new ApplyPropertyToDisplayedItemEventImpl(game,
-                            event.getPlayer().as(BedWarsPlayer.class),  property.getPropertyName(), (Map<String, Object>) converted, item);
+                            PlayerManager.getInstance().getPlayer(player.getUniqueId()).orElseThrow(),  property.getPropertyName(), (Map<String, Object>) converted, item);
                     EventManager.fire(applyEvent);
 
                     event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(item));
@@ -604,7 +607,7 @@ public class TeamUpgradesStoreInventory implements IStoreInventory, Listener {
             if (SBAConfig.getInstance().node("shop", "upgrade-shop", "enabled").getBoolean()) {
                 event.setResult(OpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened team upgrades store!", event.getPlayer().getName());
-                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()), event.getGameStore());
+                openForPlayer(event.getPlayer(), event.getGameStore());
             }
         }
     }
