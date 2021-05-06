@@ -149,7 +149,7 @@ public class Party implements IParty {
 
     @Override
     public boolean shouldDisband() {
-        return getInvitedPlayers().size() > 0 || getMembers().size() > 1;
+        return getInvitedPlayers().size() == 0 && getMembers().size() <= 1;
     }
 
     @Override

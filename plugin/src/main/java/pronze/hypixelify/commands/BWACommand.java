@@ -242,6 +242,7 @@ public class BWACommand {
                                         .getInstance()
                                         .get(MessageKeys.COMMAND_CANNOT_EXECUTE)
                                         .send(wrapper);
+                                return;
                             }
                             SBAConfig.getInstance().upgrade();
                             LanguageService
@@ -263,6 +264,7 @@ public class BWACommand {
                                         .getInstance()
                                         .get(MessageKeys.CANNOT_DO_COMMAND)
                                         .send(wrapper);
+                                return;
                             }
                             try {
                                 SBAConfig.getInstance().node("version").set(SBAHypixelify.getInstance().getVersion());

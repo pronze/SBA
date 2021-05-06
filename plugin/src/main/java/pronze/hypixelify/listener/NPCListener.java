@@ -28,11 +28,10 @@ import pronze.hypixelify.service.NPCProviderService;
 import pronze.lib.core.annotations.AutoInitialize;
 import pronze.lib.core.annotations.OnInit;
 import pronze.lib.core.utils.Logger;
-
-import java.util.ArrayList;
 import java.util.List;
 
-@AutoInitialize(listener = true)
+//TODO: find a solution to skins not displaying correctly
+//@AutoInitialize(listener = true)
 public class NPCListener implements Listener {
 
     @OnInit
@@ -131,11 +130,7 @@ public class NPCListener implements Listener {
                 .get(game.getName());
 
         if (npcs != null) {
-            npcs.stream().map(StoreWrapper::getNpc).forEach(npc -> {
-                if (npc.isCreated()) {
-                    npc.destroy();
-                }
-            });
+            npcs.stream().map(StoreWrapper::getNpc).forEach(NPC::destroy);
         }
         NPCProviderService
                 .getInstance()

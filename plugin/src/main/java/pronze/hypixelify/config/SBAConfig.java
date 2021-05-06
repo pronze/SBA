@@ -114,6 +114,8 @@ public class SBAConfig implements IConfigurator {
                     .section("floating-generator")
                         .key("enabled").defValue(true)
                         .key("holo-height").defValue(2.0)
+                        .key("diamond-block").defValue("DIAMOND_BLOCK")
+                        .key("emerald-block").defValue("EMERALD_BLOCK")
                         .back()
                     .section("upgrades")
                         .key("timer-upgrades-enabled").defValue(true)

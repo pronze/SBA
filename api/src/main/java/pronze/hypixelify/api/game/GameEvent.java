@@ -1,5 +1,4 @@
 package pronze.hypixelify.api.game;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
@@ -31,5 +30,9 @@ public enum GameEvent {
                 .filter(val -> val.ordinal() == ordinal)
                 .findAny()
                 .orElse(GameEvent.GAME_END);
+    }
+
+    public GameEvent getNextEvent() {
+        return ofOrdinal(ordinal() + 1);
     }
 }

@@ -90,6 +90,7 @@ public class ShoutCommand {
                                         .getInstance()
                                         .get(MessageKeys.COMMAND_SHOUT_INVALID_USAGE)
                                         .send(wrapper);
+                                return;
                             }
 
                             args.forEach(st -> strBuilder.append(st).append(" "));

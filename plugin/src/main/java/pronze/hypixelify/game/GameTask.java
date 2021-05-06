@@ -20,6 +20,7 @@ import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GeneratorData;
 import pronze.hypixelify.api.events.SBATeamTrapTriggeredEvent;
 import pronze.hypixelify.api.game.GameEvent;
+import pronze.hypixelify.api.game.GeneratorUpgradeType;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.lib.lang.LanguageService;
@@ -28,7 +29,6 @@ import pronze.hypixelify.utils.SBAUtil;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -42,10 +42,10 @@ public class GameTask extends BukkitRunnable {
     private final GameStorage storage;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
+    private final List<GeneratorData> generatorData = new ArrayList<>();
     private GameEvent nextEvent;
     private int elapsedTime;
     private int tier = 2;
-    private final List<GeneratorData> generatorData = new ArrayList<>();
 
     public GameTask(Arena arena) {
         nextEvent = GameEvent.DIAMOND_GEN_UPGRADE_TIER_II;
@@ -82,8 +82,17 @@ public class GameTask extends BukkitRunnable {
                     .filter(org.screamingsandals.bedwars.api.game.ItemSpawner::getFloatingEnabled)
                     .forEach((spawner) -> {
                         final var mat = spawner.getItemSpawnerType().getMaterial();
-                        final var convertedMat = mat == Material.DIAMOND ? Material.DIAMOND_BLOCK :
-                                mat == Material.EMERALD ? Material.EMERALD_BLOCK : null;
+                        Material convertedMat = null;
+
+                        switch (mat) {
+                            case DIAMOND:
+                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "diamond-block"));
+                                break;
+                            case EMERALD:
+                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "emerald-block"));
+                                break;
+                        }
+
                         if (convertedMat != null) {
                             ((ItemSpawner) spawner)
                                     .getHologram()
@@ -100,6 +109,8 @@ public class GameTask extends BukkitRunnable {
     @Override
     public void run() {
         if (game.getStatus() == GameStatus.RUNNING) {
+
+            // LOGIC FOR TRAPS
             if (storage.areTrapsEnabled()) {
                 game.getConnectedPlayers().forEach(player -> {
                     final var bwPlayer = PlayerManager
@@ -148,55 +159,68 @@ public class GameTask extends BukkitRunnable {
                 });
             }
 
+            // LOGIC FOR HEAL POOL
             if (storage.arePoolEnabled()) {
-                game.getRunningTeams().forEach(team -> {
-                    if (!storage.isPoolEnabled(team)) return;
+                game.getRunningTeams()
+                        .stream()
+                        .filter(storage::isPoolEnabled)
+                        .forEach(team -> team.getConnectedPlayers().forEach(player -> {
+                            final var bwPlayer = PlayerManager
+                                    .getInstance()
+                                    .getPlayer(player.getUniqueId())
+                                    .orElseThrow();
 
-                    team.getConnectedPlayers().forEach(player -> {
-                        final var bwPlayer = PlayerManager
-                                .getInstance()
-                                .getPlayer(player.getUniqueId())
-                                .orElseThrow();
-
-                        if (bwPlayer.isSpectator) return;
-                        if (storage.getTargetBlockLocation(team)
-                                .distanceSquared(player.getLocation()) <= arena.getRadius()) {
-                            player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,
-                                    30, 1));
-                        }
-                    });
-                });
+                            if (bwPlayer.isSpectator) return;
+                            if (storage.getTargetBlockLocation(team)
+                                    .distanceSquared(player.getLocation()) <= arena.getRadius()) {
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,
+                                        30, 1));
+                            }
+                        }));
             }
 
-            // Only proceed if the next event is not GameEnd.
-            if (!nextEvent.getKey().equals("GameEnd")) {
+            if (nextEvent != GameEvent.GAME_END) {
                 if (elapsedTime == nextEvent.getTime()) {
                     if (timerUpgrades) {
-                        final AtomicReference<String> matName = new AtomicReference<>();
-                        final AtomicReference<Material> type = new AtomicReference<>();
+                        final var tierName = nextEvent.getKey();
+                        GeneratorUpgradeType upgradeType = GeneratorUpgradeType.fromString(nextEvent.getKey());
+                        String matName = null;
+                        Material type = null;
+
+                        switch (upgradeType) {
+                            case DIAMOND:
+                                matName = "§b" + diamond;
+                                type = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "diamond-block"));
+                                break;
+                            case EMERALD:
+                                matName = "§a" + emerald;
+                                type = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "emerald-block"));
+                                break;
+                        }
+
+                        // check to see if the spawners exist
+                        var emptyQuery = game.getItemSpawners()
+                                .stream()
+                                .filter(itemSpawner -> itemSpawner.getItemSpawnerType().getMaterial() == upgradeType.getMaterial())
+                                .findAny()
+                                .isEmpty();
+
+                        if (emptyQuery) {
+                            type = null;
+                        }
 
                         game.getItemSpawners().forEach(itemSpawner -> {
-                            if (nextEvent.getKey().contains("Diamond")) {
-                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND) {
-                                    itemSpawner.addToCurrentLevel(multiplier);
-                                    matName.set("§b" + diamond);
-                                    type.set(Material.DIAMOND_BLOCK);
-                                }
-                            } else if (nextEvent.getKey().contains("Emerald")) {
-                                if (itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD) {
-                                    itemSpawner.addToCurrentLevel(multiplier);
-                                    matName.set("§a" + emerald);
-                                    type.set(Material.EMERALD_BLOCK);
-                                }
+                            if (itemSpawner.getItemSpawnerType().getMaterial() == upgradeType.getMaterial()) {
+                                itemSpawner.addToCurrentLevel(multiplier);
                             }
                         });
 
-                        final var tierName = nextEvent.getKey();
-                        final var tierLevel = tierName.substring(tierName.lastIndexOf("-") + 1);
 
+                        Material finalType = type;
                         generatorData.forEach(generator -> {
                             final var generatorMatType = generator.getItemStack().getType();
-                            if (generatorMatType == type.get()) {
+                            if (generatorMatType == finalType) {
+                                generator.setTierLevel(generator.getTierLevel() + 1);
                                 generator
                                         .getItemSpawner()
                                         .getHologram()
@@ -204,16 +228,15 @@ public class GameTask extends BukkitRunnable {
                                                 .getInstance()
                                                 .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
                                                 .toString()
-                                                .replace("%tier%", tierLevel)));
-                                generator.setTierLevel(generator.getTierLevel() + 1);
+                                                .replace("%tier%", String.valueOf(generator.getTierLevel()))));
                             }
                         });
 
-                        if (showUpgradeMessage && matName.get() != null) {
+                        if (showUpgradeMessage && finalType != null) {
                             LanguageService
                                     .getInstance()
                                     .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
-                                    .replace("%MatName%", matName.get())
+                                    .replace("%MatName%", matName)
                                     .replace("%tier%", tierName)
                                     .send(game
                                             .getConnectedPlayers()
@@ -223,7 +246,7 @@ public class GameTask extends BukkitRunnable {
                         }
                     }
                     tier++;
-                    nextEvent = GameEvent.ofOrdinal(nextEvent.ordinal() + 1);
+                    nextEvent = nextEvent.getNextEvent();
                 }
             }
             elapsedTime++;

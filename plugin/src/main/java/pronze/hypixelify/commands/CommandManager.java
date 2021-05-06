@@ -19,8 +19,6 @@ import java.util.function.Function;
 @AutoInitialize
 public class CommandManager {
     private BukkitCommandManager<CommandSender> manager;
-    private BukkitAudiences bukkitAudiences;
-    private MinecraftHelp<CommandSender> minecraftHelp;
 
     public CommandManager() {
         init(SBAHypixelify.getInstance());
@@ -45,10 +43,10 @@ public class CommandManager {
             return;
         }
 
-        this.bukkitAudiences = BukkitAudiences.create(plugin);
-        this.minecraftHelp = new MinecraftHelp<>(
+        BukkitAudiences bukkitAudiences = BukkitAudiences.create(plugin);
+        MinecraftHelp<CommandSender> minecraftHelp = new MinecraftHelp<>(
                 "/bwa help",
-                this.bukkitAudiences::sender,
+                bukkitAudiences::sender,
                 this.manager
         );
         if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
