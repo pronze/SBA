@@ -132,6 +132,10 @@ public class GameTask extends BukkitRunnable {
                                 player.addPotionEffect(new PotionEffect
                                         (PotionEffectType.BLINDNESS, 20 * 3, 2));
 
+                                if (arena.isPlayerHidden(player)) {
+                                    arena.removeHiddenPlayer(player);
+                                }
+
                                 LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_TRAP_TRIGGERED_MESSAGE)
