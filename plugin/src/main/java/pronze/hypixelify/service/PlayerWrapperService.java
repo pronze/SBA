@@ -45,6 +45,9 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
 
     @Override
     public void register(Player player) {
+        if (playerData.containsKey(player.getUniqueId())) {
+            return;
+        }
         final var playerWrapper = new PlayerWrapper(player);
         playerData.put(player.getUniqueId(), playerWrapper);
         Logger.trace("Registered player: {}", player.getName());

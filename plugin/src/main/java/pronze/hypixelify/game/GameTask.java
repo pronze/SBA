@@ -86,21 +86,22 @@ public class GameTask extends BukkitRunnable {
 
                         switch (mat) {
                             case DIAMOND:
-                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "diamond-block"));
+                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator.diamond-block"));
                                 break;
                             case EMERALD:
-                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "emerald-block"));
+                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator.emerald-block"));
                                 break;
                         }
 
-                        if (convertedMat != null) {
-                            ((ItemSpawner) spawner)
-                                    .getHologram()
-                                    .replaceLine(2, TextEntry.of(LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
-                                            .toString()));
-                            generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
+                        if (convertedMat != null && spawner.getHologramEnabled()) {
+                            var holo = ((ItemSpawner) spawner).getHologram();
+                            if (holo != null) {
+                                holo.replaceLine(2, TextEntry.of(LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
+                                        .toString()));
+                                generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
+                            }
                         }
                     });
         }
@@ -120,45 +121,51 @@ public class GameTask extends BukkitRunnable {
                     if (bwPlayer.isSpectator) return;
 
                     game.getRunningTeams().forEach(team -> {
-                        if (!storage.isTrapEnabled(team) || team.getConnectedPlayers().contains(player)) return;
-
-                        if (storage.getTargetBlockLocation(team)
-                                .distanceSquared(player.getLocation()) <= arena.getRadius()) {
-                            final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
-                            SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
-
-                            if (!triggeredEvent.isCancelled()) {
-                                storage.setTrap(team, false);
-                                player.addPotionEffect(new PotionEffect
-                                        (PotionEffectType.BLINDNESS, 20 * 3, 2));
-
-                                if (arena.isPlayerHidden(player)) {
-                                    arena.removeHiddenPlayer(player);
-                                }
-
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.TEAM_TRAP_TRIGGERED_MESSAGE)
-                                        .send(PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class));
-
-                                var title = LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.TEAM_TRAP_TRIGGERED_TITLE)
-                                        .toString();
-
-                                var subTitle = LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.TEAM_TRAP_TRIGGERED_SUBTITLE)
-                                        .toString();
-
-                                team.getConnectedPlayers().forEach(pl -> {
-                                    Sounds.playSound(pl, pl.getLocation(), MainConfig.getInstance()
-                                                    .node("sounds", "on_trap_triggered").getString(),
-                                            Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
-                                });
+                        if (storage.isTrapEnabled(team)) {
+                            if (team.getConnectedPlayers().contains(player)) {
+                                return;
                             }
+
+                            if (storage.getTargetBlockLocation(team)
+                                    .distanceSquared(player.getLocation()) <= arena.getRadius()) {
+                                final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
+                                SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
+
+                                if (!triggeredEvent.isCancelled()) {
+                                    storage.setTrap(team, false);
+                                    player.addPotionEffect(new PotionEffect
+                                            (PotionEffectType.BLINDNESS, 20 * 3, 2));
+
+                                    if (arena.isPlayerHidden(player)) {
+                                        arena.removeHiddenPlayer(player);
+                                    }
+
+                                    LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.TEAM_TRAP_TRIGGERED_MESSAGE)
+                                            .send(PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class));
+
+                                    var title = LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.TEAM_TRAP_TRIGGERED_TITLE)
+                                            .toString();
+
+                                    var subTitle = LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.TEAM_TRAP_TRIGGERED_SUBTITLE)
+                                            .toString();
+
+                                    team.getConnectedPlayers().forEach(pl -> {
+                                        Sounds.playSound(pl, pl.getLocation(), MainConfig.getInstance()
+                                                        .node("sounds", "on_trap_triggered").getString(),
+                                                Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
+                                    });
+                                }
+                            }
+
                         }
+
                     });
                 });
             }

@@ -27,6 +27,7 @@ import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.game.StoreWrapper;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.lib.core.annotations.AutoInitialize;
 
@@ -37,12 +38,7 @@ import java.util.stream.Collectors;
 @AutoInitialize
 public class ShopUtil {
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
-
-    public ShopUtil() {
-        initKeys();
-    }
-
-    public static void initKeys() {
+    {
         UpgradeKeys.put("STONE", 2);
         UpgradeKeys.put("IRON", 4);
         UpgradeKeys.put("DIAMOND", 5);
@@ -119,7 +115,10 @@ public class ShopUtil {
         }
     }
 
-    public static boolean clampOrApplyEnchants(Item item, int level, Enchantment enchantment) {
+    public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreWrapper.Type type) {
+        if (type == StoreWrapper.Type.UPGRADES) {
+            level = level + 1;
+        }
         if (level >= 5) {
             LanguageService
                     .getInstance()
@@ -130,11 +129,10 @@ public class ShopUtil {
                 item.getEnchantments().clear();
             }
         } else if (level > 0){
-            item.addEnchant(
-                    new EnchantmentHolder(EnchantmentMapping.resolve(enchantment).orElseThrow().getPlatformName(), level));
+            item.addEnchant(EnchantmentMapping.resolve(enchantment).orElseThrow().newLevel(level));
         }
-        return false;
     }
+
 
     /**
      * Applies enchants to displayed items in SBAHypixelify store inventory.
@@ -143,7 +141,7 @@ public class ShopUtil {
      * @param item
      * @param event
      */
-    public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event) {
+    public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreWrapper.Type type) {
         final var player = event.getPlayer().as(Player.class);
         final var game = PlayerManager
                 .getInstance()
@@ -160,15 +158,16 @@ public class ShopUtil {
                     switch (afterUnderscore.toLowerCase()) {
                         case "sword":
                             int sharpness = gameStorage.getSharpness(runningTeam.getName());
-                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL);
+                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type);
                             break;
+                        case "chestplate":
                         case "boots":
                             int protection = gameStorage.getProtection(runningTeam.getName());
-                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL);
+                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type);
                             break;
                         case "pickaxe":
                             final int efficiency = gameStorage.getEfficiency(runningTeam.getName());
-                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED);
+                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type);
                             break;
                     }
                 });
@@ -191,46 +190,6 @@ public class ShopUtil {
         player.getInventory().setLeggings(leggings);
     }
 
-    public static boolean addEnchantsToPlayerTools(Player buyer, ItemStack newItem, String name, Enchantment enchantment) {
-        final var newItemEnchantLevel = newItem.getEnchantmentLevel(enchantment);
-
-        for (final var item : buyer.getInventory().getContents()) {
-            if (item == null) continue;
-
-            final var typeName = item.getType().name();
-            final var itemEnchantLevel = item.getEnchantmentLevel(enchantment);
-            if (typeName.endsWith(name)) {
-                if (itemEnchantLevel >= newItemEnchantLevel || newItemEnchantLevel >= 5)
-                    return false;
-
-                item.addEnchantments(newItem.getEnchantments());
-            }
-        }
-
-        return true;
-    }
-
-    public static boolean addEnchantsToTeamTools(Player buyer, ItemStack stack, String name, Enchantment enchantment) {
-        final var team = PlayerManager
-                .getInstance()
-                .getGameOfPlayer(buyer.getUniqueId())
-                .orElseThrow()
-                .getTeamOfPlayer(buyer);
-
-        if (!ShopUtil.addEnchantsToPlayerTools(buyer, stack, name, enchantment)) return false;
-
-        team.getConnectedPlayers()
-                .stream()
-                .filter(Objects::nonNull)
-                .forEach(player -> {
-                    player.sendMessage("§c" + buyer.getName() + "§e has upgraded team sword damage!");
-                    if (player != buyer) {
-                        ShopUtil.addEnchantsToPlayerTools(player, stack, name, enchantment);
-                    }
-                });
-
-        return true;
-    }
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
         List<K> listOfKeys = null;

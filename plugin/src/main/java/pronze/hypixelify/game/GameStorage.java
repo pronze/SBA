@@ -4,7 +4,6 @@ import org.bukkit.Location;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import pronze.hypixelify.api.data.GameTeamData;
-
 import java.util.HashMap;
 import java.util.Map;
 

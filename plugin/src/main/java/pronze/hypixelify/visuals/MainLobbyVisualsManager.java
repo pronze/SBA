@@ -17,6 +17,8 @@ import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
 import org.screamingsandals.bedwars.lib.event.EventManager;
 import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.bedwars.lib.tasker.Tasker;
+import org.screamingsandals.bedwars.lib.tasker.TaskerTime;
 import org.screamingsandals.bedwars.player.PlayerManager;
 import org.screamingsandals.bedwars.statistics.PlayerStatisticManager;
 import pronze.hypixelify.SBAHypixelify;
@@ -125,7 +127,7 @@ public class MainLobbyVisualsManager implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         final var player = e.getPlayer();
-        if (isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
+        if (player.isOnline() && isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
             create(player);
         } else {
             remove(player);
@@ -138,7 +140,11 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void create(Player player) {
-        final var playerData = SBAHypixelify.getInstance().getPlayerWrapperService().get(player).orElseThrow();
+        final var playerData = SBAHypixelify
+                .getInstance()
+                .getPlayerWrapperService()
+                .get(player)
+                .orElseThrow();
 
         if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
             var header = LanguageService
@@ -215,8 +221,10 @@ public class MainLobbyVisualsManager implements Listener {
 
     public void onBedWarsPlayerLeaveEvent(PlayerLeaveEventImpl e) {
         final var player = e.getPlayer().as(Player.class);
-        if (isInWorld(player.getLocation())) {
-            Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> create(player), 3L);
-        }
+        Tasker.build(() -> {
+            if (isInWorld(player.getLocation()) && player.isOnline()) {
+                create(player);
+            }
+        }).delay(1, TaskerTime.SECONDS).start();
     }
 }

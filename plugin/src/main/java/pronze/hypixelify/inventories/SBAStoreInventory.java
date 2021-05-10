@@ -43,6 +43,7 @@ import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.game.IStoreInventory;
 import pronze.hypixelify.config.SBAConfig;
+import pronze.hypixelify.game.StoreWrapper;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.ShopUtil;
 import pronze.lib.core.Core;
@@ -307,8 +308,8 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.SHOP_PURCHASE_FAILED)
-                        .replace("%item%", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
-                        .replace("%material%", priceAmount + " " + type.getItemName())
+                        .replace("<item>", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
+                        .replace("<material>", priceAmount + " " + type.getItemName())
                         .send(event.getPlayer());
             }
             return;
@@ -433,7 +434,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             ShopUtil.setLore(item, itemInfo, String.valueOf(price), type);
         }
 
-        ShopUtil.applyTeamUpgradeEnchantsToItem(item, event);
+        ShopUtil.applyTeamUpgradeEnchantsToItem(item, event, StoreWrapper.Type.NORMAL);
 
         itemInfo.getProperties().forEach(property -> {
             if (property.hasName()) {

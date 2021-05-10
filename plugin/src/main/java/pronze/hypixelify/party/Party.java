@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class Party implements IParty {
     private final UUID uuid = UUID.randomUUID();
-    private  @NotNull volatile PlayerWrapper leader;
+    private @NotNull volatile PlayerWrapper leader;
     private final List<PlayerWrapper> members = Collections.synchronizedList(new LinkedList<>());
     private final List<PlayerWrapper> invitedPlayers = Collections.synchronizedList(new LinkedList<>());
     private final Map<UUID, PartyInviteData> inviteDataMap = new ConcurrentHashMap<>();

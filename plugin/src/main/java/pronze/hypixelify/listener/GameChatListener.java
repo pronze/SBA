@@ -34,14 +34,16 @@ public class GameChatListener implements Listener {
                             .orElseThrow();
 
                     String format;
+                    final var allChatPrefix = SBAConfig
+                            .getInstance()
+                            .node("chat-format", "game-chat", "all-chat-prefix").getString();
+
                     if (bedwarsPlayer.isSpectator) {
                         format = SBAConfig
                                 .getInstance()
                                 .node("chat-format", "game-chat", "format-spectator").getString();
                     } else {
-                        final var allChatPrefix = SBAConfig
-                                .getInstance()
-                                .node("chat-format", "game-chat", "all-chat-prefix").getString();
+
 
                         if (event.getMessage().startsWith(allChatPrefix)) {
                             format = SBAConfig
@@ -60,9 +62,14 @@ public class GameChatListener implements Listener {
                                 .replace("%team%", colorName);
                     }
 
+                    var message = event.getMessage().replace(allChatPrefix, "");
+                    if (message.startsWith(" ")) {
+                        message = message.substring(1);
+                    }
+
                     format = format
                             .replace("%player%", player.getName())
-                            .replace("%message%", event.getMessage());
+                            .replace("%message%", message);
                     if (Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                         format = PlaceholderAPI.setPlaceholders(player, format);
                     }

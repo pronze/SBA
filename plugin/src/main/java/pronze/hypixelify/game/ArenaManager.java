@@ -7,6 +7,7 @@ import pronze.hypixelify.api.game.IArena;
 import pronze.hypixelify.api.manager.IArenaManager;
 import pronze.lib.core.Core;
 import pronze.lib.core.annotations.AutoInitialize;
+import pronze.lib.core.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class ArenaManager implements IArenaManager {
         if (arenaMap.containsKey(gameName)) {
             throw new UnsupportedOperationException("Arena: " + gameName + " already exists!");
         }
+        Logger.trace("Creating arena for game: {}", gameName);
         arenaMap.put(gameName, new Arena(game));
     }
 
