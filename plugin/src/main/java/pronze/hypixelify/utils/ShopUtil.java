@@ -339,7 +339,6 @@ public class ShopUtil {
             newItem.addEnchantment(Enchantment.DAMAGE_ALL, level);
     }
 
-
     public static void removeAxeOrPickaxe(Player player, ItemStack newItem) {
         final String name = newItem.getType().name().substring(newItem.getType().name().indexOf("_"));
 

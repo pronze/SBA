@@ -20,6 +20,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.screamingsandals.bedwars.Main;
@@ -350,10 +351,20 @@ public class PlayerListener implements Listener {
 
         if (item.getType() == Material.POTION) {
             final var potionMeta = (PotionMeta) item.getItemMeta();
-            boolean isInvis = potionMeta
-                    .getCustomEffects()
-                    .stream()
-                    .anyMatch(potionEffect -> potionEffect.getType() == PotionEffectType.INVISIBILITY);
+            
+            boolean isInvis = false;
+            
+            if (potionMeta.getBasePotionData().getType() == PotionType.INVISIBILITY) {
+                isInvis = true;
+            } else {
+                if (potionMeta.hasCustomEffects()) {
+                    isInvis = potionMeta
+                            .getCustomEffects()
+                            .stream()
+                            .anyMatch(potionEffect -> potionEffect.getType() == PotionEffectType.INVISIBILITY);
+                }
+            }
+            
 
             if (isInvis) {
                 final var playerGame = PlayerManager

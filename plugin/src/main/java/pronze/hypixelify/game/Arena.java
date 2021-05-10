@@ -1,25 +1,20 @@
 package pronze.hypixelify.game;
 
 import lombok.Getter;
-import net.jitse.npclib.api.NPC;
 import org.bukkit.entity.Player;
-import org.screamingsandals.bedwars.api.RunningTeam;
-import org.screamingsandals.bedwars.api.events.GameEndingEvent;
-import org.screamingsandals.bedwars.api.events.TargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.events.GameEndingEventImpl;
 import org.screamingsandals.bedwars.events.TargetBlockDestroyedEventImpl;
 import org.screamingsandals.bedwars.lib.player.PlayerMapper;
 import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
-import org.screamingsandals.bedwars.player.BedWarsPlayer;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.game.IArena;
 import pronze.hypixelify.api.manager.ScoreboardManager;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.lib.lang.LanguageService;
-import pronze.hypixelify.visuals.GameScoreboardManager;
 import pronze.hypixelify.utils.SBAUtil;
+import pronze.hypixelify.visuals.GameScoreboardManager;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,6 +1,7 @@
 package pronze.hypixelify.game;
 
 
+import com.mojang.datafixers.util.Pair;
 import lombok.Data;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
@@ -11,8 +12,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
-import org.screamingsandals.bedwars.lib.utils.Pair;
 import org.screamingsandals.bedwars.lib.utils.math.Vector3D;
+import org.screamingsandals.bedwars.lib.utils.reflect.Constructor;
 import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.utils.SBAUtil;
@@ -108,12 +109,14 @@ public class InvisiblePlayer {
 
     private void hideArmor() {
         final var airStack = stackAsNMS(new ItemStack(Material.AIR));
+        var playerTeam = arena.getGame().getTeamOfPlayer(player);
+
         arena
                 .getGame()
                 .getConnectedPlayers()
                 .stream()
-                .filter(pl -> !pl.equals(player))
-                .forEach(pl -> ClassStorage.sendPacket(pl, getPackets(airStack, airStack, airStack, airStack)));
+                .filter(pl -> !playerTeam.getConnectedPlayers().contains(pl))
+                .forEach(pl -> ClassStorage.sendPackets(pl, getPackets(airStack, airStack, airStack, airStack)));
     }
 
     private List<Object> getPackets(Object nmsBoot, Object nmsChestPlate, Object nmsLeggings, Object nmsHelmet) {
@@ -147,8 +150,7 @@ public class InvisiblePlayer {
 
         Reflect.constructor(ClassStorage.NMS.PacketPlayOutEntityEquipment, int.class, List.class)
                 .ifPresentOrElse(
-                        constructor ->
-                                reference.set(constructor.construct(entity.getEntityId(), List.of(Pair.of(slot, stack)))),
+                        constructor -> reference.set(constructor.construct(entity.getEntityId(), List.of(Pair.of(slot, stack)))),
                         () ->
                                 reference.set(
                                         Reflect.constructor(ClassStorage.NMS.PacketPlayOutEntityEquipment, int.class, ClassStorage.NMS.EnumItemSlot, ClassStorage.NMS.ItemStack)
@@ -160,6 +162,8 @@ public class InvisiblePlayer {
 
     private void showPlayer() {
         isHidden = false;
+        Logger.trace("Unhiding player: {}", player.getName());
+        SBAUtil.cancelTask(armorHider);
         SBAUtil.cancelTask(footStepSoundTracker);
     }
 
