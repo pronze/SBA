@@ -111,7 +111,8 @@ public class InvisiblePlayer {
         arena
                 .getGame()
                 .getConnectedPlayers()
-                .stream().filter(pl -> !pl.equals(player))
+                .stream()
+                .filter(pl -> !pl.equals(player))
                 .forEach(pl -> ClassStorage.sendPacket(pl, getPackets(airStack, airStack, airStack, airStack)));
     }
 
@@ -121,6 +122,7 @@ public class InvisiblePlayer {
         final var headSlot = Reflect
                 .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
                 .invokeStatic(EquipmentSlot.HEAD);
+
         final var chestplateSlot = Reflect
                 .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
                 .invokeStatic(EquipmentSlot.CHEST);
@@ -140,17 +142,17 @@ public class InvisiblePlayer {
         return packets;
     }
 
-    private Object getEquipmentPacket(Player entity, Object stack, Object chestplateSlot) {
+    private Object getEquipmentPacket(Player entity, Object stack, Object slot) {
         final var reference = new AtomicReference<>();
 
         Reflect.constructor(ClassStorage.NMS.PacketPlayOutEntityEquipment, int.class, List.class)
                 .ifPresentOrElse(
                         constructor ->
-                                reference.set(constructor.construct(entity.getEntityId(), List.of(Pair.of(chestplateSlot, stack)))),
+                                reference.set(constructor.construct(entity.getEntityId(), List.of(Pair.of(slot, stack)))),
                         () ->
                                 reference.set(
                                         Reflect.constructor(ClassStorage.NMS.PacketPlayOutEntityEquipment, int.class, ClassStorage.NMS.EnumItemSlot, ClassStorage.NMS.ItemStack)
-                                                .construct(chestplateSlot, chestplateSlot, stack)
+                                                .construct(entity.getEntityId(), slot, stack)
                                 )
                 );
         return reference.get();
