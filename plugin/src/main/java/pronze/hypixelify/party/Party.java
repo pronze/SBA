@@ -51,12 +51,12 @@ public class Party implements IParty {
                 AdventureHelper.toLegacy(message),
                 debugInfo()
         );
-        final var formattedMessage = SBAConfig
+        final var formattedMessage = LanguageService
                 .getInstance()
-                .node("party", "chat-format")
-                .getString()
-                .replace("%name%", sender.getName())
-                .replace("%message%", AdventureHelper.toLegacy(message));
+                .get(MessageKeys.PARTY_CHAT_FORMAT)
+                .replace("%player%", sender.getName())
+                .replace("%message%", AdventureHelper.toLegacy(message))
+                .toComponent();
         members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
     }
 
