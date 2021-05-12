@@ -23,6 +23,7 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_OFFLINE_LEFT = {"party", "message", "offline-left"};
     public static final String[] PARTY_MESSAGE_INVITE_EXPIRED = {"party", "message", "invite-expired"};
     public static final String[] PARTY_MESSAGE_LEADER_JOIN_LEAVE = {"party", "message", "leader-join-leave"};
+    public static final String[] PARTY_CHAT_FORMAT = {"party", "chat-format"};
     public static final String[] GAMES_INV_DISABLED = {"gamesinv_disabled"};
     public static final String[] GAME_END_MESSAGE = {"game-end"};
     public static final String[] DIAMOND = {"diamond"};
