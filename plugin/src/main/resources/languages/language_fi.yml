@@ -16,6 +16,7 @@ bed-destroyed:
 already-purchased: "<red><bold>You already purchased the same %thing%</bold>"
 wait-trap: "<red>You already purchased this upgrade!, wait for it to wear out"
 upgrade-team-protection: "<red>%player%<yellow> has upgraded team protection"
+upgrade-team-sharpness: "<red>%player%<yellow> has upgraded team sharpness"
 error-occured: "<red><bold>AN ERROR HAS OCCURRED</bold>"
 greatest-enchantment: "<red><bold>You Already have the greatest enchantment</bold>"
 generator-upgrade: "%MatName%<yellow> generator has been upgraded to <red>%tier%"
