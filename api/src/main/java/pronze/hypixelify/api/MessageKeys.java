@@ -29,7 +29,7 @@ public class MessageKeys {
     public static final String[] EMERALD = {"emerald"};
     public static final String[] GAME_STARTS_IN_MESSAGE = {"game-starts-in"};
     public static final String[] BED_DESTROYED_TITLE = {"bed-destroyed", "title"};
-    public static final String[] BED_DESTROYED_SUBTITLE = {"bed-destroyed", "subtitle"};
+    public static final String[] BED_DESTROYED_SUBTITLE = {"bed-destroyed", "sub-title"};
     public static final String[] ALREADY_PURCHASED = {"already-purchased"};
     public static final String[] SUCCESSFULLY_SET_LOBBY = {"command_set_lobby_location"};
     public static final String[] COMMAND_RESETTING = {"command_resetting"};
