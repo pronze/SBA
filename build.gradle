@@ -64,7 +64,6 @@ buildscript {
         }
 
         shadowJar {
-            relocate 'cloud', 'pronze.hypixelify.lib.cloud'
             relocate 'pronze.lib', 'pronze.hypixelify.lib'
             relocate 'io.projectreactor', 'pronze.hypixelify.lib.reactor'
             relocate 'net.jitse.npclib', 'pronze.hypixelify.lib.npclib'
