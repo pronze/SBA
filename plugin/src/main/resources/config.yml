@@ -1,0 +1,305 @@
+locale: en
+debug: false
+allow-crafting: false
+keep-inventory-on-death: false
+in-lobby-colored-leather-by-team: true
+jointeam-entity-show-name: true
+friendlyfire: false
+player-drops: false
+join-randomly-after-lobby-timeout: true
+prevent-killing-villagers: true
+compass-enabled: true
+join-randomly-on-lobby-join: false
+add-wool-to-inventory-on-join: true
+prevent-spawning-mobs: true
+spawner-holograms: false
+spawner-disable-merge: true
+prevent-lobby-spawn-mobs-in-radius: 16
+spawner-holo-height: 0.25
+spawner-holograms-countdown: true
+damage-when-player-is-not-in-arena: true
+remove-unused-target-blocks: true
+allow-block-falling: true
+game-start-items: true
+player-respawn-items: false
+gived-game-start-items:
+  - wooden_sword
+  - leather_helmet
+  - leather_boots
+  - leather_leggings
+  - leather_chestplate
+gived-player-respawn-items:
+disable-hunger: true
+automatic-coloring-in-shop: true
+sell-max-64-per-click-in-shop: true
+destroy-placed-blocks-by-explosion-except: ''
+destroy-placed-blocks-by-explosion: true
+holo-above-bed: true
+allow-spectator-join: false
+disable-server-message:
+  player-join: false
+  player-leave: false
+respawn-cooldown:
+  enabled: true
+  time: 5
+stop-team-spawners-on-die: false
+allowed-commands: []
+change-allowed-commands-to-blacklist: false
+bungee:
+  enabled: false
+  serverRestart: true
+  serverStop: false
+  server: hub
+  auto-game-connect: false
+farmBlocks:
+  enable: false
+  blocks: []
+scoreboard:
+  enable: false
+  title: §a%game%§r - %time%
+  bedLost: §c✘
+  bedExists: §a✔
+  teamTitle: '%bed%%color%%team%'
+title:
+  enabled: false
+  fadeIn: 0
+  stay: 0
+  fadeOut: 0
+items:
+  jointeam: COMPASS
+  leavegame: RED_BED
+  startgame: DIAMOND
+  shopback: BARRIER
+  shopcosmetic: GRAY_STAINED_GLASS_PANE
+  pageback: ARROW
+  pageforward: ARROW
+  team-select: WHITE_WOOL
+vault:
+  enable: false
+  reward:
+    kill: 5
+    win: 20
+resources:
+  emerald:
+    material: EMERALD
+    color: GREEN
+    name: Emerald
+    interval: 60
+    translate: resource_emerald
+    spread: 0.1
+  diamond:
+    material: DIAMOND
+    color: BLUE
+    name: Diamond
+    interval: 30
+    translate: resource_diamond
+    spread: 0.1
+  iron:
+    material: IRON_INGOT
+    color: WHITE
+    name: Iron
+    interval: 2.5
+    translate: resource_iron
+    spread: 1.0
+  gold:
+    material: GOLD_INGOT
+    color: GOLD
+    name: Gold
+    interval: 8
+    translate: resource_gold
+    spread: 1.0
+respawn:
+  protection-enabled: true
+  protection-time: 5
+specials:
+  action-bar-messages: true
+  rescue-platform:
+    is-breakable: false
+    delay: 0
+    break-time: 10
+    distance: 1
+    material: GLASS
+  protection-wall:
+    is-breakable: false
+    delay: 20
+    break-time: 0
+    width: 5
+    height: 3
+    distance: 2
+    material: CUT_SANDSTONE
+  tnt-sheep:
+    speed: 2.0
+    follow-range: 10.0
+    max-target-distance: 32
+    explosion-time: 8
+  arrow-blocker:
+    protection-time: 10
+    delay: 5
+  warp-powder:
+    teleport-time: 6
+    delay: 0
+  magnet-shoes:
+    probability: 75
+  golem:
+    speed: 0.25
+    follow-range: 10
+    health: 20
+    name-format: '%teamcolor%%team% Golem'
+    show-name: true
+    delay: 0
+    collidable: false
+  teamchest:
+    turn-all-enderchests-to-teamchests: true
+  throwable-fireball:
+    explosion: 3.0
+tnt:
+  auto-ignite: true
+  explosion-time: 3
+sounds:
+  on_bed_destroyed: ENTITY_ENDER_DRAGON_GROWL
+  on_countdown: UI_BUTTON_CLICK
+  on_game_start: ENTITY_PLAYER_LEVELUP
+  on_team_kill: ENTITY_PLAYER_LEVELUP
+  on_player_kill: ENTITY_PLAYER_BIG_FALL
+  on_item_buy: ENTITY_ITEM_PICKUP
+  on_upgrade_buy: ENTITY_EXPERIENCE_ORB_PICKUP
+  on_respawn_cooldown_wait: UI_BUTTON_CLICK
+  on_respawn_cooldown_done: ENTITY_PLAYER_LEVELUP
+  on_trap_triggered: ENTITY_ENDERMAN_TELEPORT
+game-effects:
+  end:
+    effects:
+      - ==: Firework
+        flicker: false
+        trail: false
+        colors:
+          - &id002
+            ==: Color
+            RED: 255
+            BLUE: 255
+            GREEN: 255
+        fade-colors:
+          - *id002
+        type: BALL
+    power: 1
+    type: Firework
+  start: {}
+  kill: {}
+  teamkill: {}
+  lobbyjoin: {}
+  lobbyleave: {}
+  respawn: {}
+  beddestroy: {}
+  warppowdertick: {}
+lobby-scoreboard:
+  enabled: false
+  title: §eBEDWARS
+  content:
+    - ' '
+    - '§fMap: §2%arena%'
+    - '§fPlayers: §2%players%§f/§2%maxplayers%'
+    - ' '
+    - §fWaiting ...
+    - ' '
+statistics:
+  enabled: true
+  type: yaml
+  show-on-game-end: false
+  bed-destroyed-kills: false
+  scores:
+    kill: 10
+    die: 0
+    win: 50
+    bed-destroy: 25
+    lose: 0
+    record: 100
+database:
+  host: localhost
+  port: 3306
+  db: databse
+  user: root
+  password: secret
+  table-prefix: bw_
+bossbar:
+  use-xp-bar: false
+  lobby:
+    enable: true
+    color: YELLOW
+    style: SEGMENTED_20
+  game:
+    enable: true
+    color: GREEN
+    style: SEGMENTED_20
+holograms:
+  enabled: true
+  headline: Your §eBEDWARS§f stats
+chat:
+  override: true
+  format: '<%teamcolor%%name%§r> '
+  separate-chat:
+    lobby: false
+    game: false
+  send-death-messages-just-in-game: true
+  send-custom-death-messages: true
+  default-team-chat-while-running: true
+  all-chat-prefix: '@a'
+  team-chat-prefix: '@t'
+  all-chat: '[ALL] '
+  team-chat: '[TEAM] '
+  death-chat: '[DEATH] '
+rewards:
+  enabled: false
+  player-win:
+    - /example {player} 200
+  player-end-game:
+    - /example {player} {score}
+  player-destroy-bed:
+    - /example {player} {score}
+  player-kill:
+    - /example {player} 10
+lore:
+  generate-automatically: true
+  text:
+    - '§7Price:'
+    - §7%price% %resource%
+    - '§7Amount:'
+    - §7%amount%
+sign:
+  - §c§l[BedWars]
+  - '%arena%'
+  - '%status%'
+  - '%players%'
+hotbar:
+  selector: 0
+  color: 1
+  start: 2
+  leave: 8
+breakable:
+  enabled: false
+  asblacklist: false
+  blocks: []
+leaveshortcuts:
+  enabled: false
+  list:
+    - leave
+mainlobby:
+  enabled: false
+  location: 5008.480952200986;122.0;5032.798965675137;-180.29222;10.652989
+  world: Lobby
+version: 2
+turnOnExperimentalGroovyShop: false
+preventSpectatorFlyingAway: false
+removePurchaseMessages: false
+disableCakeEating: true
+disableDragonEggTeleport: true
+disable-flight: true
+shop:
+  rows: 4
+  render-actual-rows: 6
+  render-offset: 9
+  render-header-start: 0
+  render-footer-start: 45
+  items-on-row: 9
+  show-page-numbers: true
+  inventory-type: CHEST
+  citizens-enabled: true

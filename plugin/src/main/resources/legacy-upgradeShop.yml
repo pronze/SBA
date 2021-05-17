@@ -1,0 +1,138 @@
+data:
+  #-   stack:
+  #      type: GOLDEN_APPLE
+  #      amount: 1
+  #      meta:
+  #        ==: ItemMeta
+  #        meta-type: UNSPECIFIC
+  #        display-name: "Example category"
+  #        lore:
+  #        - "This is my category!"
+  #        - "Please buy things inside!"
+  #    items:
+  #    - price: 50
+  #      price-type: "bronze"
+  #      stack:
+  #        type: DIAMOND_SWORD
+  #        amount: 1
+  #        meta:
+  #          ==: ItemMeta
+  #          meta-type: UNSPECIFIC
+  #          enchants:
+  #            DAMAGE_ALL: 2
+  #          repair-cost: 1
+  #          Damage: 99
+  # Value 'applycolorbyteam' is used for automatic-coloring-in-shop.
+  # See WarpPowder for more info.
+
+  - stack: "IRON_CHESTPLATE;1;Protection;Click here to get more resistance to damage!"
+    column: 2
+    price: 4 of diamond
+    properties: protection
+
+  - stack: "IRON_SWORD;1;Sharpness;Kill players quicker!."
+    column: 1
+    price: 4 of diamond
+    properties: sharpness
+
+  - stack: "GOLDEN_PICKAXE;1;Enchant;Break Blocks quicker!."
+    column: 3
+    items:
+      - price: 4 of diamond
+        skip: 1
+        properties: efficiency
+        stack:
+          type: GOLDEN_PICKAXE
+          display-name: "Efficiency I"
+          lore:
+            - "Gain Permenant Efficinecy I for your pickaxe!"
+          enchants:
+            DIG_SPEED: 1
+      - price: 8 of diamond
+        properties: efficiency
+        stack:
+          type: GOLDEN_PICKAXE
+          display-name: "Efficiency II"
+          lore:
+            - "Gain Permenant Efficiency II for your pickaxe!"
+          enchants:
+            DIG_SPEED: 2
+
+  - price: 4
+    price-type: iron
+    upgrade:
+      entities:
+        - type: spawner
+          spawner-type: iron
+          add-levels: 0.5
+          shop-name: "Iron upgrade of the team %team%"
+          notify-team: true
+    stack:
+      ==: org.bukkit.inventory.ItemStack
+      v: 1519
+      type: FURNACE
+      amount: 1
+      meta:
+        ==: ItemMeta
+        meta-type: UNSPECIFIC
+        display-name: "Bronze upgrade of the team %team%"
+
+
+  - stack: "BEACON;1;§bHeal Pool;§7Triggers a pool around the base that heals you!"
+    column: 5
+    row: 1
+    properties: healpool
+    price: 8 of diamond
+
+  - stack: "DRAGON_EGG;1;Ender Dragon;Unconfigured"
+    column: 6
+    row: 1
+
+  - stack: "LEATHER;1;TRAPS;TRAP YOUR ENEMY"
+    column: 7
+    items:
+      - price: 2 of diamond
+        skip: 1
+        properties: blindtrap
+        stack:
+          type: STRING
+          display-name: "§bBlindess trap"
+          lore:
+            - "§7Get informed when an enemy enters a 7 block radius of your base"
+            - "§7Blind the foe and gain an upper advantage!"
+
+      - price: 1 of gold
+        properties:
+          - name: "Trap"
+            data:
+              - sound: ENTITY_SHEEP_AMBIENT
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 15
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 18
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+              - effect:
+                  ==: org.bukkit.potion.PotionEffect
+                  effect: 2
+                  amplifier: 2
+                  duration: 100
+                  ambient: true
+                  has-particles: true
+                  has-icon: true
+        stack:
+          type: STRING
+          display-name: "Trap"
+          lore:
+            - "Get informed if an enemy steps on your trap"
+            - "and your enemy won't be able to move properly."
