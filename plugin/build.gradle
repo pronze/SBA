@@ -1,5 +1,6 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
+        .modules('player', 'event', 'material', 'entity', 'world', 'command', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator')
         .enableAnnotationProcessor()
         .version("2.0.0-SNAPSHOT")
         .build()
@@ -7,6 +8,21 @@ ScreamingLibBuilder()
 dependencies {
     implementation project(':SBAHypixelify-API')
     compileOnly 'me.clip:placeholderapi:2.10.9'
+    implementation 'pronze.lib:scoreboard:1.0.2-SNAPSHOT'
+    implementation "io.projectreactor:reactor-core:3.4.4"
+    compileOnly 'com.mojang:datafixerupper:1.0.20'
+    implementation 'cloud.commandframework:cloud-minecraft-extras:1.4.0'
+    implementation 'me.lucko:commodore:1.9', {
+        exclude group: 'com.mojang', module: 'brigadier'
+    }
+    implementation "cloud.commandframework:cloud-paper:1.4.0"
+    implementation "cloud.commandframework:cloud-annotations:1.4.0"
+    implementation "net.kyori:adventure-text-minimessage:4.1.0-SNAPSHOT"
+    implementation 'org.spongepowered:configurate-core:4.0.0'
+    implementation 'org.spongepowered:configurate-gson:4.0.0' 
+    implementation 'org.spongepowered:configurate-hocon:4.0.0'
+    implementation 'org.spongepowered:configurate-xml:4.0.0'
+    implementation 'org.spongepowered:configurate-yaml:4.0.0'
 }
 
 
