@@ -1,47 +1,45 @@
 package pronze.hypixelify.service;
 
 import org.bukkit.entity.Player;
-import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
-import org.screamingsandals.bedwars.lib.bukkit.utils.nms.network.AutoPacketInboundListener;
-import org.screamingsandals.bedwars.lib.bukkit.utils.nms.network.AutoPacketOutboundListener;
-import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
-import org.screamingsandals.bedwars.player.PlayerManager;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.lib.bukkit.utils.nms.network.AutoPacketOutboundListener;
+import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.game.ArenaManager;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.annotations.OnInit;
-
 import java.util.concurrent.atomic.AtomicReference;
 
-@AutoInitialize
+@Service
 public class PlayerInvisibilityMaintainerService {
 
-    @OnInit
+    @OnPostEnable
     public void addListener() {
         final Class<?> PacketPlayOutEntityEquipment = ClassStorage.safeGetClass("{nms}.PacketPlayOutEntityEquipment");
 
-        new AutoPacketOutboundListener(SBAHypixelify.getInstance()) {
+        new AutoPacketOutboundListener(SBAHypixelify.getPluginInstance()) {
             @Override
             protected Object handle(Player player, Object packet) {
                 if (PacketPlayOutEntityEquipment.isInstance(packet)) {
                     final var entityId = (int) Reflect.getField(ClassStorage.NMS.PacketPlayInUseEntity, "a,field_149567_a", packet);
 
                     final AtomicReference<Player> armorEquipper = new AtomicReference<>();
-                    final Game playerGame = PlayerManager.getInstance().getGameOfPlayer(player.getUniqueId()).orElse(null);
+                    final Game playerGame = Main.getInstance().getGameOfPlayer(player);
 
                     if (playerGame == null) {
                         return packet;
                     }
 
-                    PlayerManager
-                            .getInstance()
-                            .getGameOfPlayer(player.getUniqueId())
-                            .ifPresent(game -> game.getConnectedPlayers().forEach(pl -> {
+                    playerGame
+                            .getConnectedPlayers()
+                            .forEach(pl -> {
                                 if (pl.getEntityId() == entityId) {
                                     armorEquipper.set(pl);
                                 }
-                            }));
+                            });
 
 
                     final var equipper = armorEquipper.get();

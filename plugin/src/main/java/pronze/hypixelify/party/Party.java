@@ -1,20 +1,18 @@
 package pronze.hypixelify.party;
+import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.PartyInviteData;
 import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.party.PartySetting;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.lib.lang.LanguageService;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.core.utils.Logger;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -132,7 +130,7 @@ public class Party implements IParty {
                         .get(MessageKeys.PARTY_MESSAGE_INVITE_EXPIRED)
                         .send(getPartyLeader());
             }
-        }.runTaskLater(SBAHypixelify.getInstance(),
+        }.runTaskLater(SBAHypixelify.getPluginInstance(),
                 20L * SBAHypixelify
                         .getInstance()
                         .getConfigurator()

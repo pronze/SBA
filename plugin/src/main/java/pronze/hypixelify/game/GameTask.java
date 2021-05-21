@@ -7,14 +7,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.config.MainConfig;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.utils.visual.TextEntry;
-import org.screamingsandals.bedwars.player.PlayerManager;
 import org.screamingsandals.bedwars.utils.Sounds;
+import org.screamingsandals.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GeneratorData;
@@ -71,40 +69,7 @@ public class GameTask extends BukkitRunnable {
                 .getBoolean("upgrades.show-upgrade-message", true);
 
         multiplier = SBAConfig.getInstance().getDouble("upgrades.multiplier", 0.25);
-        linkSpawnerData();
-        runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
-    }
-
-    private void linkSpawnerData() {
-        if (SBAConfig.getInstance().getBoolean("floating-generator.enabled", true)) {
-            game.getItemSpawners()
-                    .stream()
-                    .filter(org.screamingsandals.bedwars.api.game.ItemSpawner::getFloatingEnabled)
-                    .forEach((spawner) -> {
-                        final var mat = spawner.getItemSpawnerType().getMaterial();
-                        Material convertedMat = null;
-
-                        switch (mat) {
-                            case DIAMOND:
-                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator.diamond-block"));
-                                break;
-                            case EMERALD:
-                                convertedMat = Material.valueOf(SBAConfig.getInstance().getString("floating-generator.emerald-block"));
-                                break;
-                        }
-
-                        if (convertedMat != null && spawner.getHologramEnabled()) {
-                            var holo = ((ItemSpawner) spawner).getHologram();
-                            if (holo != null) {
-                                holo.replaceLine(2, TextEntry.of(LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
-                                        .toString()));
-                                generatorData.add(new GeneratorData((ItemSpawner) spawner, new ItemStack(convertedMat)));
-                            }
-                        }
-                    });
-        }
+        runTaskTimer(SBAHypixelify.getPluginInstance(), 0L, 20L);
     }
 
     @Override
@@ -114,10 +79,7 @@ public class GameTask extends BukkitRunnable {
             // LOGIC FOR TRAPS
             if (storage.areTrapsEnabled()) {
                 game.getConnectedPlayers().forEach(player -> {
-                    final var bwPlayer = PlayerManager
-                            .getInstance()
-                            .getPlayer(player.getUniqueId())
-                            .orElseThrow();
+                    final var bwPlayer = Main.getPlayerGameProfile(player);
                     if (bwPlayer.isSpectator) return;
 
                     game.getRunningTeams().forEach(team -> {
@@ -129,7 +91,7 @@ public class GameTask extends BukkitRunnable {
                             if (storage.getTargetBlockLocation(team)
                                     .distanceSquared(player.getLocation()) <= arena.getRadius()) {
                                 final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
-                                SBAHypixelify.getInstance().getServer().getPluginManager().callEvent(triggeredEvent);
+                                SBAHypixelify.getPluginInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
                                 if (!triggeredEvent.isCancelled()) {
                                     storage.setTrap(team, false);
@@ -156,8 +118,7 @@ public class GameTask extends BukkitRunnable {
                                             .toString();
 
                                     team.getConnectedPlayers().forEach(pl -> {
-                                        Sounds.playSound(pl, pl.getLocation(), MainConfig.getInstance()
-                                                        .node("sounds", "on_trap_triggered").getString(),
+                                        Sounds.playSound(pl, pl.getLocation(), Main.getInstance().getConfig().getString("sounds.on_trap_triggered"),
                                                 Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
                                         SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
                                     });
@@ -176,10 +137,7 @@ public class GameTask extends BukkitRunnable {
                         .stream()
                         .filter(storage::isPoolEnabled)
                         .forEach(team -> team.getConnectedPlayers().forEach(player -> {
-                            final var bwPlayer = PlayerManager
-                                    .getInstance()
-                                    .getPlayer(player.getUniqueId())
-                                    .orElseThrow();
+                            final var bwPlayer = Main.getPlayerGameProfile(player);
 
                             if (bwPlayer.isSpectator) return;
                             if (storage.getTargetBlockLocation(team)
@@ -232,14 +190,14 @@ public class GameTask extends BukkitRunnable {
                             final var generatorMatType = generator.getItemStack().getType();
                             if (generatorMatType == finalType) {
                                 generator.setTierLevel(generator.getTierLevel() + 1);
-                                generator
-                                        .getItemSpawner()
-                                        .getHologram()
-                                        .bottomLine(TextEntry.of(LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
-                                                .toString()
-                                                .replace("%tier%", String.valueOf(generator.getTierLevel()))));
+                            //  generator
+                            //          .getItemSpawner()
+                            //          .getHologram()
+                            //          .bottomLine(TextEntry.of(LanguageService
+                            //                  .getInstance()
+                            //                  .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
+                            //                  .toString()
+                            //                  .replace("%tier%", String.valueOf(generator.getTierLevel()))));
                             }
                         });
 
@@ -253,7 +211,7 @@ public class GameTask extends BukkitRunnable {
                                             .getConnectedPlayers()
                                             .stream()
                                             .map(PlayerMapper::wrapPlayer)
-                                            .toArray(org.screamingsandals.bedwars.lib.player.PlayerWrapper[]::new));
+                                            .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
                         }
                     }
                     tier++;

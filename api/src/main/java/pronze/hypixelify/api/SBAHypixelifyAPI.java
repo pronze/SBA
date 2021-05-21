@@ -1,8 +1,6 @@
 package pronze.hypixelify.api;
 
-import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.config.IConfigurator;
-import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.lang.ILanguageService;
 import pronze.hypixelify.api.manager.IArenaManager;
@@ -69,12 +67,6 @@ public interface SBAHypixelifyAPI {
      * @return The {@link IArenaManager} instance that handles the creation or destruction of arenas.
      */
     IArenaManager getArenaManager();
-
-    /**
-     *
-     * @param handler The {@link ExceptionHandler} instance that will handle exceptions thrown by the plugin.
-     */
-    void setExceptionHandler(@NotNull ExceptionHandler handler);
 
     /**
      *

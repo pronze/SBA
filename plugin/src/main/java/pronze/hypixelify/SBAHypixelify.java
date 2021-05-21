@@ -1,11 +1,12 @@
 package pronze.hypixelify;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.config.IConfigurator;
-import pronze.hypixelify.api.exception.ExceptionHandler;
 import pronze.hypixelify.api.game.GameStorage;
 import pronze.hypixelify.api.lang.ILanguageService;
 import pronze.hypixelify.api.manager.IArenaManager;
@@ -13,10 +14,18 @@ import pronze.hypixelify.api.manager.IPartyManager;
 import pronze.hypixelify.api.service.WrapperService;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
+import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.game.ArenaManager;
 import pronze.hypixelify.inventories.CustomShop;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
+import pronze.hypixelify.inventories.GamesInventory;
+import pronze.hypixelify.lib.lang.LanguageService;
+import pronze.hypixelify.listener.BedWarsListener;
+import pronze.hypixelify.listener.GameChatListener;
+import pronze.hypixelify.listener.PartyListener;
+import pronze.hypixelify.listener.PlayerListener;
+import pronze.hypixelify.party.PartyManager;
 import pronze.hypixelify.placeholderapi.SBAExpansion;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
@@ -27,7 +36,16 @@ import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
+import pronze.hypixelify.service.HealthIndicatorService;
+import pronze.hypixelify.service.PlayerInvisibilityMaintainerService;
+import pronze.hypixelify.service.PlayerWrapperService;
+import pronze.hypixelify.utils.DateUtils;
+import pronze.hypixelify.utils.Logger;
+import pronze.hypixelify.visuals.LobbyScoreboardManager;
+import pronze.hypixelify.visuals.MainLobbyVisualsManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -43,9 +61,24 @@ import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
         "PlaceholderAPI"
 )
 @Init(services = {
+        UpdateChecker.class,
+        SBAConfig.class,
+        Logger.class,
+        LanguageService.class,
+        CommandManager.class,
         ArenaManager.class,
         CustomShop.class,
-        CommandManager.class
+        GamesInventory.class,
+        PlayerWrapperService.class,
+        HealthIndicatorService.class,
+        PlayerInvisibilityMaintainerService.class,
+        DateUtils.class,
+        BedWarsListener.class,
+        GameChatListener.class,
+        PartyListener.class,
+        PlayerListener.class,
+        LobbyScoreboardManager.class,
+        MainLobbyVisualsManager.class
 })
 
 public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
@@ -58,6 +91,8 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
     public static JavaPlugin getPluginInstance() {
         return instance.getPluginDescription().as(JavaPlugin.class);
     }
+
+    private final List<Listener> registeredListeners = new ArrayList<>();
 
     @Override
     public void enable() {
@@ -130,6 +165,28 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
         }
     }
 
+    public void registerListener(@NotNull Listener listener) {
+        if (registeredListeners.contains(listener)) {
+            return;
+        }
+
+        Bukkit.getServer().getPluginManager().registerEvents(listener, getPluginInstance());
+        Logger.trace("Registered listener: {}", listener.getClass().getSimpleName());
+    }
+
+    public void unregisterListener(@NotNull Listener listener) {
+        if (!registeredListeners.contains(listener)) {
+            return;
+        }
+        HandlerList.unregisterAll(listener);
+        registeredListeners.remove(listener);
+        Logger.trace("Unregistered listener: {}", listener.getClass().getSimpleName());
+    }
+
+    public List<Listener> getRegisteredListeners() {
+        return List.copyOf(registeredListeners);
+    }
+
     @Override
     public void disable() {
         getLogger().info("Cancelling current tasks....");
@@ -149,52 +206,47 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
 
     @Override
     public boolean isDebug() {
-        return false;
+        return SBAConfig.getInstance().getBoolean("debug.enabled", false);
     }
 
     @Override
     public boolean isSnapshot() {
-        return false;
+        return getVersion().contains("snapshot");
     }
 
     @Override
     public String getVersion() {
-        return null;
+        return getPluginDescription().getVersion();
     }
 
     @Override
     public IArenaManager getArenaManager() {
-        return null;
-    }
-
-    @Override
-    public void setExceptionHandler(@NotNull ExceptionHandler handler) {
-
+        return ArenaManager.getInstance();
     }
 
     @Override
     public IPartyManager getPartyManager() {
-        return null;
+        return PartyManager.getInstance();
     }
 
     @Override
     public WrapperService<Player, PlayerWrapper> getPlayerWrapperService() {
-        return null;
+        return PlayerWrapperService.getInstance();
     }
 
     @Override
     public IConfigurator getConfigurator() {
-        return null;
+        return SBAConfig.getInstance();
     }
 
     @Override
     public boolean isPendingUpgrade() {
-        return false;
+        return !getVersion().contains(Objects.requireNonNull(SBAConfig.getInstance().node("version").getString()));
     }
 
     @Override
     public ILanguageService getLanguageService() {
-        return null;
+        return LanguageService.getInstance();
     }
 }
 

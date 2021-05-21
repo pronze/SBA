@@ -1,6 +1,6 @@
 package pronze.hypixelify.utils;
 
-import pronze.hypixelify.Configurator;
+import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
 import pronze.hypixelify.SBAHypixelify;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import pronze.hypixelify.api.lang.Message;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -18,6 +19,9 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
+import pronze.hypixelify.config.SBAConfig;
+import pronze.hypixelify.game.ArenaManager;
+import pronze.hypixelify.service.PlayerWrapperService;
 
 import java.util.*;
 
@@ -26,10 +30,8 @@ import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 public class ShopUtil {
 
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
-    public static ItemStack Diamond, FireWorks, Arrow, BED;
 
     private static void InitalizeStacks() {
-
         UpgradeKeys.clear();
         UpgradeKeys.put("STONE", 2);
         UpgradeKeys.put("IRON", 4);
@@ -41,36 +43,6 @@ public class ShopUtil {
             UpgradeKeys.put("WOOD", 1);
             UpgradeKeys.put("GOLD", 3);
         }
-
-        Arrow = new ItemStack(Material.ARROW);
-        final ItemMeta metaArrow = Arrow.getItemMeta();
-
-        metaArrow.setDisplayName(SBAHypixelify.getConfigurator()
-                .config.getString("games-inventory.back-item.name", "§aGo Back"));
-        final List<String> arrowLore = SBAHypixelify.getConfigurator()
-                .config.getStringList("games-inventory.back-item.lore");
-
-        metaArrow.setLore(arrowLore);
-        Arrow.setItemMeta(metaArrow);
-
-        if (Main.isLegacy()) {
-            FireWorks = new ItemStack(Material.valueOf("FIREWORK"));
-            BED = new ItemStack(Material.valueOf("BED"));
-        } else {
-            FireWorks = new ItemStack(Material.FIREWORK_ROCKET);
-            BED = new ItemStack(Material.RED_BED);
-        }
-
-        ItemMeta fireMeta = FireWorks.getItemMeta();
-        fireMeta.setDisplayName(SBAHypixelify.getConfigurator()
-                .config.getString("games-inventory.firework-name", "§aRandom Map"));
-        FireWorks.setItemMeta(fireMeta);
-
-        Diamond = new ItemStack(Material.DIAMOND);
-        ItemMeta diamondMeta = Diamond.getItemMeta();
-        diamondMeta.setDisplayName(SBAHypixelify.getConfigurator()
-                .config.getString("games-inventory.firework-name", "§aRandom Favorite"));
-        Diamond.setItemMeta(diamondMeta);
     }
 
     public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
@@ -88,7 +60,7 @@ public class ShopUtil {
         ItemStack leggings = new ItemStack(mat_leggings);
         int level = 0;
         try {
-            level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getProtection(game.getTeamOfPlayer(player).getName());
+            level = ArenaManager.getInstance().getGameStorage(game.getName()).orElseThrow().getProtection(game.getTeamOfPlayer(player).getName());
         } catch (Throwable ignored){
 
         }
@@ -152,7 +124,7 @@ public class ShopUtil {
     }
 
     public static List<Game> getGamesWithSize(int c) {
-        final List<String> maps = getAllKeysForValue(Configurator.game_size, c);
+        final List<String> maps = getAllKeysForValue(SBAConfig.game_size, c);
         if (maps == null || maps.isEmpty())
             return null;
 
@@ -263,91 +235,6 @@ public class ShopUtil {
         return firstLetter + restLetters;
     }
 
-    public static ArrayList<Object> createGamesGUI(int mode, List<String> lore) {
-        if (Arrow == null)
-            InitalizeStacks();
-
-        final ArrayList<Object> games = new ArrayList<>();
-        int items = 0;
-
-
-
-        for (org.screamingsandals.bedwars.api.game.Game game : BedwarsAPI.getInstance()
-                .getGames()) {
-            if (Configurator.game_size.containsKey(game.getName()) &&
-                    Configurator.game_size.get(game.getName()).equals(mode) && items < 28) {
-                ItemStack arenaMaterial = new ItemStack(Material
-                        .valueOf(SBAHypixelify.getConfigurator().config
-                                .getString("games-inventory.stack-material", "PAPER")));
-
-                ItemMeta arenaMatMeta = arenaMaterial.getItemMeta();
-
-                String name1 = "§a" + game.getName();
-                List<String> newLore = new ArrayList<>();
-                lore.forEach(ls->{
-                    if(ls == null || ls.isEmpty()){
-                        return;
-                    }
-                    newLore.add(
-                            ls.replace("{players}", String.valueOf(game.getConnectedPlayers().size()))
-                                    .replace("{status}", capFirstLetter(game.getStatus().name()))
-                    );
-                });
-                arenaMatMeta.setLore(newLore);
-                arenaMatMeta.setDisplayName(name1);
-                arenaMaterial.setItemMeta(arenaMatMeta);
-                HashMap<String, Object> gameStack = new HashMap<>();
-                gameStack.put("stack", arenaMaterial);
-                gameStack.put("game", game);
-                games.add(gameStack);
-                items++;
-            }
-        }
-
-        ItemStack arrowStack = Arrow;
-        HashMap<String, Object> arrows = new HashMap<>();
-        arrows.put("stack", arrowStack);
-        arrows.put("row", 5);
-        arrows.put("column", 4);
-        arrows.put("locate", "main");
-
-        ItemStack fs = FireWorks;
-        ItemMeta fsMeta = fs.getItemMeta();
-        String size = getGamesWithSize(mode) == null ? "0" : String.valueOf(Objects.requireNonNull(getGamesWithSize(mode)).size());
-
-        List<String> fsMetaLore = SBAHypixelify.getConfigurator().getStringList("games-inventory.fireworks-lore");
-        List<String> tempList = new ArrayList<>();
-        for (String st : fsMetaLore) {
-            st = st
-                    .replace("{mode}", getModeFromInt(mode))
-                    .replace("{games}", size);
-            tempList.add(st);
-        }
-
-        fsMeta.setLore(tempList);
-
-
-        fs.setItemMeta(fsMeta);
-        HashMap<String, Object> fireworks = new HashMap<>();
-        fireworks.put("stack", fs);
-        fireworks.put("row", 4);
-        fireworks.put("column", 3);
-
-        ItemStack Dia = Diamond;
-        ItemMeta diaMeta = Dia.getItemMeta();
-        diaMeta.setLore(fsMeta.getLore());
-        Dia.setItemMeta(diaMeta);
-        HashMap<String, Object> diamond = new HashMap<>();
-        diamond.put("stack", Dia);
-        diamond.put("row", 4);
-        diamond.put("column", 5);
-
-        games.add(arrows);
-        games.add(fireworks);
-        games.add(diamond);
-        return games;
-    }
-
     public static String getModeFromInt(int mode) {
         return mode == 1 ? "Solo" : mode == 2 ? "Double" : mode == 3 ? "Triples" : "Squads";
     }
@@ -356,86 +243,6 @@ public class ShopUtil {
         return mode.equalsIgnoreCase("Solo") ? 1 :
                 mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 :
                 mode.equalsIgnoreCase("Squads") ? 4 : 0;
-    }
-
-    public static Options generateOptions() {
-        Options options = new Options(SBAHypixelify.getInstance());
-        options.setShowPageNumber(false);
-
-        ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
-        ItemMeta backItemMeta = backItem.getItemMeta();
-        backItemMeta.setDisplayName(i18n("shop_back", false));
-        backItem.setItemMeta(backItemMeta);
-        options.setBackItem(backItem);
-
-        ItemStack pageBackItem = Main.getConfigurator().readDefinedItem("pageback", "ARROW");
-        ItemMeta pageBackItemMeta = backItem.getItemMeta();
-        pageBackItemMeta.setDisplayName(i18n("page_back", false));
-        pageBackItem.setItemMeta(pageBackItemMeta);
-        options.setPageBackItem(pageBackItem);
-
-        ItemStack pageForwardItem = Main.getConfigurator().readDefinedItem("pageforward", "ARROW");
-        ItemMeta pageForwardItemMeta = backItem.getItemMeta();
-        pageForwardItemMeta.setDisplayName(i18n("page_forward", false));
-        pageForwardItem.setItemMeta(pageForwardItemMeta);
-        options.setPageForwardItem(pageForwardItem);
-
-        ItemStack cosmeticItem = Main.getConfigurator().readDefinedItem("shopcosmetic", "AIR");
-        options.setCosmeticItem(cosmeticItem);
-        options.setRender_header_start(600);
-        options.setRender_footer_start(600);
-        options.setRender_offset(9);
-        options.setRows(4);
-        options.setRender_actual_rows(4);
-        options.setShowPageNumber(false);
-        return options;
-    }
-
-    public static List<ItemStack> createCategories(List<String> lore1,
-                                                   String name, String name2) {
-        List<ItemStack> myList = new ArrayList<>();
-
-        ItemStack category;
-        ItemStack category2;
-        if (Main.isLegacy()) {
-            category = new ItemStack(Material.valueOf("BED"));
-            category2 = new ItemStack(Material.valueOf("SIGN"));
-        } else {
-            category = new ItemStack(Material.valueOf("RED_BED"));
-            category2 = new ItemStack(Material.valueOf("OAK_SIGN"));
-        }
-
-        ItemStack category3 = new ItemStack(Material.BARRIER);
-        ItemStack category4 = new ItemStack(Material.ENDER_PEARL);
-        ItemMeta meta = category.getItemMeta();
-        meta.setLore(lore1);
-        meta.setDisplayName(name);
-        category.setItemMeta(meta);
-
-        ItemMeta meta2 = category2.getItemMeta();
-        meta2.setLore(SBAHypixelify.getConfigurator().getStringList("games-inventory.oak_sign-lore"));
-        meta2.setDisplayName(name2);
-        category2.setItemMeta(meta2);
-
-        ItemMeta meta3 = category3.getItemMeta();
-        String name3 = SBAHypixelify.getConfigurator().getString("games-inventory.barrier-name", "§cExit");
-        meta3.setDisplayName(name3);
-        category3.setItemMeta(meta3);
-
-        ItemMeta meta4 = category4.getItemMeta();
-        String name4 = SBAHypixelify.getConfigurator().getString("games-inventory.ender_pearl-name"
-                , "§cClick here to rejoin!");
-
-        meta4.setLore(SBAHypixelify.getConfigurator().getStringList("games-inventory.ender_pearl-lore"));
-        meta4.setDisplayName(name4);
-        category4.setItemMeta(meta4);
-
-        myList.add(category);
-        myList.add(category2);
-        myList.add(category3);
-        myList.add(category4);
-
-        return myList;
     }
 
     public static String translateColors(String s) {
@@ -448,7 +255,7 @@ public class ShopUtil {
     }
 
     public static void upgradeSwordOnPurchase(Player player, ItemStack newItem, Game game) {
-        if (SBAHypixelify.getConfigurator().config.getBoolean("remove-sword-on-upgrade", true)) {
+        if (SBAHypixelify.getInstance().getConfigurator().getBoolean("remove-sword-on-upgrade", true)) {
             Arrays.stream(player.getInventory().getContents()).forEach(item -> {
                 if (item == null) return;
 
@@ -461,7 +268,7 @@ public class ShopUtil {
         }
         int level;
         try {
-            level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getSharpness(game.getTeamOfPlayer(player).getName());
+            level = ArenaManager.getInstance().getGameStorage(game.getName()).orElseThrow().getSharpness(game.getTeamOfPlayer(player).getName());
         } catch (Throwable t) {
             return;
         }
@@ -485,8 +292,32 @@ public class ShopUtil {
         }
     }
 
+    public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
+        final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
+   //backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
+   //localOptionsBuilder.backItem(backItem);
+
+   //final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");
+   //pageBackItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_BACK).asComponent());
+   //localOptionsBuilder.pageBackItem(pageBackItem);
+
+   //final var pageForwardItem = MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
+   //pageForwardItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_FORWARD).asComponent());
+   //localOptionsBuilder.pageForwardItem(pageForwardItem);
+
+   //final var cosmeticItem = MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");
+        localOptionsBuilder
+              //  .cosmeticItem(cosmeticItem)
+                .renderHeaderStart(600)
+                .renderFooterStart(600)
+                .renderOffset(9)
+                .rows(4)
+                .renderActualRows(4)
+                .showPageNumber(false);
+    }
+
     public static String ChatColorChanger(Player player) {
-        final PlayerWrapper db = SBAHypixelify.getWrapperService().getWrapper(player);
+        final PlayerWrapper db = PlayerWrapperService.getInstance().get(player).orElseThrow();
         if (db.getLevel() > 100 || player.isOp()) {
             return "§f";
         } else {

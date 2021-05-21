@@ -1,32 +1,52 @@
 package pronze.hypixelify;
 
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
 
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.screamingsandals.lib.utils.annotations.Service;
+import reactor.core.publisher.Mono;
 
+@Service
 public class UpdateChecker {
 
+    public UpdateChecker() {
+        run(SBAHypixelify.getInstance());
+    }
 
-    public static void run(JavaPlugin plugin, int resourceId) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            try (InputStream inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + resourceId).openStream(); Scanner scanner = new Scanner(inputStream)) {
+    public Mono<String> checkForUpdates(SBAHypixelify plugin) {
+        return Mono.create(sink -> {
+            if (plugin.isSnapshot()) {
+                sink.success();
+            }
+            try (final var inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=79505").openStream(); Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
-                    String version = scanner.next();
-                    if (version != null) {
-                        if (!version.equalsIgnoreCase(SBAHypixelify.getVersion())) {
-                            Bukkit.getLogger().info("§e§lTHERE IS A NEW UPDATE AVAILABLE.");
-                        } else {
-                            Bukkit.getLogger().info("No updates found");
-                        }
-                    }
+                    sink.success(scanner.next());
                 }
             } catch (IOException exception) {
-                Bukkit.getLogger().info("Cannot look for updates: " + exception.getMessage());
+                sink.error(exception);
             }
         });
+    }
+
+    protected void run(SBAHypixelify plugin) {
+        checkForUpdates(plugin)
+                .doOnError(throwable -> Bukkit.getLogger().info("Cannot look for updates: " + throwable.getMessage()))
+                .doOnNext(this::promptUpdate)
+                .subscribe();
+    }
+
+    private void promptUpdate(String version) {
+        if (version == null) {
+            throw new UnsupportedOperationException("Update Version cannot be null!");
+        }
+        if (!version.equalsIgnoreCase(SBAHypixelify.getInstance().getVersion())) {
+            Bukkit.getLogger().info("§e§lTHERE IS A NEW UPDATE AVAILABLE Version: " + version);
+            Bukkit.getLogger().info("Download it from here: https://www.spigotmc.org/resources/addon-sbahypixelify-for-screaming-bedwars-1-9-4-1-16-4.79505/");
+        } else {
+            Bukkit.getLogger().info("No updates found");
+        }
     }
 }

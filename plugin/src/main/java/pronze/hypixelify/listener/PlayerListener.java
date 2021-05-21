@@ -26,10 +26,9 @@ import org.bukkit.util.Vector;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.lib.lang.Lang;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.player.BedWarsPlayer;
-import org.screamingsandals.bedwars.player.PlayerManager;
+import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.utils.annotations.Service;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.Permissions;
@@ -39,8 +38,6 @@ import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.utils.Logger;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -50,161 +47,158 @@ import java.util.List;
 import java.util.Objects;
 
 
-@AutoInitialize(listener = true)
+@Service
 public class PlayerListener implements Listener {
     private final List<Material> allowedDropItems;
     private final List<Material> generatorDropItems;
 
     public PlayerListener() {
+        SBAHypixelify.getInstance().registerListener(this);
         allowedDropItems = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
         generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
-        Logger.trace("Player death event called");
         final var player = e.getEntity();
-        final var gameOptional = PlayerManager
-                .getInstance()
-                .getGameOfPlayer(player.getUniqueId());
 
-        if (gameOptional.isEmpty()) return;
+        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) return;
 
-        final var game = gameOptional.get();
+        final var game = Main.getInstance().getGameOfPlayer(player);
         if (game.getStatus() != GameStatus.RUNNING) return;
 
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresentOrElse(arena -> {
-                    final var itemArr = new ArrayList<ItemStack>();
-                    final var sword = Main.isLegacy() ?
-                            new ItemStack(Material.valueOf("WOOD_SWORD")) :
-                            new ItemStack(Material.WOODEN_SWORD);
+        final var optionalArena = ArenaManager.getInstance().get(game.getName());
 
-                    Arrays.stream(player
-                            .getInventory()
-                            .getContents()
-                            .clone())
-                            .filter(Objects::nonNull)
-                            .forEach(stack -> {
-                                final String name = stack.getType().name();
-                                var endStr = name.substring(name.contains("_") ? name.indexOf("_") : 0);
-                                switch (endStr) {
-                                    case "SWORD":
-                                        sword.addEnchantments(stack.getEnchantments());
-                                        break;
-                                    case "AXE":
-                                        itemArr.add(ShopUtil.checkifUpgraded(stack));
-                                        break;
-                                    case "SHEARS":
-                                    case "LEGGINGS":
-                                    case "BOOTS":
-                                    case "CHESTPLATE":
-                                    case "HELMET":
-                                        itemArr.add(stack);
-                                        break;
-                                }
-                            });
+        if (optionalArena.isEmpty()) {
+            return;
+        }
 
-                    itemArr.add(sword);
-                    arena.getPlayerData(player.getUniqueId())
-                            .ifPresent(playerData -> playerData.setInventory(itemArr));
+        final var arena = optionalArena.get();
+
+        final var itemArr = new ArrayList<ItemStack>();
+        final var sword = Main.isLegacy() ?
+                new ItemStack(Material.valueOf("WOOD_SWORD")) :
+                new ItemStack(Material.WOODEN_SWORD);
+
+        Arrays.stream(player
+                .getInventory()
+                .getContents()
+                .clone())
+                .filter(Objects::nonNull)
+                .forEach(stack -> {
+                    final String name = stack.getType().name();
+                    var endStr = name.substring(name.contains("_") ? name.indexOf("_") : 0);
+                    switch (endStr) {
+                        case "SWORD":
+                            sword.addEnchantments(stack.getEnchantments());
+                            break;
+                        case "AXE":
+                            itemArr.add(ShopUtil.checkifUpgraded(stack));
+                            break;
+                        case "SHEARS":
+                        case "LEGGINGS":
+                        case "BOOTS":
+                        case "CHESTPLATE":
+                        case "HELMET":
+                            itemArr.add(stack);
+                            break;
+                    }
+                });
+
+        itemArr.add(sword);
+        arena.getPlayerData(player.getUniqueId())
+                .ifPresent(playerData -> playerData.setInventory(itemArr));
 
 
-                    if (SBAConfig.getInstance().getBoolean("give-killer-resources", true)) {
-                        final var killer = e.getEntity().getKiller();
+        if (SBAConfig.getInstance().getBoolean("give-killer-resources", true)) {
+            final var killer = e.getEntity().getKiller();
 
-                        if (killer != null
-                                && PlayerManager.getInstance().getGameOfPlayer(killer.getUniqueId()).isPresent()
-                                && killer.getGameMode() == GameMode.SURVIVAL) {
-                            Arrays.stream(player.getInventory().getContents())
-                                    .filter(Objects::nonNull)
-                                    .forEach(drop -> {
-                                        if (generatorDropItems.contains(drop.getType())) {
-                                            killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name());
-                                            killer.getInventory().addItem(drop);
-                                        }
-                                    });
+            if (killer != null
+                    && Main.getInstance().isPlayerPlayingAnyGame(killer)
+                    && killer.getGameMode() == GameMode.SURVIVAL) {
+                Arrays.stream(player.getInventory().getContents())
+                        .filter(Objects::nonNull)
+                        .forEach(drop -> {
+                            if (generatorDropItems.contains(drop.getType())) {
+                                killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name());
+                                killer.getInventory().addItem(drop);
+                            }
+                        });
+            }
+        }
+
+        final var gVictim = Main.getPlayerGameProfile(player);
+
+        final var victimTeam = game.getTeamOfPlayer(player);
+
+        if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
+                victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
+                game.getTeamOfPlayer(player).isTargetBlockExists()) {
+
+            new BukkitRunnable() {
+                final GamePlayer gamePlayer = gVictim;
+                final Player player = gamePlayer.player;
+                int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
+
+                byte buffer = 2;
+
+                final String respawnTitle = LanguageService
+                        .getInstance()
+                        .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
+                        .toString();
+
+                final String respawnSubtitle = LanguageService
+                        .getInstance()
+                        .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
+                        .toString();
+                final PlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class);
+
+                @Override
+                public void run() {
+                    if (!Main.isPlayerInGame(player)) {
+                        this.cancel();
+                        return;
+                    }
+
+                    //send custom title because we disabled BedWars from showing any title
+                    if (livingTime > 0) {
+                        SBAUtil.sendTitle(wrappedPlayer, respawnTitle,
+                                respawnSubtitle.replace("%time%", String.valueOf(livingTime)),
+                                0, 20, 0);
+
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.RESPAWN_COUNTDOWN_MESSAGE)
+                                .replace("%time%", String.valueOf(livingTime))
+                                .send(wrappedPlayer);
+                        livingTime--;
+                    }
+
+
+                    if (livingTime == 0) {
+                        if (gVictim.isSpectator && buffer > 0) {
+                            buffer--;
+                        } else {
+                            LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.RESPAWNED_MESSAGE)
+                                    .send(wrappedPlayer);
+
+                            var respawnedTitle = LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.RESPAWNED_TITLE)
+                                    .toString();
+
+                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
+                                    5, 40, 5);
+                            ShopUtil.giveItemToPlayer(itemArr, player,
+                                    Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player).getColor());
+                            this.cancel();
                         }
                     }
-
-                    final var gVictim = PlayerManager
-                            .getInstance()
-                            .getPlayer(player.getUniqueId())
-                            .orElseThrow();
-
-                    final var victimTeam = game.getTeamOfPlayer(player);
-
-                    if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
-                            victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
-                            game.getTeamOfPlayer(player).isTargetBlockExists()) {
-
-                        new BukkitRunnable() {
-                            final BedWarsPlayer gamePlayer = gVictim;
-                            final Player player = gamePlayer.as(Player.class);
-                            int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
-
-                            byte buffer = 2;
-
-                            String respawnTitle = LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
-                                    .toString();
-
-                            String respawnSubtitle = LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
-                                    .toString();
-                            PlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class);
-
-                            @Override
-                            public void run() {
-                                if (!PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
-                                    this.cancel();
-                                    return;
-                                }
-
-                                //send custom title because we disabled BedWars from showing any title
-                                if (livingTime > 0) {
-                                    SBAUtil.sendTitle(wrappedPlayer, respawnTitle,
-                                            respawnSubtitle.replace("%time%", String.valueOf(livingTime)),
-                                            0, 20, 0);
-
-                                    LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.RESPAWN_COUNTDOWN_MESSAGE)
-                                            .replace("%time%", String.valueOf(livingTime))
-                                            .send(wrappedPlayer);
-                                    livingTime--;
-                                }
-
-
-                                if (livingTime == 0) {
-                                    if (gVictim.isSpectator && buffer > 0) {
-                                        buffer--;
-                                    } else {
-                                        LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.RESPAWNED_MESSAGE)
-                                                .send(wrappedPlayer);
-
-                                        var respawnedTitle = LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.RESPAWNED_TITLE)
-                                                .toString();
-
-                                        SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
-                                                5, 40, 5);
-                                        ShopUtil.giveItemToPlayer(itemArr, player,
-                                                Main.getInstance().getGameManager().getGame(game.getName()).orElseThrow().getTeamOfPlayer(gamePlayer.as(Player.class)).getColor());
-                                        this.cancel();
-                                    }
-                                }
-                            }
-                        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 20L);
-                    }
-                }, () -> Logger.trace("Event hit null arena"));
+                }
+            }.runTaskTimer(SBAHypixelify.getPluginInstance(), 0L, 20L);
+        }
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -216,7 +210,7 @@ public class PlayerListener implements Listener {
 
         final var player = (Player) event.getWhoClicked();
 
-        if (!PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) return;
+        if (!Main.isPlayerInGame(player)) return;
 
         if (SBAConfig.getInstance().getBoolean("disable-armor-inventory-movement", true) &&
                 event.getSlotType() == SlotType.ARMOR)
@@ -247,7 +241,7 @@ public class PlayerListener implements Listener {
     public void onItemDrop(PlayerDropItemEvent evt) {
         final var player = evt.getPlayer();
 
-        if (!PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) return;
+        if (!Main.isPlayerInGame(player)) return;
         if (!SBAConfig.getInstance().getBoolean("block-item-drops", true)) return;
 
         final var ItemDrop = evt.getItemDrop().getItemStack();
@@ -264,9 +258,9 @@ public class PlayerListener implements Listener {
     public void itemDamage(PlayerItemDamageEvent e) {
         if (!SBAConfig.getInstance().getBoolean("disable-sword-armor-damage", true)) return;
         var player = e.getPlayer();
-        if (!PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) return;
+        if (!Main.isPlayerInGame(player)) return;
 
-        if (PlayerManager.getInstance().getPlayer(player.getUniqueId()).orElseThrow().isSpectator) return;
+        if (Main.getPlayerGameProfile(player).isSpectator) return;
 
         final var typeName = e.getItem().getType().toString();
         final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
@@ -328,17 +322,19 @@ public class PlayerListener implements Listener {
         SBAHypixelify.getInstance().getPlayerWrapperService().unregister(player);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
         final var entity = event.getEntity();
         if (entity instanceof Player) {
             final var player = (Player) entity;
-            PlayerManager
-                    .getInstance()
-                    .getGameOfPlayer(player.getUniqueId())
-                    .flatMap(game -> ArenaManager
-                            .getInstance()
-                            .get(game.getName())).ifPresent(arena -> arena.removeHiddenPlayer(player));
+
+            if (Main.isPlayerInGame(player)) {
+                final var game = Main.getInstance().getGameOfPlayer(player);
+                ArenaManager
+                        .getInstance()
+                        .get(game.getName())
+                        .ifPresent(arena -> arena.removeHiddenPlayer(player));
+            }
         }
     }
 
@@ -347,7 +343,7 @@ public class PlayerListener implements Listener {
         final var item = event.getItem();
         final var player = event.getPlayer();
 
-        if (!PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) return;
+        if (!Main.isPlayerInGame(player)) return;
 
         if (item.getType() == Material.POTION) {
             final var potionMeta = (PotionMeta) item.getItemMeta();
@@ -364,14 +360,9 @@ public class PlayerListener implements Listener {
                             .anyMatch(potionEffect -> potionEffect.getType() == PotionEffectType.INVISIBILITY);
                 }
             }
-            
 
             if (isInvis) {
-                final var playerGame = PlayerManager
-                        .getInstance()
-                        .getGameOfPlayer(player.getUniqueId())
-                        .orElseThrow();
-
+                final var playerGame = Main.getInstance().getGameOfPlayer(player);
                 ArenaManager
                         .getInstance()
                         .get(playerGame.getName())
@@ -386,7 +377,7 @@ public class PlayerListener implements Listener {
         SBAHypixelify.getInstance().getPlayerWrapperService().register(player);
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
             if (SBAHypixelify.getInstance().isPendingUpgrade()) {
-                Bukkit.getScheduler().runTaskLater(SBAHypixelify.getInstance(), () -> {
+                Bukkit.getScheduler().runTaskLater(SBAHypixelify.getPluginInstance(), () -> {
                     player.sendMessage("§6[SBAHypixelify]: Plugin has detected a version change, do you want to upgrade internal files?");
                     player.sendMessage("Type /bwaddon upgrade to upgrade file");
                     player.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");

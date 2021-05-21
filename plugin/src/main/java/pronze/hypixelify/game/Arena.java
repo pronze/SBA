@@ -2,11 +2,11 @@ package pronze.hypixelify.game;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;
+import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.events.GameEndingEventImpl;
-import org.screamingsandals.bedwars.events.TargetBlockDestroyedEventImpl;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.data.GamePlayerData;
 import pronze.hypixelify.api.game.IArena;
@@ -74,7 +74,7 @@ public class Arena implements IArena {
         putPlayerData(player.getUniqueId(), GamePlayerData.from(player));
     }
 
-    public void onTargetBlockDestroyed(TargetBlockDestroyedEventImpl e) {
+    public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var team = e.getTeam();
         // send bed destroyed message to all players of the team
         final var title = LanguageService
@@ -90,7 +90,7 @@ public class Arena implements IArena {
                 SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), title, subtitle, 0, 40, 20)
         );
 
-        final var destroyer = e.getBroker().as(Player.class);
+        final var destroyer = e.getPlayer();
         if (destroyer != null) {
             // increment bed destroy data for the destroyer
             getPlayerData(destroyer.getUniqueId())
@@ -98,7 +98,7 @@ public class Arena implements IArena {
         }
     }
 
-    public void onOver(GameEndingEventImpl e) {
+    public void onOver(BedwarsGameEndingEvent e) {
         // destroy scoreboard manager instance and GameTask, we do not need these anymore
         scoreboardManager.destroy();
         gameTask.cancel();

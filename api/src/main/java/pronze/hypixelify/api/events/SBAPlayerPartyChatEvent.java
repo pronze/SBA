@@ -2,11 +2,11 @@ package pronze.hypixelify.api.events;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 

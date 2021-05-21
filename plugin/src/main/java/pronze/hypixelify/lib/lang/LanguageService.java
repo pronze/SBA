@@ -2,40 +2,36 @@ package pronze.hypixelify.lib.lang;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.screamingsandals.bedwars.lib.ext.configurate.ConfigurationNode;
-import org.screamingsandals.bedwars.lib.ext.configurate.serialize.SerializationException;
-import org.screamingsandals.bedwars.lib.ext.configurate.yaml.NodeStyle;
-import org.screamingsandals.bedwars.lib.ext.configurate.yaml.YamlConfigurationLoader;
-import org.screamingsandals.bedwars.lib.sgui.loaders.ConfigurateLoader;
+import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.utils.annotations.Service;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.yaml.NodeStyle;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.lang.ILanguageService;
 import pronze.hypixelify.api.lang.Message;
 import pronze.hypixelify.config.SBAConfig;
-import pronze.lib.core.Core;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.auto.InitializationPriority;
-
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@AutoInitialize(initPriority = InitializationPriority.HIGH)
+@Service
 @Getter
 public class LanguageService implements ILanguageService {
-    private final String locale;
     private static final List<String> validLocale = List.of(
             "af", "ar", "ca", "cs", "da", "de", "el", "en", "es", "fi", "fr", "he", "hu",
             "it", "ja", "ko", "nl", "no", "pl", "pt", "pt-BR", "ro", "ru", "sr", "sv", "tr",
             "uk", "vi", "zh", "zh-CN"
     );
 
+    public static LanguageService getInstance() {
+        return ServiceManager.get(LanguageService.class);
+    }
+
+    private final String locale;
     private ConfigurationNode configurationNode;
     private ConfigurationNode fallbackNode;
-
-    public static LanguageService getInstance() {
-        return Core.getObjectFromClass(LanguageService.class);
-    }
 
     public LanguageService() {
         locale = SBAConfig.getInstance().node("locale").getString("en");
@@ -74,7 +70,7 @@ public class LanguageService implements ILanguageService {
         }
 
         try {
-            var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath();
+            var pathStr = SBAHypixelify.getPluginInstance().getDataFolder().getAbsolutePath();
             pathStr = pathStr + "/languages/language_" + locale + ".yml";
 
             var loader = YamlConfigurationLoader
@@ -85,11 +81,11 @@ public class LanguageService implements ILanguageService {
             configurationNode = loader.load();
         } catch (Exception ex) {
             Bukkit.getLogger().warning("There was an error loading language file!");
-            SBAHypixelify.getExceptionManager().handleException(ex);
+            ex.printStackTrace();
         }
 
         try {
-            var pathStr = SBAHypixelify.getInstance().getDataFolder().getAbsolutePath();
+            var pathStr = SBAHypixelify.getPluginInstance().getDataFolder().getAbsolutePath();
             pathStr = pathStr + "/languages/language_fallback.yml";
 
             var loader = YamlConfigurationLoader
@@ -100,7 +96,7 @@ public class LanguageService implements ILanguageService {
             fallbackNode = loader.load();
         } catch (Exception ex) {
             Bukkit.getLogger().warning("There was an error loading fallback language!");
-            SBAHypixelify.getExceptionManager().handleException(ex);
+            ex.printStackTrace();
         }
     }
 }

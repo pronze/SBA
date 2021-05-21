@@ -1,7 +1,7 @@
 package pronze.hypixelify.api.party;
 
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
 import pronze.hypixelify.api.data.PartyInviteData;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 

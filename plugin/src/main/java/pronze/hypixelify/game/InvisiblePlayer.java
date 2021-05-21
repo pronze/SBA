@@ -11,14 +11,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
-import org.screamingsandals.bedwars.lib.utils.math.Vector3D;
-import org.screamingsandals.bedwars.lib.utils.reflect.Constructor;
-import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
+import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.lib.utils.math.Vector3D;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.core.utils.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -67,7 +65,7 @@ public class InvisiblePlayer {
                     //TODO: play effect
                 }
             }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 10L);
+        }.runTaskTimer(SBAHypixelify.getPluginInstance(), 0L, 10L);
 
         armorHider = new BukkitRunnable() {
             @Override
@@ -79,7 +77,7 @@ public class InvisiblePlayer {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 1L);
+        }.runTaskTimer(SBAHypixelify.getPluginInstance(), 0L, 1L);
     }
 
     private boolean isElligble() {

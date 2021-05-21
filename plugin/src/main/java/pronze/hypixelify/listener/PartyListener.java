@@ -1,19 +1,23 @@
 package pronze.hypixelify.listener;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.utils.annotations.Service;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyChatEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
-import pronze.lib.core.annotations.AutoInitialize;
 
-@AutoInitialize(listener = true)
+@Service
 public class PartyListener implements Listener {
+
+    public PartyListener() {
+        SBAHypixelify.getInstance().registerListener(this);
+    }
 
     @EventHandler
     public void onPlayerChat(AsyncPlayerChatEvent event) {
@@ -32,7 +36,7 @@ public class PartyListener implements Listener {
 
                         Runnable runnable = () -> {
                                 SBAHypixelify
-                                        .getInstance()
+                                        .getPluginInstance()
                                         .getServer()
                                         .getPluginManager()
                                         .callEvent(chatEvent);
@@ -47,7 +51,7 @@ public class PartyListener implements Listener {
                         };
 
                         if (Bukkit.isPrimaryThread()) {
-                            Bukkit.getScheduler().runTaskAsynchronously(SBAHypixelify.getInstance(), runnable);
+                            Bukkit.getScheduler().runTaskAsynchronously(SBAHypixelify.getPluginInstance(), runnable);
                         } else {
                             runnable.run();
                         }

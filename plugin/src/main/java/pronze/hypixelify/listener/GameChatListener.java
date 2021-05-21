@@ -6,32 +6,31 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.bedwars.player.PlayerManager;
+import org.screamingsandals.lib.utils.annotations.Service;
+import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
-import pronze.lib.core.annotations.AutoInitialize;
 
-@AutoInitialize(listener = true)
+@Service
 public class GameChatListener implements Listener {
+
+    public GameChatListener() {
+        SBAHypixelify.getInstance().registerListener(this);
+    }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         final var player = event.getPlayer();
-        if (PlayerManager.getInstance().isPlayerInGame(player.getUniqueId())) {
-            final var game = PlayerManager
-                    .getInstance()
-                    .getGameOfPlayer(player.getUniqueId())
-                    .orElseThrow();
+        if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
+            final var game = Main.getInstance().getGameOfPlayer(player);
 
             if (game.getStatus() == GameStatus.RUNNING) {
                 if (SBAConfig.getInstance().node("chat-format", "game-chat", "enabled").getBoolean(true)) {
                     event.setCancelled(true);
 
-                    final var bedwarsPlayer = PlayerManager
-                            .getInstance()
-                            .getPlayer(player.getUniqueId())
-                            .orElseThrow();
+                    final var bedwarsPlayer = Main.getPlayerGameProfile(player);
 
                     String format;
                     final var allChatPrefix = SBAConfig

@@ -8,9 +8,7 @@ import pronze.hypixelify.config.SBAConfig;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Service(dependsOn = {
-        SBAConfig.class
-})
+@Service
 public class Logger {
     private static Logger instance;
     private Level level;

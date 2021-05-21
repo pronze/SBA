@@ -11,10 +11,13 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.screamingsandals.lib.player.PlayerMapper;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.ApplyPropertyToItemEvent;
 import pronze.hypixelify.api.events.PlayerToolUpgradeEvent;
-import pronze.hypixelify.message.Messages;
+import pronze.hypixelify.game.ArenaManager;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -70,11 +73,11 @@ public class CustomShop implements Listener {
     );
 
     public CustomShop() {
-        prices.put(0, SBAHypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-I", 4));
-        prices.put(1, SBAHypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-I", 4));
-        prices.put(2, SBAHypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-II", 8));
-        prices.put(3, SBAHypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-III", 12));
-        prices.put(4, SBAHypixelify.getConfigurator().config.getInt("upgrades.prices.Sharpness-Prot-IV", 16));
+        prices.put(0, SBAHypixelify.getInstance().getConfigurator().getInt("upgrades.prices.Sharpness-Prot-I", 4));
+        prices.put(1, SBAHypixelify.getInstance().getConfigurator().getInt("upgrades.prices.Sharpness-Prot-I", 4));
+        prices.put(2, SBAHypixelify.getInstance().getConfigurator().getInt("upgrades.prices.Sharpness-Prot-II", 8));
+        prices.put(3, SBAHypixelify.getInstance().getConfigurator().getInt("upgrades.prices.Sharpness-Prot-III", 12));
+        prices.put(4, SBAHypixelify.getInstance().getConfigurator().getInt("upgrades.prices.Sharpness-Prot-IV", 16));
 
         ItemStack backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         ItemMeta backItemMeta = backItem.getItemMeta();
@@ -106,7 +109,7 @@ public class CustomShop implements Listener {
         options.setShowPageNumber(false);
         options.setInventoryType(InventoryType.valueOf(Main.getConfigurator().config.getString("shop.inventory-type", "CHEST")));
 
-        options.setPrefix(SBAHypixelify.getConfigurator().getString("shop-name", "[SBAHypixelify] Shop"));
+        options.setPrefix(SBAHypixelify.getInstance().getConfigurator().getString("shop-name", "[SBAHypixelify] Shop"));
         options.setGenericShop(true);
         options.setGenericShopPriceTypeRequired(true);
         options.setAnimationsEnabled(true);
@@ -226,7 +229,7 @@ public class CustomShop implements Listener {
                 }
                 String name = (parent ? "+" : "-") + file;
                 if (!shopMap.containsKey(name)) {
-                    if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false) && new File(SBAHypixelify.getInstance().getDataFolder(), file + ".groovy").exists()) {
+                    if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false) && new File(SBAHypixelify.getPluginInstance().getDataFolder(), file + ".groovy").exists()) {
                         loadNewShop(name, file + ".groovy", parent);
                     } else {
                         loadNewShop(name, file + ".yml", parent);
@@ -270,11 +273,14 @@ public class CustomShop implements Listener {
              */
             try {
                 if (eventStack != null) {
+                    final var gameStorage = ArenaManager.getInstance().getGameStorage(game.getName()).orElseThrow();
+
                     if (typeName.endsWith("SWORD")) {
                         final RunningTeam rt = game.getTeamOfPlayer(player);
+
                         int sharpness = 0;
                         try {
-                            sharpness = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getSharpness(rt.getName());
+                            sharpness = gameStorage.getSharpness(rt.getName());
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
@@ -289,7 +295,7 @@ public class CustomShop implements Listener {
                         final RunningTeam rt = game.getTeamOfPlayer(player);
                         int protection = 0;
                         try {
-                            protection = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getProtection(rt.getName());
+                            protection = gameStorage.getProtection(rt.getName());
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
@@ -344,7 +350,7 @@ public class CustomShop implements Listener {
     public void onShopOpen(BedwarsOpenShopEvent event) {
         final Player player = event.getPlayer();
         if (Main.getPlayerGameProfile(player).isSpectator) return;
-        if (SBAHypixelify.getConfigurator().config.getBoolean("store.replace-store-with-hypixelstore", true)) {
+        if (SBAHypixelify.getInstance().getConfigurator().getBoolean("store.replace-store-with-hypixelstore", true)) {
             event.setResult(Result.DISALLOW_UNKNOWN);
             this.show(player, event.getStore());
         }
@@ -386,6 +392,7 @@ public class CustomShop implements Listener {
 
         return stack;
     }
+
     @EventHandler
     public void onApplyPropertyToItem(ApplyPropertyToItemEvent event) {
         String price = null;
@@ -394,6 +401,7 @@ public class CustomShop implements Listener {
         final RunningTeam team = game.getTeamOfPlayer(player);
         final String propertyName = event.getPropertyName();
         final ItemStack itemStack = event.getStack();
+        final var gameStorage = ArenaManager.getInstance().getGameStorage(game.getName()).orElseThrow();
 
         if (propertyName.equalsIgnoreCase("applycolorbyteam")
                 || propertyName.equalsIgnoreCase("transform::applycolorbyteam")) {
@@ -408,7 +416,7 @@ public class CustomShop implements Listener {
         else if (propertyName.equalsIgnoreCase("sharpness")) {
             if (team == null) return;
             ItemStack stack = event.getStack();
-            int level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getSharpness(team.getName()) + 1;
+            int level = gameStorage.getSharpness(team.getName()) + 1;
             if (level == 5) {
                 stack.removeEnchantment(Enchantment.DAMAGE_ALL);
                 stack.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
@@ -422,7 +430,7 @@ public class CustomShop implements Listener {
         } else if (propertyName.equalsIgnoreCase("protection")) {
             if (team == null) return;
             ItemStack stack = event.getStack();
-            int level = Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).getProtection(team.getName()) + 1;
+            int level = gameStorage.getProtection(team.getName()) + 1;
             if (level == 5) {
                 stack.removeEnchantment(Enchantment.DAMAGE_ALL);
                 stack.setLore(Arrays.asList("Maximum Enchant", "Your team already has maximum Enchant."));
@@ -460,7 +468,7 @@ public class CustomShop implements Listener {
                 if (Main.getConfigurator().config.getBoolean("turnOnExperimentalGroovyShop", false)) {
                     shopFileName = "shop.groovy";
                 }
-                format.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), shopFileName);
+                format.loadFromDataFolder(SBAHypixelify.getPluginInstance().getDataFolder(), shopFileName);
             }
             if (fileName != null) {
                 if (Main.isLegacy()) {
@@ -469,12 +477,12 @@ public class CustomShop implements Listener {
                     else if (fileName.equalsIgnoreCase("upgradeShop.yml"))
                         fileName = "legacy-upgradeShop.yml";
                 }
-                format.loadFromDataFolder(SBAHypixelify.getInstance().getDataFolder(), fileName);
+                format.loadFromDataFolder(SBAHypixelify.getPluginInstance().getDataFolder(), fileName);
             }
         } catch (Exception e) {
             Bukkit.getLogger().severe("Wrong shop.yml configuration!");
             Bukkit.getLogger().severe("Your villagers won't work, check validity of your YAML!");
-            SBAHypixelify.debug(e.getMessage());
+            e.printStackTrace();
         }
 
         format.generateData();
@@ -502,18 +510,22 @@ public class CustomShop implements Listener {
         final RunningTeam team = e.getTeam();
         final String name = e.getName();
         final org.screamingsandals.bedwars.api.game.Game game = e.getGame();
+        final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
+        final var gameStorage = ArenaManager.getInstance().getGameStorage(game.getName()).orElseThrow();
 
         if (name.equalsIgnoreCase("sharpness")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "SWORD", Enchantment.DAMAGE_ALL)) {
                 e.setCancelled(true);
-                player.sendMessage(Messages.message_greatest_enchantment);
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.GREATEST_ENCHANTMENT)
+                        .send(wrappedPlayer);
             } else {
                 int level = newItem.getEnchantmentLevel(Enchantment.DAMAGE_ALL);
                 int price = prices.get(level);
                 ItemStack materialItem = e.getStackFromPrice(price);
                 if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
-                    Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setSharpness(team.getName()
-                            , level);
+                    gameStorage.setSharpness(team.getName(), level);
                 }
                 e.setPrice(Integer.toString(price));
             }
@@ -522,60 +534,73 @@ public class CustomShop implements Listener {
         else if (name.equalsIgnoreCase("efficiency")) {
             if (!ShopUtil.addEnchantsToTeamTools(player, newItem, "PICKAXE", Enchantment.DIG_SPEED)) {
                 e.setCancelled(true);
-                player.sendMessage(Messages.message_greatest_enchantment);
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.GREATEST_ENCHANTMENT)
+                        .send(wrappedPlayer);
             }
         }
 
         else if (name.equalsIgnoreCase("blindtrap")) {
-            if (SBAHypixelify.getGamestorage(game) == null) {
-                e.setCancelled(true);
-                player.sendMessage(Messages.ERROR_OCCURED);
-                return;
-            }
-            if (Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).isTrapEnabled(team)) {
-                player.sendMessage(Messages.trap_timeout_message);
+            if (gameStorage.isTrapEnabled(team)) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.WAIT_FOR_TRAP)
+                        .send(wrappedPlayer);
                 e.setCancelled(true);
             } else {
-                Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setTrap(team, true);
-                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, Messages.blindnessTrapPurchased, "", 20, 40, 20));
+                gameStorage.setTrap(team, true);
+                final var trapPurchasedTitle = LanguageService
+                        .getInstance()
+                        .get(MessageKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
+                        .toString();
+
+                team.getConnectedPlayers().forEach(pl -> sendTitle(pl, trapPurchasedTitle, "", 20, 40, 20));
             }
         }
 
         else if (name.equalsIgnoreCase("healpool")) {
-            if (SBAHypixelify.getGamestorage(game) == null) {
-                e.setCancelled(true);
-                player.sendMessage(Messages.ERROR_OCCURED);
-                return;
-            }
-            if (Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).isPoolEnabled(team)) {
-                player.sendMessage(Messages.trap_timeout_message);
+            if (gameStorage.isPoolEnabled(team)) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.WAIT_FOR_TRAP)
+                        .send(wrappedPlayer);
                 e.setCancelled(true);
             } else {
-                Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setPool(team, true);
-                team.getConnectedPlayers().forEach(pl -> pl.sendMessage(Messages.message_purchase_heal_pool
-                        .replace("{player}", player.getName())));
+                gameStorage.setPool(team, true);
+                final var purchasedPool = LanguageService
+                        .getInstance()
+                        .get(MessageKeys.PURCHASED_HEAL_POOL_MESSAGE)
+                        .replace("%player%", player.getName())
+                        .toString();
+
+                team.getConnectedPlayers().forEach(pl -> pl.sendMessage(purchasedPool));
             }
         }
 
         else if (name.equalsIgnoreCase("protection")) {
-            if (Objects.requireNonNull(player.getInventory().getBoots())
-                    .getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL) >= 4) {
+            if (gameStorage.getProtection(team.getName()) >= 4) {
                 e.setCancelled(true);
-                player.sendMessage("§c§l" + Messages.message_greatest_enchantment);
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.GREATEST_ENCHANTMENT)
+                        .send(wrappedPlayer);
             } else {
                 int level = newItem.getEnchantmentLevel(Enchantment.PROTECTION_ENVIRONMENTAL);
                 int price = prices.get(level);
                 ItemStack materialItem = e.getStackFromPrice(price);
                 if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
-                    Objects.requireNonNull(SBAHypixelify.getGamestorage(game)).setProtection(team.getName()
-                            , level);
+                    gameStorage.setProtection(team.getName(), level);
                 }
                 e.setPrice(Integer.toString(price));
                 ShopUtil.addEnchantsToPlayerArmor(player, newItem);
                 for (Player playerCheck : team.getConnectedPlayers()) {
                     ShopUtil.addEnchantsToPlayerArmor(playerCheck, newItem);
-                    playerCheck.sendMessage(Messages.message_upgrade_team_protection
-                            .replace("{player}", player.getName()));
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.UPGRADE_TEAM_PROTECTION)
+                            .replace("%player%", player.getName())
+                            .send(PlayerMapper.wrapPlayer(playerCheck));
                 }
             }
         }
@@ -680,7 +705,7 @@ public class CustomShop implements Listener {
                 //since we are  setting the price to a different one on upgrade, we do the check again
                 if (!event.hasPlayerInInventory(materialItem) &&
                         !Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
+                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getInstance().getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
                             .replace("{price}", priceType));
                     return;
                 }
@@ -700,13 +725,19 @@ public class CustomShop implements Listener {
                     buystack(newItem, event);
                 } else {
                     shouldSellStack = false;
-                    player.sendMessage(Messages.already_purchased_thing
-                            .replace("{thing}", "Sword"));
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.ALREADY_PURCHASED)
+                            .replace("%thing%", "Sword")
+                            .send(PlayerMapper.wrapPlayer(player));
                 }
             } else if (player.getInventory().getBoots() != null
                     && newItem.getType().equals(player.getInventory().getBoots().getType())) {
-                player.sendMessage(Messages.already_purchased_thing
-                        .replace("{thing}", "Armor"));
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.ALREADY_PURCHASED)
+                        .replace("%thing%", "Armor")
+                        .send(PlayerMapper.wrapPlayer(player));
                 shouldSellStack = false;
             } else if (newItem.getType().name().contains("BOOTS")) {
                 ShopUtil.buyArmor(player, newItem.getType(), newItem.getType().name(), game);
@@ -715,10 +746,12 @@ public class CustomShop implements Listener {
                     ShopUtil.removeAxeOrPickaxe(player, newItem);
                     buystack(newItem, event);
                 } else {
-                    player.sendMessage(Messages.already_purchased_thing
-                            .replace("{thing}",
-                                    newItem.getType().name().substring
-                                            (newItem.getType().name().indexOf("_")).substring(1)));
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.ALREADY_PURCHASED)
+                            .replace("%thing%",   newItem.getType().name().substring
+                                    (newItem.getType().name().indexOf("_")).substring(1))
+                            .send(PlayerMapper.wrapPlayer(player));
                     shouldSellStack = false;
                 }
             } else {
@@ -728,7 +761,7 @@ public class CustomShop implements Listener {
             if (shouldSellStack) {
                 sellstack(materialItem, event);
                 if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.purchase", "§aYou purchased &e"))
+                    player.sendMessage(Objects.requireNonNull(SBAHypixelify.getInstance().getConfigurator().getString("message.purchase", "§aYou purchased &e"))
                             .replace("{item}", getNameOrCustomNameOfItem(newItem)));
                 }
                 Sounds.playSound(player, player.getLocation(),
@@ -738,7 +771,7 @@ public class CustomShop implements Listener {
 
         } else {
             if (!Main.getConfigurator().config.getBoolean("removePurchaseMessages", false)) {
-                player.sendMessage(Objects.requireNonNull(SBAHypixelify.getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
+                player.sendMessage(Objects.requireNonNull(SBAHypixelify.getInstance().getConfigurator().getString("message.cannot-buy", "§cYou don't have enough {price}"))
                         .replace("{price}", priceType));
             }
         }

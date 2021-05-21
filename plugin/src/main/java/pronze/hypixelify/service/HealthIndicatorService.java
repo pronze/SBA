@@ -1,33 +1,31 @@
 package pronze.hypixelify.service;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.craftbukkit.MinecraftComponentSerializer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.RunningTeam;
-import org.screamingsandals.bedwars.api.events.GameStartedEvent;
-import org.screamingsandals.bedwars.api.events.PlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.events.GameStartedEventImpl;
-import org.screamingsandals.bedwars.events.PlayerLeaveEventImpl;
-import org.screamingsandals.bedwars.lib.bukkit.utils.nms.ClassStorage;
-import org.screamingsandals.bedwars.lib.event.EventManager;
-import org.screamingsandals.bedwars.lib.event.OnEvent;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.Component;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.craftbukkit.MinecraftComponentSerializer;
-import org.screamingsandals.bedwars.lib.ext.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import org.screamingsandals.bedwars.lib.utils.AdventureHelper;
-import org.screamingsandals.bedwars.lib.utils.reflect.Reflect;
+import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnDisable;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.annotations.OnDestroy;
 import java.text.DecimalFormat;
 import java.util.*;
 
-@AutoInitialize(listener = true)
+@Service(dependsOn = {
+        SBAConfig.class
+})
 public class HealthIndicatorService implements Listener {
     private final Map<UUID, Map<UUID, Double>> dataMap = new HashMap<>();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");
@@ -48,13 +46,10 @@ public class HealthIndicatorService implements Listener {
                 .getInstance()
                 .node("show-health-under-player-name")
                 .getBoolean();
-
-        EventManager.getDefaultEventManager().register(GameStartedEventImpl.class, this::onGameStart);
-        EventManager.getDefaultEventManager().register(PlayerLeaveEventImpl.class, this::onPlayerLeave);
-
     }
 
-    public void onGameStart(GameStartedEventImpl event) {
+    @EventHandler
+    public void onGameStart(BedwarsGameStartedEvent event) {
         final Game game = event.getGame();
         game.getConnectedPlayers().forEach(this::create);
         new BukkitRunnable() {
@@ -66,10 +61,10 @@ public class HealthIndicatorService implements Listener {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(SBAHypixelify.getInstance(), 0L, 2L);
+        }.runTaskTimer(SBAHypixelify.getPluginInstance(), 0L, 2L);
     }
 
-    @OnDestroy
+    @OnDisable
     public void onDestroy() {
         Set.copyOf(dataMap
                 .keySet())
@@ -79,9 +74,10 @@ public class HealthIndicatorService implements Listener {
                 .forEach(this::removePlayer);
     }
 
-    public void onPlayerLeave(PlayerLeaveEventImpl event) {
+    @EventHandler
+    public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
         final var player = event.getPlayer();
-        removePlayer(player.as(Player.class));
+        removePlayer(player);
     }
 
     public void removePlayer(Player player) {

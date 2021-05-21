@@ -21,17 +21,17 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Service;
 import pronze.hypixelify.SBAHypixelify;
+import pronze.hypixelify.commands.party.PartyCommand;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-@Service
-@Init(services = {
+@Service(initAnother = {
         SBACommand.class,
-        ShoutCommand.class
+        ShoutCommand.class,
+        PartyCommand.class
 })
 @Getter
 public class CommandManager {

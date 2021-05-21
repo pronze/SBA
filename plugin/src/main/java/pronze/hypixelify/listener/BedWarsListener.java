@@ -13,30 +13,21 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.events.*;
 import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.game.GameManager;
-import org.screamingsandals.bedwars.lang.LangKeys;
-import org.screamingsandals.bedwars.lib.event.EventManager;
-import org.screamingsandals.bedwars.lib.event.EventPriority;
-import org.screamingsandals.bedwars.lib.event.OnEvent;
 import org.screamingsandals.bedwars.lib.lang.Message;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
-import org.screamingsandals.bedwars.lib.player.PlayerWrapper;
-import org.screamingsandals.bedwars.player.BedWarsPlayer;
-import org.screamingsandals.bedwars.player.PlayerManager;
+import org.screamingsandals.bedwars.utils.MiscUtils;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.utils.annotations.Service;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.game.Arena;
 import pronze.hypixelify.game.ArenaManager;
 import pronze.hypixelify.lib.lang.LanguageService;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
 import pronze.hypixelify.utils.ShopUtil;
-import pronze.lib.core.Core;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.annotations.OnInit;
-import pronze.lib.core.utils.Logger;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -44,22 +35,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@AutoInitialize(listener = true)
+@Service
 public class BedWarsListener implements Listener {
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
-    @OnInit
-    public void registerSLibEvents() {
-        EventManager.getDefaultEventManager().register(GameStartedEventImpl.class, this::onStarted);
-        EventManager.getDefaultEventManager().register(TargetBlockDestroyedEventImpl.class, this::onTargetBlockDestroyed);
-        EventManager.getDefaultEventManager().register(PostRebuildingEventImpl.class, this::onPostRebuildingEvent, EventPriority.HIGHEST);
-        EventManager.getDefaultEventManager().register(GameEndingEventImpl.class, this::onOver);
-        EventManager.getDefaultEventManager().register(PlayerJoinedEventImpl.class, this::onBWLobbyJoin, EventPriority.HIGHEST);
-        EventManager.getDefaultEventManager().register(PlayerLeaveEventImpl.class, this::onBedWarsPlayerLeave, EventPriority.LOWEST);
-        EventManager.getDefaultEventManager().register(PlayerKilledEventImpl.class, this::onBedWarsPlayerKilledEvent);
+    public BedWarsListener() {
+        SBAHypixelify.getInstance().registerListener(this);
     }
 
-    public void onStarted(GameStartedEventImpl e) {
+    @EventHandler
+    public void onStarted(BedwarsGameStartedEvent e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -74,17 +59,19 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onBwReload(PluginEnableEvent event) {
         final var pluginName = event.getPlugin().getName();
-        //Register listeners again
-        if (pluginName.equalsIgnoreCase(Main.getInstance().as(JavaPlugin.class).getName())) {
-            Logger.trace("Re-registering listeners");
-            final var listeners = Core.getRegisteredListeners();
-            listeners.forEach(Core::unregisterListener);
-            listeners.forEach(Core::registerListener);
-            Logger.trace("Registration complete");
+        if (pluginName.equalsIgnoreCase(Main.getInstance().getName())) {
+            Logger.trace("Re registering listeners!");
+            final var listeners = SBAHypixelify.getInstance().getRegisteredListeners();
+
+            listeners.forEach(SBAHypixelify.getInstance()::unregisterListener);
+            listeners.forEach(SBAHypixelify.getInstance()::registerListener);
+
+            Logger.trace("Registration complete!");
         }
     }
 
-    public void onTargetBlockDestroyed(TargetBlockDestroyedEventImpl e) {
+    @EventHandler
+    public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -92,14 +79,16 @@ public class BedWarsListener implements Listener {
                 .ifPresent(arena -> ((Arena)arena).onTargetBlockDestroyed(e));
     }
 
-    public void onPostRebuildingEvent(PostRebuildingEventImpl e) {
+    @EventHandler
+    public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
                 .removeArena(game);
     }
 
-    public void onOver(GameEndingEventImpl e) {
+    @EventHandler
+    public void onOver(BedwarsGameEndingEvent e) {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -107,9 +96,10 @@ public class BedWarsListener implements Listener {
                 .ifPresent(arena -> ((Arena)arena).onOver(e));
     }
 
-    public void onBWLobbyJoin(PlayerJoinedEventImpl e) {
-        final var player = e.getPlayer().as(Player.class);
-        final var game = (Game) GameManager.getInstance().getGame(e.getGame().getName()).orElseThrow();
+    @EventHandler
+    public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
+        final var player = e.getPlayer();
+        final var game = (Game) e.getGame();
         final var task = runnableCache.get(player.getUniqueId());
         if (task != null) {
             SBAUtil.cancelTask(task);
@@ -149,7 +139,7 @@ public class BedWarsListener implements Listener {
                             runnableCache.remove(player.getUniqueId());
                         }
                     }
-                }.runTaskTimer(SBAHypixelify.getInstance(), 3L, 20L);
+                }.runTaskTimer(SBAHypixelify.getPluginInstance(), 3L, 20L);
                 runnableCache.put(player.getUniqueId(), bukkitTask);
                 break;
             case RUNNING:
@@ -161,8 +151,9 @@ public class BedWarsListener implements Listener {
         }
     }
 
-    public void onBedWarsPlayerLeave(PlayerLeaveEventImpl e) {
-        final var player = e.getPlayer().as(Player.class);
+    @EventHandler
+    public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
+        final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
         ArenaManager
@@ -187,7 +178,8 @@ public class BedWarsListener implements Listener {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
-    public void onBedWarsPlayerKilledEvent(PlayerKilledEventImpl e) {
+    @EventHandler
+    public void onBedWarsPlayerKilledEvent(BedwarsPlayerKilledEvent e) {
         final var game = e.getGame();
         // query arena instance for access to Victim/Killer data
         ArenaManager
@@ -196,24 +188,21 @@ public class BedWarsListener implements Listener {
                 .ifPresent(arena -> {
                     final var victim = e.getPlayer();
                     // player has died, increment death counter
-                    arena.getPlayerData(victim.getUuid())
+                    arena.getPlayerData(victim.getUniqueId())
                             .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
                     final var killer = e.getKiller();
                     //killer is present
                     if (killer != null) {
                         // get victim game profile
-                        final var gVictim = PlayerManager
-                                .getInstance()
-                                .getPlayer(victim.getUuid())
-                                .orElse(null);
+                        final var gVictim = Main.getPlayerGameProfile(victim);
 
                         if (gVictim == null || gVictim.isSpectator) return;
 
                         // get victim team to check if it was a final kill or not
-                        final var victimTeam = game.getTeamOfPlayer(victim.as(Player.class));
+                        final var victimTeam = game.getTeamOfPlayer(victim);
                         if (victimTeam != null) {
-                            arena.getPlayerData(killer.getUuid())
+                            arena.getPlayerData(killer.getUniqueId())
                                     .ifPresent(killerData -> {
                                         // increment kill counter for killer
                                         killerData.setKills(killerData.getKills() + 1);

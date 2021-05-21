@@ -1,23 +1,30 @@
 package pronze.hypixelify.party;
 
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.utils.annotations.Service;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyCreatedEvent;
 import pronze.hypixelify.api.manager.IPartyManager;
 import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
+import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.SBAUtil;
-import pronze.lib.core.annotations.AutoInitialize;
-import pronze.lib.core.utils.Logger;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@AutoInitialize
+@Service(dependsOn = {
+        Logger.class
+})
 public class PartyManager implements IPartyManager {
+
+    public static PartyManager getInstance() {
+        return ServiceManager.get(PartyManager.class);
+    }
+
     private final Map<UUID, IParty> partyMap = new ConcurrentHashMap<>();
 
     public PartyManager() {
@@ -29,7 +36,7 @@ public class PartyManager implements IPartyManager {
         final var party = new Party(leader);
         final var partyCreateEvent = new SBAPlayerPartyCreatedEvent(leader, party);
         SBAHypixelify
-                .getInstance()
+                .getPluginInstance()
                 .getServer()
                 .getPluginManager()
                 .callEvent(partyCreateEvent);
