@@ -3,6 +3,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
 
 import java.util.regex.Matcher;
@@ -14,10 +16,11 @@ public class Logger {
     private Level level;
     private java.util.logging.Logger logger;
 
-    public static void init(@NonNull JavaPlugin plugin) {
-        instance = new Logger();
+    @OnPostEnable
+    public void postInit() {
+        instance = this;
         instance.level = Level.ALL;
-        instance.logger = plugin.getLogger();
+        instance.logger = SBAHypixelify.getPluginInstance().getLogger();
         if (!SBAConfig.getInstance().node("debug", "enabled").getBoolean()) {
             instance.level = Level.DISABLED;
         }

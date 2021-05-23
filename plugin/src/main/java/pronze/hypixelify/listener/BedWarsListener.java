@@ -19,6 +19,7 @@ import org.screamingsandals.bedwars.utils.MiscUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
@@ -39,7 +40,8 @@ import java.util.UUID;
 public class BedWarsListener implements Listener {
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
 
-    public BedWarsListener() {
+    @OnPostEnable
+    public void registerListener() {
         SBAHypixelify.getInstance().registerListener(this);
     }
 

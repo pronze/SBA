@@ -4,11 +4,11 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.builder.ItemFactory;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -27,32 +27,33 @@ import java.util.List;
 public class SBAConfig implements IConfigurator {
     public static HashMap<String, Integer> game_size = new HashMap<>();
 
-    public final File dataFolder;
+    public static SBAConfig getInstance() {
+        return ServiceManager.get(SBAConfig.class);
+    }
+
+    public JavaPlugin plugin;
+    public File dataFolder;
     public File langFolder, shopFolder, gamesInventoryFolder;
 
     private ConfigurationNode configurationNode;
     private YamlConfigurationLoader loader;
+    private ConfigGenerator generator;
+
+    public SBAConfig(JavaPlugin plugin) {
+        this.plugin = plugin;
+        loadDefaults();
+    }
 
     public ConfigurationNode node(Object... keys) {
         return configurationNode.node(keys);
     }
 
-    public static SBAConfig getInstance() {
-        return ServiceManager.get(SBAConfig.class);
-    }
-
-    public SBAConfig() {
-        this.dataFolder = SBAHypixelify
-                .getPluginInstance()
-                .getDataFolder();
+    public void loadDefaults() {
+        this.dataFolder = plugin.getDataFolder();
 
         /* To avoid config confusions*/
         deleteFile("config.yml");
         deleteFile("bwaconfig.yml");
-        loadDefaults();
-    }
-
-    public void loadDefaults() {
         try {
             langFolder = new File(dataFolder, "languages");
             gamesInventoryFolder = new File(dataFolder, "games-inventory");
@@ -74,10 +75,10 @@ public class SBAConfig implements IConfigurator {
             saveFile("games-inventory/triple.yml");
             saveFile("games-inventory/squad.yml");
 
-            SBAHypixelify.getInstance().saveResource("languages/language_fallback.yml", true);
+            plugin.saveResource("languages/language_fallback.yml", true);
 
-            saveFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "shop.yml");
-            saveFile("shops/" + (Main.isLegacy() ? "legacy-" : "") + "upgradeShop.yml");
+            saveFile("shops/shop.yml");
+            saveFile("shops/upgradeShop.yml");
 
             loader = YamlConfigurationLoader
                     .builder()
@@ -87,9 +88,9 @@ public class SBAConfig implements IConfigurator {
 
             configurationNode = loader.load();
 
-            var generator = new ConfigGenerator(loader, configurationNode);
+            generator = new ConfigGenerator(loader, configurationNode);
             generator.start()
-                    .key("version").defValue(SBAHypixelify.getInstance().getVersion())
+                    .key("version").defValue(plugin.getDescription().getVersion())
                     .key("locale").defValue("en")
                     .key("prefix").defValue("[SBAHypixelify]")
                     .section("debug")
@@ -105,7 +106,7 @@ public class SBAConfig implements IConfigurator {
                     .key("give-killer-resources").defValue(true)
                     .key("remove-sword-on-upgrade").defValue(true)
                     .key("block-players-putting-certain-items-onto-chest").defValue(true)
-                    .key("disable-armor-inventory-movement").defValue(SBAHypixelify.getInstance().getVersion())
+                    .key("disable-armor-inventory-movement").defValue(true)
                     .section("floating-generator")
                         .key("enabled").defValue(true)
                         .key("holo-height").defValue(2.0)
@@ -198,6 +199,7 @@ public class SBAConfig implements IConfigurator {
                         .key("pageforward").defValue("BARRIER")
                         .key("shopcosmetic").defValue("AIR")
                         .section("normal-shop")
+                            .key("name").defValue("[SBAHypixelify] Shop")
                             .key("rows").defValue(4)
                             .key("render-actual-rows").defValue(6)
                             .key("render-offset").defValue(9)
@@ -227,21 +229,7 @@ public class SBAConfig implements IConfigurator {
                         .key("upgrade-shop-skin").defValue(779554483);
 
 
-            var gameSection = generator
-                    .start()
-                    .section("lobby-scoreboard")
-                    .section("player-size")
-                    .section("games");
 
-            Main.getInstance().getGameNames().forEach(gameName -> {
-                try {
-                    gameSection.key(gameName).defValue(4);
-                } catch (SerializationException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            generator.saveIfModified();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -258,10 +246,33 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
+    @OnPostEnable
+    public void postEnable() {
+        var gameSection = generator
+                .start()
+                .section("lobby-scoreboard")
+                .section("player-size")
+                .section("games");
+
+        Main.getGameNames().forEach(gameName -> {
+            try {
+                gameSection.key(gameName).defValue(4);
+            } catch (SerializationException e) {
+                e.printStackTrace();
+            }
+        });
+
+        try {
+            generator.saveIfModified();
+        } catch (ConfigurateException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void saveFile(String fileName, String saveTo) {
         final var file = new File(dataFolder, fileName);
         if (!file.exists()) {
-            SBAHypixelify.getInstance().saveResource(saveTo, false);
+            plugin.saveResource(saveTo, false);
         }
     }
 
@@ -283,9 +294,9 @@ public class SBAConfig implements IConfigurator {
             node("autoset-bw-config").set(false);
             saveConfig();
 
-            SBAHypixelify.getInstance().saveResource("shops/shop.yml", true);
-            SBAHypixelify.getInstance().saveResource("shops/upgradeShop.yml", true);
-            try (final var inputStream = SBAHypixelify.getPluginInstance().getResource("config.yml")) {
+            plugin.saveResource("shops/shop.yml", true);
+            plugin.saveResource("shops/upgradeShop.yml", true);
+            try (final var inputStream = plugin.getResource("config.yml")) {
                 if (inputStream != null) {
                     final var configFile =
                             new File(Main.getInstance().getDataFolder(), "config.yml");

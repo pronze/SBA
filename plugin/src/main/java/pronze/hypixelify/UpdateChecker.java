@@ -1,24 +1,21 @@
 package pronze.hypixelify;
 
 
+import org.bukkit.Bukkit;
+import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import reactor.core.publisher.Mono;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.Scanner;
 
-import org.bukkit.Bukkit;
-import org.screamingsandals.lib.utils.annotations.Service;
-import reactor.core.publisher.Mono;
-
 @Service
 public class UpdateChecker {
 
-    public UpdateChecker() {
-        run(SBAHypixelify.getInstance());
-    }
-
-    public Mono<String> checkForUpdates(SBAHypixelify plugin) {
+    public Mono<String> checkForUpdates() {
         return Mono.create(sink -> {
-            if (plugin.isSnapshot()) {
+            if (SBAHypixelify.getInstance().isSnapshot()) {
                 sink.success();
             }
             try (final var inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=79505").openStream(); Scanner scanner = new Scanner(inputStream)) {
@@ -31,8 +28,9 @@ public class UpdateChecker {
         });
     }
 
-    protected void run(SBAHypixelify plugin) {
-        checkForUpdates(plugin)
+    @OnPostEnable
+    protected void run() {
+        checkForUpdates()
                 .doOnError(throwable -> Bukkit.getLogger().info("Cannot look for updates: " + throwable.getMessage()))
                 .doOnNext(this::promptUpdate)
                 .subscribe();

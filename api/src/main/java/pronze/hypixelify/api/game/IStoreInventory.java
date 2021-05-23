@@ -1,26 +1,15 @@
 package pronze.hypixelify.api.game;
 
 import org.screamingsandals.bedwars.game.GameStore;
+import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
 import java.io.File;
 
 public interface IStoreInventory {
 
-///**
-// *
-// * @return
-// * @param key
-// */
-//Optional<InventorySet> getInventory(String key);
-
-///**
-// *
-// * @param player
-// */
-//void openForPlayer(PlayerWrapper player, GameStore gameStore);
+    void openForPlayer(PlayerWrapper player, GameStore gameStore);
 
     /**
-     *
      * @param name
      * @param file
      * @param useParent

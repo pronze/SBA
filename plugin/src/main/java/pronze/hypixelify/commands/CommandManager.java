@@ -17,11 +17,13 @@ import cloud.commandframework.paper.PaperCommandManager;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.commands.party.PartyCommand;
 
@@ -35,6 +37,7 @@ import java.util.function.Function;
 })
 @Getter
 public class CommandManager {
+
     public static CommandManager getInstance() {
         return ServiceManager.get(CommandManager.class);
     }
@@ -44,30 +47,26 @@ public class CommandManager {
     private CommandConfirmationManager<CommandSender> confirmationManager;
     private MinecraftHelp<CommandSender> minecraftHelp;
 
-    public CommandManager() {
-        init(SBAHypixelify.getPluginInstance());
-    }
-
-    public void init(JavaPlugin plugin) {
+    @OnPostEnable
+    public void onPostEnable() {
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
                 AsynchronousCommandExecutionCoordinator.<CommandSender>newBuilder().build();
-
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();
         try {
             this.manager = new PaperCommandManager<>(
-                    plugin,
+                    SBAHypixelify.getPluginInstance(),
                     executionCoordinatorFunction,
                     mapperFunction,
                     mapperFunction
             );
         } catch (final Exception e) {
-            plugin.getLogger().severe("Failed to initialize the command manager");
+            Bukkit.getLogger().severe("Failed to initialize the command manager");
             /* Disable the plugin */
-            plugin.getServer().getPluginManager().disablePlugin(plugin);
+            Bukkit.getServer().getPluginManager().disablePlugin(SBAHypixelify.getPluginInstance());
             return;
         }
 
-        BukkitAudiences bukkitAudiences = BukkitAudiences.create(plugin);
+        BukkitAudiences bukkitAudiences = BukkitAudiences.create(SBAHypixelify.getPluginInstance());
         minecraftHelp = new MinecraftHelp<>(
                 "/manhunt help",
                 bukkitAudiences::sender,

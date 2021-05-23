@@ -7,6 +7,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -16,7 +17,8 @@ import pronze.hypixelify.lib.lang.LanguageService;
 @Service
 public class PartyWarpCommand {
 
-    public PartyWarpCommand() {
+    @OnPostEnable
+    public void onPostEnable() {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 

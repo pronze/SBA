@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyPromoteEvent;
@@ -19,7 +20,8 @@ import java.util.stream.Collectors;
 @Service
 public class PartyPromoteCommand {
 
-    public PartyPromoteCommand() {
+    @OnPostEnable
+    public void onPostEnable() {
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("promote", (ctx, s) -> {
             final var optionalParty = SBAHypixelify
                     .getInstance()
@@ -42,7 +44,7 @@ public class PartyPromoteCommand {
     @CommandMethod("party promote [player]")
     private void commandPromote(
             final @NotNull Player playerArg,
-            final @NotNull @Argument(value = "player", parserName = "promote") Player toPromote
+            final @NotNull @Argument(value = "player", suggestions = "promote") Player toPromote
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)

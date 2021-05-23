@@ -5,6 +5,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.event.EventManager;
 import pronze.hypixelify.api.SBAHypixelifyAPI;
 import pronze.hypixelify.api.config.IConfigurator;
 import pronze.hypixelify.api.game.GameStorage;
@@ -16,10 +17,10 @@ import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.commands.CommandManager;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.game.ArenaManager;
-import pronze.hypixelify.inventories.CustomShop;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import pronze.hypixelify.inventories.GamesInventory;
+import pronze.hypixelify.inventories.SBAStoreInventory;
 import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.listener.BedWarsListener;
 import pronze.hypixelify.listener.GameChatListener;
@@ -53,21 +54,24 @@ import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
 
 @Plugin(
         id = "SBAHypixelify",
-        authors = "pronze",
+        authors = {"pronze"},
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.0"
+        version = "1.5.0-SNAPSHOT"
 )
-@PluginDependencies(platform = PlatformType.BUKKIT, softDependencies =
+@PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
+        "BedWars"
+}, softDependencies =
         "PlaceholderAPI"
 )
 @Init(services = {
+        EventManager.class,
         UpdateChecker.class,
         SBAConfig.class,
         Logger.class,
         LanguageService.class,
         CommandManager.class,
         ArenaManager.class,
-        CustomShop.class,
+        SBAStoreInventory.class,
         GamesInventory.class,
         PlayerWrapperService.class,
         HealthIndicatorService.class,
@@ -95,6 +99,11 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
     private final List<Listener> registeredListeners = new ArrayList<>();
 
     @Override
+    public void load() {
+        instance = this;
+    }
+
+    @Override
     public void enable() {
         instance = this;
 
@@ -104,7 +113,7 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
             return;
         }
 
-        if (!Main.getVersion().contains("0.3.0")) {
+        if (!Main.getVersion().contains("0.2.15")) {
             showErrorMessage("You need ScreamingBedWars v0.2.15 to run SBAHypixelify v1.0",
                     "Get the latest version from here: https://www.spigotmc.org/resources/screaming-bedwars-1-9-1-16.63714/");
             return;
@@ -120,12 +129,8 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
         //Do changes for legacy support.
         changeBedWarsConfig();
 
-        try {
-            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-                new SBAExpansion().register();
-            }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            new SBAExpansion().register();
         }
 
         Bukkit.getServer().getServicesManager().register(SBAHypixelifyAPI.class, this, getPluginInstance(), ServicePriority.Normal);
@@ -196,12 +201,12 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
 
     @Override
     public Optional<GameStorage> getGameStorage(Game game) {
-        return Optional.empty();
+        return ArenaManager.getInstance().getGameStorage(game.getName());
     }
 
     @Override
     public PlayerWrapper getPlayerWrapper(Player player) {
-        return null;
+        return PlayerWrapperService.getInstance().get(player).orElse(null);
     }
 
     @Override

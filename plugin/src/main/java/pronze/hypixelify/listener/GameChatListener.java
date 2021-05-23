@@ -10,13 +10,15 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.config.SBAConfig;
 
 @Service
 public class GameChatListener implements Listener {
 
-    public GameChatListener() {
+    @OnPostEnable
+    public void registerListener() {
         SBAHypixelify.getInstance().registerListener(this);
     }
 

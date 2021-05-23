@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyKickEvent;
@@ -19,7 +20,8 @@ import java.util.stream.Collectors;
 @Service
 public class PartyKickCommand {
 
-    public PartyKickCommand() {
+    @OnPostEnable
+    public void onPostEnable() {
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("kick", (ctx, s) -> {
             final var player = PlayerMapper
                     .wrapPlayer((Player)ctx.getSender())
@@ -44,7 +46,7 @@ public class PartyKickCommand {
     @CommandMethod("party kick [player]")
     private void commandKick(
             final @NotNull Player playerArg,
-            final @NotNull @Argument(value = "player", parserName = "kick") Player toKick
+            final @NotNull @Argument(value = "player", suggestions = "kick") Player toKick
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)

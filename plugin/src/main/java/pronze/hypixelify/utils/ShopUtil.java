@@ -1,6 +1,13 @@
 package pronze.hypixelify.utils;
 
+import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
+import org.screamingsandals.lib.material.Item;
+import org.screamingsandals.lib.material.meta.EnchantmentMapping;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
+import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
+import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
+import org.spongepowered.configurate.ConfigurationNode;
 import pronze.hypixelify.SBAHypixelify;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -9,6 +16,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import pronze.hypixelify.api.MessageKeys;
+import pronze.hypixelify.api.game.GameStorage;
+import pronze.hypixelify.api.game.StoreType;
 import pronze.hypixelify.api.lang.Message;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import org.screamingsandals.bedwars.Main;
@@ -21,9 +31,12 @@ import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
 import org.screamingsandals.bedwars.lib.sgui.inventory.Options;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.game.ArenaManager;
+import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.service.PlayerWrapperService;
 
+import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
@@ -53,18 +66,13 @@ public class ShopUtil {
         });
     }
 
-    public static void buyArmor(Player player, Material mat_boots, String name, Game game) {
-        String matName = name.substring(0, name.indexOf("_"));
-        Material mat_leggings = Material.valueOf(matName + "_LEGGINGS");
-        ItemStack boots = new ItemStack(mat_boots);
-        ItemStack leggings = new ItemStack(mat_leggings);
-        int level = 0;
-        try {
-            level = ArenaManager.getInstance().getGameStorage(game.getName()).orElseThrow().getProtection(game.getTeamOfPlayer(player).getName());
-        } catch (Throwable ignored){
+    public static void buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {
+        final var matName = mat_boots.name().substring(0, mat_boots.name().indexOf("_"));
+        final var mat_leggings = Material.valueOf(matName + "_LEGGINGS");
+        final var boots = new ItemStack(mat_boots);
+        final var leggings = new ItemStack(mat_leggings);
 
-        }
-
+        final var level = gameStorage.getProtection(game.getTeamOfPlayer(player).getName());
         if (level != 0) {
             boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
             leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
@@ -290,6 +298,129 @@ public class ShopUtil {
                 player.getInventory().remove(item);
             }
         }
+    }
+
+    public static File normalizeShopFile(String name) {
+        if (name.split("\\.").length > 1) {
+            return SBAHypixelify.getPluginInstance().getDataFolder().toPath().resolve(name).toFile();
+        }
+
+        var fileg = SBAHypixelify.getPluginInstance().getDataFolder().toPath().resolve(name + ".groovy").toFile();
+        if (fileg.exists()) {
+            return fileg;
+        }
+        return SBAHypixelify.getPluginInstance().getDataFolder().toPath().resolve(name + ".yml").toFile();
+    }
+
+    public static Map<?, ?> nullValuesAllowingMap(Object... objects) {
+        var map = new HashMap<>();
+        Object key = null;
+        for (var object : objects) {
+            if (key == null) {
+                key = Objects.requireNonNull(object);
+            } else {
+                map.put(key, object);
+                key = null;
+            }
+        }
+        return map;
+    }
+
+    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type) {
+        var enabled = itemInfo.getFirstPropertyByName("generateLore")
+                .map(property -> property.getPropertyData().getBoolean())
+                .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
+
+        if (enabled) {
+            var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
+                    .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
+                    .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
+                    .map(s -> s
+                            .replaceAll("%price%", price)
+                            .replaceAll("%resource%", type.getItemName())
+                            .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
+                    .map(s -> ChatColor.translateAlternateColorCodes('&', s))
+                    .map(AdventureHelper::toComponent)
+                    .collect(Collectors.toList());
+
+            item.getLore().addAll(loreText);
+        }
+    }
+
+    public static String getNameOrCustomNameOfItem(Item item) {
+        try {
+            if (item.getDisplayName() != null) {
+                return AdventureHelper.toLegacy(item.getDisplayName());
+            }
+            if (item.getLocalizedName() != null) {
+                return AdventureHelper.toLegacy(item.getLocalizedName());
+            }
+        } catch (Throwable ignored) {
+        }
+
+        var normalItemName = item.getMaterial().getPlatformName().replace("_", " ").toLowerCase();
+        var sArray = normalItemName.split(" ");
+        var stringBuilder = new StringBuilder();
+
+        for (var s : sArray) {
+            stringBuilder.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
+        }
+        return stringBuilder.toString().trim();
+    }
+
+    public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type) {
+        if (type == StoreType.UPGRADES) {
+            level = level + 1;
+        }
+        if (level >= 5) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.SHOP_MAX_ENCHANT)
+                    .toComponentList()
+                    .forEach(item::addLore);
+            if (item.getEnchantments() != null) {
+                item.getEnchantments().clear();
+            }
+        } else if (level > 0){
+            item.addEnchant(EnchantmentMapping.resolve(enchantment).orElseThrow().newLevel(level));
+        }
+    }
+
+
+    /**
+     * Applies enchants to displayed items in SBAHypixelify store inventory.
+     * Enchants are applied and are dependent on the team upgrades the player's team has.
+     *
+     * @param item
+     * @param event
+     */
+    public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreType type) {
+        final var player = event.getPlayer().as(Player.class);
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        final var typeName = item.getMaterial().getPlatformName();
+        final var runningTeam = game.getTeamOfPlayer(player);
+
+        SBAHypixelify
+                .getInstance()
+                .getGameStorage(game)
+                .ifPresent(gameStorage -> {
+                    final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
+                    switch (afterUnderscore.toLowerCase()) {
+                        case "sword":
+                            int sharpness = gameStorage.getSharpness(runningTeam.getName());
+                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type);
+                            break;
+                        case "chestplate":
+                        case "boots":
+                            int protection = gameStorage.getProtection(runningTeam.getName());
+                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type);
+                            break;
+                        case "pickaxe":
+                            final int efficiency = gameStorage.getEfficiency(runningTeam.getName());
+                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type);
+                            break;
+                    }
+                });
     }
 
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {

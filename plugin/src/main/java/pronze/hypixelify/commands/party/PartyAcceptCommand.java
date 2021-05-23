@@ -4,6 +4,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.events.SBAPlayerPartyInviteAcceptEvent;
@@ -14,7 +15,8 @@ import pronze.hypixelify.lib.lang.LanguageService;
 @Service
 public class PartyAcceptCommand {
 
-    public PartyAcceptCommand() {
+    @OnPostEnable
+    public void onPostEnable() {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 

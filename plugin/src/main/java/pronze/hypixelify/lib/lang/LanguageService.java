@@ -2,13 +2,14 @@ package pronze.hypixelify.lib.lang;
 
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
-import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.lang.ILanguageService;
 import pronze.hypixelify.api.lang.Message;
 import pronze.hypixelify.config.SBAConfig;
@@ -29,14 +30,46 @@ public class LanguageService implements ILanguageService {
         return ServiceManager.get(LanguageService.class);
     }
 
-    private final String locale;
+    public LanguageService(JavaPlugin plugin) {
+        locale = SBAConfig.getInstance().node("locale").getString("en");
+        if (!validLocale.contains(locale.toLowerCase())) {
+            throw new UnsupportedOperationException("Invalid locale provided!");
+        }
+
+        try {
+            var pathStr = plugin.getDataFolder().getAbsolutePath();
+            pathStr = pathStr + "/languages/language_" + locale + ".yml";
+
+            var loader = YamlConfigurationLoader
+                    .builder()
+                    .path(Paths.get(pathStr))
+                    .nodeStyle(NodeStyle.BLOCK)
+                    .build();
+            configurationNode = loader.load();
+        } catch (Exception ex) {
+            Bukkit.getLogger().warning("There was an error loading language file!");
+            ex.printStackTrace();
+        }
+
+        try {
+            var pathStr = plugin.getDataFolder().getAbsolutePath();
+            pathStr = pathStr + "/languages/language_fallback.yml";
+
+            var loader = YamlConfigurationLoader
+                    .builder()
+                    .path(Paths.get(pathStr))
+                    .nodeStyle(NodeStyle.BLOCK)
+                    .build();
+            fallbackNode = loader.load();
+        } catch (Exception ex) {
+            Bukkit.getLogger().warning("There was an error loading fallback language!");
+            ex.printStackTrace();
+        }
+    }
+
+    private String locale;
     private ConfigurationNode configurationNode;
     private ConfigurationNode fallbackNode;
-
-    public LanguageService() {
-        locale = SBAConfig.getInstance().node("locale").getString("en");
-        loadConfigurationNode();
-    }
 
     @Override
     public Message get(String... arguments) {
@@ -62,41 +95,5 @@ public class LanguageService implements ILanguageService {
             e.printStackTrace();
         }
         return Message.of(List.of("TRANSLATION FOR: " + Arrays.toString(arguments) + " NOT FOUND!"));
-    }
-
-    private void loadConfigurationNode() {
-        if (!validLocale.contains(locale.toLowerCase())) {
-            throw new UnsupportedOperationException("Invalid locale provided!");
-        }
-
-        try {
-            var pathStr = SBAHypixelify.getPluginInstance().getDataFolder().getAbsolutePath();
-            pathStr = pathStr + "/languages/language_" + locale + ".yml";
-
-            var loader = YamlConfigurationLoader
-                    .builder()
-                    .path(Paths.get(pathStr))
-                    .nodeStyle(NodeStyle.BLOCK)
-                    .build();
-            configurationNode = loader.load();
-        } catch (Exception ex) {
-            Bukkit.getLogger().warning("There was an error loading language file!");
-            ex.printStackTrace();
-        }
-
-        try {
-            var pathStr = SBAHypixelify.getPluginInstance().getDataFolder().getAbsolutePath();
-            pathStr = pathStr + "/languages/language_fallback.yml";
-
-            var loader = YamlConfigurationLoader
-                    .builder()
-                    .path(Paths.get(pathStr))
-                    .nodeStyle(NodeStyle.BLOCK)
-                    .build();
-            fallbackNode = loader.load();
-        } catch (Exception ex) {
-            Bukkit.getLogger().warning("There was an error loading fallback language!");
-            ex.printStackTrace();
-        }
     }
 }

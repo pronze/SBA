@@ -13,6 +13,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.SBAHypixelify;
@@ -28,7 +29,8 @@ import java.util.*;
 public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
 
-    public LobbyScoreboardManager() {
+    @OnPostEnable
+    public void registerListener() {
         if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
             return;
         }

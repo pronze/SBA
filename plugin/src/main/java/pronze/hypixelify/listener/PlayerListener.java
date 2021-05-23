@@ -29,6 +29,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.Permissions;
@@ -53,9 +54,13 @@ public class PlayerListener implements Listener {
     private final List<Material> generatorDropItems;
 
     public PlayerListener() {
-        SBAHypixelify.getInstance().registerListener(this);
         allowedDropItems = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
         generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
+    }
+
+    @OnPostEnable
+    public void registerListener() {
+        SBAHypixelify.getInstance().registerListener(this);
     }
 
     @EventHandler

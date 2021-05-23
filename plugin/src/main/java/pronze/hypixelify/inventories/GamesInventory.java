@@ -20,13 +20,13 @@ import pronze.hypixelify.lib.lang.LanguageService;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.utils.ShopUtil;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
 @Service(dependsOn = {
-        SBAConfig.class
+        SBAConfig.class,
+        SimpleInventoriesCore.class
 })
 public class GamesInventory implements Listener {
 

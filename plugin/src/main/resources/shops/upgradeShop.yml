@@ -1,30 +1,4 @@
 data:
-  #-   stack:
-  #      type: GOLDEN_APPLE
-  #      amount: 1
-  #      meta:
-  #        ==: ItemMeta
-  #        meta-type: UNSPECIFIC
-  #        display-name: "Example category"
-  #        lore:
-  #        - "This is my category!"
-  #        - "Please buy things inside!"
-  #    items:
-  #    - price: 50
-  #      price-type: "bronze"
-  #      stack:
-  #        type: DIAMOND_SWORD
-  #        amount: 1
-  #        meta:
-  #          ==: ItemMeta
-  #          meta-type: UNSPECIFIC
-  #          enchants:
-  #            DAMAGE_ALL: 2
-  #          repair-cost: 1
-  #          Damage: 99
-  # Value 'applycolorbyteam' is used for automatic-coloring-in-shop.
-  # See WarpPowder for more info.
-
   - stack: "IRON_CHESTPLATE;1;Protection;Click here to get more resistance to damage!"
     column: 2
     price: 4 of diamond
@@ -84,7 +58,7 @@ data:
     properties: healpool
     price: 8 of diamond
 
-  - stack: "DRAGON_EGG;1;Ender Dragon;Unconfigured"
+  - stack: "DRAGON_EGG;1;Ender Dragon;Summon the dragon to bring wreck upon your enemies!"
     column: 6
     row: 1
 

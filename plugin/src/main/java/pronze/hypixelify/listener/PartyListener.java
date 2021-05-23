@@ -8,6 +8,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.SBAHypixelify;
 import pronze.hypixelify.api.events.SBAPlayerPartyChatEvent;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
@@ -15,7 +16,8 @@ import pronze.hypixelify.api.wrapper.PlayerWrapper;
 @Service
 public class PartyListener implements Listener {
 
-    public PartyListener() {
+    @OnPostEnable
+    public void registerListener() {
         SBAHypixelify.getInstance().registerListener(this);
     }
 

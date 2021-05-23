@@ -12,6 +12,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.hypixelify.api.MessageKeys;
 import pronze.hypixelify.api.Permissions;
 import pronze.hypixelify.config.SBAConfig;
@@ -22,7 +23,8 @@ import java.util.List;
 @Service
 public class ShoutCommand {
 
-    public ShoutCommand() {
+    @OnPostEnable
+    public void onPostEnable() {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 
@@ -30,8 +32,15 @@ public class ShoutCommand {
     @CommandDescription("shout command")
     private void commandShout(
             final @NotNull Player player,
-            final @Argument("args") List<String> args
+            final @NotNull @Argument("args") String[] argsParam
     ) {
+        final var args = List.of(argsParam);
+
+        if (args.isEmpty()) {
+            //TODO:
+            return;
+        }
+
         final var wrapper = PlayerMapper
                 .wrapPlayer(player);
 

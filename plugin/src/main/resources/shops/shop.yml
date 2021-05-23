@@ -1,5 +1,4 @@
 data:
-
   - locate: '$blocks'
     stack: WHITE_WOOL;1;§aBlocks;§eClick to view!
     skip: 1
@@ -23,7 +22,7 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: '$utility'
         stack: TNT;1;§aUtility;§eClick to view!
-      - stack: STAINED_GLASS_PANE;1
+      - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 1
       - stack: WOOL;16;Wool;§7Great for bridging across;§7islands.
@@ -57,7 +56,7 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: '$utility'
         stack: TNT;1;§aUtility;§eClick to view!
-      - stack: STAINED_GLASS_PANE;1
+      - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 2
       - stack: STONE_SWORD;1
@@ -91,7 +90,7 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: '$utility'
         stack: TNT;1;§aUtility;§eClick to view!
-      - stack: STAINED_GLASS_PANE;1
+      - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 3
       - stack: CHAINMAIL_BOOTS;1
@@ -120,7 +119,7 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: '$utility'
         stack: TNT;1;§aUtility;§eClick to view!
-      - stack: STAINED_GLASS_PANE;1
+      - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 4
       - stack: SHEARS;1
@@ -153,7 +152,7 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: '$utility'
         stack: TNT;1;§aUtility;§eClick to view!
-      - stack: STAINED_GLASS_PANE;1
+      - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 5
       - stack: BOW;1
@@ -191,6 +190,9 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: '$utility'
         stack: TNT;1;§aUtility;§eClick to view!
+      - stack: GREEN_STAINED_GLASS_PANE;1
+        row: 2
+        column: 6
       - row: 3
         column: 1
         stack:
@@ -231,7 +233,7 @@ data:
         stack: BREWING_STAND;1;§aPotions;§eClick to view!
       - locate: 'main'
         stack: TNT;1;§aUtility;§eClick to view!
-      - stack: STAINED_GLASS_PANE;1
+      - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 7
       - price: 3 of gold
@@ -335,7 +337,7 @@ data:
     row: 3
     column: 3
 
-  - stack: STAINED_GLASS_PANE;1
+  - stack: RED_STAINED_GLASS_PANE;1
     price: 4 of iron
     row: 3
     column: 4
@@ -390,3 +392,35 @@ data:
     row: 4
     column: 7
     price: 3 of emerald
+
+  - stack: "RED_STAINED_GLASS_PANE;1"
+    row: 5
+    column: 1
+
+  - stack: "RED_STAINED_GLASS_PANE;1"
+    row: 5
+    column: 2
+
+  - stack: "RED_STAINED_GLASS_PANE;1"
+    row: 5
+    column: 3
+
+  - stack: "RED_STAINED_GLASS_PANE;1"
+    row: 5
+    column: 4
+
+  - stack: RED_STAINED_GLASS_PANE;1
+    row: 5
+    column: 5
+
+  - stack: RED_STAINED_GLASS_PANE;1
+    row: 5
+    column: 6
+
+  - stack: RED_STAINED_GLASS_PANE;1
+    row: 5
+    column: 7
+
+  - stack: GREEN_STAINED_GLASS_PANE;1
+    row: 2
+    column: 0
