@@ -44,6 +44,7 @@ import pronze.hypixelify.utils.DateUtils;
 import pronze.hypixelify.utils.Logger;
 import pronze.hypixelify.visuals.LobbyScoreboardManager;
 import pronze.hypixelify.visuals.MainLobbyVisualsManager;
+import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +134,7 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
             new SBAExpansion().register();
         }
 
+        ScoreboardManager.init(getPluginInstance());
         Bukkit.getServer().getServicesManager().register(SBAHypixelifyAPI.class, this, getPluginInstance(), ServicePriority.Normal);
         getLogger().info("Plugin has loaded");
     }

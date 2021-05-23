@@ -13,6 +13,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
@@ -215,10 +217,13 @@ public class MainLobbyVisualsManager implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
-        Tasker.build(() -> {
-            if (isInWorld(player.getLocation()) && player.isOnline()) {
-                create(player);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (isInWorld(player.getLocation()) && player.isOnline()) {
+                    create(player);
+                }
             }
-        }).delay(1, TaskerTime.SECONDS).start();
+        }.runTaskLater(SBAHypixelify.getPluginInstance(), 20L);
     }
 }
