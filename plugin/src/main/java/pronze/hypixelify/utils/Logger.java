@@ -19,7 +19,7 @@ public class Logger {
     public static void init(JavaPlugin plugin) {
         instance = new Logger();
         instance.level = Level.ALL;
-        instance.logger = SBAHypixelify.getPluginInstance().getLogger();
+        instance.logger = plugin.getLogger();
         if (!SBAConfig.getInstance().node("debug", "enabled").getBoolean()) {
             instance.level = Level.DISABLED;
         }
