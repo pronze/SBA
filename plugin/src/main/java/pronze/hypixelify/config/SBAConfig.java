@@ -290,7 +290,7 @@ public class SBAConfig implements IConfigurator {
     @Override
     public void upgrade() {
         try {
-            node("version").set(Main.getVersion());
+            node("version").set(SBAHypixelify.getInstance().getVersion());
             node("autoset-bw-config").set(false);
             saveConfig();
 
