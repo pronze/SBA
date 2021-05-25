@@ -44,7 +44,6 @@ public class CommandManager {
 
     private PaperCommandManager<CommandSender> manager;
     private AnnotationParser<CommandSender> annotationParser;
-    private CommandConfirmationManager<CommandSender> confirmationManager;
     private MinecraftHelp<CommandSender> minecraftHelp;
 
     @OnPostEnable
@@ -68,7 +67,7 @@ public class CommandManager {
 
         BukkitAudiences bukkitAudiences = BukkitAudiences.create(SBAHypixelify.getPluginInstance());
         minecraftHelp = new MinecraftHelp<>(
-                "/manhunt help",
+                "/sba help",
                 bukkitAudiences::sender,
                 manager
         );
@@ -79,15 +78,6 @@ public class CommandManager {
         if (manager.queryCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
             manager.registerAsynchronousCompletions();
         }
-        confirmationManager = new CommandConfirmationManager<>(
-                30L,
-                TimeUnit.SECONDS,
-                context -> context.getCommandContext().getSender().sendMessage(
-                        ChatColor.RED + "Confirmation required. Confirm using /manhunt confirm."),
-                sender -> sender.sendMessage(
-                        ChatColor.RED + "You don't have any pending commands.")
-        );
-        confirmationManager.registerConfirmationProcessor(manager);
         final Function<ParserParameters, CommandMeta> commandMetaFunction = p ->
                 CommandMeta.simple()
                         .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))

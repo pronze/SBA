@@ -52,7 +52,7 @@ public class Party implements IParty {
         final var formattedMessage = LanguageService
                 .getInstance()
                 .get(MessageKeys.PARTY_CHAT_FORMAT)
-                .replace("%player%", sender.getName())
+                .replace("%name%", sender.getName())
                 .replace("%message%", AdventureHelper.toLegacy(message))
                 .toComponent();
         members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));

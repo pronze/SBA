@@ -1,7 +1,10 @@
 package pronze.hypixelify.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
@@ -71,15 +74,17 @@ public class PartyWarpCommand {
                                 .forEach(member -> {
                                     final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
 
-                                    if (game != memberGame) {
-                                        if (memberGame != null)
-                                            memberGame.leaveFromGame(member.getInstance());
-                                        game.joinToGame(member.getInstance());
-                                        LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.PARTY_MESSAGE_WARP)
-                                                .send(member);
-                                    }
+                                    Bukkit.getScheduler().runTask(SBAHypixelify.getPluginInstance(), () -> {
+                                        if (game != memberGame) {
+                                            if (memberGame != null)
+                                                memberGame.leaveFromGame(member.getInstance());
+                                            game.joinToGame(member.getInstance());
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                    .send(member);
+                                        }
+                                    });
                                 });
                     } else {
                         final var leaderLocation = player.getInstance().getLocation();
