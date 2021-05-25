@@ -20,7 +20,7 @@ public class PartyDebugCommand {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 
-    @CommandMethod("party debug [player]")
+    @CommandMethod("party debug <player>")
     private void commandDebug(
             final @NotNull CommandSender sender,
             final @NotNull @Argument("player") Player playerArg

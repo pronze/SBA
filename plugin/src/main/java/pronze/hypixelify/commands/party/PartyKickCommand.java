@@ -43,7 +43,7 @@ public class PartyKickCommand {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 
-    @CommandMethod("party kick [player]")
+    @CommandMethod("party kick <player>")
     private void commandKick(
             final @NotNull Player playerArg,
             final @NotNull @Argument(value = "player", suggestions = "kick") Player toKick

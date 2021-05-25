@@ -105,7 +105,7 @@ public class SBACommand {
         sender.sendMessage(c2);
     }
 
-   @CommandMethod("sba generate [gamemode] [maps]")
+   @CommandMethod("sba generate <gamemode> <maps>")
    @CommandDescription("generate games inventory configuration files")
    @CommandPermission("sba.generate")
    private void commandGenerate(
@@ -204,7 +204,7 @@ public class SBACommand {
        }
    }
 
-    @CommandMethod("sba gamesinv [gamemode]")
+    @CommandMethod("sba gamesinv <gamemode>")
     @CommandDescription("open GamesInventory for player")
     private void commandGamesInv(
             final @NotNull Player player,

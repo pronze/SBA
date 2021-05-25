@@ -41,7 +41,7 @@ public class PartyPromoteCommand {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 
-    @CommandMethod("party promote [player]")
+    @CommandMethod("party promote <player>")
     private void commandPromote(
             final @NotNull Player playerArg,
             final @NotNull @Argument(value = "player", suggestions = "promote") Player toPromote

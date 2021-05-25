@@ -18,6 +18,8 @@ import pronze.hypixelify.api.Permissions;
 import pronze.hypixelify.config.SBAConfig;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 import pronze.hypixelify.lib.lang.LanguageService;
+
+import javax.annotation.Syntax;
 import java.util.List;
 
 @Service
@@ -28,18 +30,13 @@ public class ShoutCommand {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 
-    @CommandMethod("shout [args]")
+    @CommandMethod("shout <args>")
     @CommandDescription("shout command")
     private void commandShout(
             final @NotNull Player player,
             final @NotNull @Argument("args") String[] argsParam
     ) {
         final var args = List.of(argsParam);
-
-        if (args.isEmpty()) {
-            //TODO:
-            return;
-        }
 
         final var wrapper = PlayerMapper
                 .wrapPlayer(player);

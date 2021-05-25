@@ -23,7 +23,7 @@ public class PartyInviteCommand {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 
-    @CommandMethod("party invite [invitee]")
+    @CommandMethod("party invite <invitee>")
     private void commandInvite(
             final @NotNull Player playerArg,
             final @NotNull @Argument("invitee") Player invitee
