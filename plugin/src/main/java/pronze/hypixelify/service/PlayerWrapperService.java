@@ -40,7 +40,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
         PlayerMapper.UNSAFE_getPlayerConverter()
                 .registerW2P(PlayerWrapper.class, wrapper -> {
                     if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
-                        return playerData.get(wrapper.as(PlayerWrapper.class).getUuid());
+                        return playerData.get(wrapper.getUuid());
                     }
                     return null;
                 });

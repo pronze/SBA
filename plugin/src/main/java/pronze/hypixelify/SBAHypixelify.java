@@ -72,6 +72,7 @@ import static pronze.hypixelify.utils.MessageUtils.showErrorMessage;
         LanguageService.class,
         CommandManager.class,
         ArenaManager.class,
+        PartyManager.class,
         SBAStoreInventory.class,
         GamesInventory.class,
         PlayerWrapperService.class,
@@ -115,7 +116,7 @@ public class SBAHypixelify extends PluginContainer implements SBAHypixelifyAPI {
         }
 
         if (!Main.getVersion().contains("0.2.15")) {
-            showErrorMessage("You need ScreamingBedWars v0.2.15 to run SBAHypixelify v1.0",
+            showErrorMessage("You need ScreamingBedWars v0.2.15 to run SBAHypixelify v1.5.0",
                     "Get the latest version from here: https://www.spigotmc.org/resources/screaming-bedwars-1-9-1-16.63714/");
             return;
         }

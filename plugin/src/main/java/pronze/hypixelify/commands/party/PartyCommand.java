@@ -3,8 +3,7 @@ package pronze.hypixelify.commands.party;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Service;
 
-@Service
-@Init(services = {
+@Service(initAnother = {
         PartyAcceptCommand.class,
         PartyChatCommand.class,
         PartyDebugCommand.class,
