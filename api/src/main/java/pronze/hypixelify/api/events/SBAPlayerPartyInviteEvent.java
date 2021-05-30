@@ -16,7 +16,7 @@ public class SBAPlayerPartyInviteEvent extends Event implements Cancellable {
 
     public SBAPlayerPartyInviteEvent(PlayerWrapper player,
                                      PlayerWrapper invited) {
-        super(true);
+        super(false);
         this.player = player;
         this.invited = invited;
     }

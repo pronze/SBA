@@ -18,7 +18,7 @@ public class SBAPlayerPartyKickEvent extends Event implements Cancellable {
 
     public SBAPlayerPartyKickEvent(PlayerWrapper playerToKick,
                                    IParty party) {
-        super(true);
+        super(false);
         this.playerToKick = playerToKick;
         this.party = party;
     }

@@ -15,6 +15,7 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.lib.lang.Message;
+import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.bedwars.utils.MiscUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
@@ -101,11 +102,78 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        final var game = (Game) e.getGame();
+        final var wrappedPlayer = PlayerMapper
+                .wrapPlayer(player)
+                .as(pronze.hypixelify.api.wrapper.PlayerWrapper.class);
         final var task = runnableCache.get(player.getUniqueId());
+        final var game = (Game) e.getGame();
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
+        SBAHypixelify
+                .getInstance()
+                .getPartyManager()
+                .getPartyOf(wrappedPlayer)
+                .ifPresentOrElse(party -> {
+                    if (!wrappedPlayer.equals(party.getPartyLeader())) {
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                .send(wrappedPlayer);
+                        return;
+                    }
+                    if (party.getMembers().size() == 1) {
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.PARTY_MESSAGE_NO_PLAYERS_TO_WARP)
+                                .send(wrappedPlayer);
+                        return;
+                    }
+
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.PARTY_MESSAGE_WARP)
+                            .send(wrappedPlayer);
+
+                    if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
+
+                        party.getMembers()
+                                .stream().filter(member -> !wrappedPlayer.equals(member))
+                                .forEach(member -> {
+                                    final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
+
+                                    Bukkit.getScheduler().runTask(SBAHypixelify.getPluginInstance(), () -> {
+                                        if (game != memberGame) {
+                                            if (memberGame != null)
+                                                memberGame.leaveFromGame(member.getInstance());
+                                            game.joinToGame(member.getInstance());
+                                            LanguageService
+                                                    .getInstance()
+                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                    .send(member);
+                                        }
+                                    });
+                                });
+                    } else {
+                        final var leaderLocation = wrappedPlayer.getInstance().getLocation();
+                        party.getMembers()
+                                .stream()
+                                .filter(member -> !member.equals(player))
+                                .forEach(member -> {
+                                    if (Main.getInstance().isPlayerPlayingAnyGame(member.getInstance())) {
+                                        Main.getInstance().getGameOfPlayer(member.getInstance()).leaveFromGame(member.getInstance());
+                                    }
+                                    PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
+                                    LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
+                                            .send(PlayerMapper.wrapPlayer(member.getInstance()));
+                                });
+                    }
+                }, () -> LanguageService
+                        .getInstance()
+                        .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                        .send(wrappedPlayer));
 
         switch (game.getStatus()) {
             case WAITING:
