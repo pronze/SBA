@@ -18,7 +18,7 @@ public class SBAPlayerPartyDisbandEvent extends Event implements Cancellable {
 
     public SBAPlayerPartyDisbandEvent(PlayerWrapper player,
                                       IParty party) {
-        super(true);
+        super(false);
         this.player = player;
         this.party = party;
     }

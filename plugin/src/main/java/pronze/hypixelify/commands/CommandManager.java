@@ -49,7 +49,7 @@ public class CommandManager {
     @OnPostEnable
     public void onPostEnable() {
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
-                AsynchronousCommandExecutionCoordinator.<CommandSender>newBuilder().build();
+                CommandExecutionCoordinator.simpleCoordinator();
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();
         try {
             this.manager = new PaperCommandManager<>(

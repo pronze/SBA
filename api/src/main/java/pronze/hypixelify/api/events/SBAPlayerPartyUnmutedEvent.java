@@ -18,7 +18,7 @@ public class SBAPlayerPartyUnmutedEvent extends Event implements Cancellable {
 
     public SBAPlayerPartyUnmutedEvent(PlayerWrapper player,
                                       IParty party) {
-        super(true);
+        super(false);
         this.player = player;
         this.party = party;
     }

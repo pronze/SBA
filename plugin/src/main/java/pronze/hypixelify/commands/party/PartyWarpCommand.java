@@ -99,7 +99,7 @@ public class PartyWarpCommand {
                                     LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
-                                            .send(PlayerMapper.wrapPlayer(member));
+                                            .send(PlayerMapper.wrapPlayer(member.getInstance()));
                                 });
                     }
                 }, () -> LanguageService
