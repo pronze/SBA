@@ -1,5 +1,7 @@
 package pronze.hypixelify.api.events;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -9,36 +11,19 @@ import org.screamingsandals.bedwars.lib.sgui.utils.MapReader;
 
 import java.util.Map;
 
+@RequiredArgsConstructor
+@Getter
 public class ApplyPropertyToItemEvent extends Event {
-
     private static final HandlerList handlers = new HandlerList();
-    private Game game;
-    private Player player;
-    private ItemStack stack;
-    private Map<String, Object> properties;
+    private final Game game;
+    private final Player player;
+    private final ItemStack stack;
+    private final Map<String, Object> properties;
     private final MapReader reader;
     private String price = null;
 
-    /**
-     * @param game
-     * @param player
-     * @param stack
-     * @param properties
-     */
-    public ApplyPropertyToItemEvent(Game game, Player player, ItemStack stack, Map<String, Object> properties, MapReader reader) {
-        this.game = game;
-        this.player = player;
-        this.stack = stack;
-        this.properties = properties;
-        this.reader = reader;
-    }
-
     public static HandlerList getHandlerList() {
         return ApplyPropertyToItemEvent.handlers;
-    }
-
-    public String getPrice() {
-        return price;
     }
 
     public void setPrice(String st) {
@@ -61,18 +46,6 @@ public class ApplyPropertyToItemEvent extends Event {
      */
     public Player getPlayer() {
         return this.player;
-    }
-
-    /**
-     * @param stack
-     * @return
-     */
-    public boolean setStack(ItemStack stack) {
-        if (stack == null) {
-            return false;
-        }
-        this.stack = stack;
-        return true;
     }
 
     /**

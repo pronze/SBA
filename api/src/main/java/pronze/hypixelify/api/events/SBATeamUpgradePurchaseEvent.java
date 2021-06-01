@@ -9,11 +9,11 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 
-@EqualsAndHashCode(callSuper = true)
 @RequiredArgsConstructor
 @Data
 public class SBATeamUpgradePurchaseEvent extends Event implements Cancellable {
@@ -36,6 +36,7 @@ public class SBATeamUpgradePurchaseEvent extends Event implements Cancellable {
         return cancelled;
     }
 
+    @NotNull
     @Override
     public HandlerList getHandlers() {
         return SBATeamUpgradePurchaseEvent.handlers;

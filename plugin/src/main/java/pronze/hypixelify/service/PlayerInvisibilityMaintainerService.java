@@ -18,12 +18,10 @@ public class PlayerInvisibilityMaintainerService {
 
     @OnPostEnable
     public void addListener() {
-        final Class<?> PacketPlayOutEntityEquipment = ClassStorage.safeGetClass("{nms}.PacketPlayOutEntityEquipment");
-
         new AutoPacketOutboundListener(SBAHypixelify.getPluginInstance()) {
             @Override
             protected Object handle(Player player, Object packet) {
-                if (PacketPlayOutEntityEquipment.isInstance(packet)) {
+                if (ClassStorage.NMS.PacketPlayOutEntityEquipment.isInstance(packet)) {
                     final var entityId = (int) Reflect.getField(ClassStorage.NMS.PacketPlayInUseEntity, "a,field_149567_a", packet);
 
                     final AtomicReference<Player> armorEquipper = new AtomicReference<>();

@@ -1,8 +1,6 @@
 package pronze.hypixelify.service;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.craftbukkit.MinecraftComponentSerializer;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +12,11 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.lib.packet.PacketMapper;
+import org.screamingsandals.lib.packet.SPacketPlayOutScoreboardDisplayObjective;
+import org.screamingsandals.lib.packet.SPacketPlayOutScoreboardObjective;
+import org.screamingsandals.lib.packet.SPacketPlayOutScoreboardScore;
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnDisable;
@@ -30,8 +33,8 @@ public class HealthIndicatorService implements Listener {
     private final Map<UUID, Map<UUID, Double>> dataMap = new HashMap<>();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");
 
-    private static final String TAB_IDENTIFIER = "sba-tab";
-    private static final String TAG_IDENTIFIER = "sba-tag";
+    private static final Component TAB_IDENTIFIER = Component.text("sba-tab");
+    private static final Component TAG_IDENTIFIER = Component.text("sba-tag");
 
     private final boolean tabEnabled;
     private final boolean tagEnabled;
@@ -83,12 +86,16 @@ public class HealthIndicatorService implements Listener {
     public void removePlayer(Player player) {
         final var playerData = dataMap.get(player.getUniqueId());
         if (playerData != null) {
+            final var playerWrapper = PlayerMapper.wrapPlayer(player);
             if (tabEnabled) {
-                ClassStorage.sendPacket(player, destroyObjective(TAB_IDENTIFIER));
+                getDestroyObjectivePacket(TAB_IDENTIFIER)
+                        .sendPacket(playerWrapper);
             }
             if (tagEnabled) {
-                ClassStorage.sendPacket(player, destroyObjective(TAG_IDENTIFIER));
+                getDestroyObjectivePacket(TAG_IDENTIFIER)
+                        .sendPacket(playerWrapper);
             }
+
             dataMap.remove(player.getUniqueId());
         }
     }
@@ -110,76 +117,74 @@ public class HealthIndicatorService implements Listener {
     }
 
     public void update(Player player, @NotNull String playerName, int health) {
+        final var playerWrapper = PlayerMapper.wrapPlayer(player);
+
         if (tabEnabled) {
-            ClassStorage.sendPacket(player, createOrUpdateScorePacket(TAB_IDENTIFIER, health, playerName));
+            createOrUpdateScorePacket(TAB_IDENTIFIER, health, playerName)
+                    .sendPacket(playerWrapper);
         }
         if (tagEnabled) {
-            ClassStorage.sendPacket(player, createOrUpdateScorePacket(TAG_IDENTIFIER, health, playerName));
+            createOrUpdateScorePacket(TAG_IDENTIFIER, health, playerName)
+                    .sendPacket(playerWrapper);
         }
     }
 
     public void create(Player player) {
         dataMap.put(player.getUniqueId(), new HashMap<>());
+        final var playerWrapper = PlayerMapper.wrapPlayer(player);
 
         if (tabEnabled) {
-            ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(TAB_IDENTIFIER, Component.text("healthIndicator")));
-            ClassStorage.sendPacket(player, getScoreboardDisplayObjective(TAB_IDENTIFIER, 0));
+            getScoreboardObjectiveCreatePacket(TAB_IDENTIFIER, Component.text("healthIndicator"))
+                    .sendPacket(playerWrapper);
+            getScoreboardDisplayObjectivePacket(TAB_IDENTIFIER, SPacketPlayOutScoreboardDisplayObjective.DisplaySlot.PLAYER_LIST)
+                    .sendPacket(playerWrapper);
         }
 
         if (tagEnabled) {
-            ClassStorage.sendPacket(player, getScoreboardObjectiveCreatePacket(TAG_IDENTIFIER, Component.text("§c♥")));
-            ClassStorage.sendPacket(player, getScoreboardDisplayObjective(TAG_IDENTIFIER, 2));
+            getScoreboardObjectiveCreatePacket(TAG_IDENTIFIER, Component.text("§c♥"))
+                    .sendPacket(playerWrapper);
+            getScoreboardDisplayObjectivePacket(TAG_IDENTIFIER, SPacketPlayOutScoreboardDisplayObjective.DisplaySlot.BELOW_NAME)
+                    .sendPacket(playerWrapper);
         }
     }
 
-    private Object createOrUpdateScorePacket(String objectiveKey, int i, String value) {
-        var packet = Reflect.constructResulted(ClassStorage.NMS.PacketPlayOutScoreboardScore);
-        packet.setField("a", value);
-        packet.setField("b", objectiveKey);
-        packet.setField("c", i);
-        packet.setField("d", Reflect.findEnumConstant(ClassStorage.NMS.EnumScoreboardAction, "CHANGE"));
-        return packet.raw();
+    private SPacketPlayOutScoreboardScore createOrUpdateScorePacket(Component objectiveKey, int i, String value) {
+        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardScore.class);
+        packet.setValue(Component.text(value));
+        packet.setObjectiveKey(objectiveKey);
+        packet.setAction(SPacketPlayOutScoreboardScore.ScoreboardAction.CHANGE);
+        packet.setScore(i);
+        return packet;
     }
 
-    private Object destroyScore(String value, String objectiveKey) {
-        var packet = Reflect.constructResulted(ClassStorage.NMS.PacketPlayOutScoreboardScore);
-        packet.setField("a", value);
-        packet.setField("b", objectiveKey);
-        packet.setField("d", Reflect.findEnumConstant(ClassStorage.NMS.EnumScoreboardAction, "REMOVE"));
-        return packet.raw();
+    private SPacketPlayOutScoreboardScore destroyScore(String value, Component objectiveKey) {
+        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardScore.class);
+        packet.setObjectiveKey(objectiveKey);
+        packet.setValue(Component.text(value));
+        packet.setAction(SPacketPlayOutScoreboardScore.ScoreboardAction.REMOVE);
+        return packet;
     }
 
-    private Object destroyObjective(String objectiveKey) {
-        var packet = Reflect.constructResulted(ClassStorage.NMS.PacketPlayOutScoreboardObjective);
-        packet.setField("a", objectiveKey);
-        packet.setField("d", 1);
-        return packet.raw();
+    private SPacketPlayOutScoreboardObjective getDestroyObjectivePacket(Component objectiveKey) {
+        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardObjective.class);
+        packet.setObjectiveKey(objectiveKey);
+        packet.setMode(SPacketPlayOutScoreboardObjective.Mode.DESTROY);
+        return packet;
     }
 
-    private Object getScoreboardDisplayObjective(String objectiveKey, int type) {
-        var packet = Reflect.constructResulted(ClassStorage.NMS.PacketPlayOutScoreboardDisplayObjective);
-        packet.setField("a", type);
-        packet.setField("b", objectiveKey);
-        return packet.raw();
+    private SPacketPlayOutScoreboardDisplayObjective getScoreboardDisplayObjectivePacket(Component objectiveKey, SPacketPlayOutScoreboardDisplayObjective.DisplaySlot type) {
+        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardDisplayObjective.class);
+        packet.setObjectiveKey(objectiveKey);
+        packet.setDisplaySlot(type);
+        return packet;
     }
 
-    public Object getScoreboardObjectiveCreatePacket(String objectiveKey, Component title) {
-        var packet = Reflect.constructResulted(ClassStorage.NMS.PacketPlayOutScoreboardObjective);
-        packet.setField("a", objectiveKey);
-        if (packet.setField("b", asMinecraftComponent(title)) == null) {
-            packet.setField("b", AdventureHelper.toLegacy(title));
-        }
-        packet.setField("c", Reflect.findEnumConstant(ClassStorage.NMS.EnumScoreboardHealthDisplay, "INTEGER"));
-        packet.setField("d", 0);
-        return packet.raw();
-    }
-
-    public static Object asMinecraftComponent(Component component) {
-        try {
-            return MinecraftComponentSerializer.get().serialize(component);
-        } catch (Exception ignored) { // current Adventure is facing some weird bug on non-adventure native server software, let's do temporary workaround
-            return Reflect.getMethod(ClassStorage.NMS.ChatSerializer, "a,field_150700_a", String.class)
-                    .invokeStatic(GsonComponentSerializer.gson().serialize(component));
-        }
+    public SPacketPlayOutScoreboardObjective getScoreboardObjectiveCreatePacket(Component objectiveKey, Component title) {
+        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardObjective.class);
+        packet.setObjectiveKey(objectiveKey);
+        packet.setTitle(title);
+        packet.setCriteria(SPacketPlayOutScoreboardObjective.Type.INTEGER);
+        packet.setMode(SPacketPlayOutScoreboardObjective.Mode.CREATE);
+        return packet;
     }
 }

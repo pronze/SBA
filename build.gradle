@@ -58,6 +58,9 @@ subprojects {
         compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.2.15'
     }
 
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+    }
     sourceCompatibility = '11.0'
 }
 

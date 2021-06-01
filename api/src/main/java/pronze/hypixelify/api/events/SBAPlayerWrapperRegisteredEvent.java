@@ -8,7 +8,6 @@ import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
-@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @Getter
 public class SBAPlayerWrapperRegisteredEvent extends Event {

@@ -1,6 +1,7 @@
 package pronze.hypixelify.api.events;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.Cancellable;
@@ -10,21 +11,17 @@ import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
+@RequiredArgsConstructor
 @Getter
 public class SBAPlayerPartyChatEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
 
     private final PlayerWrapper player;
     private final IParty party;
-    @Setter private Component message;
+    @Setter
+    private Component message;
     private boolean cancelled;
 
-    public SBAPlayerPartyChatEvent(PlayerWrapper player,
-                                   IParty party) {
-        super(true);
-        this.player = player;
-        this.party = party;
-    }
     @Override
     public @NotNull HandlerList getHandlers() {
         return handlerList;

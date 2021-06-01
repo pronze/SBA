@@ -44,8 +44,6 @@ public class GameChatListener implements Listener {
                                 .getInstance()
                                 .node("chat-format", "game-chat", "format-spectator").getString();
                     } else {
-
-
                         if (event.getMessage().startsWith(allChatPrefix)) {
                             format = SBAConfig
                                     .getInstance()

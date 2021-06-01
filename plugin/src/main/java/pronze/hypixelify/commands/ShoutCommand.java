@@ -103,7 +103,7 @@ public class ShoutCommand {
                 .replace("%team%", team == null ? "" : team.getName())
                 .toComponent();
 
-        wrapper.as(PlayerWrapper.class).shout(shoutMessage, game);
+        wrapper.as(PlayerWrapper.class).shout(shoutMessage);
     }
 
 }

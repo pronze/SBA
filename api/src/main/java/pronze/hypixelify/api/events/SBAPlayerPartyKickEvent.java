@@ -1,6 +1,7 @@
 package pronze.hypixelify.api.events;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import pronze.hypixelify.api.party.IParty;
 import pronze.hypixelify.api.wrapper.PlayerWrapper;
 
+@RequiredArgsConstructor
 @Getter
 public class SBAPlayerPartyKickEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
@@ -16,12 +18,6 @@ public class SBAPlayerPartyKickEvent extends Event implements Cancellable {
     private final IParty party;
     private boolean cancelled;
 
-    public SBAPlayerPartyKickEvent(PlayerWrapper playerToKick,
-                                   IParty party) {
-        super(false);
-        this.playerToKick = playerToKick;
-        this.party = party;
-    }
     @Override
     public @NotNull HandlerList getHandlers() {
         return handlerList;

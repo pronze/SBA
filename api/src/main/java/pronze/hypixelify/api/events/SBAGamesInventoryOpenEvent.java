@@ -1,22 +1,20 @@
 package pronze.hypixelify.api.events;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
+@RequiredArgsConstructor
 @Getter
 public class SBAGamesInventoryOpenEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private Player player;
+    private final Player player;
+    private final int mode;
     private boolean isCancelled = false;
-    private int mode;
-
-    public SBAGamesInventoryOpenEvent(Player player, int mode){
-        this.player = player;
-        this.mode = mode;
-    }
 
     @Override
     public boolean isCancelled() {
@@ -28,6 +26,7 @@ public class SBAGamesInventoryOpenEvent extends Event implements Cancellable {
         isCancelled = b;
     }
 
+    @NotNull
     @Override
     public HandlerList getHandlers() {
         return SBAGamesInventoryOpenEvent.handlers;

@@ -1,6 +1,6 @@
 dependencies {
-    compileOnly "net.kyori:adventure-text-minimessage:4.1.0-SNAPSHOT"
-    compileOnly "org.screamingsandals.lib:sender:2.0.0-SNAPSHOT"
-    compileOnly "org.screamingsandals.lib:player-bukkit:2.0.0-SNAPSHOT"
-    compileOnly "org.screamingsandals.lib:utils-bukkit:2.0.0-SNAPSHOT"
+    compileOnly "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_VERSION
+    compileOnly "org.screamingsandals.lib:sender:" + SCREAMINGLIB_VERSION
+    compileOnly "org.screamingsandals.lib:player-bukkit:" + SCREAMINGLIB_VERSION
+    compileOnly "org.screamingsandals.lib:utils-bukkit:" + SCREAMINGLIB_VERSION
 }

@@ -42,21 +42,20 @@ import static org.screamingsandals.bedwars.lib.lang.I.i18n;
 
 public class ShopUtil {
 
-    private final static Map<String, Integer> UpgradeKeys = new HashMap<>();
-
-    private static void InitalizeStacks() {
-        UpgradeKeys.clear();
-        UpgradeKeys.put("STONE", 2);
-        UpgradeKeys.put("IRON", 4);
-        UpgradeKeys.put("DIAMOND", 5);
-        if (!Main.isLegacy()) {
-            UpgradeKeys.put("WOODEN", 1);
-            UpgradeKeys.put("GOLDEN", 3);
-        } else {
-            UpgradeKeys.put("WOOD", 1);
-            UpgradeKeys.put("GOLD", 3);
+    private final static Map<String, Integer> UpgradeKeys = new HashMap<>() {
+        {
+            put("STONE", 2);
+            put("IRON", 4);
+            put("DIAMOND", 5);
+            if (Main.isLegacy()) {
+                put("WOOD", 1);
+                put("GOLD", 3);
+            } else {
+                put("WOODEN", 1);
+                put("GOLDEN", 3);
+            }
         }
-    }
+    };
 
     public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
         Arrays.stream(player.getInventory().getArmorContents()).forEach(item ->{

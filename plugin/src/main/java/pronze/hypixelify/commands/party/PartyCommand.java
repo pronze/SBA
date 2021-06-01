@@ -1,6 +1,5 @@
 package pronze.hypixelify.commands.party;
 
-import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Service;
 
 @Service(initAnother = {

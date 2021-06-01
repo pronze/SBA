@@ -60,7 +60,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         return !shoutCooldown;
     }
 
-    public void shout(Component message, Game game) {
+    public void shout(Component message) {
         if (!shoutCooldown) {
             shoutCooldown = true;
             sendMessage(message);
