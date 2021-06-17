@@ -7,7 +7,7 @@ ScreamingLibBuilder()
         .build()
 
 dependencies {
-    implementation project(':SBAHypixelify-API')
+    implementation project(':SBA-API')
     compileOnly 'com.mojang:datafixerupper:' + DATAFIXER_UPPER_VERSION
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
     // TODO: use sidebar from slib

@@ -1,4 +1,4 @@
-# SBAHypixelify 
+# SBA 
 
 This addon is to the ScreamingBedWars Plugin made by ScreamingSandals, it's made to hypixelify certain elements of the plugin such as store,
 player behavior, events, scoreboard and so on. Download this plugin directly from [spigot](https://www.spigotmc.org/resources/screaming-bedwars-extension-1-15-2.79505/)
@@ -35,7 +35,7 @@ player behavior, events, scoreboard and so on. Download this plugin directly fro
 
 
 ## Snapshot builds
-Tired of waiting for a newer version of sbahypixelify to release?, get the latest version from [ScreamingSandals CI server](https://ci.screamingsandals.org/job/SBAHypixelify/)
+Tired of waiting for a newer version of SBA to release?, get the latest version from [ScreamingSandals CI server](https://ci.screamingsandals.org/job/SBA/)
 
 ## Credits
 Special thanks to the [ScreamingSandals team](https://github.com/ScreamingSandals) and [NotFoundName](https://github.com/notfoundname) (for his XpWars addon that helped in the creation of this one). This wouldn't have been possible without them.

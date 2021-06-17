@@ -1,0 +1,68 @@
+package pronze.sba.game;
+import org.bukkit.entity.Player;
+import org.screamingsandals.bedwars.api.game.Game;
+import pronze.sba.data.GamePlayerData;
+import pronze.sba.manager.ScoreboardManager;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public interface IArena {
+    /**
+     *
+     * @return game storage
+     */
+    GameStorage getStorage();
+
+    /**
+     *
+     * @return game object of this arena
+     */
+    Game getGame();
+
+    /**
+     *
+     * @return the {@link ScoreboardManager} instance that manages scoreboard activity for this arena.
+     */
+    ScoreboardManager getScoreboardManager();
+
+    /**
+     *
+     * @param playerUUID the uuid of the player to query.
+     * @return an optional {@link GamePlayerData} instance.
+     */
+    Optional<GamePlayerData> getPlayerData(UUID playerUUID);
+
+    /**
+     *
+     * @param uuid the uuid instance of the player to register in the HashMap.
+     * @param data the value of the uuid key to be used.
+     */
+    void putPlayerData(UUID uuid, GamePlayerData data);
+
+    /**
+     *
+     * @param player
+     * @return
+     */
+    boolean isPlayerHidden(Player player);
+
+    /**
+     *
+     * @param player
+     */
+    void removeHiddenPlayer(Player player);
+
+    /**
+     *
+     * @param player
+     */
+    void addHiddenPlayer(Player player);
+
+    /**
+     *
+     * @return
+     */
+    List<Player> getInvisiblePlayers();
+}
