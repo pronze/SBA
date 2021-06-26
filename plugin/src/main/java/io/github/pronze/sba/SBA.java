@@ -31,6 +31,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.event.EventManager;
+import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -47,6 +48,7 @@ import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
+import org.screamingsandals.lib.world.LocationMapper;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
@@ -67,6 +69,8 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 )
 @Init(services = {
         PlayerMapper.class,
+        LocationMapper.class,
+        HologramManager.class,
         EventManager.class,
         UpdateChecker.class,
         SBAConfig.class,

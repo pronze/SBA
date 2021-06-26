@@ -75,7 +75,7 @@ public class RotatingGenerator implements IRotatingGenerator {
                 .itemPosition(Hologram.ItemPosition.BELOW)
                 .rotationMode(Hologram.RotationMode.X)
                 .rotationTime(Pair.of(2, TaskerTime.TICKS));
-
+        viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
         scheduleTasks();
     }
 
