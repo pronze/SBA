@@ -219,10 +219,15 @@ public class BedWarsListener implements Listener {
                 runnableCache.put(player.getUniqueId(), bukkitTask);
                 break;
             case RUNNING:
-                ArenaManager
+                final var arena = ArenaManager
                         .getInstance()
                         .get(game.getName())
-                        .ifPresent(arena -> arena.getScoreboardManager().createBoard(player));
+                        .orElseThrow();
+
+                arena.getScoreboardManager().createBoard(player);
+                ((Arena) arena).getRotatingGenerators().forEach(generator -> {
+                    generator.addViewer(player);
+                });
                 break;
         }
     }

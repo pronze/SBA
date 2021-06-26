@@ -5,6 +5,7 @@ import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.game.GameStorage;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.inventories.SBAStoreInventory;
+import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lang.ILanguageService;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.listener.BedWarsListener;
@@ -75,6 +76,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         ArenaManager.class,
         PartyManager.class,
         SBAStoreInventory.class,
+        SBAUpgradeStoreInventory.class,
         GamesInventory.class,
         PlayerWrapperService.class,
         HealthIndicatorService.class,

@@ -12,7 +12,6 @@ public class MessageKeys {
     public static final String[] SHOP_AMOUNT = {"shop", "amount"};
     public static final String[] SHOP_MAX_ENCHANT = {"shop", "max-enchant"};
     public static final String[] SHOP_PURCHASE_SUCCESS = {"shop", "buy_success"};
-    public static final String[] SHOP_PURCHASE_FAILED = {"shop", "buy_failed"};
     public static final String[] DRAGON_SPAWNED = {"dragon-spawn"};
     public static final String[] DRAGON_TRAP_PURCHASED_MESSAGE = {"dragon-trap-purchased"};
     public static final String[] PARTY_MESSAGE_INVALID_COMMAND = {"party", "message", "invalid-command"};
@@ -41,7 +40,6 @@ public class MessageKeys {
     public static final String[] LOBBY_SCOREBOARD_TRIPLES_PREFIX = {"lobby-scoreboard", "triples-prefix"};
     public static final String[] LOBBY_SCOREBOARD_SQUADS_PREFIX = {"lobby-scoreboard", "squads-prefix"};
     public static final String[] LOBBY_SCOREBOARD_STATE_WAITING = {"lobby-scoreboard", "state", "waiting"};
-    public static final String[] MAXIMUM_ENCHANT_LORE = {"maximum-enchant-lore"};
     public static final String[] GAME_START_MESSAGE = {"game-start", "message"};
     public static final String[] OVERSTATS_MESSAGE = {"overstats", "message"};
     public static final String[] SCOREBOARD_YOU_MESSAGE = {"scoreboard","you"};
@@ -90,7 +88,6 @@ public class MessageKeys {
     public static final String[] COMMAND_PARTY_SETTINGS_GET_HELP = {"command_party_settings_get_help"};
     public static final String[] NONE = {"none"};
     public static final String[] VICTORY_TITLE = {"victory-title"};
-    public static final String[] SPAWNER_HOLO_TIER_FORMAT = {"spawner_holo_tier_format"};
     public static final String[] ROTATING_GENERATOR_FORMAT = {"floating-generator", "holo-text"};
     public static final String[] TEAM_TRAP_TRIGGERED_MESSAGE = {"trap-triggered", "message"};
     public static final String[] TEAM_TRAP_TRIGGERED_TITLE = {"trap-triggered", "title"};
@@ -115,4 +112,5 @@ public class MessageKeys {
     public static final String[] SWORD = {"sword"};
     public static final String[] PICKAXE = {"pickaxe"};
     public static final String[] AXE = {"axe"};
+    public static final String[] CANNOT_DOWNGRADE_ITEM = {"cannot-downgrade-item"};
 }

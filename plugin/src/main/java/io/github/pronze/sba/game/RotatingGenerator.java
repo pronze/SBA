@@ -4,6 +4,7 @@ import io.github.pronze.sba.utils.ShopUtil;
 import io.papermc.lib.PaperLib;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.ArmorStand;
@@ -15,12 +16,18 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import org.screamingsandals.bedwars.lib.nms.holograms.Hologram;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
+import org.screamingsandals.lib.hologram.Hologram;
+import org.screamingsandals.lib.hologram.HologramManager;
+import org.screamingsandals.lib.material.builder.ItemFactory;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.utils.Pair;
+import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +44,7 @@ public class RotatingGenerator implements IRotatingGenerator {
     private final ItemSpawner itemSpawner;
     private final ItemStack stack;
 
-    private BukkitTask rotatingTask, hologramTask;
-    private ArmorStand entity;
+    private BukkitTask hologramTask;
     private Hologram hologram;
 
     public RotatingGenerator(ItemSpawner itemSpawner, ItemStack stack, Location location) {
@@ -56,57 +62,37 @@ public class RotatingGenerator implements IRotatingGenerator {
     @Override
     public void spawn(List<Player> viewers) {
         final var holoHeight = SBAConfig.getInstance()
-                .node("floating-generator", "holo-height").getDouble(2.0);
+                .node("floating-generator", "holo-height").getDouble(0.5);
 
-        final var itemHeight = SBAConfig.getInstance()
-                .node("floating-generator", "item-height").getDouble(0.25);
-
-        hologram = Main.getHologramManager()
-                .spawnHologram(viewers, location.clone().add(0, holoHeight, 0), lines.toArray(new String[0]));
-
-        PaperLib
-                .getChunkAtAsync(location)
-                .thenAccept(chunk -> {
-                    entity = (ArmorStand) location.getWorld().
-                            spawnEntity(location.clone().add(0, itemHeight, 0), EntityType.ARMOR_STAND);
-                    entity.setCustomName(entityName);
-                    entity.setVisible(false);
-                    entity.setHelmet(stack);
-                    entity.setGravity(false);
-
-                    //make sure there aren't any other rotating generator entities in the same area
-                    entity.getLocation().getWorld().getNearbyEntitiesByType(ArmorStand.class, entity.getLocation()
-                            , 1, 1, 1)
-                            .stream()
-                            .filter(e1->  e1.getLocation().getBlock().equals(entity.getLocation().getBlock()) && !entity.equals(e1))
-                            .forEach(Entity::remove);
-                });
+        hologram = HologramManager
+                .hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
+        hologram
+                .item(
+                        ItemFactory
+                                .build(stack)
+                                .orElseThrow()
+                )
+                .itemPosition(Hologram.ItemPosition.BELOW)
+                .rotationMode(Hologram.RotationMode.X)
+                .rotationTime(Pair.of(2, TaskerTime.TICKS));
 
         scheduleTasks();
     }
 
     @Override
     public void addViewer(Player player) {
-        hologram.addViewer(player);
+        hologram.addViewer(PlayerMapper.wrapPlayer(player));
     }
 
     @Override
     public void removeViewer(Player player) {
-        hologram.removeViewer(player);
+        hologram.removeViewer(PlayerMapper.wrapPlayer(player));
     }
 
     protected void scheduleTasks() {
         // cancel tasks if pending
-        SBAUtil.cancelTask(rotatingTask);
         SBAUtil.cancelTask(hologramTask);
 
-        rotatingTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                location.setYaw(location.getYaw() + 10f);
-                entity.teleport(location);
-            }
-        }.runTaskTimer(SBA.getPluginInstance(), 0L, 2L);
 
         hologramTask = new BukkitRunnable() {
             @Override
@@ -154,18 +140,13 @@ public class RotatingGenerator implements IRotatingGenerator {
             return;
         }
         for (int i = 0; i < newLines.size(); i++) {
-            hologram.setLine(i, newLines.get(i));
+            hologram.newLine(i, Component.text(newLines.get(i)));
         }
         this.lines = new ArrayList<>(newLines);
     }
 
     public void destroy() {
-        SBAUtil.cancelTask(rotatingTask);
         SBAUtil.cancelTask(hologramTask);
-        if (entity != null) {
-            entity.remove();
-            entity = null;
-        }
         if (hologram != null) {
             hologram.destroy();
             hologram = null;

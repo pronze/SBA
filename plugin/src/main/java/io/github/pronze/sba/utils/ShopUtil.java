@@ -5,12 +5,14 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.GameStorage;
 import io.github.pronze.sba.game.StoreType;
+import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.meta.EnchantmentMapping;
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
@@ -58,6 +60,7 @@ public class ShopUtil {
             put("STONE", 2);
             put("IRON", 4);
             put("DIAMOND", 5);
+            put("NETHERITE", 6);
             if (Main.isLegacy()) {
                 put("WOOD", 1);
                 put("GOLD", 3);
@@ -68,8 +71,34 @@ public class ShopUtil {
         }
     };
 
-    public static void buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {
+    public static boolean buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {
         final var matName = mat_boots.name().substring(0, mat_boots.name().indexOf("_"));
+
+        if (UpgradeKeys.containsKey(matName)) {
+            final var playerBoots = player.getInventory().getBoots();
+            if (playerBoots != null) {
+                var keyLevel = UpgradeKeys.get(matName);
+                var currentLevel = UpgradeKeys.get(playerBoots.getType().name().substring(0, playerBoots.getType().name().indexOf("_")));
+                if (currentLevel > keyLevel) {
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.CANNOT_DOWNGRADE_ITEM)
+                            .replace("<item>", "armor")
+                            .send(PlayerMapper.wrapPlayer(player));
+                    return false;
+                }
+
+                if (currentLevel.equals(keyLevel)) {
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.ALREADY_PURCHASED)
+                            .replace("<thing>", "armor")
+                            .send(PlayerMapper.wrapPlayer(player));
+                    return false;
+                }
+            }
+        }
+
         final var mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         final var boots = new ItemStack(mat_boots);
         final var leggings = new ItemStack(mat_leggings);
@@ -83,6 +112,7 @@ public class ShopUtil {
         player.getInventory().setBoots(null);
         player.getInventory().setBoots(boots);
         player.getInventory().setLeggings(leggings);
+        return true;
     }
 
 
@@ -262,6 +292,14 @@ public class ShopUtil {
         return stringBuilder.toString().trim();
     }
 
+
+    public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
+        Arrays.stream(player.getInventory()
+                .getArmorContents())
+                .filter(Objects::nonNull)
+                .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
+    }
+
     public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type) {
         if (type == StoreType.UPGRADES) {
             level = level + 1;
@@ -294,8 +332,7 @@ public class ShopUtil {
         final var typeName = item.getMaterial().getPlatformName();
         final var runningTeam = game.getTeamOfPlayer(player);
 
-        SBA
-                .getInstance()
+        SBA.getInstance()
                 .getGameStorage(game)
                 .ifPresent(gameStorage -> {
                     final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
@@ -320,7 +357,10 @@ public class ShopUtil {
     //TODO:
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
-        //backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
+        final var backItemMeta = backItem.getItemMeta();
+     //   backItemMeta.setDisplayName(Message.of());
+//
+       // backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
         //localOptionsBuilder.backItem(backItem);
 
         //final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");

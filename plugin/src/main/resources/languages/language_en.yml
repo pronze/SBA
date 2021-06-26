@@ -6,6 +6,7 @@ armor: "armor"
 sword: "sword"
 pickaxe: "pickaxe"
 axe: "axe"
+cannot-downgrade-item: "<red>Cannot downgrade <item>!"
 dragon-spawn: "<red>Dragons has been spawned!, good luck"
 dragon-trap-purchased: "<gold>Dragon upgrade has been purchased!"
 game-starts-in: "<yellow>The game starts in <red>%seconds% <yellow>seconds"
@@ -52,7 +53,6 @@ not_in_game: "<red>You have to be in a game to do this command!"
 shout_wait: "<red>You have to wait for %seconds% to use this command again!"
 none: "None"
 command_party_settings_get_help: "<red>Do /p settings help for help regarding party settings"
-spawner_holo_tier_format: "<yellow>Tier <red>%tier%"
 floating-generator:
   holo-text:
     - "<yellow>Tier <red>%tier%"
@@ -78,9 +78,6 @@ lobby-scoreboard:
   state:
     waiting: "<white>Waiting..."
     countdown: "<white>Starting in <green>%countdown%s"
-maximum-enchant-lore:
-  - "Maximum Enchant"
-  - "Your team already has maximum Enchant."
 games-inventory:
   could-not-find-game: "<red>Could not find game!"
   gui:

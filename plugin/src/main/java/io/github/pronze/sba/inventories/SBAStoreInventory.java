@@ -99,7 +99,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 player.openInventory(shopMap.get("default"));
             }
         } catch (Throwable ignored) {
-            player.sendMessage("[BW] Your shop.yml/shop.groovy is invalid! Check it out or contact us on Discord.");
+            player.sendMessage("[SBA] Your shop.yml is invalid! Check it out or contact us on Discord.");
         }
     }
 
@@ -292,9 +292,8 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
                 LanguageService
                         .getInstance()
-                        .get(MessageKeys.SHOP_PURCHASE_FAILED)
-                        .replace("<item>", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
-                        .replace("<material>", priceAmount + " " + type.getItemName())
+                        .get(MessageKeys.CANNOT_BUY)
+                        .replace("<item>", type.getItemName())
                         .send(event.getPlayer());
             }
             return;
@@ -306,7 +305,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 if (!(converted instanceof Map)) {
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
-                if (((Map<?, ?>)converted).get("name") == null) {
+                if (((Map<?, ?>) converted).get("name") == null) {
                     continue;
                 }
                 //noinspection unchecked
@@ -320,6 +319,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
         }
 
         var shouldBuyStack = true;
+        var shouldSellStack = true;
 
         var gameStorage = SBA
                 .getInstance()
@@ -346,7 +346,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             case "helmet":
             case "leggings":
                 shouldBuyStack = false;
-                ShopUtil.buyArmor(player, newItem.as(ItemStack.class).getType(), gameStorage, game);
+                shouldSellStack = ShopUtil.buyArmor(player, newItem.as(ItemStack.class).getType(), gameStorage, game);
                 break;
             case "pickaxe":
                 final var efficiency = gameStorage.getEfficiency(team.getName());
@@ -354,9 +354,9 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                     newItem.addEnchant(new EnchantmentHolder(EnchantmentMapping
                             .resolve(Enchantment.DIG_SPEED).orElseThrow().getPlatformName(), efficiency));
                 }
+                break;
         }
 
-        event.sellStack(materialItem);
 
         if (shouldBuyStack) {
             List<Item> notFit = event.buyStack(newItem);
@@ -365,15 +365,20 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             }
         }
 
-        if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                    .replace("<item>", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
-                    .replace("<material>", priceAmount + " " + type.getItemName())
-                    .send(event.getPlayer());
+        if (shouldSellStack) {
+            event.sellStack(materialItem);
+
+            if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
+                        .replace("<item>", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
+                        .replace("<material>", priceAmount + " " + type.getItemName())
+                        .send(event.getPlayer());
+            }
         }
     }
+
 
     @SneakyThrows
     private void loadDefault(InventorySet inventorySet) {
@@ -447,7 +452,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
         final var shopFile = event.getStore().getShopFile();
-        if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml") )|| event.getStore().getUseParent()) {
+        if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml")) || event.getStore().getUseParent()) {
             if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened store!", event.getPlayer().getName());
