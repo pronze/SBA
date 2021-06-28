@@ -1,20 +1,15 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.utils.ShopUtil;
-import io.papermc.lib.PaperLib;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
@@ -75,6 +70,7 @@ public class RotatingGenerator implements IRotatingGenerator {
                 .itemPosition(Hologram.ItemPosition.BELOW)
                 .rotationMode(Hologram.RotationMode.X)
                 .rotationTime(Pair.of(2, TaskerTime.TICKS));
+        hologram.show();
         viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
         scheduleTasks();
     }
@@ -140,7 +136,7 @@ public class RotatingGenerator implements IRotatingGenerator {
             return;
         }
         for (int i = 0; i < newLines.size(); i++) {
-            hologram.newLine(i, Component.text(newLines.get(i)));
+            hologram.replaceLine(i, Component.text(newLines.get(i)));
         }
         this.lines = new ArrayList<>(newLines);
     }

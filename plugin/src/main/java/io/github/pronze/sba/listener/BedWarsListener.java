@@ -275,6 +275,7 @@ public class BedWarsListener implements Listener {
                     final var killer = e.getKiller();
                     //killer is present
                     if (killer != null) {
+                        Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());
                         // get victim game profile
                         final var gVictim = Main.getPlayerGameProfile(victim);
 
@@ -285,6 +286,7 @@ public class BedWarsListener implements Listener {
                         if (victimTeam != null) {
                             arena.getPlayerData(killer.getUniqueId())
                                     .ifPresent(killerData -> {
+                                        Logger.trace("Incrementing killer kills to: {}", killerData.getKills() + 1);
                                         // increment kill counter for killer
                                         killerData.setKills(killerData.getKills() + 1);
                                         if (!victimTeam.isAlive()) {

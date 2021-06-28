@@ -108,7 +108,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         if (xp < 50) {
             return 1;
         }
-        return xp / AddonAPI.getInstance().getConfigurator().getInt("player-statistics.xp-to-level-up", 500);
+        return 1 + (xp / AddonAPI.getInstance().getConfigurator().getInt("player-statistics.xp-to-level-up", 500));
     }
 
     public String getProgress() {

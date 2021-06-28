@@ -30,8 +30,10 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
+import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -70,6 +72,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 @Init(services = {
         PlayerMapper.class,
         LocationMapper.class,
+        PacketMapper.class,
         HologramManager.class,
         EventManager.class,
         UpdateChecker.class,
@@ -142,6 +145,10 @@ public class SBA extends PluginContainer implements AddonAPI {
             new SBAExpansion().register();
         }
 
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            final var handle = ClassStorage.getHandle(player);
+            Bukkit.getLogger().info("UUID: " + Reflect.getMethod(handle, "getUniqueID,ch,bc,bS,func_110124_au").invoke());
+        });
         ScoreboardManager.init(getPluginInstance());
         Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
         getLogger().info("Plugin has loaded");

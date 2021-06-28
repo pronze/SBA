@@ -25,7 +25,9 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import java.text.DecimalFormat;
 import java.util.*;
 
-@Service
+@Service(dependsOn = {
+        PacketMapper.class
+})
 public class HealthIndicatorService implements Listener {
     private final Map<UUID, Map<UUID, Double>> dataMap = new HashMap<>();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");

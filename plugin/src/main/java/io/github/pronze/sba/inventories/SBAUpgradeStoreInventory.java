@@ -293,7 +293,7 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
             ShopUtil.setLore(item, itemInfo, String.valueOf(price), type);
         }
 
-        ShopUtil.applyTeamUpgradeEnchantsToItem(item, event, StoreType.NORMAL);
+        ShopUtil.applyTeamUpgradeEnchantsToItem(item, event, StoreType.UPGRADES);
 
         itemInfo.getProperties().forEach(property -> {
             if (property.hasName()) {
