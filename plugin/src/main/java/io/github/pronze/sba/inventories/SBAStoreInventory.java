@@ -293,7 +293,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.CANNOT_BUY)
-                        .replace("<item>", type.getItemName())
+                        .replace("%price%", type.getItemName())
                         .send(event.getPlayer());
             }
             return;

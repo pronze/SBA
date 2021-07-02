@@ -106,7 +106,7 @@ public class PlayerListener implements Listener {
                 .filter(Objects::nonNull)
                 .forEach(stack -> {
                     final String name = stack.getType().name();
-                    var endStr = name.substring(name.contains("_") ? name.indexOf("_") : 0);
+                    var endStr = name.substring(name.contains("_") ? name.indexOf("_") + 1 : 0);
                     switch (endStr) {
                         case "SWORD":
                             sword.addEnchantments(stack.getEnchantments());

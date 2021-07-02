@@ -74,7 +74,7 @@ lobby-scoreboard:
     - "<white>Mode: <green>%mode%"
     - "<white>Version: <gray>v1.1"
     - ""
-    - "<yellow>SBA v1.4.5"
+    - "<yellow>SBA v1.5.0"
   state:
     waiting: "<white>Waiting..."
     countdown: "<white>Starting in <green>%countdown%s"
@@ -153,7 +153,7 @@ scoreboard:
       - "<white>Kills: <green>%kills%"
       - "<white>Bed Broken: <green>%beds%"
       - ""
-      - "<yellow>SBA v1.4.5"
+      - "<yellow>SBA v1.5.0"
     5:
       - "<gray>%date%"
       - ""
@@ -161,14 +161,14 @@ scoreboard:
       - ""
       - "%team_status%"
       - ""
-      - "<yellow>SBA v1.4.5"
+      - "<yellow>SBA v1.5.0"
 main-lobby:
   chat-format: "%color%[%level%✫] %name%: %message%"
   tablist:
     header:
       - "<aqua>You are playing on <yellow><bold>WWW.SAMPLE.NET"
     footer:
-      - '<yellow><bold>SBA v1.4.5'
+      - '<yellow><bold>SBA v1.5.0'
   scoreboard:
     title: "<yellow><bold>BED WARS</bold>"
     lines:
@@ -183,7 +183,7 @@ main-lobby:
       - ""
       - "K/D ratio: <gold>%kdr%"
       - ""
-      - "<yellow>SBA v1.4.5"
+      - "<yellow>SBA v1.5.0"
 party:
   chat-format: "<green>Party >> %name% <white> : %message%"
   message:

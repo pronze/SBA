@@ -57,7 +57,7 @@ public class RotatingGenerator implements IRotatingGenerator {
     @Override
     public void spawn(List<Player> viewers) {
         final var holoHeight = SBAConfig.getInstance()
-                .node("floating-generator", "holo-height").getDouble(0.5);
+                .node("floating-generator", "height").getDouble(2.0);
 
         hologram = HologramManager
                 .hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
@@ -68,8 +68,9 @@ public class RotatingGenerator implements IRotatingGenerator {
                                 .orElseThrow()
                 )
                 .itemPosition(Hologram.ItemPosition.BELOW)
-                .rotationMode(Hologram.RotationMode.X)
+                .rotationMode(Hologram.RotationMode.Y)
                 .rotationTime(Pair.of(2, TaskerTime.TICKS));
+
         hologram.show();
         viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
         scheduleTasks();

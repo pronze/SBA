@@ -144,18 +144,18 @@ public class GameTask extends BukkitRunnable {
                 if (elapsedTime == nextEvent.getTime()) {
                     if (timerUpgrades) {
                         final var tierName = nextEvent.getKey();
-                        GeneratorUpgradeType upgradeType = GeneratorUpgradeType.fromString(nextEvent.getKey());
+                        GeneratorUpgradeType upgradeType = GeneratorUpgradeType.fromString(tierName.substring(0, tierName.indexOf("-")));
                         String matName = null;
                         Material type = null;
 
                         switch (upgradeType) {
                             case DIAMOND:
                                 matName = "§b" + diamond;
-                                type = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "diamond-block"));
+                                type = Material.DIAMOND_BLOCK;
                                 break;
                             case EMERALD:
                                 matName = "§a" + emerald;
-                                type = Material.valueOf(SBAConfig.getInstance().getString("floating-generator", "emerald-block"));
+                                type = Material.EMERALD_BLOCK;
                                 break;
                         }
 
@@ -178,43 +178,32 @@ public class GameTask extends BukkitRunnable {
 
 
                         Material finalType = type;
-                        generatorData.forEach(generator -> {
-                            final var generatorMatType = generator.getItemStack().getType();
-                            if (generatorMatType == finalType) {
-                                generator.setTierLevel(generator.getTierLevel() + 1);
-                                //  generator
-                                //          .getItemSpawner()
-                                //          .getHologram()
-                                //          .bottomLine(TextEntry.of(LanguageService
-                                //                  .getInstance()
-                                //                  .get(MessageKeys.SPAWNER_HOLO_TIER_FORMAT)
-                                //                  .toString()
-                                //                  .replace("%tier%", String.valueOf(generator.getTierLevel()))));
-                            }
-                        });
+                        generatorData.stream()
+                                .filter(generator -> generator.getItemStack().getType() == finalType)
+                                .forEach(generator -> generator.setTierLevel(generator.getTierLevel() + 1));
 
-                        if (showUpgradeMessage && finalType != null) {
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
-                                    .replace("%MatName%", matName)
-                                    .replace("%tier%", tierName)
-                                    .send(game
-                                            .getConnectedPlayers()
-                                            .stream()
-                                            .map(PlayerMapper::wrapPlayer)
-                                            .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
-                        }
+                    if (showUpgradeMessage && finalType != null) {
+                        LanguageService
+                                .getInstance()
+                                .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
+                                .replace("%MatName%", matName)
+                                .replace("%tier%", tierName)
+                                .send(game
+                                        .getConnectedPlayers()
+                                        .stream()
+                                        .map(PlayerMapper::wrapPlayer)
+                                        .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
                     }
-                    tier++;
-                    nextEvent = nextEvent.getNextEvent();
                 }
+                tier++;
+                nextEvent = nextEvent.getNextEvent();
             }
-            elapsedTime++;
-        } else {
-            this.cancel();
         }
+        elapsedTime++;
+    } else {
+        this.cancel();
     }
+}
 
     public String getTimeLeftForNextEvent() {
         return dateFormat.format((nextEvent.getTime() - elapsedTime) * 1000);

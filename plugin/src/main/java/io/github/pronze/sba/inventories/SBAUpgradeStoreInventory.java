@@ -384,7 +384,7 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.CANNOT_BUY)
-                        .replace("<item>", type.getItemName())
+                        .replace("%price%", type.getItemName())
                         .send(event.getPlayer());
             }
             return;
@@ -397,23 +397,18 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
 
         final var team = game.getTeamOfPlayer(player);
 
-        var shouldBuyStack = false;
         var shouldSellStack = true;
-
         final var wrappedPlayer = event.getPlayer();
 
         for (var property : itemInfo.getProperties()) {
             if (property.hasName()) {
+                final var propertyName = property.getPropertyName().toLowerCase();
                 var converted = ConfigurateUtils.raw(property.getPropertyData());
                 if (!(converted instanceof Map)) {
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
-                if (((Map<?, ?>) converted).get("name") == null) {
-                    continue;
-                }
                 //noinspection unchecked
                 var propertyData = (Map<String, Object>) converted;
-                final var propertyName = property.getPropertyName().toLowerCase();
                 Logger.trace("Found property: {} for item: {}", propertyName, itemInfo.getStack().toString());
 
                 if (upgradeProperties.contains(propertyName)) {
@@ -551,26 +546,19 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                 }
             }
 
-            final var typeName = newItem.getMaterial().getPlatformName();
 
-            if (shouldBuyStack) {
-                List<Item> notFit = event.buyStack(newItem);
-                if (!notFit.isEmpty()) {
-                    notFit.forEach(stack -> player.getLocation().getWorld().dropItem(player.getLocation(), stack.as(ItemStack.class)));
-                }
-            }
+        }
 
-            if (shouldSellStack) {
-                event.sellStack(materialItem);
+        if (shouldSellStack) {
+            event.sellStack(materialItem);
 
-                if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                            .replace("<item>", amount + "x " + ShopUtil.getNameOrCustomNameOfItem(newItem))
-                            .replace("<material>", priceAmount + " " + type.getItemName())
-                            .send(event.getPlayer());
-                }
+            if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
+                        .replace("<item>", ShopUtil.getNameOrCustomNameOfItem(newItem))
+                        .replace("<material>", priceAmount + " " + type.getItemName())
+                        .send(event.getPlayer());
             }
         }
     }
