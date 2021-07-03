@@ -37,6 +37,7 @@ public class RotatingGenerator implements IRotatingGenerator {
     @Setter
     private int tierLevel = 1;
     private final ItemSpawner itemSpawner;
+    @Getter
     private final ItemStack stack;
 
     private BukkitTask hologramTask;

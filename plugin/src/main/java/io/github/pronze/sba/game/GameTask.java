@@ -37,7 +37,6 @@ public class GameTask extends BukkitRunnable {
     private final GameStorage storage;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
-    private final List<GeneratorData> generatorData = new ArrayList<>();
     private GameEvent nextEvent;
     private int elapsedTime;
     private int tier = 2;
@@ -79,7 +78,7 @@ public class GameTask extends BukkitRunnable {
                 game.getRunningTeams()
                         .stream()
                         .filter(storage::isTrapEnabled)
-                        .forEach(team -> game.getConnectedPlayeSrs()
+                        .forEach(team -> game.getConnectedPlayers()
                                 .stream()
                                 .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
                                 .forEach(player -> {
@@ -177,8 +176,9 @@ public class GameTask extends BukkitRunnable {
 
 
                         Material finalType = type;
-                        generatorData.stream()
-                                .filter(generator -> generator.getItemStack().getType() == finalType)
+                        arena.getRotatingGenerators().stream()
+                                .map(generator -> (RotatingGenerator) generator)
+                                .filter(generator -> generator.getStack().getType() == finalType)
                                 .forEach(generator -> generator.setTierLevel(generator.getTierLevel() + 1));
 
                     if (showUpgradeMessage && finalType != null) {
