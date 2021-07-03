@@ -1,4 +1,5 @@
 package io.github.pronze.sba.listener;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.GameMode;
 import org.bukkit.block.data.type.TNT;
@@ -9,9 +10,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
 @Service
 public class ExplosionVelocityControlListener implements Listener {
+
+    @OnPostEnable
+    public void postEnable() {
+        SBA.getInstance().registerListener(this);
+    }
 
     @EventHandler
     public void onExplode(EntityExplodeEvent event) {

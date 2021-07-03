@@ -91,6 +91,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PartyListener.class,
         PlayerListener.class,
         GeneratorSplitterListener.class,
+        ExplosionVelocityControlListener.class,
         LobbyScoreboardManager.class,
         MainLobbyVisualsManager.class
 })
