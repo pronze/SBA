@@ -73,6 +73,9 @@ public class SBAUtil {
     }
 
     public static void disablePlugin(@NotNull JavaPlugin plugin) {
+        if (!plugin.isEnabled()) {
+            return;
+        }
         // thank you Misat for this :)
         try {
             String message = String.format("Disabling %s", plugin.getDescription().getFullName());
@@ -120,7 +123,9 @@ public class SBAUtil {
 
     public static void reloadPlugin(@NonNull JavaPlugin plugin) {
         disablePlugin(plugin);
-        Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+        if (!plugin.isEnabled()) {
+            Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+        }
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 

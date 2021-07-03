@@ -1,5 +1,6 @@
 package io.github.pronze.sba.config;
 
+import io.github.pronze.sba.SBA;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -331,7 +332,10 @@ public class SBAConfig implements IConfigurator {
                 e.printStackTrace();
             }
             // give enough time to properly initialize
-            Tasker.build(() -> SBAUtil.reloadPlugin(Main.getInstance())).delay(3L, TaskerTime.SECONDS).start();
+            Tasker.build(() -> {
+                SBAUtil.reloadPlugin(Main.getInstance());
+                SBAUtil.reloadPlugin(SBA.getPluginInstance());
+            }).delay(3L, TaskerTime.SECONDS).start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
