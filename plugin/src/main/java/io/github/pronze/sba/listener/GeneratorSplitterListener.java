@@ -11,17 +11,22 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.bukkit.utils.nms.Version;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 public class GeneratorSplitterListener {
+    private static List<Material> allowedMaterials = new ArrayList<>();
 
+    @SneakyThrows
     @OnPostEnable
     public void onPostEnable() {
         if (Version.isVersion(1, 12)) {
@@ -29,6 +34,11 @@ public class GeneratorSplitterListener {
         } else {
             SBA.getInstance().registerListener(new GeneratorSplitterListenerBefore112());
         }
+        allowedMaterials = Objects.requireNonNull(SBAConfig.getInstance().node("generator-splitter", "allowed-materials").
+                getList(String.class))
+                .stream()
+                .map(matName -> Material.valueOf(matName.toUpperCase()))
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unchecked")
@@ -47,13 +57,7 @@ public class GeneratorSplitterListener {
                 return;
             }
 
-            final var allowedItems = Objects.requireNonNull(SBAConfig.getInstance().node("generator-splitter", "allowed-materials").
-                    getList(String.class))
-                    .stream()
-                    .map(matName -> Material.valueOf(matName.toUpperCase()))
-                    .collect(Collectors.toList());
-
-            if (!allowedItems.contains(item.getItemStack().getType())) {
+            if (!allowedMaterials.contains(item.getItemStack().getType())) {
                 return;
             }
 
@@ -67,6 +71,9 @@ public class GeneratorSplitterListener {
                         final var nearbyPlayerTeam = game.getTeamOfPlayer(nearbyPlayer);
                         if (nearbyPlayerTeam == playerTeam) {
                             nearbyPlayer.getInventory().addItem(item.getItemStack().clone());
+                            Sounds.playSound(nearbyPlayer, nearbyPlayer.getLocation(),
+                                    "ENTITY_ITEM_PICKUP",
+                                        Sounds.ENTITY_ITEM_PICKUP, 1, 1);
                         }
                     });
         }
