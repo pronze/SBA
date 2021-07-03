@@ -300,11 +300,12 @@ public class ShopUtil {
                 .forEach(item -> item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel));
     }
 
-    public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type) {
+    public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type, int maxLevel) {
         if (type == StoreType.UPGRADES) {
             level = level + 1;
         }
-        if (level >= 5) {
+        if (level >= maxLevel) {
+            item.getLore().clear();
             LanguageService
                     .getInstance()
                     .get(MessageKeys.SHOP_MAX_ENCHANT)
@@ -339,16 +340,16 @@ public class ShopUtil {
                     switch (afterUnderscore.toLowerCase()) {
                         case "sword":
                             int sharpness = gameStorage.getSharpness(runningTeam.getName());
-                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type);
+                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type, SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
                             break;
                         case "chestplate":
                         case "boots":
                             int protection = gameStorage.getProtection(runningTeam.getName());
-                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type);
+                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type, SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4));
                             break;
                         case "pickaxe":
                             final int efficiency = gameStorage.getEfficiency(runningTeam.getName());
-                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type);
+                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type, SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2));
                             break;
                     }
                 });

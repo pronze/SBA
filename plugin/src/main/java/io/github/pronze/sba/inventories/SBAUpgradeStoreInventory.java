@@ -428,7 +428,9 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                     switch (propertyName) {
                         case "sharpness":
                             var teamSharpnessLevel = gameStorage.getSharpness(team.getName());
-                            if (teamSharpnessLevel >= 4) {
+                            var maxSharpnessLevel = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1);
+
+                            if (teamSharpnessLevel >= maxSharpnessLevel) {
                                 shouldSellStack = false;
                                 LanguageService
                                         .getInstance()
@@ -465,8 +467,9 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
 
                         case "efficiency":
                             var efficiencyLevel = gameStorage.getEfficiency(team.getName());
+                            var maxEfficiencyLevel = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2);
 
-                            if (efficiencyLevel >= 4) {
+                            if (efficiencyLevel >= maxEfficiencyLevel) {
                                 shouldSellStack = false;
                                 LanguageService
                                         .getInstance()
@@ -540,8 +543,9 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
 
                         case "protection":
                             var teamProtectionLevel = gameStorage.getProtection(team.getName());
+                            var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
 
-                            if (teamProtectionLevel >= 4) {
+                            if (teamProtectionLevel >= maxProtectionLevel) {
                                 shouldSellStack = false;
                                 LanguageService
                                         .getInstance()
