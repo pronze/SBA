@@ -143,11 +143,6 @@ public class SBA extends PluginContainer implements AddonAPI {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new SBAExpansion().register();
         }
-
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            final var handle = ClassStorage.getHandle(player);
-            Bukkit.getLogger().info("UUID: " + Reflect.getMethod(handle, "getUniqueID,ch,bc,bS,func_110124_au").invoke());
-        });
         ScoreboardManager.init(getPluginInstance());
         Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
         getLogger().info("Plugin has loaded");

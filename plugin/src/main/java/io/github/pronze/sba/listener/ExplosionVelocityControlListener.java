@@ -51,11 +51,11 @@ public class ExplosionVelocityControlListener implements Listener {
                         Vector vector = explodedEntity
                                 .getLocation()
                                 .clone()
-                                .add(0, SBAConfig.getInstance().node("tnt-fireball-jumping", "acceleration-y").getInt(1) ,0)
+                                .add(0, SBAConfig.getInstance().node("tnt-fireball-jumping", "acceleration-y").getDouble(1.0) ,0)
                                 .toVector()
                                 .subtract(explodedEntity.getLocation().toVector()).normalize();
-                        vector.setY(vector.getY() /  SBAConfig.getInstance().node("tnt-fireball-jumping", "reduce-y").getDouble());
-                        vector.multiply(SBAConfig.getInstance().node("tnt-fireball-jumping", "launch-multiplier").getInt());
+                        vector.setY(vector.getY() /  SBAConfig.getInstance().node("tnt-fireball-jumping", "reduce-y").getDouble(2.0));
+                        vector.multiply(SBAConfig.getInstance().node("tnt-fireball-jumping", "launch-multiplier").getDouble(4.0));
 
 
                         if (entity instanceof Player) {
