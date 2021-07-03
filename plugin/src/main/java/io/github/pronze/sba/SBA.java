@@ -8,10 +8,7 @@ import io.github.pronze.sba.inventories.SBAStoreInventory;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lang.ILanguageService;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.listener.BedWarsListener;
-import io.github.pronze.sba.listener.GameChatListener;
-import io.github.pronze.sba.listener.PartyListener;
-import io.github.pronze.sba.listener.PlayerListener;
+import io.github.pronze.sba.listener.*;
 import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.party.PartyManager;
@@ -93,6 +90,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         GameChatListener.class,
         PartyListener.class,
         PlayerListener.class,
+        GeneratorSplitterListener.class,
         LobbyScoreboardManager.class,
         MainLobbyVisualsManager.class
 })

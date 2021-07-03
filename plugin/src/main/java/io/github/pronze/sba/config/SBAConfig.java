@@ -226,7 +226,11 @@ public class SBAConfig implements IConfigurator {
                     .section("npc")
                         .key("enabled").defValue(true)
                         .key("shop-skin").defValue(561657710)
-                        .key("upgrade-shop-skin").defValue(779554483);
+                        .key("upgrade-shop-skin").defValue(779554483)
+                        .back()
+                    .section("generator-splitter")
+                        .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
+                        .back();
             generator.saveIfModified();
         } catch (Exception ex) {
             ex.printStackTrace();
