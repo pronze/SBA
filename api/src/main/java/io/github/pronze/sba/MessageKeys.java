@@ -91,7 +91,7 @@ public class MessageKeys {
     public static final String[] ROTATING_GENERATOR_FORMAT = {"floating-generator", "holo-text"};
     public static final String[] TEAM_TRAP_TRIGGERED_MESSAGE = {"trap-triggered", "message"};
     public static final String[] TEAM_TRAP_TRIGGERED_TITLE = {"trap-triggered", "title"};
-    public static final String[] TEAM_TRAP_TRIGGERED_SUBTITLE = {"trap-triggered", "subtitle"};
+    public static final String[] TEAM_TRAP_TRIGGERED_SUBTITLE = {"trap-triggered", "sub-title"};
     public static final String[] GENERATOR_UPGRADE_MESSAGE = {"generator-upgrade"};
     public static final String[] RESPAWN_COUNTDOWN_TITLE = {"respawn-title"};
     public static final String[] RESPAWN_COUNTDOWN_SUBTITLE = {"respawn-subtitle"};
@@ -105,6 +105,7 @@ public class MessageKeys {
     public static final String[] PURCHASED_HEAL_POOL_MESSAGE = {"purchase-heal-pool"};
     public static final String[] UPGRADE_TEAM_PROTECTION = {"upgrade-team-protection"};
     public static final String[] UGPRADE_TEAM_SHARPNESS = {"upgrade-team-sharpness"};
+    public static final String[] UPGRADE_TEAM_EFFICIENCY=  {"upgrade-team-sharpness"};
     public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard", "title"};
     public static final String[] CANNOT_BUY = {"cannot-buy"};
     public static final String[] GAMES_INVENTORY_CANNOT_FIND_GAME = {"games-inventory", "could-not-find-game"};

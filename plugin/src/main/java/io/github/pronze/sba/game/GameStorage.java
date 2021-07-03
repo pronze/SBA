@@ -29,7 +29,9 @@ public class GameStorage {
 
     public Integer getEfficiency(String team) { return teamDataMap.get(team).getEfficiency(); }
 
-    public void setEfficiency(RunningTeam rt, Integer level) {teamDataMap.get(rt.getName()).setEfficiency(level);}
+    public void setEfficiency(RunningTeam rt, Integer level) {
+        teamDataMap.get(rt.getName()).setEfficiency(level);
+    }
 
     public void setTrap(RunningTeam rt, boolean b) {
         if (!teamDataMap.containsKey(rt.getName())) return;

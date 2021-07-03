@@ -275,7 +275,6 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void itemDamage(PlayerItemDamageEvent e) {
-        if (!SBAConfig.getInstance().getBoolean("disable-sword-armor-damage", true)) return;
         var player = e.getPlayer();
         if (!Main.isPlayerInGame(player)) return;
 
@@ -285,10 +284,13 @@ public class PlayerListener implements Listener {
         final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
 
         switch (afterUnderscore.toLowerCase()) {
-            case "BOOTS":
-            case "HELMET":
-            case "CHESTPLATE":
-            case "SWORD":
+            case "boots":
+            case "helmet":
+            case "chestplate":
+            case "pickaxe":
+            case "axe":
+            case "shears":
+            case "sword":
                 e.setCancelled(true);
         }
     }

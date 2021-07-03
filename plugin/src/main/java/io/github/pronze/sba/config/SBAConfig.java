@@ -123,6 +123,10 @@ public class SBAConfig implements IConfigurator {
                             .key("Prot-II").defValue(8)
                             .key("Prot-III").defValue(12)
                             .key("Prot-IV").defValue(16)
+                            .key("Efficiency-I").defValue(4)
+                            .key("Efficiency-II").defValue(4)
+                            .key("Efficiency-III").defValue(4)
+                            .key("Efficiency-IV").defValue(4)
                             .back()
                         .section("time")
                             .key("Diamond-II").defValue(200)
@@ -223,6 +227,7 @@ public class SBAConfig implements IConfigurator {
                         .key("enabled").defValue(true)
                         .key("shop-skin").defValue(561657710)
                         .key("upgrade-shop-skin").defValue(779554483);
+            generator.saveIfModified();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -330,7 +335,7 @@ public class SBAConfig implements IConfigurator {
     public List<String> getStringList(String string)  {
         final var list = new ArrayList<String>();
         try {
-            for (String s : node((Object[]) string.split("\\.")).getList(String.class)) {
+            for (String s : Objects.requireNonNull(node((Object[]) string.split("\\.")).getList(String.class))) {
                 s = ChatColor.translateAlternateColorCodes('&', s);
                 list.add(s);
             }
@@ -359,7 +364,7 @@ public class SBAConfig implements IConfigurator {
     }
 
     public String getString(String path) {
-        return ChatColor.translateAlternateColorCodes('&', node((Object[])path.split("\\.")).getString());
+        return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(node((Object[]) path.split("\\.")).getString()));
     }
 
     @Override

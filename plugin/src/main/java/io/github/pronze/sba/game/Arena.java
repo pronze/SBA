@@ -29,13 +29,11 @@ public class Arena implements IArena {
     private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final GameScoreboardManager scoreboardManager;
-    private final double radius;
     private final Game game;
     private final GameStorage storage;
     private final GameTask gameTask;
 
     public Arena(Game game) {
-        radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
         this.game = game;
         storage = new GameStorage(game);
         gameTask = new GameTask(this);

@@ -34,6 +34,7 @@ import org.screamingsandals.lib.material.meta.EnchantmentHolder;
 import org.screamingsandals.lib.material.meta.EnchantmentMapping;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -56,14 +57,18 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
     private final static List<String> upgradeProperties = List.of(
             "sharpness",
             "protection",
+            "efficiency",
             "blindtrap",
             "healpool",
             "dragon"
     );
 
     private final Map<String, InventorySet> shopMap = new HashMap<>();
+
+    // change these to lists instead.
     private final Map<Integer, Integer> sharpnessPrices = new HashMap<>();
     private final Map<Integer, Integer> protectionPrices = new HashMap<>();
+    private final Map<Integer, Integer> efficiencyPrices = new HashMap<>();
 
     public static SBAStoreInventory getInstance() {
         return ServiceManager.get(SBAStoreInventory.class);
@@ -99,7 +104,12 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
         protectionPrices.put(2, SBAConfig.getInstance().node("upgrades", "prices", "Prot-II").getInt(8));
         protectionPrices.put(3, SBAConfig.getInstance().node("upgrades", "prices", "Prot-III").getInt(12));
         protectionPrices.put(4, SBAConfig.getInstance().node("upgrades", "prices", "Prot-IV").getInt(16));
-    }
+
+        efficiencyPrices.put(0, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-I").getInt(4));
+        efficiencyPrices.put(1, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-I").getInt(4));
+        efficiencyPrices.put(2, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-II").getInt(8));
+        efficiencyPrices.put(3, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-III").getInt(12));
+        efficiencyPrices.put(4, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-IV").getInt(16));    }
 
 
     public Optional<InventorySet> getInventory(String key) {
@@ -404,15 +414,17 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
             if (property.hasName()) {
                 final var propertyName = property.getPropertyName().toLowerCase();
                 var converted = ConfigurateUtils.raw(property.getPropertyData());
+
                 if (!(converted instanceof Map)) {
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
                 //noinspection unchecked
                 var propertyData = (Map<String, Object>) converted;
-                Logger.trace("Found property: {} for item: {}", propertyName, itemInfo.getStack().toString());
+
+                //temporary fix
+                propertyData.putIfAbsent("name", propertyName);
 
                 if (upgradeProperties.contains(propertyName)) {
-                    final var bukkitItem = newItem.as(ItemStack.class);
                     switch (propertyName) {
                         case "sharpness":
                             var teamSharpnessLevel = gameStorage.getSharpness(team.getName());
@@ -461,7 +473,31 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                                         .get(MessageKeys.GREATEST_ENCHANTMENT)
                                         .send(wrappedPlayer);
                             } else {
-                                //TODO:
+                                efficiencyLevel = efficiencyLevel + 1;
+                                var ePrice = efficiencyPrices.get(efficiencyLevel);
+                                materialItem = ItemFactory
+                                        .build(type.getStack(ePrice))
+                                        .orElse(materialItem);
+
+                                if (player.getInventory().containsAtLeast(materialItem.as(ItemStack.class), materialItem.getAmount())) {
+                                    gameStorage.setEfficiency(team, efficiencyLevel);
+                                    Integer finalTeamEfficiencyLevel = efficiencyLevel;
+                                    team.getConnectedPlayers().forEach(teamPlayer -> {
+                                        LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.UPGRADE_TEAM_EFFICIENCY)
+                                                .replace("%player%", player.getName())
+                                                .send(PlayerMapper.wrapPlayer(teamPlayer));
+
+                                        Arrays.stream(teamPlayer.getInventory().getContents())
+                                                .filter(Objects::nonNull)
+                                                .forEach(item -> {
+                                                    if (item.getType().name().endsWith("PICKAXE")) {
+                                                        item.addEnchantment(Enchantment.DIG_SPEED, finalTeamEfficiencyLevel);
+                                                    }
+                                                });
+                                    });
+                                }
                             }
                             break;
                         case "blindtrap":
@@ -512,28 +548,28 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                                         .get(MessageKeys.GREATEST_ENCHANTMENT)
                                         .send(wrappedPlayer);
                             } else {
-                                teamSharpnessLevel = teamProtectionLevel + 1;
-                                var ePrice = protectionPrices.get(teamSharpnessLevel);
+                                teamProtectionLevel = teamProtectionLevel + 1;
+                                var ePrice = protectionPrices.get(teamProtectionLevel);
                                 materialItem = ItemFactory
                                         .build(type.getStack(ePrice))
                                         .orElse(materialItem);
 
                                 if (player.getInventory().containsAtLeast(materialItem.as(ItemStack.class), materialItem.getAmount())) {
-                                    gameStorage.setProtection(team.getName(), teamSharpnessLevel);
+                                    gameStorage.setProtection(team.getName(), teamProtectionLevel);
+                                    ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
+
+                                    var upgradeMessage = LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.UPGRADE_TEAM_PROTECTION)
+                                            .replace("%player%", player.getName())
+                                            .toComponent();
+
+                                    final var finalTeamProtectionLevel = teamProtectionLevel;
+                                    team.getConnectedPlayers().forEach(teamPlayer -> {
+                                        ShopUtil.addEnchantsToPlayerArmor(teamPlayer, finalTeamProtectionLevel);
+                                        PlayerMapper.wrapPlayer(teamPlayer).sendMessage(upgradeMessage);
+                                    });
                                 }
-
-                                ShopUtil.addEnchantsToPlayerArmor(player, bukkitItem);
-
-                                var upgradeMessage = LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.UPGRADE_TEAM_PROTECTION)
-                                        .replace("%player%", player.getName())
-                                        .toComponent();
-
-                                team.getConnectedPlayers().forEach(teamPlayer -> {
-                                    ShopUtil.addEnchantsToPlayerArmor(teamPlayer, bukkitItem);
-                                    PlayerMapper.wrapPlayer(teamPlayer).sendMessage(upgradeMessage);
-                                });
                             }
                             break;
                     }
@@ -545,8 +581,18 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                             .orElse(newItem);
                 }
             }
+        }
 
-
+        // purchase failed, player does not have enough resources to purchase
+        if (!event.hasPlayerInInventory(materialItem)) {
+            if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.CANNOT_BUY)
+                        .replace("%price%", type.getItemName())
+                        .send(event.getPlayer());
+            }
+            return;
         }
 
         if (shouldSellStack) {

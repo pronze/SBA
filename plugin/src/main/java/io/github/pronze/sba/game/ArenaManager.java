@@ -2,12 +2,14 @@ package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.utils.Logger;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,7 +20,12 @@ public class ArenaManager implements IArenaManager {
         return ServiceManager.get(ArenaManager.class);
     }
 
+    @Getter
     private final Map<String, IArena> arenaMap = new HashMap<>();
+
+    public List<IArena> getRegisteredArenas() {
+        return List.copyOf(arenaMap.values());
+    }
 
     @Override
     public void createArena(@NotNull Game game) {
@@ -32,6 +39,7 @@ public class ArenaManager implements IArenaManager {
 
     @Override
     public void removeArena(@NotNull Game game) {
+        Logger.trace("Removing arena for game: {}", game.getName());
         arenaMap.remove(game.getName());
     }
 

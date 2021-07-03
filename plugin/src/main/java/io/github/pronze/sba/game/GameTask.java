@@ -27,6 +27,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class GameTask extends BukkitRunnable {
+    private final double radius;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
     private final String diamond;
     private final String emerald;
@@ -42,8 +43,9 @@ public class GameTask extends BukkitRunnable {
     private int tier = 2;
 
     public GameTask(Arena arena) {
-        nextEvent = GameEvent.DIAMOND_GEN_UPGRADE_TIER_II;
+        radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
 
+        nextEvent = GameEvent.DIAMOND_GEN_UPGRADE_TIER_II;
         diamond = LanguageService
                 .getInstance()
                 .get(MessageKeys.DIAMOND)
@@ -74,17 +76,15 @@ public class GameTask extends BukkitRunnable {
 
             // LOGIC FOR TRAPS
             if (storage.areTrapsEnabled()) {
-
-                game.getConnectedPlayers()
+                game.getRunningTeams()
                         .stream()
-                        .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
-                        .forEach(player -> game.getRunningTeams()
+                        .filter(storage::isTrapEnabled)
+                        .forEach(team -> game.getConnectedPlayeSrs()
                                 .stream()
-                                .filter(storage::isTrapEnabled)
-                                .filter(team -> !team.getConnectedPlayers().contains(player))
-                                .forEach(team -> {
+                                .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
+                                .forEach(player -> {
 
-                                    if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= arena.getRadius()) {
+                                    if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= radius) {
                                         final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
                                         SBA.getPluginInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
@@ -121,7 +121,6 @@ public class GameTask extends BukkitRunnable {
                                             SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
                                         });
                                     }
-
                                 }));
             }
 
@@ -134,7 +133,7 @@ public class GameTask extends BukkitRunnable {
                                 .stream()
                                 .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
                                 .forEach(player -> {
-                                    if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= arena.getRadius()) {
+                                    if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= radius) {
                                         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
                                     }
                                 }));

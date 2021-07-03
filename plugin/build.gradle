@@ -22,13 +22,21 @@ dependencies {
     implementation "cloud.commandframework:cloud-paper:" + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION
 
-    implementation "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_VERSION
+    implementation "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_TEXT_MINIMESSAGE_VERSION
 
     implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-gson:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-hocon:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-xml:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
+
+    testImplementation 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
+    testImplementation 'org.screamingsandals.bedwars:BedWars:0.2.15'
+    testImplementation 'org.screamingsandals.bedwars:BedWars-API:0.2.15'
 }
 
-
+test {
+    useJUnitPlatform()
+}

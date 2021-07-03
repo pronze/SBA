@@ -293,11 +293,11 @@ public class ShopUtil {
     }
 
 
-    public static void addEnchantsToPlayerArmor(Player player, ItemStack newItem) {
+    public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
         Arrays.stream(player.getInventory()
                 .getArmorContents())
                 .filter(Objects::nonNull)
-                .forEach(item -> item.addEnchantments(newItem.getEnchantments()));
+                .forEach(item -> item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel));
     }
 
     public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type) {

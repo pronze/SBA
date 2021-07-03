@@ -267,8 +267,8 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     public void setEnabled(boolean enabled) {
-        Reflect.getMethod(getPluginInstance(), "setEnabled", Boolean.class)
-                .invoke(enabled);
+        Reflect.setField(getPluginInstance(), "isEnabled", enabled);
+        getPluginInstance().onDisable();
     }
 }
 

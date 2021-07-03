@@ -1,4 +1,5 @@
 package io.github.pronze.sba.utils;
+
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -13,6 +14,16 @@ public class Logger {
     private static Logger instance;
     private Level level;
     private java.util.logging.Logger logger;
+    private boolean testMode = false;
+
+    public static void mockMode() {
+        instance = new Logger();
+        instance.testMode = true;
+    }
+
+    public static boolean isInitialized() {
+        return instance != null;
+    }
 
     public static void init(JavaPlugin plugin) {
         instance = new Logger();
@@ -23,19 +34,35 @@ public class Logger {
         }
     }
 
+    protected static void mockDebug(String message, Object... params) {
+        System.out.println(getMessage(message, params));
+    }
+
     public static void trace(@NonNull String message, Object... params) {
+        if (instance.testMode) {
+            mockDebug(message, params);
+            return;
+        }
         if (instance.level.getLevel() >= Level.TRACE.getLevel()) {
             instance.logger.info(getMessage(message, params));
         }
     }
 
     public static void warn(@NonNull String message, Object... params) {
+        if (instance.testMode) {
+            mockDebug(message, params);
+            return;
+        }
         if (instance.level.getLevel() >= Level.WARNING.getLevel()) {
             instance.logger.warning(getMessage(message, params));
         }
     }
 
     public static void error(@NonNull String message, Object... params) {
+        if (instance.testMode) {
+            mockDebug(message, params);
+            return;
+        }
         if (instance.level.getLevel() >= Level.ERROR.getLevel()) {
             instance.logger.warning(getMessage(message, params));
         }
