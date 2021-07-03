@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
@@ -24,7 +25,9 @@ public class ExplosionVelocityControlListener implements Listener {
     public void onExplode(EntityExplodeEvent event) {
         final var explodedEntity = event.getEntity();
         if (explodedEntity instanceof TNT || explodedEntity instanceof Fireball) {
-            explodedEntity.getWorld().getNearbyEntities(explodedEntity.getLocation(), 5, 5, 5)
+            final var detectionDistance = SBAConfig.getInstance().node("tnt-fireball-jumping", "detection-distance").getDouble(5.0D);
+
+            explodedEntity.getWorld().getNearbyEntities(explodedEntity.getLocation(), detectionDistance, detectionDistance, detectionDistance)
                     .stream()
                     .filter(entity ->  !entity.equals(explodedEntity))
                     .forEach(entity -> {
@@ -39,13 +42,16 @@ public class ExplosionVelocityControlListener implements Listener {
 
                         if (entity instanceof Player) {
                             final var player = (Player) entity;
-                            if (player.getGameMode() == GameMode.SPECTATOR) {
+                            if (player.getGameMode() == GameMode.SPECTATOR || !Main.isPlayerInGame(player)) {
                                 return;
                             }
+                            entity.setVelocity(vector);
+                            return;
                         }
 
-
-                        entity.setVelocity(vector);
+                        if (Main.getInstance().isEntityInGame(entity)) {
+                            entity.setVelocity(vector);
+                        }
                     });
         }
     }

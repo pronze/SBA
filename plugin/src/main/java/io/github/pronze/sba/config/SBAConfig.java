@@ -103,6 +103,7 @@ public class SBAConfig implements IConfigurator {
                         .key("acceleration-y").defValue(1)
                         .key("reduce-y").defValue(2)
                         .key("launch-multiplier").defValue(3)
+                        .key("detection-distance").defValue(5.0D)
                         .back()
                     .key("explosion-damage").defValue(0.25)
                     .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))
