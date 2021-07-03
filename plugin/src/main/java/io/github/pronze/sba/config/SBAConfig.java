@@ -7,6 +7,8 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.builder.ItemFactory;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.ConfigurateException;
@@ -328,7 +330,8 @@ public class SBAConfig implements IConfigurator {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            SBAUtil.reloadPlugin(Main.getInstance());
+            // give enough time to properly initialize
+            Tasker.build(() -> SBAUtil.reloadPlugin(Main.getInstance())).delay(3L, TaskerTime.SECONDS).start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

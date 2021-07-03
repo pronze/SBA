@@ -176,7 +176,7 @@ public class SBA extends PluginContainer implements AddonAPI {
             if (doneChanges.get()) {
                 getLogger().info("[SBA]: Making legacy changes");
                 Main.getConfigurator().saveConfig();
-                SBAUtil.reloadPlugin(getPluginInstance());
+                SBAUtil.reloadPlugin(Main.getInstance());
             }
 
         }
@@ -205,9 +205,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public void disable() {
-        getLogger().info("Cancelling current tasks....");
-        Bukkit.getServer().getScheduler().cancelTasks(getPluginInstance());
-        Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
+
     }
 
     @Override
