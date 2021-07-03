@@ -31,6 +31,7 @@ public class GeneratorSplitterListener {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @SneakyThrows
     public static void onPickup(Player player, Item item) {
         if (Main.isPlayerInGame(player)) {
@@ -74,7 +75,6 @@ public class GeneratorSplitterListener {
     private static class GeneratorSplitterListener112 implements Listener {
 
         @SneakyThrows
-        @SuppressWarnings("unchecked")
         @EventHandler
         public void onPickup(EntityPickupItemEvent event) {
             if (!((event.getEntity()) instanceof Player)) {
