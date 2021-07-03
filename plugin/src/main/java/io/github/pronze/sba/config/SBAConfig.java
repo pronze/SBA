@@ -332,10 +332,7 @@ public class SBAConfig implements IConfigurator {
                 e.printStackTrace();
             }
             // give enough time to properly initialize
-            Tasker.build(() -> {
-                SBAUtil.reloadPlugin(Main.getInstance());
-                SBAUtil.reloadPlugin(SBA.getPluginInstance());
-            }).delay(3L, TaskerTime.SECONDS).start();
+            Tasker.build(() -> SBAUtil.reloadPlugin(Main.getInstance())).delay(3L, TaskerTime.SECONDS).start();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

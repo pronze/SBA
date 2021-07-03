@@ -72,6 +72,9 @@ public class BedWarsListener implements Listener {
     public void onBwReload(PluginEnableEvent event) {
         final var pluginName = event.getPlugin().getName();
         if (pluginName.equalsIgnoreCase(Main.getInstance().getName())) {
+            if (!SBA.getPluginInstance().isEnabled()) {
+                return;
+            }
             Logger.trace("Re registering listeners!");
             final var listeners = SBA.getInstance().getRegisteredListeners();
 
