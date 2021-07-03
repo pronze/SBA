@@ -2,19 +2,22 @@ package io.github.pronze.sba.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.GameMode;
-import org.bukkit.block.data.type.TNT;
-import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Explosive;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class ExplosionVelocityControlListener implements Listener {
+    private final Set<Player> explosionAffectedPlayers = new HashSet<>();
 
     @OnPostEnable
     public void postEnable() {
@@ -22,9 +25,23 @@ public class ExplosionVelocityControlListener implements Listener {
     }
 
     @EventHandler
+    public void onPlayerDamage(EntityDamageEvent event) {
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            final var entity = event.getEntity();
+            if (entity instanceof Player) {
+                final var player = (Player) entity;
+                if (explosionAffectedPlayers.contains(player)) {
+                    event.setDamage(0.0D);
+                    explosionAffectedPlayers.remove(player);
+                }
+            }
+        }
+    }
+
+    @EventHandler
     public void onExplode(EntityExplodeEvent event) {
         final var explodedEntity = event.getEntity();
-        if (explodedEntity instanceof TNT || explodedEntity instanceof Fireball) {
+        if (explodedEntity instanceof Explosive) {
             final var detectionDistance = SBAConfig.getInstance().node("tnt-fireball-jumping", "detection-distance").getDouble(5.0D);
 
             explodedEntity.getWorld().getNearbyEntities(explodedEntity.getLocation(), detectionDistance, detectionDistance, detectionDistance)
@@ -40,12 +57,14 @@ public class ExplosionVelocityControlListener implements Listener {
                         vector.setY(vector.getY() /  SBAConfig.getInstance().node("tnt-fireball-jumping", "reduce-y").getDouble());
                         vector.multiply(SBAConfig.getInstance().node("tnt-fireball-jumping", "launch-multiplier").getInt());
 
+
                         if (entity instanceof Player) {
                             final var player = (Player) entity;
                             if (player.getGameMode() == GameMode.SPECTATOR || !Main.isPlayerInGame(player)) {
                                 return;
                             }
-                            entity.setVelocity(vector);
+                            player.setVelocity(vector);
+                            explosionAffectedPlayers.add(player);
                             return;
                         }
 
