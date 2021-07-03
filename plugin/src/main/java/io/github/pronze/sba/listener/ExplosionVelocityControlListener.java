@@ -35,8 +35,6 @@ public class ExplosionVelocityControlListener implements Listener {
                             if (player.getGameMode() == GameMode.SPECTATOR) {
                                 return;
                             }
-                            player.setVelocity(vector);
-                            return;
                         }
 
 
