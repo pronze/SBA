@@ -355,6 +355,10 @@ public class PlayerListener implements Listener {
                         .getInstance()
                         .get(game.getName())
                         .ifPresent(arena -> arena.removeHiddenPlayer(player));
+
+                if (SBAConfig.getInstance().node("disable-explosion-damage").getBoolean(true)) {
+                    event.setDamage(0);
+                }
             }
         }
     }

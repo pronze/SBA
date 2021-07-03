@@ -98,6 +98,7 @@ public class SBAConfig implements IConfigurator {
                     .section("store")
                         .key("replace-store-with-hypixelstore").defValue(true)
                         .back()
+                    .key("disable-explosion-damage").defValue(true)
                     .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))
                     .key("block-item-drops").defValue(true)
                     .key("allowed-item-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "OBSIDIAN", "TNT"))
