@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
@@ -311,7 +312,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 //temporary fix
                 propertyData.putIfAbsent("name", property.getPropertyName());
 
-                var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.as(ItemStack.class), propertyData);
+                var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player, newItem.as(ItemStack.class), propertyData);
                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
                 newItem = ItemFactory
                         .build(applyEvent.getStack())
