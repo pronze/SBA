@@ -312,13 +312,12 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
 
-                if (((Map<?, ?>) converted).get("name") == null) {
-                    return;
-                }
-
                 //noinspection unchecked
+                final var propertyData = (Map<String, Object>) converted;
+                propertyData.putIfAbsent("name", property.getPropertyName());
+
                 var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
-                        player, item.as(ItemStack.class), (Map<String, Object>) converted);
+                        player, item.as(ItemStack.class), propertyData);
                 Bukkit.getServer().getPluginManager().callEvent(applyEvent);
 
                 event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(item));
@@ -577,13 +576,12 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                             }
                             break;
                     }
-
-                    var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.as(ItemStack.class), propertyData);
-                    SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
-                    newItem = ItemFactory
-                            .build(applyEvent.getStack())
-                            .orElse(newItem);
                 }
+                var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.as(ItemStack.class), propertyData);
+                SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
+                newItem = ItemFactory
+                        .build(applyEvent.getStack())
+                        .orElse(newItem);
             }
         }
 
