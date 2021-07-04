@@ -13,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.bukkit.entity.Player;
+import org.screamingsandals.lib.utils.reflect.Reflect;
+
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -78,7 +80,7 @@ public class SBAUtil {
             String message = String.format("Disabling %s", plugin.getDescription().getFullName());
             plugin.getLogger().info(message);
             Bukkit.getPluginManager().callEvent(new PluginDisableEvent(plugin));
-            SBA.getInstance().setEnabled(false);
+            Reflect.setField(plugin, "isEnabled", false);
         } catch (Throwable ex) {
             Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
         }

@@ -256,11 +256,6 @@ public class SBA extends PluginContainer implements AddonAPI {
     public ILanguageService getLanguageService() {
         return LanguageService.getInstance();
     }
-
-    public void setEnabled(boolean enabled) {
-        Reflect.setField(getPluginInstance(), "isEnabled", enabled);
-        getPluginInstance().onDisable();
-    }
 }
 
 

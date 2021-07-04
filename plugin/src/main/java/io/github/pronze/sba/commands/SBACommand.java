@@ -51,11 +51,6 @@ public class SBACommand {
             final @NotNull CommandSender sender
     ) {
         SBAUtil.reloadPlugin(SBA.getPluginInstance());
-        final var reloaded = LanguageService
-                .getInstance()
-                .get(MessageKeys.RELOADED)
-                .toComponent();
-        sender.sendMessage(reloaded);
     }
 
     @CommandMethod("sba setlobby")
