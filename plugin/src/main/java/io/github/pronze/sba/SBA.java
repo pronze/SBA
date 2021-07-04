@@ -91,8 +91,8 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         ExplosionVelocityControlListener.class,
         LobbyScoreboardManager.class,
         MainLobbyVisualsManager.class,
+        DynamicSpawnerLimiterService.class,
         FirstStartConfigReplacer.class,
-        DynamicSpawnerLimiterService.class
 })
 
 public class SBA extends PluginContainer implements AddonAPI {
