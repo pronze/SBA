@@ -60,6 +60,10 @@ floating-generator:
     - "<yellow>Tier <red>%tier%"
     - "%material%"
     - "<yellow>Spawns in <red>%seconds% <yellow>seconds"
+  full-text:
+    - "<yellow>Tier <red>%tier%"
+    - "%material%"
+    - "<red><bold>Spawner is full!</bold></red>"
 lobby-scoreboard:
   solo-prefix: "Solo"
   doubles-prefix: "Doubles"

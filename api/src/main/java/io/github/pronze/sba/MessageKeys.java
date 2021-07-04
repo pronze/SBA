@@ -89,6 +89,7 @@ public class MessageKeys {
     public static final String[] NONE = {"none"};
     public static final String[] VICTORY_TITLE = {"victory-title"};
     public static final String[] ROTATING_GENERATOR_FORMAT = {"floating-generator", "holo-text"};
+    public static final String[] ROTATING_GENERATOR_FULL_TEXT_FORMAT = {"floating-generator", "full-text"};
     public static final String[] TEAM_TRAP_TRIGGERED_MESSAGE = {"trap-triggered", "message"};
     public static final String[] TEAM_TRAP_TRIGGERED_TITLE = {"trap-triggered", "title"};
     public static final String[] TEAM_TRAP_TRIGGERED_SUBTITLE = {"trap-triggered", "sub-title"};

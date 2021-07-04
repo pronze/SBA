@@ -6,6 +6,7 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,6 +23,7 @@ import org.screamingsandals.lib.material.builder.ItemFactory;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.Pair;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.ArrayList;
@@ -88,19 +90,26 @@ public class RotatingGenerator implements IRotatingGenerator {
         hologram.removeViewer(PlayerMapper.wrapPlayer(player));
     }
 
+    @SuppressWarnings("unchecked")
     protected void scheduleTasks() {
         // cancel tasks if pending
         SBAUtil.cancelTask(hologramTask);
-
 
         hologramTask = new BukkitRunnable() {
             @Override
             public void run() {
                 time--;
 
-                final var format = LanguageService
+                boolean full = itemSpawner.getMaxSpawnedResources() <= ((List<Item>) Reflect.getField(itemSpawner, "spawnedItems")).size();
+
+                final var format = !full ? LanguageService
                         .getInstance()
                         .get(MessageKeys.ROTATING_GENERATOR_FORMAT)
+                        .toStringList() :
+
+                        LanguageService
+                        .getInstance()
+                        .get(MessageKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT)
                         .toStringList();
 
                 final var newLines = new ArrayList<String>();

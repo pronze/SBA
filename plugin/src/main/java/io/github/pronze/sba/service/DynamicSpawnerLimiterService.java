@@ -27,28 +27,28 @@ public class DynamicSpawnerLimiterService implements Listener {
     public void onPostEnable() {
         SBA.getInstance().registerListener(this);
 
-        diamondLimiter.put(1, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-I").getInt());
-        diamondLimiter.put(2, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-II").getInt());
-        diamondLimiter.put(3, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-III").getInt());
-        diamondLimiter.put(4, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-IV").getInt());
+        diamondLimiter.put(1, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-I").getInt(4));
+        diamondLimiter.put(2, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-II").getInt(6));
+        diamondLimiter.put(3, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-III").getInt(8));
+        diamondLimiter.put(4, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-IV").getInt(12));
 
-        emeraldLimiter.put(1, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-I").getInt());
-        emeraldLimiter.put(2, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-II").getInt());
-        emeraldLimiter.put(3, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-III").getInt());
-        emeraldLimiter.put(4, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-IV").getInt());
+        emeraldLimiter.put(1, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-I").getInt(4));
+        emeraldLimiter.put(2, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-II").getInt(6));
+        emeraldLimiter.put(3, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-III").getInt(8));
+        emeraldLimiter.put(4, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-IV").getInt(12));
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onGameStart(BedwarsGameStartedEvent event) {
-        setAccordingly(event.getGame());
+        setAccordingly(event.getGame(), false);
     }
 
     @EventHandler
     public void onSpawnerUpgrade(SBASpawnerTierUpgradeEvent event) {
-        setAccordingly(event.getGame());
+        setAccordingly(event.getGame(), true);
     }
 
-    private void setAccordingly(Game game) {
+    private void setAccordingly(Game game, boolean isUpgraded) {
         final var arena = ArenaManager
                 .getInstance()
                 .get(game.getName())
@@ -64,9 +64,11 @@ public class DynamicSpawnerLimiterService implements Listener {
                             limit = emeraldLimiter.getOrDefault(generator.getTierLevel(), 4);
                             break;
                         case DIAMOND_BLOCK:
-                            limit = diamondLimiter.getOrDefault(generator.getTierLevel(), 4);
+                            limit = diamondLimiter.getOrDefault(generator.getTierLevel() , 4);
                             break;
                     }
+
+                    limit = isUpgraded ? limit + 1 : limit;
 
                     final var spawner = generator.getItemSpawner();
                     Reflect.setField(spawner, "maxSpawnedResources", limit);
