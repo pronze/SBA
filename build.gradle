@@ -65,6 +65,7 @@ subprojects {
         relocate 'cloud.commandframework', 'io.github.pronze.lib.cloud'
         relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
         relocate 'pronze.lib', 'io.github.pronze.lib.pronzelib'
+        relocate 'org.screamingsandals.lib', 'io.github.pronze.lib.screaminglib'
     }
 
     tasks.withType(JavaCompile) {
