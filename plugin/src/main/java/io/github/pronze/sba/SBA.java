@@ -13,10 +13,8 @@ import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
-import io.github.pronze.sba.service.HealthIndicatorService;
-import io.github.pronze.sba.service.PlayerInvisibilityMaintainerService;
-import io.github.pronze.sba.service.PlayerWrapperService;
-import io.github.pronze.sba.service.WrapperService;
+import io.github.pronze.sba.service.*;
+import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.visuals.LobbyScoreboardManager;
@@ -27,7 +25,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.packet.PacketMapper;
@@ -93,7 +90,9 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         GeneratorSplitterListener.class,
         ExplosionVelocityControlListener.class,
         LobbyScoreboardManager.class,
-        MainLobbyVisualsManager.class
+        MainLobbyVisualsManager.class,
+        FirstStartConfigReplacer.class,
+        DynamicSpawnerLimiterService.class
 })
 
 public class SBA extends PluginContainer implements AddonAPI {

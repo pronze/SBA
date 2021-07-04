@@ -32,11 +32,11 @@ public class SBAExpansion extends PlaceholderExpansion {
             return " ";
         }
         String[] identifiers = identifier.split("_", 0);
-        if(identifiers.length <= 1) return null;
+        if (identifiers.length <= 1) return null;
 
         if (identifiers[0].equalsIgnoreCase("player")) {
             final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).get();
-            switch (identifiers[1]){
+            switch (identifiers[1]) {
                 case "level":
                     return Integer.toString(database.getLevel());
                 case "xp":
@@ -44,10 +44,10 @@ public class SBAExpansion extends PlaceholderExpansion {
                 case "progress":
                     return Integer.toString(database.getIntegerProgress());
             }
-        }else if(identifiers[0].equalsIgnoreCase("game")) {
-            if(identifiers.length <=2) return null;
+        } else if (identifiers[0].equalsIgnoreCase("game")) {
+            if (identifiers.length <= 2) return null;
             final Game game = Main.getInstance().getGameByName(identifiers[1]);
-            switch (identifiers[2]){
+            switch (identifiers[2]) {
                 case "status":
                     return game.getStatus().toString();
                 case "teams":

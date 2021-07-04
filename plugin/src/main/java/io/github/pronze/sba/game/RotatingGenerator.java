@@ -36,6 +36,7 @@ public class RotatingGenerator implements IRotatingGenerator {
     @Getter
     @Setter
     private int tierLevel = 1;
+    @Getter
     private final ItemSpawner itemSpawner;
     @Getter
     private final ItemStack stack;

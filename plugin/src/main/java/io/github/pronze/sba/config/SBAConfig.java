@@ -1,15 +1,10 @@
 package io.github.pronze.sba.config;
-
-import io.github.pronze.sba.SBA;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.builder.ItemFactory;
 import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.tasker.Tasker;
-import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.ConfigurateException;
@@ -129,6 +124,16 @@ public class SBAConfig implements IConfigurator {
                             .key("Sharpness").defValue(1)
                             .key("Protection").defValue(4)
                             .key("Efficiency").defValue(2)
+                            .key("Iron").defValue(30)
+                            .key("Gold").defValue(7)
+                            .key("Diamond-I").defValue(4)
+                            .key("Emerald-I").defValue(4)
+                            .key("Diamond-II").defValue(6)
+                            .key("Emerald-II").defValue(6)
+                            .key("Diamond-III").defValue(8)
+                            .key("Emerald-III").defValue(8)
+                            .key("Diamond-IV").defValue(12)
+                            .key("Emerald-IV").defValue(12)
                             .back()
                         .section("prices")
                             .key("Sharpness-I").defValue(4)
@@ -145,12 +150,12 @@ public class SBAConfig implements IConfigurator {
                             .key("Efficiency-IV").defValue(4)
                             .back()
                         .section("time")
-                            .key("Diamond-II").defValue(200)
-                            .key("Emerald-II").defValue(320)
-                            .key("Diamond-III").defValue(540)
-                            .key("Emerald-III").defValue(750)
-                            .key("Diamond-IV").defValue(900)
-                            .key("Emerald-IV").defValue(1000)
+                            .key("Diamond-II").defValue(300)
+                            .key("Emerald-II").defValue(700)
+                            .key("Diamond-III").defValue(1000)
+                            .key("Emerald-III").defValue(1300)
+                            .key("Diamond-IV").defValue(1500)
+                            .key("Emerald-IV").defValue(1800)
                             .back()
                         .back()
                     .section("date")
@@ -274,16 +279,19 @@ public class SBAConfig implements IConfigurator {
         } catch (ConfigurateException e) {
             e.printStackTrace();
         }
+    }
 
-        if (node("first_start").getBoolean(false)) {
-            Bukkit.getLogger().info("§aDetected first start");
-            upgrade();
-            try {
-                node("first_start").set(false);
-            } catch (SerializationException e) {
-                e.printStackTrace();
-            }
-            saveConfig();
+    public void forceReload() {
+        loader = YamlConfigurationLoader
+                .builder()
+                .path(dataFolder.toPath().resolve("sbaconfig.yml"))
+                .nodeStyle(NodeStyle.BLOCK)
+                .build();
+
+        try {
+            configurationNode = loader.load();
+        } catch (ConfigurateException e) {
+            e.printStackTrace();
         }
     }
 
@@ -308,16 +316,11 @@ public class SBAConfig implements IConfigurator {
     @Override
     public void upgrade() {
         try {
-            node("version").set(plugin.getDescription().getVersion());
-            node("autoset-bw-config").set(false);
-            saveConfig();
-
             plugin.saveResource("shops/shop.yml", true);
             plugin.saveResource("shops/upgradeShop.yml", true);
             try (final var inputStream = plugin.getResource("config.yml")) {
                 if (inputStream != null) {
-                    final var configFile =
-                            new File(Main.getInstance().getDataFolder(), "config.yml");
+                    final var configFile = new File(Main.getInstance().getDataFolder(), "config.yml");
                     if (configFile.exists()) {
                         configFile.delete();
                     }
@@ -331,8 +334,7 @@ public class SBAConfig implements IConfigurator {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            // give enough time to properly initialize
-            Tasker.build(() -> SBAUtil.reloadPlugin(Main.getInstance())).delay(3L, TaskerTime.SECONDS).start();
+            SBAUtil.reloadPlugin(Main.getInstance());
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -4,12 +4,14 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GeneratorData;
+import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -179,7 +181,14 @@ public class GameTask extends BukkitRunnable {
                         arena.getRotatingGenerators().stream()
                                 .map(generator -> (RotatingGenerator) generator)
                                 .filter(generator -> generator.getStack().getType() == finalType)
-                                .forEach(generator -> generator.setTierLevel(generator.getTierLevel() + 1));
+                                .forEach(generator -> {
+                                    final var event = new SBASpawnerTierUpgradeEvent(game, generator);
+                                    Bukkit.getServer().getPluginManager().callEvent(event);
+                                    if (event.isCancelled()) {
+                                        return;
+                                    }
+                                    generator.setTierLevel(generator.getTierLevel() + 1);
+                                });
 
                     if (showUpgradeMessage && finalType != null) {
                         LanguageService
