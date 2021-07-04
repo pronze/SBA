@@ -58,6 +58,15 @@ subprojects {
         compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.2.15'
     }
 
+    shadowJar {
+        relocate 'org.spongepowered.configurate', 'io.github.pronze.lib.configurate'
+        relocate 'org.yaml.snakeyaml', 'io.github.pronze.lib.snakeyaml'
+        relocate 'net.kyori', 'io.github.pronze.lib.kyori'
+        relocate 'cloud.commandframework', 'io.github.pronze.lib.cloud'
+        relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
+        relocate 'pronze.lib', 'io.github.pronze.lib.pronzelib'
+    }
+
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
