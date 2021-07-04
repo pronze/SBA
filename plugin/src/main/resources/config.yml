@@ -23,11 +23,11 @@ allow-block-falling: true
 game-start-items: true
 player-respawn-items: false
 gived-game-start-items:
-  - wooden_sword
-  - leather_helmet
-  - leather_boots
-  - leather_leggings
-  - leather_chestplate
+  - 'wooden_sword'
+  - 'leather_helmet'
+  - 'leather_boots'
+  - 'leather_leggings'
+  - 'leather_chestplate'
 gived-player-respawn-items:
 disable-hunger: true
 automatic-coloring-in-shop: true
@@ -193,13 +193,13 @@ game-effects:
   warppowdertick: {}
 lobby-scoreboard:
   enabled: false
-  title: §eBEDWARS
+  title: '§eBEDWARS'
   content:
     - ' '
     - '§fMap: §2%arena%'
     - '§fPlayers: §2%players%§f/§2%maxplayers%'
     - ' '
-    - §fWaiting ...
+    - '§fWaiting ...'
     - ' '
 statistics:
   enabled: true
@@ -250,22 +250,22 @@ chat:
 rewards:
   enabled: false
   player-win:
-    - /example {player} 200
+    - '/example {player} 200'
   player-end-game:
-    - /example {player} {score}
+    - '/example {player} {score}'
   player-destroy-bed:
-    - /example {player} {score}
+    - '/example {player} {score}'
   player-kill:
-    - /example {player} 10
+    - '/example {player} 10'
 lore:
   generate-automatically: true
   text:
     - '§7Price:'
-    - §7%price% %resource%
+    - '§7%price% %resource%'
     - '§7Amount:'
-    - §7%amount%
+    - '§7%amount%'
 sign:
-  - §c§l[BedWars]
+  - '§c§l[BedWars]'
   - '%arena%'
   - '%status%'
   - '%players%'
