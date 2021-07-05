@@ -108,7 +108,7 @@ public class MessageKeys {
     public static final String[] UGPRADE_TEAM_SHARPNESS = {"upgrade-team-sharpness"};
     public static final String[] UPGRADE_TEAM_EFFICIENCY=  {"upgrade-team-sharpness"};
     public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard", "title"};
-    public static final String[] CANNOT_BUY = {"cannot-buy"};
+    public static final String[] CANNOT_BUY = {"shop", "buy_failed"};
     public static final String[] GAMES_INVENTORY_CANNOT_FIND_GAME = {"games-inventory", "could-not-find-game"};
     public static final String[] ARMOR = {"armor"};
     public static final String[] SWORD = {"sword"};

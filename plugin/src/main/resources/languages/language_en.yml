@@ -33,8 +33,6 @@ trap-triggered:
   sub-title: "<yellow>Someone has entered your base!"
 blindness-trap-purchased-title: "<gold>Blindness Trap has been purchased!"
 purchase-heal-pool: "<aqua>Heal Pool has been purchased by: %player%"
-cannot-buy: "<red>You don't have enough %price%"
-purchase: "<green>You purchased <yellow>%item%"
 respawn-title: "<red>YOU DIED!"
 respawn-message: "<yellow>You will respawn in <red>%time% <yellow>seconds"
 respawn-subtitle: "<yellow>You will respawn in <red>%time% <yellow>seconds"

@@ -393,7 +393,7 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.CANNOT_BUY)
-                        .replace("%price%", type.getItemName())
+                        .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
             return;
@@ -591,7 +591,7 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.CANNOT_BUY)
-                        .replace("%price%", type.getItemName())
+                        .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
             return;
@@ -604,8 +604,8 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                        .replace("<item>", ShopUtil.getNameOrCustomNameOfItem(newItem))
-                        .replace("<material>", priceAmount + " " + type.getItemName())
+                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(newItem))
+                        .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
         }
