@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
@@ -91,13 +92,15 @@ public class SBACommand {
                 .getInstance()
                 .get(MessageKeys.COMMAND_RESETTING)
                 .toComponent();
-        sender.sendMessage(component);
+
+        PlayerMapper.wrapSender(sender).sendMessage(component);
         SBAConfig.getInstance().upgrade();
         final var c2 = LanguageService
                 .getInstance()
                 .get(MessageKeys.RESET_COMMAND_SUCCESS)
                 .toComponent();
-        sender.sendMessage(c2);
+
+        PlayerMapper.wrapSender(sender).sendMessage(c2);
     }
 
    @CommandMethod("sba generate <gamemode> <maps>")
@@ -193,7 +196,7 @@ public class SBACommand {
                    .getInstance()
                    .get(MessageKeys.GAMESINV_GENERATED)
                    .toComponent();
-           sender.sendMessage(generated);
+           PlayerMapper.wrapSender(sender).sendMessage(generated);
        } catch (IOException ex) {
            ex.printStackTrace();
        }
@@ -230,7 +233,8 @@ public class SBACommand {
                     .getInstance()
                     .get(MessageKeys.COMMAND_CANNOT_EXECUTE)
                     .toString();
-            sender.sendMessage(cannotExecute);
+
+            PlayerMapper.wrapSender(sender).sendMessage(cannotExecute);
             return;
         }
 
@@ -239,7 +243,8 @@ public class SBACommand {
                 .getInstance()
                 .get(MessageKeys.COMMAND_SUCCESSFULLY_UPGRADED)
                 .toString();
-        sender.sendMessage(upgraded);
+
+        PlayerMapper.wrapSender(sender).sendMessage(upgraded);
     }
 
     @CommandMethod("sba cancel")
@@ -253,7 +258,8 @@ public class SBACommand {
                     .getInstance()
                     .get(MessageKeys.CANNOT_DO_COMMAND)
                     .toString();
-            sender.sendMessage(m1);
+
+            PlayerMapper.wrapSender(sender).sendMessage(m1);
             return;
         }
 
@@ -264,7 +270,8 @@ public class SBACommand {
                     .getInstance()
                     .get(MessageKeys.COMMAND_CANCEL_UPGRADE)
                     .toString();
-            sender.sendMessage(m2);
+
+            PlayerMapper.wrapSender(sender).sendMessage(m2);
         } catch (SerializationException ex) {
             ex.printStackTrace();
         }
