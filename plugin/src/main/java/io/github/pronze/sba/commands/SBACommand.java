@@ -25,6 +25,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -135,7 +136,7 @@ public class SBACommand {
            }
        });
 
-       final var loader = HoconConfigurationLoader.builder()
+       final var loader = YamlConfigurationLoader.builder()
                .path(file.getAbsoluteFile().toPath())
                .build();
        try {
@@ -197,6 +198,7 @@ public class SBACommand {
                    .get(MessageKeys.GAMESINV_GENERATED)
                    .toComponent();
            PlayerMapper.wrapSender(sender).sendMessage(generated);
+           SBAUtil.reloadPlugin(SBA.getPluginInstance());
        } catch (IOException ex) {
            ex.printStackTrace();
        }
