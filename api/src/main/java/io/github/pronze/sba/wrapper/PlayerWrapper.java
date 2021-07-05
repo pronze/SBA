@@ -152,7 +152,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
     public String getCompletedBoxes() {
         int progress = (getXP() - (getLevel() * 500)) / 5;;
         if (progress < 1)
-            progress = 1;
+            progress = 0;
 
         char i  =String.valueOf(Math.abs((long) progress)).charAt(0);
         if (progress < 10) {

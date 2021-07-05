@@ -115,4 +115,11 @@ public class MessageKeys {
     public static final String[] PICKAXE = {"pickaxe"};
     public static final String[] AXE = {"axe"};
     public static final String[] CANNOT_DOWNGRADE_ITEM = {"cannot-downgrade-item"};
+    public static final String[] BED_DESTROYED_MESSAGES = {"bed-destroyed", "messages"};
+    public static final String[] DEATH_MESSAGES_VOID_KILL = {"death-messages", "void-kill"};
+    public static final String[] DEATH_MESSAGES_VOID_DEATH = {"death-messages", "void-death"};
+    public static final String[] DEATH_MESSAGES_PVP_REGULAR = {"death-messages", "pvp-regular"};
+    public static final String[] DEATH_MESSAGES_GENERIC = {"death-messages", "generic"};
+    public static final String[] TEAM_ELIMINATED_MESSAGE = {"team-eliminated"};
+    public static final String[] FINAL_KILL_PREFIX = {"death-messages", "final-kill"};
 }

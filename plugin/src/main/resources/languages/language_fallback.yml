@@ -13,6 +13,11 @@ game-starts-in: "<yellow>The game starts in <red>%seconds% <yellow>seconds"
 bed-destroyed:
   title: "<red><bold>BED DESTROYED!</bold>"
   sub-title: "You will no longer respawn!"
+  messages:
+    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was destroyed by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>got memed by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was deep fried by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was incinerated by %destroyer%</gray>"
 already-purchased: "<red><bold>You already purchased the same %thing%</bold>"
 wait-trap: "<red>You already purchased this upgrade!, wait for it to wear out"
 upgrade-team-protection: "<red>%player%<yellow> has upgraded team protection"
@@ -35,6 +40,7 @@ respawn-message: "<yellow>You will respawn in <red>%time% <yellow>seconds"
 respawn-subtitle: "<yellow>You will respawn in <red>%time% <yellow>seconds"
 respawned-message: "<yellow>You have respawned"
 respawned-title: "<green>RESPAWNED!"
+eliminated-message: "<red>You have been eliminated!</red>"
 victory-title: "<gold><bold>VICTORY!</bold>"
 cannot-put-item-on-chest: "<red><bold>You cannot put this item onto this chest.</bold>"
 upgrade: "Upgrade: "
@@ -102,6 +108,7 @@ game-start:
     - "            <yellow><bold>to access powerful upgrades.</bold>"
     - ""
     - "<green>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - ""
 overstats:
   message:
     - "<green>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
@@ -115,6 +122,7 @@ overstats:
     - "    <red><bold>3rd<gray> - <white>%third_killer_name% <gray>- <white>%third_killer_score%</bold>"
     - ""
     - "<green>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
+    - ""
 scoreboard:
   you: "<gray>YOU"
   title:
@@ -350,3 +358,19 @@ shop:
   max-enchant:
     - "Maximum Enchant"
     - "Your team already has maximum Enchant."
+death-messages:
+  final-kill: "<aqua><bold>FINAL KILL!</aqua></bold>"
+  void-death: "%player% <gray>fell into the void</gray>"
+  void-kill: "%player% <gray>was knocked into the void by %killer%.</gray>"
+  generic: "%player% <gray>died.</gray>"
+  pvp-regular:
+    - "%player% <gray>was killed by %killer%</gray>."
+    - "%player% <gray>got rekt by %killer%</gray>."
+    - "%player% <gray>was not spicy enough for %killer%</gray>."
+    - "%player% <gray>met their end by %killer%</gray>."
+    - "%player% <gray>was smacked down by %killer%</gray>."
+    - "%%player% <gray>took the L to %killer%</gray>."
+team-eliminated:
+  - ""
+  - "<white><bold>TEAM ELIMINATED > %team% Team <red>has been eliminated!"
+  - ""

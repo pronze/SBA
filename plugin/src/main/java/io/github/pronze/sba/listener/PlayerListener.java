@@ -357,7 +357,7 @@ public class PlayerListener implements Listener {
                         .ifPresent(arena -> arena.removeHiddenPlayer(player));
 
                 if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
-                    event.setDamage(SBAConfig.getInstance().node("explosion-damage").getDouble(0.25));
+                    event.setDamage(SBAConfig.getInstance().node("explosion-damage").getDouble(1.0D));
                 }
             }
         }

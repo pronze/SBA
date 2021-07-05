@@ -29,7 +29,6 @@ import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.reflect.Reflect;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.ArenaManager;
@@ -92,6 +91,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         LobbyScoreboardManager.class,
         MainLobbyVisualsManager.class,
         DynamicSpawnerLimiterService.class,
+        BedwarsCustomMessageModifierListener.class,
         FirstStartConfigReplacer.class,
 })
 
@@ -123,8 +123,8 @@ public class SBA extends PluginContainer implements AddonAPI {
             return;
         }
 
-        if (!Main.getVersion().contains("0.2.17")) {
-            showErrorMessage("You need ScreamingBedWars v0.2.17 to run SBA v1.5.0",
+        if (!Main.getVersion().contains("0.2.18")) {
+            showErrorMessage("You need ScreamingBedWars v0.2.18 to run SBA v1.5.0",
                     "Get the latest version from here: https://www.spigotmc.org/resources/screaming-bedwars-1-9-1-16.63714/");
             return;
         }

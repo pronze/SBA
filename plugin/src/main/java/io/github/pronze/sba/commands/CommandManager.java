@@ -70,7 +70,7 @@ public class CommandManager {
 
         if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
             try {
-               // manager.registerBrigadier();
+                 manager.registerBrigadier();
             } catch (Throwable ignored) {
                 // cloud bug on 1.17
             }
