@@ -37,7 +37,8 @@ public class BedwarsCustomMessageModifierListener implements Listener {
             return;
         }
         final var playerTeam = game.getTeamOfPlayer(player);
-        if (playerTeam != null && playerTeam.getConnectedPlayers().size() == 1 && playerTeam.getConnectedPlayers().contains(player)) {
+        if (playerTeam != null && !playerTeam.isTargetBlockExists() &&
+                playerTeam.getConnectedPlayers().size() == 1 && playerTeam.getConnectedPlayers().contains(player)) {
             final var teamColorStr = TeamColor.fromApiColor(playerTeam.getColor()).chatColor.toString();
             game.getConnectedPlayers().forEach(gPlayer -> LanguageService
                     .getInstance()

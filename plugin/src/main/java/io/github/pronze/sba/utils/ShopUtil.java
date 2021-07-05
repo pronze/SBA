@@ -304,7 +304,7 @@ public class ShopUtil {
         if (type == StoreType.UPGRADES) {
             level = level + 1;
         }
-        if (level >= maxLevel) {
+        if (level > maxLevel) {
             item.getLore().clear();
             LanguageService
                     .getInstance()

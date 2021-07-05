@@ -30,7 +30,9 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
 
     public void sendMessage(String message) { getInstance().sendMessage(message); }
 
-    public Player getInstance() { return Bukkit.getPlayer(getUuid()); }
+    public Player getInstance() {
+        return Bukkit.getPlayer(getUuid());
+    }
 
     public boolean isInParty() {
         return isInParty.get();
@@ -152,7 +154,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
     public String getCompletedBoxes() {
         int progress = (getXP() - (getLevel() * 500)) / 5;;
         if (progress < 1)
-            progress = 0;
+            progress = 1;
 
         char i  =String.valueOf(Math.abs((long) progress)).charAt(0);
         if (progress < 10) {
