@@ -4,8 +4,6 @@ package io.github.pronze.sba;
 import org.bukkit.Bukkit;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import reactor.core.publisher.Mono;
-
 import java.io.IOException;
 import java.net.URL;
 import java.util.Scanner;
@@ -13,27 +11,20 @@ import java.util.Scanner;
 @Service
 public class UpdateChecker {
 
-    public Mono<String> checkForUpdates() {
-        return Mono.create(sink -> {
+    @OnPostEnable
+    public void checkForUpdates() {
+        new Thread(() -> {
             if (SBA.getInstance().isSnapshot()) {
-                sink.success();
+                return;
             }
             try (final var inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=79505").openStream(); Scanner scanner = new Scanner(inputStream)) {
                 if (scanner.hasNext()) {
-                    sink.success(scanner.next());
+                    promptUpdate(scanner.next());
                 }
             } catch (IOException exception) {
-                sink.error(exception);
+                exception.printStackTrace();
             }
-        });
-    }
-
-    @OnPostEnable
-    protected void run() {
-        checkForUpdates()
-                .doOnError(throwable -> Bukkit.getLogger().info("Cannot look for updates: " + throwable.getMessage()))
-                .doOnNext(this::promptUpdate)
-                .subscribe();
+        }).start();
     }
 
     private void promptUpdate(String version) {

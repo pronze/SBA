@@ -1,6 +1,6 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'event', 'command', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator')
+        .modules('core', 'event', 'tasker', 'hologram', 'healthindicator')
         .enableAnnotationProcessor()
         .simpleInventories(SIMPLEINVENTORIES_VERSION)
         .version(SCREAMINGLIB_VERSION)
@@ -12,7 +12,6 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
     // TODO: use sidebar from slib
     implementation 'pronze.lib:scoreboard:' + PRONZELIB_SBOARD_VERSION
-    implementation "io.projectreactor:reactor-core:" + REACTOR_CORE_VERSION
 
     implementation 'me.lucko:commodore:' + COMMODORE_VERSION, {
         exclude group: 'com.mojang', module: 'brigadier'
@@ -25,9 +24,6 @@ dependencies {
     implementation "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_TEXT_MINIMESSAGE_VERSION
 
     implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
-    implementation 'org.spongepowered:configurate-gson:' + CONFIGURATE_VERSION
-    implementation 'org.spongepowered:configurate-hocon:' + CONFIGURATE_VERSION
-    implementation 'org.spongepowered:configurate-xml:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
 
     testImplementation 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
