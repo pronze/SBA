@@ -22,7 +22,7 @@ public class GameChatListener implements Listener {
         SBA.getInstance().registerListener(this);
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         final var player = event.getPlayer();
         if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
