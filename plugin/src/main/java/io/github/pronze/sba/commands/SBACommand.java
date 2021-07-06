@@ -16,10 +16,8 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.serialize.SerializationException;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
@@ -104,9 +102,10 @@ public class SBACommand {
         PlayerMapper.wrapSender(sender).sendMessage(c2);
     }
 
-   @CommandMethod("sba generate <gamemode> <maps>")
-   @CommandDescription("generate games inventory configuration files")
-   @CommandPermission("sba.generate")
+ //TODO: work on generation
+// @CommandMethod("sba generate <gamemode> <maps>")
+// @CommandDescription("generate games inventory configuration files")
+// @CommandPermission("sba.generate")
    private void commandGenerate(
            final @NotNull CommandSender sender,
            final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode,
@@ -146,7 +145,7 @@ public class SBACommand {
            }, List.of(
                    Map.of("stack", "RED_BED;1;§aBed Wars §7(Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!",
                            "row", "1",
-                           "column", "1",
+                           "column", "3",
                            "properties", "join_randomly"),
 
                    Map.of("stack", "BARRIER;1;§cExit",

@@ -142,6 +142,15 @@ public class GamesInventory implements Listener {
                                     player.closeInventory();
                                     player.performCommand("bw rejoin");
                                     break;
+                                case "join":
+                                    player.closeInventory();
+                                    final var gameName = property.getPropertyData().node("gameName").getString(null);
+                                    if (gameName == null) {
+                                        couldNotFindGameMessage.send(playerWrapper);
+                                        return;
+                                    }
+                                    Main.getInstance().getGameByName(gameName).joinToGame(player);
+                                    break;
                                 default:
                                     break;
                             }

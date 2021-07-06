@@ -47,5 +47,5 @@ data:
         row: 1
         column: 2
         properties:
-          - name: randomly_join
+          - name: join
           - gameName: test
