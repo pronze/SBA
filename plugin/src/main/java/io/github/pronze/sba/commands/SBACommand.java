@@ -240,6 +240,7 @@ public class SBACommand {
         }
 
         SBAConfig.getInstance().upgrade();
+        LanguageService.getInstance().load(SBA.getPluginInstance());
         final var upgraded = LanguageService
                 .getInstance()
                 .get(MessageKeys.COMMAND_SUCCESSFULLY_UPGRADED)

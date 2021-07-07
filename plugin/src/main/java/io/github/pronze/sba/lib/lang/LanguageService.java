@@ -31,6 +31,10 @@ public class LanguageService implements ILanguageService {
     }
 
     public LanguageService(JavaPlugin plugin) {
+        load(plugin);
+    }
+
+    public void load(JavaPlugin plugin) {
         locale = SBAConfig.getInstance().node("locale").getString("en");
         if (!validLocale.contains(locale.toLowerCase())) {
             throw new UnsupportedOperationException("Invalid locale provided!");
@@ -67,7 +71,7 @@ public class LanguageService implements ILanguageService {
         }
     }
 
-    private final String locale;
+    private String locale;
     private ConfigurationNode configurationNode;
     private ConfigurationNode fallbackNode;
 

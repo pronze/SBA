@@ -2,6 +2,7 @@ package io.github.pronze.sba.utils;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.lib.lang.LanguageService;
 import org.bukkit.Bukkit;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -21,6 +22,7 @@ public class FirstStartConfigReplacer {
                 SBAConfig.getInstance().node("autoset-bw-config").set(false);
                 SBAConfig.getInstance().saveConfig();
                 SBAConfig.getInstance().forceReload();
+                LanguageService.getInstance().load(SBA.getPluginInstance());
             } catch (SerializationException e) {
                 e.printStackTrace();
             }
