@@ -315,6 +315,12 @@ public class SBAConfig implements IConfigurator {
         try {
             plugin.saveResource("shops/shop.yml", true);
             plugin.saveResource("shops/upgradeShop.yml", true);
+            langFolder.delete();
+            langFolder = new File(dataFolder, "languages");
+            if (!langFolder.exists()) {
+                langFolder.mkdirs();
+            }
+
             try (final var inputStream = plugin.getResource("config.yml")) {
                 if (inputStream != null) {
                     final var configFile = new File(Main.getInstance().getDataFolder(), "config.yml");

@@ -21,6 +21,8 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
@@ -142,11 +144,13 @@ public class MainLobbyVisualsManager implements Listener {
             var header = LanguageService
                     .getInstance()
                     .get(MessageKeys.MAIN_LOBBY_TABLIST_HEADER)
+                    .replace("%sba_version%", SBA.getInstance().getVersion())
                     .toComponent();
 
             var footer = LanguageService
                     .getInstance()
                     .get(MessageKeys.MAIN_LOBBY_TABLIST_FOOTER)
+                    .replace("%sba_version%", SBA.getInstance().getVersion())
                     .toComponent();
 
             playerData.sendPlayerListHeaderAndFooter(header, footer);
@@ -178,6 +182,7 @@ public class MainLobbyVisualsManager implements Listener {
 
                     return hook
                             .getLine()
+                            .replace("%sba_version%", SBA.getInstance().getVersion())
                             .replace("%kills%", String.valueOf(playerStatistic.getKills()))
                             .replace("%beddestroys%", String.valueOf(playerStatistic.getDestroyedBeds()))
                             .replace("%deaths%", String.valueOf(playerStatistic.getDeaths()))
@@ -215,13 +220,10 @@ public class MainLobbyVisualsManager implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (isInWorld(player.getLocation()) && player.isOnline()) {
-                    create(player);
-                }
+        Tasker.build(() -> {
+            if (isInWorld(player.getLocation()) && player.isOnline()) {
+                create(player);
             }
-        }.runTaskLater(SBA.getPluginInstance(), 20L);
+        }).delay(1L, TaskerTime.SECONDS);
     }
 }

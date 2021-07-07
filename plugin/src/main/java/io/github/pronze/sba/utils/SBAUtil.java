@@ -123,6 +123,9 @@ public class SBAUtil {
     public static void reloadPlugin(@NonNull JavaPlugin plugin) {
         disablePlugin(plugin);
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
+        if (plugin == SBA.getPluginInstance()) {
+            SBAConfig.getInstance().forceReload();
+        }
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 

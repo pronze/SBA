@@ -58,9 +58,10 @@ public class ShopUtil {
     private final static Map<String, Integer> UpgradeKeys = new HashMap<>() {
         {
             put("STONE", 2);
-            put("IRON", 4);
-            put("DIAMOND", 5);
-            put("NETHERITE", 6);
+            put("CHAINMAIL", 4);
+            put("IRON", 5);
+            put("DIAMOND", 6);
+            put("NETHERITE", 7);
             if (Main.isLegacy()) {
                 put("WOOD", 1);
                 put("GOLD", 3);
@@ -79,6 +80,9 @@ public class ShopUtil {
             if (playerBoots != null) {
                 var keyLevel = UpgradeKeys.get(matName);
                 var currentLevel = UpgradeKeys.get(playerBoots.getType().name().substring(0, playerBoots.getType().name().indexOf("_")));
+                if (currentLevel == null) {
+                    currentLevel = 0;
+                }
                 if (currentLevel > keyLevel) {
                     LanguageService
                             .getInstance()

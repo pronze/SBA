@@ -49,5 +49,3 @@ data:
      properties:
        - name: join
        - gameName: test
-
-    

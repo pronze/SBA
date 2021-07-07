@@ -15,6 +15,7 @@ import io.github.pronze.sba.config.SBAConfig;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Getter
@@ -66,7 +67,7 @@ public class LanguageService implements ILanguageService {
         }
     }
 
-    private String locale;
+    private final String locale;
     private ConfigurationNode configurationNode;
     private ConfigurationNode fallbackNode;
 
@@ -86,7 +87,7 @@ public class LanguageService implements ILanguageService {
             if (argumentNode.isList()) {
                 return Message.of(argumentNode.getList(String.class));
             } else {
-                return Message.of(List.of(argumentNode.getString()));
+                return Message.of(List.of(Objects.requireNonNull(argumentNode.getString())));
             }
         } catch (SerializationException | UnsupportedOperationException e) {
             if (!fallback)

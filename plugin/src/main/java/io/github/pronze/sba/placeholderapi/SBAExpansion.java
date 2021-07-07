@@ -35,7 +35,7 @@ public class SBAExpansion extends PlaceholderExpansion {
         if (identifiers.length <= 1) return null;
 
         if (identifiers[0].equalsIgnoreCase("player")) {
-            final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).get();
+            final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();
             switch (identifiers[1]) {
                 case "level":
                     return Integer.toString(database.getLevel());
@@ -63,6 +63,8 @@ public class SBAExpansion extends PlaceholderExpansion {
                 case "maxplayers":
                     return Integer.toString(game.getMaxPlayers());
             }
+        } else if (identifiers[0].equalsIgnoreCase("version")) {
+            return SBA.getInstance().getVersion();
         }
 
         return super.onPlaceholderRequest(player, identifier);

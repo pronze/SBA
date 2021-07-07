@@ -55,7 +55,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         id = "SBA",
         authors = { "pronze" },
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.0-SNAPSHOT"
+        version = "1.5.1"
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
@@ -249,7 +249,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public boolean isPendingUpgrade() {
-        return !getVersion().contains(Objects.requireNonNull(SBAConfig.getInstance().node("version").getString()));
+        return !getVersion().equalsIgnoreCase(SBAConfig.getInstance().node("version").getString());
     }
 
     @Override

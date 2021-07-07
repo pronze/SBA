@@ -1,6 +1,7 @@
 package io.github.pronze.sba.visuals;
 
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
@@ -134,6 +135,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                         return;
                     }
                     line = line
+                            .replace("%sba_version%", SBA.getInstance().getVersion())
                             .replace("%team%", teamName)
                             .replace("%beds%", currentBedDestroys)
                             .replace("%dies%", currentDeaths)

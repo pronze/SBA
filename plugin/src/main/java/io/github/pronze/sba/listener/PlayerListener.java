@@ -404,8 +404,8 @@ public class PlayerListener implements Listener {
             if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
                     player.sendMessage("§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
-                    player.sendMessage("Type /bwaddon upgrade to upgrade file");
-                    player.sendMessage("§cif you want to cancel the upgrade files do /bwaddon cancel");
+                    player.sendMessage("Type /sba upgrade to upgrade file");
+                    player.sendMessage("§cif you want to cancel the upgrade files do /sba cancel");
                 }, 40L);
             }
         }

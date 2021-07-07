@@ -50,7 +50,7 @@ command_resetting: "Resetting..."
 command_upgraded: "<gold>Successfully upgraded files!"
 command_cannot_do: "<red>Cannot do this right now!"
 command_cancel_upgrade: "<red>Cancelled shop and upgradeShop changes"
-command_unknown: "<red>Unknown command, do /bwaddon help for more."
+command_unknown: "<red>Unknown command, do /sba help for more."
 command_spectator_disabled: "<red>You cannot do this command while spectating"
 command_shout_invalid_usage: "<red>Invalid usage, /shout %message% is the format!"
 gamesinv_disabled: "<red>Games inventory has been disabled, Contact the server owner to enable it."
@@ -84,7 +84,7 @@ lobby-scoreboard:
     - "<white>Mode: <green>%mode%"
     - "<white>Version: <gray>v1.1"
     - ""
-    - "<yellow>SBA v1.5.0"
+    - "<yellow>SBA v%sba_version%"
   state:
     waiting: "<white>Waiting..."
     countdown: "<white>Starting in <green>%countdown%s"
@@ -165,7 +165,7 @@ scoreboard:
       - "<white>Kills: <green>%kills%"
       - "<white>Bed Broken: <green>%beds%"
       - ""
-      - "<yellow>SBA v1.5.0"
+      - "<yellow>SBA v%sba_version%"
     5:
       - "<gray>%date%"
       - ""
@@ -173,14 +173,14 @@ scoreboard:
       - ""
       - "%team_status%"
       - ""
-      - "<yellow>SBA v1.5.0"
+      - "<yellow>SBA v%sba_version%"
 main-lobby:
   chat-format: "%color%[%level%✫] %name%: %message%"
   tablist:
     header:
       - "<aqua>You are playing on <yellow><bold>WWW.SAMPLE.NET"
     footer:
-      - '<yellow><bold>SBA v1.5.0'
+      - '<yellow><bold>SBA v%sba_version%'
   scoreboard:
     title: "<yellow><bold>BED WARS</bold>"
     lines:
@@ -195,7 +195,7 @@ main-lobby:
       - ""
       - "K/D ratio: <gold>%kdr%"
       - ""
-      - "<yellow>SBA v1.5.0"
+      - "<yellow>SBA v%sba_version%"
 party:
   chat-format: "<green>Party >> %name% <white> : %message%"
   message:
