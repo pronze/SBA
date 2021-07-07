@@ -44,7 +44,7 @@ public class MessageKeys {
     public static final String[] OVERSTATS_MESSAGE = {"overstats", "message"};
     public static final String[] SCOREBOARD_YOU_MESSAGE = {"scoreboard","you"};
     public static final String[] SCOREBOARD_LINES_DEFAULT = {"scoreboard", "lines", "default"};
-    public static final String[] SCOREBOARD_LINES_5 = {"scoreboard", "lines", "5"};
+    public static final String[] SCOREBOARD_LINES_5 = {"scoreboard", "lines", "five"};
     public static final String[] LOBBY_SCOREBOARD_STATE = {"lobby-scoreboard", "state", "countdown"};
     public static final String[] LOBBY_SCOREBOARD_LINES = {"lobby-scoreboard", "lines"};
     public static final String[] MAIN_LOBBY_SCOREBOARD_TITLE = {"main-lobby", "scoreboard", "title"};

@@ -166,7 +166,7 @@ scoreboard:
       - "<white>Bed Broken: <green>%beds%"
       - ""
       - "<yellow>SBA v%sba_version%"
-    5:
+    five:
       - "<gray>%date%"
       - ""
       - "%tier%"
