@@ -313,6 +313,7 @@ public class SBAConfig implements IConfigurator {
     @Override
     public void upgrade() {
         try {
+            node("version").set(plugin.getDescription().getVersion());
             plugin.saveResource("shops/shop.yml", true);
             plugin.saveResource("shops/upgradeShop.yml", true);
             langFolder.delete();
