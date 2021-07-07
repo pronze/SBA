@@ -256,6 +256,12 @@ public class SBA extends PluginContainer implements AddonAPI {
     public ILanguageService getLanguageService() {
         return LanguageService.getInstance();
     }
+
+    @Override
+    public JavaPlugin getJavaPlugin() {
+        return instance.getPluginDescription().as(JavaPlugin.class);
+    }
+
 }
 
 

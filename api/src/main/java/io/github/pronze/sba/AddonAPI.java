@@ -8,6 +8,7 @@ import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.service.WrapperService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.api.game.Game;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 
@@ -99,4 +100,10 @@ public interface AddonAPI {
      * @return The language service instance for retrieving language related information.
      */
     ILanguageService getLanguageService();
+
+    /**
+     *
+     * @return an instance of the SBA plugin.
+     */
+    JavaPlugin getJavaPlugin();
 }

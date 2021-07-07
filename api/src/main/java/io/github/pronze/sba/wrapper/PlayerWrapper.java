@@ -83,7 +83,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
                         this.cancel();
                     }
                 }
-            }.runTaskTimer((JavaPlugin) AddonAPI.getInstance(), 0L, 20L);
+            }.runTaskTimer(AddonAPI.getInstance().getJavaPlugin(), 0L, 20L);
         } else {
             final var shout = String.valueOf(getShoutTimeOut());
             AddonAPI
