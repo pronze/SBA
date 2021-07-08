@@ -276,6 +276,12 @@ public class SBAConfig implements IConfigurator {
         } catch (ConfigurateException e) {
             e.printStackTrace();
         }
+
+        node("lobby-scoreboard")
+                .node("player-size")
+                .node("games")
+                .childrenMap()
+                .forEach((key, val) -> game_size.put((String) key, val.getInt(4)));
     }
 
     public void forceReload() {
