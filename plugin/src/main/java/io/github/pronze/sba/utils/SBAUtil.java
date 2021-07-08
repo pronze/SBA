@@ -2,6 +2,7 @@ package io.github.pronze.sba.utils;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.lib.lang.LanguageService;
 import lombok.NonNull;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
@@ -125,6 +126,7 @@ public class SBAUtil {
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
         if (plugin == SBA.getPluginInstance()) {
             SBAConfig.getInstance().forceReload();
+            LanguageService.getInstance().load(plugin);
         }
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }

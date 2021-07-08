@@ -203,8 +203,8 @@ public class SBACommand {
        }
    }
 
-    @CommandMethod("sba gamesinv <gamemode>")
-    @CommandDescription("open GamesInventory for player")
+ // @CommandMethod("sba gamesinv <gamemode>")
+ // @CommandDescription("open GamesInventory for player")
     private void commandGamesInv(
             final @NotNull Player player,
             final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode

@@ -303,6 +303,16 @@ data:
             - "By the time you know"
             - "you are dead!"
 
+      - price: 1 of emerald
+        row: 4
+        column: 1
+        properties: "BridgeEgg"
+        stack:
+          type: EGG
+          display-name: "§cBridgeEgg"
+          lore:
+            - "This egg creates a trail of bridge after it's thrown"
+
   - locate: '$swords'
     stack: GOLDEN_SWORD;1;§aMelee;§eClick to view!
 

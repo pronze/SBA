@@ -14,6 +14,7 @@ import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
+import io.github.pronze.sba.specials.listener.BridgeEggListener;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
@@ -55,7 +56,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         id = "SBA",
         authors = { "pronze" },
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.2"
+        version = "1.5.4-SNAPSHOT"
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
@@ -92,6 +93,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         MainLobbyVisualsManager.class,
         DynamicSpawnerLimiterService.class,
         BedwarsCustomMessageModifierListener.class,
+        BridgeEggListener.class,
         FirstStartConfigReplacer.class,
 })
 
@@ -219,7 +221,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public boolean isSnapshot() {
-        return getVersion().contains("snapshot");
+        return getVersion().contains("SNAPSHOT");
     }
 
     @Override

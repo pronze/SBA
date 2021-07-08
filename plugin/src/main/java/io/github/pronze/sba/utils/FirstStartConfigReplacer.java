@@ -18,11 +18,9 @@ public class FirstStartConfigReplacer {
             SBAConfig.getInstance().upgrade();
             try {
                 SBAConfig.getInstance().node("first_start").set(false);
-                SBAConfig.getInstance().node("version").set(SBA.getPluginInstance().getDescription().getVersion());
                 SBAConfig.getInstance().node("autoset-bw-config").set(false);
                 SBAConfig.getInstance().saveConfig();
                 SBAConfig.getInstance().forceReload();
-                LanguageService.getInstance().load(SBA.getPluginInstance());
             } catch (SerializationException e) {
                 e.printStackTrace();
             }
