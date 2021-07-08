@@ -96,7 +96,7 @@ public class ShopUtil {
                     LanguageService
                             .getInstance()
                             .get(MessageKeys.ALREADY_PURCHASED)
-                            .replace("<thing>", "armor")
+                            .replace("%thing%", "armor")
                             .send(PlayerMapper.wrapPlayer(player));
                     return false;
                 }

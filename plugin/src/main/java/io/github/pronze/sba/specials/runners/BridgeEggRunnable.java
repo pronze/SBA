@@ -66,6 +66,7 @@ public class BridgeEggRunnable extends BukkitRunnable {
     }
 
     public void cancel() {
+        this.cancel();
         ProjectileHitEvent event = new ProjectileHitEvent(egg);
         Bukkit.getServer().getPluginManager().callEvent(event);
     }
