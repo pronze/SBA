@@ -249,6 +249,9 @@ public class SBAConfig implements IConfigurator {
                         .back()
                     .section("generator-splitter")
                         .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
+                        .back()
+                    .section("popup-tower")
+                        .key("height").defValue(10)
                         .back();
             generator.saveIfModified();
         } catch (Exception ex) {

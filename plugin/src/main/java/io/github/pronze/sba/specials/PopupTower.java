@@ -94,7 +94,7 @@ public class PopupTower {
         }
 
         final Location firstLadderBlock = mainBlock.getBlock().getRelative(structureFace).getLocation();
-        placeLadderRow(this.height, firstLadderBlock, BlockFace.UP, structureFace);
+        placeLadderRow(this.height, firstLadderBlock, BlockFace.UP, structureFace.getOppositeFace());
     }
 
     public void placeRow(int length, Location loc, BlockFace face) {
