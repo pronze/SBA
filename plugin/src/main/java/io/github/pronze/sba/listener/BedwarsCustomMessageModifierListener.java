@@ -89,6 +89,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
             final var list = messages.toStringList();
             event.setMessage(list.get(RANDOM.nextInt(list.size())));
 
+
             final var lastDamageCause = victim.getLastDamageCause();
             if (lastDamageCause != null) {
                 if (lastDamageCause.getCause() == EntityDamageEvent.DamageCause.VOID) {
@@ -103,6 +104,12 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     event.setMessage(message.toString());
                 }
             }
+            var setMessage = event.getMessage();
+            setMessage = setMessage + " " + LanguageService
+                    .getInstance()
+                    .get(MessageKeys.FINAL_KILL_PREFIX)
+                    .toString();
+            event.setMessage(setMessage);
         } else {
             message = LanguageService
                     .getInstance()

@@ -1,6 +1,7 @@
 package io.github.pronze.sba.specials.runners;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.utils.SBAUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -66,8 +67,6 @@ public class BridgeEggRunnable extends BukkitRunnable {
     }
 
     public void cancel() {
-        this.cancel();
-        ProjectileHitEvent event = new ProjectileHitEvent(egg);
-        Bukkit.getServer().getPluginManager().callEvent(event);
+        SBAUtil.cancelTask(task);
     }
 }

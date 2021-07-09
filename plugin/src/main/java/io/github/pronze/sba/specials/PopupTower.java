@@ -88,7 +88,7 @@ public class PopupTower {
         }
 
         final Location firstLadderBlock = mainBlock.getBlock().getRelative(structureFace).getLocation();
-        this.placeLadderRow(10, firstLadderBlock, BlockFace.UP, structureFace);
+        placeLadderRow(10, firstLadderBlock, BlockFace.UP, structureFace);
     }
 
     public void placeRow(int length, Location loc, BlockFace face) {
@@ -104,16 +104,19 @@ public class PopupTower {
         Location lastLoc = loc;
         for (int i = 0; i < length; i++) {
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
-            final Block ladder = loc.getBlock();
+            final Block ladder = lastLoc.getBlock();
             ladder.setType(Material.LADDER, false);
-         // if (!Main.isLegacy()) {
-         //     BlockData blockData = ladder.getBlockData();
-         //     ((Directional)blockData).setFacing(ladderFace);
-         //     ladder.setBlockData(blockData);
-         // } else {
-         //     Reflect.getMethod(ladder, "setData", Byte.class)
-         //             .invoke(ladder, faceToByte.get(ladderFace));
-         // }
+            game.getRegion().addBuiltDuringGame(lastLoc);
+            if (!Main.isLegacy()) {
+                BlockData blockData = ladder.getBlockData();
+                if (blockData instanceof Directional) {
+                    ((Directional)blockData).setFacing(ladderFace);
+                    ladder.setBlockData(blockData);
+                }
+            } else {
+                Reflect.getMethod(ladder, "setData", Byte.class)
+                        .invoke(ladder, faceToByte.get(ladderFace));
+            }
             Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
             blocks.add(lastLoc.getBlock());
         }
