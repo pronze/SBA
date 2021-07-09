@@ -73,7 +73,7 @@ public class RotatingGenerator implements IRotatingGenerator {
                 )
                 .itemPosition(Hologram.ItemPosition.BELOW)
                 .rotationMode(Hologram.RotationMode.Y)
-                .rotationTime(Pair.of(2, TaskerTime.TICKS));
+                .rotationTime(Pair.of(1, TaskerTime.TICKS));
 
         hologram.show();
         viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
@@ -98,10 +98,11 @@ public class RotatingGenerator implements IRotatingGenerator {
         hologramTask = new BukkitRunnable() {
             @Override
             public void run() {
-                time--;
 
                 boolean full = itemSpawner.getMaxSpawnedResources() <= ((List<Item>) Reflect.getField(itemSpawner, "spawnedItems")).size();
-
+                if (!full) {
+                    time--;
+                }
                 final var format = !full ? LanguageService
                         .getInstance()
                         .get(MessageKeys.ROTATING_GENERATOR_FORMAT)
@@ -132,7 +133,7 @@ public class RotatingGenerator implements IRotatingGenerator {
 
                 update(newLines);
 
-                if (time <= 0) {
+                if (time <= 0 || full) {
                     time = itemSpawner.getItemSpawnerType().getInterval();
                 }
             }

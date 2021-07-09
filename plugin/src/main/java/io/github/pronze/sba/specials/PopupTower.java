@@ -84,7 +84,7 @@ public class PopupTower {
         blocks.remove(secondPlatform.getRelative(structureFace));
         final var relative = secondPlatform.getRelative(structureFace);
         if (game.getRegion().isBlockAddedDuringGame(relative.getLocation())) {
-            secondPlatform.getRelative(structureFace).setType(Material.AIR);
+            relative.setType(Material.AIR);
         }
 
         final Location firstLadderBlock = mainBlock.getBlock().getRelative(structureFace).getLocation();
@@ -123,6 +123,9 @@ public class PopupTower {
     }
 
     public Block placeBlock(Location loc, Material mat) {
+        if (!game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() != Material.AIR) {
+            return loc.getBlock();
+        }
         loc.getBlock().setType(mat);
         game.getRegion().addBuiltDuringGame(loc);
         Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);

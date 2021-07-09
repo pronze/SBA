@@ -372,9 +372,7 @@ public class PlayerListener implements Listener {
 
         if (item.getType() == Material.POTION) {
             final var potionMeta = (PotionMeta) item.getItemMeta();
-            
             boolean isInvis = false;
-            
             if (potionMeta.getBasePotionData().getType() == PotionType.INVISIBILITY) {
                 isInvis = true;
             } else {
@@ -382,7 +380,7 @@ public class PlayerListener implements Listener {
                     isInvis = potionMeta
                             .getCustomEffects()
                             .stream()
-                            .anyMatch(potionEffect -> potionEffect.getType() == PotionEffectType.INVISIBILITY);
+                            .anyMatch(potionEffect -> potionEffect.getType().getName().equalsIgnoreCase(PotionEffectType.INVISIBILITY.getName()));
                 }
             }
 

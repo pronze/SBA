@@ -1,26 +1,25 @@
 package io.github.pronze.sba.game;
 
 
-import com.mojang.datafixers.util.Pair;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import lombok.Data;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
+import org.screamingsandals.lib.bukkit.packet.BukkitPacketMapper;
+import org.screamingsandals.lib.material.builder.ItemFactory;
+import org.screamingsandals.lib.packet.SPacket;
+import org.screamingsandals.lib.packet.SPacketPlayOutEntityEquipment;
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.math.Vector3D;
-import org.screamingsandals.lib.utils.reflect.Reflect;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 @Data
 public class InvisiblePlayer {
@@ -29,7 +28,6 @@ public class InvisiblePlayer {
 
     private boolean isHidden;
     private Vector3D lastLocation;
-    protected BukkitTask footStepSoundTracker;
     protected BukkitTask armorHider;
 
     public void vanish() {
@@ -41,48 +39,22 @@ public class InvisiblePlayer {
                 player.getLocation().getY(),
                 player.getLocation().getZ()
         );
-        footStepSoundTracker = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!isElligble() || !isHidden) {
-                    arena.removeHiddenPlayer(player);
-                    showPlayer();
-                    this.cancel();
-                    return;
-                }
-                final var currentLocation = new Vector3D(
-                        player.getLocation().getX(),
-                        player.getLocation().getY(),
-                        player.getLocation().getZ()
-                );
-                if (currentLocation.equals(lastLocation)) {
-                    return;
-                }
-
-                Location location = player.getLocation();
-                location.setY(Math.floor(location.getY()));
-
-                if (!player.getLocation().clone().subtract(0, 1, 0).getBlock().isEmpty()) {
-                    //TODO: play effect
-                }
-            }
-        }.runTaskTimer(SBA.getPluginInstance(), 0L, 10L);
-
+        hideArmor();
         armorHider = new BukkitRunnable() {
             @Override
             public void run() {
-                if (isElligble() && isHidden) {
-                    hideArmor();
-                } else {
-                    showArmor();
+                if (!isElligble() || !isHidden) {
+                    showPlayer();
                     this.cancel();
+                    arena.removeHiddenPlayer(player);
                 }
             }
-        }.runTaskTimer(SBA.getPluginInstance(), 0L, 1L);
+        }.runTaskTimer(SBA.getPluginInstance(), 0L, 20L);
     }
 
     private boolean isElligble() {
         return arena.getGame().getStatus() == GameStatus.RUNNING
+                && player.getGameMode() == GameMode.SURVIVAL
                 && player.isOnline()
                 && player.hasPotionEffect(PotionEffectType.INVISIBILITY)
                 && arena.getGame().getConnectedPlayers().contains(player);
@@ -94,20 +66,13 @@ public class InvisiblePlayer {
         final var helmet = player.getInventory().getHelmet();
         final var chestplate = player.getInventory().getChestplate();
         final var leggings = player.getInventory().getLeggings();
-
-        final var nmsBoot = stackAsNMS(boots == null ? new ItemStack(Material.AIR) : boots);
-        final var nmsChestPlate = stackAsNMS(chestplate == null ? new ItemStack(Material.AIR) : boots);
-        final var nmsLeggings = stackAsNMS(leggings == null ? new ItemStack(Material.AIR) : leggings);
-        final var nmsHelmet = stackAsNMS(boots == null ? new ItemStack(Material.AIR) : helmet);
-
         arena
                 .getGame()
                 .getConnectedPlayers()
-                .forEach(pl -> ClassStorage.sendPacket(pl, getPackets(nmsBoot, nmsChestPlate, nmsLeggings, nmsHelmet)));
+                .forEach(pl -> sendPackets(pl, getPackets(boots, chestplate, leggings, helmet)));
     }
 
     private void hideArmor() {
-        final var airStack = stackAsNMS(new ItemStack(Material.AIR));
         var playerTeam = arena.getGame().getTeamOfPlayer(player);
 
         arena
@@ -115,58 +80,33 @@ public class InvisiblePlayer {
                 .getConnectedPlayers()
                 .stream()
                 .filter(pl -> !playerTeam.getConnectedPlayers().contains(pl))
-                .forEach(pl -> ClassStorage.sendPackets(pl, getPackets(airStack, airStack, airStack, airStack)));
+                .forEach(pl -> sendPackets(pl, getPackets(null, null, null, null)));
     }
 
-    private List<Object> getPackets(Object nmsBoot, Object nmsChestPlate, Object nmsLeggings, Object nmsHelmet) {
-        final var packets = new ArrayList<>();
+    public void sendPackets(Player player, List<SPacket> packets) {
+        packets.forEach(packet-> packet.sendPacket(PlayerMapper.wrapPlayer(player)));
+    }
 
-        final var headSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.HEAD);
-
-        final var chestplateSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.CHEST);
-
-        final var legsSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.LEGS);
-
-        final var feetSlot = Reflect
-                .getMethod(ClassStorage.NMS.CraftEquipmentSlot, "getNMS", EquipmentSlot.class)
-                .invokeStatic(EquipmentSlot.FEET);
-
-        packets.add(getEquipmentPacket(player, nmsHelmet, headSlot));
-        packets.add(getEquipmentPacket(player, nmsChestPlate, chestplateSlot));
-        packets.add(getEquipmentPacket(player, nmsLeggings, legsSlot));
-        packets.add(getEquipmentPacket(player, nmsBoot, feetSlot));
+    private List<SPacket> getPackets(ItemStack nmsBoot, ItemStack nmsChestPlate, ItemStack nmsLeggings, ItemStack nmsHelmet) {
+        final var packets = new ArrayList<SPacket>();
+        packets.add(getEquipmentPacket(player, nmsHelmet, SPacketPlayOutEntityEquipment.Slot.HEAD));
+        packets.add(getEquipmentPacket(player, nmsChestPlate, SPacketPlayOutEntityEquipment.Slot.CHEST));
+        packets.add(getEquipmentPacket(player, nmsLeggings, SPacketPlayOutEntityEquipment.Slot.LEGS));
+        packets.add(getEquipmentPacket(player, nmsBoot, SPacketPlayOutEntityEquipment.Slot.FEET));
         return packets;
     }
 
-    private Object getEquipmentPacket(Player entity, Object stack, Object slot) {
-        final var reference = new AtomicReference<>();
-
-        Reflect.constructor(ClassStorage.NMS.PacketPlayOutEntityEquipment, int.class, List.class)
-                .ifPresentOrElse(
-                        constructor -> reference.set(constructor.construct(entity.getEntityId(), List.of(Pair.of(slot, stack)))),
-                        () ->
-                                reference.set(
-                                        Reflect.constructor(ClassStorage.NMS.PacketPlayOutEntityEquipment, int.class, ClassStorage.NMS.EnumItemSlot, ClassStorage.NMS.ItemStack)
-                                                .construct(entity.getEntityId(), slot, stack)
-                                )
-                );
-        return reference.get();
+    private SPacket getEquipmentPacket(Player entity, ItemStack stack, SPacketPlayOutEntityEquipment.Slot slot) {
+        final var equipmentPacket = BukkitPacketMapper.createPacket(SPacketPlayOutEntityEquipment.class);
+        equipmentPacket.setEntityId(entity.getEntityId());
+        equipmentPacket.setItemAndSlot(ItemFactory.build(stack).orElse(null), slot);
+        return equipmentPacket;
     }
 
     private void showPlayer() {
+        showArmor();
         isHidden = false;
         Logger.trace("Un hiding player: {}", player.getName());
         SBAUtil.cancelTask(armorHider);
-        SBAUtil.cancelTask(footStepSoundTracker);
-    }
-
-    private Object stackAsNMS(ItemStack item) {
-        return Reflect.getMethod(ClassStorage.NMS.CraftItemStack, "asNMSCopy", ItemStack.class).invokeStatic(item);
     }
 }
