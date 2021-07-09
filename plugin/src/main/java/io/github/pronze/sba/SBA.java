@@ -57,7 +57,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         id = "SBA",
         authors = { "pronze" },
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.5-SNAPSHOT"
+        version = "1.5.5"
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
