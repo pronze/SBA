@@ -52,8 +52,8 @@ public class PopupTowerListener implements Listener {
                     stack.setAmount(stack.getAmount() - 1);
                     player.updateInventory();
                     final var team = game.getTeamOfPlayer(player);
-                    PopupTower tower = new PopupTower(game, TeamColor.fromApiColor(team.getColor()).getWool().getType(), player.getLocation());
-                    tower.createTower(true, player.getFacing());
+                    PopupTower tower = new PopupTower(game, TeamColor.fromApiColor(team.getColor()).getWool().getType(), player.getLocation().getBlock().getRelative(player.getFacing(), 2).getLocation());
+                    tower.createTower(false, player.getFacing().getOppositeFace());
                 }
             }
         }

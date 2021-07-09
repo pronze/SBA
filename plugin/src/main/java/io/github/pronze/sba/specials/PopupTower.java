@@ -12,7 +12,6 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,13 +27,12 @@ public class PopupTower {
     );
 
     private final Game game;
-    private final List<Block> blocks = new ArrayList<>();
     private final Material mat;
     private final Location loc;
 
     public void createTower(boolean floor, BlockFace structureFace) {
         final Location mainBlock = this.loc.getBlock().getRelative(BlockFace.DOWN).getLocation();
-        blocks.add(placeBlock(mainBlock, this.mat));
+        placeBlock(mainBlock, this.mat);
         final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
         pillarSides.forEach(blockFace -> {
             if (floor) {
@@ -64,7 +62,7 @@ public class PopupTower {
         });
 
         final Block secondPlatform = mainBlock.getBlock().getRelative(BlockFace.UP, 10);
-        blocks.add(placeBlock(secondPlatform.getLocation(), this.mat));
+        placeBlock(secondPlatform.getLocation(), this.mat);
         this.placeRow(10, mainBlock, BlockFace.UP);
         pillarSides.forEach(blockFace -> {
             for (int i = 0; i < 4; i++) {
@@ -81,7 +79,6 @@ public class PopupTower {
             this.placeRow(4, secondPlatform.getLocation(), blockFace);
         });
 
-        blocks.remove(secondPlatform.getRelative(structureFace));
         final var relative = secondPlatform.getRelative(structureFace);
         if (game.getRegion().isBlockAddedDuringGame(relative.getLocation())) {
             relative.setType(Material.AIR);
@@ -96,7 +93,6 @@ public class PopupTower {
         for (int i = 0; i < length; i++) {
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             placeBlock(lastLoc, this.mat);
-            blocks.add(lastLoc.getBlock());
         }
     }
 
@@ -118,17 +114,14 @@ public class PopupTower {
                         .invoke(ladder, faceToByte.get(ladderFace));
             }
             Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
-            blocks.add(lastLoc.getBlock());
         }
     }
 
-    public Block placeBlock(Location loc, Material mat) {
-        if (!game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() != Material.AIR) {
-            return loc.getBlock();
+    public void placeBlock(Location loc, Material mat) {
+        if (game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() == Material.AIR) {
+            loc.getBlock().setType(mat);
+            game.getRegion().addBuiltDuringGame(loc);
+            Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
         }
-        loc.getBlock().setType(mat);
-        game.getRegion().addBuiltDuringGame(loc);
-        Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
-        return loc.getBlock();
     }
 }
