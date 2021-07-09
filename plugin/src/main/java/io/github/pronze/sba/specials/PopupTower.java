@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
@@ -98,7 +99,11 @@ public class PopupTower {
 
     public void placeLadderRow(int length, Location loc, BlockFace face, BlockFace ladderFace) {
         Location lastLoc = loc;
+        final List<Location> targetBlocks = game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList());
         for (int i = 0; i < length; i++) {
+            if ((!game.getRegion().isBlockAddedDuringGame(lastLoc) && lastLoc.getBlock().getType() != Material.AIR) || targetBlocks.contains(lastLoc) || targetBlocks.contains(lastLoc.getBlock().getRelative(face).getLocation())) {
+                return;
+            }
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             final Block ladder = lastLoc.getBlock();
             ladder.setType(Material.LADDER, false);
@@ -118,10 +123,11 @@ public class PopupTower {
     }
 
     public void placeBlock(Location loc, Material mat) {
-        if (game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() == Material.AIR) {
-            loc.getBlock().setType(mat);
-            game.getRegion().addBuiltDuringGame(loc);
-            Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
+        if ((!game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() != Material.AIR) || game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList()).contains(loc)) {
+            return;
         }
+        loc.getBlock().setType(mat);
+        game.getRegion().addBuiltDuringGame(loc);
+        Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
     }
 }

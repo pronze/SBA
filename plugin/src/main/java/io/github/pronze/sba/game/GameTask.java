@@ -83,6 +83,7 @@ public class GameTask extends BukkitRunnable {
                         .forEach(team -> game.getConnectedPlayers()
                                 .stream()
                                 .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
+                                .filter(player -> !team.getConnectedPlayers().contains(player))
                                 .forEach(player -> {
 
                                     if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= radius) {
@@ -103,7 +104,7 @@ public class GameTask extends BukkitRunnable {
 
                                         LanguageService
                                                 .getInstance()
-                                                .get(MessageKeys.TEAM_TRAP_TRIGGERED_MESSAGE)
+                                                .get(MessageKeys.TEAM_TRAP_TRIGGERED_MESSAGE).replace("%team%", game.getTeamOfPlayer(player).getName())
                                                 .send(PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class));
 
                                         var title = LanguageService
