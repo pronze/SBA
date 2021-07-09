@@ -104,12 +104,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     event.setMessage(message.toString());
                 }
             }
-            var setMessage = event.getMessage();
-            setMessage = setMessage + " " + LanguageService
-                    .getInstance()
-                    .get(MessageKeys.FINAL_KILL_PREFIX)
-                    .toString();
-            event.setMessage(setMessage);
+
         } else {
             message = LanguageService
                     .getInstance()

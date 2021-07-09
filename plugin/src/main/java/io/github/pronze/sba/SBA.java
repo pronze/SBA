@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
+import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.player.PlayerMapper;
 import io.github.pronze.sba.utils.SBAUtil;
