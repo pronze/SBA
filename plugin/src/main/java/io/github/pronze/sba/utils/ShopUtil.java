@@ -5,6 +5,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.GameStorage;
 import io.github.pronze.sba.game.StoreType;
+import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
@@ -257,7 +258,7 @@ public class ShopUtil {
         return map;
     }
 
-    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type) {
+    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type, Player player) {
         var enabled = itemInfo.getFirstPropertyByName("generateLore")
                 .map(property -> property.getPropertyData().getBoolean())
                 .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
@@ -265,11 +266,37 @@ public class ShopUtil {
         if (enabled) {
             final var originalList = item.getLore();
 
+            final var isSharp = itemInfo.getFirstPropertyByName("sharpness").isPresent();
+            final var isProt = itemInfo.getFirstPropertyByName("protection").isPresent();
+            final var isEfficiency = itemInfo.getFirstPropertyByName("efficiency").isPresent();
+
+            final var game = Main.getInstance().getGameOfPlayer(player);
+            final var arena = ArenaManager
+                    .getInstance()
+                    .get(game.getName())
+                    .orElseThrow();
+
+            if (isSharp) {
+                price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(
+                        arena.getStorage().getSharpness(game.getTeamOfPlayer(player).getName()) + 1));
+            }
+
+            if (isProt) {
+                price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(
+                        arena.getStorage().getProtection(game.getTeamOfPlayer(player).getName()) + 1));
+            }
+
+            if (isEfficiency) {
+                price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(
+                        arena.getStorage().getProtection(game.getTeamOfPlayer(player).getName()) + 1));
+            }
+
+            String finalPrice = price;
             final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
                     .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
                     .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
                     .map(s -> s
-                            .replaceAll("%price%", price)
+                            .replaceAll("%price%", finalPrice)
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
                     .map(s -> ChatColor.translateAlternateColorCodes('&', s))
@@ -277,7 +304,7 @@ public class ShopUtil {
             newList.addAll(originalList);
 
             item.getLore().clear();
-            item.getLore().addAll(newList);;
+            item.getLore().addAll(newList);
         }
     }
 

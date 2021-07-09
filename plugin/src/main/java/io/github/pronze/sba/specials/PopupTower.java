@@ -31,10 +31,11 @@ public class PopupTower {
     private final Material mat;
     private final Location loc;
 
+    final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
+
     public void createTower(boolean floor, BlockFace structureFace) {
         final Location mainBlock = this.loc.getBlock().getRelative(BlockFace.DOWN).getLocation();
         placeBlock(mainBlock, this.mat);
-        final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
         pillarSides.forEach(blockFace -> {
             if (floor) {
                 for (int i = 0; i < 3; i++) {
@@ -97,12 +98,21 @@ public class PopupTower {
         }
     }
 
+    private boolean isTargetBlockNear(List<Location> targetBlocks, Location loc) {
+        for (BlockFace blockFace : pillarSides) {
+            if (targetBlocks.contains(loc.getBlock().getRelative(blockFace).getLocation())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void placeLadderRow(int length, Location loc, BlockFace face, BlockFace ladderFace) {
         Location lastLoc = loc;
         final List<Location> targetBlocks = game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList());
         for (int i = 0; i < length; i++) {
-            if ((!game.getRegion().isBlockAddedDuringGame(lastLoc) && lastLoc.getBlock().getType() != Material.AIR) || targetBlocks.contains(lastLoc) || targetBlocks.contains(lastLoc.getBlock().getRelative(face).getLocation())) {
-                return;
+            if ((!game.getRegion().isBlockAddedDuringGame(lastLoc) && lastLoc.getBlock().getType() != Material.AIR) || targetBlocks.contains(lastLoc) || this.isTargetBlockNear(targetBlocks, lastLoc)) {
+                continue;
             }
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             final Block ladder = lastLoc.getBlock();
@@ -123,7 +133,8 @@ public class PopupTower {
     }
 
     public void placeBlock(Location loc, Material mat) {
-        if ((!game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() != Material.AIR) || game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList()).contains(loc)) {
+        final List<Location> targetBlocks = game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList());
+        if ((!game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() != Material.AIR) || targetBlocks.contains(loc) || this.isTargetBlockNear(targetBlocks, loc)) {
             return;
         }
         loc.getBlock().setType(mat);
