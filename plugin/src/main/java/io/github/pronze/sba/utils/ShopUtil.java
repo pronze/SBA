@@ -10,6 +10,7 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.meta.EnchantmentMapping;
@@ -36,6 +37,7 @@ import io.github.pronze.sba.game.ArenaManager;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.screamingsandals.bedwars.lib.lang.I.i18n;
@@ -261,7 +263,9 @@ public class ShopUtil {
                 .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
 
         if (enabled) {
-            var loreText = itemInfo.getFirstPropertyByName("generatedLoreText")
+            final var originalList = item.getLore();
+
+            final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
                     .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
                     .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
                     .map(s -> s
@@ -269,10 +273,11 @@ public class ShopUtil {
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
                     .map(s -> ChatColor.translateAlternateColorCodes('&', s))
-                    .map(AdventureHelper::toComponent)
-                    .collect(Collectors.toList());
+                    .map(AdventureHelper::toComponent).collect(Collectors.toCollection((Supplier<ArrayList<Component>>) ArrayList::new));
+            newList.addAll(originalList);
 
-            item.getLore().addAll(loreText);
+            item.getLore().clear();
+            item.getLore().addAll(newList);;
         }
     }
 
@@ -338,10 +343,13 @@ public class ShopUtil {
         final var typeName = item.getMaterial().getPlatformName();
         final var runningTeam = game.getTeamOfPlayer(player);
 
-        item.addLore(LanguageService
-                .getInstance()
-                .get(MessageKeys.CLICK_TO_PURCHASE)
-                .toComponent());
+        var prices = event.getInfo().getOriginal().getPrices();
+        if (!prices.isEmpty()) {
+            item.addLore(LanguageService
+                    .getInstance()
+                    .get(MessageKeys.CLICK_TO_PURCHASE)
+                    .toComponent());
+        }
 
         SBA.getInstance()
                 .getGameStorage(game)

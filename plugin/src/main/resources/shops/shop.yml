@@ -280,8 +280,10 @@ data:
           type: STRING
           display-name: "Trap"
           lore:
-            - "Get informed if an enemy steps on your trap"
-            - "and your enemy won't be able to move properly."
+            - ""
+            - "§7Get informed if an enemy steps on your trap"
+            - "§7and your enemy won't be able to move properly."
+            - ""
       - price: 120 of iron
         properties:
           - name: "Golem"
@@ -291,18 +293,22 @@ data:
           type: GHAST_SPAWN_EGG
           display-name: "Golem"
           lore:
-            - "An iron golem that will protect"
-            - "your team from the enemies."
+            - ""
+            - "§7An iron golem that will protect"
+            - "§7your team from the enemies."
+            - ""
       - price: 40 of iron
         properties: "ThrowableFireball"
         stack:
           type: FIRE_CHARGE
           display-name: "Fireball"
           lore:
-            - "Is it a bird? Is it a plane?"
-            - "By the time you know"
-            - "you are dead!"
-
+            - ""
+            - "§7Is it a bird? Is it a plane?"
+            - "§7By the time you know"
+            - "§7you are dead!"
+            - ""
+            -
       - price: 1 of emerald
         row: 4
         column: 1
@@ -311,6 +317,7 @@ data:
           type: EGG
           display-name: "§cBridgeEgg"
           lore:
+            - ""
             - "§7This egg creates a trail of bridge after it's thrown"
             - ""
       - price: 24 of iron
@@ -321,6 +328,7 @@ data:
           type: CHEST
           display-name: "§aCompact Pop-up Tower"
           lore:
+            - ""
             - "§7Place a pop-up defence!"
             - ""
 
