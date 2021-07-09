@@ -15,6 +15,7 @@ import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
 import io.github.pronze.sba.specials.listener.BridgeEggListener;
+import io.github.pronze.sba.specials.listener.PopupTowerListener;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
@@ -94,6 +95,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         DynamicSpawnerLimiterService.class,
         BedwarsCustomMessageModifierListener.class,
         BridgeEggListener.class,
+        PopupTowerListener.class,
         FirstStartConfigReplacer.class,
 })
 

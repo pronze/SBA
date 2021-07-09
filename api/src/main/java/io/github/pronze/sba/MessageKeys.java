@@ -122,4 +122,5 @@ public class MessageKeys {
     public static final String[] DEATH_MESSAGES_GENERIC = {"death-messages", "generic"};
     public static final String[] TEAM_ELIMINATED_MESSAGE = {"team-eliminated"};
     public static final String[] FINAL_KILL_PREFIX = {"death-messages", "final-kill"};
+    public static final String[] CLICK_TO_PURCHASE = {"click-to-purchase"};
 }

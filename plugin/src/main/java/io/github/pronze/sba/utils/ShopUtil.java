@@ -9,6 +9,7 @@ import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
+import net.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.meta.EnchantmentMapping;
@@ -337,6 +338,11 @@ public class ShopUtil {
         final var typeName = item.getMaterial().getPlatformName();
         final var runningTeam = game.getTeamOfPlayer(player);
 
+        item.addLore(LanguageService
+                .getInstance()
+                .get(MessageKeys.CLICK_TO_PURCHASE)
+                .toComponent());
+
         SBA.getInstance()
                 .getGameStorage(game)
                 .ifPresent(gameStorage -> {
@@ -363,9 +369,9 @@ public class ShopUtil {
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         final var backItemMeta = backItem.getItemMeta();
-     //   backItemMeta.setDisplayName(Message.of());
+        //   backItemMeta.setDisplayName(Message.of());
 //
-       // backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
+        // backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
         //localOptionsBuilder.backItem(backItem);
 
         //final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");

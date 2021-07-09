@@ -311,7 +311,18 @@ data:
           type: EGG
           display-name: "§cBridgeEgg"
           lore:
-            - "This egg creates a trail of bridge after it's thrown"
+            - "§7This egg creates a trail of bridge after it's thrown"
+            - ""
+      - price: 24 of iron
+        row: 4
+        column: 2
+        properties: "PopupTower"
+        stack:
+          type: CHEST
+          display-name: "§aCompact Pop-up Tower"
+          lore:
+            - "§7Place a pop-up defence!"
+            - ""
 
   - locate: '$swords'
     stack: GOLDEN_SWORD;1;§aMelee;§eClick to view!
