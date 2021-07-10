@@ -64,9 +64,9 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
     private final Map<String, InventorySet> shopMap = new HashMap<>();
 
     // change these to lists instead.
-    private final Map<Integer, Integer> sharpnessPrices = new HashMap<>();
-    private final Map<Integer, Integer> protectionPrices = new HashMap<>();
-    private final Map<Integer, Integer> efficiencyPrices = new HashMap<>();
+    public static Map<Integer, Integer> sharpnessPrices = new HashMap<>();
+    public static Map<Integer, Integer> protectionPrices = new HashMap<>();
+    public static Map<Integer, Integer> efficiencyPrices = new HashMap<>();
 
     public static SBAStoreInventory getInstance() {
         return ServiceManager.get(SBAStoreInventory.class);
@@ -295,7 +295,7 @@ public class SBAUpgradeStoreInventory implements IStoreInventory, Listener {
             if (type == null) {
                 return;
             }
-            ShopUtil.setLore(item, itemInfo, String.valueOf(price), type);
+            ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player);
         }
 
         ShopUtil.applyTeamUpgradeEnchantsToItem(item, event, StoreType.UPGRADES);

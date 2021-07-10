@@ -98,7 +98,8 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
     public int getXP() {
         var statistic = Main
                 .getPlayerStatisticsManager()
-                .getStatistic(getInstance());
+                .getStatistic(this.getInstance());
+
         if (statistic == null) {
             return 1;
         }
@@ -125,13 +126,17 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
                 .getString("main-lobby.progress-format", "§b%progress%§7/§e%total%")
                 .replace("%total%", String.valueOf(maxLimit));
 
-        int progress = getXP() - (getLevel() * 500);
+        int progress = getXP() - ((getLevel() - 1) * maxLimit);
 
         return format.replace("%progress%", String.valueOf(progress));
     }
 
     public int getIntegerProgress() {
-        return getXP() - (getLevel() * 500);
+        var maxLimit  = AddonAPI
+                .getInstance()
+                .getConfigurator()
+                .getInt("player-statistics.xp-to-level-up", 500);
+        return getXP() - ((getLevel() - 1) * maxLimit);
     }
 
     public String getStringProgress() {
@@ -152,11 +157,16 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
     }
 
     public String getCompletedBoxes() {
-        int progress = (getXP() - (getLevel() * 500)) / 5;;
+        var maxLimit  = AddonAPI
+                .getInstance()
+                .getConfigurator()
+                .getInt("player-statistics.xp-to-level-up", 500);
+
+        int progress = (getXP() - ((getLevel() - 1) * maxLimit)) / (maxLimit / 100);
         if (progress < 1)
             progress = 1;
 
-        char i  =String.valueOf(Math.abs((long) progress)).charAt(0);
+        char i = String.valueOf(Math.abs((long) progress)).charAt(0);
         if (progress < 10) {
             i = '1';
         }

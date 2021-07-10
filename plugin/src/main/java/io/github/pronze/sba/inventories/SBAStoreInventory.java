@@ -425,7 +425,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
             if (type == null) {
                 return;
             }
-            ShopUtil.setLore(item, itemInfo, String.valueOf(price), type);
+            ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player);
         }
 
         ShopUtil.applyTeamUpgradeEnchantsToItem(item, event, StoreType.NORMAL);
