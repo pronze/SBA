@@ -1,5 +1,6 @@
 package io.github.pronze.sba.specials;
 
+import lombok.Setter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,9 +32,15 @@ public class PopupTower {
     private final Material mat;
     private final Location loc;
 
+    @Setter
+    private int height = 10;
+
     final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
 
     public void createTower(boolean floor, BlockFace structureFace) {
+        if (this.height < 4) {
+            this.height = 4;
+        }
         final Location mainBlock = this.loc.getBlock().getRelative(BlockFace.DOWN).getLocation();
         placeBlock(mainBlock, this.mat);
         pillarSides.forEach(blockFace -> {
@@ -52,18 +59,18 @@ public class PopupTower {
             final Block pillarBase = mainBlock.getBlock().getRelative(blockFace, 3);
             if (structureFace == blockFace) {
                 final Block lastBlock = mainBlock.getBlock().getRelative(blockFace, 3).getRelative(BlockFace.UP, 2);
-                this.placeRow(7, lastBlock.getLocation(), BlockFace.UP);
+                this.placeRow(this.height - 3, lastBlock.getLocation(), BlockFace.UP);
             } else {
-                this.placeRow(9, pillarBase.getLocation(), BlockFace.UP);
+                this.placeRow(this.height - 1, pillarBase.getLocation(), BlockFace.UP);
             }
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < this.height; i++) {
                 List<BlockFace> direction = pillarSides.stream().filter(face -> face != blockFace).filter(face -> face != blockFace.getOppositeFace()).collect(Collectors.toList());
                 int finalI = i;
                 direction.forEach(face -> this.placeRow(2, pillarBase.getRelative(BlockFace.UP, finalI).getLocation(), face));
             }
         });
 
-        final Block secondPlatform = mainBlock.getBlock().getRelative(BlockFace.UP, 10);
+        final Block secondPlatform = mainBlock.getBlock().getRelative(BlockFace.UP, this.height);
         placeBlock(secondPlatform.getLocation(), this.mat);
         this.placeRow(10, mainBlock, BlockFace.UP);
         pillarSides.forEach(blockFace -> {
@@ -87,7 +94,7 @@ public class PopupTower {
         }
 
         final Location firstLadderBlock = mainBlock.getBlock().getRelative(structureFace).getLocation();
-        placeLadderRow(10, firstLadderBlock, BlockFace.UP, structureFace);
+        placeLadderRow(this.height, firstLadderBlock, BlockFace.UP, structureFace.getOppositeFace());
     }
 
     public void placeRow(int length, Location loc, BlockFace face) {

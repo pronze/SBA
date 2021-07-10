@@ -1,6 +1,7 @@
 package io.github.pronze.sba.specials.listener;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.PopupTower;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -52,7 +53,8 @@ public class PopupTowerListener implements Listener {
                     stack.setAmount(stack.getAmount() - 1);
                     player.updateInventory();
                     final var team = game.getTeamOfPlayer(player);
-                    PopupTower tower = new PopupTower(game, TeamColor.fromApiColor(team.getColor()).getWool().getType(), player.getLocation().getBlock().getRelative(player.getFacing(), 2).getLocation());
+                    PopupTower tower = new PopupTower(game, TeamColor.fromApiColor(team.getColor()).getWool().getType(), player.getLocation().getBlock().getRelative(player.getFacing(), 3).getLocation());
+                    tower.setHeight(SBAConfig.getInstance().node("popup-tower", "height").getInt(10));
                     tower.createTower(false, player.getFacing().getOppositeFace());
                 }
             }
