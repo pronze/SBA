@@ -94,7 +94,6 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         BedwarsCustomMessageModifierListener.class,
         BridgeEggListener.class,
         PopupTowerListener.class,
-        NPCStoreService.class,
         FirstStartConfigReplacer.class,
 })
 
