@@ -5,6 +5,7 @@ import io.github.pronze.sba.lang.Message;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -76,6 +77,7 @@ public class LanguageService implements ILanguageService {
     private ConfigurationNode fallbackNode;
 
     @Override
+    @NotNull
     public Message get(String... arguments) {
         return get(false, arguments);
     }

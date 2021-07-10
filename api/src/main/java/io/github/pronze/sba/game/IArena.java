@@ -1,6 +1,7 @@
 package io.github.pronze.sba.game;
 import io.github.pronze.sba.data.GamePlayerData;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import io.github.pronze.sba.manager.ScoreboardManager;
@@ -9,63 +10,81 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Represents an arena implementation.
+ */
 public interface IArena {
-    /**
-     *
-     * @return game storage
-     */
-    GameStorage getStorage();
 
     /**
-     *
+     * Gets the GameStorage of the current arena.
+     * @return game storage of the current arena
+     */
+    @NotNull
+    IGameStorage getStorage();
+
+    /**
+     * Gets the Game instance that has been linked to this Arena.
      * @return game object of this arena
      */
+    @NotNull
     Game getGame();
 
     /**
-     *
-     * @return the {@link ScoreboardManager} instance that manages scoreboard activity for this arena.
+     * Gets the scoreboard manager that manages the scoreboard visuals for this arena.
+     * @return the ScoreboardManager instance that manages scoreboard activity for this arena
      */
+    @NotNull
     ScoreboardManager getScoreboardManager();
 
     /**
-     *
-     * @param playerUUID the uuid of the player to query.
-     * @return an optional {@link GamePlayerData} instance.
+     * Gets an optional that may or may not be empty depending if the player data has been registered in the arena.
+     * @param playerUUID the uuid of the player to query
+     * @return an optional {@link GamePlayerData} instance
      */
-    Optional<GamePlayerData> getPlayerData(UUID playerUUID);
+    Optional<GamePlayerData> getPlayerData(@NotNull UUID playerUUID);
 
     /**
-     *
-     * @param uuid the uuid instance of the player to register in the HashMap.
-     * @param data the value of the uuid key to be used.
+     * Registers the player data to the arena.
+     * @param uuid the uuid instance of the player to register
+     * @param data the value of the uuid key to be used
      */
-    void putPlayerData(UUID uuid, GamePlayerData data);
+    void registerPlayerData(@NotNull UUID uuid, @NotNull GamePlayerData data);
 
     /**
-     *
-     * @param player
-     * @return
+     * Unregisters the player data from the arena.
+     * @param uuid the uuid instance of the player to unregister
      */
-    boolean isPlayerHidden(Player player);
+    void unregisterPlayerData(@NotNull UUID uuid);
 
     /**
-     *
-     * @param player
+     * Gets whether the player is hidden from game players or not.
+     * @param player the player instance to query
+     * @return true if the player is hidden from game players, false otherwise
      */
-    void removeHiddenPlayer(Player player);
+    boolean isPlayerHidden(@NotNull Player player);
 
     /**
-     *
-     * @param player
+     * Removes the player from it's hidden state.
+     * @param player the player instance to remove
      */
-    void addHiddenPlayer(Player player);
+    void removeHiddenPlayer(@NotNull Player player);
 
     /**
-     *
-     * @return
+     * Adds the player as a hidden player in the arena.
+     * @param player the player instance to add
      */
+    void addHiddenPlayer(@NotNull Player player);
+
+    /**
+     * Gets a list of players that are current invisible in the arena.
+     * @return a list of players that are currently invisible in the arena
+     */
+    @NotNull
     List<Player> getInvisiblePlayers();
 
-    void createRotatingGenerator(ItemSpawner itemSpawner);
+    /**
+     *
+     * @param itemSpawner the item spawner instance to be rotated.
+     */
+    void createRotatingGenerator(@NotNull ItemSpawner itemSpawner);
 }

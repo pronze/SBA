@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
@@ -43,10 +44,10 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
                     .toStringList());
         }
-        game.getConnectedPlayers().forEach(this::createBoard);
+        game.getConnectedPlayers().forEach(this::createScoreboard);
     }
 
-    public void createBoard(Player player) {
+    public void createScoreboard(@NotNull Player player) {
         Logger.trace("Creating board for player: {}", player.getName());
 
         final var scoreboardOptional = ScoreboardManager.getInstance()
@@ -72,7 +73,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
-    public void removeBoard(Player player) {
+    public void removeScoreboard(@NotNull Player player) {
         if (scoreboardMap.containsKey(player.getUniqueId())) {
             final var scoreboard = scoreboardMap.get(player.getUniqueId());
             if (scoreboard != null) {

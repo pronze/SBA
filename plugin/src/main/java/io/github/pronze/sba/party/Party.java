@@ -134,7 +134,7 @@ public class Party implements IParty {
                         .getConfigurator()
                         .getInt("party.invite-expiration-time", 60));
 
-        final var inviteData = new PartyInviteData(invitee, player, inviteTask);
+        final var inviteData = PartyInviteData.of(invitee, player, inviteTask);
         inviteDataMap.put(invitee.getInstance().getUniqueId(), inviteData);
     }
 

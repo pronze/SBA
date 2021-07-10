@@ -3,14 +3,12 @@ package io.github.pronze.sba.utils;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
-import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.meta.EnchantmentMapping;
@@ -28,12 +26,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
-import org.screamingsandals.bedwars.lib.sgui.builder.FormatBuilder;
-import io.github.pronze.sba.game.ArenaManager;
 
 import java.io.File;
 import java.util.*;
@@ -75,7 +70,7 @@ public class ShopUtil {
         }
     };
 
-    public static boolean buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {
+    public static boolean buyArmor(Player player, Material mat_boots, IGameStorage gameStorage, Game game) {
         final var matName = mat_boots.name().substring(0, mat_boots.name().indexOf("_"));
 
         if (UpgradeKeys.containsKey(matName)) {
@@ -110,7 +105,7 @@ public class ShopUtil {
         final var boots = new ItemStack(mat_boots);
         final var leggings = new ItemStack(mat_leggings);
 
-        final var level = gameStorage.getProtection(game.getTeamOfPlayer(player).getName());
+        final var level = gameStorage.getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow();
         if (level != 0) {
             boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
             leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
@@ -357,16 +352,16 @@ public class ShopUtil {
                     final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
                     switch (afterUnderscore.toLowerCase()) {
                         case "sword":
-                            int sharpness = gameStorage.getSharpness(runningTeam.getName());
+                            int sharpness = gameStorage.getSharpnessLevel(runningTeam).orElseThrow();
                             clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type, SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
                             break;
                         case "chestplate":
                         case "boots":
-                            int protection = gameStorage.getProtection(runningTeam.getName());
+                            int protection = gameStorage.getProtectionLevel(runningTeam).orElseThrow();
                             clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type, SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4));
                             break;
                         case "pickaxe":
-                            final int efficiency = gameStorage.getEfficiency(runningTeam.getName());
+                            final int efficiency = gameStorage.getEfficiencyLevel(runningTeam).orElseThrow();
                             clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type, SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2));
                             break;
                     }

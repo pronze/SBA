@@ -5,9 +5,12 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.Arrays;
 
+/**
+ * Represents the events related to the upgrades of Rotating Generators.
+ */
 @RequiredArgsConstructor
 @Getter
-public enum GameEvent {
+public enum GameTierEvent {
     DIAMOND_GEN_UPGRADE_TIER_II("Diamond-II"),
     EMERALD_GEN_UPGRADE_TIER_II("Emerald-II"),
     DIAMOND_GEN_UPGRADE_TIER_III("Diamond-III"),
@@ -25,14 +28,14 @@ public enum GameEvent {
                 .getInt("upgrades.time." + key, Integer.MAX_VALUE);
     }
 
-    public static GameEvent ofOrdinal(int ordinal) {
+    public static GameTierEvent ofOrdinal(int ordinal) {
         return Arrays.stream(values())
                 .filter(val -> val.ordinal() == ordinal)
                 .findAny()
-                .orElse(GameEvent.GAME_END);
+                .orElse(GameTierEvent.GAME_END);
     }
 
-    public GameEvent getNextEvent() {
+    public GameTierEvent getNextEvent() {
         return ofOrdinal(ordinal() + 1);
     }
 }

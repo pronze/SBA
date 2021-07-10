@@ -1,8 +1,9 @@
-package io.github.pronze.sba;
+package io.github.pronze.sba.game;
 import io.github.pronze.sba.mock.MockArenaManager;
 import io.github.pronze.sba.mock.MockGame;
 import io.github.pronze.sba.utils.Logger;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -22,7 +23,7 @@ public class ArenaManagerTest {
         Logger.mockMode();
     }
 
-    @Test
+    @BeforeEach
     public void registerArena() {
         manager.createArena(game);
         assertTrue(manager.getRegisteredArenas()

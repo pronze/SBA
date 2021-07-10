@@ -1,7 +1,6 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.MessageKeys;
-import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
@@ -11,6 +10,7 @@ import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -30,7 +30,7 @@ public class Arena implements IArena {
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
-    private final GameStorage storage;
+    private final IGameStorage storage;
     private final GameTask gameTask;
 
     public Arena(Game game) {
@@ -38,26 +38,10 @@ public class Arena implements IArena {
         storage = new GameStorage(game);
         gameTask = new GameTask(this);
         scoreboardManager = new GameScoreboardManager(this);
-        game.getConnectedPlayers().forEach(this::registerPlayerData);
+        game.getConnectedPlayers().forEach(player -> registerPlayerData(player.getUniqueId(), GamePlayerData.of(player)));
     }
 
-
-    public void createRotatingGenerator(ItemSpawner itemSpawner) {
-        final var spawnerMaterial = itemSpawner.getItemSpawnerType().getMaterial();
-        final var rotationStack = spawnerMaterial == Material.DIAMOND ?
-                new ItemStack(Material.DIAMOND_BLOCK) :
-                new ItemStack(Material.EMERALD_BLOCK);
-
-        final var generator = new RotatingGenerator(
-                itemSpawner,
-                rotationStack,
-                itemSpawner.getLocation()
-        );
-
-        generator.spawn(game.getConnectedPlayers());
-        rotatingGenerators.add(generator);
-    }
-
+    @NotNull
     @Override
     public List<Player> getInvisiblePlayers() {
         return invisiblePlayers
@@ -68,15 +52,17 @@ public class Arena implements IArena {
     }
 
     @Override
-    public void addHiddenPlayer(Player player) {
-        if (invisiblePlayers.containsKey(player.getUniqueId())) return;
+    public void addHiddenPlayer(@NotNull Player player) {
+        if (invisiblePlayers.containsKey(player.getUniqueId())) {
+            return;
+        }
         final var invisiblePlayer = new InvisiblePlayer(player, this);
         invisiblePlayer.vanish();
         invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
     }
 
     @Override
-    public void removeHiddenPlayer(Player player) {
+    public void removeHiddenPlayer(@NotNull Player player) {
         final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());
         if (invisiblePlayer != null) {
             invisiblePlayer.setHidden(false);
@@ -85,14 +71,38 @@ public class Arena implements IArena {
     }
 
     @Override
-    public boolean isPlayerHidden(Player player) {
+    public void registerPlayerData(@NotNull UUID uuid, @NotNull GamePlayerData data) {
+        if (playerDataMap.containsKey(uuid)) {
+            throw new UnsupportedOperationException("PlayerData of uuid: " + uuid.toString() + " is already registered!");
+        }
+        playerDataMap.put(uuid, data);
+    }
+
+    @Override
+    public void unregisterPlayerData(@NotNull UUID uuid) {
+        if (!playerDataMap.containsKey(uuid)) {
+            throw new UnsupportedOperationException("PlayerData of uuid: " + uuid.toString() + " is not registered!");
+        }
+        playerDataMap.remove(uuid);
+    }
+
+    @Override
+    public Optional<GamePlayerData> getPlayerData(@NotNull UUID uuid) {
+        return Optional.ofNullable(playerDataMap.get(uuid));
+    }
+
+    @NotNull
+    @Override
+    public ScoreboardManager getScoreboardManager() {
+        return scoreboardManager;
+    }
+
+    @Override
+    public boolean isPlayerHidden(@NotNull Player player) {
         return invisiblePlayers.containsKey(player.getUniqueId());
     }
 
-    private void registerPlayerData(Player player) {
-        putPlayerData(player.getUniqueId(), GamePlayerData.from(player));
-    }
-
+    // non api event handler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var team = e.getTeam();
         // send bed destroyed message to all players of the team
@@ -199,22 +209,17 @@ public class Arena implements IArena {
                         .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
             }
         }).afterOneTick().start();
-
-
     }
 
     @Override
-    public void putPlayerData(UUID uuid, GamePlayerData data) {
-        playerDataMap.put(uuid, data);
-    }
+    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner) {
+        final var spawnerMaterial = itemSpawner.getItemSpawnerType().getMaterial();
+        final var rotationStack = spawnerMaterial == Material.DIAMOND ?
+                new ItemStack(Material.DIAMOND_BLOCK) :
+                new ItemStack(Material.EMERALD_BLOCK);
 
-    @Override
-    public Optional<GamePlayerData> getPlayerData(UUID uuid) {
-        return Optional.ofNullable(playerDataMap.get(uuid));
-    }
-
-    @Override
-    public ScoreboardManager getScoreboardManager() {
-        return scoreboardManager;
+        final var generator = new RotatingGenerator(itemSpawner, rotationStack, itemSpawner.getLocation());
+        generator.spawn(game.getConnectedPlayers());
+        rotatingGenerators.add(generator);
     }
 }

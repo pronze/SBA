@@ -14,10 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
@@ -81,7 +81,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
     }
 
     @Override
-    public void openForPlayer(PlayerWrapper player, GameStore store) {
+    public void openForPlayer(@NotNull PlayerWrapper player, @NotNull GameStore store) {
         try {
             var parent = true;
             String fileName = null;
@@ -104,7 +104,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
         }
     }
 
-    public void loadNewShop(String name, File file, boolean useParent) {
+    public void loadNewShop(@NotNull String name, @NotNull File file, boolean useParent) {
         var inventorySet = SimpleInventoriesCore
                 .builder()
                 .genericShop(true)
@@ -337,7 +337,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
          */
         switch (afterUnderscore.toLowerCase()) {
             case "sword":
-                final var sharpness = gameStorage.getSharpness(team.getName());
+                final var sharpness = gameStorage.getSharpnessLevel(team).orElseThrow();
                 if (sharpness > 0 && sharpness < 5) {
                     newItem.addEnchant(new EnchantmentHolder(EnchantmentMapping
                             .resolve(Enchantment.DAMAGE_ALL).orElseThrow().getPlatformName(), sharpness));
@@ -351,7 +351,7 @@ public class SBAStoreInventory implements IStoreInventory, Listener {
                 shouldSellStack = ShopUtil.buyArmor(player, newItem.as(ItemStack.class).getType(), gameStorage, game);
                 break;
             case "pickaxe":
-                final var efficiency = gameStorage.getEfficiency(team.getName());
+                final var efficiency = gameStorage.getEfficiencyLevel(team).orElseThrow();
                 if (efficiency > 0 && efficiency < 5) {
                     newItem.addEnchant(new EnchantmentHolder(EnchantmentMapping
                             .resolve(Enchantment.DIG_SPEED).orElseThrow().getPlatformName(), efficiency));

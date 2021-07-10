@@ -2,7 +2,7 @@ package io.github.pronze.sba;
 
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.IConfigurator;
-import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.inventories.SBAStoreInventory;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
@@ -27,10 +27,10 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.Core;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.packet.PacketMapper;
-import org.screamingsandals.lib.player.PlayerMapper;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.ArenaManager;
@@ -45,7 +45,6 @@ import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
-import org.screamingsandals.lib.world.LocationMapper;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
@@ -57,7 +56,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         id = "SBA",
         authors = { "pronze" },
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.5-SNAPSHOT"
+        version = "1.5.6-SNAPSHOT"
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
@@ -65,8 +64,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "PlaceholderAPI"
 )
 @Init(services = {
-        PlayerMapper.class,
-        LocationMapper.class,
+        Core.class,
         PacketMapper.class,
         HologramManager.class,
         EventManager.class,
@@ -96,6 +94,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         BedwarsCustomMessageModifierListener.class,
         BridgeEggListener.class,
         PopupTowerListener.class,
+        NPCStoreService.class,
         FirstStartConfigReplacer.class,
 })
 
@@ -207,7 +206,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public Optional<GameStorage> getGameStorage(Game game) {
+    public Optional<IGameStorage> getGameStorage(Game game) {
         return ArenaManager.getInstance().getGameStorage(game.getName());
     }
 

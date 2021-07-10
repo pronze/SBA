@@ -5,6 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * Represents the UpgradeType [Emerald/Diamond]
+ */
 @RequiredArgsConstructor
 @Getter
 public enum GeneratorUpgradeType {

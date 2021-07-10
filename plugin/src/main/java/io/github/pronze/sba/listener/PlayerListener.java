@@ -111,6 +111,7 @@ public class PlayerListener implements Listener {
                         case "SWORD":
                             sword.addEnchantments(stack.getEnchantments());
                             break;
+                        case "PICKAXE":
                         case "AXE":
                             itemArr.add(ShopUtil.checkifUpgraded(stack));
                             break;

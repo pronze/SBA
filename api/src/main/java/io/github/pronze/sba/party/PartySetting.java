@@ -2,6 +2,11 @@ package io.github.pronze.sba.party;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * TODO:
+ * Represents the settings of the party.
+ * Configurable via /p settings <enum> <setting>
+ */
 @RequiredArgsConstructor
 @Data
 public class PartySetting {

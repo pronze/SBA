@@ -227,7 +227,7 @@ public class BedWarsListener implements Listener {
                         .get(game.getName())
                         .orElseThrow();
 
-                arena.getScoreboardManager().createBoard(player);
+                arena.getScoreboardManager().createScoreboard(player);
                 ((Arena) arena).getRotatingGenerators().forEach(generator -> {
                     generator.addViewer(player);
                 });
@@ -246,7 +246,7 @@ public class BedWarsListener implements Listener {
                 .ifPresent(arena -> {
                     final var scoreboardManager = arena.getScoreboardManager();
                     if (scoreboardManager != null) {
-                        scoreboardManager.removeBoard(player);
+                        scoreboardManager.removeScoreboard(player);
                     }
                 });
 

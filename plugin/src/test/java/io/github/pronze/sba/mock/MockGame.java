@@ -17,11 +17,14 @@ import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.api.special.SpecialItem;
 import org.screamingsandals.bedwars.api.utils.DelayFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class MockGame implements Game {
     private final String name;
+    private final List<Player> connectedPlayers = new ArrayList<>();
+    private GameStatus gameStatus = GameStatus.RUNNING;
 
     @Override
     public String getName() {
@@ -30,7 +33,11 @@ public class MockGame implements Game {
 
     @Override
     public GameStatus getStatus() {
-        return null;
+        return gameStatus;
+    }
+
+    public void setStatus(GameStatus status) {
+        gameStatus = status;
     }
 
     @Override
@@ -45,12 +52,18 @@ public class MockGame implements Game {
 
     @Override
     public void joinToGame(Player player) {
-
+        if (connectedPlayers.contains(player)) {
+            throw new UnsupportedOperationException("Player: " + player.getName() + " is already in game!");
+        }
+        connectedPlayers.add(player);
     }
 
     @Override
     public void leaveFromGame(Player player) {
-
+        if (!connectedPlayers.contains(player)) {
+            throw new UnsupportedOperationException("Player: " + player.getName() + " is not in game!");
+        }
+        connectedPlayers.remove(player);
     }
 
     @Override
@@ -105,7 +118,7 @@ public class MockGame implements Game {
 
     @Override
     public List<Player> getConnectedPlayers() {
-        return null;
+        return List.of();
     }
 
     @Override
@@ -135,7 +148,7 @@ public class MockGame implements Game {
 
     @Override
     public List<RunningTeam> getRunningTeams() {
-        return null;
+        return List.of();
     }
 
     @Override

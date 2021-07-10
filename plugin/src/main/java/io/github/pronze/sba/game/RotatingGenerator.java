@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
@@ -59,18 +60,12 @@ public class RotatingGenerator implements IRotatingGenerator {
     }
 
     @Override
-    public void spawn(List<Player> viewers) {
+    public void spawn(@NotNull List<Player> viewers) {
         final var holoHeight = SBAConfig.getInstance()
                 .node("floating-generator", "height").getDouble(2.0);
 
-        hologram = HologramManager
-                .hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
-        hologram
-                .item(
-                        ItemFactory
-                                .build(stack)
-                                .orElseThrow()
-                )
+        hologram = HologramManager.hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
+        hologram.item(ItemFactory.build(stack).orElseThrow())
                 .itemPosition(Hologram.ItemPosition.BELOW)
                 .rotationMode(Hologram.RotationMode.Y)
                 .rotationTime(Pair.of(1, TaskerTime.TICKS));
@@ -81,12 +76,12 @@ public class RotatingGenerator implements IRotatingGenerator {
     }
 
     @Override
-    public void addViewer(Player player) {
+    public void addViewer(@NotNull Player player) {
         hologram.addViewer(PlayerMapper.wrapPlayer(player));
     }
 
     @Override
-    public void removeViewer(Player player) {
+    public void removeViewer(@NotNull Player player) {
         hologram.removeViewer(PlayerMapper.wrapPlayer(player));
     }
 
@@ -141,10 +136,7 @@ public class RotatingGenerator implements IRotatingGenerator {
     }
 
     @Override
-    public void update(List<String> newLines) {
-        if (newLines == null) {
-            return;
-        }
+    public void update(@NotNull List<String> newLines) {
         if (newLines.equals(lines)) {
             return;
         }
@@ -163,7 +155,7 @@ public class RotatingGenerator implements IRotatingGenerator {
     }
 
     @Override
-    public void setLocation(Location location) {
+    public void setLocation(@NotNull Location location) {
         this.location = location;
     }
 }

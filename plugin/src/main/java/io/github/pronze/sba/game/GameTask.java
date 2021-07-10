@@ -3,7 +3,6 @@ package io.github.pronze.sba.game;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.data.GeneratorData;
 import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
@@ -23,8 +22,6 @@ import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.player.PlayerMapper;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -36,17 +33,17 @@ public class GameTask extends BukkitRunnable {
     private final double multiplier;
     private final Game game;
     private final Arena arena;
-    private final GameStorage storage;
+    private final IGameStorage storage;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
-    private GameEvent nextEvent;
+    private GameTierEvent nextEvent;
     private int elapsedTime;
     private int tier = 2;
 
     public GameTask(Arena arena) {
         radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
 
-        nextEvent = GameEvent.DIAMOND_GEN_UPGRADE_TIER_II;
+        nextEvent = GameTierEvent.DIAMOND_GEN_UPGRADE_TIER_II;
         diamond = LanguageService
                 .getInstance()
                 .get(MessageKeys.DIAMOND)
@@ -79,13 +76,13 @@ public class GameTask extends BukkitRunnable {
             if (storage.areTrapsEnabled()) {
                 game.getRunningTeams()
                         .stream()
-                        .filter(storage::isTrapEnabled)
+                        .filter(storage::areTrapsEnabled)
                         .forEach(team -> game.getConnectedPlayers()
                                 .stream()
                                 .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
                                 .forEach(player -> {
 
-                                    if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= radius) {
+                                    if (storage.getTargetBlockLocation(team).orElseThrow().distanceSquared(player.getLocation()) <= radius) {
                                         final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
                                         SBA.getPluginInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
@@ -93,7 +90,7 @@ public class GameTask extends BukkitRunnable {
                                             return;
                                         }
 
-                                        storage.setTrap(team, false);
+                                        storage.setPurchasedTrap(team, false);
                                         player.addPotionEffect(new PotionEffect
                                                 (PotionEffectType.BLINDNESS, 20 * 3, 2));
 
@@ -129,18 +126,18 @@ public class GameTask extends BukkitRunnable {
             if (storage.arePoolEnabled()) {
                 game.getRunningTeams()
                         .stream()
-                        .filter(storage::isPoolEnabled)
+                        .filter(storage::arePoolEnabled)
                         .forEach(team -> team.getConnectedPlayers()
                                 .stream()
                                 .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
                                 .forEach(player -> {
-                                    if (storage.getTargetBlockLocation(team).distanceSquared(player.getLocation()) <= radius) {
+                                    if (storage.getTargetBlockLocation(team).orElseThrow().distanceSquared(player.getLocation()) <= radius) {
                                         player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
                                     }
                                 }));
             }
 
-            if (nextEvent != GameEvent.GAME_END) {
+            if (nextEvent != GameTierEvent.GAME_END) {
                 if (elapsedTime == nextEvent.getTime()) {
                     if (timerUpgrades) {
                         final var tierName = nextEvent.getKey();

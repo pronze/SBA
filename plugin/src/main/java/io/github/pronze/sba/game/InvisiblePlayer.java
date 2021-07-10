@@ -24,7 +24,7 @@ import java.util.List;
 @Data
 public class InvisiblePlayer {
     private final Player player;
-    private final Arena arena;
+    private final IArena arena;
 
     private boolean isHidden;
     private Vector3D lastLocation;
@@ -66,8 +66,7 @@ public class InvisiblePlayer {
         final var helmet = player.getInventory().getHelmet();
         final var chestplate = player.getInventory().getChestplate();
         final var leggings = player.getInventory().getLeggings();
-        arena
-                .getGame()
+        arena.getGame()
                 .getConnectedPlayers()
                 .forEach(pl -> sendPackets(pl, getPackets(boots, chestplate, leggings, helmet)));
     }
@@ -75,8 +74,7 @@ public class InvisiblePlayer {
     private void hideArmor() {
         var playerTeam = arena.getGame().getTeamOfPlayer(player);
 
-        arena
-                .getGame()
+        arena.getGame()
                 .getConnectedPlayers()
                 .stream()
                 .filter(pl -> !playerTeam.getConnectedPlayers().contains(pl))
@@ -103,7 +101,7 @@ public class InvisiblePlayer {
         return equipmentPacket;
     }
 
-    private void showPlayer() {
+    public void showPlayer() {
         showArmor();
         isHidden = false;
         Logger.trace("Un hiding player: {}", player.getName());

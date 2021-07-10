@@ -1,22 +1,64 @@
 package io.github.pronze.sba.data;
 
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.Team;
 
-@RequiredArgsConstructor
+/**
+ * Represents the data of a team.
+ */
+@RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @Data
 public class GameTeamData {
-     private int sharpness;
-     private int protection;
-     private int efficiency;
-     private boolean purchasedPool;
-     private boolean purchasedTrap;
-     private boolean purchasedDragonUpgrade;
-     private final Location targetBlockLoc;
 
-     public static GameTeamData from(Team team) {
-          return new GameTeamData(team.getTargetBlock());
-     }
+    /**
+     * Current level of sharpness for the team.
+     * Enchant applied is {@link org.bukkit.enchantments.Enchantment#DAMAGE_ALL}
+     */
+    private int sharpness;
+
+    /**
+     * Current level of protection for the team.
+     * Enchant applied is {@link org.bukkit.enchantments.Enchantment#PROTECTION_ENVIRONMENTAL}
+     */
+    private int protection;
+
+    /**
+     * Current level of efficiency for the team.
+     * Enchant applied is {@link org.bukkit.enchantments.Enchantment#DIG_SPEED}
+     */
+    private int efficiency;
+
+    /**
+     * A boolean representing whether the team has purchased the Heal Pool upgrade from the Upgrades store.
+     */
+    private boolean purchasedPool;
+
+    /**
+     * A boolean representing whether the team has purchased the Trap upgrade from the Upgrades store.
+     */
+    private boolean purchasedTrap;
+
+    /**
+     * A boolean representing whether the team has purchased the Dragon upgrade from the Upgrades store.
+     */
+    private boolean purchasedDragonUpgrade;
+
+    /**
+     * Location of the target block of the team.
+     */
+    private final Location targetBlockLoc;
+
+
+    /**
+     * Constructs a new GameTeamData instance.
+     * @param team the team for construction of GameTeamData instance
+     * @return a new GameTeamData instance
+     */
+    public static GameTeamData of(@NotNull Team team) {
+        return new GameTeamData(team.getTargetBlock());
+    }
 }

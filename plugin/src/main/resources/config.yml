@@ -32,7 +32,7 @@ gived-player-respawn-items:
 disable-hunger: true
 automatic-coloring-in-shop: true
 sell-max-64-per-click-in-shop: true
-destroy-placed-blocks-by-explosion-except: ''
+destroy-placed-blocks-by-explosion-except: 'GLASS'
 destroy-placed-blocks-by-explosion: true
 holo-above-bed: true
 allow-spectator-join: false

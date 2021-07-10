@@ -28,13 +28,15 @@ public class ArenaManager implements IArenaManager {
     }
 
     @Override
-    public void createArena(@NotNull Game game) {
+    public IArena createArena(@NotNull Game game) {
         final var gameName = game.getName();
         if (arenaMap.containsKey(gameName)) {
             throw new UnsupportedOperationException("Arena: " + gameName + " already exists!");
         }
         Logger.trace("Creating arena for game: {}", gameName);
-        arenaMap.put(gameName, new Arena(game));
+        final var arena = new Arena(game);
+        arenaMap.put(gameName, arena);
+        return arena;
     }
 
     @Override
@@ -49,10 +51,10 @@ public class ArenaManager implements IArenaManager {
     }
 
     @Override
-    public Optional<GameStorage> getGameStorage(String gameName) {
+    public Optional<IGameStorage> getGameStorage(String gameName) {
         if (!arenaMap.containsKey(gameName)) {
             return Optional.empty();
         }
-        return Optional.ofNullable(arenaMap.get(gameName).getStorage());
+        return Optional.of(arenaMap.get(gameName).getStorage());
     }
 }

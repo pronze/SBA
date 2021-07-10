@@ -1,69 +1,94 @@
 package io.github.pronze.sba.mock;
-
 import io.github.pronze.sba.data.GamePlayerData;
-import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.IArena;
+import io.github.pronze.sba.game.InvisiblePlayer;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class MockArena implements IArena {
+    private final Map<UUID, MockInvisiblePlayer> invisiblePlayers = new HashMap<>();
+    private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final Game game;
+    private final IGameStorage gameStorage;
 
     @Override
-    public GameStorage getStorage() {
-        return null;
+    public @NotNull IGameStorage getStorage() {
+        return gameStorage;
     }
 
     @Override
-    public Game getGame() {
+    public @NotNull Game getGame() {
         return game;
     }
 
     @Override
-    public ScoreboardManager getScoreboardManager() {
+    public @NotNull ScoreboardManager getScoreboardManager() {
         return null;
     }
 
     @Override
-    public Optional<GamePlayerData> getPlayerData(UUID playerUUID) {
+    public Optional<GamePlayerData> getPlayerData(@NotNull UUID playerUUID) {
         return Optional.empty();
     }
 
     @Override
-    public void putPlayerData(UUID uuid, GamePlayerData data) {
-
+    public void registerPlayerData(@NotNull UUID uuid, @NotNull GamePlayerData data) {
+        if (playerDataMap.containsKey(uuid)) {
+            throw new UnsupportedOperationException("PlayerData of uuid: " + uuid.toString() + " is already registered!");
+        }
+        playerDataMap.put(uuid, data);
     }
 
     @Override
-    public boolean isPlayerHidden(Player player) {
-        return false;
+    public void unregisterPlayerData(@NotNull UUID uuid) {
+        if (!playerDataMap.containsKey(uuid)) {
+            throw new UnsupportedOperationException("PlayerData of uuid: " + uuid.toString() + " is not registered!");
+        }
+        playerDataMap.remove(uuid);
     }
 
     @Override
-    public void removeHiddenPlayer(Player player) {
-
+    public boolean isPlayerHidden(@NotNull Player player) {
+        return invisiblePlayers.containsKey(player.getUniqueId());
     }
 
     @Override
-    public void addHiddenPlayer(Player player) {
-
+    public void removeHiddenPlayer(@NotNull Player player) {
+        final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());
+        if (invisiblePlayer != null) {
+            invisiblePlayer.showPlayer();
+            invisiblePlayers.remove(player.getUniqueId());
+        }
     }
 
     @Override
-    public List<Player> getInvisiblePlayers() {
-        return null;
+    public void addHiddenPlayer(@NotNull Player player) {
+        if (invisiblePlayers.containsKey(player.getUniqueId())) return;
+        final var invisiblePlayer = new MockInvisiblePlayer(player, this);
+        invisiblePlayer.vanish();
+        invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
     }
 
     @Override
-    public void createRotatingGenerator(ItemSpawner itemSpawner) {
+    public @NotNull List<Player> getInvisiblePlayers() {
+        return invisiblePlayers
+                .values()
+                .stream()
+                .map(InvisiblePlayer::getPlayer)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner) {
 
     }
 }

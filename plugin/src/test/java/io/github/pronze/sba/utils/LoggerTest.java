@@ -1,4 +1,4 @@
-package io.github.pronze.sba;
+package io.github.pronze.sba.utils;
 
 import io.github.pronze.sba.utils.Logger;
 import org.junit.jupiter.api.BeforeAll;

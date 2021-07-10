@@ -1,7 +1,7 @@
 package io.github.pronze.sba;
 
 import io.github.pronze.sba.config.IConfigurator;
-import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.lang.ILanguageService;
 import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.manager.IPartyManager;
@@ -34,9 +34,9 @@ public interface AddonAPI {
     /**
      *
      * @param game The game associated with the storage.
-     * @return {@link GameStorage} of game if exists, null otherwise
+     * @return {@link IGameStorage} of game if exists, null otherwise
      */
-    Optional<GameStorage> getGameStorage(Game game);
+    Optional<IGameStorage> getGameStorage(Game game);
 
     /**
      *

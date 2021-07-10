@@ -1,23 +1,27 @@
 package io.github.pronze.sba.lang;
 import io.github.pronze.sba.AddonAPI;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.screamingsandals.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)
 public class Message {
-    private List<String> original;
+    private List<String> original = new ArrayList<>();
     private boolean prefix;
 
     public static Message of(List<String> text) {
         return new Message(text);
     }
 
-    public Message(List<String> text) {
-        original = text;
+    private Message(List<String> text) {
+        original.addAll(text);
     }
 
     public Message replace(String key, String value) {
