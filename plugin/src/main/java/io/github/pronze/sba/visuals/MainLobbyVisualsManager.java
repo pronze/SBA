@@ -114,7 +114,7 @@ public class MainLobbyVisualsManager implements Listener {
                     if (isInWorld(player.getLocation()) && !Main.isPlayerInGame(player)) {
                         create(player);
                     }
-                }, 3L);
+                }, 20L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

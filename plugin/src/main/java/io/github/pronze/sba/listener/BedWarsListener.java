@@ -6,7 +6,9 @@ import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -262,20 +264,23 @@ public class BedWarsListener implements Listener {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
-    @EventHandler
-    public void onBedWarsPlayerKilledEvent(BedwarsPlayerKilledEvent e) {
-        final var game = e.getGame();
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
+        final var victim = e.getEntity();
+        if (!Main.isPlayerInGame(victim)) {
+            return;
+        }
+        final var game = Main.getInstance().getGameOfPlayer(victim);
         // query arena instance for access to Victim/Killer data
         ArenaManager
                 .getInstance()
                 .get(game.getName())
                 .ifPresent(arena -> {
-                    final var victim = e.getPlayer();
                     // player has died, increment death counter
                     arena.getPlayerData(victim.getUniqueId())
                             .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
-                    final var killer = e.getKiller();
+                    final var killer = victim.getKiller();
                     //killer is present
                     if (killer != null) {
                         Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());

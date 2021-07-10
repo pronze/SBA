@@ -35,9 +35,12 @@ public class PopupTower {
     @Setter
     private int height = 10;
 
-    final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
+    private final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
+    private List<Location> targetBlocks;
 
     public void createTower(boolean floor, BlockFace structureFace) {
+        targetBlocks = game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList());
+
         if (this.height < 4) {
             this.height = 4;
         }
@@ -94,7 +97,7 @@ public class PopupTower {
         }
 
         final Location firstLadderBlock = mainBlock.getBlock().getRelative(structureFace).getLocation();
-        placeLadderRow(this.height, firstLadderBlock, BlockFace.UP, structureFace.getOppositeFace());
+        placeLadderRow(this.height, firstLadderBlock, BlockFace.UP, structureFace);
     }
 
     public void placeRow(int length, Location loc, BlockFace face) {
@@ -106,20 +109,19 @@ public class PopupTower {
     }
 
     private boolean isTargetBlockNear(List<Location> targetBlocks, Location loc) {
-        for (BlockFace blockFace : pillarSides) {
-            if (targetBlocks.contains(loc.getBlock().getRelative(blockFace).getLocation())) {
-                return true;
-            }
-        }
-        return false;
+        return pillarSides.stream()
+                .anyMatch(blockFace -> {
+                    return targetBlocks.contains(loc) || targetBlocks.contains(loc.getBlock().getRelative(blockFace, 1).getLocation());
+                });
     }
 
     public void placeLadderRow(int length, Location loc, BlockFace face, BlockFace ladderFace) {
         Location lastLoc = loc;
-        final List<Location> targetBlocks = game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList());
         for (int i = 0; i < length; i++) {
-            if ((!game.getRegion().isBlockAddedDuringGame(lastLoc) && lastLoc.getBlock().getType() != Material.AIR) || targetBlocks.contains(lastLoc) || this.isTargetBlockNear(targetBlocks, lastLoc)) {
-                continue;
+            if (i != 0) {
+                if ((!game.getRegion().isBlockAddedDuringGame(lastLoc) && (lastLoc.getBlock().getType() != Material.AIR && lastLoc.getBlock().getType() != Material.GRASS)) || isTargetBlockNear(targetBlocks, lastLoc)) {
+                    continue;
+                }
             }
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             final Block ladder = lastLoc.getBlock();
@@ -135,17 +137,16 @@ public class PopupTower {
                 Reflect.getMethod(ladder, "setData", Byte.class)
                         .invoke(ladder, faceToByte.get(ladderFace));
             }
-            Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
+            Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 1, 1);
         }
     }
 
     public void placeBlock(Location loc, Material mat) {
-        final List<Location> targetBlocks = game.getRunningTeams().stream().map(RunningTeam::getTargetBlock).collect(Collectors.toList());
-        if ((!game.getRegion().isBlockAddedDuringGame(loc) && loc.getBlock().getType() != Material.AIR) || targetBlocks.contains(loc) || this.isTargetBlockNear(targetBlocks, loc)) {
+        if ((!game.getRegion().isBlockAddedDuringGame(loc) && (loc.getBlock().getType() != Material.AIR && loc.getBlock().getType() != Material.GRASS)) || isTargetBlockNear(targetBlocks, loc)) {
             return;
         }
         loc.getBlock().setType(mat);
         game.getRegion().addBuiltDuringGame(loc);
-        Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 10, 1);
+        Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 1, 1);
     }
 }
