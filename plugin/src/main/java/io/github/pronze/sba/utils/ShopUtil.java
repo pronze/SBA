@@ -3,8 +3,10 @@ package io.github.pronze.sba.utils;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
+import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
@@ -252,7 +254,7 @@ public class ShopUtil {
         return map;
     }
 
-    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type) {
+    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type, Player player) {
         var enabled = itemInfo.getFirstPropertyByName("generateLore")
                 .map(property -> property.getPropertyData().getBoolean())
                 .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
@@ -260,11 +262,37 @@ public class ShopUtil {
         if (enabled) {
             final var originalList = item.getLore();
 
+            final var isSharp = itemInfo.getFirstPropertyByName("sharpness").isPresent();
+            final var isProt = itemInfo.getFirstPropertyByName("protection").isPresent();
+            final var isEfficiency = itemInfo.getFirstPropertyByName("efficiency").isPresent();
+
+            final var game = Main.getInstance().getGameOfPlayer(player);
+            final var arena = ArenaManager
+                    .getInstance()
+                    .get(game.getName())
+                    .orElseThrow();
+
+            if (isSharp) {
+                price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(
+                        arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+            }
+
+            if (isProt) {
+                price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(
+                        arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+            }
+
+            if (isEfficiency) {
+                price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(
+                        arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow()+ 1));
+            }
+
+            String finalPrice = price;
             final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
                     .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
                     .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
                     .map(s -> s
-                            .replaceAll("%price%", price)
+                            .replaceAll("%price%", finalPrice)
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
                     .map(s -> ChatColor.translateAlternateColorCodes('&', s))
