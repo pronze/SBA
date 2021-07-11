@@ -27,11 +27,9 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.lib.sgui.SimpleInventories;
 import org.screamingsandals.lib.Core;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.config.SBAConfig;
@@ -73,7 +71,6 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PacketMapper.class,
         HologramManager.class,
         SimpleInventoriesCore.class,
-        NPCManager.class,
         EventManager.class,
         UpdateChecker.class,
         SBAConfig.class,

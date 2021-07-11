@@ -1,6 +1,6 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'tasker', 'event', 'npc', 'hologram', 'healthindicator')
+        .modules('core', 'tasker', 'event', 'hologram', 'healthindicator')
         .enableAnnotationProcessor()
         .simpleInventories(SIMPLEINVENTORIES_VERSION)
         .version(SCREAMINGLIB_VERSION)

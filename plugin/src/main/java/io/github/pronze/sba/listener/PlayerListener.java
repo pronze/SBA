@@ -52,6 +52,8 @@ public class PlayerListener implements Listener {
     @OnPostEnable
     public void registerListener() {
         SBA.getInstance().registerListener(this);
+        allowedDropItems.clear();
+        generatorDropItems.clear();
         allowedDropItems.addAll(SBAUtil.parseMaterialFromConfig("allowed-item-drops"));
         generatorDropItems.addAll(SBAUtil.parseMaterialFromConfig("running-generator-drops"));
     }

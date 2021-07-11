@@ -14,6 +14,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -109,10 +110,8 @@ public class PopupTower {
     }
 
     private boolean isTargetBlockNear(List<Location> targetBlocks, Location loc) {
-        return pillarSides.stream()
-                .anyMatch(blockFace -> {
-                    return targetBlocks.contains(loc) || targetBlocks.contains(loc.getBlock().getRelative(blockFace, 1).getLocation());
-                });
+        return targetBlocks.contains(loc) || Arrays.stream(BlockFace.values())
+                .anyMatch(blockFace -> targetBlocks.contains(loc.getBlock().getRelative(blockFace, 1).getLocation()));
     }
 
     public void placeLadderRow(int length, Location loc, BlockFace face, BlockFace ladderFace) {
