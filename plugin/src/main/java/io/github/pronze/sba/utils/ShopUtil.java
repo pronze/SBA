@@ -3,6 +3,7 @@ package io.github.pronze.sba.utils;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
@@ -11,7 +12,19 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import net.kyori.adventure.text.Component;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.BedwarsAPI;
+import org.screamingsandals.bedwars.api.TeamColor;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
+import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.meta.EnchantmentMapping;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -20,118 +33,98 @@ import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
 import org.spongepowered.configurate.ConfigurationNode;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.TeamColor;
-import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.api.utils.ColorChanger;
 
 import java.io.File;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.screamingsandals.bedwars.lib.lang.I.i18n;
-
 public class ShopUtil {
-    public static final Map<Integer, String> romanNumerals = new HashMap<>() {
-        {
-            put(1, "I");
-            put(2, "II");
-            put(3, "III");
-            put(4, "IV");
-            put(5, "V");
-            put(6, "VI");
-            put(7, "VII");
-            put(8, "VIII");
-            put(9, "IX");
-            put(0, "X");
-        }
-    };
 
-    private final static Map<String, Integer> UpgradeKeys = new HashMap<>() {
-        {
-            put("STONE", 2);
-            put("CHAINMAIL", 4);
-            put("IRON", 5);
-            put("DIAMOND", 6);
-            put("NETHERITE", 7);
-            if (Main.isLegacy()) {
-                put("WOOD", 1);
-                put("GOLD", 3);
-            } else {
-                put("WOODEN", 1);
-                put("GOLDEN", 3);
-            }
-        }
-    };
+    public static final List<String> romanNumerals = List.of("NONE", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X");
+    public static final List<String> orderOfArmor = List.of("WOOD,WOODEN", "STONE", "GOLD,GOLDEN", "CHAINMAIL", "IRON", "DIAMOND", "NETHERITE");
+    public static final List<String> orderOfTools = List.of("WOOD,WOODEN", "STONE", "GOLD,GOLDEN", "IRON", "DIAMOND");
+
+    @NotNull
+    public static Integer getLevelFromMaterialName(@NotNull String name, final List<String> list) {
+        return list.stream()
+                .filter(value -> Arrays.stream(value.split(",")).anyMatch(names -> names.equalsIgnoreCase(name)))
+                .map(list::indexOf)
+                .findAny()
+                .orElse(0);
+    }
+
+    @NotNull
+    public static String getMaterialFromLevel(int level, final List<String> list) {
+        return Optional.ofNullable(list.get(level)).orElse(list.get(0));
+    }
+
+    @NotNull
+    public static String getMaterialFromArmorOrTools(@NotNull String material) {
+        return material.substring(0, material.indexOf("_")).toUpperCase();
+    }
+
+    @NotNull
+    public static String getMaterialFromArmorOrTools(@NotNull Material material) {
+        return getMaterialFromArmorOrTools(material.name());
+    }
 
     public static boolean buyArmor(Player player, Material mat_boots, IGameStorage gameStorage, Game game) {
-        final var matName = mat_boots.name().substring(0, mat_boots.name().indexOf("_"));
+        final var playerInventory = player.getInventory();
+        final var playerBoots = playerInventory.getBoots();
+        final var matName = getMaterialFromArmorOrTools(mat_boots);
 
-        if (UpgradeKeys.containsKey(matName)) {
-            final var playerBoots = player.getInventory().getBoots();
-            if (playerBoots != null) {
-                var keyLevel = UpgradeKeys.get(matName);
-                var currentLevel = UpgradeKeys.get(playerBoots.getType().name().substring(0, playerBoots.getType().name().indexOf("_")));
-                if (currentLevel == null) {
-                    currentLevel = 0;
-                }
-                if (currentLevel > keyLevel) {
+        if (playerBoots != null) {
+            final var currentMat = playerBoots.getType();
+            final var currentMatName = getMaterialFromArmorOrTools(currentMat);
+
+            int currentLevel = getLevelFromMaterialName(currentMatName, orderOfArmor);
+            int newLevel = getLevelFromMaterialName(matName, orderOfArmor);
+
+            if (!SBAConfig.getInstance().node("can-downgrade-item").getBoolean(false)) {
+                if (currentLevel > newLevel) {
                     LanguageService
                             .getInstance()
                             .get(MessageKeys.CANNOT_DOWNGRADE_ITEM)
-                            .replace("<item>", "armor")
-                            .send(PlayerMapper.wrapPlayer(player));
-                    return false;
-                }
-
-                if (currentLevel.equals(keyLevel)) {
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.ALREADY_PURCHASED)
-                            .replace("%thing%", "armor")
+                            .replace("%item%", "armor")
                             .send(PlayerMapper.wrapPlayer(player));
                     return false;
                 }
             }
+
+            if (currentLevel == newLevel) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.ALREADY_PURCHASED)
+                        .replace("%thing%", "armor")
+                        .send(PlayerMapper.wrapPlayer(player));
+                return false;
+            }
         }
 
-        final var mat_leggings = Material.valueOf(matName + "_LEGGINGS");
         final var boots = new ItemStack(mat_boots);
-        final var leggings = new ItemStack(mat_leggings);
+        final var leggings = new ItemStack(Material.valueOf(matName + "_LEGGINGS"));
 
         final var level = gameStorage.getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow();
         if (level != 0) {
             boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
             leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
         }
-        player.getInventory().setLeggings(null);
-        player.getInventory().setBoots(null);
-        player.getInventory().setBoots(boots);
-        player.getInventory().setLeggings(leggings);
+
+        playerInventory.setLeggings(null);
+        playerInventory.setBoots(null);
+        playerInventory.setBoots(boots);
+        playerInventory.setLeggings(leggings);
         return true;
     }
 
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
-        List<K> listOfKeys = null;
-        if (mapOfWords.containsValue(value)) {
-            listOfKeys = new ArrayList<>();
-
-            for (Map.Entry<K, V> entry : mapOfWords.entrySet()) {
-                if (entry.getValue().equals(value)) {
-                    listOfKeys.add(entry.getKey());
-                }
-            }
-        }
-        return listOfKeys;
+        return mapOfWords.entrySet()
+                .stream()
+                .filter((entry) -> entry.getValue().equals(value))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     public static List<Game> getGamesWithSize(int size) {
@@ -151,20 +144,15 @@ public class ShopUtil {
 
 
     public static <K, V> K getKey(Map<K, V> map, V value) {
-        for (K key : map.keySet()) {
-            if (value.equals(map.get(key))) {
-                return key;
-            }
-        }
-        return null;
+        return map.keySet()
+                .stream()
+                .filter(key -> value.equals(map.get(key)))
+                .findAny()
+                .orElse(null);
     }
 
-
-    public static void giveItemToPlayer(List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
-        if (itemStackList == null) return;
-
+    public static void giveItemToPlayer(@NotNull List<ItemStack> itemStackList, Player player, TeamColor teamColor) {
         itemStackList.forEach(itemStack -> {
-
             if (itemStack == null) {
                 return;
             }
@@ -195,28 +183,24 @@ public class ShopUtil {
 
     }
 
-    public static ItemStack checkifUpgraded(ItemStack newItem) {
-        try {
-            if (UpgradeKeys.get(newItem.getType().name().substring(0, newItem.getType().name().indexOf("_"))) > 1) {
-                final Map<Enchantment, Integer> enchant = newItem.getEnchantments();
-                final String typeName = newItem.getType().name();
-                final int upgradeValue = UpgradeKeys.get(typeName.substring(0, typeName.indexOf("_"))) - 1;
-                final Material mat = Material.valueOf(getKey(UpgradeKeys, upgradeValue) + typeName.substring(typeName.lastIndexOf("_")));
-                ItemStack temp = new ItemStack(mat);
-                temp.addEnchantments(enchant);
-                return temp;
-            }
-        } catch (Throwable e) {
-            e.printStackTrace();
+    public static ItemStack downgradeItem(ItemStack currentItem, DegradableItem itemType) {
+        final var currentItemName = getMaterialFromArmorOrTools(currentItem.getType());
+        final int currentItemLevel = getLevelFromMaterialName(currentItemName, orderOfTools);
+
+        if (currentItemLevel == 0) {
+            return currentItem;
         }
-        return newItem;
+
+        final var newItemLevel = currentItemLevel - 1;
+        final var newMaterialName = getMaterialFromLevel(newItemLevel, itemType == DegradableItem.ARMOR ? orderOfArmor : orderOfTools);
+        final var newMaterial = Material.valueOf(newMaterialName);
+        final var newStack = new ItemStack(newMaterial);
+        newStack.addEnchantments(currentItem.getEnchantments());
+        return newStack;
     }
 
-
     public static int getIntFromMode(String mode) {
-        return mode.equalsIgnoreCase("Solo") ? 1 :
-                mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 :
-                        mode.equalsIgnoreCase("Squads") ? 4 : 0;
+        return mode.equalsIgnoreCase("Solo") ? 1 : mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 : mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
     public static String translateColors(String s) {
@@ -284,7 +268,7 @@ public class ShopUtil {
 
             if (isEfficiency) {
                 price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(
-                        arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow()+ 1));
+                        arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
             }
 
             String finalPrice = price;
@@ -300,7 +284,7 @@ public class ShopUtil {
             newList.addAll(originalList);
 
             item.getLore().clear();
-            item.getLore().addAll(newList);;
+            item.getLore().addAll(newList);
         }
     }
 

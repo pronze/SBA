@@ -27,9 +27,11 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.sgui.SimpleInventories;
 import org.screamingsandals.lib.Core;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.hologram.HologramManager;
+import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.config.SBAConfig;
@@ -41,10 +43,12 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.lib.plugin.PluginContainer;
+import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
+import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.*;
@@ -65,8 +69,11 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 )
 @Init(services = {
         Core.class,
+        Tasker.class,
         PacketMapper.class,
         HologramManager.class,
+        SimpleInventoriesCore.class,
+        NPCManager.class,
         EventManager.class,
         UpdateChecker.class,
         SBAConfig.class,
@@ -174,7 +181,6 @@ public class SBA extends PluginContainer implements AddonAPI {
                 Main.getConfigurator().saveConfig();
                 SBAUtil.reloadPlugin(Main.getInstance());
             }
-
         }
     }
 

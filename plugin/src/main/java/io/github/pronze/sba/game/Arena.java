@@ -135,80 +135,78 @@ public class Arena implements IArena {
         rotatingGenerators.forEach(IRotatingGenerator::destroy);
         rotatingGenerators.clear();
 
-        Tasker.build(() -> {
-            final var winner = e.getWinningTeam();
-            if (winner != null) {
-                final var nullStr = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.NONE)
-                        .toString();
+        final var winner = e.getWinningTeam();
+        if (winner != null) {
+            final var nullStr = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.NONE)
+                    .toString();
 
-                String firstKillerName = nullStr;
-                int firstKillerScore = 0;
+            String firstKillerName = nullStr;
+            int firstKillerScore = 0;
 
-                for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
-                    final var playerData = playerDataMap.get(entry.getKey());
-                    final var kills = playerData.getKills();
-                    if (kills > 0 && kills > firstKillerScore) {
-                        firstKillerScore = kills;
-                        firstKillerName = playerData.getName();
-                    }
+            for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
+                final var playerData = playerDataMap.get(entry.getKey());
+                final var kills = playerData.getKills();
+                if (kills > 0 && kills > firstKillerScore) {
+                    firstKillerScore = kills;
+                    firstKillerName = playerData.getName();
                 }
-
-                String secondKillerName = nullStr;
-                int secondKillerScore = 0;
-
-                for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
-                    final var playerData = playerDataMap.get(entry.getKey());
-                    final var kills = playerData.getKills();
-                    final var name = playerData.getName();
-
-                    if (kills > 0 && kills > secondKillerScore && !name.equalsIgnoreCase(firstKillerName)) {
-                        secondKillerName = name;
-                        secondKillerScore = kills;
-                    }
-                }
-
-                String thirdKillerName = nullStr;
-                int thirdKillerScore = 0;
-                for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
-                    final var playerData = playerDataMap.get(entry.getKey());
-                    final var kills = playerData.getKills();
-                    final var name = playerData.getName();
-                    if (kills > 0 && kills > thirdKillerScore && !name.equalsIgnoreCase(firstKillerName) &&
-                            !name.equalsIgnoreCase(secondKillerName)) {
-                        thirdKillerName = name;
-                        thirdKillerScore = kills;
-                    }
-                }
-
-                var victoryTitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.VICTORY_TITLE)
-                        .toString();
-
-                final var WinTeamPlayers = new ArrayList<String>();
-                winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
-                winner.getConnectedPlayers().forEach(pl ->
-                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, "", 0, 90, 0));
-
-
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.OVERSTATS_MESSAGE)
-                        .replace("%color%",
-                                org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
-                        .replace("%win_team%", winner.getName())
-                        .replace("%winners%", WinTeamPlayers.toString())
-                        .replace("%first_killer_name%", firstKillerName)
-                        .replace("%second_killer_name%", secondKillerName)
-                        .replace("%third_killer_name%", thirdKillerName)
-                        .replace("%first_killer_score%", String.valueOf(firstKillerScore))
-                        .replace("%second_killer_score%", String.valueOf(secondKillerScore))
-                        .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
-                        .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
             }
-        }).afterOneTick().start();
+
+            String secondKillerName = nullStr;
+            int secondKillerScore = 0;
+
+            for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
+                final var playerData = playerDataMap.get(entry.getKey());
+                final var kills = playerData.getKills();
+                final var name = playerData.getName();
+
+                if (kills > 0 && kills > secondKillerScore && !name.equalsIgnoreCase(firstKillerName)) {
+                    secondKillerName = name;
+                    secondKillerScore = kills;
+                }
+            }
+
+            String thirdKillerName = nullStr;
+            int thirdKillerScore = 0;
+            for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
+                final var playerData = playerDataMap.get(entry.getKey());
+                final var kills = playerData.getKills();
+                final var name = playerData.getName();
+                if (kills > 0 && kills > thirdKillerScore && !name.equalsIgnoreCase(firstKillerName) &&
+                        !name.equalsIgnoreCase(secondKillerName)) {
+                    thirdKillerName = name;
+                    thirdKillerScore = kills;
+                }
+            }
+
+            var victoryTitle = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.VICTORY_TITLE)
+                    .toString();
+
+            final var WinTeamPlayers = new ArrayList<String>();
+            winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
+            winner.getConnectedPlayers().forEach(pl ->
+                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, "", 0, 90, 0));
+
+
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.OVERSTATS_MESSAGE)
+                    .replace("%color%",
+                            org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
+                    .replace("%win_team%", winner.getName())
+                    .replace("%winners%", WinTeamPlayers.toString())
+                    .replace("%first_killer_name%", firstKillerName)
+                    .replace("%second_killer_name%", secondKillerName)
+                    .replace("%third_killer_name%", thirdKillerName)
+                    .replace("%first_killer_score%", String.valueOf(firstKillerScore))
+                    .replace("%second_killer_score%", String.valueOf(secondKillerScore))
+                    .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
+                    .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
+        }
     }
 
     @Override

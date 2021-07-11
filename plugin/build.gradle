@@ -1,6 +1,6 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'event', 'tasker', 'hologram', 'healthindicator', 'npc')
+        .modules('core', 'tasker', 'event', 'npc', 'hologram', 'healthindicator')
         .enableAnnotationProcessor()
         .simpleInventories(SIMPLEINVENTORIES_VERSION)
         .version(SCREAMINGLIB_VERSION)
@@ -27,10 +27,10 @@ dependencies {
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
 
     testImplementation 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-    testImplementation 'org.screamingsandals.bedwars:BedWars:0.2.15'
-    testImplementation 'org.screamingsandals.bedwars:BedWars-API:0.2.15'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:' + JUPITER_VERSION
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:' + JUPITER_VERSION
+    testImplementation 'org.screamingsandals.bedwars:BedWars:' + BEDWARS_VERSION
+    testImplementation 'org.screamingsandals.bedwars:BedWars-API:' + BEDWARS_VERSION
 }
 
 test {

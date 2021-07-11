@@ -12,7 +12,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:1.0.44'
+        classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
     }
 }
 
@@ -54,9 +54,9 @@ subprojects {
     }
 
     dependencies {
-        compileOnly paper("1.16.5")
-        compileOnly 'org.screamingsandals.bedwars:BedWars:0.2.18-SNAPSHOT'
-        compileOnly 'org.screamingsandals.bedwars:BedWars-API:0.2.18-SNAPSHOT'
+        compileOnly paperLegacy(PAPER_LEGACY_VERSION)
+        compileOnly 'org.screamingsandals.bedwars:BedWars:' + BEDWARS_VERSION
+        compileOnly 'org.screamingsandals.bedwars:BedWars-API:' + BEDWARS_VERSION
     }
 
     shadowJar {

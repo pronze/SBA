@@ -123,7 +123,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         final var format = AddonAPI
                 .getInstance()
                 .getConfigurator()
-                .getString("main-lobby.progress-format", "§b%progress%§7/§e%total%")
+                .getString("main-lobby.progress-format", "§b%progress%§7/§a%total%")
                 .replace("%total%", String.valueOf(maxLimit));
 
         int progress = getXP() - ((getLevel() - 1) * maxLimit);
@@ -140,18 +140,23 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
     }
 
     public String getStringProgress() {
+        var maxLimit  = AddonAPI
+                .getInstance()
+                .getConfigurator()
+                .getInt("player-statistics.xp-to-level-up", 500);
+
         String progress = null;
         try {
             int p = getIntegerProgress();
             if (p < 0)
-                progress = "§b0§7/§a500";
+                progress = "§b0§7/§a" + maxLimit;
             else
                 progress = getProgress();
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
         if (progress == null) {
-            return "§b0§7/§a500";
+            return "§b0§7/§a" + maxLimit;
         }
         return progress;
     }

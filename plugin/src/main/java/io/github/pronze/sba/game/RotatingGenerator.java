@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RotatingGenerator implements IRotatingGenerator {
-    public static final String entityName = "sba_rot_entity";
-
     private Location location;
     private List<String> lines;
     private int time;

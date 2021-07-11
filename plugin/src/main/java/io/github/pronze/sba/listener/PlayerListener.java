@@ -2,8 +2,13 @@ package io.github.pronze.sba.listener;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
-import io.github.pronze.sba.game.RotatingGenerator;
+import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.data.DegradableItem;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.SBAUtil;
+import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -30,11 +35,6 @@ import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.utils.SBAUtil;
-import io.github.pronze.sba.utils.ShopUtil;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -46,53 +46,33 @@ import java.util.Objects;
 
 @Service
 public class PlayerListener implements Listener {
-    private final List<Material> allowedDropItems;
-    private final List<Material> generatorDropItems;
-
-    public PlayerListener() {
-        allowedDropItems = SBAUtil.parseMaterialFromConfig("allowed-item-drops");
-        generatorDropItems = SBAUtil.parseMaterialFromConfig("running-generator-drops");
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onPlayerInteract(PlayerInteractEntityEvent event) {
-        final var entity = event.getRightClicked();
-        final var customName = entity.getCustomName();
-        if (customName != null && customName.equalsIgnoreCase(RotatingGenerator.entityName)) {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler
-    public void onArmorStandManipulate(PlayerArmorStandManipulateEvent event) {
-        final var entity = event.getRightClicked();
-        final var customName = entity.getCustomName();
-        if (customName != null && customName.equalsIgnoreCase(RotatingGenerator.entityName)) {
-            event.setCancelled(true);
-        }
-    }
+    private final List<Material> allowedDropItems = new ArrayList<>();
+    private final List<Material> generatorDropItems = new ArrayList<>();
 
     @OnPostEnable
     public void registerListener() {
         SBA.getInstance().registerListener(this);
+        allowedDropItems.addAll(SBAUtil.parseMaterialFromConfig("allowed-item-drops"));
+        generatorDropItems.addAll(SBAUtil.parseMaterialFromConfig("running-generator-drops"));
     }
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
         final var player = e.getEntity();
 
-        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) return;
-
-        final var game = Main.getInstance().getGameOfPlayer(player);
-        if (game.getStatus() != GameStatus.RUNNING) return;
-
-        final var optionalArena = ArenaManager.getInstance().get(game.getName());
-
-        if (optionalArena.isEmpty()) {
+        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
             return;
         }
 
-        final var arena = optionalArena.get();
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        if (game.getStatus() != GameStatus.RUNNING) {
+            return;
+        }
+
+        final var arena = ArenaManager
+                .getInstance()
+                .get(game.getName())
+                .orElseThrow();
 
         final var itemArr = new ArrayList<ItemStack>();
         final var sword = Main.isLegacy() ?
@@ -109,33 +89,31 @@ public class PlayerListener implements Listener {
                     var endStr = name.substring(name.contains("_") ? name.indexOf("_") + 1 : 0);
                     switch (endStr) {
                         case "SWORD":
-                            sword.addEnchantments(stack.getEnchantments());
+                            itemArr.add(ShopUtil.downgradeItem(stack, DegradableItem.WEAPONARY));
                             break;
                         case "PICKAXE":
                         case "AXE":
-                            itemArr.add(ShopUtil.checkifUpgraded(stack));
+                            itemArr.add(ShopUtil.downgradeItem(stack, DegradableItem.TOOLS));
                             break;
-                        case "SHEARS":
                         case "LEGGINGS":
                         case "BOOTS":
                         case "CHESTPLATE":
                         case "HELMET":
+                            itemArr.add(ShopUtil.downgradeItem(stack, DegradableItem.ARMOR));
+                            break;
+                        case "SHEARS":
                             itemArr.add(stack);
                             break;
                     }
                 });
 
         itemArr.add(sword);
-        arena.getPlayerData(player.getUniqueId())
-                .ifPresent(playerData -> playerData.setInventory(itemArr));
-
+        arena.getPlayerData(player.getUniqueId()).ifPresent(playerData -> playerData.setInventory(itemArr));
 
         if (SBAConfig.getInstance().getBoolean("give-killer-resources", true)) {
             final var killer = e.getEntity().getKiller();
 
-            if (killer != null
-                    && Main.getInstance().isPlayerPlayingAnyGame(killer)
-                    && killer.getGameMode() == GameMode.SURVIVAL) {
+            if (killer != null && Main.getInstance().isPlayerPlayingAnyGame(killer) && killer.getGameMode() == GameMode.SURVIVAL) {
                 Arrays.stream(player.getInventory().getContents())
                         .filter(Objects::nonNull)
                         .forEach(drop -> {
@@ -148,7 +126,6 @@ public class PlayerListener implements Listener {
         }
 
         final var gVictim = Main.getPlayerGameProfile(player);
-
         final var victimTeam = game.getTeamOfPlayer(player);
 
         if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
@@ -158,20 +135,17 @@ public class PlayerListener implements Listener {
             new BukkitRunnable() {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
-                int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
-
-                byte buffer = 2;
-
                 final String respawnTitle = LanguageService
                         .getInstance()
                         .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
                         .toString();
-
                 final String respawnSubtitle = LanguageService
                         .getInstance()
                         .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
                         .toString();
                 final PlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class);
+                int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
+                byte buffer = 2;
 
                 @Override
                 public void run() {
