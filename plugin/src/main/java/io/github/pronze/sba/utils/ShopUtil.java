@@ -42,21 +42,39 @@ import java.util.stream.Collectors;
 public class ShopUtil {
 
     public static final List<String> romanNumerals = List.of("NONE", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X");
-    public static final List<String> orderOfArmor = List.of("WOOD,WOODEN", "STONE", "GOLD,GOLDEN", "CHAINMAIL", "IRON", "DIAMOND", "NETHERITE");
-    public static final List<String> orderOfTools = List.of("WOOD,WOODEN", "STONE", "GOLD,GOLDEN", "IRON", "DIAMOND");
+    public static final List<String> orderOfArmor = List.of("GOLDEN,GOLD", "CHAINMAIL", "IRON", "DIAMOND", "NETHERITE");
+    public static final List<String> orderOfTools = List.of("WOODEN,WOOD", "STONE", "GOLDEN,GOLD", "IRON", "DIAMOND");
 
     @NotNull
     public static Integer getLevelFromMaterialName(@NotNull String name, final List<String> list) {
+        name = name.substring(0, name.contains("_") ? name.lastIndexOf("_") : name.length());
+        @NotNull String finalName = name;
         return list.stream()
-                .filter(value -> Arrays.stream(value.split(",")).anyMatch(names -> names.equalsIgnoreCase(name)))
+                .filter(value -> Arrays.stream(value.split(",")).anyMatch(names -> names.equalsIgnoreCase(finalName)))
                 .map(list::indexOf)
                 .findAny()
                 .orElse(0);
     }
 
     @NotNull
-    public static String getMaterialFromLevel(int level, final List<String> list) {
-        return Optional.ofNullable(list.get(level)).orElse(list.get(0));
+    public static String getMaterialFromLevel(int level, DegradableItem itemType) {
+        final var list = itemType == DegradableItem.ARMOR ? orderOfArmor : orderOfTools;
+        var obj = list.get(level);
+        if (obj == null) {
+            obj = list.get(0);
+        }
+
+        final var toTest = itemType == DegradableItem.ARMOR ? "_BOOTS" : "_AXE";
+        var toParse = obj.split(",");
+        for (String matName : toParse) {
+            try {
+                Material.valueOf(matName + toTest);
+                return matName;
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return list.get(0);
     }
 
     @NotNull
@@ -192,8 +210,8 @@ public class ShopUtil {
         }
 
         final var newItemLevel = currentItemLevel - 1;
-        final var newMaterialName = getMaterialFromLevel(newItemLevel, itemType == DegradableItem.ARMOR ? orderOfArmor : orderOfTools);
-        final var newMaterial = Material.valueOf(newMaterialName);
+        final var newMaterialName = getMaterialFromLevel(newItemLevel, itemType);
+        final var newMaterial = Material.valueOf(newMaterialName + currentItem.getType().name().substring(currentItem.getType().name().lastIndexOf("_")).toUpperCase());
         final var newStack = new ItemStack(newMaterial);
         newStack.addEnchantments(currentItem.getEnchantments());
         return newStack;
@@ -312,7 +330,8 @@ public class ShopUtil {
 
     public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
         Arrays.stream(player.getInventory()
-                .getArmorContents())
+                .getArmorContents()
+                .clone())
                 .filter(Objects::nonNull)
                 .forEach(item -> item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel));
     }
