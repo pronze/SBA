@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import io.github.pronze.sba.manager.ScoreboardManager;
+import org.screamingsandals.lib.npc.NPC;
 
 import java.util.List;
 import java.util.Optional;
@@ -87,4 +88,18 @@ public interface IArena {
      * @param itemSpawner the item spawner instance to be rotated.
      */
     void createRotatingGenerator(@NotNull ItemSpawner itemSpawner);
+
+    /**
+     *
+     * @return a list containing all the normal store npc's registered to the arena.
+     */
+    @NotNull
+    List<NPC> getStoreNPCS();
+
+    /**
+     *
+     * @return a list containing all the upgrade store npc's registered to the arena.
+     */
+    @NotNull
+    List<NPC> getUpgradeStoreNPCS();
 }

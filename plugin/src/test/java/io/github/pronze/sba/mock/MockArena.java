@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.ItemSpawner;
+import org.screamingsandals.lib.npc.NPC;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -90,5 +91,15 @@ public class MockArena implements IArena {
     @Override
     public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner) {
 
+    }
+
+    @Override
+    public @NotNull List<NPC> getStoreNPCS() {
+        return List.of();
+    }
+
+    @Override
+    public @NotNull List<NPC> getUpgradeStoreNPCS() {
+        return List.of();
     }
 }

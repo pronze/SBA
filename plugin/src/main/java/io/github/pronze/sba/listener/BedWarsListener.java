@@ -4,7 +4,6 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -16,14 +15,11 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -47,27 +43,11 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
         final var game = e.getGame();
-        ArenaManager
+        final var arena = ArenaManager
                 .getInstance()
                 .createArena(game);
 
-        LanguageService
-                .getInstance()
-                .get(MessageKeys.GAME_START_MESSAGE)
-                .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
-
-        if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
-            final var arena = ArenaManager
-                    .getInstance()
-                    .get(game.getName())
-                    .orElseThrow();
-
-            game.getItemSpawners()
-                    .stream()
-                    .filter(itemSpawner -> itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD ||
-                                            itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND)
-                    .forEach(itemSpawner -> arena.createRotatingGenerator((ItemSpawner) itemSpawner));
-        }
+        ((Arena) arena).onGameStarted(e);
     }
 
     @EventHandler
