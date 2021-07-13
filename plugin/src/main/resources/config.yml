@@ -275,7 +275,7 @@ hotbar:
 breakable:
   enabled: false
   asblacklist: false
-  blocks: []
+  blocks: [GRASS]
 leaveshortcuts:
   enabled: false
   list:
