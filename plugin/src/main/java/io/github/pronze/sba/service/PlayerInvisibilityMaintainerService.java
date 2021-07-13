@@ -23,29 +23,26 @@ public class PlayerInvisibilityMaintainerService {
                 if (ClassStorage.NMS.PacketPlayOutEntityEquipment.isInstance(packet)) {
                     final var entityId = (int) Reflect.getField(ClassStorage.NMS.PacketPlayInUseEntity, "a,field_149567_a", packet);
 
-                    final AtomicReference<Player> armorEquipper = new AtomicReference<>();
-                    final Game playerGame = Main.getInstance().getGameOfPlayer(player);
-
+                    Player equipper = null;
+                    final var playerGame = Main.getInstance().getGameOfPlayer(player);
                     if (playerGame == null) {
                         return packet;
                     }
 
-                    playerGame
-                            .getConnectedPlayers()
-                            .forEach(pl -> {
-                                if (pl.getEntityId() == entityId) {
-                                    armorEquipper.set(pl);
-                                }
-                            });
-
-
-                    final var equipper = armorEquipper.get();
+                    for (var gamePlayer : playerGame.getConnectedPlayers()) {
+                        if (gamePlayer.getEntityId() == entityId) {
+                            equipper = gamePlayer;
+                            break;
+                        }
+                    }
 
                     if (equipper == null) {
                         return packet;
                     }
 
-                    final var maybeArena = ArenaManager.getInstance().get(playerGame.getName());
+                    final var maybeArena = ArenaManager
+                            .getInstance()
+                            .get(playerGame.getName());
 
                     if (maybeArena.isEmpty()) {
                         return packet;

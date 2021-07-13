@@ -51,8 +51,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
         final var playerWrapper = new PlayerWrapper(player);
         playerData.put(player.getUniqueId(), playerWrapper);
         Logger.trace("Registered player: {}", player.getName());
-        SBA
-                .getPluginInstance()
+        SBA.getPluginInstance()
                 .getServer()
                 .getPluginManager()
                 .callEvent(new SBAPlayerWrapperRegisteredEvent(playerWrapper));
@@ -64,8 +63,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
             return;
         }
         final var playerWrapper = playerData.get(player.getUniqueId());
-        SBA
-                .getPluginInstance()
+        SBA.getPluginInstance()
                 .getServer()
                 .getPluginManager()
                 .callEvent(new SBAPlayerWrapperPreUnregisterEvent(playerWrapper));
@@ -73,8 +71,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
         playerData.remove(player.getUniqueId());
         Logger.trace("Unregistered player: {}", player.getName());
 
-        SBA
-                .getPluginInstance()
+        SBA.getPluginInstance()
                 .getServer()
                 .getPluginManager()
                 .callEvent(new SBAPlayerWrapperPostUnregisterEvent(player));

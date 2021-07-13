@@ -145,8 +145,6 @@ public class SBA extends PluginContainer implements AddonAPI {
 
         InventoryListener.init(getPluginInstance());
 
-        //Do changes for legacy support.
-        enableLegacySupport();
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new SBAExpansion().register();

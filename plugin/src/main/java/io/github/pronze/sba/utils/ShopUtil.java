@@ -275,18 +275,15 @@ public class ShopUtil {
                     .orElseThrow();
 
             if (isSharp) {
-                price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(
-                        arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
             }
 
             if (isProt) {
-                price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(
-                        arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
             }
 
             if (isEfficiency) {
-                price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(
-                        arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
             }
 
             String finalPrice = price;
@@ -403,6 +400,7 @@ public class ShopUtil {
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         final var backItemMeta = backItem.getItemMeta();
+
         //   backItemMeta.setDisplayName(Message.of());
 //
         // backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());

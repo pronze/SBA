@@ -13,6 +13,8 @@ public class FirstStartConfigReplacer {
 
     @OnPostEnable
     public void onPostEnable() {
+        //Do changes for legacy support.
+        SBA.getInstance().enableLegacySupport();
         if (SBAConfig.getInstance().node("first_start").getBoolean(false)) {
             Bukkit.getLogger().info("§aDetected first start");
             SBAConfig.getInstance().upgrade();

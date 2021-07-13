@@ -170,6 +170,10 @@ data:
           enchants:
             ARROW_KNOCKBACK: 1
             ARROW_DAMAGE: 1
+      - price: 2 of gold
+        stack:
+            type: ARROW
+            amount: 8
 
   - write: false
     stack: 'STONE'
@@ -361,8 +365,8 @@ data:
     row: 3
     column: 3
 
-  - stack: RED_STAINED_GLASS_PANE;1
-    price: 4 of iron
+  - stack: DIAMOND_SWORD;1
+    price: 4 of emerald
     row: 3
     column: 4
 

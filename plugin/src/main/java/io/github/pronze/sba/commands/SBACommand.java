@@ -102,10 +102,9 @@ public class SBACommand {
         PlayerMapper.wrapSender(sender).sendMessage(c2);
     }
 
- //TODO: work on generation
-// @CommandMethod("sba generate <gamemode> <maps>")
-// @CommandDescription("generate games inventory configuration files")
-// @CommandPermission("sba.generate")
+   @CommandMethod("sba generate <gamemode> <maps>")
+   @CommandDescription("generate games inventory configuration files")
+   @CommandPermission("sba.generate")
    private void commandGenerate(
            final @NotNull CommandSender sender,
            final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode,
@@ -203,8 +202,8 @@ public class SBACommand {
        }
    }
 
- // @CommandMethod("sba gamesinv <gamemode>")
- // @CommandDescription("open GamesInventory for player")
+    @CommandMethod("sba gamesinv <gamemode>")
+    @CommandDescription("open GamesInventory for player")
     private void commandGamesInv(
             final @NotNull Player player,
             final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode

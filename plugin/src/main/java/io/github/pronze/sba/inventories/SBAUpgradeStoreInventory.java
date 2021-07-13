@@ -70,10 +70,9 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
             "dragon"
     );
 
-    // TODO: change these to lists instead.
-    public static Map<Integer, Integer> sharpnessPrices = new HashMap<>();
-    public static Map<Integer, Integer> protectionPrices = new HashMap<>();
-    public static Map<Integer, Integer> efficiencyPrices = new HashMap<>();
+    public static List<Integer> sharpnessPrices = new ArrayList<>();
+    public static List<Integer> protectionPrices = new ArrayList<>();
+    public static List<Integer> efficiencyPrices = new ArrayList<>();
 
     private final Map<String, InventorySet> shopMap = new HashMap<>();
 
@@ -83,23 +82,23 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     }
 
     private void loadPrices() {
-        sharpnessPrices.put(0, SBAConfig.getInstance().node("upgrades", "prices", "Sharpness-I").getInt(4));
-        sharpnessPrices.put(1, SBAConfig.getInstance().node("upgrades", "prices", "Sharpness-I").getInt(4));
-        sharpnessPrices.put(2, SBAConfig.getInstance().node("upgrades", "prices", "Sharpness-II").getInt(8));
-        sharpnessPrices.put(3, SBAConfig.getInstance().node("upgrades", "prices", "Sharpness-III").getInt(12));
-        sharpnessPrices.put(4, SBAConfig.getInstance().node("upgrades", "prices", "Sharpness-IV").getInt(16));
+        // make sure they contain at least one value
+        sharpnessPrices.add(4);
+        protectionPrices.add(4);
+        efficiencyPrices.add(4);
 
-        protectionPrices.put(0, SBAConfig.getInstance().node("upgrades", "prices", "Prot-I").getInt(4));
-        protectionPrices.put(1, SBAConfig.getInstance().node("upgrades", "prices", "Prot-I").getInt(4));
-        protectionPrices.put(2, SBAConfig.getInstance().node("upgrades", "prices", "Prot-II").getInt(8));
-        protectionPrices.put(3, SBAConfig.getInstance().node("upgrades", "prices", "Prot-III").getInt(12));
-        protectionPrices.put(4, SBAConfig.getInstance().node("upgrades", "prices", "Prot-IV").getInt(16));
-
-        efficiencyPrices.put(0, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-I").getInt(4));
-        efficiencyPrices.put(1, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-I").getInt(4));
-        efficiencyPrices.put(2, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-II").getInt(8));
-        efficiencyPrices.put(3, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-III").getInt(12));
-        efficiencyPrices.put(4, SBAConfig.getInstance().node("upgrades", "prices", "Efficiency-IV").getInt(16));
+        SBAConfig.getInstance().node("upgrades", "prices").childrenMap()
+                .forEach((key, val) -> {
+                    final var castedKey = (String) key;
+                    final var value = val.getInt(4);
+                    if (castedKey.startsWith("Sharpness")) {
+                        sharpnessPrices.add(value);
+                    } else if (castedKey.startsWith("Protection")) {
+                        protectionPrices.add(value);
+                    } else if (castedKey.startsWith("Efficiency")) {
+                        efficiencyPrices.add(value);
+                    }
+                });
     }
 
     @Override
