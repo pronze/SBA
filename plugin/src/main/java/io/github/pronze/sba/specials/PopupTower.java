@@ -33,8 +33,7 @@ public class PopupTower {
     private final Material mat;
     private final Location loc;
 
-    @Setter
-    private int height = 10;
+    private final int height;
 
     private final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
     private List<Location> targetBlocks;
@@ -76,7 +75,7 @@ public class PopupTower {
 
         final Block secondPlatform = mainBlock.getBlock().getRelative(BlockFace.UP, this.height);
         placeBlock(secondPlatform.getLocation(), this.mat);
-        this.placeRow(10, mainBlock, BlockFace.UP);
+        this.placeRow(this.length, mainBlock, BlockFace.UP);
         pillarSides.forEach(blockFace -> {
             for (int i = 0; i < 4; i++) {
                 List<BlockFace> direction = pillarSides.stream().filter(face -> face != blockFace).filter(face -> face != blockFace.getOppositeFace()).collect(Collectors.toList());
