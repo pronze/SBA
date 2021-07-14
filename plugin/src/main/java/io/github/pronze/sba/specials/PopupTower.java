@@ -1,7 +1,7 @@
 package io.github.pronze.sba.specials;
 
-import lombok.Setter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -34,7 +34,9 @@ public class PopupTower {
     private final Location loc;
 
     @Setter
-    private int height = 10;
+    private int height;
+    @Setter
+    private int width;
 
     private final List<BlockFace> pillarSides = List.of(BlockFace.EAST, BlockFace.WEST, BlockFace.NORTH, BlockFace.SOUTH);
     private List<Location> targetBlocks;
@@ -45,11 +47,14 @@ public class PopupTower {
         if (this.height < 4) {
             this.height = 4;
         }
+        if (this.width < 1) {
+            this.width = 1;
+        }
         final Location mainBlock = this.loc.getBlock().getRelative(BlockFace.DOWN).getLocation();
         placeBlock(mainBlock, this.mat);
         pillarSides.forEach(blockFace -> {
             if (floor) {
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < (this.width + 2); i++) {
                     List<BlockFace> direction = pillarSides.stream().filter(face -> face != blockFace).filter(face -> face != blockFace.getOppositeFace()).collect(Collectors.toList());
                     int finalI = i;
                     if (finalI == 2) {
@@ -58,7 +63,7 @@ public class PopupTower {
                     }
                     direction.forEach(face -> this.placeRow(finalI + 1, mainBlock.getBlock().getRelative(blockFace, finalI + 1).getLocation(), face));
                 }
-                this.placeRow(3, mainBlock, blockFace);
+                this.placeRow(this.width + 2, mainBlock, blockFace);
             }
             final Block pillarBase = mainBlock.getBlock().getRelative(blockFace, 3);
             if (structureFace == blockFace) {
@@ -70,26 +75,26 @@ public class PopupTower {
             for (int i = 0; i < this.height; i++) {
                 List<BlockFace> direction = pillarSides.stream().filter(face -> face != blockFace).filter(face -> face != blockFace.getOppositeFace()).collect(Collectors.toList());
                 int finalI = i;
-                direction.forEach(face -> this.placeRow(2, pillarBase.getRelative(BlockFace.UP, finalI).getLocation(), face));
+                direction.forEach(face -> this.placeRow(this.width, pillarBase.getRelative(BlockFace.UP, finalI).getLocation(), face));
             }
         });
 
         final Block secondPlatform = mainBlock.getBlock().getRelative(BlockFace.UP, this.height);
         placeBlock(secondPlatform.getLocation(), this.mat);
-        this.placeRow(10, mainBlock, BlockFace.UP);
+        this.placeRow(this.height, mainBlock, BlockFace.UP);
         pillarSides.forEach(blockFace -> {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < (this.width + 1); i++) {
                 List<BlockFace> direction = pillarSides.stream().filter(face -> face != blockFace).filter(face -> face != blockFace.getOppositeFace()).collect(Collectors.toList());
                 int finalI = i;
-                if (i == 3) {
+                if (i == (this.width - 1)) {
                     direction.forEach(face -> this.placeRow(finalI, secondPlatform.getRelative(blockFace, finalI + 1).getLocation(), face));
                     direction.forEach(face -> this.placeRow(finalI, secondPlatform.getRelative(BlockFace.UP).getRelative(blockFace, finalI + 1).getLocation(), face));
-                    direction.forEach(face -> this.placeRow(finalI, secondPlatform.getRelative(BlockFace.UP, 2).getRelative(blockFace, finalI + 1).getLocation(), face));
+                    direction.forEach(face -> this.placeRow(finalI, secondPlatform.getRelative(BlockFace.UP, this.width - 1).getRelative(blockFace, finalI + 1).getLocation(), face));
                     continue;
                 }
                 direction.forEach(face -> this.placeRow(finalI + 1, secondPlatform.getRelative(blockFace, finalI + 1).getLocation(), face));
             }
-            this.placeRow(4, secondPlatform.getLocation(), blockFace);
+            this.placeRow(this.width + 1, secondPlatform.getLocation(), blockFace);
         });
 
         final var relative = secondPlatform.getRelative(structureFace);
