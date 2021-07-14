@@ -6,6 +6,7 @@ import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Getter;
@@ -177,7 +178,7 @@ public class Arena implements IArena {
                 npc.show();
             });
             ((org.screamingsandals.bedwars.game.Game) game).getGameStoreList().clear();
-        }).delay(2L, TaskerTime.TICKS).start();
+        }).afterOneTick().start();
     }
 
     // non api event handler

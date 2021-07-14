@@ -51,6 +51,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service(dependsOn = {
         SimpleInventoriesCore.class,
@@ -89,16 +90,19 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
 
         SBAConfig.getInstance().node("upgrades", "prices").childrenMap()
                 .forEach((key, val) -> {
-                    final var castedKey = (String) key;
+                    final var castedKey = ((String) key).toLowerCase();
                     final var value = val.getInt(4);
-                    if (castedKey.startsWith("Sharpness")) {
+                    if (castedKey.startsWith("sharpness")) {
                         sharpnessPrices.add(value);
-                    } else if (castedKey.startsWith("Protection")) {
+                    } else if (castedKey.startsWith("prot")) {
                         protectionPrices.add(value);
-                    } else if (castedKey.startsWith("Efficiency")) {
+                    } else if (castedKey.startsWith("efficiency")) {
                         efficiencyPrices.add(value);
                     }
                 });
+        Logger.trace("Protection prices: {}", protectionPrices.stream().map(String::valueOf).collect(Collectors.toList()));
+        Logger.trace("Efficiency prices: {}", efficiencyPrices.stream().map(String::valueOf).collect(Collectors.toList()));
+        Logger.trace("Sharpness prices: {}", sharpnessPrices.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 
     @Override

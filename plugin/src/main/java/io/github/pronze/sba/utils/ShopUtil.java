@@ -275,15 +275,27 @@ public class ShopUtil {
                     .orElseThrow();
 
             if (isSharp) {
-                price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
+                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
+                if (currentLevel <= limit) {
+                    price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                }
             }
 
             if (isProt) {
-                price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
+                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
+                if (currentLevel <= limit) {
+                    price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                }
             }
 
             if (isEfficiency) {
-                price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
+                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
+                if (currentLevel <= limit) {
+                    price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                }
             }
 
             String finalPrice = price;
@@ -326,11 +338,11 @@ public class ShopUtil {
 
 
     public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
-        Arrays.stream(player.getInventory()
-                .getArmorContents()
-                .clone())
-                .filter(Objects::nonNull)
-                .forEach(item -> item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel));
+        for (var item : player.getInventory().getArmorContents()) {
+            if (item != null) {
+                item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel);
+            }
+        }
     }
 
     public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type, int maxLevel) {
