@@ -14,9 +14,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.lib.bukkit.packet.BukkitPacketMapper;
 import org.screamingsandals.lib.material.builder.ItemFactory;
-import org.screamingsandals.lib.nms.accessors.ClientboundSetEquipmentPacketAccessor;
-import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
 import org.screamingsandals.lib.packet.SPacket;
+import org.screamingsandals.lib.packet.SPacketPlayOutEntityEquipment;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.math.Vector3D;
 import java.util.ArrayList;
@@ -88,15 +87,15 @@ public class InvisiblePlayer {
 
     private List<SPacket> getPackets(ItemStack nmsBoot, ItemStack nmsChestPlate, ItemStack nmsLeggings, ItemStack nmsHelmet) {
         final var packets = new ArrayList<SPacket>();
-        packets.add(getEquipmentPacket(player, nmsHelmet, SClientboundSetEquipmentPacket.Slot.HEAD));
-        packets.add(getEquipmentPacket(player, nmsChestPlate, SClientboundSetEquipmentPacket.Slot.CHEST));
-        packets.add(getEquipmentPacket(player, nmsLeggings, SClientboundSetEquipmentPacket.Slot.LEGS));
-        packets.add(getEquipmentPacket(player, nmsBoot, SClientboundSetEquipmentPacket.Slot.FEET));
+        packets.add(getEquipmentPacket(player, nmsHelmet, SPacketPlayOutEntityEquipment.Slot.HEAD));
+        packets.add(getEquipmentPacket(player, nmsChestPlate, SPacketPlayOutEntityEquipment.Slot.CHEST));
+        packets.add(getEquipmentPacket(player, nmsLeggings, SPacketPlayOutEntityEquipment.Slot.LEGS));
+        packets.add(getEquipmentPacket(player, nmsBoot, SPacketPlayOutEntityEquipment.Slot.FEET));
         return packets;
     }
 
-    private SPacket getEquipmentPacket(Player entity, ItemStack stack, SClientboundSetEquipmentPacket.Slot slot) {
-        final var equipmentPacket = BukkitPacketMapper.createPacket(SClientboundSetEquipmentPacket.class);
+    private SPacket getEquipmentPacket(Player entity, ItemStack stack, SPacketPlayOutEntityEquipment.Slot slot) {
+        final var equipmentPacket = BukkitPacketMapper.createPacket(SPacketPlayOutEntityEquipment.class);
         equipmentPacket.setEntityId(entity.getEntityId());
         equipmentPacket.setItemAndSlot(ItemFactory.build(stack).orElse(null), slot);
         return equipmentPacket;

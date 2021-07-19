@@ -1,13 +1,7 @@
-ScreamingLibBuilder()
-        .platforms('bukkit')
-        .modules('core', 'tasker', 'event', 'hologram', 'healthindicator')
-        .enableAnnotationProcessor()
-        .simpleInventories(SIMPLEINVENTORIES_VERSION)
-        .version(SCREAMINGLIB_VERSION)
-        .build()
-
 dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':SBA-API')
+
     compileOnly 'com.mojang:datafixerupper:' + DATAFIXER_UPPER_VERSION
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
     // TODO: use sidebar from slib
@@ -17,11 +11,14 @@ dependencies {
         exclude group: 'com.mojang', module: 'brigadier'
     }
 
+    implementation 'org.screamingsandals.simpleinventories:core-bukkit:2.0.1-SNAPSHOT'
+    implementation 'org.screamingsandals.simpleinventories:core-common:2.0.1-SNAPSHOT'
     implementation 'cloud.commandframework:cloud-minecraft-extras:' + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-paper:" + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION
 
     implementation "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_TEXT_MINIMESSAGE_VERSION
+    implementation "net.kyori:adventure-platform-bukkit:4.0.0-SNAPSHOT"
 
     implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
