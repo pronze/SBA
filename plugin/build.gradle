@@ -1,6 +1,7 @@
 dependencies {
+    annotationProcessor 'org.screamingsandals.lib:screaming-annotation:' + SCREAMINGLIB_VERSION
+
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    annotationProcessor files('annotation-processor/screaming-annotation-2.0.1-SNAPSHOT-all.jar')
 
     implementation project(':SBA-API')
 
@@ -13,8 +14,30 @@ dependencies {
         exclude group: 'com.mojang', module: 'brigadier'
     }
 
-    implementation 'org.screamingsandals.simpleinventories:core-bukkit:2.0.1-SNAPSHOT'
-    implementation 'org.screamingsandals.simpleinventories:core-common:2.0.1-SNAPSHOT'
+    implementation 'org.screamingsandals.simpleinventories:core-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.simpleinventories:core-common:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:api-utils:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:event-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:event-common:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:plugin-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:plugin-common:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:tasker-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:tasker-common:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:utils-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:utils-common:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:utils-adventure:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:visuals-api:' + SCREAMINGLIB_VERSION
+
+    implementation 'org.screamingsandals.lib:tasker-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:tasker-common:' + SCREAMINGLIB_VERSION
+
+
     implementation 'cloud.commandframework:cloud-minecraft-extras:' + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-paper:" + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION
