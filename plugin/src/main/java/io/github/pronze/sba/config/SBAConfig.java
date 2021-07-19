@@ -264,6 +264,8 @@ public class SBAConfig implements IConfigurator {
                         .back()
                     .section("popup-tower")
                         .key("height").defValue(10)
+                        .key("width").defValue(3)
+                        .key("floor").defValue(false)
                         .back();
             generator.saveIfModified();
         } catch (Exception ex) {
