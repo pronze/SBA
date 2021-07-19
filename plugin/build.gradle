@@ -1,5 +1,7 @@
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    annotationProcessor files('annotation-processor/screaming-annotation-2.0.1-SNAPSHOT-all.jar')
+
     implementation project(':SBA-API')
 
     compileOnly 'com.mojang:datafixerupper:' + DATAFIXER_UPPER_VERSION
