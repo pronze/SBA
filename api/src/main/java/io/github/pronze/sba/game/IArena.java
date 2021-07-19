@@ -89,17 +89,17 @@ public interface IArena {
      */
     void createRotatingGenerator(@NotNull ItemSpawner itemSpawner);
 
-    /**
-     *
-     * @return a list containing all the normal store npc's registered to the arena.
-     */
-    @NotNull
-    List<NPC> getStoreNPCS();
+ // /**
+ //  *
+ //  * @return a list containing all the normal store npc's registered to the arena.
+ //  */
+ // @NotNull
+ // List<NPC> getStoreNPCS();
 
-    /**
-     *
-     * @return a list containing all the upgrade store npc's registered to the arena.
-     */
-    @NotNull
-    List<NPC> getUpgradeStoreNPCS();
+ // /**
+ //  *
+ //  * @return a list containing all the upgrade store npc's registered to the arena.
+ //  */
+ // @NotNull
+ // List<NPC> getUpgradeStoreNPCS();
 }
