@@ -192,7 +192,7 @@ main-lobby:
       - "%bar%"
       - ""
       - "Total Kills: <green>%kills%"
-      - "Total Wins: <green>%deaths%"
+      - "Total Wins: <green>%wins%"
       - ""
       - "K/D ratio: <gold>%kdr%"
       - ""

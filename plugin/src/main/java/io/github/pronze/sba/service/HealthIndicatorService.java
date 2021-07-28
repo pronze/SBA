@@ -50,7 +50,6 @@ public class HealthIndicatorService implements Listener {
                 .node("show-health-under-player-name")
                 .getBoolean();
         SBA.getInstance().registerListener(this);
-
     }
 
     @EventHandler
