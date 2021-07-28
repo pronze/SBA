@@ -264,6 +264,7 @@ public class PlayerListener implements Listener {
             case "boots":
             case "helmet":
             case "chestplate":
+            case "leggings":
             case "pickaxe":
             case "axe":
             case "shears":
