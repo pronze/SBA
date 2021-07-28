@@ -12,9 +12,9 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.lib.packet.PacketMapper;
-import org.screamingsandals.lib.packet.SPacketPlayOutScoreboardDisplayObjective;
-import org.screamingsandals.lib.packet.SPacketPlayOutScoreboardObjective;
-import org.screamingsandals.lib.packet.SPacketPlayOutScoreboardScore;
+import org.screamingsandals.lib.packet.SClientboundSetDisplayObjectivePacket;
+import org.screamingsandals.lib.packet.SClientboundSetObjectivePacket;
+import org.screamingsandals.lib.packet.SClientboundSetScorePacket;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnDisable;
@@ -32,8 +32,8 @@ public class HealthIndicatorService implements Listener {
     private final Map<UUID, Map<UUID, Double>> dataMap = new HashMap<>();
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##");
 
-    private static final Component TAB_IDENTIFIER = Component.text("sba-tab");
-    private static final Component TAG_IDENTIFIER = Component.text("sba-tag");
+    private static final String TAB_IDENTIFIER = "sba-tab";
+    private static final String TAG_IDENTIFIER = "sba-tag";
 
     private boolean tabEnabled;
     private boolean tagEnabled;
@@ -138,55 +138,55 @@ public class HealthIndicatorService implements Listener {
         if (tabEnabled) {
             getScoreboardObjectiveCreatePacket(TAB_IDENTIFIER, Component.text("healthIndicator"))
                     .sendPacket(playerWrapper);
-            getScoreboardDisplayObjectivePacket(TAB_IDENTIFIER, SPacketPlayOutScoreboardDisplayObjective.DisplaySlot.PLAYER_LIST)
+            getScoreboardDisplayObjectivePacket(TAB_IDENTIFIER, SClientboundSetDisplayObjectivePacket.DisplaySlot.PLAYER_LIST)
                     .sendPacket(playerWrapper);
         }
 
         if (tagEnabled) {
             getScoreboardObjectiveCreatePacket(TAG_IDENTIFIER, Component.text("§c♥"))
                     .sendPacket(playerWrapper);
-            getScoreboardDisplayObjectivePacket(TAG_IDENTIFIER, SPacketPlayOutScoreboardDisplayObjective.DisplaySlot.BELOW_NAME)
+            getScoreboardDisplayObjectivePacket(TAG_IDENTIFIER, SClientboundSetDisplayObjectivePacket.DisplaySlot.BELOW_NAME)
                     .sendPacket(playerWrapper);
         }
     }
 
-    private SPacketPlayOutScoreboardScore createOrUpdateScorePacket(Component objectiveKey, int i, String value) {
-        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardScore.class);
-        packet.setValue(Component.text(value));
-        packet.setObjectiveKey(objectiveKey);
-        packet.setAction(SPacketPlayOutScoreboardScore.ScoreboardAction.CHANGE);
-        packet.setScore(i);
+    private SClientboundSetScorePacket createOrUpdateScorePacket(String objectiveKey, int i, String entityName) {
+        var packet = new SClientboundSetScorePacket();
+        packet.entityName(entityName);
+        packet.objectiveKey(objectiveKey);
+        packet.action(SClientboundSetScorePacket.ScoreboardAction.CHANGE);
+        packet.score(i);
         return packet;
     }
 
-    private SPacketPlayOutScoreboardScore destroyScore(String value, Component objectiveKey) {
-        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardScore.class);
-        packet.setObjectiveKey(objectiveKey);
-        packet.setValue(Component.text(value));
-        packet.setAction(SPacketPlayOutScoreboardScore.ScoreboardAction.REMOVE);
+    private SClientboundSetScorePacket destroyScore(String entityName, String objectiveKey) {
+        var packet = new SClientboundSetScorePacket();
+        packet.objectiveKey(objectiveKey);
+        packet.entityName(entityName);
+        packet.action(SClientboundSetScorePacket.ScoreboardAction.REMOVE);
         return packet;
     }
 
-    private SPacketPlayOutScoreboardObjective getDestroyObjectivePacket(Component objectiveKey) {
-        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardObjective.class);
-        packet.setObjectiveKey(objectiveKey);
-        packet.setMode(SPacketPlayOutScoreboardObjective.Mode.DESTROY);
+    private SClientboundSetObjectivePacket getDestroyObjectivePacket(String objectiveKey) {
+        var packet = new SClientboundSetObjectivePacket();
+        packet.objectiveKey(objectiveKey);
+        packet.mode(SClientboundSetObjectivePacket.Mode.DESTROY);
         return packet;
     }
 
-    private SPacketPlayOutScoreboardDisplayObjective getScoreboardDisplayObjectivePacket(Component objectiveKey, SPacketPlayOutScoreboardDisplayObjective.DisplaySlot type) {
-        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardDisplayObjective.class);
-        packet.setObjectiveKey(objectiveKey);
-        packet.setDisplaySlot(type);
+    private SClientboundSetDisplayObjectivePacket getScoreboardDisplayObjectivePacket(String objectiveKey, SClientboundSetDisplayObjectivePacket.DisplaySlot type) {
+        var packet = new SClientboundSetDisplayObjectivePacket();
+        packet.objectiveKey(objectiveKey);
+        packet.slot(type);
         return packet;
     }
 
-    public SPacketPlayOutScoreboardObjective getScoreboardObjectiveCreatePacket(Component objectiveKey, Component title) {
-        var packet = PacketMapper.createPacket(SPacketPlayOutScoreboardObjective.class);
-        packet.setObjectiveKey(objectiveKey);
-        packet.setTitle(title);
-        packet.setCriteria(SPacketPlayOutScoreboardObjective.Type.INTEGER);
-        packet.setMode(SPacketPlayOutScoreboardObjective.Mode.CREATE);
+    public SClientboundSetObjectivePacket getScoreboardObjectiveCreatePacket(String objectiveKey, Component title) {
+        var packet = new SClientboundSetObjectivePacket();
+        packet.objectiveKey(objectiveKey);
+        packet.title(title);
+        packet.criteriaType(SClientboundSetObjectivePacket.Type.INTEGER);
+        packet.mode(SClientboundSetObjectivePacket.Mode.CREATE);
         return packet;
     }
 }

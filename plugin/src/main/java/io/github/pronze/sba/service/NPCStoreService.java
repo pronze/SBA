@@ -1,13 +1,38 @@
 package io.github.pronze.sba.service;
 
+import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.utils.Logger;
 import lombok.Getter;
+import lombok.SneakyThrows;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.event.EventManager;
+import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
+import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.npc.NPCManager;
+import org.screamingsandals.lib.npc.NPCSkin;
+import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import org.screamingsandals.lib.world.LocationMapper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Service(dependsOn = {
-  //      NPCManager.class
+        NPCManager.class
 })
 @Getter
 public class NPCStoreService implements Listener {
@@ -16,87 +41,75 @@ public class NPCStoreService implements Listener {
         return ServiceManager.get(NPCStoreService.class);
     }
 
-//private final GameStore shopStore;
-//private final GameStore upgradeStore;
+    private final GameStore shopStore;
+    private final GameStore upgradeStore;
 
-//private NPCSkin shopSkin;
-//private NPCSkin upgradeShopSkin;
+    private NPCSkin shopSkin;
+    private NPCSkin upgradeShopSkin;
 
-//private final List<Component> shopText = new ArrayList<>();
-//private final List<Component> upgradeShopText = new ArrayList<>();
+    private final List<Component> shopText = new ArrayList<>();
+    private final List<Component> upgradeShopText = new ArrayList<>();
 
-//@SneakyThrows
-//public NPCStoreService() {
-//    shopStore = new GameStore(null, "shop.yml", false, SBAConfig.getInstance().node("shop", "normal-shop", "name").getString(), false, false);
-//    upgradeStore = new GameStore(null, "upgradeShop.yml", false, SBAConfig.getInstance().node("shop", "upgrade-shop", "name").getString(), false, false);
+    @SneakyThrows
+    public NPCStoreService() {
+        shopStore = new GameStore(null, "shop.yml", false, SBAConfig.getInstance().node("shop", "normal-shop", "name").getString(), false, false);
+        upgradeStore = new GameStore(null, "upgradeShop.yml", false, SBAConfig.getInstance().node("shop", "upgrade-shop", "name").getString(), false, false);
 
-//    shopText.clear();
-//    shopText.addAll(Objects.requireNonNull(SBAConfig.getInstance().node("shop", "normal-shop", "entity-name")
-//            .getList(String.class))
-//            .stream()
-//            .map(AdventureHelper::toComponent)
-//            .collect(Collectors.toList()));
+        shopText.clear();
+        shopText.addAll(Objects.requireNonNull(SBAConfig.getInstance().node("shop", "normal-shop", "entity-name")
+                        .getList(String.class))
+                .stream()
+                .map(AdventureHelper::toComponent)
+                .collect(Collectors.toList()));
 
-//    upgradeShopText.clear();
-//    upgradeShopText.addAll(Objects.requireNonNull(SBAConfig.getInstance().node("shop", "upgrade-shop", "entity-name")
-//            .getList(String.class))
-//            .stream()
-//            .map(AdventureHelper::toComponent)
-//            .collect(Collectors.toList()));
-//}
+        upgradeShopText.clear();
+        upgradeShopText.addAll(Objects.requireNonNull(SBAConfig.getInstance().node("shop", "upgrade-shop", "entity-name")
+                        .getList(String.class))
+                .stream()
+                .map(AdventureHelper::toComponent)
+                .collect(Collectors.toList()));
+    }
 
-//@OnPostEnable
-//public void onPostEnabled() {
-//    SBA.getInstance().registerListener(this);
-//    EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
+    @OnPostEnable
+    public void onPostEnabled() {
+        SBA.getInstance().registerListener(this);
+        EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
 
-//    shopSkin = new NPCSkin(
-//            SBAConfig.getInstance().node("shop", "normal-shop", "skin", "value").getString(),
-//            SBAConfig.getInstance().node("shop", "normal-shop", "skin", "signature").getString()
-//            );
+        shopSkin = new NPCSkin(
+                SBAConfig.getInstance().node("shop", "normal-shop", "skin", "value").getString(),
+                SBAConfig.getInstance().node("shop", "normal-shop", "skin", "signature").getString()
+        );
 
-//    upgradeShopSkin = new NPCSkin(
-//            SBAConfig.getInstance().node("shop","upgrade-shop", "skin", "value").getString(),
-//            SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "signature").getString()
-//    );
+        upgradeShopSkin = new NPCSkin(
+                SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "value").getString(),
+                SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "signature").getString()
+        );
+    }
 
-//    EventManager.getDefaultEventManager().register(SPlayerJoinEvent.class, this::onPlayerJoin);
-//}
+    public void onNPCTouched(NPCInteractEvent event) {
+        Logger.trace("Clicked NPC with click type: {}", event.getInteractType().name());
+        if (event.getInteractType() == NPCInteractEvent.InteractType.LEFT_CLICK) {
+            return;
+        }
 
-//public void onPlayerJoin(SPlayerJoinEvent event) {
-//    final var player = event.getPlayer();
-//    NPC.of(LocationMapper.wrapLocation(player.getLocation()))
-//            .setDisplayName(shopText)
-//            .setShouldLookAtViewer(true)
-//            .setSkin(shopSkin)
-//            .addViewer(player)
-//            .show();
-//}
+        final var player = event.getPlayer().as(Player.class);
+        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
+            return;
+        }
 
-//public void onNPCTouched(NPCInteractEvent event) {
-//    Logger.trace("Clicked NPC with click type: {}", event.getInteractType().name());
-//    if (event.getInteractType() == NPCInteractEvent.InteractType.LEFT_CLICK) {
-//        return;
-//    }
-
-//    final var player = event.getPlayer().as(Player.class);
-//    if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
-//        return;
-//    }
-
-//    final var game = Main.getInstance().getGameOfPlayer(player);
-//    final var npc = event.getNpc();
-//    ArenaManager
-//            .getInstance()
-//            .getArenaMap()
-//            .values()
-//            .stream()
-//            .filter(iArena -> iArena.getStoreNPCS().contains(npc) || iArena.getUpgradeStoreNPCS().contains(npc))
-//            .forEach(arena -> {
-//                GameStore store = arena.getStoreNPCS().contains(npc) ? shopStore : upgradeStore;
-//                BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
-//                        player, store, null);
-//                Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
-//            });
-//}
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        final var npc = event.getNpc();
+        ArenaManager
+                .getInstance()
+                .getArenaMap()
+                .values()
+                .stream()
+                .filter(iArena -> iArena.getStoreNPCS().contains(npc) || iArena.getUpgradeStoreNPCS().contains(npc))
+                .forEach(arena -> {
+                    GameStore store = arena.getStoreNPCS().contains(npc) ? shopStore : upgradeStore;
+                    BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                            player, store, null);
+                    Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
+                });
+    }
 }

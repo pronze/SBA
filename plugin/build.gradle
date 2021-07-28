@@ -1,8 +1,12 @@
+ScreamingLibBuilder()
+        .platforms('bukkit')
+        .modules('core', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator', 'npc')
+        .version(SCREAMINGLIB_VERSION)
+        .simpleInventories(SCREAMINGLIB_VERSION)
+        .enableAnnotationProcessor()
+        .build()
+
 dependencies {
-    annotationProcessor 'org.screamingsandals.lib:screaming-annotation:' + SCREAMINGLIB_VERSION
-
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-
     implementation project(':SBA-API')
 
     compileOnly 'com.mojang:datafixerupper:' + DATAFIXER_UPPER_VERSION

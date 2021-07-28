@@ -7,21 +7,29 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ArenaManager;
 import io.github.pronze.sba.manager.GameTaskManager;
 import io.github.pronze.sba.manager.ScoreboardManager;
+import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
+import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
+import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,8 +41,8 @@ public class Arena implements IArena {
     private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final List<TaskerTask> gameTasks;
-    //private final List<NPC> storeNPCS = new ArrayList<>();
-    //private final List<NPC> upgradeStoreNPCS = new ArrayList<>();
+    private final List<NPC> storeNPCS = new ArrayList<>();
+    private final List<NPC> upgradeStoreNPCS = new ArrayList<>();
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
@@ -130,43 +138,45 @@ public class Arena implements IArena {
                     .forEach(itemSpawner -> arena.createRotatingGenerator((ItemSpawner) itemSpawner));
         }
 
-        //  Tasker.build(() -> {
-        //      game.getGameStores().forEach(store -> {
-        //          final var villager = ((GameStore) store).kill();
-        //          if (villager != null) {
-        //              Main.unregisterGameEntity(villager);
-        //          }
+        Tasker.build(() -> {
+            game.getGameStores().forEach(store -> {
+                final var villager = ((GameStore) store).kill();
+                if (villager != null) {
+                    Main.unregisterGameEntity(villager);
+                }
 
-        //          NPCSkin skin = null;
-        //          List<Component> name = null;
-        //          final var file = store.getShopFile();
-        //          try {
-        //              if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
-        //                  skin = NPCStoreService.getInstance().getUpgradeShopSkin();
-        //                  name = NPCStoreService.getInstance().getUpgradeShopText();
-        //              } else {
-        //                  skin = NPCStoreService.getInstance().getShopSkin();
-        //                  name = NPCStoreService.getInstance().getShopText();
-        //              }
-        //          } catch (Throwable t) {
-        //              t.printStackTrace();
-        //          }
+                NPCSkin skin = null;
+                List<Component> name = null;
+                final var file = store.getShopFile();
+                try {
+                    if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+                        skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+                        name = NPCStoreService.getInstance().getUpgradeShopText();
+                    } else {
+                        skin = NPCStoreService.getInstance().getShopSkin();
+                        name = NPCStoreService.getInstance().getShopText();
+                    }
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
 
-        //          final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
-        //                  .setDisplayName(name)
-        //                  .setShouldLookAtViewer(true)
-        //                  .setSkin(skin);
+                final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+                        .setDisplayName(name)
+                        .setShouldLookAtViewer(true)
+                        .setSkin(skin);
 
-        //          if (file != null && file.equals("upgradeShop.yml")) {
-        //              upgradeStoreNPCS.add(npc);
-        //          } else {
-        //              storeNPCS.add(npc);
-        //          }
+                if (file != null && file.equals("upgradeShop.yml")) {
+                    upgradeStoreNPCS.add(npc);
+                } else {
+                    storeNPCS.add(npc);
+                }
 
-        //          game.getConnectedPlayers()
-        //                  .stream()
-        //                  .map(PlayerMapper::wrapPlayer)
-        //  }).afterOneTick().start();
+                game.getConnectedPlayers()
+                        .stream()
+                        .map(PlayerMapper::wrapPlayer)
+                        .forEach(npc::addViewer);
+            });
+        }).afterOneTick().start();
 
     }
 
@@ -295,15 +305,15 @@ public class Arena implements IArena {
         rotatingGenerators.add(generator);
     }
 
-    // @NotNull
-    // @Override
-    // public List<NPC> getStoreNPCS() {
-    //     return List.copyOf(storeNPCS);
-    // }
+    @NotNull
+    @Override
+    public List<NPC> getStoreNPCS() {
+        return List.copyOf(storeNPCS);
+    }
 
-    // @NotNull
-    // @Override
-    // public List<NPC> getUpgradeStoreNPCS() {
-    //     return List.copyOf(upgradeStoreNPCS);
-    // }
+    @NotNull
+    @Override
+    public List<NPC> getUpgradeStoreNPCS() {
+        return List.copyOf(upgradeStoreNPCS);
+    }
 }

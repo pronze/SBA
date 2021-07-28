@@ -12,12 +12,14 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.lib.bukkit.packet.BukkitPacketMapper;
 import org.screamingsandals.lib.material.builder.ItemFactory;
-import org.screamingsandals.lib.packet.SPacket;
-import org.screamingsandals.lib.packet.SPacketPlayOutEntityEquipment;
+import org.screamingsandals.lib.material.slot.EquipmentSlotHolder;
+import org.screamingsandals.lib.material.slot.EquipmentSlotMapping;
+import org.screamingsandals.lib.packet.AbstractPacket;
+import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.math.Vector3D;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,24 +83,25 @@ public class InvisiblePlayer {
                 .forEach(pl -> sendPackets(pl, getPackets(null, null, null, null)));
     }
 
-    public void sendPackets(Player player, List<SPacket> packets) {
-        packets.forEach(packet-> packet.sendPacket(PlayerMapper.wrapPlayer(player)));
+    public void sendPackets(Player player, List<AbstractPacket> packets) {
+        packets.forEach(packet -> packet.sendPacket(PlayerMapper.wrapPlayer(player)));
     }
 
-    private List<SPacket> getPackets(ItemStack nmsBoot, ItemStack nmsChestPlate, ItemStack nmsLeggings, ItemStack nmsHelmet) {
-        final var packets = new ArrayList<SPacket>();
-        packets.add(getEquipmentPacket(player, nmsHelmet, SPacketPlayOutEntityEquipment.Slot.HEAD));
-        packets.add(getEquipmentPacket(player, nmsChestPlate, SPacketPlayOutEntityEquipment.Slot.CHEST));
-        packets.add(getEquipmentPacket(player, nmsLeggings, SPacketPlayOutEntityEquipment.Slot.LEGS));
-        packets.add(getEquipmentPacket(player, nmsBoot, SPacketPlayOutEntityEquipment.Slot.FEET));
+    private List<AbstractPacket> getPackets(ItemStack nmsBoot, ItemStack nmsChestPlate, ItemStack nmsLeggings, ItemStack nmsHelmet) {
+        final var packets = new ArrayList<AbstractPacket>();
+        packets.add(getEquipmentPacket(player, nmsHelmet, EquipmentSlotMapping.resolve("HEAD").orElseThrow()));
+        packets.add(getEquipmentPacket(player, nmsChestPlate, EquipmentSlotMapping.resolve("CHEST").orElseThrow()));
+        packets.add(getEquipmentPacket(player, nmsLeggings, EquipmentSlotMapping.resolve("LEGS").orElseThrow()));
+        packets.add(getEquipmentPacket(player, nmsBoot, EquipmentSlotMapping.resolve("FEET").orElseThrow()));
         return packets;
     }
 
-    private SPacket getEquipmentPacket(Player entity, ItemStack stack, SPacketPlayOutEntityEquipment.Slot slot) {
-        final var equipmentPacket = BukkitPacketMapper.createPacket(SPacketPlayOutEntityEquipment.class);
-        equipmentPacket.setEntityId(entity.getEntityId());
-        equipmentPacket.setItemAndSlot(ItemFactory.build(stack).orElse(null), slot);
-        return equipmentPacket;
+    private SClientboundSetEquipmentPacket getEquipmentPacket(Player entity, ItemStack stack, EquipmentSlotHolder slot) {
+        var packet = new SClientboundSetEquipmentPacket();
+        packet
+                .entityId(entity.getEntityId())
+                .slots().put(slot, ItemFactory.build(stack).orElse(null));
+        return packet;
     }
 
     public void showPlayer() {
