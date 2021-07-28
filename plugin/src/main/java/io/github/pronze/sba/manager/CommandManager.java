@@ -1,4 +1,4 @@
-package io.github.pronze.sba.commands;
+package io.github.pronze.sba.manager;
 import cloud.commandframework.CommandTree;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.annotations.Argument;
@@ -12,6 +12,8 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
+import io.github.pronze.sba.commands.SBACommand;
+import io.github.pronze.sba.commands.ShoutCommand;
 import io.github.pronze.sba.commands.party.PartyCommand;
 import lombok.Getter;
 import lombok.NonNull;

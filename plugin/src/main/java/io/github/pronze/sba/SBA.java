@@ -1,6 +1,6 @@
 package io.github.pronze.sba;
 
-import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.manager.CommandManager;
 import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.inventories.GamesInventory;
@@ -11,7 +11,7 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.listener.*;
 import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.manager.IPartyManager;
-import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.manager.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
 import io.github.pronze.sba.specials.listener.BridgeEggListener;
@@ -33,7 +33,7 @@ import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.manager.ArenaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;

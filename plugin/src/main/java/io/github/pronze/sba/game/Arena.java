@@ -4,6 +4,8 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.manager.GameTaskManager;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
@@ -19,6 +21,8 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.tasker.task.TaskerTask;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,17 +32,17 @@ public class Arena implements IArena {
     private final List<IRotatingGenerator> rotatingGenerators = new ArrayList<>();
     private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
-  //private final List<NPC> storeNPCS = new ArrayList<>();
-  //private final List<NPC> upgradeStoreNPCS = new ArrayList<>();
+    private final List<TaskerTask> gameTasks;
+    //private final List<NPC> storeNPCS = new ArrayList<>();
+    //private final List<NPC> upgradeStoreNPCS = new ArrayList<>();
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
-    private final GameTask gameTask;
 
     public Arena(Game game) {
         this.game = game;
         storage = new GameStorage(game);
-        gameTask = new GameTask(this);
+        gameTasks = GameTaskManager.getInstance().startTasks(this);
         scoreboardManager = new GameScoreboardManager(this);
         game.getConnectedPlayers().forEach(player -> registerPlayerData(player.getUniqueId(), GamePlayerData.of(player)));
     }
@@ -126,43 +130,43 @@ public class Arena implements IArena {
                     .forEach(itemSpawner -> arena.createRotatingGenerator((ItemSpawner) itemSpawner));
         }
 
-   //  Tasker.build(() -> {
-   //      game.getGameStores().forEach(store -> {
-   //          final var villager = ((GameStore) store).kill();
-   //          if (villager != null) {
-   //              Main.unregisterGameEntity(villager);
-   //          }
+        //  Tasker.build(() -> {
+        //      game.getGameStores().forEach(store -> {
+        //          final var villager = ((GameStore) store).kill();
+        //          if (villager != null) {
+        //              Main.unregisterGameEntity(villager);
+        //          }
 
-   //          NPCSkin skin = null;
-   //          List<Component> name = null;
-   //          final var file = store.getShopFile();
-   //          try {
-   //              if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
-   //                  skin = NPCStoreService.getInstance().getUpgradeShopSkin();
-   //                  name = NPCStoreService.getInstance().getUpgradeShopText();
-   //              } else {
-   //                  skin = NPCStoreService.getInstance().getShopSkin();
-   //                  name = NPCStoreService.getInstance().getShopText();
-   //              }
-   //          } catch (Throwable t) {
-   //              t.printStackTrace();
-   //          }
+        //          NPCSkin skin = null;
+        //          List<Component> name = null;
+        //          final var file = store.getShopFile();
+        //          try {
+        //              if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+        //                  skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+        //                  name = NPCStoreService.getInstance().getUpgradeShopText();
+        //              } else {
+        //                  skin = NPCStoreService.getInstance().getShopSkin();
+        //                  name = NPCStoreService.getInstance().getShopText();
+        //              }
+        //          } catch (Throwable t) {
+        //              t.printStackTrace();
+        //          }
 
-   //          final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
-   //                  .setDisplayName(name)
-   //                  .setShouldLookAtViewer(true)
-   //                  .setSkin(skin);
+        //          final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+        //                  .setDisplayName(name)
+        //                  .setShouldLookAtViewer(true)
+        //                  .setSkin(skin);
 
-   //          if (file != null && file.equals("upgradeShop.yml")) {
-   //              upgradeStoreNPCS.add(npc);
-   //          } else {
-   //              storeNPCS.add(npc);
-   //          }
+        //          if (file != null && file.equals("upgradeShop.yml")) {
+        //              upgradeStoreNPCS.add(npc);
+        //          } else {
+        //              storeNPCS.add(npc);
+        //          }
 
-   //          game.getConnectedPlayers()
-   //                  .stream()
-   //                  .map(PlayerMapper::wrapPlayer)
-   //  }).afterOneTick().start();
+        //          game.getConnectedPlayers()
+        //                  .stream()
+        //                  .map(PlayerMapper::wrapPlayer)
+        //  }).afterOneTick().start();
 
     }
 
@@ -194,16 +198,16 @@ public class Arena implements IArena {
     public void onOver(BedwarsGameEndingEvent e) {
         // destroy scoreboard manager instance and GameTask, we do not need these anymore
         scoreboardManager.destroy();
-        gameTask.cancel();
+        gameTasks.forEach(TaskerTask::cancel);
 
         rotatingGenerators.forEach(IRotatingGenerator::destroy);
         rotatingGenerators.clear();
 
-  //    storeNPCS.forEach(NPC::destroy);
-  //    upgradeStoreNPCS.forEach(NPC::destroy);
+        //    storeNPCS.forEach(NPC::destroy);
+        //    upgradeStoreNPCS.forEach(NPC::destroy);
 
-  //    storeNPCS.clear();
-  //    upgradeStoreNPCS.clear();
+        //    storeNPCS.clear();
+        //    upgradeStoreNPCS.clear();
 
         final var winner = e.getWinningTeam();
         if (winner != null) {
@@ -291,15 +295,15 @@ public class Arena implements IArena {
         rotatingGenerators.add(generator);
     }
 
-  // @NotNull
-  // @Override
-  // public List<NPC> getStoreNPCS() {
-  //     return List.copyOf(storeNPCS);
-  // }
+    // @NotNull
+    // @Override
+    // public List<NPC> getStoreNPCS() {
+    //     return List.copyOf(storeNPCS);
+    // }
 
-  // @NotNull
-  // @Override
-  // public List<NPC> getUpgradeStoreNPCS() {
-  //     return List.copyOf(upgradeStoreNPCS);
-  // }
+    // @NotNull
+    // @Override
+    // public List<NPC> getUpgradeStoreNPCS() {
+    //     return List.copyOf(upgradeStoreNPCS);
+    // }
 }

@@ -2,6 +2,7 @@ package io.github.pronze.sba.visuals;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
@@ -17,6 +18,7 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
+import org.screamingsandals.lib.tasker.task.TaskerTask;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -149,10 +151,12 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%date%", DateUtils.getFormattedDate())
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus);
 
-                    if (arena.getGameTask() != null) {
-                        line = line
-                                .replace("%tier%", arena.getGameTask().getNextTierName()
-                                .replace("-", " ") + " in §a" + arena.getGameTask().getTimeLeftForNextEvent());
+                    for (TaskerTask task : arena.getGameTasks()) {
+                        if (task.getTaskObject() instanceof GeneratorTask) {
+                            final var generatorTask = (GeneratorTask) task.getTaskObject();
+                            line = line.replace("%tier%", generatorTask.getNextTierName()
+                                       .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
+                        }
                     }
                     lines.add(line);
                 });

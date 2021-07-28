@@ -1,12 +1,13 @@
-package io.github.pronze.sba.party;
+package io.github.pronze.sba.manager;
 
+import io.github.pronze.sba.party.IParty;
+import io.github.pronze.sba.party.Party;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyCreatedEvent;
-import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;

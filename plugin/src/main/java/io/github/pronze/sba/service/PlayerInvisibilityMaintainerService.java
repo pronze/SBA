@@ -2,15 +2,13 @@ package io.github.pronze.sba.service;
 
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.bukkit.utils.nms.ClassStorage;
 import org.screamingsandals.lib.bukkit.utils.nms.network.AutoPacketOutboundListener;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.game.ArenaManager;
-import java.util.concurrent.atomic.AtomicReference;
+import io.github.pronze.sba.manager.ArenaManager;
 
 @Service
 public class PlayerInvisibilityMaintainerService {

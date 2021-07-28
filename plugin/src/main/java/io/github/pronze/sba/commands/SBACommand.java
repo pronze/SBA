@@ -8,6 +8,7 @@ import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.manager.CommandManager;
 import io.github.pronze.sba.utils.Logger;
 import io.leangen.geantyref.TypeToken;
 import org.bukkit.Location;

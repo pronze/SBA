@@ -1,6 +1,8 @@
-package io.github.pronze.sba.game;
+package io.github.pronze.sba.manager;
 
-import io.github.pronze.sba.manager.IArenaManager;
+import io.github.pronze.sba.game.Arena;
+import io.github.pronze.sba.game.IArena;
+import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.utils.Logger;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;

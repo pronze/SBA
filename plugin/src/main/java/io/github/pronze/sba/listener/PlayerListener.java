@@ -5,7 +5,7 @@ import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.manager.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;

@@ -4,7 +4,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
 import io.github.pronze.sba.game.Arena;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.manager.ArenaManager;
 import io.github.pronze.sba.game.RotatingGenerator;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

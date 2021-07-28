@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.manager.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
