@@ -1,10 +1,12 @@
 package io.github.pronze.sba.manager;
 
+import io.github.pronze.sba.data.GameTaskData;
 import io.github.pronze.sba.game.IArena;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an GameTaskManager implementation.
@@ -29,5 +31,5 @@ public interface IGameTaskManager {
      * @param arena arena instance to construct the tasks
      * @return A list containing all the tasks initialized for the game
      */
-    List<TaskerTask> startTasks(@NotNull IArena arena);
+    List<GameTaskData<?>> startTasks(@NotNull IArena arena);
 }

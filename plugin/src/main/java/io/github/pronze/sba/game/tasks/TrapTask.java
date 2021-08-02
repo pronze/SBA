@@ -5,6 +5,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
 import io.github.pronze.sba.game.Arena;
+import io.github.pronze.sba.game.IArena;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
@@ -20,7 +21,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 public class TrapTask implements Runnable {
 
     @NotNull
-    private final Arena arena;
+    private final IArena arena;
     private final double radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
 
     @Override

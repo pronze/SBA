@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.Core;
 import org.screamingsandals.lib.event.EventManager;
+import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
@@ -67,6 +68,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         Tasker.class,
         PacketMapper.class,
         HologramManager.class,
+        HealthIndicatorManager.class,
         SimpleInventoriesCore.class,
         NPCManager.class,
         EventManager.class,
@@ -130,12 +132,11 @@ public class SBA extends PluginContainer implements AddonAPI {
         }
 
         if (Main.getVersionNumber() < 109) {
-            showErrorMessage("Minecraft server is running versions below 1.9, please upgrade!");
+            showErrorMessage("Minecraft server is running versions below 1.9.4, please upgrade!");
             return;
         }
 
         InventoryListener.init(getPluginInstance());
-
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new SBAExpansion().register();
@@ -154,7 +155,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     };
 
     public void enableLegacySupport() {
-        //Do changes for legacy support.
+        //Do change for legacy support.
         if (Main.isLegacy()) {
             final var doneChanges =  new AtomicBoolean(false);
 
@@ -258,7 +259,6 @@ public class SBA extends PluginContainer implements AddonAPI {
     public JavaPlugin getJavaPlugin() {
         return instance.getPluginDescription().as(JavaPlugin.class);
     }
-
 }
 
 

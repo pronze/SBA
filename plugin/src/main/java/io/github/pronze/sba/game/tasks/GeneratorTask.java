@@ -27,8 +27,8 @@ public class GeneratorTask implements Runnable {
     private int elapsedTime;
     private int nextTier = 2;
 
-    public GeneratorTask(Arena arena) {
-        this.arena = arena;
+    public GeneratorTask(IArena arena) {
+        this.arena = (Arena) arena;
         nextEvent = GameTierEvent.DIAMOND_GEN_UPGRADE_TIER_II;
         diamond = LanguageService
                 .getInstance()

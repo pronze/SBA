@@ -2,7 +2,7 @@ ScreamingLibBuilder()
         .platforms('bukkit')
         .modules('core', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator', 'npc')
         .version(SCREAMINGLIB_VERSION)
-        .simpleInventories(SCREAMINGLIB_VERSION)
+        .simpleInventories(SIMPLEINVENTORIES_VERSION)
         .enableAnnotationProcessor()
         .build()
 
@@ -18,30 +18,6 @@ dependencies {
         exclude group: 'com.mojang', module: 'brigadier'
     }
 
-    implementation 'org.screamingsandals.simpleinventories:core-bukkit:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.simpleinventories:core-common:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:api-utils:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:event-bukkit:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.lib:event-common:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:plugin-bukkit:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.lib:plugin-common:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:tasker-bukkit:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.lib:tasker-common:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:utils-bukkit:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.lib:utils-common:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.lib:utils-adventure:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:visuals-api:' + SCREAMINGLIB_VERSION
-
-    implementation 'org.screamingsandals.lib:tasker-bukkit:' + SCREAMINGLIB_VERSION
-    implementation 'org.screamingsandals.lib:tasker-common:' + SCREAMINGLIB_VERSION
-
-
     implementation 'cloud.commandframework:cloud-minecraft-extras:' + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-paper:" + CLOUD_COMMANDS_VERSION
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION
@@ -52,7 +28,7 @@ dependencies {
     implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
 
-    testImplementation 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
+    testImplementation 'org.spigotmc:spigot:1.17.1-R0.1-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:' + JUPITER_VERSION
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:' + JUPITER_VERSION
     testImplementation 'org.screamingsandals.bedwars:BedWars:' + BEDWARS_VERSION

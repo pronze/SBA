@@ -151,11 +151,11 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%date%", DateUtils.getFormattedDate())
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus);
 
-                    for (TaskerTask task : arena.getGameTasks()) {
-                        if (task.getTaskObject() instanceof GeneratorTask) {
-                            final var generatorTask = (GeneratorTask) task.getTaskObject();
+                    for (var taskData : arena.getGameTasks()) {
+                        if (taskData.getTaskClass().isAssignableFrom(GeneratorTask.class)) {
+                            final var generatorTask = taskData.as(GeneratorTask.class);
                             line = line.replace("%tier%", generatorTask.getNextTierName()
-                                       .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
+                                    .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
                         }
                     }
                     lines.add(line);

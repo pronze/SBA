@@ -1,6 +1,8 @@
 package io.github.pronze.sba.manager;
+import io.github.pronze.sba.data.GameTaskData;
 import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.IArena;
+import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.game.tasks.HealPoolTask;
 import io.github.pronze.sba.game.tasks.TrapTask;
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +14,7 @@ import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +27,7 @@ public class GameTaskManager implements IGameTaskManager {
     private final List<Class<? extends Runnable>> tasks = new ArrayList<>();
 
     public GameTaskManager() {
+        addTask(GeneratorTask.class);
         addTask(TrapTask.class);
         addTask(HealPoolTask.class);
     }
@@ -45,10 +49,9 @@ public class GameTaskManager implements IGameTaskManager {
     }
 
     @Override
-    public List<TaskerTask> startTasks(@NotNull IArena arena) {
+    public List<GameTaskData<?>> startTasks(@NotNull IArena arena) {
         return tasks.stream()
-                .map(taskClass -> Reflect.constructor(taskClass, Arena.class).construct(arena))
-                .map(task -> Tasker.build((Runnable) task).repeat(1L, TaskerTime.SECONDS).start())
+                .map(taskClass -> new GameTaskData<>(taskClass, arena))
                 .collect(Collectors.toList());
     }
 }
