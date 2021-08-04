@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Service(initAnother = {
+        GeneratorTask.class,
+        HealPoolTask.class,
+        TrapTask.class
+})
 public class GameTaskManager implements IGameTaskManager {
 
     public static GameTaskManager getInstance() {
@@ -25,12 +29,6 @@ public class GameTaskManager implements IGameTaskManager {
     }
 
     private final List<Class<? extends Runnable>> tasks = new ArrayList<>();
-
-    public GameTaskManager() {
-        addTask(GeneratorTask.class);
-        addTask(TrapTask.class);
-        addTask(HealPoolTask.class);
-    }
 
     @Override
     public void addTask(@NotNull Class<? extends Runnable> task) {

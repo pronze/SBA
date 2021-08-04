@@ -12,19 +12,25 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class Party implements IParty {
-    private final UUID uuid = UUID.randomUUID();
-    private @NotNull volatile PlayerWrapper leader;
-    private final List<PlayerWrapper> members = Collections.synchronizedList(new LinkedList<>());
-    private final List<PlayerWrapper> invitedPlayers = Collections.synchronizedList(new LinkedList<>());
-    private final Map<UUID, PartyInviteData> inviteDataMap = new ConcurrentHashMap<>();
-    private final PartySetting settings = new PartySetting();
+    @NotNull
+    private volatile PlayerWrapper leader;
+    private final UUID uuid;
+    private final List<PlayerWrapper> members;
+    private final List<PlayerWrapper> invitedPlayers;
+    private final Map<UUID, PartyInviteData> inviteDataMap;
+    private final PartySetting settings;
 
     public Party(@NotNull PlayerWrapper leader) {
         this.leader = leader;
+        this.uuid = UUID.randomUUID();
+        this.members = new ArrayList<>();
+        this.invitedPlayers = new ArrayList<>();
+        this.inviteDataMap = new HashMap<>();
+        this.settings = new PartySetting();
+
         leader.setInParty(true);
         members.add(leader);
         Logger.trace("Created party with leader: {}, party is: {}", leader.getName(), debugInfo());

@@ -43,7 +43,8 @@ respawn-cooldown:
   enabled: true
   time: 5
 stop-team-spawners-on-die: false
-allowed-commands: []
+allowed-commands:
+  - /shout
 change-allowed-commands-to-blacklist: false
 bungee:
   enabled: false

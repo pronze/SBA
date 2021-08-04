@@ -37,7 +37,7 @@ public class GeneratorSplitterListener {
         allowedMaterials = Objects.requireNonNull(SBAConfig.getInstance().node("generator-splitter", "allowed-materials").
                 getList(String.class))
                 .stream()
-                .map(matName -> Material.valueOf(matName.toUpperCase()))
+                .map(matName -> Material.valueOf(matName.toUpperCase().trim()))
                 .collect(Collectors.toList());
     }
 
@@ -61,7 +61,7 @@ public class GeneratorSplitterListener {
                 return;
             }
 
-            player.getWorld().getNearbyEntities(player.getLocation(), 1.4, 1.4, 1.4)
+            player.getWorld().getNearbyEntities(player.getLocation(), 3, 3, 3)
                     .stream()
                     .filter(entity -> !entity.equals(player))
                     .filter(entity -> entity instanceof Player)

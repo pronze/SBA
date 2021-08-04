@@ -17,12 +17,14 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.player.PlayerMapper;
 
-@RequiredArgsConstructor
-public class TrapTask implements Runnable {
+public class TrapTask extends AbstractTask {
 
-    @NotNull
-    private final IArena arena;
-    private final double radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
+    private final double radius;
+
+    public TrapTask(@NotNull Arena arena) {
+        super(arena);
+        radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
+    }
 
     @Override
     public void run() {

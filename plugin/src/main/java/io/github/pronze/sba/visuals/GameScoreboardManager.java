@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -18,7 +19,6 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
-import org.screamingsandals.lib.tasker.task.TaskerTask;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -98,16 +98,25 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     }
 
     public List<String> process(Player player, Scoreboard board) {
+        final var holder = board.getHolder();
         final var lines = new ArrayList<String>();
         final var optionalPlayerData = arena.getPlayerData(player.getUniqueId());
 
-        if (optionalPlayerData.isEmpty()) return List.of();
+        if (optionalPlayerData.isEmpty()) {
+            return List.of();
+        }
+
         final var playerData = optionalPlayerData.get();
         final var playerTeam = game.getTeamOfPlayer(player);
-        final var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+        var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
 
-        if (statistic == null)
-            return List.of();
+        if (statistic == null) {
+            Main.getInstance().getStatisticsManager().loadStatistic(player.getUniqueId());
+            statistic = Main.getPlayerStatisticsManager().getStatistic(player);
+            if (statistic == null) {
+                return List.of();
+            }
+        }
 
         final var totalKills = String.valueOf(statistic.getKills());
         final var currentKills = String.valueOf(playerData.getKills());
@@ -161,7 +170,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     lines.add(line);
                 });
 
-        final var holder = board.getHolder();
         game.getRunningTeams().forEach(team -> {
             if (!holder.hasTeamEntry(team.getName())) {
                 holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
@@ -184,16 +192,36 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     .filter(player1 -> !arena.isPlayerHidden(player1))
                     .map(Player::getName)
                     .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
-                    .forEach(scoreboardTeam::addEntry);
+                    .forEach(playerName -> {
+                        holder.getTeamEntry("invisibleSBA").ifPresent(sInvisTeam -> {
+                            if (sInvisTeam.hasEntry(playerName)) {
+                                sInvisTeam.removeEntry(playerName);
+                            }
+                        });
+                        scoreboardTeam.addEntry(playerName);
+                    });
         });
 
         if (!arena.getInvisiblePlayers().isEmpty()) {
             arena.getInvisiblePlayers().forEach(invisiblePlayer -> {
                 final var team = game.getTeamOfPlayer(invisiblePlayer);
                 if (team != null && playerTeam != team) {
-                    board.getHolder().getTeamEntry(teamName).ifPresent(teamEntry -> {
+                    holder.getTeamEntry(teamName).ifPresent(teamEntry -> {
                         if (teamEntry.hasEntry(invisiblePlayer.getName())) {
                             teamEntry.removeEntry(invisiblePlayer.getName());
+                        }
+                    });
+
+                    if (!holder.hasTeamEntry("invisibleSBA")) {
+                        holder.addTeam("invisibleSBA", ChatColor.WHITE);
+                        holder.getTeamEntry("invisibleSBA").ifPresent(sTeam -> {
+                            sTeam.setNameTagVisibility(NameTagVisibility.NEVER);
+                        });
+                    }
+
+                    holder.getTeamEntry("invisibleSBA").ifPresent(entry -> {
+                        if (!entry.hasEntry(invisiblePlayer.getName())) {
+                            entry.addEntry(invisiblePlayer.getName());
                         }
                     });
                 }

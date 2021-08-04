@@ -31,25 +31,30 @@ import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.screamingsandals.lib.world.LocationMapper;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Getter
 public class Arena implements IArena {
-    private final List<IRotatingGenerator> rotatingGenerators = new ArrayList<>();
-    private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
-    private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
-    private final List<GameTaskData<?>> gameTasks = new ArrayList<>();
-    private final List<NPC> storeNPCS = new ArrayList<>();
-    private final List<NPC> upgradeStoreNPCS = new ArrayList<>();
+    private final List<IRotatingGenerator> rotatingGenerators;
+    private final Map<UUID, InvisiblePlayer> invisiblePlayers;
+    private final Map<UUID, GamePlayerData> playerDataMap;
+    private final List<GameTaskData<?>> gameTasks;
+    private final List<NPC> storeNPCS;
+    private final List<NPC> upgradeStoreNPCS;
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
 
-    public Arena(Game game) {
+    public Arena(@NotNull Game game) {
         this.game = game;
+        this.rotatingGenerators = new ArrayList<>();
+        this.invisiblePlayers = new HashMap<>();
+        this.playerDataMap = new HashMap<>();
+        this.gameTasks = new ArrayList<>();
+        this.storeNPCS = new ArrayList<>();
+        this.upgradeStoreNPCS = new ArrayList<>();
+
         this.storage = new GameStorage(game);
         this.gameTasks.addAll(GameTaskManager.getInstance().startTasks(this));
         this.scoreboardManager = new GameScoreboardManager(this);

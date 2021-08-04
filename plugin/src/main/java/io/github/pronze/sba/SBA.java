@@ -30,7 +30,6 @@ import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
-import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -46,9 +45,7 @@ import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import pronze.lib.scoreboards.ScoreboardManager;
-
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 
@@ -144,34 +141,6 @@ public class SBA extends PluginContainer implements AddonAPI {
         ScoreboardManager.init(getPluginInstance());
         Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
         getLogger().info("Plugin has loaded");
-    }
-
-    // legacy replacement map
-    private static final Map<Map.Entry<String, String>, String> replacementMap = new HashMap<>() {
-        {
-            put(Map.entry("items.leavegame", "RED_BED"), "BED");
-            put(Map.entry("items.shopcosmetic", "GRAY_STAINED_GLASS_PANE"), "STAINED_GLASS_PANE");
-        }
-    };
-
-    public void enableLegacySupport() {
-        //Do change for legacy support.
-        if (Main.isLegacy()) {
-            final var doneChanges =  new AtomicBoolean(false);
-
-            replacementMap.forEach((key, value) -> {
-                if (Main.getConfigurator().config.getString(key.getKey(), key.getValue()).equalsIgnoreCase(key.getValue())) {
-                    Main.getConfigurator().config.set(key.getKey(), value);
-                    doneChanges.set(true);
-                }
-            });
-
-            if (doneChanges.get()) {
-                getLogger().info("[SBA]: Making legacy changes");
-                Main.getConfigurator().saveConfig();
-                SBAUtil.reloadPlugin(Main.getInstance());
-            }
-        }
     }
 
     public void registerListener(@NotNull Listener listener) {

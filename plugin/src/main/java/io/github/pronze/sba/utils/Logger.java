@@ -14,7 +14,7 @@ public class Logger {
     private static Logger instance;
     private Level level;
     private java.util.logging.Logger logger;
-    private boolean testMode = false;
+    private boolean testMode;
 
     public static void mockMode() {
         instance = new Logger();
@@ -70,7 +70,13 @@ public class Logger {
 
     private static String getMessage(String message, Object... params) {
         for (var param : params) {
-            message = message.replaceFirst(Pattern.quote("{}"), Matcher.quoteReplacement(param.toString()));
+            if (param == null) {
+                param = "NULL";
+            }
+            if (!(param instanceof String)) {
+                param = param.toString();
+            }
+            message = message.replaceFirst(Pattern.quote("{}"), Matcher.quoteReplacement((String) param));
         }
         return message;
     }

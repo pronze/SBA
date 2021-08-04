@@ -11,6 +11,8 @@ import io.github.pronze.sba.events.SBAPlayerPartyCreatedEvent;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +27,7 @@ public class PartyManager implements IPartyManager {
         return ServiceManager.get(PartyManager.class);
     }
 
-    private final Map<UUID, IParty> partyMap = new ConcurrentHashMap<>();
+    private final Map<UUID, IParty> partyMap = new HashMap<>();
 
     public PartyManager() {
         Logger.trace("IPartyManager has been initialized!");
