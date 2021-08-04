@@ -9,12 +9,12 @@ import org.bukkit.potion.PotionEffectType;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.utils.annotations.Service;
 
-public class HealPoolTask extends AbstractTask {
-
+public class HealPoolTask implements Runnable {
+    private final Arena arena;
     private final double radius;
 
     public HealPoolTask(Arena arena) {
-        super(arena);
+        this.arena = arena;
         radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
     }
 

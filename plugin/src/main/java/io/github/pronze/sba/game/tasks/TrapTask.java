@@ -15,12 +15,13 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.player.PlayerMapper;
 
-public class TrapTask extends AbstractTask {
+public class TrapTask implements Runnable {
 
+    private final Arena arena;
     private final double radius;
 
     public TrapTask(@NotNull Arena arena) {
-        super(arena);
+        this.arena = arena;
         radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
     }
 

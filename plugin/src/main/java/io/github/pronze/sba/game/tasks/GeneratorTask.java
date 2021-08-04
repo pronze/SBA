@@ -13,10 +13,10 @@ import org.screamingsandals.lib.utils.annotations.Service;
 
 import java.text.SimpleDateFormat;
 
-public class GeneratorTask extends AbstractTask {
+public class GeneratorTask implements Runnable {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
-
+    private final Arena arena;
     private final String diamond;
     private final String emerald;
     private final double multiplier;
@@ -28,7 +28,7 @@ public class GeneratorTask extends AbstractTask {
     private int nextTier = 2;
 
     public GeneratorTask(Arena arena) {
-        super(arena);
+        this.arena = arena;
         nextEvent = GameTierEvent.DIAMOND_GEN_UPGRADE_TIER_II;
         diamond = LanguageService
                 .getInstance()
