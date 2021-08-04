@@ -9,7 +9,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.utils.annotations.Service;
 
-@Service
 public class HealPoolTask extends AbstractTask {
 
     private final double radius;

@@ -10,6 +10,5 @@ public abstract class AbstractTask implements Runnable {
 
     public AbstractTask(@NotNull Arena arena) {
         this.arena = arena;
-        GameTaskManager.getInstance().addTask(this.getClass());
     }
 }

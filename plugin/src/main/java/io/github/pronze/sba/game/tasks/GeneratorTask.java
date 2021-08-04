@@ -13,7 +13,6 @@ import org.screamingsandals.lib.utils.annotations.Service;
 
 import java.text.SimpleDateFormat;
 
-@Service
 public class GeneratorTask extends AbstractTask {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
