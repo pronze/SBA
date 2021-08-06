@@ -4,7 +4,7 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
-import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;

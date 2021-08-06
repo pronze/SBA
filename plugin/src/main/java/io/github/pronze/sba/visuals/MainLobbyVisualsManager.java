@@ -110,7 +110,7 @@ public class MainLobbyVisualsManager implements Listener {
         Bukkit.getServer().getScheduler()
                 .runTaskLater(SBA.getPluginInstance(), () -> {
                     if (hasMainLobbyObjective(player)) return;
-                    if (isInWorld(player.getLocation()) && !Main.isPlayerInGame(player)) {
+                    if (isInWorld(player.getLocation()) && !Main.isPlayerInGame(player) && player.isOnline()) {
                         create(player);
                     }
                 }, 20L);

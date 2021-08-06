@@ -102,4 +102,9 @@ public class MockArena implements IArena {
     public @NotNull List<NPC> getUpgradeStoreNPCS() {
         return List.of();
     }
+
+    @Override
+    public <T extends Runnable> Optional<T> getTask(@NotNull Class<T> taskClass) {
+        return Optional.empty();
+    }
 }

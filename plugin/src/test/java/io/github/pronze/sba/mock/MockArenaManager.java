@@ -1,6 +1,6 @@
 package io.github.pronze.sba.mock;
 
-import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.GameStorage;
 import io.github.pronze.sba.utils.Logger;
 import org.jetbrains.annotations.NotNull;

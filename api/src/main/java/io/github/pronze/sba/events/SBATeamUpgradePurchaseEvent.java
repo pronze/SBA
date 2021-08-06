@@ -1,6 +1,7 @@
 package io.github.pronze.sba.events;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 
+@EqualsAndHashCode(callSuper=false)
 @RequiredArgsConstructor
 @Data
 public class SBATeamUpgradePurchaseEvent extends Event implements Cancellable {

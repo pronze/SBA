@@ -1,5 +1,8 @@
 package io.github.pronze.sba;
 
+import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.manager.*;
 import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.game.IGameStorage;
@@ -9,6 +12,7 @@ import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lang.ILanguageService;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.listener.*;
+import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
 import io.github.pronze.sba.specials.listener.BridgeEggListener;
@@ -43,6 +47,7 @@ import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import pronze.lib.scoreboards.ScoreboardManager;
 import java.util.*;
@@ -121,7 +126,13 @@ public class SBA extends PluginContainer implements AddonAPI {
     @Override
     public void enable() {
         instance = this;
+        ScoreboardManager.init(getPluginInstance());
+        // register API
+        Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
+    }
 
+    @OnPostEnable
+    public void postEnabled() {
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
@@ -138,8 +149,6 @@ public class SBA extends PluginContainer implements AddonAPI {
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             new SBAExpansion().register();
         }
-        ScoreboardManager.init(getPluginInstance());
-        Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
         getLogger().info("Plugin has loaded");
     }
 

@@ -1,9 +1,7 @@
-package io.github.pronze.sba.manager;
+package io.github.pronze.sba.game.tasks;
 import io.github.pronze.sba.data.GameTaskData;
 import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.game.tasks.GeneratorTask;
-import io.github.pronze.sba.game.tasks.HealPoolTask;
-import io.github.pronze.sba.game.tasks.TrapTask;
+import io.github.pronze.sba.manager.IGameTaskManager;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;

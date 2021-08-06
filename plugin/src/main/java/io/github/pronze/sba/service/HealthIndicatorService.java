@@ -3,7 +3,7 @@ package io.github.pronze.sba.service;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.game.ArenaManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
@@ -83,7 +83,7 @@ public class HealthIndicatorService implements Listener {
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
         final var playerWrapper = PlayerMapper.wrapPlayer(event.getPlayer());
-        final var healthIndicator = healthIndicatorMap.get(ArenaManager.getInstance().get(event.getGame().getName()).orElseThrow());
+        final var healthIndicator = healthIndicatorMap.get(ArenaManager.getInstance().get(event.getGame().getName()).orElse(null));
         if (healthIndicator != null) {
             healthIndicator.removeViewer(playerWrapper);
             healthIndicator.removeTrackedPlayer(playerWrapper);

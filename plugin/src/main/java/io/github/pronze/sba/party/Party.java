@@ -123,16 +123,17 @@ public class Party implements IParty {
                 invitee.setInvitedToAParty(false);
                 inviteDataMap.remove(invitee.getInstance().getUniqueId());
                 if (shouldDisband()) {
-                    SBA
-                            .getInstance()
+                    SBA.getInstance()
                             .getPartyManager()
                             .disband(uuid);
                     Logger.trace("Disbanding party: {}", uuid);
                 }
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.PARTY_MESSAGE_INVITE_EXPIRED)
-                        .send(getPartyLeader());
+                if (getPartyLeader().isOnline()) {
+                    LanguageService
+                            .getInstance()
+                            .get(MessageKeys.PARTY_MESSAGE_INVITE_EXPIRED)
+                            .send(getPartyLeader());
+                }
             }
         }.runTaskLater(SBA.getPluginInstance(),
                 20L * SBA

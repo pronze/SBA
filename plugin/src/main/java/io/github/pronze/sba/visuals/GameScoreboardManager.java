@@ -146,6 +146,9 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                         });
                         return;
                     }
+
+                    final var generatorTask = arena.getTask(GeneratorTask.class).orElseThrow();
+
                     line = line
                             .replace("%sba_version%", SBA.getInstance().getVersion())
                             .replace("%team%", teamName)
@@ -158,15 +161,10 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%formattime%", game.getFormattedTimeLeft())
                             .replace("%game%", game.getName())
                             .replace("%date%", DateUtils.getFormattedDate())
-                            .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus);
+                            .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus)
+                            .replace("%tier%", generatorTask.getNextTierName()
+                            .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
 
-                    for (var taskData : arena.getGameTasks()) {
-                        if (taskData.getTaskClass().isAssignableFrom(GeneratorTask.class)) {
-                            final var generatorTask = taskData.as(GeneratorTask.class);
-                            line = line.replace("%tier%", generatorTask.getNextTierName()
-                                    .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
-                        }
-                    }
                     lines.add(line);
                 });
 

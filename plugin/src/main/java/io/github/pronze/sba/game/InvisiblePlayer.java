@@ -98,8 +98,7 @@ public class InvisiblePlayer {
 
     private SClientboundSetEquipmentPacket getEquipmentPacket(Player entity, ItemStack stack, EquipmentSlotHolder slot) {
         var packet = new SClientboundSetEquipmentPacket();
-        packet
-                .entityId(entity.getEntityId())
+        packet.entityId(entity.getEntityId())
                 .slots().put(slot, ItemFactory.build(stack).orElse(null));
         return packet;
     }

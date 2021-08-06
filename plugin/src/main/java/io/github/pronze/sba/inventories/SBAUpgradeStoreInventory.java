@@ -3,7 +3,7 @@ package io.github.pronze.sba.inventories;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;

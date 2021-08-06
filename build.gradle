@@ -69,6 +69,7 @@ subprojects {
         relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
         relocate 'pronze.lib', 'io.github.pronze.lib.pronzelib'
         relocate 'org.screamingsandals.lib', 'io.github.pronze.lib.screaminglib'
+        relocate 'org.screamingsandals.simpleinventories', 'io.github.pronze.lib.simpleinventories'
     }
 
     tasks.withType(JavaCompile) {

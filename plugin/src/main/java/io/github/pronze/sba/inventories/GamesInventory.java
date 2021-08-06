@@ -110,24 +110,14 @@ public class GamesInventory implements Listener {
                         .get(MessageKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
                 final var playerWrapper = PlayerMapper.wrapPlayer(player);
 
+                player.closeInventory();
                 properties.stream()
                         .filter(Property::hasName)
                         .forEach(property -> {
                             switch (property.getPropertyName().toLowerCase()) {
-                                case "game":
-                                    try {
-                                        final var game = Main.getInstance().getGameOfPlayer(player);
-                                        game.joinToGame(player);
-                                    } catch (Throwable t) {
-                                        couldNotFindGameMessage.send(playerWrapper);
-                                    }
-                                    player.closeInventory();
-                                    break;
                                 case "exit":
-                                    player.closeInventory();
                                     break;
                                 case "randomly_join":
-                                    player.closeInventory();
                                     final var games = ShopUtil.getGamesWithSize(mode);
                                     if (games == null || games.isEmpty()) {
                                         couldNotFindGameMessage.send(playerWrapper);
@@ -139,12 +129,10 @@ public class GamesInventory implements Listener {
                                             .ifPresentOrElse(game -> game.joinToGame(player), () -> couldNotFindGameMessage.send(playerWrapper));
                                     break;
                                 case "rejoin":
-                                    player.closeInventory();
                                     player.performCommand("bw rejoin");
                                     break;
                                 case "join":
-                                    player.closeInventory();
-                                    final var gameName = property.getPropertyData().node("gameName").getString(null);
+                                    final var gameName = item.getFirstPropertyByName("join").orElseThrow().getPropertyData().node("gameName").getString();
                                     if (gameName == null) {
                                         couldNotFindGameMessage.send(playerWrapper);
                                         return;

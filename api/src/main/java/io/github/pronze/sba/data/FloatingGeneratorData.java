@@ -30,7 +30,7 @@ public class FloatingGeneratorData {
     private int tierLevel;
 
     /**
-     * The current time elapsed since it's cycle.
+     * The current time elapsed since its cycle.
      * Refer {@link ItemSpawner#getItemSpawnerType()#getTime()}
      */
     private int time;

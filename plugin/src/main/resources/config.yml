@@ -45,6 +45,7 @@ respawn-cooldown:
 stop-team-spawners-on-die: false
 allowed-commands:
   - /shout
+  - /party
 change-allowed-commands-to-blacklist: false
 bungee:
   enabled: false

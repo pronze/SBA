@@ -11,7 +11,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyInviteEvent;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
-import io.github.pronze.sba.manager.CommandManager;
+import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 

@@ -8,7 +8,6 @@ import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.manager.CommandManager;
 import io.github.pronze.sba.utils.Logger;
 import io.leangen.geantyref.TypeToken;
 import org.bukkit.Location;
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 @Service
 public class SBACommand {
@@ -111,6 +111,7 @@ public class SBACommand {
            final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode,
            final @NotNull @Argument(value = "maps", suggestions = "maps") String[] mapsArg
    ) {
+        final var stringedGameMode = SBAUtil.capitalizeFirstLetter(gameMode);
        final var maps = List.of(mapsArg);
        if (maps.isEmpty()) {
            //TODO:
@@ -130,6 +131,8 @@ public class SBACommand {
        maps.forEach(arg -> {
            try {
                node.node(arg).set(Integer.class, ShopUtil.getIntFromMode(gameMode));
+               SBAConfig.getInstance().saveConfig();
+               SBAConfig.getInstance().forceReload();
            } catch (Exception ex) {
                ex.printStackTrace();
            }
@@ -143,10 +146,10 @@ public class SBACommand {
 
            root.node("data").setList(new TypeToken<>() {
            }, List.of(
-                   Map.of("stack", "RED_BED;1;§aBed Wars §7(Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!",
+                   Map.of("stack", "RED_BED;1;§aBed Wars §7(%s);§7Play Bed Wars {§7%s}; ;§eClick to play!".replaceAll(Pattern.quote("%s"), stringedGameMode),
                            "row", "1",
                            "column", "3",
-                           "properties", "join_randomly"),
+                           "properties", "randomly_join"),
 
                    Map.of("stack", "BARRIER;1;§cExit",
                            "row", "3",
@@ -161,12 +164,12 @@ public class SBACommand {
 
 
            //why does it work this way?, no clue
-           root.node("data").appendListNode().set(Map.of("stack", "OAK_SIGN;1;§aMap Selector §7(Solo);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!",
+           root.node("data").appendListNode().set(Map.of("stack", "OAK_SIGN;1;§aMap Selector §7(%s);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!".replaceAll(Pattern.quote("%s"), stringedGameMode),
                    "row", "1",
                    "column", "5",
                    "options", Map.of("rows", "6",
                            "render_actual_rows", "6"),
-                   "items", new ArrayList<Map<String, String>>() {
+                   "items", new ArrayList<Map<String, Object>>() {
                        {
                            final var col = new AtomicInteger(1);
                            final var row = new AtomicInteger(1);
@@ -179,14 +182,22 @@ public class SBACommand {
                                            row.set(row.get() + 1);
                                            col.set(2);
                                        }
-                                       if (row.get() >= 5) return;
+                                       if (row.get() >= 3) return;
 
-                                       add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + String.valueOf(gameMode.charAt(0)).toUpperCase() + gameMode.substring(1) + "; ;§aClick to play"),
+                                       add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + stringedGameMode + "; ;§aClick to play"),
                                                "row", String.valueOf(row.get()),
                                                "column", String.valueOf(col.get()),
-                                               "gameName", game.getName())
+                                               "properties", Map.of("name", "join",
+                                                       "gameName", game.getName()))
                                        );
                                    });
+                       }
+
+                       {
+                           add(Map.of("stack", "ARROW;1;§cGo Back",
+                                   "row", 4,
+                                   "column", 4,
+                                   "locate", "main"));
                        }
                    }));
 

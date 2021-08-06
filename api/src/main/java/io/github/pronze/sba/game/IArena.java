@@ -95,6 +95,8 @@ public interface IArena {
     List<Player> getInvisiblePlayers();
 
     /**
+     * Creates a floating generator above the location of spawner. This generator is upgradable.
+     *
      * @param itemSpawner the item spawner instance to be rotated.
      */
     void createRotatingGenerator(@NotNull ItemSpawner itemSpawner);
@@ -110,4 +112,12 @@ public interface IArena {
      */
     @NotNull
     List<NPC> getUpgradeStoreNPCS();
+
+    /**
+     * Gets the GameTask for this arena.
+     *
+     * @param <T> The Type of the task to query
+     * @return an optional containing the task instance if present, empty otherwise.
+     */
+    <T extends Runnable> Optional<T> getTask(@NotNull Class<T> taskClass);
 }

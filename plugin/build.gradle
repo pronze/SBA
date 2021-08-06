@@ -9,8 +9,8 @@ ScreamingLibBuilder()
 dependencies {
     implementation project(':SBA-API')
 
-    compileOnly 'com.mojang:datafixerupper:' + DATAFIXER_UPPER_VERSION
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
+
     // TODO: use sidebar from slib
     implementation 'pronze.lib:scoreboard:' + PRONZELIB_SBOARD_VERSION
 
@@ -23,7 +23,7 @@ dependencies {
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION
 
     implementation "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_TEXT_MINIMESSAGE_VERSION
-    implementation "net.kyori:adventure-platform-bukkit:4.0.0-SNAPSHOT"
+    implementation "net.kyori:adventure-platform-bukkit:" + KYORI_ADVENTURE_PLATFORM_BUKKIT_VERSION
 
     implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION

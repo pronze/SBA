@@ -5,7 +5,7 @@ import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
-import io.github.pronze.sba.manager.ArenaManager;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
@@ -37,12 +37,10 @@ import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
 
 @Service
 public class PlayerListener implements Listener {
@@ -120,7 +118,7 @@ public class PlayerListener implements Listener {
                         .filter(Objects::nonNull)
                         .forEach(drop -> {
                             if (generatorDropItems.contains(drop.getType())) {
-                                killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name());
+                                killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name().toLowerCase().replace("_", " "));
                                 killer.getInventory().addItem(drop);
                             }
                         });
@@ -251,25 +249,13 @@ public class PlayerListener implements Listener {
 
 
     @EventHandler
-    public void itemDamage(PlayerItemDamageEvent e) {
-        var player = e.getPlayer();
-        if (!Main.isPlayerInGame(player)) return;
+    public void itemDamage(PlayerItemDamageEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer())) {
+            return;
+        }
 
-        if (Main.getPlayerGameProfile(player).isSpectator) return;
-
-        final var typeName = e.getItem().getType().toString();
-        final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
-
-        switch (afterUnderscore.toLowerCase()) {
-            case "boots":
-            case "helmet":
-            case "chestplate":
-            case "leggings":
-            case "pickaxe":
-            case "axe":
-            case "shears":
-            case "sword":
-                e.setCancelled(true);
+        if (SBAConfig.getInstance().node("disable-item-damage").getBoolean(true)) {
+            event.setCancelled(true);
         }
     }
 
@@ -281,17 +267,16 @@ public class PlayerListener implements Listener {
                 .getInstance()
                 .fromCache(uuid)
                 .ifPresent(Scoreboard::destroy);
+
         final var wrappedPlayer = PlayerMapper.wrapPlayer(player)
                 .as(PlayerWrapper.class);
-        SBA
-                .getInstance()
+        SBA.getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
                 .ifPresent(party -> {
                     party.removePlayer(wrappedPlayer);
                     if (party.getMembers().size() == 1) {
-                        SBA
-                                .getInstance()
+                        SBA.getInstance()
                                 .getPartyManager()
                                 .disband(party.getUUID());
                         return;

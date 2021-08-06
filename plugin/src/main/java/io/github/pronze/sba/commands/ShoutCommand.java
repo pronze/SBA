@@ -5,7 +5,6 @@ import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.manager.CommandManager;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;

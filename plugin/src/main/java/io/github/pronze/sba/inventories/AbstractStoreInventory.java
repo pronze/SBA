@@ -26,6 +26,7 @@ import org.screamingsandals.bedwars.api.upgrades.Upgrade;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.material.Item;
 import org.screamingsandals.lib.material.builder.ItemFactory;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
@@ -341,6 +342,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                         .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
+            Sounds.playSound(player, player.getLocation(),
+                    Main.getConfigurator().config.getString("sounds.item_buy.sound"), Sounds.ENTITY_ITEM_PICKUP, (float) Main.getConfigurator().config.getDouble("sounds.item_buy.volume"), (float) Main.getConfigurator().config.getDouble("sounds.item_buy.pitch"));
         }
     }
 

@@ -4,9 +4,8 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.data.GameTaskData;
+import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.manager.ArenaManager;
-import io.github.pronze.sba.manager.GameTaskManager;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -28,7 +27,6 @@ import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
-import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.screamingsandals.lib.world.LocationMapper;
 import java.util.*;
@@ -144,7 +142,7 @@ public class Arena implements IArena {
                     .forEach(itemSpawner -> arena.createRotatingGenerator((ItemSpawner) itemSpawner));
         }
 
-        Tasker.build(() -> game.getGameStores().forEach(store -> {
+        game.getGameStores().forEach(store -> {
             final var villager = ((GameStore) store).kill();
             if (villager != null) {
                 Main.unregisterGameEntity(villager);
@@ -184,8 +182,7 @@ public class Arena implements IArena {
 
             npc.show();
 
-        })).afterOneTick().start();
-
+        });
     }
 
     // non api event handler
@@ -324,5 +321,14 @@ public class Arena implements IArena {
     @Override
     public List<NPC> getUpgradeStoreNPCS() {
         return List.copyOf(upgradeStoreNPCS);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends Runnable> Optional<T> getTask(@NotNull Class<T> taskClass) {
+        return getGameTasks().stream()
+                .filter(gameTaskData -> gameTaskData.getTaskClass().isAssignableFrom(taskClass))
+                .map(gameTaskData -> (T) gameTaskData.raw())
+                .findAny();
     }
 }

@@ -144,4 +144,8 @@ public class SBAUtil {
 
         player.showTitle(titleComponent);
     }
+
+    public static String capitalizeFirstLetter(@NotNull String toCap) {
+        return toCap.substring(0, 1).toUpperCase() + toCap.substring(1).toLowerCase();
+    }
 }

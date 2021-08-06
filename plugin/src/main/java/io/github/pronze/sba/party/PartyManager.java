@@ -1,7 +1,6 @@
-package io.github.pronze.sba.manager;
+package io.github.pronze.sba.party;
 
-import io.github.pronze.sba.party.IParty;
-import io.github.pronze.sba.party.Party;
+import io.github.pronze.sba.manager.IPartyManager;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
@@ -16,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service(dependsOn = {
         Logger.class
@@ -37,8 +35,7 @@ public class PartyManager implements IPartyManager {
     public Optional<IParty> createParty(@NotNull PlayerWrapper leader) {
         final var party = new Party(leader);
         final var partyCreateEvent = new SBAPlayerPartyCreatedEvent(leader, party);
-        SBA
-                .getPluginInstance()
+        SBA.getPluginInstance()
                 .getServer()
                 .getPluginManager()
                 .callEvent(partyCreateEvent);
@@ -111,6 +108,9 @@ public class PartyManager implements IPartyManager {
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(member.getInstance())
                     .as(PlayerWrapper.class);
+            if (!wrapperImpl.isOnline()) {
+                return;
+            }
             disbandMessage
                     .forEach(wrapperImpl::sendMessage);
         });
@@ -121,8 +121,10 @@ public class PartyManager implements IPartyManager {
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(invitedPlayer.getInstance())
                     .as(PlayerWrapper.class);
-            SBA
-                    .getInstance()
+            if (!wrapperImpl.isOnline()) {
+                return;
+            }
+            SBA.getInstance()
                     .getConfigurator()
                     .getStringList("party.message.invite-expired")
                     .forEach(wrapperImpl::sendMessage);

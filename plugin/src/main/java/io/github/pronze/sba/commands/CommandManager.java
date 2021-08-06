@@ -1,4 +1,4 @@
-package io.github.pronze.sba.manager;
+package io.github.pronze.sba.commands;
 import cloud.commandframework.CommandTree;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.annotations.Argument;
@@ -12,8 +12,6 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
-import io.github.pronze.sba.commands.SBACommand;
-import io.github.pronze.sba.commands.ShoutCommand;
 import io.github.pronze.sba.commands.party.PartyCommand;
 import lombok.Getter;
 import lombok.NonNull;
@@ -71,13 +69,9 @@ public class CommandManager {
         );
 
         if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
-            try {
-                 manager.registerBrigadier();
-            } catch (Throwable ignored) {
-                // cloud bug on 1.17
-            }
-
+            manager.registerBrigadier();
         }
+
         if (manager.queryCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
             manager.registerAsynchronousCompletions();
         }

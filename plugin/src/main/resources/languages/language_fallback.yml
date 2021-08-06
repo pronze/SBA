@@ -198,7 +198,7 @@ main-lobby:
       - ""
       - "<yellow>SBA v%sba_version%"
 party:
-  chat-format: "<green>Party >> %name% <white> : %message%"
+  chat-format: "<blue>Party </blue><gray>>></gray> %name%<white>: %message%"
   message:
     cannot-invite:
       - "<gold>-----------------------------------------------------"

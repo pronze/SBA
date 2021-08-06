@@ -27,10 +27,10 @@ public class SBAExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
-
         if (player == null) {
             return " ";
         }
+
         String[] identifiers = identifier.split("_", 0);
         if (identifiers.length <= 1) return null;
 
