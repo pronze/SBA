@@ -111,14 +111,14 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         if (xp < 50) {
             return 1;
         }
-        return 1 + (xp / AddonAPI.getInstance().getConfigurator().getInt("player-statistics.xp-to-level-up", 500));
+        return 1 + (xp / AddonAPI.getInstance().getConfigurator().getInt("player-statistics.xp-to-level-up", 5000));
     }
 
     public String getProgress() {
         var maxLimit  = AddonAPI
                 .getInstance()
                 .getConfigurator()
-                .getInt("player-statistics.xp-to-level-up", 500);
+                .getInt("player-statistics.xp-to-level-up", 5000);
 
         final var format = AddonAPI
                 .getInstance()
@@ -135,7 +135,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         var maxLimit  = AddonAPI
                 .getInstance()
                 .getConfigurator()
-                .getInt("player-statistics.xp-to-level-up", 500);
+                .getInt("player-statistics.xp-to-level-up", 5000);
         return getXP() - ((getLevel() - 1) * maxLimit);
     }
 
@@ -143,7 +143,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         var maxLimit  = AddonAPI
                 .getInstance()
                 .getConfigurator()
-                .getInt("player-statistics.xp-to-level-up", 500);
+                .getInt("player-statistics.xp-to-level-up", 5000);
 
         String progress = null;
         try {
@@ -165,7 +165,7 @@ public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper
         var maxLimit  = AddonAPI
                 .getInstance()
                 .getConfigurator()
-                .getInt("player-statistics.xp-to-level-up", 500);
+                .getInt("player-statistics.xp-to-level-up", 5000);
 
         int progress = (getXP() - ((getLevel() - 1) * maxLimit)) / (maxLimit / 100);
         if (progress < 1)

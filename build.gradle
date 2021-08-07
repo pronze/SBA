@@ -28,6 +28,7 @@ subprojects {
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         maven {
             url = uri('https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven')

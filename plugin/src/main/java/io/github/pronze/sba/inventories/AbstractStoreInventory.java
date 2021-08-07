@@ -199,7 +199,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     @SneakyThrows
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
-        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(Objects.requireNonNull(SBAStoreInventory.class.getResource("/" + shopPaths.split(",")[0])).toURI())));
+        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(Objects.requireNonNull(SBA.class.getResource("/" + shopPaths.split(",")[0])).toURI())));
         inventorySet.getMainSubInventory().process();
     }
 

@@ -1,4 +1,5 @@
 package io.github.pronze.sba.config;
+import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
@@ -14,8 +15,6 @@ import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import io.github.pronze.sba.utils.SBAUtil;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -50,6 +49,7 @@ public class SBAConfig implements IConfigurator {
         /* To avoid config confusions*/
         deleteFile("config.yml");
         deleteFile("bwaconfig.yml");
+
         try {
             langFolder = new File(dataFolder, "languages");
             gamesInventoryFolder = new File(dataFolder, "games-inventory");
@@ -66,12 +66,11 @@ public class SBAConfig implements IConfigurator {
             }
 
             saveFile("languages/language_en.yml");
+
             saveFile("games-inventory/solo.yml");
             saveFile("games-inventory/double.yml");
             saveFile("games-inventory/triple.yml");
             saveFile("games-inventory/squad.yml");
-
-            plugin.saveResource("languages/language_fallback.yml", true);
 
             saveFile("shops/shop.yml");
             saveFile("shops/upgradeShop.yml");
@@ -348,24 +347,7 @@ public class SBAConfig implements IConfigurator {
                 Arrays.stream(langFiles).forEach(File::delete);
 
             saveFile("languages/language_en.yml");
-            plugin.saveResource("languages/language_fallback.yml", true);
-
-            try (final var inputStream = plugin.getResource("config.yml")) {
-                if (inputStream != null) {
-                    final var configFile = new File(Main.getInstance().getDataFolder(), "config.yml");
-                    if (configFile.exists()) {
-                        configFile.delete();
-                    }
-                    configFile.createNewFile();
-                    try (final var outputStream = new FileOutputStream(configFile)) {
-                        inputStream.transferTo(outputStream);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            ServiceManager.get(FirstStartConfigReplacer.class).updateBedWarsConfig();
             SBAUtil.reloadPlugin(Main.getInstance());
         } catch (Exception ex) {
             ex.printStackTrace();

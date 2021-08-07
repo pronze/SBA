@@ -86,6 +86,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SBAUpgradeStoreInventory.class,
         GamesInventory.class,
         PlayerWrapperService.class,
+        GamesInventoryService.class,
         HealthIndicatorService.class,
         PlayerInvisibilityMaintainerService.class,
         DateUtils.class,

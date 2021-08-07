@@ -4,15 +4,12 @@ import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.utils.Logger;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
-import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -26,10 +23,11 @@ public class LanguageServiceTest {
         Logger.mockMode();
 
         File tempFile = File.createTempFile("test", "language");
-        var input = getClass().getResourceAsStream("/language_en.yml");
-        assert input != null;
-        try (var output = new FileOutputStream(tempFile, false)) {
-            input.transferTo(output);
+        try(var input = LanguageServiceTest.class.getResourceAsStream("/languages/language_en.yml")) {
+            assert input != null;
+            try (var output = new FileOutputStream(tempFile, false)) {
+                input.transferTo(output);
+            }
         }
 
         node = YamlConfigurationLoader

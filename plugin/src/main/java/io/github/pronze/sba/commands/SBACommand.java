@@ -163,7 +163,6 @@ public class SBACommand {
            ));
 
 
-           //why does it work this way?, no clue
            root.node("data").appendListNode().set(Map.of("stack", "OAK_SIGN;1;§aMap Selector §7(%s);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!".replaceAll(Pattern.quote("%s"), stringedGameMode),
                    "row", "1",
                    "column", "5",
