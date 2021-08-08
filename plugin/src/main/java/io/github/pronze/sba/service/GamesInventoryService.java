@@ -209,14 +209,14 @@ public class GamesInventoryService implements Listener {
         final var isTriple = tripleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
         final var isSquad = squadsNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
         int mode = 1;
-        if (isSolo) {
-            mode = 1;
-        } else if (isDouble) {
+        if (isDouble) {
             mode = 2;
         } else if (isTriple) {
             mode = 3;
         } else if (isSquad) {
             mode = 4;
+        } else if (!isSolo) {
+            return;
         }
         GamesInventory
                 .getInstance()
