@@ -16,25 +16,25 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.player.PlayerMapper;
 
-public class TrapTask implements Runnable {
+public class MinerTrapTask implements Runnable {
 
     private final Arena arena;
     private final double radius;
 
-    public TrapTask(@NotNull IArena arena) {
+    public MinerTrapTask(@NotNull IArena arena) {
         this.arena = (Arena) arena;
         radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
     }
 
     @Override
     public void run() {
-        if (!arena.getStorage().areBlindTrapEnabled()) {
+        if (!arena.getStorage().areMinerTrapEnabled()) {
             return;
         }
 
         arena.getGame().getRunningTeams()
                 .stream()
-                .filter(arena.getStorage()::areBlindTrapEnabled)
+                .filter(arena.getStorage()::areMinerTrapEnabled)
                 .forEach(team -> arena.getGame().getConnectedPlayers()
                         .stream()
                         .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
@@ -49,9 +49,9 @@ public class TrapTask implements Runnable {
                                     return;
                                 }
 
-                                arena.getStorage().setPurchasedBlindTrap(team, false);
+                                arena.getStorage().setPurchasedMinerTrap(team, false);
                                 player.addPotionEffect(new PotionEffect
-                                        (PotionEffectType.BLINDNESS, 20 * 3, 2));
+                                    (PotionEffectType.SLOW_DIGGING, 20 * 10, 2));
 
                                 if (arena.isPlayerHidden(player)) {
                                     arena.removeHiddenPlayer(player);
