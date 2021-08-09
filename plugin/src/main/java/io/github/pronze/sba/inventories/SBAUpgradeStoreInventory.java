@@ -228,7 +228,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             } else {
                                 final var minerTrapTitle = LanguageService
                                         .getInstance()
-                                        .get(MessageKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
+                                        .get(MessageKeys.MINER_TRAP_PURCHASED_TITLE)
                                         .toString();
 
                                 gameStorage.setPurchasedMinerTrap(team, true);
