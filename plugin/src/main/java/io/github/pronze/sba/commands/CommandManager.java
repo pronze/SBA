@@ -20,6 +20,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -43,8 +44,8 @@ public class CommandManager {
     private AnnotationParser<CommandSender> annotationParser;
     private MinecraftHelp<CommandSender> minecraftHelp;
 
-    @OnPostEnable
-    public void onPostEnable() {
+    @OnEnable
+    public void onEnable() {
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
                 CommandExecutionCoordinator.simpleCoordinator();
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();
