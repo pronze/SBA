@@ -41,6 +41,7 @@ miner-trap-triggered:
   title: "<red>Trap Triggered!"
   sub-title: "<yellow>Someone has entered your base!"
 blindness-trap-purchased-title: "<gold>Blindness Trap has been purchased!"
+miner-trap-purchased-title: "<gold>Mining Fatigue Trap has been purchased!"
 purchase-heal-pool: "<aqua>Heal Pool has been purchased by: %player%"
 respawn-title: "<red>YOU DIED!"
 respawn-message: "<yellow>You will respawn in <red>%time% <yellow>seconds"
