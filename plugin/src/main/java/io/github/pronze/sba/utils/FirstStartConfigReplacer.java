@@ -60,7 +60,7 @@ public class FirstStartConfigReplacer {
         updateConfig("gived-game-start-items", List.of("WOODEN_SWORD", "LEATHER_HELMET", "LEATHER_CHESTPLATE", "LEATHER_LEGGINGS", "LEATHER_BOOTS"));
         updateConfig("destroy-placed-blocks-by-explosion-except", "GLASS");
         updateConfig("allowed-commands", List.of("/shout", "/party"));
-        updateConfig("scoreboard.enabled", false);
+        updateConfig("scoreboard.enable", false);
         updateConfig("lobby-scoreboard.enabled", false);
         updateConfig("chat.override", false);
         updateConfig("title.enabled", false);
