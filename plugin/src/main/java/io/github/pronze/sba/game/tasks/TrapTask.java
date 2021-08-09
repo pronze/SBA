@@ -59,17 +59,17 @@ public class TrapTask implements Runnable {
 
                                 LanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
+                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
                                         .send(PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class));
 
                                 var title = LanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_TRAP_TRIGGERED_TITLE)
+                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE)
                                         .toString();
 
                                 var subTitle = LanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_TRAP_TRIGGERED_SUBTITLE)
+                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE)
                                         .toString();
 
                                 team.getConnectedPlayers().forEach(pl -> {
