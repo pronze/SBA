@@ -199,7 +199,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             }
                             break;
                         case "blindtrap":
-                            if (gameStorage.areTrapsEnabled(team)) {
+                            if (gameStorage.areBlindTrapEnabled(team)) {
                                 shouldSellStack = false;
                                 LanguageService
                                         .getInstance()
@@ -211,9 +211,28 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         .get(MessageKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
                                         .toString();
 
-                                gameStorage.setPurchasedTrap(team, true);
+                                gameStorage.setPurchasedBlindTrap(team, true);
                                 team.getConnectedPlayers().forEach(pl ->
                                         SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), blindnessTrapTitle, "", 20, 40, 20));
+                            }
+                            break;
+
+                        case "minertrap":
+                            if (gameStorage.areMinerTrapEnabled(team)) {
+                                shouldSellStack = false;
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.WAIT_FOR_TRAP)
+                                        .send(wrappedPlayer);
+                            } else {
+                                final var minerTrapTitle = LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
+                                        .toString();
+
+                                gameStorage.setPurchasedMinerTrap(team, true);
+                                team.getConnectedPlayers().forEach(pl ->
+                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), minerTrapTitle, "", 20, 40, 20));
                             }
                             break;
 
