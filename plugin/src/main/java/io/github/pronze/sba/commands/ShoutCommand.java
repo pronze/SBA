@@ -64,7 +64,7 @@ public class ShoutCommand {
         if(!cancelShout && !player.hasPermission(Permissions.SHOUT_BYPASS.getKey())) {
             final var sbaPlayerWrapper = wrapper.as(PlayerWrapper.class);
             if (!sbaPlayerWrapper.canShout()) {
-                final var shout = String.valueOf(sbaPlayerWrapper.getShoutTimeOut());
+                final var shout = String.valueOf(sbaPlayerWrapper.getShoutCooldown());
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.MESSAGE_SHOUT_WAIT)

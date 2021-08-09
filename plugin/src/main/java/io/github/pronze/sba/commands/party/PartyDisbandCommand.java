@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyDisbandEvent;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -28,7 +29,7 @@ public class PartyDisbandCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        if (!player.isInParty()) {
+        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
@@ -50,8 +51,7 @@ public class PartyDisbandCommand {
                     }
 
                     final var disbandEvent = new SBAPlayerPartyDisbandEvent(player, party);
-                    SBA
-                            .getPluginInstance()
+                    SBA.getPluginInstance()
                             .getServer()
                             .getPluginManager()
                             .callEvent(disbandEvent);
@@ -62,8 +62,7 @@ public class PartyDisbandCommand {
                             .get(MessageKeys.PARTY_MESSAGE_DISBAND)
                             .send(party.getMembers().toArray(PlayerWrapper[]::new));
 
-                    SBA
-                            .getInstance()
+                    SBA.getInstance()
                             .getPartyManager()
                             .disband(party.getUUID());
                 }, () -> LanguageService

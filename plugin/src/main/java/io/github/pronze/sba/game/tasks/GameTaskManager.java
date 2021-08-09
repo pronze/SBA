@@ -23,6 +23,7 @@ public class GameTaskManager implements IGameTaskManager {
         addTask(HealPoolTask.class);
         addTask(TrapTask.class);
     }
+
     @Override
     public void addTask(@NotNull Class<? extends Runnable> task) {
         if (tasks.contains(task)) {

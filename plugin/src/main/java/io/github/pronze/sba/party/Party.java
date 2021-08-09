@@ -1,4 +1,5 @@
 package io.github.pronze.sba.party;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class Party implements IParty {
     @NotNull
-    private volatile PlayerWrapper leader;
+    private PlayerWrapper leader;
     private final UUID uuid;
     private final List<PlayerWrapper> members;
     private final List<PlayerWrapper> invitedPlayers;
@@ -31,7 +32,7 @@ public class Party implements IParty {
         this.inviteDataMap = new HashMap<>();
         this.settings = new PartySetting();
 
-        leader.setInParty(true);
+        leader.getSettings().enable(PlayerSetting.IN_PARTY);
         members.add(leader);
         Logger.trace("Created party with leader: {}, party is: {}", leader.getName(), debugInfo());
     }
@@ -67,12 +68,12 @@ public class Party implements IParty {
         Logger.trace("Adding player: {} to party: {}", player.getName(), debugInfo());
         invitedPlayers.remove(player);
         members.add(player);
-        player.setInParty(true);
+        leader.getSettings().disable(PlayerSetting.IN_PARTY);
         if (inviteDataMap.containsKey(player.getInstance().getUniqueId())) {
             final var inviteData = inviteDataMap.get(player.getInstance().getUniqueId());
             if (inviteData != null) {
                 SBAUtil.cancelTask(inviteData.getInviteTask());
-                player.setInvitedToAParty(false);
+                player.getSettings().disable(PlayerSetting.IN_PARTY);
                 inviteDataMap.remove(player.getInstance().getUniqueId());
             }
         }
@@ -82,7 +83,7 @@ public class Party implements IParty {
     public void removePlayer(@NotNull PlayerWrapper player) {
         Logger.trace("Removing player: {} from party: {}", player.getName(), debugInfo());
         members.remove(player);
-        player.setInParty(false);
+        player.getSettings().disable(PlayerSetting.IN_PARTY);
     }
 
     @NotNull
@@ -93,13 +94,16 @@ public class Party implements IParty {
 
     @Override
     public synchronized void setPartyLeader(@NotNull PlayerWrapper player) {
-        if (player.equals(leader)) return;
+        if (player.equals(leader)) {
+            return;
+        }
         Logger.trace("Replacing leader: {} with: {} in party of uuid: {}",
                 leader.getName(), player.getName(), debugInfo());
         leader = player;
-        leader.setInParty(true);
-        if (!members.contains(leader))
+        leader.getSettings().disable(PlayerSetting.IN_PARTY);
+        if (!members.contains(leader)) {
             members.add(leader);
+        }
     }
 
     @Override
@@ -114,13 +118,13 @@ public class Party implements IParty {
         Logger.trace("Player: {} has invited: {} to party: {}", player.getName(),
                 invitee.getName(), debugInfo());
         invitedPlayers.add(invitee);
-        invitee.setInvitedToAParty(true);
+        invitee.getSettings().enable(PlayerSetting.IN_PARTY);
 
         final var inviteTask = new BukkitRunnable() {
             @Override
             public void run() {
                 Logger.trace("IParty invitation expired for: {} of party: {}", invitee.getName(), debugInfo());
-                invitee.setInvitedToAParty(false);
+                invitee.getSettings().disable(PlayerSetting.IN_PARTY);
                 inviteDataMap.remove(invitee.getInstance().getUniqueId());
                 if (shouldDisband()) {
                     SBA.getInstance()
@@ -162,7 +166,7 @@ public class Party implements IParty {
         }
 
         invitedPlayers.remove(invitee);
-        invitee.setInvitedToAParty(false);
+        invitee.getSettings().disable(PlayerSetting.IN_PARTY);
     }
 
     @Override

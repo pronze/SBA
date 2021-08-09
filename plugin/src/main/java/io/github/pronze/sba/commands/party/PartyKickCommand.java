@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -30,7 +31,7 @@ public class PartyKickCommand {
                     .getInstance()
                     .getPartyManager()
                     .getPartyOf(player);
-            if (optionalParty.isEmpty() || !player.isInParty() || !player.equals(optionalParty.get().getPartyLeader())) {
+            if (optionalParty.isEmpty() || !player.getSettings().isToggled(PlayerSetting.IN_PARTY) || !player.equals(optionalParty.get().getPartyLeader())) {
                 return List.of();
             }
             return optionalParty.get()
@@ -78,8 +79,7 @@ public class PartyKickCommand {
                             }
 
                             final var kickEvent = new SBAPlayerPartyKickEvent(player, party);
-                            SBA
-                                    .getPluginInstance()
+                            SBA.getPluginInstance()
                                     .getServer()
                                     .getPluginManager()
                                     .callEvent(kickEvent);
@@ -101,8 +101,7 @@ public class PartyKickCommand {
                                     .send(args);
 
                             if (party.getMembers().size() == 1) {
-                                SBA
-                                        .getInstance()
+                                SBA.getInstance()
                                         .getPartyManager()
                                         .disband(party.getUUID());
                             }

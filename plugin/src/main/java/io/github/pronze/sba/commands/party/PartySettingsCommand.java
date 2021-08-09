@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartySetting;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -41,7 +42,7 @@ public class PartySettingsCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        if (!player.isInParty()) {
+        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
@@ -98,7 +99,7 @@ public class PartySettingsCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        if (!player.isInParty()) {
+        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
@@ -106,8 +107,7 @@ public class PartySettingsCommand {
             return;
         }
 
-        SBA
-                .getInstance()
+        SBA.getInstance()
                 .getPartyManager()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {
@@ -129,8 +129,7 @@ public class PartySettingsCommand {
                     }
 
                     final var unmuteEvent = new SBAPlayerPartyUnmutedEvent(player, party);
-                    SBA
-                            .getPluginInstance()
+                    SBA.getPluginInstance()
                             .getServer()
                             .getPluginManager()
                             .callEvent(unmuteEvent);

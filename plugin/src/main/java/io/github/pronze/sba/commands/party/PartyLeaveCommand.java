@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -29,7 +30,7 @@ public class PartyLeaveCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        if (!player.isInParty()) {
+        if (!player.getSettings().isToggled(PlayerSetting.INVITED_TO_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
@@ -50,7 +51,7 @@ public class PartyLeaveCommand {
                             .callEvent(event);
                     if (event.isCancelled()) return;
 
-                    player.setInParty(false);
+                    player.getSettings().disable(PlayerSetting.IN_PARTY);
                     party.removePlayer(player);
                     LanguageService
                             .getInstance()

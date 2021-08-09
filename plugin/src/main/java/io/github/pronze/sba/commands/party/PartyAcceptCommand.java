@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyInviteAcceptEvent;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -28,7 +29,7 @@ public class PartyAcceptCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        if (!player.isInvitedToAParty()) {
+        if (!player.getSettings().isToggled(PlayerSetting.INVITED_TO_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_NOT_INVITED)
@@ -43,16 +44,19 @@ public class PartyAcceptCommand {
 
         optionalParty.ifPresentOrElse(party -> {
             final var acceptEvent = new SBAPlayerPartyInviteAcceptEvent(player, party);
-            SBA
-                    .getPluginInstance()
+            SBA.getPluginInstance()
                     .getServer()
                     .getPluginManager()
                     .callEvent(acceptEvent);
             if (acceptEvent.isCancelled()) {
                 return;
             }
-            player.setInvitedToAParty(false);
-            player.setInParty(true);
+
+
+            player.getSettings()
+                    .disable(PlayerSetting.INVITED_TO_PARTY)
+                    .enable(PlayerSetting.IN_PARTY);
+
             party.addPlayer(player);
 
             LanguageService

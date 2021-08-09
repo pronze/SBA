@@ -30,7 +30,6 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import pronze.lib.scoreboards.Scoreboard;
-
 import java.util.*;
 
 @Service
@@ -174,7 +173,7 @@ public class MainLobbyVisualsManager implements Listener {
                 .lines(lines)
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
-                    final var progress = playerData.getStringProgress();
+                    final var progress = playerData.getProgress();
                     final var playerStatistic  = Main
                             .getPlayerStatisticsManager()
                             .getStatistic(player);
