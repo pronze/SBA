@@ -12,6 +12,7 @@ import java.util.Optional;
 
 public class GameStorage implements IGameStorage {
     private final Map<RunningTeam, GameTeamData> teamDataMap = new HashMap<>();
+    private RunningTeam team;
 
     public GameStorage(Game game) {
         game.getRunningTeams().forEach(team -> teamDataMap.put(team, GameTeamData.of(team)));
@@ -74,11 +75,19 @@ public class GameStorage implements IGameStorage {
     }
 
     @Override
-    public void setPurchasedTrap(@NotNull RunningTeam team, boolean isTrapEnabled) {
+    public void setPurchasedBlindTrap(@NotNull RunningTeam team, boolean isBlindTrapEnabled) {
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
-        teamDataMap.get(team).setPurchasedTrap(isTrapEnabled);
+        teamDataMap.get(team).setPurchasedBlindTrap(isBlindTrapEnabled);
+    }
+
+    @Override
+    public void setPurchasedMinerTrap(@NotNull RunningTeam team, boolean isMinerTrapEnabled) {
+        if (!teamDataMap.containsKey(team)) {
+            throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
+        }
+        teamDataMap.get(team).setPurchasedBlindTrap(isMinerTrapEnabled);
     }
 
     @Override
@@ -98,11 +107,19 @@ public class GameStorage implements IGameStorage {
     }
 
     @Override
-    public boolean areTrapsEnabled(@NotNull RunningTeam team) {
+    public boolean areBlindTrapEnabled(@NotNull RunningTeam team) {
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
-        return teamDataMap.get(team).isPurchasedTrap();
+        return teamDataMap.get(team).isPurchasedBlindTrap();
+    }
+
+    @Override
+    public boolean areMinerTrapEnabled(@NotNull RunningTeam team) {
+        if (!teamDataMap.containsKey(team)) {
+            throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
+        }
+        return teamDataMap.get(team).isPurchasedMinerTrap();
     }
 
     @Override
@@ -130,11 +147,19 @@ public class GameStorage implements IGameStorage {
     }
 
     @Override
-    public boolean areTrapsEnabled() {
+    public boolean areBlindTrapEnabled() {
         return teamDataMap
                 .values()
                 .stream()
-                .anyMatch(GameTeamData::isPurchasedTrap);
+                .anyMatch(GameTeamData::isPurchasedBlindTrap);
+    }
+
+    @Override
+    public boolean areMinerTrapEnabled() {
+        return teamDataMap
+                .values()
+                .stream()
+                .anyMatch(GameTeamData::isPurchasedMinerTrap);
     }
 
     @Override

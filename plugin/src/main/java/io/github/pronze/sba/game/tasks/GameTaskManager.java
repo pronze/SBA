@@ -22,6 +22,7 @@ public class GameTaskManager implements IGameTaskManager {
         addTask(GeneratorTask.class);
         addTask(HealPoolTask.class);
         addTask(TrapTask.class);
+        addTask(MinerTrapTask.class);
     }
 
     @Override

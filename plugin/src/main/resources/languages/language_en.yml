@@ -32,11 +32,16 @@ error-occured: "<red><bold>AN ERROR HAS OCCURRED</bold>"
 greatest-enchantment: "<red><bold>You Already have the greatest enchantment</bold>"
 generator-upgrade: "%MatName%<yellow> generator has been upgraded to <red>%tier%"
 shout-format: "<gold>[SHOUT] %color%[%team%]<reset> %player%<gray>: <reset>%message%"
-trap-triggered:
+blind-trap-triggered:
   message: "<yellow>You have been blinded by %team% team!"
   title: "<red>Trap Triggered!"
   sub-title: "<yellow>Someone has entered your base!"
+miner-trap-triggered:
+  message: "<yellow>You have been slowed by %team% team!"
+  title: "<red>Trap Triggered!"
+  sub-title: "<yellow>Someone has entered your base!"
 blindness-trap-purchased-title: "<gold>Blindness Trap has been purchased!"
+miner-trap-purchased-title: "<gold>Mining Fatigue Trap has been purchased!"
 purchase-heal-pool: "<aqua>Heal Pool has been purchased by: %player%"
 respawn-title: "<red>YOU DIED!"
 respawn-message: "<yellow>You will respawn in <red>%time% <yellow>seconds"

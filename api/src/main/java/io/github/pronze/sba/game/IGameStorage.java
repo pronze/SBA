@@ -63,9 +63,16 @@ public interface IGameStorage {
     /**
      * Sets whether the trap has been enabled for the specified team.
      * @param team the team instance to set
-     * @param isTrapEnabled the trap boolean to be set
+     * @param isBlindTrapEnabled the trap boolean to be set
      */
-    void setPurchasedTrap(@NotNull RunningTeam team, boolean isTrapEnabled);
+    void setPurchasedBlindTrap(@NotNull RunningTeam team, boolean isBlindTrapEnabled);
+
+    /**
+     * Sets whether the trap has been enabled for the specified team.
+     * @param team the team instance to set
+     * @param isMinerTrapEnabled the trap boolean to be set
+     */
+    void setPurchasedMinerTrap(@NotNull RunningTeam team, boolean isMinerTrapEnabled);
 
     /**
      * Sets whether the pool has been enabled for the specified team.
@@ -82,10 +89,16 @@ public interface IGameStorage {
     void setPurchasedDragons(@NotNull RunningTeam team, boolean isDragonsEnabled);
 
     /**
-     * Returns a boolean if the traps are enabled for any teams in the game.
+     * Returns a boolean if the blindness trap are enabled for any teams in the game.
      * @return true if traps are enabled for any teams in the game, false otherwise
      */
-    boolean areTrapsEnabled();
+    boolean areBlindTrapEnabled();
+
+    /**
+     * Returns a boolean if the miner trap are enabled for any teams in the game.
+     * @return true if traps are enabled for any teams in the game, false otherwise
+     */
+    boolean areMinerTrapEnabled();
 
     /**
      * Returns a boolean if the pools are enabled for any teams in the game.
@@ -100,11 +113,18 @@ public interface IGameStorage {
     boolean areDragonsEnabled();
 
     /**
+     * Returns a boolean if the blindness trap are enabled for the specified team.
+     * @param team the team instance to query
+     * @return true if traps are enabled for the specified team, false otherwise
+     */
+    boolean areBlindTrapEnabled(@NotNull RunningTeam team);
+
+    /**
      * Returns a boolean if the traps are enabled for the specified team.
      * @param team the team instance to query
      * @return true if traps are enabled for the specified team, false otherwise
      */
-    boolean areTrapsEnabled(@NotNull RunningTeam team);
+    boolean areMinerTrapEnabled(@NotNull RunningTeam team);
 
     /**
      * Returns a boolean if the pool are enabled for the specified team.

@@ -38,9 +38,14 @@ public class GameTeamData {
     private boolean purchasedPool;
 
     /**
-     * A boolean representing whether the team has purchased the Trap upgrade from the Upgrades store.
+     * A boolean representing whether the team has purchased the Blind Trap upgrade from the Upgrades store.
      */
-    private boolean purchasedTrap;
+    private boolean purchasedBlindTrap;
+
+    /**
+     * A boolean representing whether the team has purchased the Miner Trap upgrade from the Upgrades store.
+     */
+    private boolean purchasedMinerTrap;
 
     /**
      * A boolean representing whether the team has purchased the Dragon upgrade from the Upgrades store.

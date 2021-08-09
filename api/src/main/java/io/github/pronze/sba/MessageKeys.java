@@ -90,9 +90,12 @@ public class MessageKeys {
     public static final String[] VICTORY_TITLE = {"victory-title"};
     public static final String[] ROTATING_GENERATOR_FORMAT = {"floating-generator", "holo-text"};
     public static final String[] ROTATING_GENERATOR_FULL_TEXT_FORMAT = {"floating-generator", "full-text"};
-    public static final String[] TEAM_TRAP_TRIGGERED_MESSAGE = {"trap-triggered", "message"};
-    public static final String[] TEAM_TRAP_TRIGGERED_TITLE = {"trap-triggered", "title"};
-    public static final String[] TEAM_TRAP_TRIGGERED_SUBTITLE = {"trap-triggered", "sub-title"};
+    public static final String[] TEAM_BLIND_TRAP_TRIGGERED_MESSAGE = {"blind-trap-triggered", "message"};
+    public static final String[] TEAM_BLIND_TRAP_TRIGGERED_TITLE = {"blind-trap-triggered", "title"};
+    public static final String[] TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE = {"blind-trap-triggered", "sub-title"};
+    public static final String[] TEAM_MINER_TRAP_TRIGGERED_MESSAGE = {"miner-trap-triggered", "message"};
+    public static final String[] TEAM_MINER_TRAP_TRIGGERED_TITLE = {"miner-trap-triggered", "title"};
+    public static final String[] TEAM_MINER_TRAP_TRIGGERED_SUBTITLE = {"miner-trap-triggered", "sub-title"};
     public static final String[] GENERATOR_UPGRADE_MESSAGE = {"generator-upgrade"};
     public static final String[] RESPAWN_COUNTDOWN_TITLE = {"respawn-title"};
     public static final String[] RESPAWN_COUNTDOWN_SUBTITLE = {"respawn-subtitle"};
@@ -103,6 +106,7 @@ public class MessageKeys {
     public static final String[] GREATEST_ENCHANTMENT = {"greatest-enchantment"};
     public static final String[] WAIT_FOR_TRAP = {"wait-trap"};
     public static final String[] BLINDNESS_TRAP_PURCHASED_TITLE = {"blindness-trap-purchased-title"};
+    public static final String[] MINER_TRAP_PURCHASED_TITLE = {"miner-trap-purchased-title"};
     public static final String[] PURCHASED_HEAL_POOL_MESSAGE = {"purchase-heal-pool"};
     public static final String[] UPGRADE_TEAM_PROTECTION = {"upgrade-team-protection"};
     public static final String[] UGPRADE_TEAM_SHARPNESS = {"upgrade-team-sharpness"};
