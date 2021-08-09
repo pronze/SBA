@@ -1,9 +1,7 @@
 package io.github.pronze.sba.game;
 
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Arrays;
-import java.util.Locale;
 
 public enum GameMode {
     SOLOS,

@@ -1,6 +1,7 @@
 package io.github.pronze.sba.listener;
 
 import io.github.pronze.sba.events.SBAPlayerPartyChatEvent;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
@@ -28,7 +29,7 @@ public class PartyListener implements Listener {
                 .wrapPlayer(event.getPlayer())
                 .as(PlayerWrapper.class);
 
-        if (player.isPartyChatEnabled() && player.isInParty()) {
+        if (player.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED) && player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             event.setCancelled(true);
             SBA.getInstance()
                     .getPartyManager()

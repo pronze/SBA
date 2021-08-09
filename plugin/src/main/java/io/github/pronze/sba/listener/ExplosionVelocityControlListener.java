@@ -31,7 +31,7 @@ public class ExplosionVelocityControlListener implements Listener {
             if (entity instanceof Player) {
                 final var player = (Player) entity;
                 if (explosionAffectedPlayers.contains(player)) {
-                    event.setDamage(0.0D);
+                    event.setDamage(4.0D);
                     explosionAffectedPlayers.remove(player);
                 }
             }

@@ -29,8 +29,7 @@ public class PartyDebugCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        SBA
-                .getInstance()
+        SBA.getInstance()
                 .getPartyManager()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> sender.sendMessage(party.toString()), () ->

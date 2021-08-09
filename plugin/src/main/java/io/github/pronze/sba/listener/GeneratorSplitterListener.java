@@ -7,16 +7,18 @@ import org.bukkit.Material;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.bukkit.utils.nms.Version;
+import org.screamingsandals.lib.event.OnEvent;
+import org.screamingsandals.lib.event.player.SPlayerPickupItemEvent;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,7 +37,7 @@ public class GeneratorSplitterListener {
             SBA.getInstance().registerListener(new GeneratorSplitterListenerBefore112());
         }
         allowedMaterials = Objects.requireNonNull(SBAConfig.getInstance().node("generator-splitter", "allowed-materials").
-                getList(String.class))
+                        getList(String.class))
                 .stream()
                 .map(matName -> Material.valueOf(matName.toUpperCase().trim()))
                 .collect(Collectors.toList());
@@ -73,7 +75,7 @@ public class GeneratorSplitterListener {
                             nearbyPlayer.getInventory().addItem(item.getItemStack().clone());
                             Sounds.playSound(nearbyPlayer, nearbyPlayer.getLocation(),
                                     "ENTITY_ITEM_PICKUP",
-                                        Sounds.ENTITY_ITEM_PICKUP, 1, 1);
+                                    Sounds.ENTITY_ITEM_PICKUP, 1, 1);
                         }
                     });
         }
@@ -82,7 +84,7 @@ public class GeneratorSplitterListener {
     private static class GeneratorSplitterListener112 implements Listener {
 
         @SneakyThrows
-        @EventHandler
+        @EventHandler(priority = EventPriority.LOWEST)
         public void onPickup(EntityPickupItemEvent event) {
             if (!((event.getEntity()) instanceof Player)) {
                 return;
@@ -92,7 +94,7 @@ public class GeneratorSplitterListener {
     }
 
     private static class GeneratorSplitterListenerBefore112 implements Listener {
-        @EventHandler
+        @EventHandler(priority = EventPriority.LOWEST)
         public void onPickup(PlayerPickupItemEvent event) {
             GeneratorSplitterListener.onPickup(event.getPlayer(), event.getItem());
         }

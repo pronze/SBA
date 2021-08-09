@@ -1,6 +1,7 @@
 package io.github.pronze.sba.party;
 
 import io.github.pronze.sba.manager.IPartyManager;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
@@ -103,7 +104,7 @@ public class PartyManager implements IPartyManager {
                 .getStringList("party.message.disband");
 
         party.getMembers().forEach(member -> {
-            member.setInParty(false);
+            member.getSettings().disable(PlayerSetting.IN_PARTY);
             party.removePlayer(member);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(member.getInstance())
@@ -116,7 +117,7 @@ public class PartyManager implements IPartyManager {
         });
 
         party.getInvitedPlayers().forEach(invitedPlayer -> {
-            invitedPlayer.setInvitedToAParty(false);
+            invitedPlayer.getSettings().disable(PlayerSetting.IN_PARTY);
             party.removeInvitedPlayer(invitedPlayer);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(invitedPlayer.getInstance())

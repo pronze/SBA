@@ -24,6 +24,7 @@ public class GameTaskManager implements IGameTaskManager {
         addTask(TrapTask.class);
         addTask(MinerTrapTask.class);
     }
+
     @Override
     public void addTask(@NotNull Class<? extends Runnable> task) {
         if (tasks.contains(task)) {

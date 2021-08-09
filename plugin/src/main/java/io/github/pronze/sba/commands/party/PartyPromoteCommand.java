@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -54,7 +55,7 @@ public class PartyPromoteCommand {
                 .wrapPlayer(toPromote)
                 .as(PlayerWrapper.class);
 
-        if (!player.isInParty()) {
+        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)

@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -27,11 +28,12 @@ public class PartyChatCommand {
                 .wrapPlayer(playerArg)
                 .as(PlayerWrapper.class);
 
-        player.setPartyChatEnabled(!player.isPartyChatEnabled());
+        player.getSettings().toggle(PlayerSetting.PARTY_CHAT_ENABLED);
+
         LanguageService
                 .getInstance()
                 .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
-                .replace("%mode%", player.isPartyChatEnabled() ? "enabled" : "disabled")
+                .replace("%mode%", player.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED) ? "enabled" : "disabled")
                 .send(player);
     }
 }

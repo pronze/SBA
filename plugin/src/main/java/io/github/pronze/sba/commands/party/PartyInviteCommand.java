@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -43,7 +44,7 @@ public class PartyInviteCommand {
                     .send(player);
             return;
         }
-        if (invitedPlayer.isInvitedToAParty()) {
+        if (invitedPlayer.getSettings().isToggled(PlayerSetting.INVITED_TO_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_ALREADY_INVITED)
@@ -51,7 +52,7 @@ public class PartyInviteCommand {
             return;
         }
 
-        if (invitedPlayer.isInParty()) {
+        if (invitedPlayer.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_CANNOT_INVITE)
