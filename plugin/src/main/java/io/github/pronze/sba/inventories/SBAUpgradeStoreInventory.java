@@ -48,6 +48,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
             "protection",
             "efficiency",
             "blindtrap",
+            "minertrap",
             "healpool",
             "dragon"
     );
