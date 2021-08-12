@@ -38,39 +38,42 @@ public class SBAExpansion extends PlaceholderExpansion {
         if (identifiers.length <= 1) return null;
         if (Objects.equals(identifiers[0], "sba")) {
             identifiers = Arrays.copyOfRange(identifiers, 1, identifiers.length);
-        }
-
-        if (identifiers[0].equalsIgnoreCase("player")) {
-            final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();
-            switch (identifiers[1]) {
-                case "level":
-                    return Integer.toString(database.getLevel());
-                case "xp":
-                    return Integer.toString(database.getXP());
-                case "progress":
-                    return Integer.toString(database.getIntegerProgress());
+            if (identifiers.length >= 1) {
+                if (identifiers[0].equalsIgnoreCase("player")) {
+                    final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();
+                    switch (identifiers[1]) {
+                        case "level":
+                            return Integer.toString(database.getLevel());
+                        case "xp":
+                            return Integer.toString(database.getXP());
+                        case "progress":
+                            return Integer.toString(database.getIntegerProgress());
+                    }
+                } else if (identifiers[0].equalsIgnoreCase("game")) {
+                    if (identifiers.length <= 2) return null;
+                    final Game game = Main.getInstance().getGameByName(identifiers[1]);
+                    switch (identifiers[2]) {
+                        case "status":
+                            return game.getStatus().toString();
+                        case "teams":
+                            return Integer.toString(game.countRunningTeams());
+                        case "players":
+                            return Integer.toString(game.countConnectedPlayers());
+                        case "time":
+                            return Integer.toString(game.getArenaTime().time);
+                        case "gametime":
+                            return Integer.toString(game.getGameTime());
+                        case "minplayers":
+                            return Integer.toString(game.getMinPlayers());
+                        case "maxplayers":
+                            return Integer.toString(game.getMaxPlayers());
+                    }
+                } else if (identifiers[0].equalsIgnoreCase("version")) {
+                    return SBA.getInstance().getVersion();
+                }
+            } else {
+                return null;
             }
-        } else if (identifiers[0].equalsIgnoreCase("game")) {
-            if (identifiers.length <= 2) return null;
-            final Game game = Main.getInstance().getGameByName(identifiers[1]);
-            switch (identifiers[2]) {
-                case "status":
-                    return game.getStatus().toString();
-                case "teams":
-                    return Integer.toString(game.countRunningTeams());
-                case "players":
-                    return Integer.toString(game.countConnectedPlayers());
-                case "time":
-                    return Integer.toString(game.getArenaTime().time);
-                case "gametime":
-                    return Integer.toString(game.getGameTime());
-                case "minplayers":
-                    return Integer.toString(game.getMinPlayers());
-                case "maxplayers":
-                    return Integer.toString(game.getMaxPlayers());
-            }
-        } else if (identifiers[0].equalsIgnoreCase("version")) {
-            return SBA.getInstance().getVersion();
         }
 
         return super.onPlaceholderRequest(player, identifier);
