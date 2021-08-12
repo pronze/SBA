@@ -9,6 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import io.github.pronze.sba.service.PlayerWrapperService;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class SBAExpansion extends PlaceholderExpansion {
     @Override
     public @NotNull String getIdentifier() {
@@ -33,6 +36,9 @@ public class SBAExpansion extends PlaceholderExpansion {
 
         String[] identifiers = identifier.split("_", 0);
         if (identifiers.length <= 1) return null;
+        if (Objects.equals(identifiers[0], "sba")) {
+            identifiers = Arrays.copyOfRange(identifiers, 1, identifiers.length);
+        }
 
         if (identifiers[0].equalsIgnoreCase("player")) {
             final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();

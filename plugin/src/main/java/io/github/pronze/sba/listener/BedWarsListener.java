@@ -1,6 +1,8 @@
 package io.github.pronze.sba.listener;
 
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.events.SBAFinalKillEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
@@ -280,6 +282,10 @@ public class BedWarsListener implements Listener {
                                         if (!victimTeam.isAlive()) {
                                             // increment final kill counter for killer
                                             killerData.setFinalKills(killerData.getFinalKills() + 1);
+                                            Bukkit.getPluginManager().callEvent(new SBAFinalKillEvent(game, victim, killer));
+                                            if (SBAConfig.getInstance().node("final-kill-lightning").getBoolean(true)) {
+                                                victim.getWorld().strikeLightningEffect(victim.getLocation());
+                                            }
                                         }
                                     });
                         }

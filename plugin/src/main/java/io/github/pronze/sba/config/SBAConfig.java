@@ -108,6 +108,7 @@ public class SBAConfig implements IConfigurator {
                     .key("replace-sword-on-upgrade").defValue(true)
                     .key("block-players-putting-certain-items-onto-chest").defValue(true)
                     .key("disable-armor-inventory-movement").defValue(true)
+                    .key("final-kill-lightning").defValue(true)
                     .section("floating-generator")
                         .key("enabled").defValue(true)
                         .key("height").defValue(2.5)
