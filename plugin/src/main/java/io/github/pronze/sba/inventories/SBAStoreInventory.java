@@ -1,56 +1,37 @@
 package io.github.pronze.sba.inventories;
 
 import io.github.pronze.sba.MessageKeys;
-import io.github.pronze.sba.game.IStoreInventory;
+import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.PlayerWrapper;
 import lombok.SneakyThrows;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
-import org.screamingsandals.bedwars.api.upgrades.Upgrade;
-import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
-import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.game.GameStore;
-import org.screamingsandals.lib.material.Item;
-import org.screamingsandals.lib.material.builder.ItemFactory;
-import org.screamingsandals.lib.material.meta.EnchantmentHolder;
-import org.screamingsandals.lib.material.meta.EnchantmentMapping;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.annotations.Service;
-import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
-import org.screamingsandals.simpleinventories.events.OnTradeEvent;
-import org.screamingsandals.simpleinventories.events.PreClickEvent;
 import org.screamingsandals.simpleinventories.inventory.Include;
 import org.screamingsandals.simpleinventories.inventory.InventorySet;
-import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.utils.ShopUtil;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
 
-import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
 
 @Service(dependsOn = {
         SimpleInventoriesCore.class,
@@ -108,7 +89,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
                     Arrays.stream(player.getInventory().getContents().clone())
                             .filter(Objects::nonNull)
                             .filter(itemStack -> itemStack.getType().name().endsWith("SWORD"))
-                            .forEach(sword -> player.getInventory().remove(sword));
+                            .forEach(sword -> player.getInventory().removeItem(sword));
                 }
                 break;
             case "boots":

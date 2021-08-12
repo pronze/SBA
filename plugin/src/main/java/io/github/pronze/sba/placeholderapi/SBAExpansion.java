@@ -1,13 +1,14 @@
 package io.github.pronze.sba.placeholderapi;
 
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.game.Game;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.service.PlayerWrapperService;
+import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.wrapper.PlayerWrapper;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
-import io.github.pronze.sba.service.PlayerWrapperService;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.game.Game;
 
 public class SBAExpansion extends PlaceholderExpansion {
     @Override
@@ -27,14 +28,13 @@ public class SBAExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
-        if (player == null) {
-            return " ";
-        }
-
-        String[] identifiers = identifier.split("_", 0);
+        Logger.trace("Placeholder '" + identifier + "' was requested.");
+        String[] identifiers = identifier.split("_");
         if (identifiers.length <= 1) return null;
-
         if (identifiers[0].equalsIgnoreCase("player")) {
+            if (player == null) {
+                return "";
+            }
             final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();
             switch (identifiers[1]) {
                 case "level":
