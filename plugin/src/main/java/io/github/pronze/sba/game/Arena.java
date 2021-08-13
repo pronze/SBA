@@ -181,8 +181,9 @@ public class Arena implements IArena {
                     .forEach(npc::addViewer);
 
             npc.show();
-
         });
+
+      ((org.screamingsandals.bedwars.game.Game)game).getGameStoreList().clear();
     }
 
     // non api event handler
