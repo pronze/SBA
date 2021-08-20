@@ -5,6 +5,7 @@ import io.github.pronze.sba.game.IArena;
 import io.github.pronze.sba.game.InvisiblePlayer;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -89,7 +90,7 @@ public class MockArena implements IArena {
     }
 
     @Override
-    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner) {
+    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner, @NotNull Material material) {
 
     }
 

@@ -29,6 +29,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.screamingsandals.lib.world.LocationMapper;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,16 +131,14 @@ public class Arena implements IArena {
 
         // spawn rotating generators
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
-            final var arena = ArenaManager
-                    .getInstance()
-                    .get(game.getName())
-                    .orElseThrow();
-
             game.getItemSpawners()
-                    .stream()
-                    .filter(itemSpawner -> itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD ||
-                            itemSpawner.getItemSpawnerType().getMaterial() == Material.DIAMOND)
-                    .forEach(itemSpawner -> arena.createRotatingGenerator((ItemSpawner) itemSpawner));
+                    .forEach(itemSpawner -> {
+                        for (var entry : SBAConfig.getInstance().node("floating-generator", "mapping").childrenMap().entrySet()) {
+                            if (itemSpawner.getItemSpawnerType().getMaterial().name().equalsIgnoreCase(((String) entry.getKey()).toUpperCase())) {
+                                createRotatingGenerator((ItemSpawner) itemSpawner, Material.valueOf(entry.getValue().getString("AIR")));
+                            }
+                        }
+                    });
         }
 
         game.getGameStores().forEach(store -> {
@@ -183,7 +182,7 @@ public class Arena implements IArena {
             npc.show();
         });
 
-      ((org.screamingsandals.bedwars.game.Game)game).getGameStoreList().clear();
+        ((org.screamingsandals.bedwars.game.Game) game).getGameStoreList().clear();
     }
 
     // non api event handler
@@ -301,13 +300,8 @@ public class Arena implements IArena {
     }
 
     @Override
-    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner) {
-        final var spawnerMaterial = itemSpawner.getItemSpawnerType().getMaterial();
-        final var rotationStack = spawnerMaterial == Material.DIAMOND ?
-                new ItemStack(Material.DIAMOND_BLOCK) :
-                new ItemStack(Material.EMERALD_BLOCK);
-
-        final var generator = new RotatingGenerator(itemSpawner, rotationStack, itemSpawner.getLocation());
+    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner, @NotNull Material rotationMaterial) {
+        final var generator = new RotatingGenerator(itemSpawner, new ItemStack(rotationMaterial), itemSpawner.getLocation());
         generator.spawn(game.getConnectedPlayers());
         rotatingGenerators.add(generator);
     }

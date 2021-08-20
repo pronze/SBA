@@ -65,6 +65,9 @@ public class FirstStartConfigReplacer {
         updateConfig("chat.override", false);
         updateConfig("title.enabled", false);
         updateConfig("items.leavegame", "RED_BED");
+        updateConfig("player-drops", false);
+        updateConfig("compass-enabled", false);
+        updateConfig("add-wool-to-inventory-on-join", false);
         updateConfig("resources", Map.of(
                 "emerald", Map.of(
                         "material", "EMERALD",

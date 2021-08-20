@@ -1,6 +1,7 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GamePlayerData;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -98,8 +99,9 @@ public interface IArena {
      * Creates a floating generator above the location of spawner. This generator is upgradable.
      *
      * @param itemSpawner the item spawner instance to be rotated.
+     * @param rotationMaterial the material used as the head of armor stand
      */
-    void createRotatingGenerator(@NotNull ItemSpawner itemSpawner);
+    void createRotatingGenerator(@NotNull ItemSpawner itemSpawner, @NotNull Material rotationMaterial);
 
     /**
      * @return a list containing all the normal store npc's registered to the arena.
