@@ -69,6 +69,7 @@ public class FirstStartConfigReplacer {
         updateConfig("compass-enabled", false);
         updateConfig("add-wool-to-inventory-on-join", false);
         updateConfig("breakable.blocks", List.of("GRASS", "SNOW"));
+        updateConfig("disable-hunger", true);
         updateConfig("resources", Map.of(
                 "emerald", Map.of(
                         "material", "EMERALD",
