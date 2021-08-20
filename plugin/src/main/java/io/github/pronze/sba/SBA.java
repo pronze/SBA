@@ -43,11 +43,14 @@ import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
 import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.utils.Controllable;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -131,10 +134,15 @@ public class SBA extends PluginContainer implements AddonAPI {
         ScoreboardManager.init(getPluginInstance());
         // register API
         Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
+
+        // TODO:
+        var pluginControllable = Reflect.getField(getPluginInstance(), "pluginControllable");
+        if (pluginControllable instanceof Controllable) {
+            ((Controllable) pluginControllable).child().postEnable(this::onPostEnable);
+        }
     }
 
-    @OnPostEnable
-    public void postEnabled() {
+    public void onPostEnable() {
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
@@ -148,9 +156,11 @@ public class SBA extends PluginContainer implements AddonAPI {
 
         InventoryListener.init(getPluginInstance());
 
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            Logger.trace("Registering SBAExpansion...");
             new SBAExpansion().register();
         }
+
         getLogger().info("Plugin has loaded");
     }
 

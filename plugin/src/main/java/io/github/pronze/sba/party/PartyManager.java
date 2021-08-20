@@ -28,9 +28,7 @@ public class PartyManager implements IPartyManager {
 
     private final Map<UUID, IParty> partyMap = new HashMap<>();
 
-    public PartyManager() {
-        Logger.trace("IPartyManager has been initialized!");
-    }
+    public PartyManager() {}
 
     @Override
     public Optional<IParty> createParty(@NotNull PlayerWrapper leader) {
