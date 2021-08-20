@@ -67,7 +67,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
         event.getVictim().sendMessage(" ");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBedWarsPlayerDeathEvent(BedwarsPlayerDeathMessageSendEvent event) {
         final var victim = event.getVictim();
         final var victimTeam = event.getGame().getTeamOfPlayer(victim);
@@ -98,9 +98,6 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                             .get(MessageKeys.DEATH_MESSAGES_VOID_KILL)
                             .replace("%player%", victimTeamColorStr + victim.getName())
                             .replace("%killer%", killerTeamColorStr + killer.getName());
-                    if (!victimTeam.isTargetBlockExists()) {
-                        message = Message.of(List.of(message.toString() + " " + LanguageService.getInstance().get(MessageKeys.FINAL_KILL_PREFIX).toString()));
-                    }
                     event.setMessage(message.toString());
                 }
             }
@@ -124,6 +121,9 @@ public class BedwarsCustomMessageModifierListener implements Listener {
             }
         }
 
-
+        if (!victimTeam.isTargetBlockExists()) {
+            final var finalKillPrefix = LanguageService.getInstance().get(MessageKeys.FINAL_KILL_PREFIX).toString();
+            event.setMessage(event.getMessage() + " " + finalKillPrefix);
+        }
     }
 }
