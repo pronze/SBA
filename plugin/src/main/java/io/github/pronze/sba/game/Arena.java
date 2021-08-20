@@ -8,12 +8,14 @@ import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
-import io.github.pronze.sba.utils.MockEntity;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
+import org.bukkit.entity.Bat;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class Arena implements IArena {
+    private static LivingEntity mockEntity = null;
     private final List<IRotatingGenerator> rotatingGenerators;
     private final Map<UUID, InvisiblePlayer> invisiblePlayers;
     private final Map<UUID, GamePlayerData> playerDataMap;
@@ -151,8 +154,14 @@ public class Arena implements IArena {
             }
 
 
-            // create fake entity to avoid bw listener npe
-            Reflect.setField(nonAPIStore, "entity", new MockEntity());
+            if (mockEntity == null) {
+                // find a better version independent way to mock entities lol
+                mockEntity = (Bat) game.getGameWorld().spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                mockEntity.setAI(false);
+            }
+
+            // set fake entity to avoid bw listener npe
+            Reflect.setField(nonAPIStore, "entity", mockEntity);
 
             NPCSkin skin = null;
             List<Component> name = null;
@@ -185,10 +194,8 @@ public class Arena implements IArena {
                     .stream()
                     .map(PlayerMapper::wrapPlayer)
                     .forEach(npc::addViewer);
-
             npc.show();
         });
-
     }
 
     // non api event handler

@@ -89,6 +89,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
                     Arrays.stream(player.getInventory().getContents().clone())
                             .filter(Objects::nonNull)
                             .filter(itemStack -> itemStack.getType().name().endsWith("SWORD"))
+                            .filter(itemStack ->  !itemStack.isSimilar(newItem))
                             .forEach(sword -> player.getInventory().removeItem(sword));
                 }
                 break;
