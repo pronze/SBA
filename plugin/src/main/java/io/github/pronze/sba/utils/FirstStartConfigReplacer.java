@@ -68,6 +68,7 @@ public class FirstStartConfigReplacer {
         updateConfig("player-drops", false);
         updateConfig("compass-enabled", false);
         updateConfig("add-wool-to-inventory-on-join", false);
+        updateConfig("breakable.blocks", List.of("GRASS", "SNOW"));
         updateConfig("resources", Map.of(
                 "emerald", Map.of(
                         "material", "EMERALD",
