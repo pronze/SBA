@@ -8,6 +8,7 @@ import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
+import io.github.pronze.sba.utils.MockEntity;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Getter;
@@ -28,6 +29,7 @@ import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.*;
@@ -142,10 +144,15 @@ public class Arena implements IArena {
         }
 
         game.getGameStores().forEach(store -> {
-            final var villager = ((GameStore) store).kill();
+            final var nonAPIStore = (GameStore) store;
+            final var villager = nonAPIStore.kill();
             if (villager != null) {
                 Main.unregisterGameEntity(villager);
             }
+
+
+            // create fake entity to avoid bw listener npe
+            Reflect.setField(nonAPIStore, "entity", new MockEntity());
 
             NPCSkin skin = null;
             List<Component> name = null;
@@ -182,7 +189,6 @@ public class Arena implements IArena {
             npc.show();
         });
 
-        ((org.screamingsandals.bedwars.game.Game) game).getGameStoreList().clear();
     }
 
     // non api event handler

@@ -19,6 +19,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
@@ -93,6 +94,7 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .get(game.getName())
                 .ifPresent(arena -> ((Arena)arena).onOver(e));
+        Tasker.build(() -> ArenaManager.getInstance().removeArena(game)).afterOneTick().start();
     }
 
     @EventHandler
