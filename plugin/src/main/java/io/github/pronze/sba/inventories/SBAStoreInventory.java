@@ -7,7 +7,7 @@ import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.ShopUtil;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.SneakyThrows;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -144,7 +144,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
             if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened store!", event.getPlayer().getName());
-                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(PlayerWrapper.class), (GameStore) event.getStore());
+                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class), (GameStore) event.getStore());
             }
         }
     }

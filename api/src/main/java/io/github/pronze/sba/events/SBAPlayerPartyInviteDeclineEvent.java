@@ -1,7 +1,7 @@
 package io.github.pronze.sba.events;
 
 import io.github.pronze.sba.party.IParty;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Cancellable;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 public class SBAPlayerPartyInviteDeclineEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
-    private final PlayerWrapper player;
+    private final SBAPlayerWrapper player;
     private final IParty party;
     private boolean cancelled;
 

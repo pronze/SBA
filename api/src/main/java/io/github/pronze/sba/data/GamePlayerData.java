@@ -16,7 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @Data
 public class GamePlayerData {
-
     /**
      * Name of the game player.
      */

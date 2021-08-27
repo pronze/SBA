@@ -271,7 +271,9 @@ public class SBAConfig implements IConfigurator {
                         .key("height").defValue(10)
                         .key("width").defValue(3)
                         .key("floor").defValue(false)
-                        .back();
+                        .back()
+                    .key("replace-stores-with-npc").defValue(true);
+
             generator.saveIfModified();
         } catch (Exception ex) {
             ex.printStackTrace();

@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyPromoteEvent;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
@@ -24,19 +25,18 @@ public class PartyPromoteCommand {
     @OnPostEnable
     public void onPostEnable() {
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("promote", (ctx, s) -> {
-            final var optionalParty = SBA
+            final var optionalParty = PartyManager
                     .getInstance()
-                    .getPartyManager()
                     .getPartyOf(PlayerMapper
                             .wrapPlayer((Player)ctx.getSender())
-                            .as(PlayerWrapper.class));
+                            .as(SBAPlayerWrapper.class));
             if (optionalParty.isEmpty()) {
                 return List.of();
             }
             return optionalParty.get()
                     .getMembers()
                     .stream()
-                    .map(PlayerWrapper::getName)
+                    .map(SBAPlayerWrapper::getName)
                     .collect(Collectors.toList());
         });
         CommandManager.getInstance().getAnnotationParser().parse(this);
@@ -49,11 +49,11 @@ public class PartyPromoteCommand {
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
         final var args = PlayerMapper
                 .wrapPlayer(toPromote)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -90,7 +90,7 @@ public class PartyPromoteCommand {
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
                             .replace("%player%", args.getName())
-                            .send(party.getMembers().toArray(new PlayerWrapper[0]));
+                            .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                 }, () -> LanguageService
                         .getInstance()

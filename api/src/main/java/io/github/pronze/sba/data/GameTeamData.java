@@ -13,7 +13,6 @@ import org.screamingsandals.bedwars.api.Team;
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @Data
 public class GameTeamData {
-
     /**
      * Current level of sharpness for the team.
      * Enchant applied is {@link org.bukkit.enchantments.Enchantment#DAMAGE_ALL}
@@ -56,7 +55,6 @@ public class GameTeamData {
      * Location of the target block of the team.
      */
     private final Location targetBlockLoc;
-
 
     /**
      * Constructs a new GameTeamData instance.

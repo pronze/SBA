@@ -8,7 +8,7 @@ import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.IArena;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +60,7 @@ public class TrapTask implements Runnable {
                                 LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
-                                        .send(PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class));
+                                        .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
 
                                 var title = LanguageService
                                         .getInstance()

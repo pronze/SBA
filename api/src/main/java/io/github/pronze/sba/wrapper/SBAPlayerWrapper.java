@@ -17,11 +17,11 @@ import java.math.RoundingMode;
 
 @Getter
 @Setter
-public class PlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper {
+public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper {
     private int shoutCooldown;
     private final ToggleableSetting<PlayerSetting> settings;
 
-    public PlayerWrapper(Player player) {
+    public SBAPlayerWrapper(Player player) {
         super(player.getName(), player.getUniqueId());
 
         // default values

@@ -4,7 +4,7 @@ import io.github.pronze.sba.events.SBAPlayerWrapperPostUnregisterEvent;
 import io.github.pronze.sba.events.SBAPlayerWrapperPreUnregisterEvent;
 import io.github.pronze.sba.events.SBAPlayerWrapperRegisteredEvent;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -23,18 +23,18 @@ import java.util.concurrent.ConcurrentHashMap;
         PlayerMapper.class,
         Logger.class
 })
-public class PlayerWrapperService implements WrapperService<Player, PlayerWrapper> {
+public class PlayerWrapperService implements WrapperService<Player, SBAPlayerWrapper> {
 
     public static PlayerWrapperService getInstance() {
         return ServiceManager.get(PlayerWrapperService.class);
     }
 
-    private final Map<UUID, PlayerWrapper> playerData = new ConcurrentHashMap<>();
+    private final Map<UUID, SBAPlayerWrapper> playerData = new ConcurrentHashMap<>();
 
     @OnPostEnable
     public void registerMapping() {
         PlayerMapper.UNSAFE_getPlayerConverter()
-                .registerW2P(PlayerWrapper.class, wrapper -> {
+                .registerW2P(SBAPlayerWrapper.class, wrapper -> {
                     if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
                         return playerData.get(wrapper.getUuid());
                     }
@@ -48,7 +48,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
         if (playerData.containsKey(player.getUniqueId())) {
             return;
         }
-        final var playerWrapper = new PlayerWrapper(player);
+        final var playerWrapper = new SBAPlayerWrapper(player);
         playerData.put(player.getUniqueId(), playerWrapper);
         Logger.trace("Registered player: {}", player.getName());
         SBA.getPluginInstance()
@@ -78,7 +78,7 @@ public class PlayerWrapperService implements WrapperService<Player, PlayerWrappe
     }
 
     @Override
-    public Optional<PlayerWrapper> get(Player param) {
+    public Optional<SBAPlayerWrapper> get(Player param) {
         return Optional.ofNullable(playerData.get(param.getUniqueId()));
     }
 }

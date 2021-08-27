@@ -5,13 +5,13 @@ import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 @AllArgsConstructor
 @Getter
 public class SBAPlayerWrapperPreUnregisterEvent extends Event {
     private static final HandlerList handlerList = new HandlerList();
-    private final PlayerWrapper player;
+    private final SBAPlayerWrapper player;
     
     @Override
     public @NotNull HandlerList getHandlers() {

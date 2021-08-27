@@ -5,6 +5,7 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBAFinalKillEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -102,7 +103,7 @@ public class BedWarsListener implements Listener {
         final var player = e.getPlayer();
         final var wrappedPlayer = PlayerMapper
                 .wrapPlayer(player)
-                .as(io.github.pronze.sba.wrapper.PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
         final var task = runnableCache.get(player.getUniqueId());
         final var game = (Game) e.getGame();
         if (task != null) {
@@ -231,9 +232,7 @@ public class BedWarsListener implements Listener {
                 .get(game.getName())
                 .ifPresent(arena -> {
                     final var scoreboardManager = arena.getScoreboardManager();
-                    if (scoreboardManager != null) {
-                        scoreboardManager.removeScoreboard(player);
-                    }
+                    scoreboardManager.removeScoreboard(player);
                 });
 
         if (task != null) {

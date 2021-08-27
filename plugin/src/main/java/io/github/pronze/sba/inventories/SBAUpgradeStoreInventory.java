@@ -9,7 +9,7 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -341,7 +341,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
             if (SBAConfig.getInstance().node("shop", "upgrade-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened upgrades store!", event.getPlayer().getName());
-                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(PlayerWrapper.class), (GameStore) event.getStore());
+                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class), (GameStore) event.getStore());
             }
         }
     }

@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyDisbandEvent;
+import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -9,7 +10,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
@@ -27,7 +28,7 @@ public class PartyDisbandCommand {
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -37,9 +38,8 @@ public class PartyDisbandCommand {
             return;
         }
 
-        SBA
+        PartyManager
                 .getInstance()
-                .getPartyManager()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {
                     if (!party.getPartyLeader().equals(player)) {
@@ -60,7 +60,7 @@ public class PartyDisbandCommand {
                     LanguageService
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_DISBAND)
-                            .send(party.getMembers().toArray(PlayerWrapper[]::new));
+                            .send(party.getMembers().toArray(SBAPlayerWrapper[]::new));
 
                     SBA.getInstance()
                             .getPartyManager()

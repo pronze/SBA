@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyKickEvent;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
@@ -26,18 +27,19 @@ public class PartyKickCommand {
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("kick", (ctx, s) -> {
             final var player = PlayerMapper
                     .wrapPlayer((Player)ctx.getSender())
-                    .as(PlayerWrapper.class);
+                    .as(SBAPlayerWrapper.class);
             final var optionalParty = SBA
                     .getInstance()
                     .getPartyManager()
                     .getPartyOf(player);
+
             if (optionalParty.isEmpty() || !player.getSettings().isToggled(PlayerSetting.IN_PARTY) || !player.equals(optionalParty.get().getPartyLeader())) {
                 return List.of();
             }
             return optionalParty.get()
                     .getMembers()
                     .stream()
-                    .map(PlayerWrapper::getName)
+                    .map(SBAPlayerWrapper::getName)
                     .filter(name -> !player.getName().equalsIgnoreCase(name))
                     .collect(Collectors.toList());
         });
@@ -51,15 +53,14 @@ public class PartyKickCommand {
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
         final var args = PlayerMapper
                 .wrapPlayer(toKick)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
-        SBA
+        PartyManager
                 .getInstance()
-                .getPartyManager()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {
                             if (!party.getPartyLeader().equals(player)) {
@@ -86,14 +87,12 @@ public class PartyKickCommand {
 
                             if (kickEvent.isCancelled()) return;
 
-
-
                             party.removePlayer(args);
                             LanguageService
                                     .getInstance()
                                     .get(MessageKeys.PARTY_MESSAGE_KICKED)
                                     .replace("%player%", args.getName())
-                                    .send(party.getMembers().toArray(PlayerWrapper[]::new));
+                                    .send(party.getMembers().toArray(SBAPlayerWrapper[]::new));
 
                             LanguageService
                                     .getInstance()
@@ -101,8 +100,8 @@ public class PartyKickCommand {
                                     .send(args);
 
                             if (party.getMembers().size() == 1) {
-                                SBA.getInstance()
-                                        .getPartyManager()
+                                PartyManager
+                                        .getInstance()
                                         .disband(party.getUUID());
                             }
                         },() -> LanguageService

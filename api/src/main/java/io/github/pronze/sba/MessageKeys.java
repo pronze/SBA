@@ -127,11 +127,9 @@ public class MessageKeys {
     public static final String[] TEAM_ELIMINATED_MESSAGE = {"team-eliminated"};
     public static final String[] FINAL_KILL_PREFIX = {"death-messages", "final-kill"};
     public static final String[] CLICK_TO_PURCHASE = {"click-to-purchase"};
-
     public static final String[] GAMES_INV_DISPLAY_NAME = {"games-inventory", "npc", "display-name"};
     public static final String[] ADDED_NPC = {"added-npc"};
     public static final String[] NPC_ALREADY_SPAWNED = {"npc-already-available"};
     public static final String[] REMOVABLE_NPC_TOGGLE = {"removable-npc-toggle"};
     public static final String[] NPC_REMOVED = {"npc-removed"};
-
 }

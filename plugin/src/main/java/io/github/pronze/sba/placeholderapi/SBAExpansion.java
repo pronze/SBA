@@ -3,7 +3,7 @@ package io.github.pronze.sba.placeholderapi;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +35,7 @@ public class SBAExpansion extends PlaceholderExpansion {
             if (player == null) {
                 return "";
             }
-            final PlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();
+            final SBAPlayerWrapper database = PlayerWrapperService.getInstance().get(player).orElseThrow();
             switch (identifiers[1]) {
                 case "level":
                     return Integer.toString(database.getLevel());

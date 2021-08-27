@@ -8,7 +8,7 @@ import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyCreatedEvent;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 
@@ -31,7 +31,7 @@ public class PartyManager implements IPartyManager {
     public PartyManager() {}
 
     @Override
-    public Optional<IParty> createParty(@NotNull PlayerWrapper leader) {
+    public Optional<IParty> createParty(@NotNull SBAPlayerWrapper leader) {
         final var party = new Party(leader);
         final var partyCreateEvent = new SBAPlayerPartyCreatedEvent(leader, party);
         SBA.getPluginInstance()
@@ -44,7 +44,7 @@ public class PartyManager implements IPartyManager {
     }
 
     @Override
-    public Optional<IParty> get(@NotNull PlayerWrapper leader) {
+    public Optional<IParty> get(@NotNull SBAPlayerWrapper leader) {
         return partyMap
                 .values()
                 .stream()
@@ -61,12 +61,12 @@ public class PartyManager implements IPartyManager {
     }
 
     @Override
-    public Optional<IParty> getOrCreate(@NotNull PlayerWrapper player) {
+    public Optional<IParty> getOrCreate(@NotNull SBAPlayerWrapper player) {
         return getPartyOf(player).or(() -> createParty(player));
     }
 
     @Override
-    public Optional<IParty> getPartyOf(@NotNull PlayerWrapper player) {
+    public Optional<IParty> getPartyOf(@NotNull SBAPlayerWrapper player) {
         return partyMap.values()
                 .stream()
                 .filter(party -> party.getMembers().contains(player))
@@ -74,7 +74,7 @@ public class PartyManager implements IPartyManager {
     }
 
     @Override
-    public Optional<IParty> getInvitedPartyOf(@NotNull PlayerWrapper player) {
+    public Optional<IParty> getInvitedPartyOf(@NotNull SBAPlayerWrapper player) {
         return partyMap.values()
                 .stream()
                 .filter(party -> party.isInvited(player))
@@ -90,7 +90,7 @@ public class PartyManager implements IPartyManager {
     }
 
     @Override
-    public void disband(@NotNull PlayerWrapper leader) {
+    public void disband(@NotNull SBAPlayerWrapper leader) {
         getPartyOf(leader).ifPresent(this::disband);
     }
 
@@ -106,7 +106,7 @@ public class PartyManager implements IPartyManager {
             party.removePlayer(member);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(member.getInstance())
-                    .as(PlayerWrapper.class);
+                    .as(SBAPlayerWrapper.class);
             if (!wrapperImpl.isOnline()) {
                 return;
             }
@@ -119,7 +119,7 @@ public class PartyManager implements IPartyManager {
             party.removeInvitedPlayer(invitedPlayer);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(invitedPlayer.getInstance())
-                    .as(PlayerWrapper.class);
+                    .as(SBAPlayerWrapper.class);
             if (!wrapperImpl.isOnline()) {
                 return;
             }

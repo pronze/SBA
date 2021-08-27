@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.party.PartySetting;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
@@ -12,7 +13,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyMutedEvent;
 import io.github.pronze.sba.events.SBAPlayerPartyUnmutedEvent;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
@@ -40,7 +41,7 @@ public class PartySettingsCommand {
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -50,9 +51,8 @@ public class PartySettingsCommand {
             return;
         }
 
-        SBA
+        PartyManager
                 .getInstance()
-                .getPartyManager()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {
                     if (!player.equals(party.getPartyLeader())) {
@@ -97,7 +97,7 @@ public class PartySettingsCommand {
     ) {
         final var player = PlayerMapper
                 .wrapPlayer(playerArg)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -107,8 +107,8 @@ public class PartySettingsCommand {
             return;
         }
 
-        SBA.getInstance()
-                .getPartyManager()
+        PartyManager
+                .getInstance()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {
                     if (!player.equals(party.getPartyLeader())) {
@@ -140,7 +140,7 @@ public class PartySettingsCommand {
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
                             .replace("%mode%", "unmuted")
-                            .send(party.getMembers().toArray(new PlayerWrapper[0]));
+                            .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
                 }, () -> LanguageService
                         .getInstance()
                         .get(MessageKeys.PARTY_MESSAGE_ERROR)

@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.screamingsandals.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -94,5 +93,10 @@ public class Message {
         for (var sender : wrapper) {
             message.forEach(sender::sendMessage);
         }
+    }
+
+    public void send(List<CommandSenderWrapper> wrapperList) {
+        var message = toComponentList();
+        wrapperList.forEach(wrapper -> message.forEach(wrapper::sendMessage));
     }
 }

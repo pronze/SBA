@@ -3,7 +3,7 @@ package io.github.pronze.sba.manager;
 import io.github.pronze.sba.events.SBAPlayerPartyCreatedEvent;
 import io.github.pronze.sba.party.IParty;
 import org.jetbrains.annotations.NotNull;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -15,14 +15,14 @@ public interface IPartyManager {
      * @param leader the leader object that owns the party
      * @return the party instance that has been created, returns an empty Optional if {@link SBAPlayerPartyCreatedEvent} is cancelled
      */
-    Optional<IParty> createParty(@NotNull PlayerWrapper leader);
+    Optional<IParty> createParty(@NotNull SBAPlayerWrapper leader);
 
     /**
      * Gets an optional containing the party instance, or empty if the query fails to find any matches.
      * @param leader the leader of the party to query
      * @return an optional containing a party which may or may not be empty depending on the query
      */
-    Optional<IParty> get(@NotNull PlayerWrapper leader);
+    Optional<IParty> get(@NotNull SBAPlayerWrapper leader);
 
     /**
      * Gets an optional containing the party instance, or empty if the query fails to find any matches.
@@ -37,21 +37,21 @@ public interface IPartyManager {
      * @param leader the leader of the newly created party
      * @return
      */
-    Optional<IParty> getOrCreate(@NotNull PlayerWrapper leader);
+    Optional<IParty> getOrCreate(@NotNull SBAPlayerWrapper leader);
 
     /**
      * Gets an optional containing the party instance, or empty if the query fails to find any matches.
      * @param player the player of the party to query
      * @return an optional containing a party which may or may not be empty depending on the query
      */
-    Optional<IParty> getPartyOf(@NotNull PlayerWrapper player);
+    Optional<IParty> getPartyOf(@NotNull SBAPlayerWrapper player);
 
     /**
      * Gets an optional containing the party instance, or empty if the query fails to find any matches.
      * @param player the player which has been invited to the party
      * @return an optional containing a party which may or may not be empty depending on the query
      */
-    Optional<IParty> getInvitedPartyOf(@NotNull PlayerWrapper player);
+    Optional<IParty> getInvitedPartyOf(@NotNull SBAPlayerWrapper player);
 
     /**
      * Disbands the party and notifies the members.
@@ -63,5 +63,5 @@ public interface IPartyManager {
      * Disbands the party and notifies the members.
      * @param leader the leader of the party to disband
      */
-    void disband(@NotNull PlayerWrapper leader);
+    void disband(@NotNull SBAPlayerWrapper leader);
 }

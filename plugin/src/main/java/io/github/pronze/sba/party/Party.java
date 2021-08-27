@@ -8,7 +8,7 @@ import org.screamingsandals.lib.utils.AdventureHelper;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.data.PartyInviteData;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -17,14 +17,14 @@ import java.util.stream.Collectors;
 
 public class Party implements IParty {
     @NotNull
-    private PlayerWrapper leader;
+    private SBAPlayerWrapper leader;
     private final UUID uuid;
-    private final List<PlayerWrapper> members;
-    private final List<PlayerWrapper> invitedPlayers;
+    private final List<SBAPlayerWrapper> members;
+    private final List<SBAPlayerWrapper> invitedPlayers;
     private final Map<UUID, PartyInviteData> inviteDataMap;
     private final PartySetting settings;
 
-    public Party(@NotNull PlayerWrapper leader) {
+    public Party(@NotNull SBAPlayerWrapper leader) {
         this.leader = leader;
         this.uuid = UUID.randomUUID();
         this.members = new ArrayList<>();
@@ -38,17 +38,17 @@ public class Party implements IParty {
     }
 
     @Override
-    public List<PlayerWrapper> getMembers() {
+    public List<SBAPlayerWrapper> getMembers() {
         return List.copyOf(members);
     }
 
     @Override
-    public List<PlayerWrapper> getInvitedPlayers() {
+    public List<SBAPlayerWrapper> getInvitedPlayers() {
         return List.copyOf(invitedPlayers);
     }
 
     @Override
-    public void sendMessage(@NotNull Component message, @NotNull PlayerWrapper sender) {
+    public void sendMessage(@NotNull Component message, @NotNull SBAPlayerWrapper sender) {
         Logger.trace(
                 "Sending message: {} to party: {}",
                 AdventureHelper.toLegacy(message),
@@ -64,7 +64,7 @@ public class Party implements IParty {
     }
 
     @Override
-    public void addPlayer(@NotNull PlayerWrapper player) {
+    public void addPlayer(@NotNull SBAPlayerWrapper player) {
         Logger.trace("Adding player: {} to party: {}", player.getName(), debugInfo());
         invitedPlayers.remove(player);
         members.add(player);
@@ -80,7 +80,7 @@ public class Party implements IParty {
     }
 
     @Override
-    public void removePlayer(@NotNull PlayerWrapper player) {
+    public void removePlayer(@NotNull SBAPlayerWrapper player) {
         Logger.trace("Removing player: {} from party: {}", player.getName(), debugInfo());
         members.remove(player);
         player.getSettings().disable(PlayerSetting.IN_PARTY);
@@ -88,12 +88,12 @@ public class Party implements IParty {
 
     @NotNull
     @Override
-    public synchronized PlayerWrapper getPartyLeader() {
+    public synchronized SBAPlayerWrapper getPartyLeader() {
         return leader;
     }
 
     @Override
-    public synchronized void setPartyLeader(@NotNull PlayerWrapper player) {
+    public synchronized void setPartyLeader(@NotNull SBAPlayerWrapper player) {
         if (player.equals(leader)) {
             return;
         }
@@ -112,8 +112,8 @@ public class Party implements IParty {
     }
 
     @Override
-    public void invitePlayer(@NotNull PlayerWrapper invitee,
-                             @NotNull PlayerWrapper player) {
+    public void invitePlayer(@NotNull SBAPlayerWrapper invitee,
+                             @NotNull SBAPlayerWrapper player) {
         if (inviteDataMap.containsKey(invitee.getInstance().getUniqueId())) return;
         Logger.trace("Player: {} has invited: {} to party: {}", player.getName(),
                 invitee.getName(), debugInfo());
@@ -150,7 +150,7 @@ public class Party implements IParty {
     }
 
     @Override
-    public boolean isInvited(@NotNull PlayerWrapper player) {
+    public boolean isInvited(@NotNull SBAPlayerWrapper player) {
         return inviteDataMap.containsKey(player.getInstance().getUniqueId());
     }
 
@@ -160,7 +160,7 @@ public class Party implements IParty {
     }
 
     @Override
-    public void removeInvitedPlayer(@NotNull PlayerWrapper invitee) {
+    public void removeInvitedPlayer(@NotNull SBAPlayerWrapper invitee) {
         if (!invitedPlayers.contains(invitee)) {
             return;
         }
@@ -179,8 +179,8 @@ public class Party implements IParty {
         return "Party{" +
                 "uuid=" + uuid +
                 ", leader=" + leader.getName() +
-                ", members=" + members.stream().map(PlayerWrapper::getName).collect(Collectors.toList()).toString() +
-                ", invitedPlayers=" + invitedPlayers.stream().map(PlayerWrapper::getName).collect(Collectors.toList()).toString() +
+                ", members=" + members.stream().map(SBAPlayerWrapper::getName).collect(Collectors.toList()).toString() +
+                ", invitedPlayers=" + invitedPlayers.stream().map(SBAPlayerWrapper::getName).collect(Collectors.toList()).toString() +
                 '}';
     }
 

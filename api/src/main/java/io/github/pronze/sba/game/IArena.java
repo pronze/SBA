@@ -43,7 +43,7 @@ public interface IArena {
     ScoreboardManager getScoreboardManager();
 
     /**
-     * Gets an optional that may or may not be empty depending if the player data has been registered in the arena.
+     * Gets an optional that may or may not be empty depending on if the player data has been registered in the arena.
      *
      * @param playerUUID the uuid of the player to query
      * @return an optional {@link GamePlayerData} instance

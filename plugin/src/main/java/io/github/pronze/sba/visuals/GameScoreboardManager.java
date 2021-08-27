@@ -64,7 +64,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 .animate(true)
                 .player(player)
                 .displayObjective("bwa-game")
-                .updateInterval(20L)
+                .updateInterval(10L)
                 .animationInterval(2L)
                 .animatedTitle(title)
                 .updateCallback(board -> {

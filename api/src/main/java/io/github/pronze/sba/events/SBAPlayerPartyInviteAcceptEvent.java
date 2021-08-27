@@ -7,13 +7,13 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 @RequiredArgsConstructor
 @Getter
 public class SBAPlayerPartyInviteAcceptEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
-    private final PlayerWrapper player;
+    private final SBAPlayerWrapper player;
     private final IParty party;
     private boolean cancelled;
 

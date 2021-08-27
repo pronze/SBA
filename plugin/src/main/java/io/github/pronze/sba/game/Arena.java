@@ -146,56 +146,57 @@ public class Arena implements IArena {
                     });
         }
 
-        game.getGameStores().forEach(store -> {
-            final var nonAPIStore = (GameStore) store;
-            final var villager = nonAPIStore.kill();
-            if (villager != null) {
-                Main.unregisterGameEntity(villager);
-            }
-
-
-            if (mockEntity == null) {
-                // find a better version independent way to mock entities lol
-                mockEntity = (Bat) game.getGameWorld().spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                mockEntity.setAI(false);
-            }
-
-            // set fake entity to avoid bw listener npe
-            Reflect.setField(nonAPIStore, "entity", mockEntity);
-
-            NPCSkin skin = null;
-            List<Component> name = null;
-            final var file = store.getShopFile();
-            try {
-                if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
-                    skin = NPCStoreService.getInstance().getUpgradeShopSkin();
-                    name = NPCStoreService.getInstance().getUpgradeShopText();
-                } else {
-                    skin = NPCStoreService.getInstance().getShopSkin();
-                    name = NPCStoreService.getInstance().getShopText();
+        if (SBAConfig.getInstance().node("replace-stores-with-npc").getBoolean(true)) {
+            game.getGameStores().forEach(store -> {
+                final var nonAPIStore = (GameStore) store;
+                final var villager = nonAPIStore.kill();
+                if (villager != null) {
+                    Main.unregisterGameEntity(villager);
                 }
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
 
-            final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
-                    .setDisplayName(name)
-                    .setShouldLookAtViewer(true)
-                    .setTouchable(true)
-                    .setSkin(skin);
+                if (mockEntity == null) {
+                    // find a better version independent way to mock entities lol
+                    mockEntity = (Bat) game.getGameWorld().spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                    mockEntity.setAI(false);
+                }
 
-            if (file != null && file.equals("upgradeShop.yml")) {
-                upgradeStoreNPCS.add(npc);
-            } else {
-                storeNPCS.add(npc);
-            }
+                // set fake entity to avoid bw listener npe
+                Reflect.setField(nonAPIStore, "entity", mockEntity);
 
-            game.getConnectedPlayers()
-                    .stream()
-                    .map(PlayerMapper::wrapPlayer)
-                    .forEach(npc::addViewer);
-            npc.show();
-        });
+                NPCSkin skin = null;
+                List<Component> name = null;
+                final var file = store.getShopFile();
+                try {
+                    if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+                        skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+                        name = NPCStoreService.getInstance().getUpgradeShopText();
+                    } else {
+                        skin = NPCStoreService.getInstance().getShopSkin();
+                        name = NPCStoreService.getInstance().getShopText();
+                    }
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+
+                final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+                        .setDisplayName(name)
+                        .setShouldLookAtViewer(true)
+                        .setTouchable(true)
+                        .setSkin(skin);
+
+                if (file != null && file.equals("upgradeShop.yml")) {
+                    upgradeStoreNPCS.add(npc);
+                } else {
+                    storeNPCS.add(npc);
+                }
+
+                game.getConnectedPlayers()
+                        .stream()
+                        .map(PlayerMapper::wrapPlayer)
+                        .forEach(npc::addViewer);
+                npc.show();
+            });
+        }
     }
 
     // non api event handler

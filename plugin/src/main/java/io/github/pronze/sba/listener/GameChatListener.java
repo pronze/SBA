@@ -1,7 +1,7 @@
 package io.github.pronze.sba.listener;
 
 import io.github.pronze.sba.wrapper.PlayerSetting;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -28,7 +28,7 @@ public class GameChatListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         final var player = event.getPlayer();
-        final var playerWrapper = PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class);
+        final var playerWrapper = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
 
         if (playerWrapper.getSettings().isToggled(PlayerSetting.IN_PARTY) && playerWrapper.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED)) {
             // PartyChatListener will take care of this.

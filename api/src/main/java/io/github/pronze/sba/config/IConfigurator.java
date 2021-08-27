@@ -6,7 +6,6 @@ import java.util.List;
  * Represents a configurator implementation.
  */
 public interface IConfigurator {
-
     /**
      * Loads the default configuration of the plugin.
      */
@@ -51,7 +50,7 @@ public interface IConfigurator {
      *
      * @param path path of the Byte to lookup.
      * @param def The default value to return if the path is not found
-     * @return an byte that was found, returns def otherwise.
+     * @return a byte that was found, returns def otherwise.
      */
     Byte getByte(String path, Byte def);
 
@@ -59,7 +58,7 @@ public interface IConfigurator {
      *
      * @param path path of the boolean to lookup.
      * @param def the default value to return if the path is not found.
-     * @return an boolean that was found, returns def otherwise.
+     * @return a boolean that was found, returns def otherwise.
      */
     Boolean getBoolean(String path, boolean def);
 

@@ -4,10 +4,10 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.IStoreInventory;
-import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.ShopUtil;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
@@ -76,7 +76,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     }
 
     @Override
-    public void openForPlayer(@NotNull PlayerWrapper player, @NotNull GameStore store) {
+    public void openForPlayer(@NotNull SBAPlayerWrapper player, @NotNull GameStore store) {
         try {
             var parent = true;
             parent = store.getUseParent();
@@ -236,7 +236,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         var price = event.getPrices().get(0);
         ItemSpawnerType type = Main.getSpawnerType(price.getCurrency().toLowerCase());
 
-        var newItem = event.getStack();
+        var newItem = event.getStack().as(ItemStack.class);
 
         var amount = newItem.getAmount();
         var priceAmount = price.getAmount();
@@ -255,10 +255,10 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 return;
             }
 
-            newItem = ItemFactory.build(changeItemType.getStack()).orElse(newItem);
+            newItem = changeItemType.getStack();
         }
 
-        var originalMaxStackSize = newItem.getMaterial().as(Material.class).getMaxStackSize();
+        var originalMaxStackSize = newItem.getType().getMaxStackSize();
         if (clickType.isShiftClick() && originalMaxStackSize > 1) {
             double priceOfOne = (double) priceAmount / amount;
             double maxStackSize;
@@ -312,23 +312,19 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 //temporary fix
                 propertyData.putIfAbsent("name", property.getPropertyName());
 
-                var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player, newItem.as(ItemStack.class), propertyData);
+                var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player, newItem, propertyData);
+                Logger.trace("Calling event: {} for property: {}", applyEvent.getClass().getSimpleName(), property.getPropertyName());
                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
-                newItem = ItemFactory
-                        .build(applyEvent.getStack())
-                        .orElse(newItem);
+                newItem = applyEvent.getStack();
             }
         }
 
-        final var result  = handlePurchase(player, newItem.as(ItemStack.class), materialItem.as(ItemStack.class), itemInfo, type);
+        final var result  = handlePurchase(player, newItem, materialItem.as(ItemStack.class), itemInfo, type);
         final var shouldSellStack = result.getKey();
         final var shouldBuyStack = result.getValue();
 
         if (shouldBuyStack) {
-            List<Item> notFit = event.buyStack(newItem);
-            if (!notFit.isEmpty()) {
-                notFit.forEach(stack -> player.getLocation().getWorld().dropItem(player.getLocation(), stack.as(ItemStack.class)));
-            }
+            buyStack(newItem, player);
         }
 
         if (shouldSellStack) {
@@ -338,12 +334,19 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(newItem))
+                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(ItemFactory.build(newItem).orElseThrow()))
                         .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
             Sounds.playSound(player, player.getLocation(),
                     Main.getConfigurator().config.getString("sounds.item_buy.sound"), Sounds.ENTITY_ITEM_PICKUP, (float) Main.getConfigurator().config.getDouble("sounds.item_buy.volume"), (float) Main.getConfigurator().config.getDouble("sounds.item_buy.pitch"));
+        }
+    }
+
+    private void buyStack(ItemStack newItem, Player player) {
+        final HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
+        if (!noFit.isEmpty()) {
+            noFit.forEach((i, stack) -> player.getLocation().getWorld().dropItem(player.getLocation(), stack));
         }
     }
 

@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 import java.util.Optional;
 
@@ -46,9 +46,9 @@ public interface AddonAPI {
      *  Returns the wrapper object associated to the player containing additional player data.
      *
      * @param player The player instance to obtain the wrapper from.
-     * @return the {@link PlayerWrapper} object linked to the specific player
+     * @return the {@link SBAPlayerWrapper} object linked to the specific player
      */
-    PlayerWrapper getPlayerWrapper(Player player);
+    SBAPlayerWrapper getPlayerWrapper(Player player);
 
     /**
      * Returns a boolean indicating if the plugin is running in debug mode.
@@ -90,7 +90,7 @@ public interface AddonAPI {
      * @return an instance of the PlayerWrapperService that is associated with wrapping player
      * instances into objects that contain additional data
      */
-    WrapperService<Player, PlayerWrapper> getPlayerWrapperService();
+    WrapperService<Player, SBAPlayerWrapper> getPlayerWrapperService();
 
     /**
      * Look into IConfigurator getter methods to get certain settings from the config.

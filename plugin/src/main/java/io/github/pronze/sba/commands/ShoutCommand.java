@@ -5,7 +5,7 @@ import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -62,7 +62,7 @@ public class ShoutCommand {
                 .getInt(60) == 0;
 
         if(!cancelShout && !player.hasPermission(Permissions.SHOUT_BYPASS.getKey())) {
-            final var sbaPlayerWrapper = wrapper.as(PlayerWrapper.class);
+            final var sbaPlayerWrapper = wrapper.as(SBAPlayerWrapper.class);
             if (!sbaPlayerWrapper.canShout()) {
                 final var shout = String.valueOf(sbaPlayerWrapper.getShoutCooldown());
                 LanguageService
@@ -100,7 +100,7 @@ public class ShoutCommand {
                 .replace("%team%", team == null ? "" : team.getName())
                 .toComponent();
 
-        wrapper.as(PlayerWrapper.class).shout(shoutMessage);
+        wrapper.as(SBAPlayerWrapper.class).shout(shoutMessage);
     }
 
 }

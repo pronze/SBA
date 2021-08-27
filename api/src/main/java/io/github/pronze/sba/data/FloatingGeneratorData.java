@@ -12,7 +12,6 @@ import org.screamingsandals.bedwars.game.ItemSpawner;
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @Data
 public class FloatingGeneratorData {
-
     /**
      * ItemSpawner instance to replicate Floating Generators.
      */

@@ -9,7 +9,7 @@ import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -143,7 +143,7 @@ public class PlayerListener implements Listener {
                         .getInstance()
                         .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
                         .toString();
-                final PlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(PlayerWrapper.class);
+                final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
                 int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
                 byte buffer = 2;
 
@@ -269,7 +269,7 @@ public class PlayerListener implements Listener {
                 .ifPresent(Scoreboard::destroy);
 
         final var wrappedPlayer = PlayerMapper.wrapPlayer(player)
-                .as(PlayerWrapper.class);
+                .as(SBAPlayerWrapper.class);
         SBA.getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
@@ -292,7 +292,7 @@ public class PlayerListener implements Listener {
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
                                             .replace("%player%", member.getName())
-                                            .send(party.getMembers().toArray(new PlayerWrapper[0]));
+                                            .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                 }, () -> SBA.getInstance().getPartyManager()
                                         .disband(party.getUUID()));
@@ -301,7 +301,7 @@ public class PlayerListener implements Listener {
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
                             .replace("%player%", player.getName())
-                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).toArray(PlayerWrapper[]::new));
+                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).toArray(SBAPlayerWrapper[]::new));
                 });
         SBA.getInstance().getPlayerWrapperService().unregister(player);
     }

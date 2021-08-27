@@ -10,7 +10,7 @@ import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -438,7 +438,7 @@ public class ShopUtil {
     }
 
     public static String ChatColorChanger(Player player) {
-        final PlayerWrapper db = PlayerWrapperService.getInstance().get(player).orElseThrow();
+        final SBAPlayerWrapper db = PlayerWrapperService.getInstance().get(player).orElseThrow();
         if (db.getLevel() > 100 || player.isOp()) {
             return "§f";
         } else {

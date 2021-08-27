@@ -24,7 +24,7 @@ import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -36,20 +36,17 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
-import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
 import org.screamingsandals.lib.tasker.Tasker;
-import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.Controllable;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
-import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import pronze.lib.scoreboards.ScoreboardManager;
@@ -78,7 +75,6 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         HealthIndicatorManager.class,
         SimpleInventoriesCore.class,
         NPCManager.class,
-        //EventManager.class,
         UpdateChecker.class,
         SBAConfig.class,
         Logger.class,
@@ -196,7 +192,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public PlayerWrapper getPlayerWrapper(Player player) {
+    public SBAPlayerWrapper getPlayerWrapper(Player player) {
         return PlayerWrapperService.getInstance().get(player).orElse(null);
     }
 
@@ -226,7 +222,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public WrapperService<Player, PlayerWrapper> getPlayerWrapperService() {
+    public WrapperService<Player, SBAPlayerWrapper> getPlayerWrapperService() {
         return PlayerWrapperService.getInstance();
     }
 

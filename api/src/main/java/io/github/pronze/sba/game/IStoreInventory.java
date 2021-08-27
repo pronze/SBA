@@ -3,10 +3,9 @@ package io.github.pronze.sba.game;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.bedwars.game.GameStore;
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 import java.io.File;
-import java.util.Optional;
 
 /**
  * Represents an implementation for the StoreInventory.
@@ -18,7 +17,7 @@ public interface IStoreInventory {
      * @param player the player to be shown the store
      * @param gameStore the store to be displayed
      */
-    void openForPlayer(@NotNull PlayerWrapper player, @NotNull GameStore gameStore);
+    void openForPlayer(@NotNull SBAPlayerWrapper player, @NotNull GameStore gameStore);
 
     /**
      * @param name the name of the shop to load

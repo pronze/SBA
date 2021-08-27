@@ -1,6 +1,6 @@
 package io.github.pronze.sba.events;
 
-import io.github.pronze.sba.wrapper.PlayerWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Cancellable;
@@ -12,8 +12,8 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 public class SBAPlayerPartyInviteEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
-    private final PlayerWrapper player;
-    private final PlayerWrapper invited;
+    private final SBAPlayerWrapper player;
+    private final SBAPlayerWrapper invited;
     private boolean cancelled;
 
 
