@@ -57,12 +57,12 @@ public class ExplosionVelocityControlListener implements Listener {
                         vector.setY(vector.getY() /  SBAConfig.getInstance().node("tnt-fireball-jumping", "reduce-y").getDouble(2.0));
                         vector.multiply(SBAConfig.getInstance().node("tnt-fireball-jumping", "launch-multiplier").getDouble(4.0));
 
-
                         if (entity instanceof Player) {
                             final var player = (Player) entity;
                             if (player.getGameMode() == GameMode.SPECTATOR || !Main.isPlayerInGame(player)) {
                                 return;
                             }
+                            vector.add(new Vector(player.getEyeLocation().getDirection().getX(), 0, player.getEyeLocation().getDirection().getZ()));
                             player.setVelocity(vector);
                             explosionAffectedPlayers.add(player);
                             return;
