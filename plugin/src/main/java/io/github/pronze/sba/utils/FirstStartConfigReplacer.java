@@ -71,6 +71,7 @@ public class FirstStartConfigReplacer {
         updateConfig("breakable.enabled", true);
         updateConfig("breakable.blocks", List.of("GRASS", "SNOW"));
         updateConfig("disable-hunger", true);
+        updateConfig("specials.auto-igniteable-tnt.explosion-time", 3);
         updateConfig("resources", Map.of(
                 "emerald", Map.of(
                         "material", "EMERALD",
