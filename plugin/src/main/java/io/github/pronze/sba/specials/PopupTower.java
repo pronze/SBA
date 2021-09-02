@@ -100,6 +100,7 @@ public class PopupTower {
         final var relative = secondPlatform.getRelative(structureFace);
         if (game.getRegion().isBlockAddedDuringGame(relative.getLocation())) {
             relative.setType(Material.AIR);
+            game.getRegion().removeBlockBuiltDuringGame(relative.getLocation());
         }
 
         final Location firstLadderBlock = mainBlock.getBlock().getRelative(structureFace).getLocation();

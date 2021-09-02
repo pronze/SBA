@@ -3,6 +3,7 @@ package io.github.pronze.sba.specials.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.PopupTower;
+import io.github.pronze.sba.utils.SBAUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -53,10 +54,10 @@ public class PopupTowerListener implements Listener {
                     stack.setAmount(stack.getAmount() - 1);
                     player.updateInventory();
                     final var team = game.getTeamOfPlayer(player);
-                    PopupTower tower = new PopupTower(game, TeamColor.fromApiColor(team.getColor()).getWool().getType(), player.getLocation().getBlock().getRelative(player.getFacing(), 3).getLocation());
+                    PopupTower tower = new PopupTower(game, TeamColor.fromApiColor(team.getColor()).getWool().getType(), player.getLocation().getBlock().getRelative(SBAUtil.yawToFace(player.getLocation().getYaw()), 3).getLocation());
                     tower.setHeight(SBAConfig.getInstance().node("popup-tower", "height").getInt(10));
                     tower.setWidth(SBAConfig.getInstance().node("popup-tower", "width").getInt(4));
-                    tower.createTower(SBAConfig.getInstance().node("popup-tower", "floor").getBoolean(false), player.getFacing().getOppositeFace());
+                    tower.createTower(SBAConfig.getInstance().node("popup-tower", "floor").getBoolean(false), SBAUtil.yawToFace(player.getLocation().getYaw()).getOppositeFace());
                 }
             }
         }

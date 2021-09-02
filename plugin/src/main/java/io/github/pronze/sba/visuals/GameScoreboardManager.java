@@ -202,6 +202,10 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
 
         if (!arena.getInvisiblePlayers().isEmpty()) {
             arena.getInvisiblePlayers().forEach(invisiblePlayer -> {
+                if (invisiblePlayer == player) {
+                    return;
+                }
+
                 final var team = game.getTeamOfPlayer(invisiblePlayer);
                 if (team != null && playerTeam != team) {
                     holder.getTeamEntry(teamName).ifPresent(teamEntry -> {
@@ -211,10 +215,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     });
 
                     if (!holder.hasTeamEntry("invisibleSBA")) {
-                        holder.addTeam("invisibleSBA", ChatColor.WHITE);
-                        holder.getTeamEntry("invisibleSBA").ifPresent(sTeam -> {
-                            sTeam.setNameTagVisibility(NameTagVisibility.NEVER);
-                        });
+                        holder.addTeam("invisibleSBA", TeamColor.fromApiColor(team.getColor()).chatColor);
+                        holder.getTeamEntry("invisibleSBA").ifPresent(sTeam -> sTeam.setNameTagVisibility(NameTagVisibility.NEVER));
                     }
 
                     holder.getTeamEntry("invisibleSBA").ifPresent(entry -> {
