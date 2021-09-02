@@ -130,6 +130,9 @@ public class PopupTower {
             }
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             final Block ladder = lastLoc.getBlock();
+            if (ladder.getType() != Material.AIR && !game.getRegion().isBlockAddedDuringGame(ladder.getLocation())) {
+                return;
+            }
             ladder.setType(Material.LADDER, false);
             game.getRegion().addBuiltDuringGame(lastLoc);
             if (!Main.isLegacy()) {
