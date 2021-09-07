@@ -12,6 +12,7 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.nms.accessors.DirectionAccessor;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.bukkit.entity.Player;
@@ -150,33 +151,28 @@ public class SBAUtil {
         return toCap.substring(0, 1).toUpperCase() + toCap.substring(1).toLowerCase();
     }
 
-    // copy/pasta from: https://bukkit.org/threads/get-the-direction-a-player-is-facing.105314/
-    public static final BlockFace[] axis = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
-    public static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
+    public static BlockFace notchToBlockFace(String notchEnum) {
+        if (notchEnum == null)
+            return BlockFace.SELF;
 
-    /**
-     * Gets the horizontal Block Face from a given yaw angle<br>
-     * This includes the NORTH_WEST faces
-     *
-     * @param yaw angle
-     * @return The Block Face of the angle
-     */
-    public static BlockFace yawToFace(float yaw) {
-        return yawToFace(yaw, true);
+        switch (notchEnum) {
+            case "SIGN":
+                return BlockFace.DOWN;
+            case "SIGN_POST":
+                return BlockFace.UP;
+            case "WALL_SIGN":
+                return BlockFace.NORTH;
+            case "CHEST":
+                return BlockFace.SOUTH;
+            case "TRAPPED_CHEST":
+                return BlockFace.WEST;
+            case "BURNING_FURNACE":
+                return BlockFace.EAST;
+        }
+        return BlockFace.SELF;
     }
 
-    /**
-     * Gets the horizontal Block Face from a given yaw angle
-     *
-     * @param yaw angle
-     * @param useSubCardinalDirections setting, True to allow NORTH_WEST to be returned
-     * @return The Block Face of the angle
-     */
-    public static BlockFace yawToFace(float yaw, boolean useSubCardinalDirections) {
-        if (useSubCardinalDirections) {
-            return radial[Math.round(yaw / 45f) & 0x7];
-        } else {
-            return axis[Math.round(yaw / 90f) & 0x3];
-        }
+    public static BlockFace yawToFace(double yaw) {
+        return notchToBlockFace(Reflect.fastInvoke(DirectionAccessor.getMethodFromYRot1(), yaw).toString());
     }
 }

@@ -67,7 +67,6 @@ public class BridgeEggListener implements Listener {
         }
     }
 
-
     @EventHandler
     public void onProjectileHit(ProjectileHitEvent event) {
         if (!(event.getEntity() instanceof Egg)) {
