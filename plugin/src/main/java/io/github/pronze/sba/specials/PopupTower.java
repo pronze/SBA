@@ -53,7 +53,7 @@ public class PopupTower {
             width = 1;
         }
 
-        final Location mainBlock = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
+        final var mainBlock = location.getBlock().getRelative(BlockFace.DOWN).getLocation();
         placeBlock(mainBlock, material);
         
         pillarSides.forEach(blockFace -> {
@@ -134,6 +134,9 @@ public class PopupTower {
             }
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             final Block ladder = lastLoc.getBlock();
+            if ((!game.getRegion().isBlockAddedDuringGame(ladder.getLocation()) && (ladder.getType() != Material.AIR && ladder.getType() != Material.GRASS)) || isTargetBlockNear(targetBlocks, ladder.getLocation())) {
+                continue;
+            }
             if (ladder.getType() != Material.AIR && !game.getRegion().isBlockAddedDuringGame(ladder.getLocation())) {
                 continue;
             }
@@ -159,6 +162,6 @@ public class PopupTower {
         }
         loc.getBlock().setType(mat);
         game.getRegion().addBuiltDuringGame(loc);
-        Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 1, 1);
+        loc.getWorld().playSound(loc, Sound.BLOCK_STONE_PLACE, 1, 1);
     }
 }
