@@ -267,11 +267,6 @@ public class SBAConfig implements IConfigurator {
                     .section("generator-splitter")
                         .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
                         .back()
-                    .section("popup-tower")
-                        .key("height").defValue(10)
-                        .key("width").defValue(3)
-                        .key("floor").defValue(false)
-                        .back()
                     .key("replace-stores-with-npc").defValue(true);
 
             generator.saveIfModified();

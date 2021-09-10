@@ -69,7 +69,7 @@ public class FirstStartConfigReplacer {
         updateConfig("compass-enabled", false);
         updateConfig("add-wool-to-inventory-on-join", false);
         updateConfig("breakable.enabled", true);
-        updateConfig("breakable.blocks", List.of("GRASS", "SNOW"));
+        updateConfig("breakable.blocks", List.of(!Main.isLegacy() ? "GRASS" : "LONG_GRASS", "SNOW"));
         updateConfig("disable-hunger", true);
         updateConfig("specials.auto-igniteable-tnt.explosion-time", 3);
         updateConfig("resources", Map.of(

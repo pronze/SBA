@@ -25,7 +25,6 @@ public class GeneratorTask implements Runnable {
     private final boolean showUpgradeMessage;
     private GameTierEvent nextEvent;
     private int elapsedTime;
-    private int nextTier = 2;
 
     public GeneratorTask(IArena arena) {
         this.arena = (Arena) arena;
@@ -116,7 +115,6 @@ public class GeneratorTask implements Runnable {
                                         .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
                     }
                 }
-                nextTier++;
                 nextEvent = nextEvent.getNextEvent();
             }
         }
@@ -128,7 +126,7 @@ public class GeneratorTask implements Runnable {
     }
 
     public String getNextTierName() {
-        if (nextEvent.getKey().equals("GameEnd")) {
+        if (nextEvent == GameTierEvent.GAME_END) {
             return LanguageService
                     .getInstance()
                     .get(MessageKeys.GAME_END_MESSAGE)

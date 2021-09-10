@@ -151,28 +151,14 @@ public class SBAUtil {
         return toCap.substring(0, 1).toUpperCase() + toCap.substring(1).toLowerCase();
     }
 
-    public static BlockFace notchToBlockFace(String notchEnum) {
-        if (notchEnum == null)
-            return BlockFace.SELF;
 
-        switch (notchEnum) {
-            case "SIGN":
-                return BlockFace.DOWN;
-            case "SIGN_POST":
-                return BlockFace.UP;
-            case "WALL_SIGN":
-                return BlockFace.NORTH;
-            case "CHEST":
-                return BlockFace.SOUTH;
-            case "TRAPPED_CHEST":
-                return BlockFace.WEST;
-            case "BURNING_FURNACE":
-                return BlockFace.EAST;
-        }
-        return BlockFace.SELF;
-    }
+    private static final BlockFace[] axis = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
+    private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
 
-    public static BlockFace yawToFace(double yaw) {
-        return notchToBlockFace(Reflect.fastInvoke(DirectionAccessor.getMethodFromYRot1(), yaw).toString());
+    public static BlockFace yawToFace(float yaw, boolean useSubCardinalDirections) {
+        if (useSubCardinalDirections)
+            return radial[Math.round(yaw / 45f) & 0x7].getOppositeFace();
+
+        return axis[Math.round(yaw / 90f) & 0x3].getOppositeFace();
     }
 }
