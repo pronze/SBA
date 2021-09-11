@@ -44,17 +44,19 @@ public class RotatingGenerator implements IRotatingGenerator {
 
     private BukkitTask hologramTask;
     private Hologram hologram;
+    private List<Item> spawnedItems;
 
+    @SuppressWarnings("unchecked")
     public RotatingGenerator(ItemSpawner itemSpawner, ItemStack stack, Location location) {
         this.itemSpawner = itemSpawner;
         this.stack = stack;
         this.location = location;
-
-        time = itemSpawner.getItemSpawnerType().getInterval() + 1;
-        lines = LanguageService
+        this.time = itemSpawner.getItemSpawnerType().getInterval() + 1;
+        this.lines = LanguageService
                 .getInstance()
                 .get(MessageKeys.ROTATING_GENERATOR_FORMAT)
                 .toStringList();
+        this.spawnedItems = (List<Item>) Reflect.getField(itemSpawner, "spawnedItems");
     }
 
     @Override
@@ -91,8 +93,7 @@ public class RotatingGenerator implements IRotatingGenerator {
         hologramTask = new BukkitRunnable() {
             @Override
             public void run() {
-
-                boolean full = itemSpawner.getMaxSpawnedResources() <= ((List<Item>) Reflect.getField(itemSpawner, "spawnedItems")).size();
+                boolean full = itemSpawner.getMaxSpawnedResources() <= spawnedItems.size();
                 if (!full) {
                     time--;
                 }

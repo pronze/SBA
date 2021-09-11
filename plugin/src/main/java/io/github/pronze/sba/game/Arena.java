@@ -21,7 +21,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
-import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
@@ -71,7 +70,7 @@ public class Arena implements IArena {
         return invisiblePlayers
                 .values()
                 .stream()
-                .map(InvisiblePlayer::getPlayer)
+                .map(InvisiblePlayer::getHiddenPlayer)
                 .collect(Collectors.toList());
     }
 
@@ -127,7 +126,7 @@ public class Arena implements IArena {
     }
 
 
-    public void onGameStarted(BedwarsGameStartedEvent event) {
+    public void onGameStarted() {
         // send game start message
         LanguageService
                 .getInstance()
@@ -238,6 +237,8 @@ public class Arena implements IArena {
 
         storeNPCS.clear();
         upgradeStoreNPCS.clear();
+
+        getInvisiblePlayers().forEach(this::removeHiddenPlayer);
 
         final var winner = e.getWinningTeam();
         if (winner != null) {

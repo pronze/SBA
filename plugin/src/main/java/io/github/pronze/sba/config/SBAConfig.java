@@ -99,6 +99,7 @@ public class SBAConfig implements IConfigurator {
                         .key("reduce-y").defValue(2.0)
                         .key("launch-multiplier").defValue(3.4)
                         .key("detection-distance").defValue(8.0D)
+                        .key("fall-damage").defValue(3.0D)
                         .back()
                     .key("explosion-damage").defValue(0.25)
                     .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))

@@ -51,7 +51,7 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .createArena(game);
 
-        ((Arena) arena).onGameStarted(e);
+        ((Arena) arena).onGameStarted();
     }
 
     @EventHandler

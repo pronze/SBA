@@ -1,11 +1,15 @@
 package io.github.pronze.sba.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.utils.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Explosive;
+import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.util.Vector;
@@ -31,16 +35,17 @@ public class ExplosionVelocityControlListener implements Listener {
             if (entity instanceof Player) {
                 final var player = (Player) entity;
                 if (explosionAffectedPlayers.contains(player)) {
-                    event.setDamage(4.0D);
+                    event.setDamage(SBAConfig.getInstance().node("tnt-fireball-jumping", "fall-damage").getDouble(3.0D));
                     explosionAffectedPlayers.remove(player);
                 }
             }
         }
     }
 
-    @EventHandler
-    public void onExplode(EntityExplodeEvent event) {
-        final var explodedEntity = event.getEntity();
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onExplode(EntityDamageByEntityEvent event) {
+        final var explodedEntity = event.getDamager();
+
         if (explodedEntity instanceof Explosive) {
             final var detectionDistance = SBAConfig.getInstance().node("tnt-fireball-jumping", "detection-distance").getDouble(5.0D);
 

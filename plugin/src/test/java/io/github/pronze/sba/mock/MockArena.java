@@ -85,7 +85,7 @@ public class MockArena implements IArena {
         return invisiblePlayers
                 .values()
                 .stream()
-                .map(InvisiblePlayer::getPlayer)
+                .map(InvisiblePlayer::getHiddenPlayer)
                 .collect(Collectors.toList());
     }
 

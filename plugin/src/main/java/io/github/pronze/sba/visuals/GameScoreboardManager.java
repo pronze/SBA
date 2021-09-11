@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.NameTagVisibility;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -19,6 +18,7 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
+import org.screamingsandals.lib.tasker.Tasker;
 import pronze.lib.scoreboards.Scoreboard;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -49,6 +49,10 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
         game.getConnectedPlayers().forEach(this::createScoreboard);
     }
 
+    public Optional<Scoreboard> getScoreboard(@NotNull UUID playerUUID) {
+        return Optional.ofNullable(scoreboardMap.get(playerUUID));
+    }
+
     public void createScoreboard(@NotNull Player player) {
         Logger.trace("Creating board for player: {}", player.getName());
 
@@ -72,6 +76,23 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     return true;
                 })
                 .build();
+
+        final var holder = scoreboard.getHolder();
+        Tasker.build(() -> game.getRunningTeams().forEach(team -> {
+            if (!holder.hasTeamEntry(team.getName())) {
+                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+            }
+
+            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+            team.getConnectedPlayers()
+                    .forEach(teamPlayer -> {
+                        if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
+                            scoreboardTeam.addEntry(teamPlayer.getName());
+                        }
+                    });
+        })).afterOneTick().start();
+
+
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
@@ -136,9 +157,9 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             if (playerTeam != null) {
                                 if (playerTeam.getName().equalsIgnoreCase(t.getName())) {
                                     you = LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.SCOREBOARD_YOU_MESSAGE)
-                                    .toString();
+                                            .getInstance()
+                                            .get(MessageKeys.SCOREBOARD_YOU_MESSAGE)
+                                            .toString();
                                 }
                             }
                             lines.add(finalLine.replace("%team_status%",
@@ -163,70 +184,10 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%date%", DateUtils.getFormattedDate())
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus)
                             .replace("%tier%", generatorTask.getNextTierName()
-                            .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
+                                    .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
 
                     lines.add(line);
                 });
-
-        game.getRunningTeams().forEach(team -> {
-            if (!holder.hasTeamEntry(team.getName())) {
-                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
-            }
-            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
-
-            scoreboardTeam.getEntries()
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(Bukkit::getPlayerExact)
-                    .filter(Objects::nonNull)
-                    .forEach(teamPlayer -> {
-                        if (!team.getConnectedPlayers().contains(teamPlayer)) {
-                            scoreboardTeam.removeEntry(teamPlayer.getName());
-                        }
-                    });
-
-            team.getConnectedPlayers()
-                    .stream()
-                    .filter(player1 -> !arena.isPlayerHidden(player1))
-                    .map(Player::getName)
-                    .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
-                    .forEach(playerName -> {
-                        holder.getTeamEntry("invisibleSBA").ifPresent(sInvisTeam -> {
-                            if (sInvisTeam.hasEntry(playerName)) {
-                                sInvisTeam.removeEntry(playerName);
-                            }
-                        });
-                        scoreboardTeam.addEntry(playerName);
-                    });
-        });
-
-        if (!arena.getInvisiblePlayers().isEmpty()) {
-            arena.getInvisiblePlayers().forEach(invisiblePlayer -> {
-                if (invisiblePlayer == player) {
-                    return;
-                }
-
-                final var team = game.getTeamOfPlayer(invisiblePlayer);
-                if (team != null && playerTeam != team) {
-                    holder.getTeamEntry(teamName).ifPresent(teamEntry -> {
-                        if (teamEntry.hasEntry(invisiblePlayer.getName())) {
-                            teamEntry.removeEntry(invisiblePlayer.getName());
-                        }
-                    });
-
-                    if (!holder.hasTeamEntry("invisibleSBA")) {
-                        holder.addTeam("invisibleSBA", TeamColor.fromApiColor(team.getColor()).chatColor);
-                        holder.getTeamEntry("invisibleSBA").ifPresent(sTeam -> sTeam.setNameTagVisibility(NameTagVisibility.NEVER));
-                    }
-
-                    holder.getTeamEntry("invisibleSBA").ifPresent(entry -> {
-                        if (!entry.hasEntry(invisiblePlayer.getName())) {
-                            entry.addEntry(invisiblePlayer.getName());
-                        }
-                    });
-                }
-            });
-        }
         return lines;
     }
 
