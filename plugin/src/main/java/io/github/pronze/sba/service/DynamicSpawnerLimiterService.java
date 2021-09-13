@@ -42,7 +42,16 @@ public class DynamicSpawnerLimiterService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onGameStart(BedwarsGameStartedEvent event) {
-        setAccordingly(event.getGame(), false);
+        final var game = event.getGame();
+        setAccordingly(game, false);
+        game.getItemSpawners().forEach(itemSpawner -> {
+            if (Material.IRON_INGOT == itemSpawner.getItemSpawnerType().getMaterial()) {
+                Reflect.setField(itemSpawner, "maxSpawnedResources", SBAConfig.getInstance().node("upgrades", "limit", "Iron").getInt(48));
+            }
+            if (Material.GOLD_INGOT == itemSpawner.getItemSpawnerType().getMaterial()) {
+                Reflect.setField(itemSpawner, "maxSpawnedResources", SBAConfig.getInstance().node("upgrades", "limit", "Gold").getInt(8));
+            }
+        });
     }
 
     @EventHandler
