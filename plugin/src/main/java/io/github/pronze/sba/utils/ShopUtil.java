@@ -25,8 +25,8 @@ import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
-import org.screamingsandals.lib.material.Item;
-import org.screamingsandals.lib.material.meta.EnchantmentMapping;
+import org.screamingsandals.lib.item.Item;
+import org.screamingsandals.lib.item.meta.EnchantmentMapping;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
@@ -326,7 +326,8 @@ public class ShopUtil {
         } catch (Throwable ignored) {
         }
 
-        var normalItemName = item.getMaterial().getPlatformName().replace("_", " ").toLowerCase();
+
+        var normalItemName = item.getMaterial().platformName().replace("_", " ").toLowerCase();
         var sArray = normalItemName.split(" ");
         var stringBuilder = new StringBuilder();
 
@@ -375,7 +376,7 @@ public class ShopUtil {
     public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreType type) {
         final var player = event.getPlayer().as(Player.class);
         final var game = Main.getInstance().getGameOfPlayer(player);
-        final var typeName = item.getMaterial().getPlatformName();
+        final var typeName = item.getMaterial().platformName();
         final var runningTeam = game.getTeamOfPlayer(player);
 
         var prices = event.getInfo().getOriginal().getPrices();

@@ -127,6 +127,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     @Override
     public void enable() {
         instance = this;
+        Logger.init(getPluginInstance());
         ScoreboardManager.init(getPluginInstance());
         // register API
         Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
