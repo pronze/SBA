@@ -73,12 +73,12 @@ public class Arena implements IArena {
 
     @Override
     public void addHiddenPlayer(@NotNull Player player) {
-    //   if (invisiblePlayers.containsKey(player.getUniqueId())) {
-    //       return;
-    //   }
-    //   final var invisiblePlayer = new InvisiblePlayer(player, this);
-    //   invisiblePlayer.vanish();
-    //   invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
+        if (invisiblePlayers.containsKey(player.getUniqueId())) {
+            return;
+        }
+        final var invisiblePlayer = new InvisiblePlayerImpl(player, this);
+        invisiblePlayer.vanish();
+        invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
     }
 
     @Override
@@ -140,11 +140,6 @@ public class Arena implements IArena {
                 .get(MessageKeys.GAME_START_MESSAGE)
                 .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
 
-        // debugging purposes
-   //  game.getConnectedPlayers().forEach(player -> {
-   //      player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 600, 1));
-   //   //   addHiddenPlayer(player);
-   //  });
 
         // spawn rotating generators
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
@@ -365,6 +360,7 @@ public class Arena implements IArena {
         return List.copyOf(rotatingGenerators);
     }
 
+    @Override
     public Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID) {
         return Optional.ofNullable(invisiblePlayers.get(playerUUID));
     }

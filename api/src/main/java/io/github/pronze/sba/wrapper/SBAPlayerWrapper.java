@@ -8,7 +8,6 @@ import io.github.pronze.sba.data.ToggleableSetting;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.screamingsandals.bedwars.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,7 +33,7 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
     }
 
     public Player getInstance() {
-        return Bukkit.getPlayer(getUuid());
+        return as(Player.class);
     }
 
     public boolean canShout() {
@@ -86,7 +85,7 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
 
     public int getLevel() {
         var xp = getXP();
-        if (xp < 50) {
+        if (xp < getTotalXPToLevelUp()) {
             return 1;
         }
         return 1 + (xp / getTotalXPToLevelUp());
@@ -109,22 +108,17 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
     }
 
     public int getIntegerProgress() {
-        return getXP() - ((getLevel() - 1) * getTotalXPToLevelUp());
+        return ((getXP() - ((getLevel() - 1) * getTotalXPToLevelUp())) / getTotalXPToLevelUp()) * 100;
     }
 
     public String getCompletedBoxes() {
-        var maxLimit  = getTotalXPToLevelUp();
-
-        int progress = (getXP() - ((getLevel() - 1) * maxLimit)) / (maxLimit / 100);
+        int progress = getIntegerProgress();
         if (progress < 1)
             progress = 1;
 
-        char i = String.valueOf(Math.abs((long) progress)).charAt(0);
-        if (progress < 10) {
-            i = '1';
-        }
-        return "§7[§b" + Strings.repeat("■", Integer.parseInt(String.valueOf(i)))
-                + "§7" + Strings.repeat("■", 10 - Integer.parseInt(String.valueOf(i))) + "]";
+        int numberOfBoxesFilled = progress / 10;
+        return "§7[§b" + Strings.repeat("■", numberOfBoxesFilled)
+                + "§7" + Strings.repeat("■", 10 - numberOfBoxesFilled) + "]";
     }
 
     protected static String round(double toRound) {

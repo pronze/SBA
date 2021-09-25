@@ -135,4 +135,6 @@ public interface IArena {
      * @return a list containing all the rotating generators registered to the arena.
      */
     List<IRotatingGenerator> getRotatingGenerators();
+
+    Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID);
 }

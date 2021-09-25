@@ -22,15 +22,19 @@ import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
 import org.screamingsandals.lib.player.PlayerMapper;
 
 @Data
-public class InvisiblePlayer {
+public class InvisiblePlayerImpl implements InvisiblePlayer {
     private final Player hiddenPlayer;
     private final Arena arena;
     private boolean justEquipped = false;
     private boolean isHidden;
     protected BukkitTask armorHider;
 
+    @Override
     public void vanish() {
         final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
+        if (team == null) {
+            return;
+        }
         final var invisTeamName = "i-" + team.getName();
 
         // hide nametag
@@ -129,8 +133,12 @@ public class InvisiblePlayer {
         return packet;
     }
 
+    @Override
     public void showPlayer() {
         final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
+        if (team == null) {
+            return;
+        }
         final var invisTeamName = "i-" + team.getName();
 
         //show nametag

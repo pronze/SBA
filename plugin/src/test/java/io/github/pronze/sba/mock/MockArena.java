@@ -1,9 +1,6 @@
 package io.github.pronze.sba.mock;
 import io.github.pronze.sba.data.GamePlayerData;
-import io.github.pronze.sba.game.IGameStorage;
-import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.game.IRotatingGenerator;
-import io.github.pronze.sba.game.InvisiblePlayer;
+import io.github.pronze.sba.game.*;
 import io.github.pronze.sba.game.tasks.BaseGameTask;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import lombok.RequiredArgsConstructor;
@@ -87,7 +84,7 @@ public class MockArena implements IArena {
         return invisiblePlayers
                 .values()
                 .stream()
-                .map(InvisiblePlayer::getHiddenPlayer)
+                .map(InvisiblePlayerImpl::getHiddenPlayer)
                 .collect(Collectors.toList());
     }
 
@@ -121,5 +118,10 @@ public class MockArena implements IArena {
     @Override
     public List<IRotatingGenerator> getRotatingGenerators() {
         return null;
+    }
+
+    @Override
+    public Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID) {
+        return Optional.empty();
     }
 }

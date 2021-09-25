@@ -87,7 +87,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PlayerWrapperService.class,
         GamesInventoryService.class,
         HealthIndicatorService.class,
-        PlayerInvisibilityMaintainerService.class,
+        PacketListener.class,
         DateUtils.class,
         BedWarsListener.class,
         GameChatListener.class,
