@@ -1,5 +1,5 @@
 package io.github.pronze.sba.game.tasks;
-import io.github.pronze.sba.data.GameTaskData;
+
 import io.github.pronze.sba.game.IArena;
 import io.github.pronze.sba.manager.IGameTaskManager;
 import org.jetbrains.annotations.NotNull;
@@ -16,25 +16,25 @@ public class GameTaskManager implements IGameTaskManager {
         return ServiceManager.get(GameTaskManager.class);
     }
 
-    private final List<Class<? extends Runnable>> tasks = new ArrayList<>();
+    private final List<BaseGameTask> tasks = new ArrayList<>();
 
     public GameTaskManager() {
-        addTask(GeneratorTask.class);
-        addTask(HealPoolTask.class);
-        addTask(TrapTask.class);
-        addTask(MinerTrapTask.class);
+        addTask(new GeneratorTask());
+        addTask(new HealPoolTask());
+        addTask(new TrapTask());
+        addTask(new MinerTrapTask());
     }
 
     @Override
-    public void addTask(@NotNull Class<? extends Runnable> task) {
+    public void addTask(@NotNull BaseGameTask task) {
         if (tasks.contains(task)) {
-            throw new UnsupportedOperationException("TaskManager already contains task: " + task.getSimpleName());
+            throw new UnsupportedOperationException("TaskManager already contains task: " + task.getClass().getSimpleName());
         }
         tasks.add(task);
     }
 
     @Override
-    public void removeTask(@NotNull Class<? extends Runnable> task) {
+    public void removeTask(@NotNull BaseGameTask task) {
         if (!tasks.contains(task)) {
             return;
         }
@@ -42,9 +42,9 @@ public class GameTaskManager implements IGameTaskManager {
     }
 
     @Override
-    public List<GameTaskData<?>> startTasks(@NotNull IArena arena) {
+    public List<BaseGameTask> startTasks(@NotNull IArena arena) {
         return tasks.stream()
-                .map(taskClass -> new GameTaskData<>(taskClass, arena))
+                .map(task -> task.start(arena))
                 .collect(Collectors.toList());
     }
 }

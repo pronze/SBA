@@ -95,7 +95,6 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .get(game.getName())
                 .ifPresent(arena -> ((Arena)arena).onOver(e));
-        Tasker.build(() -> ArenaManager.getInstance().removeArena(game)).afterOneTick().start();
     }
 
     @EventHandler

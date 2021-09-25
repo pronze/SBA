@@ -1,5 +1,6 @@
 package io.github.pronze.sba.config;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
+import io.github.pronze.sba.utils.Logger;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
@@ -271,6 +272,10 @@ public class SBAConfig implements IConfigurator {
                     .key("replace-stores-with-npc").defValue(true);
 
             generator.saveIfModified();
+            if (!node("debug", "enabled").getBoolean()) {
+                Logger.setMode(Logger.Level.DISABLED);
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }

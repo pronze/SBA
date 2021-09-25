@@ -1,6 +1,7 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GamePlayerData;
+import io.github.pronze.sba.game.tasks.BaseGameTask;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -121,5 +122,17 @@ public interface IArena {
      * @param <T> The Type of the task to query
      * @return an optional containing the task instance if present, empty otherwise.
      */
-    <T extends Runnable> Optional<T> getTask(@NotNull Class<T> taskClass);
+    <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass);
+
+    /**
+     *
+     * @return
+     */
+    List<BaseGameTask> getGameTasks();
+
+    /**
+     *
+     * @return a list containing all the rotating generators registered to the arena.
+     */
+    List<IRotatingGenerator> getRotatingGenerators();
 }

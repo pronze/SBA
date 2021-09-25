@@ -29,9 +29,6 @@ public class Logger {
         instance = new Logger();
         instance.level = Level.ALL;
         instance.logger = plugin.getLogger();
-        if (!SBAConfig.getInstance().node("debug", "enabled").getBoolean()) {
-            instance.level = Level.DISABLED;
-        }
     }
 
     protected static void mockDebug(String message, Object... params) {

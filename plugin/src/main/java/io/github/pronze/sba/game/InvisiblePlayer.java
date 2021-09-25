@@ -25,7 +25,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 public class InvisiblePlayer {
     private final Player hiddenPlayer;
     private final Arena arena;
-
+    private boolean justEquipped = false;
     private boolean isHidden;
     protected BukkitTask armorHider;
 
@@ -112,7 +112,10 @@ public class InvisiblePlayer {
                 .getConnectedPlayers()
                 .stream()
                 .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
-                .forEach(pl -> getEquipPacket(airStack, airStack, airStack, airStack).sendPacket(PlayerMapper.wrapPlayer(pl)));
+                .forEach(pl -> {
+                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(), hiddenPlayer.getName());
+                    getEquipPacket(airStack, airStack, airStack, airStack).sendPacket(PlayerMapper.wrapPlayer(pl));
+                });
     }
 
     private SClientboundSetEquipmentPacket getEquipPacket(Item helmet, Item chestPlate, Item leggings, Item boots) {

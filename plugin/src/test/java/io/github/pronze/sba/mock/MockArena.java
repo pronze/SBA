@@ -2,7 +2,9 @@ package io.github.pronze.sba.mock;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.IArena;
+import io.github.pronze.sba.game.IRotatingGenerator;
 import io.github.pronze.sba.game.InvisiblePlayer;
+import io.github.pronze.sba.game.tasks.BaseGameTask;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
@@ -105,7 +107,19 @@ public class MockArena implements IArena {
     }
 
     @Override
-    public <T extends Runnable> Optional<T> getTask(@NotNull Class<T> taskClass) {
+    public <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass) {
         return Optional.empty();
+    }
+
+
+    @Override
+    public List<BaseGameTask> getGameTasks() {
+        return null;
+    }
+
+
+    @Override
+    public List<IRotatingGenerator> getRotatingGenerators() {
+        return null;
     }
 }

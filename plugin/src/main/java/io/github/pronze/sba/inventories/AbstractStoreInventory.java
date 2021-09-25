@@ -66,7 +66,6 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                     }
                 });
 
-
         SBA.getInstance().registerListener(this);
         loadNewShop("default", null, true);
     }

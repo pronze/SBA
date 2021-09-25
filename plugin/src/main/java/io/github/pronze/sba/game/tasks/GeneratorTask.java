@@ -13,21 +13,18 @@ import org.screamingsandals.lib.utils.annotations.Service;
 
 import java.text.SimpleDateFormat;
 
-public class GeneratorTask implements Runnable {
+public class GeneratorTask extends BaseGameTask {
 
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
-    private final Arena arena;
     private final String diamond;
     private final String emerald;
     private final double multiplier;
-    private final Game game;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
     private GameTierEvent nextEvent;
     private int elapsedTime;
 
-    public GeneratorTask(IArena arena) {
-        this.arena = (Arena) arena;
+    public GeneratorTask() {
         nextEvent = GameTierEvent.DIAMOND_GEN_UPGRADE_TIER_II;
         diamond = LanguageService
                 .getInstance()
@@ -37,8 +34,6 @@ public class GeneratorTask implements Runnable {
                 .getInstance()
                 .get(MessageKeys.EMERALD)
                 .toString();
-
-        this.game = arena.getGame();
 
         timerUpgrades = SBAConfig
                 .getInstance()

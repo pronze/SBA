@@ -3,14 +3,13 @@ package io.github.pronze.sba.game;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
-import io.github.pronze.sba.data.GameTaskData;
+import io.github.pronze.sba.game.tasks.BaseGameTask;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.entity.Bat;
@@ -29,20 +28,18 @@ import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
-import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Getter
 public class Arena implements IArena {
     private static LivingEntity mockEntity = null;
     private final List<IRotatingGenerator> rotatingGenerators;
     private final Map<UUID, InvisiblePlayer> invisiblePlayers;
     private final Map<UUID, GamePlayerData> playerDataMap;
-    private final List<GameTaskData<?>> gameTasks;
+    private final List<BaseGameTask> gameTasks;
     private final List<NPC> storeNPCS;
     private final List<NPC> upgradeStoreNPCS;
     private final GameScoreboardManager scoreboardManager;
@@ -76,12 +73,12 @@ public class Arena implements IArena {
 
     @Override
     public void addHiddenPlayer(@NotNull Player player) {
-        if (invisiblePlayers.containsKey(player.getUniqueId())) {
-            return;
-        }
-        final var invisiblePlayer = new InvisiblePlayer(player, this);
-        invisiblePlayer.vanish();
-        invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
+    //   if (invisiblePlayers.containsKey(player.getUniqueId())) {
+    //       return;
+    //   }
+    //   final var invisiblePlayer = new InvisiblePlayer(player, this);
+    //   invisiblePlayer.vanish();
+    //   invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
     }
 
     @Override
@@ -114,6 +111,16 @@ public class Arena implements IArena {
         return Optional.ofNullable(playerDataMap.get(uuid));
     }
 
+    @Override
+    public @NotNull IGameStorage getStorage() {
+        return storage;
+    }
+
+    @Override
+    public @NotNull Game getGame() {
+        return game;
+    }
+
     @NotNull
     @Override
     public ScoreboardManager getScoreboardManager() {
@@ -132,6 +139,12 @@ public class Arena implements IArena {
                 .getInstance()
                 .get(MessageKeys.GAME_START_MESSAGE)
                 .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
+
+        // debugging purposes
+   //  game.getConnectedPlayers().forEach(player -> {
+   //      player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 600, 1));
+   //   //   addHiddenPlayer(player);
+   //  });
 
         // spawn rotating generators
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
@@ -226,7 +239,7 @@ public class Arena implements IArena {
     public void onOver(BedwarsGameEndingEvent e) {
         // destroy scoreboard manager instance and GameTask, we do not need these anymore
         scoreboardManager.destroy();
-        gameTasks.stream().map(GameTaskData::getTaskerTask).forEach(TaskerTask::cancel);
+        gameTasks.forEach(BaseGameTask::stop);
         gameTasks.clear();
 
         rotatingGenerators.forEach(IRotatingGenerator::destroy);
@@ -335,10 +348,24 @@ public class Arena implements IArena {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends Runnable> Optional<T> getTask(@NotNull Class<T> taskClass) {
-        return getGameTasks().stream()
-                .filter(gameTaskData -> gameTaskData.getTaskClass().isAssignableFrom(taskClass))
-                .map(gameTaskData -> (T) gameTaskData.raw())
+    public <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass) {
+        return (Optional<T>) getGameTasks()
+                .stream()
+                .filter(gameTask -> gameTask.getClass().isAssignableFrom(taskClass))
                 .findAny();
+    }
+
+    @Override
+    public List<BaseGameTask> getGameTasks() {
+        return List.copyOf(gameTasks);
+    }
+
+    @Override
+    public List<IRotatingGenerator> getRotatingGenerators() {
+        return List.copyOf(rotatingGenerators);
+    }
+
+    public Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID) {
+        return Optional.ofNullable(invisiblePlayers.get(playerUUID));
     }
 }

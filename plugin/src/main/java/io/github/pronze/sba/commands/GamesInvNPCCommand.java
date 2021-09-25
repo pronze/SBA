@@ -1,4 +1,5 @@
 package io.github.pronze.sba.commands;
+
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
@@ -24,7 +25,7 @@ public class GamesInvNPCCommand {
     @CommandMethod("sba gamesinv spawnnpc <mode>")
     @CommandPermission("sba.spawnnpc")
     private void commandSpawn(final @NotNull Player player,
-                              final @NotNull  @Argument("mode") GameMode mode) {
+                              final @NotNull @Argument("mode") GameMode mode) {
         if (GamesInventoryService.getInstance().isNPCAtLocation(LocationMapper.wrapLocation(player.getLocation()))) {
             LanguageService
                     .getInstance()

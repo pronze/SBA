@@ -18,11 +18,10 @@ import lombok.NonNull;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
-import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.utils.SBAUtil;
 
 import java.util.function.Function;
@@ -45,13 +44,13 @@ public class CommandManager {
     private MinecraftHelp<CommandSender> minecraftHelp;
 
     @OnEnable
-    public void onEnable() {
+    public void onEnable(JavaPlugin plugin) {
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
                 CommandExecutionCoordinator.simpleCoordinator();
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();
         try {
             this.manager = new PaperCommandManager<>(
-                    SBA.getPluginInstance(),
+                    plugin,
                     executionCoordinatorFunction,
                     mapperFunction,
                     mapperFunction
@@ -59,11 +58,11 @@ public class CommandManager {
         } catch (final Exception e) {
             Bukkit.getLogger().severe("Failed to initialize the command manager");
             /* Disable the plugin */
-            SBAUtil.disablePlugin(SBA.getPluginInstance());
+            SBAUtil.disablePlugin(plugin);
             return;
         }
 
-        BukkitAudiences bukkitAudiences = BukkitAudiences.create(SBA.getPluginInstance());
+        BukkitAudiences bukkitAudiences = BukkitAudiences.create(plugin);
         minecraftHelp = new MinecraftHelp<>(
                 "/sba help",
                 bukkitAudiences::sender,
@@ -87,6 +86,7 @@ public class CommandManager {
                 CommandSender.class,
                 commandMetaFunction
         );
+        annotationParser.parse(this);
     }
 
     @CommandMethod("sba help [query]")

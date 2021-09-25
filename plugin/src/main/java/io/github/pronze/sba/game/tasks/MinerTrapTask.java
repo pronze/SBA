@@ -16,13 +16,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.player.PlayerMapper;
 
-public class MinerTrapTask implements Runnable {
-
-    private final Arena arena;
+public class MinerTrapTask extends BaseGameTask {
     private final double radius;
 
-    public MinerTrapTask(@NotNull IArena arena) {
-        this.arena = (Arena) arena;
+    public MinerTrapTask() {
         radius = Math.pow(SBAConfig.getInstance().node("upgrades", "trap-detection-range").getInt(7), 2);
     }
 

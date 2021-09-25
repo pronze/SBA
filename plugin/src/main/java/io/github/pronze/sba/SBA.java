@@ -42,12 +42,10 @@ import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
 import org.screamingsandals.lib.tasker.Tasker;
-import org.screamingsandals.lib.utils.Controllable;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
-import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import pronze.lib.scoreboards.ScoreboardManager;
 
@@ -89,7 +87,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PlayerWrapperService.class,
         GamesInventoryService.class,
         HealthIndicatorService.class,
-        //TODO: add PlayerInvisibilityMaintainerService.class,
+        PlayerInvisibilityMaintainerService.class,
         DateUtils.class,
         BedWarsListener.class,
         GameChatListener.class,
@@ -106,40 +104,37 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         NPCStoreService.class,
         FirstStartConfigReplacer.class,
 })
-
 public class SBA extends PluginContainer implements AddonAPI {
+
     private static SBA instance;
-    private final List<Listener> registeredListeners = new ArrayList<>();
 
     public static SBA getInstance() {
         return instance;
     }
 
-    public static JavaPlugin getPluginInstance() {
-        return instance.getPluginDescription().as(JavaPlugin.class);
-    }
+    private JavaPlugin cachedPluginInstance;
+    private final List<Listener> registeredListeners = new ArrayList<>();
 
-    @Override
-    public void load() {
-        instance = this;
+    public static JavaPlugin getPluginInstance() {
+        if (instance == null) {
+            throw new UnsupportedOperationException("SBA has not yet been initialized!");
+        }
+        if (instance.cachedPluginInstance == null) {
+            instance.cachedPluginInstance = (JavaPlugin) instance.getPluginDescription().as(JavaPlugin.class);
+        }
+        return instance.cachedPluginInstance;
     }
 
     @Override
     public void enable() {
         instance = this;
-        Logger.init(getPluginInstance());
-        ScoreboardManager.init(getPluginInstance());
-        // register API
-        Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, getPluginInstance(), ServicePriority.Normal);
-
-        // TODO:
-        var pluginControllable = Reflect.getField(getPluginInstance(), "pluginControllable");
-        if (pluginControllable instanceof Controllable) {
-            ((Controllable) pluginControllable).child().postEnable(this::onPostEnable);
-        }
+        cachedPluginInstance = instance.getPluginDescription().as(JavaPlugin.class);
+        Logger.init(cachedPluginInstance);
+        ScoreboardManager.init(cachedPluginInstance);
     }
 
-    public void onPostEnable() {
+    @Override
+    public void postEnable() {
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
@@ -151,14 +146,16 @@ public class SBA extends PluginContainer implements AddonAPI {
             return;
         }
 
-        InventoryListener.init(getPluginInstance());
+        InventoryListener.init(cachedPluginInstance);
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             Logger.trace("Registering SBAExpansion...");
             new SBAExpansion().register();
         }
 
-        getLogger().info("Plugin has loaded");
+        getLogger().info("Plugin has finished loading!");
+        registerAPI();
+        Logger.trace("API has been registered!");
     }
 
     public void registerListener(@NotNull Listener listener) {
@@ -182,9 +179,15 @@ public class SBA extends PluginContainer implements AddonAPI {
         return List.copyOf(registeredListeners);
     }
 
+    private void registerAPI() {
+        if (Bukkit.getServer().getServicesManager().getRegistration(AddonAPI.class) == null) {
+            Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, cachedPluginInstance, ServicePriority.Normal);
+        }
+    }
+
     @Override
     public void disable() {
-
+        Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
     }
 
     @Override
