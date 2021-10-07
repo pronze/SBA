@@ -94,7 +94,7 @@ public class GeneratorSplitterListener implements Listener {
         try {
             final var key = new NamespacedKey((Plugin) BedwarsAPI.getInstance(), APIUtils.BEDWARS_NAMESPACED_KEY);
             var container = meta.getPersistentDataContainer();
-            container.set(key, PersistentDataType.STRING, new Gson().toJson(new ArrayList<>()));
+            container.remove(key);
         } catch (Throwable ignored) {
             // Use the Lore API instead
             List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
