@@ -5,24 +5,25 @@ import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
-import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.inventories.GamesInventory;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.utils.SBAUtil;
+import io.github.pronze.sba.utils.ShopUtil;
 import io.leangen.geantyref.TypeToken;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.serialize.SerializationException;
-import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.utils.SBAUtil;
-import io.github.pronze.sba.utils.ShopUtil;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
@@ -71,11 +72,7 @@ public class SBACommand {
             lobbyNode.node("yaw").set(location.getYaw());
             lobbyNode.node("pitch").set(location.getPitch());
             SBAConfig.getInstance().saveConfig();
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.SUCCESSFULLY_SET_LOBBY)
-                    .send(PlayerMapper.wrapPlayer(player));
-
+            Message.of(LangKeys.SUCCESSFULLY_SET_LOBBY).send(PlayerMapper.wrapPlayer(player));
             SBAUtil.reloadPlugin(SBA.getPluginInstance());
         } catch (SerializationException ex) {
             ex.printStackTrace();
@@ -88,130 +85,117 @@ public class SBACommand {
     private void commandReset(
             final @NotNull CommandSender sender
     ) {
-        final var component = LanguageService
-                .getInstance()
-                .get(MessageKeys.COMMAND_RESETTING)
-                .toComponent();
-
-        PlayerMapper.wrapSender(sender).sendMessage(component);
+        final var wrappedSender = PlayerMapper.wrapSender(sender);
+        Message.of(LangKeys.COMMAND_RESETTING).send(wrappedSender);
         SBAConfig.getInstance().upgrade();
-        final var c2 = LanguageService
-                .getInstance()
-                .get(MessageKeys.RESET_COMMAND_SUCCESS)
-                .toComponent();
-
-        PlayerMapper.wrapSender(sender).sendMessage(c2);
+        Message.of(LangKeys.RESET_COMMAND_SUCCESS).send(wrappedSender);
     }
 
-   @CommandMethod("sba generate <gamemode> <maps>")
-   @CommandDescription("generate games inventory configuration files")
-   @CommandPermission("sba.generate")
-   private void commandGenerate(
-           final @NotNull CommandSender sender,
-           final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode,
-           final @NotNull @Argument(value = "maps", suggestions = "maps") String[] mapsArg
-   ) {
+    @CommandMethod("sba generate <gamemode> <maps>")
+    @CommandDescription("generate games inventory configuration files")
+    @CommandPermission("sba.generate")
+    private void commandGenerate(
+            final @NotNull CommandSender sender,
+            final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode,
+            final @NotNull @Argument(value = "maps", suggestions = "maps") String[] mapsArg
+    ) {
         final var stringedGameMode = SBAUtil.capitalizeFirstLetter(gameMode);
-       final var maps = List.of(mapsArg);
-       if (maps.isEmpty()) {
-           //TODO:
-           return;
-       }
-       Logger.trace("Generating Games Inventory file for game mode: {}", gameMode);
-       final var file = new File(SBA.getPluginInstance().getDataFolder(), "games-inventory/" + gameMode + ".yml");
-       if (file.exists()) {
-           Logger.trace("Deleting pre existing games inventory file, status: {}", file.delete());
-       }
-       try {
-           Logger.trace("Creating new games inventory file, status: {}", file.createNewFile());
-       } catch (IOException ex) {
-           ex.printStackTrace();
-       }
-       var node = SBAConfig.getInstance().node("lobby-scoreboard", "player-size", "games");
-       maps.forEach(arg -> {
-           try {
-               node.node(arg).set(Integer.class, ShopUtil.getIntFromMode(gameMode));
-               SBAConfig.getInstance().saveConfig();
-               SBAConfig.getInstance().forceReload();
-           } catch (Exception ex) {
-               ex.printStackTrace();
-           }
-       });
+        final var maps = List.of(mapsArg);
+        if (maps.isEmpty()) {
+            //TODO:
+            return;
+        }
+        Logger.trace("Generating Games Inventory file for game mode: {}", gameMode);
+        final var file = new File(SBA.getPluginInstance().getDataFolder(), "games-inventory/" + gameMode + ".yml");
+        if (file.exists()) {
+            Logger.trace("Deleting pre existing games inventory file, status: {}", file.delete());
+        }
+        try {
+            Logger.trace("Creating new games inventory file, status: {}", file.createNewFile());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        var node = SBAConfig.getInstance().node("lobby-scoreboard", "player-size", "games");
+        maps.forEach(arg -> {
+            try {
+                node.node(arg).set(Integer.class, ShopUtil.getIntFromMode(gameMode));
+                SBAConfig.getInstance().saveConfig();
+                SBAConfig.getInstance().forceReload();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
-       final var loader = YamlConfigurationLoader.builder()
-               .path(file.getAbsoluteFile().toPath())
-               .build();
-       try {
-           var root = loader.load();
+        final var loader = YamlConfigurationLoader.builder()
+                .path(file.getAbsoluteFile().toPath())
+                .build();
+        try {
+            var root = loader.load();
 
-           root.node("data").setList(new TypeToken<>() {
-           }, List.of(
-                   Map.of("stack", "RED_BED;1;§aBed Wars §7(%s);§7Play Bed Wars {§7%s}; ;§eClick to play!".replaceAll(Pattern.quote("%s"), stringedGameMode),
-                           "row", "1",
-                           "column", "3",
-                           "properties", "randomly_join"),
+            root.node("data").setList(new TypeToken<>() {
+            }, List.of(
+                    Map.of("stack", "RED_BED;1;§aBed Wars §7(%s);§7Play Bed Wars {§7%s}; ;§eClick to play!".replaceAll(Pattern.quote("%s"), stringedGameMode),
+                            "row", "1",
+                            "column", "3",
+                            "properties", "randomly_join"),
 
-                   Map.of("stack", "BARRIER;1;§cExit",
-                           "row", "3",
-                           "column", "4",
-                           "properties", "exit"),
+                    Map.of("stack", "BARRIER;1;§cExit",
+                            "row", "3",
+                            "column", "4",
+                            "properties", "exit"),
 
-                   Map.of("stack", "ENDER_PEARL;1;§cClick here to rejoin!;§7Click here to rejoin the lastly joined game.",
-                           "properties", "rejoin",
-                           "row", "3",
-                           "column", "8")
-           ));
+                    Map.of("stack", "ENDER_PEARL;1;§cClick here to rejoin!;§7Click here to rejoin the lastly joined game.",
+                            "properties", "rejoin",
+                            "row", "3",
+                            "column", "8")
+            ));
 
 
-           root.node("data").appendListNode().set(Map.of("stack", "OAK_SIGN;1;§aMap Selector §7(%s);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!".replaceAll(Pattern.quote("%s"), stringedGameMode),
-                   "row", "1",
-                   "column", "5",
-                   "options", Map.of("rows", "6",
-                           "render_actual_rows", "6"),
-                   "items", new ArrayList<Map<String, Object>>() {
-                       {
-                           final var col = new AtomicInteger(1);
-                           final var row = new AtomicInteger(1);
-                           maps
-                                   .stream()
-                                   .map(mapName -> Main.getInstance().getGameByName(mapName))
-                                   .forEach(game -> {
-                                       col.set(col.get() + 1);
-                                       if (col.get() >= 6) {
-                                           row.set(row.get() + 1);
-                                           col.set(2);
-                                       }
-                                       if (row.get() >= 3) return;
+            root.node("data").appendListNode().set(Map.of("stack", "OAK_SIGN;1;§aMap Selector §7(%s);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!".replaceAll(Pattern.quote("%s"), stringedGameMode),
+                    "row", "1",
+                    "column", "5",
+                    "options", Map.of("rows", "6",
+                            "render_actual_rows", "6"),
+                    "items", new ArrayList<Map<String, Object>>() {
+                        {
+                            final var col = new AtomicInteger(1);
+                            final var row = new AtomicInteger(1);
+                            maps
+                                    .stream()
+                                    .map(mapName -> Main.getInstance().getGameByName(mapName))
+                                    .forEach(game -> {
+                                        col.set(col.get() + 1);
+                                        if (col.get() >= 6) {
+                                            row.set(row.get() + 1);
+                                            col.set(2);
+                                        }
+                                        if (row.get() >= 3) return;
 
-                                       add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + stringedGameMode + "; ;§aClick to play"),
-                                               "row", String.valueOf(row.get()),
-                                               "column", String.valueOf(col.get()),
-                                               "properties", Map.of("name", "join",
-                                                       "gameName", game.getName()))
-                                       );
-                                   });
-                       }
+                                        add(Map.of("stack", ("PAPER;1;§a" + game.getName() + ";§7" + stringedGameMode + "; ;§aClick to play"),
+                                                "row", String.valueOf(row.get()),
+                                                "column", String.valueOf(col.get()),
+                                                "properties", Map.of("name", "join",
+                                                        "gameName", game.getName()))
+                                        );
+                                    });
+                        }
 
-                       {
-                           add(Map.of("stack", "ARROW;1;§cGo Back",
-                                   "row", 4,
-                                   "column", 4,
-                                   "locate", "main"));
-                       }
-                   }));
+                        {
+                            add(Map.of("stack", "ARROW;1;§cGo Back",
+                                    "row", 4,
+                                    "column", 4,
+                                    "locate", "main"));
+                        }
+                    }));
 
-           loader.save(root);
+            loader.save(root);
 
-           final var generated = LanguageService
-                   .getInstance()
-                   .get(MessageKeys.GAMESINV_GENERATED)
-                   .toComponent();
-           PlayerMapper.wrapSender(sender).sendMessage(generated);
-           SBAUtil.reloadPlugin(SBA.getPluginInstance());
-       } catch (IOException ex) {
-           ex.printStackTrace();
-       }
-   }
+            Message.of(LangKeys.GAMESINV_GENERATED).send(PlayerMapper.wrapSender(sender));
+            SBAUtil.reloadPlugin(SBA.getPluginInstance());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     @CommandMethod("sba gamesinv <gamemode>")
     @CommandDescription("open GamesInventory for player")
@@ -220,11 +204,8 @@ public class SBACommand {
             final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode
     ) {
         if (!gamesInvEnabled) {
-            final var disabled = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.GAMES_INV_DISABLED)
-                    .toComponent();
-            PlayerMapper.wrapPlayer(player).sendMessage(disabled);
+            Message.of(LangKeys.GAMES_INV_DISABLED)
+                    .send(PlayerMapper.wrapPlayer(player));
             return;
         }
         final int mode = ShopUtil.getIntFromMode(gameMode);
@@ -239,24 +220,13 @@ public class SBACommand {
     private void commandUpgrade(
             final @NotNull CommandSender sender
     ) {
+        final var wrappedSender = PlayerMapper.wrapSender(sender);
         if (!SBA.getInstance().isPendingUpgrade()) {
-            final var cannotExecute = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.COMMAND_CANNOT_EXECUTE)
-                    .toString();
-
-            PlayerMapper.wrapSender(sender).sendMessage(cannotExecute);
+            Message.of(LangKeys.COMMAND_CANNOT_EXECUTE).send(wrappedSender);
             return;
         }
-
         SBAConfig.getInstance().upgrade();
-        LanguageService.getInstance().load(SBA.getPluginInstance());
-        final var upgraded = LanguageService
-                .getInstance()
-                .get(MessageKeys.COMMAND_SUCCESSFULLY_UPGRADED)
-                .toString();
-
-        PlayerMapper.wrapSender(sender).sendMessage(upgraded);
+        Message.of(LangKeys.COMMAND_SUCCESSFULLY_UPGRADED).send(wrappedSender);
     }
 
     @CommandMethod("sba cancel")
@@ -265,25 +235,16 @@ public class SBACommand {
     private void commandCancel(
             final @NotNull CommandSender sender
     ) {
+        final var wrappedSender = PlayerMapper.wrapSender(sender);
         if (!SBA.getInstance().isPendingUpgrade()) {
-            final var m1 = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.CANNOT_DO_COMMAND)
-                    .toString();
-
-            PlayerMapper.wrapSender(sender).sendMessage(m1);
+            Message.of(LangKeys.CANNOT_DO_COMMAND).send(wrappedSender);
             return;
         }
 
         try {
             SBAConfig.getInstance().node("version").set(SBA.getInstance().getVersion());
             SBAConfig.getInstance().saveConfig();
-            final var m2 = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.COMMAND_CANCEL_UPGRADE)
-                    .toString();
-
-            PlayerMapper.wrapSender(sender).sendMessage(m2);
+            Message.of(LangKeys.COMMAND_CANCEL_UPGRADE).send(wrappedSender);
         } catch (SerializationException ex) {
             ex.printStackTrace();
         }

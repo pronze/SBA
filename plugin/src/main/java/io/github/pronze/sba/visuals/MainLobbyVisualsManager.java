@@ -1,9 +1,7 @@
 package io.github.pronze.sba.visuals;
 
-import io.github.pronze.sba.MessageKeys;
-import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.utils.Logger;
-import me.clip.placeholderapi.PlaceholderAPI;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,16 +10,19 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.lib.event.OnEvent;
+import org.screamingsandals.lib.event.player.SPlayerChatEvent;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.sidebar.Sidebar;
 import org.screamingsandals.lib.tasker.Tasker;
-import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
@@ -29,77 +30,126 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import java.util.*;
 
 @Service
 public class MainLobbyVisualsManager implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
-    private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
+
+    private final Sidebar sidebar;
+
+    public MainLobbyVisualsManager() {
+        this.sidebar = Sidebar.of();
+        var sidebar = Sidebar.of();
+        var title = Message.of(LangKeys.MAIN_LOBBY_SCOREBOARD_TITLE)
+                .asComponent();
+
+        sidebar.title(title);
+
+        Message.of(LangKeys.MAIN_LOBBY_SCOREBOARD_LINES)
+                .placeholder("sba_version", SBA.getInstance().getVersion())
+                .placeholder("kills", playerWrapper -> {
+                    final var playerStatistic  = Main
+                            .getPlayerStatisticsManager()
+                            .getStatistic(playerWrapper.as(Player.class));
+                    return AdventureHelper.toComponent(String.valueOf(playerStatistic.getKills()));
+                })
+                .placeholder("beddestroys", playerWrapper -> {
+                    final var playerStatistic  = Main
+                            .getPlayerStatisticsManager()
+                            .getStatistic(playerWrapper.as(Player.class));
+                    return AdventureHelper.toComponent(String.valueOf(playerStatistic.getDestroyedBeds()));
+                })
+                .placeholder("deaths", playerWrapper -> {
+                    final var playerStatistic  = Main
+                            .getPlayerStatisticsManager()
+                            .getStatistic(playerWrapper.as(Player.class));
+                    return AdventureHelper.toComponent(String.valueOf(playerStatistic.getDeaths()));
+                })
+                .placeholder("level", playerWrapper -> {
+                    final var sbaWrapper = playerWrapper.as(SBAPlayerWrapper.class);
+                    return AdventureHelper.toComponent("§7" + sbaWrapper.getLevel() + "✫");
+                })
+                .placeholder("progress", playerWrapper -> {
+                    final var sbaWrapper = playerWrapper.as(SBAPlayerWrapper.class);
+                    return AdventureHelper.toComponent(sbaWrapper.getProgress());
+                })
+                .placeholder("bar", playerWrapper -> {
+                    final var sbaWrapper = playerWrapper.as(SBAPlayerWrapper.class);
+                    return AdventureHelper.toComponent(sbaWrapper.getCompletedBoxes());
+                })
+                .placeholder("wins", playerWrapper -> {
+                    final var playerStatistic  = Main
+                            .getPlayerStatisticsManager()
+                            .getStatistic(playerWrapper.as(Player.class));
+                    return AdventureHelper.toComponent(String.valueOf(playerStatistic.getWins()));
+                })
+                .placeholder("kdr", playerWrapper -> {
+                    final var playerStatistic  = Main
+                            .getPlayerStatisticsManager()
+                            .getStatistic(playerWrapper.as(Player.class));
+                    return AdventureHelper.toComponent(String.valueOf(playerStatistic.getKD()));
+                })
+                .getForAnyone()
+                .forEach(sidebar::bottomLine);
+
+        sidebar.show();
+    }
+
+    @OnPreDisable
+    public void onPreDisable() {
+        sidebar.destroy();
+    }
 
     @OnPostEnable
     public void registerListener() {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
             return;
         }
+
         SBA.getInstance().registerListener(this);
         SBAUtil.readLocationFromConfig("main-lobby").ifPresentOrElse(location -> {
             MainLobbyVisualsManager.location = location;
-            Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> Bukkit
-                    .getOnlinePlayers().forEach(this::create), 3L);
+            Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> Bukkit.getOnlinePlayers().forEach(this::create), 3L);
         }, () -> {
-            disable();
             Bukkit.getServer().getLogger().warning("Could not find lobby world!");
+            HandlerList.unregisterAll(this);
         });
     }
 
     public static boolean isInWorld(Location loc) {
-        try {
-            return loc.getWorld().equals(location.getWorld());
-        } catch (Throwable t) {
-            return false;
-        }
+        return location != null && loc.getWorld().equals(location.getWorld());
     }
 
     public static boolean hasMainLobbyObjective(Player player) {
         return player.getScoreboard().getObjective(MAIN_LOBBY_OBJECTIVE) != null;
     }
 
-    @EventHandler
-    public void onChat(AsyncPlayerChatEvent e) {
-        if (!SBAConfig.getInstance().node("main-lobby","custom-chat").getBoolean(true)) return;
-        final var player = e.getPlayer();
-        final var db = SBA.getInstance().getPlayerWrapperService().get(player).orElseThrow();
+    @OnEvent
+    public void onChat(SPlayerChatEvent event) {
+        if (!SBAConfig.getInstance().node("main-lobby","custom-chat").getBoolean(true)) {
+            return;
+        }
+
+        final var player = event.getPlayer().as(Player.class);
+        final var db = SBA
+                .getInstance()
+                .getPlayerWrapperService()
+                .get(player)
+                .orElseThrow();
 
         if (SBAConfig.getInstance().node("main-lobby", "enabled").getBoolean(false)
-                && MainLobbyVisualsManager.isInWorld(e.getPlayer().getLocation())) {
+                && MainLobbyVisualsManager.isInWorld(player.getLocation())) {
 
-            var chatFormat = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.MAIN_LOBBY_CHAT_FORMAT)
-                    .toString();
+            var chatFormat = Message.of(LangKeys.MAIN_LOBBY_CHAT_FORMAT)
+                    .placeholder("level", String.valueOf(db.getLevel()))
+                    .placeholder("name", player.getName())
+                    .placeholder("message", event.getMessage())
+                    .placeholder("color", ShopUtil.ChatColorChanger(player))
+                    .asComponent();
 
-            if (chatFormat != null) {
-                var format = chatFormat
-                        .replace("%level%", String.valueOf(db.getLevel()))
-                        .replace("%name%", e.getPlayer().getName())
-                        .replace("%message%", e.getMessage())
-                        .replace("%color%", ShopUtil.ChatColorChanger(e.getPlayer()));
-
-                if (SBA.getPluginInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-                    format = PlaceholderAPI.setPlaceholders(player, format);
-                }
-                e.setFormat(format);
-            }
+            event.setFormat(AdventureHelper.toLegacy(chatFormat));
         }
-    }
-
-    @OnPreDisable
-    public void disable() {
-        Set.copyOf(scoreboardMap.keySet()).forEach(this::remove);
-        scoreboardMap.clear();
-        HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -118,7 +168,7 @@ public class MainLobbyVisualsManager implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
         final var player = e.getPlayer();
-        if (player.isOnline() && isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
+        if (player.isOnline() && isInWorld(player.getLocation())) {
             create(player);
         } else {
             remove(player);
@@ -131,81 +181,36 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void create(Player player) {
-        Logger.trace("Creating scoreboard for player: {} in the main lobby", player.getName());
-        final var playerData = SBA
-                .getInstance()
-                .getPlayerWrapperService()
-                .get(player)
-                .orElseThrow();
-
+        final var wrapper = PlayerMapper.wrapPlayer(player);
         if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
-            var header = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.MAIN_LOBBY_TABLIST_HEADER)
-                    .replace("%sba_version%", SBA.getInstance().getVersion())
-                    .toComponent();
+            var header = Message.of(LangKeys.MAIN_LOBBY_TABLIST_HEADER)
+                    .placeholder("sba_version", SBA.getInstance().getVersion())
+                    .asComponent();
 
-            var footer = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.MAIN_LOBBY_TABLIST_FOOTER)
-                    .replace("%sba_version%", SBA.getInstance().getVersion())
-                    .toComponent();
+            var footer = Message.of(LangKeys.MAIN_LOBBY_TABLIST_FOOTER)
+                    .placeholder("sba_version", SBA.getInstance().getVersion())
+                    .asComponent();
 
-            playerData.sendPlayerListHeaderAndFooter(header, footer);
+            wrapper.sendPlayerListHeaderAndFooter(header, footer);
         }
 
-        var title = LanguageService
-                .getInstance()
-                .get(MessageKeys.MAIN_LOBBY_SCOREBOARD_TITLE)
-                .toString();
-
-        var lines = LanguageService
-                .getInstance()
-                .get(MessageKeys.MAIN_LOBBY_SCOREBOARD_LINES)
-                .toStringList();
-
-        final var scoreboard = Scoreboard.builder()
-                .animate(false)
-                .player(player)
-                .title(title)
-                .displayObjective(MAIN_LOBBY_OBJECTIVE)
-                .updateInterval(20L)
-                .lines(lines)
-                .placeholderHook(hook -> {
-                    final var bar = playerData.getCompletedBoxes();
-                    final var progress = playerData.getProgress();
-                    final var playerStatistic  = Main
-                            .getPlayerStatisticsManager()
-                            .getStatistic(player);
-
-                    return hook
-                            .getLine()
-                            .replace("%sba_version%", SBA.getInstance().getVersion())
-                            .replace("%kills%", String.valueOf(playerStatistic.getKills()))
-                            .replace("%beddestroys%", String.valueOf(playerStatistic.getDestroyedBeds()))
-                            .replace("%deaths%", String.valueOf(playerStatistic.getDeaths()))
-                            .replace("%level%", "§7" + playerData.getLevel() + "✫")
-                            .replace("%progress%", progress)
-                            .replace("%bar%", bar)
-                            .replace("%wins%", String.valueOf(playerStatistic.getWins()))
-                            .replace("%kdr%", String.valueOf(playerStatistic.getKD()));
-                }).build();
-
-        scoreboardMap.put(player, scoreboard);
+        if (!sidebar.getViewers().contains(wrapper)) {
+            sidebar.addViewer(wrapper);
+        }
     }
 
     public void remove(Player player) {
-        if (player == null) return;
-        final var scoreboard = scoreboardMap.get(player);
-        if (scoreboard != null) {
-            scoreboard.destroy();
-            scoreboardMap.remove(player);
+        if (player == null) {
+            return;
         }
-        if (hasMainLobbyObjective(player)) {
-            player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
+        final var wrapper = PlayerMapper.wrapPlayer(player);
+        if (sidebar.getViewers().contains(wrapper)) {
+            sidebar.removeViewer(wrapper);
         }
+
         if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
-            PlayerMapper.wrapPlayer(player).sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
+            wrapper.sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
         }
     }
 
@@ -220,8 +225,8 @@ public class MainLobbyVisualsManager implements Listener {
         final var player = e.getPlayer();
         Tasker.build(() -> {
             if (isInWorld(player.getLocation()) && player.isOnline()) {
-                create(player);
+                remove(player);
             }
-        }).delay(1L, TaskerTime.SECONDS);
+        }).afterOneTick();
     }
 }

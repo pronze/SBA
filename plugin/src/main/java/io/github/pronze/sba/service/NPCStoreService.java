@@ -15,10 +15,11 @@ import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
-import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.utils.InteractType;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
@@ -85,7 +86,7 @@ public class NPCStoreService implements Listener {
 
     public void onNPCTouched(NPCInteractEvent event) {
         Logger.trace("Clicked NPC with click type: {}", event.getInteractType().name());
-        if (event.getInteractType() == NPCInteractEvent.InteractType.LEFT_CLICK) {
+        if (event.getInteractType() == InteractType.LEFT_CLICK) {
             return;
         }
 
@@ -95,7 +96,7 @@ public class NPCStoreService implements Listener {
         }
 
         final var game = Main.getInstance().getGameOfPlayer(player);
-        final var npc = event.getNpc();
+        final var npc = event.getVisual();
         ArenaManager
                 .getInstance()
                 .getArenaMap()

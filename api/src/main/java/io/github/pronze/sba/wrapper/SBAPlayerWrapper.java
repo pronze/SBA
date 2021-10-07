@@ -2,15 +2,17 @@ package io.github.pronze.sba.wrapper;
 
 import com.google.common.base.Strings;
 import io.github.pronze.sba.AddonAPI;
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.data.ToggleableSetting;
+import io.github.pronze.sba.lang.LangKeys;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.screamingsandals.lib.lang.Message;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -59,12 +61,9 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
                 }
             }.runTaskTimer(AddonAPI.getInstance().getJavaPlugin(), 0L, 20L);
         } else {
-            AddonAPI
-                    .getInstance()
-                    .getLanguageService()
-                    .get(MessageKeys.MESSAGE_SHOUT_WAIT)
-                    .replace("%seconds%", String.valueOf(getShoutCooldown()))
-                    .send(this);
+            sendMessage(Message.of(LangKeys.MESSAGE_SHOUT_WAIT)
+                    .placeholder("seconds", String.valueOf(getShoutCooldown()))
+                    .asComponent());
         }
     }
 

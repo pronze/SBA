@@ -1,12 +1,10 @@
 package io.github.pronze.sba.game;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.tasks.BaseGameTask;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
-import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.manager.ScoreboardManager;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
@@ -24,10 +22,11 @@ import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.npc.NPC;
-import org.screamingsandals.lib.npc.NPCSkin;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 
@@ -42,7 +41,6 @@ public class Arena implements IArena {
     private final List<BaseGameTask> gameTasks;
     private final List<NPC> storeNPCS;
     private final List<NPC> upgradeStoreNPCS;
-    private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
 
@@ -57,8 +55,10 @@ public class Arena implements IArena {
 
         this.storage = new GameStorage(game);
         this.gameTasks.addAll(GameTaskManager.getInstance().startTasks(this));
-        this.scoreboardManager = new GameScoreboardManager(this);
         this.game.getConnectedPlayers().forEach(player -> registerPlayerData(player.getUniqueId(), GamePlayerData.of(player)));
+
+        // init GameScoreboardManager for this arena instance.
+        GameScoreboardManager.of(this);
     }
 
     @NotNull
@@ -121,12 +121,6 @@ public class Arena implements IArena {
         return game;
     }
 
-    @NotNull
-    @Override
-    public ScoreboardManager getScoreboardManager() {
-        return scoreboardManager;
-    }
-
     @Override
     public boolean isPlayerHidden(@NotNull Player player) {
         return invisiblePlayers.containsKey(player.getUniqueId());
@@ -135,10 +129,8 @@ public class Arena implements IArena {
 
     public void onGameStarted() {
         // send game start message
-        LanguageService
-                .getInstance()
-                .get(MessageKeys.GAME_START_MESSAGE)
-                .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
+        Message.of(LangKeys.GAME_START_MESSAGE)
+                .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).collect(Collectors.toList()));
 
 
         // spawn rotating generators
@@ -187,7 +179,7 @@ public class Arena implements IArena {
 
                 final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
                         .setDisplayName(name)
-                        .setShouldLookAtViewer(true)
+                        .setShouldLookAtPlayer(true)
                         .setTouchable(true)
                         .setSkin(skin);
 
@@ -210,14 +202,8 @@ public class Arena implements IArena {
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
         final var team = e.getTeam();
         // send bed destroyed message to all players of the team
-        final var title = LanguageService
-                .getInstance()
-                .get(MessageKeys.BED_DESTROYED_TITLE)
-                .toString();
-        final var subtitle = LanguageService
-                .getInstance()
-                .get(MessageKeys.BED_DESTROYED_SUBTITLE)
-                .toString();
+        final var title = Message.of(LangKeys.BED_DESTROYED_TITLE).asComponent();
+        final var subtitle = Message.of(LangKeys.BED_DESTROYED_SUBTITLE).asComponent();
 
         team.getConnectedPlayers().forEach(player ->
                 SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), title, subtitle, 0, 40, 20)
@@ -232,8 +218,7 @@ public class Arena implements IArena {
     }
 
     public void onOver(BedwarsGameEndingEvent e) {
-        // destroy scoreboard manager instance and GameTask, we do not need these anymore
-        scoreboardManager.destroy();
+        GameScoreboardManager.getInstance().destroy(this);
         gameTasks.forEach(BaseGameTask::stop);
         gameTasks.clear();
 
@@ -250,10 +235,7 @@ public class Arena implements IArena {
 
         final var winner = e.getWinningTeam();
         if (winner != null) {
-            final var nullStr = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.NONE)
-                    .toString();
+            final var nullStr = AdventureHelper.toLegacy(Message.of(LangKeys.NONE).asComponent());
 
             String firstKillerName = nullStr;
             int firstKillerScore = 0;
@@ -294,31 +276,25 @@ public class Arena implements IArena {
                 }
             }
 
-            var victoryTitle = LanguageService
-                    .getInstance()
-                    .get(MessageKeys.VICTORY_TITLE)
-                    .toString();
+            var victoryTitle = Message.of(LangKeys.VICTORY_TITLE).asComponent();
 
             final var WinTeamPlayers = new ArrayList<String>();
             winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
             winner.getConnectedPlayers().forEach(pl ->
-                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, "", 0, 90, 0));
+                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, Component.empty(), 0, 90, 0));
 
 
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.OVERSTATS_MESSAGE)
-                    .replace("%color%",
-                            org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
-                    .replace("%win_team%", winner.getName())
-                    .replace("%winners%", WinTeamPlayers.toString())
-                    .replace("%first_killer_name%", firstKillerName)
-                    .replace("%second_killer_name%", secondKillerName)
-                    .replace("%third_killer_name%", thirdKillerName)
-                    .replace("%first_killer_score%", String.valueOf(firstKillerScore))
-                    .replace("%second_killer_score%", String.valueOf(secondKillerScore))
-                    .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
-                    .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
+           Message.of(LangKeys.OVERSTATS_MESSAGE)
+                    .placeholder("color", org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
+                    .placeholder("win_team", winner.getName())
+                    .placeholder("winners", WinTeamPlayers.toString())
+                    .placeholder("first_killer_name", firstKillerName)
+                    .placeholder("second_killer_name", secondKillerName)
+                    .placeholder("third_killer_name", thirdKillerName)
+                    .placeholder("first_killer_score", String.valueOf(firstKillerScore))
+                    .placeholder("second_killer_score", String.valueOf(secondKillerScore))
+                    .placeholder("third_killer_score", String.valueOf(thirdKillerScore))
+                    .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).collect(Collectors.toList()));
         }
     }
 

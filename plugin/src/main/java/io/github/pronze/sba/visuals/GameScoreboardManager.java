@@ -1,203 +1,171 @@
 package io.github.pronze.sba.visuals;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.Logger;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
-import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.Arena;
-import org.screamingsandals.lib.tasker.Tasker;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import org.screamingsandals.lib.lang.Message;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.sidebar.Sidebar;
+import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
-public class GameScoreboardManager implements io.github.pronze.sba.manager.ScoreboardManager {
-    private final Game game;
-    private final Arena arena;
-    private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
-    private final List<String> scoreboard_lines = new ArrayList<>();
-    protected BukkitTask updateTask;
+@Service
+public class GameScoreboardManager {
+    private final static Map<Arena, Sidebar> sidebarMap = new HashMap<>();
 
-    public GameScoreboardManager(Arena arena) {
-        this.arena = arena;
-        game = (Game) Main.getInstance().getGameByName(arena.getGame().getName());
+    public static GameScoreboardManager getInstance() {
+        return ServiceManager.get(GameScoreboardManager.class);
+    }
 
-        if (game.countAvailableTeams() >= 5) {
-            scoreboard_lines.addAll(LanguageService
-                    .getInstance()
-                    .get(MessageKeys.SCOREBOARD_LINES_5)
-                    .toStringList());
-        } else {
-            scoreboard_lines.addAll(LanguageService
-                    .getInstance()
-                    .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
-                    .toStringList());
+    public static void of(Arena arena) {
+        final var game = (Game) arena.getGame();
+        if (sidebarMap.containsKey(arena)) {
+            throw new UnsupportedOperationException("Game: " + game.getName() + " has already been registered into GameScoreboardManager!");
         }
-        game.getConnectedPlayers().forEach(this::createScoreboard);
-    }
 
-    public Optional<Scoreboard> getScoreboard(@NotNull UUID playerUUID) {
-        return Optional.ofNullable(scoreboardMap.get(playerUUID));
-    }
+        final var sidebar = Sidebar.of();
+        final var animatedTitle = Message.of(LangKeys.ANIMATED_BEDWARS_TITLE).getForAnyone();
 
-    public void createScoreboard(@NotNull Player player) {
-        Logger.trace("Creating board for player: {}", player.getName());
+        sidebar.title(animatedTitle.get(0));
+        // animated title.
+        new BukkitRunnable() {
+            int anim_title_pos = 0;
 
-        final var scoreboardOptional = ScoreboardManager.getInstance()
-                .fromCache(player.getUniqueId());
-        scoreboardOptional.ifPresent(Scoreboard::destroy);
-        final var title = LanguageService
-                .getInstance()
-                .get(MessageKeys.ANIMATED_BEDWARS_TITLE)
-                .toStringList();
-
-        final var scoreboard = Scoreboard.builder()
-                .animate(true)
-                .player(player)
-                .displayObjective("bwa-game")
-                .updateInterval(10L)
-                .animationInterval(2L)
-                .animatedTitle(title)
-                .updateCallback(board -> {
-                    board.setLines(process(player, board));
-                    return true;
-                })
-                .build();
-
-        final var holder = scoreboard.getHolder();
-        Tasker.build(() -> game.getRunningTeams().forEach(team -> {
-            if (!holder.hasTeamEntry(team.getName())) {
-                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+            @Override
+            public void run() {
+                if (game.getStatus() != GameStatus.RUNNING) {
+                    this.cancel();
+                    return;
+                }
+                anim_title_pos += 1;
+                if (anim_title_pos >= animatedTitle.size()) {
+                    anim_title_pos = 0;
+                }
+                sidebar.title(animatedTitle.get(anim_title_pos));
             }
+        }.runTaskTimerAsynchronously(SBA.getPluginInstance(), 0L, 2L);
 
-            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
-            team.getConnectedPlayers()
-                    .forEach(teamPlayer -> {
-                        if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
-                            scoreboardTeam.addEntry(teamPlayer.getName());
-                        }
-                    });
-        })).afterOneTick().start();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (game.getStatus() != GameStatus.RUNNING) {
+                    this.cancel();
+                    return;
+                }
 
-
-        scoreboardMap.put(player.getUniqueId(), scoreboard);
-    }
-
-    public void removeScoreboard(@NotNull Player player) {
-        if (scoreboardMap.containsKey(player.getUniqueId())) {
-            final var scoreboard = scoreboardMap.get(player.getUniqueId());
-            if (scoreboard != null) {
-                scoreboard.destroy();
-                Logger.trace("Destroyed board of player: {}", player.getName());
-            }
-            scoreboardMap.remove(player.getUniqueId());
-        }
-    }
-
-    public void destroy() {
-        scoreboardMap.values().forEach(Scoreboard::destroy);
-        scoreboardMap.clear();
-        Logger.trace("Destroyed scoreboard for all players of arena: {}", arena.getGame().getName());
-        if (updateTask != null) {
-            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
-                updateTask.cancel();
-            }
-        }
-    }
-
-    public List<String> process(Player player, Scoreboard board) {
-        final var holder = board.getHolder();
-        final var lines = new ArrayList<String>();
-        final var optionalPlayerData = arena.getPlayerData(player.getUniqueId());
-
-        if (optionalPlayerData.isEmpty()) {
-            return List.of();
-        }
-
-        final var playerData = optionalPlayerData.get();
-        final var playerTeam = game.getTeamOfPlayer(player);
-        var statistic = Main.getPlayerStatisticsManager().getStatistic(player);
-
-        if (statistic == null) {
-            Main.getInstance().getStatisticsManager().loadStatistic(player.getUniqueId());
-            statistic = Main.getPlayerStatisticsManager().getStatistic(player);
-            if (statistic == null) {
-                return List.of();
-            }
-        }
-
-        final var totalKills = String.valueOf(statistic.getKills());
-        final var currentKills = String.valueOf(playerData.getKills());
-        final var finalKills = String.valueOf(statistic.getKills());
-        final var currentDeaths = String.valueOf(playerData.getDeaths());
-        final var currentBedDestroys = String.valueOf(playerData.getBedDestroys());
-        final var teamName = playerTeam == null ? "" : playerTeam.getName();
-        final var teamStatus = playerTeam != null ? getTeamBedStatus(playerTeam) : null;
-
-        scoreboard_lines.stream()
-                .filter(Objects::nonNull)
-                .forEach(line -> {
-                    if (line.contains("%team_status%")) {
-                        String finalLine = line;
-                        game.getAvailableTeams().forEach(t -> {
-                            String you = "";
-                            if (playerTeam != null) {
-                                if (playerTeam.getName().equalsIgnoreCase(t.getName())) {
-                                    you = LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.SCOREBOARD_YOU_MESSAGE)
-                                            .toString();
-                                }
-                            }
-                            lines.add(finalLine.replace("%team_status%",
-                                    getTeamStatusFormat(t).replace("%you%", you)));
-                        });
-                        return;
+                game.getRunningTeams().forEach(team -> {
+                    if (sidebar.getTeam(team.getName()).isEmpty()) {
+                        sidebar.team(team.getName())
+                                .friendlyFire(false)
+                                .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
                     }
 
-                    final var generatorTask = arena.getTask(GeneratorTask.class).orElseThrow();
+                    var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
 
-                    line = line
-                            .replace("%sba_version%", SBA.getInstance().getVersion())
-                            .replace("%team%", teamName)
-                            .replace("%beds%", currentBedDestroys)
-                            .replace("%dies%", currentDeaths)
-                            .replace("%totalkills%", totalKills)
-                            .replace("%finalkills%", finalKills)
-                            .replace("%kills%", currentKills)
-                            .replace("%time%", game.getFormattedTimeLeft())
-                            .replace("%formattime%", game.getFormattedTimeLeft())
-                            .replace("%game%", game.getName())
-                            .replace("%date%", DateUtils.getFormattedDate())
-                            .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus)
-                            .replace("%tier%", generatorTask.getNextTierName()
-                                    .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
+                    List.copyOf(sidebarTeam.players())
+                            .forEach(teamPlayer -> {
+                                if (team.getConnectedPlayers().stream().noneMatch(bedWarsPlayer -> bedWarsPlayer.equals(teamPlayer.as(Player.class)))) {
+                                    sidebarTeam.removePlayer(teamPlayer);
+                                }
+                            });
 
-                    lines.add(line);
+                    team.getConnectedPlayers()
+                            .stream()
+                            .map(PlayerMapper::wrapPlayer)
+                            .filter(teamPlayer -> !sidebarTeam.players().contains(teamPlayer))
+                            .forEach(sidebarTeam::player);
                 });
-        return lines;
+            }
+        }.runTaskTimer(SBA.getPluginInstance(), 0L, 20L);
+
+
+        Message scoreboardLines;
+        if (game.countAvailableTeams() > 5) {
+            scoreboardLines = Message.of(LangKeys.SCOREBOARD_LINES_5);
+        } else {
+            scoreboardLines = Message.of(LangKeys.SCOREBOARD_LINES_DEFAULT);
+        }
+
+        final var generatorTask = arena.getTask(GeneratorTask.class).orElseThrow();
+        scoreboardLines
+                .placeholder("beds", wrapper -> {
+                    final var data = arena.getPlayerData(wrapper.as(PlayerWrapper.class).getUuid())
+                            .orElseThrow();
+                    return AdventureHelper.toComponent(String.valueOf(data.getBedDestroys()));
+                })
+                .placeholder("dies", wrapper -> {
+                    final var data = arena.getPlayerData(wrapper.as(PlayerWrapper.class).getUuid())
+                            .orElseThrow();
+                    return AdventureHelper.toComponent(String.valueOf(data.getFinalKills()));
+                })
+                .placeholder("finalkills", wrapper -> {
+                    final var data = arena.getPlayerData(wrapper.as(PlayerWrapper.class).getUuid())
+                            .orElseThrow();
+                    return AdventureHelper.toComponent(String.valueOf(data.getFinalKills()));
+                })
+                .placeholder("kills", wrapper -> {
+                    final var playerStatistic  = Main
+                            .getPlayerStatisticsManager()
+                            .getStatistic(wrapper.as(Player.class));
+                    return AdventureHelper.toComponent(String.valueOf(playerStatistic.getKills()));
+                })
+                .placeholder("time", () -> AdventureHelper.toComponent(game.getFormattedTimeLeft()))
+                .placeholder("game", game.getName())
+                .placeholder("date", DateUtils.getFormattedDate())
+                .placeholder("team_bed_status", wrapper -> {
+                    final var player = wrapper.as(Player.class);
+                    final var playerTeam = game.getTeamOfPlayer(player);
+                    final var teamStatus = playerTeam != null ? getTeamBedStatus(playerTeam) : "";
+                    return AdventureHelper.toComponent(teamStatus);
+                })
+                .placeholder("tier", generatorTask.getNextTierName().replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent())
+                .placeholder("sba_version", SBA.getInstance().getVersion())
+                .placeholder("team_status", wrapper -> {
+                    final var player = wrapper.as(Player.class);
+                    final var playerTeam = game.getTeamOfPlayer(player);
+
+                    var componentAtomicReference = new AtomicReference<Component>(Component.empty());
+
+                    game.getAvailableTeams().forEach(t -> {
+                        String you = "";
+                        if (playerTeam != null) {
+                            if (playerTeam.getName().equalsIgnoreCase(t.getName())) {
+                                you = AdventureHelper.toLegacy(Message.of(LangKeys.SCOREBOARD_YOU_MESSAGE).asComponent());
+                            }
+                        }
+                        componentAtomicReference.set(componentAtomicReference.get().append(AdventureHelper.toComponent(getTeamStatusFormat(game, t).replace("%you%", you))));
+                    });
+                    return componentAtomicReference.get();
+                });
     }
 
-    private String getTeamBedStatus(RunningTeam team) {
+    private static String getTeamBedStatus(RunningTeam team) {
         return team.isDead() ?
                 SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717") :
                 SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
     }
 
-    private String getTeamStatusFormat(RunningTeam team) {
+    private static String getTeamStatusFormat(Game game, RunningTeam team) {
         String alive = SBAConfig
                 .getInstance()
                 .node("team-status", "alive")
@@ -223,12 +191,12 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 .replace("%players%", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
     }
 
-    private String getTeamStatusFormat(Team team) {
+    private static String getTeamStatusFormat(Game game, Team team) {
         return game
                 .getRunningTeams()
                 .stream()
                 .filter(t -> t.getName().equalsIgnoreCase(team.getName()))
-                .map(this::getTeamStatusFormat)
+                .map(runningTeam -> getTeamStatusFormat(game, runningTeam))
                 .findAny()
                 .orElseGet(() -> {
                     final var destroyed = SBAConfig
@@ -245,5 +213,57 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%team%", ChatColor.WHITE
                                     + team.getName() + ":");
                 });
+    }
+
+    @OnPreDisable
+    public void destroy() {
+        sidebarMap.values()
+                .forEach(Sidebar::destroy);
+        sidebarMap.clear();
+    }
+
+    public Optional<Sidebar> getSidebar(Arena query) {
+        return Optional.ofNullable(sidebarMap.get(query));
+    }
+
+    public void destroy(Arena query) {
+        var iterator = sidebarMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final var entry = iterator.next();
+            final var arena = entry.getKey();
+            if (arena == query) {
+                final var sidebar = entry.getValue();
+                sidebar.destroy();
+                iterator.remove();
+            }
+        }
+    }
+
+    public void addViewer(Player player) {
+        final var playerGame = Main.getInstance().getGameOfPlayer(player);
+        if (playerGame == null) {
+            return;
+        }
+
+        final var wrapper = PlayerMapper.wrapPlayer(player);
+        for (var entry : sidebarMap.entrySet()) {
+            final var arena = entry.getKey();
+            if (arena.getGame() != playerGame) {
+                continue;
+            }
+
+            final var sidebar = entry.getValue();
+            if (!sidebar.getViewers().contains(wrapper)) {
+                sidebar.addViewer(wrapper);
+            }
+        }
+    }
+
+    public void removeViewer(Player player) {
+        final var wrapper = PlayerMapper.wrapPlayer(player);
+        sidebarMap.values()
+                .stream()
+                .filter(sidebar -> sidebar.getViewers().contains(wrapper))
+                .forEach(sidebar -> sidebar.removeViewer(wrapper));
     }
 }

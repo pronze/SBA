@@ -1,17 +1,13 @@
 package io.github.pronze.sba.game.tasks;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
-import io.github.pronze.sba.game.Arena;
-import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -54,19 +50,19 @@ public class TrapTask extends BaseGameTask {
                                     arena.removeHiddenPlayer(player);
                                 }
 
-                                LanguageService
+                                SBALanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
+                                        .get(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
                                         .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
 
-                                var title = LanguageService
+                                var title = SBALanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE)
+                                        .get(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE)
                                         .toString();
 
-                                var subTitle = LanguageService
+                                var subTitle = SBALanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE)
+                                        .get(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE)
                                         .toString();
 
                                 team.getConnectedPlayers().forEach(pl -> {

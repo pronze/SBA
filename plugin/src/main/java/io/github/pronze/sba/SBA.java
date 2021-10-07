@@ -9,8 +9,7 @@ import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.inventories.SBAStoreInventory;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
-import io.github.pronze.sba.lang.ILanguageService;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.listener.*;
 import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.manager.IPartyManager;
@@ -42,13 +41,13 @@ import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
+import org.screamingsandals.lib.sidebar.SidebarManager;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
-import pronze.lib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,13 +70,14 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         Tasker.class,
         PacketMapper.class,
         HologramManager.class,
+        SidebarManager.class,
         HealthIndicatorManager.class,
         SimpleInventoriesCore.class,
         NPCManager.class,
         UpdateChecker.class,
         SBAConfig.class,
         Logger.class,
-        LanguageService.class,
+        SBALanguageService.class,
         CommandManager.class,
         ArenaManager.class,
         PartyManager.class,
@@ -121,7 +121,7 @@ public class SBA extends PluginContainer implements AddonAPI {
             throw new UnsupportedOperationException("SBA has not yet been initialized!");
         }
         if (instance.cachedPluginInstance == null) {
-            instance.cachedPluginInstance = (JavaPlugin) instance.getPluginDescription().as(JavaPlugin.class);
+            instance.cachedPluginInstance = instance.getPluginDescription().as(JavaPlugin.class);
         }
         return instance.cachedPluginInstance;
     }
@@ -131,7 +131,6 @@ public class SBA extends PluginContainer implements AddonAPI {
         instance = this;
         cachedPluginInstance = instance.getPluginDescription().as(JavaPlugin.class);
         Logger.init(cachedPluginInstance);
-        ScoreboardManager.init(cachedPluginInstance);
     }
 
     @Override
@@ -244,13 +243,8 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public ILanguageService getLanguageService() {
-        return LanguageService.getInstance();
-    }
-
-    @Override
     public JavaPlugin getJavaPlugin() {
-        return instance.getPluginDescription().as(JavaPlugin.class);
+        return cachedPluginInstance;
     }
 }
 

@@ -1,21 +1,21 @@
 package io.github.pronze.sba.commands;
+
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import net.kyori.adventure.text.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.config.SBAConfig;
 
 import java.util.List;
 
@@ -34,25 +34,17 @@ public class ShoutCommand {
             final @NotNull @Argument("args") String[] argsParam
     ) {
         final var args = List.of(argsParam);
+        final var wrapper = PlayerMapper.wrapPlayer(player);
 
-        final var wrapper = PlayerMapper
-                .wrapPlayer(player);
-
-        if(!Main.getInstance().isPlayerPlayingAnyGame(player)){
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.MESSAGE_NOT_IN_GAME)
-                    .send(wrapper);
+        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
+            Message.of(LangKeys.MESSAGE_NOT_IN_GAME).send(wrapper);
             return;
         }
 
         final var bPlayer = Main.getPlayerGameProfile(player);
 
-        if(bPlayer.isSpectator){
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.COMMAND_DISABLED_FOR_SPECTATORS)
-                    .send(wrapper);
+        if (bPlayer.isSpectator) {
+            Message.of(LangKeys.COMMAND_DISABLED_FOR_SPECTATORS).send(wrapper);
             return;
         }
 
@@ -61,14 +53,12 @@ public class ShoutCommand {
                 .node("shout", "time-out")
                 .getInt(60) == 0;
 
-        if(!cancelShout && !player.hasPermission(Permissions.SHOUT_BYPASS.getKey())) {
+        if (!cancelShout && !player.hasPermission(Permissions.SHOUT_BYPASS.getKey())) {
             final var sbaPlayerWrapper = wrapper.as(SBAPlayerWrapper.class);
             if (!sbaPlayerWrapper.canShout()) {
                 final var shout = String.valueOf(sbaPlayerWrapper.getShoutCooldown());
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.MESSAGE_SHOUT_WAIT)
-                        .replace("%seconds%", shout)
+                Message.of(LangKeys.MESSAGE_SHOUT_WAIT)
+                        .placeholder("seconds", shout)
                         .send(sbaPlayerWrapper);
                 return;
             }
@@ -77,28 +67,23 @@ public class ShoutCommand {
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var team = game.getTeamOfPlayer(player);
         String color = ChatColor.GRAY.toString();
-        if(team != null) {
+        if (team != null) {
             color = TeamColor.valueOf(team.getColor().name()).chatColor.toString();
         }
         final var strBuilder = new StringBuilder();
         if (args.isEmpty()) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.COMMAND_SHOUT_INVALID_USAGE)
-                    .send(wrapper);
+            Message.of(LangKeys.COMMAND_SHOUT_INVALID_USAGE).send(wrapper);
             return;
         }
 
         args.forEach(st -> strBuilder.append(st).append(" "));
 
-        Component shoutMessage = LanguageService
-                .getInstance()
-                .get(MessageKeys.SHOUT_FORMAT)
-                .replace("%color%", color)
-                .replace("%player%", player.getName())
-                .replace("%message%", strBuilder.toString())
-                .replace("%team%", team == null ? "" : team.getName())
-                .toComponent();
+        final var shoutMessage = Message.of(LangKeys.SHOUT_FORMAT)
+                .placeholder("color", color)
+                .placeholder("player", player.getName())
+                .placeholder("message", strBuilder.toString())
+                .placeholder("team", team == null ? "" : team.getName())
+                .asComponent();
 
         wrapper.as(SBAPlayerWrapper.class).shout(shoutMessage);
     }

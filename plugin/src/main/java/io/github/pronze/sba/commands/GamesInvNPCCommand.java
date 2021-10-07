@@ -3,16 +3,15 @@ package io.github.pronze.sba.commands;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.game.GameMode;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.GamesInventoryService;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.screamingsandals.lib.world.LocationMapper;
 
 @Service
 public class GamesInvNPCCommand {
@@ -26,29 +25,24 @@ public class GamesInvNPCCommand {
     @CommandPermission("sba.spawnnpc")
     private void commandSpawn(final @NotNull Player player,
                               final @NotNull @Argument("mode") GameMode mode) {
-        if (GamesInventoryService.getInstance().isNPCAtLocation(LocationMapper.wrapLocation(player.getLocation()))) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.NPC_ALREADY_SPAWNED)
-                    .send(PlayerMapper.wrapPlayer(player));
+        final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
+        if (GamesInventoryService.getInstance().isNPCAtLocation(wrappedPlayer.getLocation())) {
+            Message.of(LangKeys.NPC_ALREADY_SPAWNED).send(wrappedPlayer);
             return;
         }
 
         GamesInventoryService.getInstance().addNPC(mode, player.getLocation());
-        GamesInventoryService.getInstance().addViewer(PlayerMapper.wrapPlayer(player));
-        LanguageService
-                .getInstance()
-                .get(MessageKeys.ADDED_NPC)
-                .send(PlayerMapper.wrapPlayer(player));
+        GamesInventoryService.getInstance().addViewer(wrappedPlayer);
+
+        Message.of(LangKeys.ADDED_NPC).send(wrappedPlayer);
     }
 
     @CommandMethod("sba gamesinv removenpc")
     @CommandPermission("sba.removenpc")
     private void commandRemove(final @NotNull Player player) {
-        LanguageService
-                .getInstance()
-                .get(MessageKeys.REMOVABLE_NPC_TOGGLE)
-                .send(PlayerMapper.wrapPlayer(player));
+        final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
+
+        Message.of(LangKeys.REMOVABLE_NPC_TOGGLE).send(wrappedPlayer);
         GamesInventoryService.getInstance().addEditable(PlayerMapper.wrapPlayer(player));
     }
 }

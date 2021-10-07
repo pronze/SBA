@@ -1,15 +1,16 @@
 package io.github.pronze.sba.inventories;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.StoreType;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+import net.kyori.adventure.text.Component;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +21,7 @@ import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
@@ -132,9 +134,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
 
                             if (teamSharpnessLevel >= maxSharpnessLevel) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.GREATEST_ENCHANTMENT)
+                                Message.of(LangKeys.GREATEST_ENCHANTMENT)
                                         .send(wrappedPlayer);
                             } else {
                                 teamSharpnessLevel = teamSharpnessLevel + 1;
@@ -145,10 +145,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     gameStorage.setSharpnessLevel(team, teamSharpnessLevel);
                                     Integer finalTeamSharpnessLevel = teamSharpnessLevel;
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
-                                        LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.UGPRADE_TEAM_SHARPNESS)
-                                                .replace("%player%", player.getName())
+                                        Message.of(LangKeys.UGPRADE_TEAM_SHARPNESS)
+                                                .placeholder("player", player.getName())
                                                 .send(PlayerMapper.wrapPlayer(teamPlayer));
 
                                         Arrays.stream(teamPlayer.getInventory().getContents())
@@ -169,9 +167,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
 
                             if (efficiencyLevel >= maxEfficiencyLevel) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.GREATEST_ENCHANTMENT)
+                                Message.of(LangKeys.GREATEST_ENCHANTMENT)
                                         .send(wrappedPlayer);
                             } else {
                                 efficiencyLevel = efficiencyLevel + 1;
@@ -182,10 +178,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     gameStorage.setEfficiencyLevel(team, efficiencyLevel);
                                     Integer finalTeamEfficiencyLevel = efficiencyLevel;
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
-                                        LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.UPGRADE_TEAM_EFFICIENCY)
-                                                .replace("%player%", player.getName())
+                                        Message.of(LangKeys.UPGRADE_TEAM_EFFICIENCY)
+                                                .placeholder("player", player.getName())
                                                 .send(PlayerMapper.wrapPlayer(teamPlayer));
 
                                         Arrays.stream(teamPlayer.getInventory().getContents())
@@ -202,54 +196,42 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                         case "blindtrap":
                             if (gameStorage.areBlindTrapEnabled(team)) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.WAIT_FOR_TRAP)
+                                Message.of(LangKeys.WAIT_FOR_TRAP)
                                         .send(wrappedPlayer);
                             } else {
-                                final var blindnessTrapTitle = LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
-                                        .toString();
+                                final var blindnessTrapTitle = Message.of(LangKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
+                                        .asComponent();
 
                                 gameStorage.setPurchasedBlindTrap(team, true);
                                 team.getConnectedPlayers().forEach(pl ->
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), blindnessTrapTitle, "", 20, 40, 20));
+                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), blindnessTrapTitle, Component.empty(), 20, 40, 20));
                             }
                             break;
 
                         case "minertrap":
                             if (gameStorage.areMinerTrapEnabled(team)) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.WAIT_FOR_TRAP)
+                                Message.of(LangKeys.WAIT_FOR_TRAP)
                                         .send(wrappedPlayer);
                             } else {
-                                final var minerTrapTitle = LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.MINER_TRAP_PURCHASED_TITLE)
-                                        .toString();
+                                final var minerTrapTitle = Message.of(LangKeys.MINER_TRAP_PURCHASED_TITLE)
+                                        .asComponent();
 
                                 gameStorage.setPurchasedMinerTrap(team, true);
                                 team.getConnectedPlayers().forEach(pl ->
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), minerTrapTitle, "", 20, 40, 20));
+                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), minerTrapTitle, Component.empty(), 20, 40, 20));
                             }
                             break;
 
                         case "healpool":
                             shouldSellStack = false;
                             if (gameStorage.arePoolEnabled(team)) {
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.WAIT_FOR_TRAP)
+                                Message.of(LangKeys.WAIT_FOR_TRAP)
                                         .send(wrappedPlayer);
                             } else {
-                                var purchaseHealPoolMessage = LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.PURCHASED_HEAL_POOL_MESSAGE)
-                                        .replace("%player%", player.getName())
-                                        .toComponent();
+                                var purchaseHealPoolMessage = Message.of(LangKeys.PURCHASED_HEAL_POOL_MESSAGE)
+                                        .placeholder("player", player.getName())
+                                        .asComponent();
 
                                 gameStorage.setPurchasedPool(team, true);
                                 team.getConnectedPlayers().forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
@@ -262,9 +244,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
 
                             if (teamProtectionLevel >= maxProtectionLevel) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.GREATEST_ENCHANTMENT)
+                                Message.of(LangKeys.GREATEST_ENCHANTMENT)
                                         .send(wrappedPlayer);
                             } else {
                                 teamProtectionLevel = teamProtectionLevel + 1;
@@ -275,11 +255,9 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     gameStorage.setProtectionLevel(team, teamProtectionLevel);
                                     ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
 
-                                    var upgradeMessage = LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.UPGRADE_TEAM_PROTECTION)
-                                            .replace("%player%", player.getName())
-                                            .toComponent();
+                                    var upgradeMessage = Message.of(LangKeys.UPGRADE_TEAM_PROTECTION)
+                                            .placeholder("player", player.getName())
+                                            .asComponent();
 
                                     final var finalTeamProtectionLevel = teamProtectionLevel;
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -307,13 +285,13 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                 .categoryOptions(localOptionsBuilder ->
                         localOptionsBuilder
                                 .backItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "shopback"), "BARRIER"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
+                                        itemBuilder.name(Message.of(LangKeys.SHOP_PAGE_BACK).asComponent())
                                 )
                                 .pageBackItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "pageback"), "ARROW"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
+                                        itemBuilder.name(Message.of(LangKeys.SHOP_PAGE_BACK).asComponent())
                                 )
                                 .pageForwardItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "pageforward"), "BARRIER"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_FORWARD).toComponent())
+                                        itemBuilder.name(Message.of(LangKeys.SHOP_PAGE_FORWARD).asComponent())
                                 )
                                 .cosmeticItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "shopcosmetic"), "AIR"))
                                 .rows(SBAConfig.getInstance().node("shop", "upgrade-shop", "rows").getInt(4))
@@ -324,7 +302,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                 .itemsOnRow(SBAConfig.getInstance().node("shop", "upgrade-shop", "items-on-row").getInt(9))
                                 .showPageNumber(SBAConfig.getInstance().node("shop", "upgrade-shop", "show-page-numbers").getBoolean(true))
                                 .inventoryType(SBAConfig.getInstance().node("shop", "upgrade-shop", "inventory-type").getString("CHEST"))
-                                .prefix(LanguageService.getInstance().get(MessageKeys.SHOP_NAME).toComponent())
+                                .prefix(Message.of(LangKeys.SHOP_NAME).asComponent())
                 )
 
                 // old shop format compatibility

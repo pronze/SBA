@@ -1,12 +1,13 @@
 package io.github.pronze.sba.inventories;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAGamesInventoryOpenEvent;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -53,7 +54,7 @@ public class GamesInventory implements Listener {
                     final var siFormat = SimpleInventoriesCore.builder()
                             .categoryOptions(localOptionsBuilder -> {
                                 ShopUtil.generateOptions(localOptionsBuilder);
-                                localOptionsBuilder.prefix(LanguageService.getInstance().get("games-inventory", "gui", label.toLowerCase() + "-prefix").toString());
+                                localOptionsBuilder.prefix(Message.of("games-inventory", "gui", label.toLowerCase() + "-prefix").asComponent());
                             })
                             .call(categoryBuilder ->{
                                 try {
@@ -105,9 +106,7 @@ public class GamesInventory implements Listener {
 
         if (stack != null) {
             if (item.hasProperties()) {
-                var couldNotFindGameMessage = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
+                var couldNotFindGameMessage = Message.of(LangKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
                 final var playerWrapper = PlayerMapper.wrapPlayer(player);
 
                 player.closeInventory();

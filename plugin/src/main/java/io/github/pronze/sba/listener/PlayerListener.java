@@ -1,15 +1,16 @@
 package io.github.pronze.sba.listener;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -32,15 +33,17 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class PlayerListener implements Listener {
@@ -80,9 +83,9 @@ public class PlayerListener implements Listener {
                 new ItemStack(Material.WOODEN_SWORD);
 
         Arrays.stream(player
-                .getInventory()
-                .getContents()
-                .clone())
+                        .getInventory()
+                        .getContents()
+                        .clone())
                 .filter(Objects::nonNull)
                 .forEach(stack -> {
                     final String name = stack.getType().name();
@@ -135,16 +138,15 @@ public class PlayerListener implements Listener {
             new BukkitRunnable() {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
-                final String respawnTitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
-                        .toString();
-                final String respawnSubtitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
-                        .toString();
                 final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
+                final Component respawnTitle = Message.of(LangKeys.RESPAWN_COUNTDOWN_TITLE).asComponent();
                 int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
+                final Component respawnSubtitle = Message.of(LangKeys.RESPAWN_COUNTDOWN_SUBTITLE)
+                        .placeholder("time", () -> AdventureHelper.toComponent(String.valueOf(livingTime))).asComponent();
+
+                final Message respawnCountdownMessage = Message.of(LangKeys.RESPAWN_COUNTDOWN_MESSAGE)
+                        .placeholder("time", () -> AdventureHelper.toComponent(String.valueOf(livingTime)));
+
                 byte buffer = 2;
 
                 @Override
@@ -154,37 +156,19 @@ public class PlayerListener implements Listener {
                         return;
                     }
 
-                    //send custom title because we disabled BedWars from showing any title
                     if (livingTime > 0) {
-                        SBAUtil.sendTitle(wrappedPlayer, respawnTitle,
-                                respawnSubtitle.replace("%time%", String.valueOf(livingTime)),
-                                0, 20, 0);
-
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.RESPAWN_COUNTDOWN_MESSAGE)
-                                .replace("%time%", String.valueOf(livingTime))
-                                .send(wrappedPlayer);
+                        SBAUtil.sendTitle(wrappedPlayer, respawnTitle, respawnSubtitle, 0, 20, 0);
+                        respawnCountdownMessage.send(wrappedPlayer);
                         livingTime--;
                     }
-
 
                     if (livingTime == 0) {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.RESPAWNED_MESSAGE)
-                                    .send(wrappedPlayer);
-
-                            var respawnedTitle = LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.RESPAWNED_TITLE)
-                                    .toString();
-
-                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
-                                    5, 40, 5);
+                            Message.of(LangKeys.RESPAWNED_MESSAGE).send(wrappedPlayer);
+                            var respawnedTitle = Message.of(LangKeys.RESPAWNED_TITLE).asComponent();
+                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, Component.empty(), 5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
                                     Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player).getColor());
                             this.cancel();
@@ -197,18 +181,22 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onClick(InventoryClickEvent event) {
-        if (event.getCurrentItem() == null)
+        if (event.getCurrentItem() == null) {
             return;
-
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        }
+        if (!(event.getWhoClicked() instanceof Player)) {
+            return;
+        }
 
         final var player = (Player) event.getWhoClicked();
-
-        if (!Main.isPlayerInGame(player)) return;
+        if (!Main.isPlayerInGame(player)) {
+            return;
+        }
 
         if (SBAConfig.getInstance().getBoolean("disable-armor-inventory-movement", true) &&
-                event.getSlotType() == SlotType.ARMOR)
+                event.getSlotType() == SlotType.ARMOR) {
             event.setCancelled(true);
+        }
 
         final var topSlot = event.getView().getTopInventory();
         final var bottomSlot = event.getView().getBottomInventory();
@@ -222,9 +210,7 @@ public class PlayerListener implements Listener {
                 && bottomSlot.getType() == InventoryType.PLAYER) {
             if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
                 event.setResult(Event.Result.DENY);
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.CANNOT_PUT_ITEM_IN_CHEST)
+                Message.of(LangKeys.CANNOT_PUT_ITEM_IN_CHEST)
                         .send(PlayerMapper.wrapPlayer(player));
             }
         }
@@ -235,8 +221,12 @@ public class PlayerListener implements Listener {
     public void onItemDrop(PlayerDropItemEvent evt) {
         final var player = evt.getPlayer();
 
-        if (!Main.isPlayerInGame(player)) return;
-        if (!SBAConfig.getInstance().getBoolean("block-item-drops", true)) return;
+        if (!Main.isPlayerInGame(player)) {
+            return;
+        }
+        if (!SBAConfig.getInstance().getBoolean("block-item-drops", true)) {
+            return;
+        }
 
         final var ItemDrop = evt.getItemDrop().getItemStack();
         final var type = ItemDrop.getType();
@@ -262,14 +252,8 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent e) {
         final var player = e.getPlayer();
-        final var uuid = player.getUniqueId();
-        ScoreboardManager
-                .getInstance()
-                .fromCache(uuid)
-                .ifPresent(Scoreboard::destroy);
+        final var wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
 
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(player)
-                .as(SBAPlayerWrapper.class);
         SBA.getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
@@ -282,26 +266,21 @@ public class PlayerListener implements Listener {
                         return;
                     }
                     if (party.getPartyLeader().equals(wrappedPlayer)) {
-                        party
-                                .getMembers()
+                        party.getMembers()
                                 .stream()
                                 .findAny()
                                 .ifPresentOrElse(member -> {
                                     party.setPartyLeader(member);
-                                    LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                            .replace("%player%", member.getName())
-                                            .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
+                                    Message.of(LangKeys.PARTY_MESSAGE_PROMOTED_LEADER)
+                                            .placeholder("%player%", member.getName())
+                                            .send(party.getMembers());
 
                                 }, () -> SBA.getInstance().getPartyManager()
                                         .disband(party.getUUID()));
                     }
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
-                            .replace("%player%", player.getName())
-                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).toArray(SBAPlayerWrapper[]::new));
+                    Message.of(LangKeys.PARTY_MESSAGE_OFFLINE_LEFT)
+                            .placeholder("%player%", player.getName())
+                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).collect(Collectors.toList()));
                 });
         SBA.getInstance().getPlayerWrapperService().unregister(player);
     }
@@ -371,6 +350,4 @@ public class PlayerListener implements Listener {
             }
         }
     }
-
-
 }

@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import io.github.pronze.sba.manager.ScoreboardManager;
 import org.screamingsandals.lib.npc.NPC;
 
 import java.util.List;
@@ -34,14 +33,6 @@ public interface IArena {
      */
     @NotNull
     Game getGame();
-
-    /**
-     * Gets the scoreboard manager that manages the scoreboard visuals for this arena.
-     *
-     * @return the ScoreboardManager instance that manages scoreboard activity for this arena
-     */
-    @NotNull
-    ScoreboardManager getScoreboardManager();
 
     /**
      * Gets an optional that may or may not be empty depending on if the player data has been registered in the arena.

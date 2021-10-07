@@ -1,6 +1,5 @@
 package io.github.pronze.sba.utils;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
@@ -8,7 +7,8 @@ import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
@@ -27,6 +27,7 @@ import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.meta.EnchantmentMapping;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
@@ -101,20 +102,16 @@ public class ShopUtil {
 
             if (!SBAConfig.getInstance().node("can-downgrade-item").getBoolean(false)) {
                 if (currentLevel > newLevel) {
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.CANNOT_DOWNGRADE_ITEM)
-                            .replace("%item%", "armor")
+                    Message.of(LangKeys.CANNOT_DOWNGRADE_ITEM)
+                            .placeholder("item", "armor")
                             .send(PlayerMapper.wrapPlayer(player));
                     return false;
                 }
             }
 
             if (currentLevel == newLevel) {
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.ALREADY_PURCHASED)
-                        .replace("%thing%", "armor")
+                Message.of(LangKeys.ALREADY_PURCHASED)
+                        .placeholder("thing", "armor")
                         .send(PlayerMapper.wrapPlayer(player));
                 return false;
             }
@@ -352,10 +349,8 @@ public class ShopUtil {
         }
         if (level > maxLevel) {
             item.getLore().clear();
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.SHOP_MAX_ENCHANT)
-                    .toComponentList()
+            Message.of(LangKeys.SHOP_MAX_ENCHANT)
+                    .getForAnyone()
                     .forEach(item::addLore);
             if (item.getEnchantments() != null) {
                 item.getEnchantments().clear();
@@ -381,10 +376,7 @@ public class ShopUtil {
 
         var prices = event.getInfo().getOriginal().getPrices();
         if (!prices.isEmpty()) {
-            item.addLore(LanguageService
-                    .getInstance()
-                    .get(MessageKeys.CLICK_TO_PURCHASE)
-                    .toComponent());
+            item.addLore(Message.of(LangKeys.CLICK_TO_PURCHASE).asComponent());
         }
 
         SBA.getInstance()

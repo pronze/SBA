@@ -1,6 +1,6 @@
-package io.github.pronze.sba;
+package io.github.pronze.sba.lang;
 
-public class MessageKeys {
+public class LangKeys {
     public static final String[] LANG_NAME = {"lang_name"};
     public static final String[] SHOP_NAME = {"shop", "name"};
     public static final String[] NPC_SHOP_DISPLAY_NAME = {"shop", "npc", "normal-shop-display-name"};

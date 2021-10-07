@@ -1,6 +1,7 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator', 'npc')
+        .modules('core', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator', 'npc', 'sidebar')
+        .universalModules('lang')
         .version(SCREAMINGLIB_VERSION)
         .simpleInventories(SIMPLEINVENTORIES_VERSION)
         .enableAnnotationProcessor()
@@ -10,9 +11,6 @@ dependencies {
     implementation project(':SBA-API')
 
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
-
-    // TODO: use sidebar from slib
-    implementation 'pronze.lib:scoreboard:' + PRONZELIB_SBOARD_VERSION
 
     implementation 'me.lucko:commodore:' + COMMODORE_VERSION, {
         exclude group: 'com.mojang', module: 'brigadier'
@@ -27,6 +25,8 @@ dependencies {
 
     implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
     implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
+
+    implementation 'io.github.pronze.language.sba:SBALanguage:v1-SNAPSHOT'
 
     testImplementation 'org.spigotmc:spigot:1.17.1-R0.1-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:' + JUPITER_VERSION

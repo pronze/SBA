@@ -1,10 +1,10 @@
 package io.github.pronze.sba.listener;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBAFinalKillEvent;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.visuals.GameScoreboardManager;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -19,8 +19,8 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
@@ -28,9 +28,6 @@ import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -50,7 +47,6 @@ public class BedWarsListener implements Listener {
         final var arena = ArenaManager
                 .getInstance()
                 .createArena(game);
-
         ((Arena) arena).onGameStarted();
     }
 
@@ -63,10 +59,8 @@ public class BedWarsListener implements Listener {
             }
             Logger.trace("Re registering listeners!");
             final var listeners = SBA.getInstance().getRegisteredListeners();
-
             listeners.forEach(SBA.getInstance()::unregisterListener);
             listeners.forEach(SBA.getInstance()::registerListener);
-
             Logger.trace("Registration complete!");
         }
     }
@@ -108,33 +102,25 @@ public class BedWarsListener implements Listener {
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
-        SBA
-                .getInstance()
+        SBA.getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
                 .ifPresent(party -> {
                     if (!wrappedPlayer.equals(party.getPartyLeader())) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                        Message.of(LangKeys.PARTY_MESSAGE_ACCESS_DENIED)
                                 .send(wrappedPlayer);
                         return;
                     }
                     if (party.getMembers().size() == 1) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_NO_PLAYERS_TO_WARP)
+                        Message.of(LangKeys.PARTY_MESSAGE_NO_PLAYERS_TO_WARP)
                                 .send(wrappedPlayer);
                         return;
                     }
 
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_WARP)
+                    Message.of(LangKeys.PARTY_MESSAGE_WARP)
                             .send(wrappedPlayer);
 
                     if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
-
                         party.getMembers()
                                 .stream().filter(member -> !wrappedPlayer.equals(member))
                                 .forEach(member -> {
@@ -145,9 +131,7 @@ public class BedWarsListener implements Listener {
                                             if (memberGame != null)
                                                 memberGame.leaveFromGame(member.getInstance());
                                             game.joinToGame(member.getInstance());
-                                            LanguageService
-                                                    .getInstance()
-                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                            Message.of(LangKeys.PARTY_MESSAGE_WARP)
                                                     .send(member);
                                         }
                                     });
@@ -162,9 +146,7 @@ public class BedWarsListener implements Listener {
                                         Main.getInstance().getGameOfPlayer(member.getInstance()).leaveFromGame(member.getInstance());
                                     }
                                     PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
-                                    LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
+                                    Message.of(LangKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
                                             .send(PlayerMapper.wrapPlayer(member.getInstance()));
                                 });
                     }
@@ -186,14 +168,9 @@ public class BedWarsListener implements Listener {
                                     if (buffer == seconds) return;
                                     buffer = seconds;
                                     if (seconds <= 10) {
-                                        var message = LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.GAME_STARTS_IN_MESSAGE)
-                                                .replace("%seconds%", String.valueOf(seconds))
-                                                .toString();
-
-                                        message = seconds == 1 ? message
-                                                .replace("seconds", "second") : message;
+                                        var message = Message.of(LangKeys.GAME_STARTS_IN_MESSAGE)
+                                                .placeholder("seconds", String.valueOf(seconds))
+                                                .asComponent();
                                         player.sendMessage(message);
                                         SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
                                     }
@@ -213,10 +190,8 @@ public class BedWarsListener implements Listener {
                         .get(game.getName())
                         .orElseThrow();
 
-                arena.getScoreboardManager().createScoreboard(player);
-                ((Arena) arena).getRotatingGenerators().forEach(generator -> {
-                    generator.addViewer(player);
-                });
+                GameScoreboardManager.getInstance().addViewer(player);
+                arena.getRotatingGenerators().forEach(generator -> generator.addViewer(player));
                 break;
         }
     }
@@ -226,23 +201,11 @@ public class BedWarsListener implements Listener {
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> {
-                    final var scoreboardManager = arena.getScoreboardManager();
-                    scoreboardManager.removeScoreboard(player);
-                });
-
+        GameScoreboardManager.getInstance().removeViewer(player);
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
         runnableCache.remove(player.getUniqueId());
-
-        ScoreboardManager
-                .getInstance()
-                .fromCache(player.getUniqueId())
-                .ifPresent(Scoreboard::destroy);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 

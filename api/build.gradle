@@ -4,4 +4,5 @@ dependencies {
     compileOnly "org.screamingsandals.lib:core-bukkit:" + SCREAMINGLIB_VERSION
     compileOnly "org.screamingsandals.lib:utils-bukkit:" + SCREAMINGLIB_VERSION
     compileOnly "org.screamingsandals.lib:npc-bukkit:" + SCREAMINGLIB_VERSION
+    compileOnly "org.screamingsandals.lib:lang:" + SCREAMINGLIB_VERSION
 }

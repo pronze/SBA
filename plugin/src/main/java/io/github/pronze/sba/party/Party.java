@@ -1,15 +1,16 @@
 package io.github.pronze.sba.party;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import net.kyori.adventure.text.Component;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.data.PartyInviteData;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import java.util.*;
@@ -54,12 +55,10 @@ public class Party implements IParty {
                 AdventureHelper.toLegacy(message),
                 debugInfo()
         );
-        final var formattedMessage = LanguageService
-                .getInstance()
-                .get(MessageKeys.PARTY_CHAT_FORMAT)
-                .replace("%name%", sender.getName())
-                .replace("%message%", AdventureHelper.toLegacy(message))
-                .toComponent();
+        final var formattedMessage = Message.of(LangKeys.PARTY_CHAT_FORMAT)
+                .placeholder("name", sender.getName())
+                .placeholder("message", AdventureHelper.toLegacy(message))
+                .asComponent();
         members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
     }
 
@@ -133,10 +132,7 @@ public class Party implements IParty {
                     Logger.trace("Disbanding party: {}", uuid);
                 }
                 if (getPartyLeader().isOnline()) {
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_INVITE_EXPIRED)
-                            .send(getPartyLeader());
+                    Message.of(LangKeys.PARTY_MESSAGE_INVITE_EXPIRED).send(getPartyLeader());
                 }
             }
         }.runTaskLater(SBA.getPluginInstance(),

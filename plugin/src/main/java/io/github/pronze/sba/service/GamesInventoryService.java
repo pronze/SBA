@@ -1,10 +1,10 @@
 package io.github.pronze.sba.service;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.inventories.GamesInventory;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.event.OnEvent;
 import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -22,6 +23,7 @@ import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.utils.InteractType;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
@@ -77,22 +79,18 @@ public class GamesInventoryService implements Listener {
             locations.clear();
             locations.addAll((List<Location>) node);
             locations.forEach(location -> npcs.add(NPC.of(LocationMapper.wrapLocation(location))
-                            .setDisplayName(LanguageService
-                            .getInstance()
-                            .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
-                            .replace("%mode%", mode.strVal())
-                            .toComponentList())
+                            .setDisplayName(Message.of(LangKeys.GAMES_INV_DISPLAY_NAME)
+                            .placeholder("%mode%", mode.strVal())
+                            .getForAnyone())
                             .show()));
         }
     }
 
     public void addNPC(@NotNull GameMode mode, @NotNull Location location) {
         npcs.add(NPC.of(LocationMapper.wrapLocation(location))
-                .setDisplayName(LanguageService
-                        .getInstance()
-                        .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
-                        .replace("%mode%", mode.strVal())
-                        .toComponentList())
+                .setDisplayName(Message.of(LangKeys.GAMES_INV_DISPLAY_NAME)
+                        .placeholder("mode", mode.strVal())
+                        .getForAnyone())
                 .show());
 
         switch (mode) {
@@ -115,10 +113,7 @@ public class GamesInventoryService implements Listener {
     public void removeNPC(PlayerWrapper remover, @NotNull NPC npc) {
         final var loc = Objects.requireNonNull(npc.getLocation()).as(Location.class);
         if (soloNPCLocations.contains(loc) || doubleNPCLocations.contains(loc) || tripleNPCLocations.contains(loc) || squadsNPCLocations.contains(loc)) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.NPC_REMOVED)
-                    .send(remover);
+            Message.of(LangKeys.NPC_REMOVED).send(remover);
             soloNPCLocations.remove(loc);
             doubleNPCLocations.remove(loc);
             tripleNPCLocations.remove(loc);
@@ -127,7 +122,6 @@ public class GamesInventoryService implements Listener {
             update();
         }
     }
-
 
     public void update() {
         try {
@@ -196,14 +190,15 @@ public class GamesInventoryService implements Listener {
 
     @OnEvent
     public void onNPCTouch(NPCInteractEvent event) {
-        if (event.getInteractType() == NPCInteractEvent.InteractType.RIGHT_CLICK) {
+        if (event.getInteractType() == InteractType.RIGHT_CLICK) {
             if (entityEditMap.contains(event.getPlayer().as(Player.class).getEntityId())) {
-                removeNPC(event.getPlayer(), event.getNpc());
+                removeNPC(event.getPlayer(), event.getVisual());
                 return;
             }
         }
 
-        final var npcLocation = Objects.requireNonNull(event.getNpc().getLocation()).as(Location.class);
+        // TODO: bruh make the indentifcation process better
+        final var npcLocation = Objects.requireNonNull(event.getVisual().getLocation()).as(Location.class);
         final var isSolo = soloNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
         final var isDouble = doubleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
         final var isTriple = tripleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);

@@ -1,5 +1,7 @@
 package io.github.pronze.sba.game;
 
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.ShopUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,26 +15,26 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.game.ItemSpawner;
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.Pair;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RotatingGenerator implements IRotatingGenerator {
     private Location location;
-    private List<String> lines;
     private int time;
     @Getter
     @Setter
@@ -52,10 +54,6 @@ public class RotatingGenerator implements IRotatingGenerator {
         this.stack = stack;
         this.location = location;
         this.time = itemSpawner.getItemSpawnerType().getInterval() + 1;
-        this.lines = LanguageService
-                .getInstance()
-                .get(MessageKeys.ROTATING_GENERATOR_FORMAT)
-                .toStringList();
         this.spawnedItems = (List<Item>) Reflect.getField(itemSpawner, "spawnedItems");
     }
 
@@ -97,35 +95,22 @@ public class RotatingGenerator implements IRotatingGenerator {
                 if (!full) {
                     time--;
                 }
-                final var format = !full ? LanguageService
-                        .getInstance()
-                        .get(MessageKeys.ROTATING_GENERATOR_FORMAT)
-                        .toStringList() :
 
-                        LanguageService
-                        .getInstance()
-                        .get(MessageKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT)
-                        .toStringList();
+                final var lines = Message.of(LangKeys.ROTATING_GENERATOR_FORMAT);
 
-                final var newLines = new ArrayList<String>();
+                final var format = !full ? Message.of(LangKeys.ROTATING_GENERATOR_FORMAT).getForAnyone() :
+                        Message.of(LangKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT).getForAnyone();
+
+
                 final var matName = itemSpawner.getItemSpawnerType().getMaterial() ==
-                        Material.EMERALD ? "§a" + LanguageService
-                        .getInstance()
-                        .get(MessageKeys.EMERALD)
-                        .toString() :
-                        "§b" + LanguageService
-                                .getInstance()
-                                .get(MessageKeys.DIAMOND)
-                                .toString();
+                        Material.EMERALD ? "§a" + AdventureHelper.toLegacy(Message.of(LangKeys.EMERALD).asComponent()) :
+                        "§b" + AdventureHelper.toLegacy(Message.of(LangKeys.DIAMOND).asComponent());
 
-                for (String line : format) {
-                    newLines.add(line
-                            .replace("%tier%", ShopUtil.romanNumerals.get(tierLevel))
-                            .replace("%material%", matName + "§6")
-                            .replace("%seconds%", String.valueOf(time)));
-                }
+                lines.placeholder("tier", ShopUtil.romanNumerals.get(tierLevel))
+                        .placeholder("material", matName + "&6")
+                        .placeholder("seconds", String.valueOf(time));
 
-                update(newLines);
+                update(lines.getForAnyone());
 
                 if (time <= 0 || full) {
                     time = itemSpawner.getItemSpawnerType().getInterval();
@@ -135,14 +120,10 @@ public class RotatingGenerator implements IRotatingGenerator {
     }
 
     @Override
-    public void update(@NotNull List<String> newLines) {
-        if (newLines.equals(lines)) {
-            return;
-        }
+    public void update(@NotNull List<Component> newLines) {
         for (int i = 0; i < newLines.size(); i++) {
-            hologram.replaceLine(i, Component.text(newLines.get(i)));
+            hologram.replaceLine(i, newLines.get(i));
         }
-        this.lines = new ArrayList<>(newLines);
     }
 
     public void destroy() {

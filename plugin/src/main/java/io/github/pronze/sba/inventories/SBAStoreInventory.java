@@ -1,10 +1,10 @@
 package io.github.pronze.sba.inventories;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.StoreType;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -18,6 +18,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -116,13 +117,13 @@ public class SBAStoreInventory extends AbstractStoreInventory {
                 .categoryOptions(localOptionsBuilder ->
                         localOptionsBuilder
                                 .backItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "shopback"), "BARRIER"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
+                                        itemBuilder.name(Message.of(LangKeys.SHOP_PAGE_BACK).asComponent())
                                 )
                                 .pageBackItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "pageback"), "ARROW"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
+                                        itemBuilder.name(Message.of(LangKeys.SHOP_PAGE_BACK).asComponent())
                                 )
                                 .pageForwardItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "pageforward"), "BARRIER"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_FORWARD).toComponent())
+                                        itemBuilder.name(Message.of(LangKeys.SHOP_PAGE_FORWARD).asComponent())
                                 )
                                 .cosmeticItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "normal-shop", "shopcosmetic"), "GRAY_STAINED_GLASS_PANE"))
                                 .rows(SBAConfig.getInstance().node("shop", "normal-shop", "rows").getInt(6))
@@ -133,7 +134,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
                                 .itemsOnRow(SBAConfig.getInstance().node("shop", "normal-shop", "items-on-row").getInt(9))
                                 .showPageNumber(SBAConfig.getInstance().node("shop", "normal-shop", "show-page-numbers").getBoolean(false))
                                 .inventoryType(SBAConfig.getInstance().node("shop", "normal-shop", "inventory-type").getString("CHEST"))
-                                .prefix(LanguageService.getInstance().get(MessageKeys.SHOP_NAME).toComponent())
+                                .prefix(Message.of(LangKeys.SHOP_NAME).asComponent())
                 );
     }
 

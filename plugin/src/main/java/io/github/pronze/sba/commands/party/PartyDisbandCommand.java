@@ -1,18 +1,19 @@
 package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyDisbandEvent;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 
 @Service
 public class PartyDisbandCommand {
@@ -31,10 +32,7 @@ public class PartyDisbandCommand {
                 .as(SBAPlayerWrapper.class);
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
-                    .send(player);
+            Message.of(LangKeys.PARTY_MESSAGE_NOT_IN_PARTY).send(player);
             return;
         }
 
@@ -43,10 +41,7 @@ public class PartyDisbandCommand {
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {
                     if (!party.getPartyLeader().equals(player)) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
-                                .send(player);
+                        Message.of(LangKeys.PARTY_MESSAGE_ACCESS_DENIED).send(player);
                         return;
                     }
 
@@ -55,19 +50,15 @@ public class PartyDisbandCommand {
                             .getServer()
                             .getPluginManager()
                             .callEvent(disbandEvent);
-                    if (disbandEvent.isCancelled()) return;
+                    if (disbandEvent.isCancelled()) {
+                        return;
+                    }
 
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_DISBAND)
-                            .send(party.getMembers().toArray(SBAPlayerWrapper[]::new));
+                    Message.of(LangKeys.PARTY_MESSAGE_DISBAND).send(party.getMembers());
 
                     SBA.getInstance()
                             .getPartyManager()
                             .disband(party.getUUID());
-                }, () -> LanguageService
-                        .getInstance()
-                        .get(MessageKeys.PARTY_MESSAGE_ERROR)
-                        .send(player));
+                }, () -> Message.of(LangKeys.PARTY_MESSAGE_ERROR).send(player));
     }
 }

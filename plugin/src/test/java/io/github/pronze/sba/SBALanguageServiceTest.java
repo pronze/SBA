@@ -1,6 +1,5 @@
 package io.github.pronze.sba;
 
-import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.utils.Logger;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class LanguageServiceTest {
+public class SBALanguageServiceTest {
     private ConfigurationNode node;
 
     @SneakyThrows
@@ -23,7 +22,7 @@ public class LanguageServiceTest {
         Logger.mockMode();
 
         File tempFile = File.createTempFile("test", "language");
-        try(var input = LanguageServiceTest.class.getResourceAsStream("/languages/language_en.yml")) {
+        try(var input = SBALanguageServiceTest.class.getResourceAsStream("/languages/language_en.yml")) {
             assert input != null;
             try (var output = new FileOutputStream(tempFile, false)) {
                 input.transferTo(output);
@@ -37,7 +36,7 @@ public class LanguageServiceTest {
                 .build()
                 .load();
 
-        Arrays.stream(MessageKeys.class.getDeclaredFields())
+        Arrays.stream(LangKeys.class.getDeclaredFields())
                 .forEach(field -> {
                     field.setAccessible(true);
                     try {

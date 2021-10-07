@@ -5,61 +5,63 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Data;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.scoreboard.NameTagVisibility;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.slot.EquipmentSlotMapping;
-
 import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
+import org.screamingsandals.lib.packet.SClientboundSetPlayerTeamPacket;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.slot.EquipmentSlotMapping;
 
 @Data
 public class InvisiblePlayerImpl implements InvisiblePlayer {
     private final Player hiddenPlayer;
     private final Arena arena;
-    private boolean justEquipped = false;
+    private boolean justEquipped;
     private boolean isHidden;
     protected BukkitTask armorHider;
 
     @Override
     public void vanish() {
+        final var wrappedPlayer = PlayerMapper.wrapPlayer(hiddenPlayer);
         final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
         if (team == null) {
             return;
         }
         final var invisTeamName = "i-" + team.getName();
 
-        // hide nametag
         arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
-            final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
-            final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
+
+            final var maybeHolder = GameScoreboardManager.getInstance().getSidebar(arena);
             if (maybeHolder.isEmpty()) {
                 return;
             }
 
-            final var holder = maybeHolder.get().getHolder();
+            final var sidebar = maybeHolder.get();
 
-            if (!holder.hasTeamEntry(invisTeamName)) {
-                holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam.setNameTagVisibility(NameTagVisibility.NEVER));
+            if (sidebar.getTeam(invisTeamName).isEmpty()) {
+                sidebar.team(invisTeamName)
+                        .nameTagVisibility(SClientboundSetPlayerTeamPacket.TagVisibility.NEVER)
+                        .friendlyFire(false)
+                        .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
             }
-            final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
 
-            holder.getTeamEntry(team.getName()).ifPresent(entry -> {
-                if (entry.hasEntry(hiddenPlayer.getName())) {
-                    entry.removeEntry(hiddenPlayer.getName());
-                }
-            });
-            if (!invisibleScoreboardTeam.hasEntry(hiddenPlayer.getName())) {
-                invisibleScoreboardTeam.addEntry(hiddenPlayer.getName());
+            var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
+            if (sidebarTeam.players().contains(wrappedPlayer)) {
+                sidebarTeam.removePlayer(wrappedPlayer);
+            }
+
+            var invisibleScoreboardTeam = sidebar.getTeam(invisTeamName).orElseThrow();
+            if (!invisibleScoreboardTeam.players().contains(PlayerMapper.wrapPlayer(hiddenPlayer))) {
+                invisibleScoreboardTeam.player(wrappedPlayer);
             }
         });
 
@@ -83,11 +85,11 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
     }
 
     private boolean isElligble() {
-       return arena.getGame().getStatus() == GameStatus.RUNNING
-               && hiddenPlayer.getGameMode() == GameMode.SURVIVAL
-               && hiddenPlayer.isOnline()
-               && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
-               && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
+        return arena.getGame().getStatus() == GameStatus.RUNNING
+                && hiddenPlayer.getGameMode() == GameMode.SURVIVAL
+                && hiddenPlayer.isOnline()
+                && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
+                && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
     }
 
     private void showArmor() {
@@ -135,6 +137,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
     @Override
     public void showPlayer() {
+        final var wrappedPlayer = PlayerMapper.wrapPlayer(hiddenPlayer);
         final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
         if (team == null) {
             return;
@@ -143,28 +146,30 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
         //show nametag
         arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
-            final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
-            final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
+            final var maybeHolder = GameScoreboardManager.getInstance().getSidebar(arena);
             if (maybeHolder.isEmpty()) {
                 return;
             }
 
-            final var holder = maybeHolder.get().getHolder();
+            final var sidebar = maybeHolder.get();
 
-            if (!holder.hasTeamEntry(invisTeamName)) {
-                holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam.setNameTagVisibility(NameTagVisibility.NEVER));
+            if (sidebar.getTeam(invisTeamName).isEmpty()) {
+                sidebar.team(invisTeamName)
+                        .nameTagVisibility(SClientboundSetPlayerTeamPacket.TagVisibility.NEVER)
+                        .friendlyFire(false)
+                        .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
             }
-            final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
 
-            if (invisibleScoreboardTeam.hasEntry(hiddenPlayer.getName())) {
-                invisibleScoreboardTeam.removeEntry(hiddenPlayer.getName());
+            var invisibleScoreboardTeam = sidebar.getTeam(invisTeamName).orElseThrow();
+
+            if (invisibleScoreboardTeam.players().contains(PlayerMapper.wrapPlayer(hiddenPlayer))) {
+                invisibleScoreboardTeam.removePlayer(wrappedPlayer);
             }
-            holder.getTeamEntry(team.getName()).ifPresent(entry -> {
-                if (!entry.hasEntry(hiddenPlayer.getName())) {
-                    entry.addEntry(hiddenPlayer.getName());
-                }
-            });
+
+            var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
+            if (!sidebarTeam.players().contains(wrappedPlayer)) {
+                sidebarTeam.player(wrappedPlayer);
+            }
         });
         SBAUtil.cancelTask(armorHider);
         showArmor();

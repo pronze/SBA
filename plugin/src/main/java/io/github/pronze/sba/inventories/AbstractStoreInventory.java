@@ -1,17 +1,16 @@
 package io.github.pronze.sba.inventories;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.IStoreInventory;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
@@ -27,8 +26,8 @@ import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
 import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
@@ -290,10 +289,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         // purchase failed, player does not have enough resources to purchase
         if (!event.hasPlayerInInventory(materialItem)) {
             if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.CANNOT_BUY)
-                        .replace("%material%", type.getItemName())
+                Message.of(LangKeys.CANNOT_BUY)
+                        .placeholder("material", type.getItemName())
                         .send(event.getPlayer());
             }
             return;
@@ -330,11 +327,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             event.sellStack(materialItem);
 
             if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(ItemFactory.build(newItem).orElseThrow()))
-                        .replace("%material%", type.getItemName())
+                Message.of(LangKeys.SHOP_PURCHASE_SUCCESS)
+                        .placeholder("item", ShopUtil.getNameOrCustomNameOfItem(ItemFactory.build(newItem).orElseThrow()))
+                        .placeholder("material", type.getItemName())
                         .send(event.getPlayer());
             }
             Sounds.playSound(player, player.getLocation(),

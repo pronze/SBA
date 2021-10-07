@@ -1,5 +1,6 @@
 package io.github.pronze.sba.game;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +16,7 @@ public interface IRotatingGenerator {
      * Updates the hologram of the rotating generator with the specified lines.
      * @param newLines lines to be updated over the current lines
      */
-    void update(@NotNull List<String> newLines);
+    void update(@NotNull List<Component> newLines);
 
     /**
      * Destroys the hologram and rotating entity completely from viewers.

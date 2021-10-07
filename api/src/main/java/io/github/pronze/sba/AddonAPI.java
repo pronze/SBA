@@ -2,7 +2,6 @@ package io.github.pronze.sba;
 
 import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.game.IGameStorage;
-import io.github.pronze.sba.lang.ILanguageService;
 import io.github.pronze.sba.manager.IArenaManager;
 import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.service.WrapperService;
@@ -106,12 +105,6 @@ public interface AddonAPI {
      * @return true if recently has been upgraded, false otherwise
      */
     boolean isPendingUpgrade();
-
-    /**
-     *
-     * @return The language service instance for retrieving language related information
-     */
-    ILanguageService getLanguageService();
 
     /**
      *

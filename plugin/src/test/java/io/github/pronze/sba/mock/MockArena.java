@@ -2,7 +2,6 @@ package io.github.pronze.sba.mock;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.*;
 import io.github.pronze.sba.game.tasks.BaseGameTask;
-import io.github.pronze.sba.manager.ScoreboardManager;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

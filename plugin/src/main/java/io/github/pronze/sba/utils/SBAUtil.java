@@ -2,8 +2,9 @@ package io.github.pronze.sba.utils;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lib.lang.SBALanguageService;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
@@ -12,7 +13,6 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.nms.accessors.DirectionAccessor;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.bukkit.entity.Player;
@@ -128,15 +128,18 @@ public class SBAUtil {
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
         if (plugin == SBA.getPluginInstance()) {
             SBAConfig.getInstance().forceReload();
-            LanguageService.getInstance().load(plugin);
         }
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    public static void sendTitle(PlayerWrapper player, String title, String subTitle, int fadeIn, int stay, int fadeOut) {
+        sendTitle(player, AdventureHelper.toComponent(title), AdventureHelper.toComponent(subTitle), fadeIn, stay, fadeOut);
+    }
+
+    public static void sendTitle(PlayerWrapper player, Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
         var titleComponent = net.kyori.adventure.title.Title.title(
-                AdventureHelper.toComponent(title),
-                AdventureHelper.toComponent(subtitle),
+                title,
+                subtitle,
                 Title.Times.of(
                         Duration.ofMillis(fadeIn * 50L),
                         Duration.ofMillis(stay * 50L),

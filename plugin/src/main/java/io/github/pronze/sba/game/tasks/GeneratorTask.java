@@ -1,15 +1,14 @@
 package io.github.pronze.sba.game.tasks;
 
-import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
 import io.github.pronze.sba.game.*;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.lang.LangKeys;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.AdventureHelper;
 
 import java.text.SimpleDateFormat;
 
@@ -26,14 +25,8 @@ public class GeneratorTask extends BaseGameTask {
 
     public GeneratorTask() {
         nextEvent = GameTierEvent.DIAMOND_GEN_UPGRADE_TIER_II;
-        diamond = LanguageService
-                .getInstance()
-                .get(MessageKeys.DIAMOND)
-                .toString();
-        emerald = LanguageService
-                .getInstance()
-                .get(MessageKeys.EMERALD)
-                .toString();
+        diamond = Message.of(LangKeys.DIAMOND).asComponent();
+        emerald = Message.of(LangKeys.EMERALD).asComponent();
 
         timerUpgrades = SBAConfig
                 .getInstance()
@@ -98,11 +91,9 @@ public class GeneratorTask extends BaseGameTask {
                             });
 
                     if (showUpgradeMessage && finalType != null) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
-                                .replace("%MatName%", matName)
-                                .replace("%tier%", tierName)
+                        Message.of(LangKeys.GENERATOR_UPGRADE_MESSAGE)
+                                .placeholder("MatName", matName)
+                                .placeholder("tier", tierName)
                                 .send(game
                                         .getConnectedPlayers()
                                         .stream()
@@ -122,10 +113,7 @@ public class GeneratorTask extends BaseGameTask {
 
     public String getNextTierName() {
         if (nextEvent == GameTierEvent.GAME_END) {
-            return LanguageService
-                    .getInstance()
-                    .get(MessageKeys.GAME_END_MESSAGE)
-                    .toString();
+            return AdventureHelper.toLegacy(Message.of(LangKeys.GAME_END_MESSAGE).asComponent());
         }
         return nextEvent.getKey();
     }

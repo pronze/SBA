@@ -87,7 +87,7 @@ public class SBAConfig implements IConfigurator {
             generator = new ConfigGenerator(loader, configurationNode);
             generator.start()
                     .key("version").defValue(plugin.getDescription().getVersion())
-                    .key("locale").defValue("en")
+                    .key("locale").defValue("en_US")
                     .key("prefix").defValue("[SBA]")
                     .section("debug")
                         .key("enabled").defValue(false)

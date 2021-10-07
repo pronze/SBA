@@ -1,199 +1,221 @@
 package io.github.pronze.sba.visuals;
 
-import io.github.pronze.sba.MessageKeys;
-import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.Logger;
-import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.lib.lang.Message;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.sidebar.Sidebar;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.SBA;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class LobbyScoreboardManager implements Listener {
-    private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+
+    public static LobbyScoreboardManager getInstance() {
+        return ServiceManager.get(LobbyScoreboardManager.class);
+    }
+
+    public static void of(Game game) {
+        if (getInstance().sidebarMap.containsKey(game)) {
+            throw new UnsupportedOperationException("Game: " + game.getName() + " has already been registered into LobbyScoreboardManager!");
+        }
+
+        final var sidebar = Sidebar.of();
+        final var animatedTitle = Message.of(LangKeys.ANIMATED_BEDWARS_TITLE).getForAnyone();
+        sidebar.title(animatedTitle.get(0));
+        // animated title.
+        new BukkitRunnable() {
+            int anim_title_pos = 0;
+
+            @Override
+            public void run() {
+                if (game.getStatus() != GameStatus.WAITING) {
+                    return;
+                }
+
+                anim_title_pos += 1;
+                if (anim_title_pos >= animatedTitle.size()) {
+                    anim_title_pos = 0;
+                }
+
+                sidebar.title(animatedTitle.get(anim_title_pos));
+            }
+        }.runTaskTimerAsynchronously(SBA.getPluginInstance(), 0L, 2L);
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (game.getStatus() != GameStatus.WAITING) {
+                    return;
+                }
+
+                game.getRunningTeams().forEach(team -> {
+                    if (sidebar.getTeam(team.getName()).isEmpty()) {
+                        sidebar.team(team.getName())
+                                .friendlyFire(false)
+                                .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
+                    }
+
+                    var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
+
+                    List.copyOf(sidebarTeam.players())
+                            .forEach(teamPlayer -> {
+                                if (team.getConnectedPlayers().stream().noneMatch(bedWarsPlayer -> bedWarsPlayer.equals(teamPlayer.as(Player.class)))) {
+                                    sidebarTeam.removePlayer(teamPlayer);
+                                }
+                            });
+
+                    team.getConnectedPlayers()
+                            .stream()
+                            .map(PlayerMapper::wrapPlayer)
+                            .filter(teamPlayer -> !sidebarTeam.players().contains(teamPlayer))
+                            .forEach(sidebarTeam::player);
+                });
+            }
+        }.runTaskTimer(SBA.getPluginInstance(), 0L, 20L);
+
+        Message.of(LangKeys.LOBBY_SCOREBOARD_LINES)
+                .placeholder("sba_version", SBA.getInstance().getVersion())
+                .placeholder("date", DateUtils.getFormattedDate())
+                .placeholder("state", () -> {
+                    var state = Message.of(LangKeys.LOBBY_SCOREBOARD_STATE_WAITING).asComponent();
+                    if (game.countConnectedPlayers() >= game.getMinPlayers()
+                            && game.getStatus() == GameStatus.WAITING) {
+                        final var time = ((org.screamingsandals.bedwars.game.Game) Main.getInstance().getGameByName(game.getName())).getFormattedTimeLeft();
+                        if (!time.contains("0-1")) {
+                            final var units = time.split(":");
+                            var seconds = Integer.parseInt(units[1]) + 1;
+                            state = Message.of(LangKeys.LOBBY_SCOREBOARD_STATE)
+                                    .placeholder("countdown", String.valueOf(seconds))
+                                    .asComponent();
+                        }
+                    }
+                    return state;
+                })
+                .placeholder("game", () -> AdventureHelper.toComponent(game.getName()))
+                .placeholder("players", () -> AdventureHelper.toComponent(String.valueOf(game.getConnectedPlayers().size())))
+                .placeholder("maxplayers", () -> AdventureHelper.toComponent(String.valueOf(game.getMaxPlayers())))
+                .placeholder("minplayers", () -> AdventureHelper.toComponent(String.valueOf(game.getMinPlayers())))
+                .placeholder("needplayers", () -> {
+                    int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
+                    needplayers = Math.max(needplayers, 0);
+                    return AdventureHelper.toComponent(String.valueOf(needplayers));
+                })
+                .placeholder("mode", () -> {
+                    int size = SBAConfig.game_size.getOrDefault(game.getName(), 4);
+                    Component mode;
+                    switch (size) {
+                        case 1:
+                            mode = Message.of(LangKeys.LOBBY_SCOREBOARD_SOLO_PREFIX).asComponent();
+                            break;
+                        case 2:
+                            mode = Message.of(LangKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX).asComponent();
+                            break;
+                        case 3:
+                            mode = Message.of(LangKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX).asComponent();
+                            break;
+                        case 4:
+                            mode = Message.of(LangKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX).asComponent();
+                            break;
+                        default:
+                            mode = Component.text(size + "v" + size + "v" + size + "v" + size);
+                    }
+                    return mode;
+                }).getForAnyone()
+                .forEach(sidebar::bottomLine);
+
+        game.getConnectedPlayers()
+                .stream()
+                .map(PlayerMapper::wrapPlayer)
+                .forEach(sidebar::addViewer);
+        sidebar.show();
+
+        getInstance().sidebarMap.put(game, Sidebar.of());
+    }
+
+    private final Map<Game, Sidebar> sidebarMap = new HashMap<>();
 
     @OnPostEnable
-    public void registerListener() {
+    public void onPostEnable() {
         if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
             return;
         }
         SBA.getInstance().registerListener(this);
     }
 
-    @EventHandler
-    public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
-        final var player = e.getPlayer();
-        if (e.getGame().getStatus() == GameStatus.WAITING) {
-            Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> createBoard(player, e.getGame()), 3L);
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onPlayerJoin(BedwarsPlayerJoinedEvent event) {
+        final var player = event.getPlayer();
+        if (event.getGame().getStatus() == GameStatus.WAITING) {
+            addViewer(player);
         }
     }
 
-    private void createBoard(Player player, Game game) {
-        Logger.trace("Creating board for player: {}", player.getName());
+    private void addViewer(Player player) {
+        final var playerGame = Main.getInstance().getGameOfPlayer(player);
+        if (playerGame == null) {
+            return;
+        }
 
-        final var scoreboardOptional = ScoreboardManager.getInstance()
-                .fromCache(player.getUniqueId());
-        scoreboardOptional.ifPresent(Scoreboard::destroy);
+        final var wrapper = PlayerMapper.wrapPlayer(player);
+        for (var entry : sidebarMap.entrySet()) {
+            final var game = entry.getKey();
+            if (game != playerGame) {
+                continue;
+            }
 
-        var animatedTitle = LanguageService
-                .getInstance()
-                .get(MessageKeys.ANIMATED_BEDWARS_TITLE)
-                .toStringList();
-
-        final var scoreboard = Scoreboard.builder()
-                .animate(true)
-                .player(player)
-                .displayObjective("bwa-lobby")
-                .updateInterval(20L)
-                .animationInterval(2L)
-                .animatedTitle(animatedTitle)
-                .updateCallback(board -> {
-                    board.setLines(process(player, game, board));
-                    return true;
-                })
-                .build();
-        scoreboardMap.put(player.getUniqueId(), scoreboard);
+            final var sidebar = entry.getValue();
+            if (!sidebar.getViewers().contains(wrapper)) {
+                sidebar.addViewer(wrapper);
+            }
+        }
     }
 
-    @EventHandler
+    private void remove(Player player) {
+        final var wrapper = PlayerMapper.wrapPlayer(player);
+        sidebarMap.values()
+                .stream()
+                .filter(sidebar -> sidebar.getViewers().contains(wrapper))
+                .forEach(sidebar -> sidebar.removeViewer(wrapper));
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerLeave(BedwarsPlayerLeaveEvent e) {
         remove(e.getPlayer());
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent e) {
         remove(e.getPlayer());
     }
 
-    private void remove(Player player) {
-        if (scoreboardMap.containsKey(player.getUniqueId())) {
-            final var scoreboard = scoreboardMap.get(player.getUniqueId());
-            if (scoreboard != null) {
-                scoreboard.destroy();
-                scoreboardMap.remove(player.getUniqueId());
-            }
-        }
-    }
-
-    private List<String> process(Player player, Game game, Scoreboard scoreboard) {
-        final var lines = new ArrayList<String>();
-        String state = LanguageService
-                .getInstance()
-                .get(MessageKeys.LOBBY_SCOREBOARD_STATE_WAITING)
-                .toString();
-
-        int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
-        needplayers = Math.max(needplayers, 0);
-        int s = SBAConfig.game_size.getOrDefault(game.getName(), 4);
-        String mode;
-        switch (s) {
-            case 1:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_SOLO_PREFIX)
-                        .toString();
-                break;
-            case 2:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX)
-                        .toString();
-                break;
-            case 3:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX)
-                        .toString();
-                break;
-            case 4:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX)
-                        .toString();
-                break;
-            default:
-                mode = s + "v" + s + "v" + s + "v" + s;
-        }
-
-        if (game.countConnectedPlayers() >= game.getMinPlayers()
-                && game.getStatus() == GameStatus.WAITING) {
-            final var time = ((org.screamingsandals.bedwars.game.Game)Main.getInstance().getGameByName(game.getName())).getFormattedTimeLeft();
-            if (!time.contains("0-1")) {
-                final var units = time.split(":");
-                var seconds = Integer.parseInt(units[1]) + 1;
-                state = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_STATE)
-                        .replace("%countdown%", String.valueOf(seconds))
-                        .toString();
-            }
-        }
-
-        final var finalState = state;
-        final var finalNeedplayers = needplayers;
-
-        var lobbyScoreboardLines = LanguageService
-                .getInstance()
-                .get(MessageKeys.LOBBY_SCOREBOARD_LINES)
-                .toStringList();
-
-        lobbyScoreboardLines.forEach(line -> {
-            line = line
-                    .replace("%sba_version%", SBA.getInstance().getVersion())
-                    .replace("%date%", DateUtils.getFormattedDate())
-                    .replace("%state%", finalState)
-                    .replace("%game%", game.getName())
-                    .replace("%players%", String.valueOf(game.getConnectedPlayers().size()))
-                    .replace("%maxplayers%", String.valueOf(game.getMaxPlayers()))
-                    .replace("%minplayers%", String.valueOf(game.getMinPlayers()))
-                    .replace("%needplayers%", String.valueOf(finalNeedplayers))
-                    .replace("%mode%", mode);
-            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI"))
-                line = PlaceholderAPI.setPlaceholders(player, line);
-            lines.add(line);
-        });
-
-        final var holder = scoreboard.getHolder();
-        game.getRunningTeams().forEach(team -> {
-            if (!holder.hasTeamEntry(team.getName())) {
-                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
-            }
-            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
-
-            new HashSet<>(scoreboardTeam.getEntries())
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .map(Bukkit::getPlayerExact)
-                    .filter(Objects::nonNull)
-                    .forEach(teamPlayer -> {
-                        if (!team.getConnectedPlayers().contains(teamPlayer)) {
-                            scoreboardTeam.removeEntry(teamPlayer.getName());
-                        }
-                    });
-
-            team.getConnectedPlayers()
-                    .stream()
-                    .map(Player::getName)
-                    .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
-                    .forEach(scoreboardTeam::addEntry);
-        });
-        return lines;
+    @OnPreDisable
+    public void destroy() {
+        sidebarMap.values()
+                .forEach(Sidebar::destroy);
+        sidebarMap.clear();
     }
 }
