@@ -1,12 +1,11 @@
-package io.github.pronze.sba.service;
+package io.github.pronze.sba.listener;
 
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.event.OnEvent;
-import org.screamingsandals.lib.event.player.SPlayerPacketEvent;
 import org.screamingsandals.lib.nms.accessors.ClientboundSetEquipmentPacketAccessor;
 import org.screamingsandals.lib.nms.accessors.ClientboundUpdateMobEffectPacketAccessor;
-import org.screamingsandals.lib.nms.accessors.ServerboundInteractPacketAccessor;
+import org.screamingsandals.lib.packet.event.SPacketEvent;
 import org.screamingsandals.lib.utils.PacketMethod;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -16,7 +15,7 @@ import io.github.pronze.sba.game.ArenaManager;
 public class PacketListener {
 
     @OnEvent
-    public void onEffects(SPlayerPacketEvent event) {
+    public void onEffects(SPacketEvent event) {
         if (event.getMethod() != PacketMethod.OUTBOUND) {
             return;
         }
@@ -26,7 +25,6 @@ public class PacketListener {
 
         if (ClientboundUpdateMobEffectPacketAccessor.getType().isInstance(packet)) {
             final var entityId = (int) Reflect.getField(packet, ClientboundUpdateMobEffectPacketAccessor.getFieldEntityId());
-
             final var playerGame = Main.getInstance().getGameOfPlayer(player);
             if (playerGame == null) {
                 return;
@@ -60,7 +58,7 @@ public class PacketListener {
     }
 
     @OnEvent
-    public void onEquipped(SPlayerPacketEvent event) {
+    public void onEquipped(SPacketEvent event) {
         if (event.getMethod() != PacketMethod.OUTBOUND) {
             return;
         }

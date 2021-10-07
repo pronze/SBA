@@ -36,6 +36,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
+import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
@@ -187,6 +188,8 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public void disable() {
+        EventManager.getDefaultEventManager().unregisterAll();
+        EventManager.getDefaultEventManager().destroy();
         Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
     }
 
