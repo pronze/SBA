@@ -3,6 +3,7 @@ package io.github.pronze.sba.game.tasks;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
+import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -10,6 +11,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
+import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 
 public class TrapTask extends BaseGameTask {
@@ -50,20 +52,12 @@ public class TrapTask extends BaseGameTask {
                                     arena.removeHiddenPlayer(player);
                                 }
 
-                                SBALanguageService
-                                        .getInstance()
-                                        .get(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
+                                Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE)
+                                        .placeholder("team", arena.getGame().getTeamOfPlayer(player).getName())
                                         .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
 
-                                var title = SBALanguageService
-                                        .getInstance()
-                                        .get(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE)
-                                        .toString();
-
-                                var subTitle = SBALanguageService
-                                        .getInstance()
-                                        .get(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE)
-                                        .toString();
+                                var title = Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE).asComponent();
+                                var subTitle = Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE).asComponent();
 
                                 team.getConnectedPlayers().forEach(pl -> {
                                     Sounds.playSound(pl, pl.getLocation(), Main.getInstance().getConfig().getString("sounds.on_trap_triggered"),

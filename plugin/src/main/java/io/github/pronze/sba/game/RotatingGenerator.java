@@ -96,21 +96,20 @@ public class RotatingGenerator implements IRotatingGenerator {
                     time--;
                 }
 
-                final var lines = Message.of(LangKeys.ROTATING_GENERATOR_FORMAT);
-
-                final var format = !full ? Message.of(LangKeys.ROTATING_GENERATOR_FORMAT).getForAnyone() :
-                        Message.of(LangKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT).getForAnyone();
+                final var format = !full ? Message.of(LangKeys.ROTATING_GENERATOR_FORMAT) :
+                        Message.of(LangKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT);
 
 
                 final var matName = itemSpawner.getItemSpawnerType().getMaterial() ==
                         Material.EMERALD ? "§a" + AdventureHelper.toLegacy(Message.of(LangKeys.EMERALD).asComponent()) :
                         "§b" + AdventureHelper.toLegacy(Message.of(LangKeys.DIAMOND).asComponent());
 
-                lines.placeholder("tier", ShopUtil.romanNumerals.get(tierLevel))
+                format
+                        .placeholder("tier", ShopUtil.romanNumerals.get(tierLevel))
                         .placeholder("material", matName + "&6")
                         .placeholder("seconds", String.valueOf(time));
 
-                update(lines.getForAnyone());
+                update(format.getForAnyone());
 
                 if (time <= 0 || full) {
                     time = itemSpawner.getItemSpawnerType().getInterval();

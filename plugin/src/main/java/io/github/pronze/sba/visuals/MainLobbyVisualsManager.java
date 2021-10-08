@@ -40,10 +40,21 @@ public class MainLobbyVisualsManager implements Listener {
 
     public MainLobbyVisualsManager() {
         this.sidebar = Sidebar.of();
-        var sidebar = Sidebar.of();
+    }
+
+    @OnPreDisable
+    public void onPreDisable() {
+        sidebar.destroy();
+    }
+
+    @OnPostEnable
+    public void registerListener() {
+        if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
+            return;
+        }
+
         var title = Message.of(LangKeys.MAIN_LOBBY_SCOREBOARD_TITLE)
                 .asComponent();
-
         sidebar.title(title);
 
         Message.of(LangKeys.MAIN_LOBBY_SCOREBOARD_LINES)
@@ -94,18 +105,6 @@ public class MainLobbyVisualsManager implements Listener {
                 .forEach(sidebar::bottomLine);
 
         sidebar.show();
-    }
-
-    @OnPreDisable
-    public void onPreDisable() {
-        sidebar.destroy();
-    }
-
-    @OnPostEnable
-    public void registerListener() {
-        if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
-            return;
-        }
 
         SBA.getInstance().registerListener(this);
         SBAUtil.readLocationFromConfig("main-lobby").ifPresentOrElse(location -> {

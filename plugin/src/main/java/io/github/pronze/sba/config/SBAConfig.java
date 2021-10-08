@@ -29,7 +29,7 @@ public class SBAConfig implements IConfigurator {
 
     public JavaPlugin plugin;
     public File dataFolder;
-    public File langFolder, shopFolder, gamesInventoryFolder;
+    public File shopFolder, gamesInventoryFolder;
 
     private ConfigurationNode configurationNode;
     private YamlConfigurationLoader loader;
@@ -52,7 +52,6 @@ public class SBAConfig implements IConfigurator {
         deleteFile("bwaconfig.yml");
 
         try {
-            langFolder = new File(dataFolder, "languages");
             gamesInventoryFolder = new File(dataFolder, "games-inventory");
             shopFolder = new File(dataFolder, "shops");
 
@@ -62,11 +61,6 @@ public class SBAConfig implements IConfigurator {
             if (!gamesInventoryFolder.exists()) {
                 gamesInventoryFolder.mkdirs();
             }
-            if (!langFolder.exists()) {
-                langFolder.mkdirs();
-            }
-
-            saveFile("languages/language_en.yml");
 
             saveFile("games-inventory/solo.yml");
             saveFile("games-inventory/double.yml");
@@ -349,12 +343,6 @@ public class SBAConfig implements IConfigurator {
             saveConfig();
             plugin.saveResource("shops/shop.yml", true);
             plugin.saveResource("shops/upgradeShop.yml", true);
-
-            final var langFiles = langFolder.listFiles();
-            if (langFiles != null)
-                Arrays.stream(langFiles).forEach(File::delete);
-
-            saveFile("languages/language_en.yml");
             ServiceManager.get(FirstStartConfigReplacer.class).updateBedWarsConfig();
             SBAUtil.reloadPlugin(Main.getInstance());
         } catch (Exception ex) {
@@ -426,7 +414,6 @@ public class SBAConfig implements IConfigurator {
             var obj = node.raw();
             return ItemFactory.build(obj).orElse(ItemFactory.getAir());
         }
-
         return ItemFactory.build(def).orElse(ItemFactory.getAir());
     }
 }

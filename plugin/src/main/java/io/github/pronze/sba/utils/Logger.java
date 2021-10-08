@@ -1,7 +1,9 @@
 package io.github.pronze.sba.utils;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.utils.annotations.Service;
 import io.github.pronze.sba.config.SBAConfig;
@@ -10,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
+@RequiredArgsConstructor
 public class Logger {
     private static Logger instance;
     private Level level;
@@ -17,16 +20,19 @@ public class Logger {
     private boolean testMode;
 
     public static void mockMode() {
-        instance = new Logger();
-        instance.testMode = true;
+       //instance = new Logger();
+       //instance.testMode = true;
     }
 
     public static boolean isInitialized() {
         return instance != null;
     }
 
-    public static void init(JavaPlugin plugin) {
-        instance = new Logger();
+    public Logger(JavaPlugin plugin) {
+        if (instance != null) {
+            throw new UnsupportedOperationException("Logger has already been initialized!");
+        }
+        instance = this;
         instance.level = Level.ALL;
         instance.logger = plugin.getLogger();
     }

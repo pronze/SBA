@@ -75,8 +75,8 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SimpleInventoriesCore.class,
         NPCManager.class,
         UpdateChecker.class,
-        SBAConfig.class,
         Logger.class,
+        SBAConfig.class,
         SBALanguageService.class,
         CommandManager.class,
         ArenaManager.class,
@@ -130,7 +130,6 @@ public class SBA extends PluginContainer implements AddonAPI {
     public void enable() {
         instance = this;
         cachedPluginInstance = instance.getPluginDescription().as(JavaPlugin.class);
-        Logger.init(cachedPluginInstance);
     }
 
     @Override

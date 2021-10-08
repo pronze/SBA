@@ -58,14 +58,13 @@ public class SBALanguageService extends LangService {
         }
         final var finalLocale = locale;
 
-        var prefix = AddonAPI
-                .getInstance()
-                .getConfigurator()
-                .getString("prefix", "[SBA]");
+        var prefix = mainConfig
+                .node("prefix")
+                .getString("[SBA]");
 
         Lang.setDefaultPrefix(AdventureHelper.toComponent(prefix));
 
-        internalLanguageDefinition = new Gson().fromJson(new InputStreamReader(SBALanguageService.class.getResourceAsStream("/language_definition.json")), LanguageDefinition.class);
+        internalLanguageDefinition = new Gson().fromJson(new InputStreamReader(Objects.requireNonNull(SBALanguageService.class.getResourceAsStream("/language_definition.json"))), LanguageDefinition.class);
         if (internalLanguageDefinition == null) {
             Logger.error("Can't load default Language Definition for Screaming BedWars!");
             return;
@@ -95,7 +94,7 @@ public class SBALanguageService extends LangService {
                         return LayeredTranslationContainer.of(
                                 GsonConfigurationLoader
                                         .builder()
-                                        .source(() -> new BufferedReader(new InputStreamReader(SBALanguageService.class.getResourceAsStream("/" + entry.getValue()))))
+                                        .source(() -> new BufferedReader(new InputStreamReader(Objects.requireNonNull(SBALanguageService.class.getResourceAsStream("/" + entry.getValue())))))
                                         .build()
                                         .load()
                         );
@@ -127,7 +126,7 @@ public class SBALanguageService extends LangService {
                                     us,
                                     GsonConfigurationLoader
                                             .builder()
-                                            .source(() -> new BufferedReader(new InputStreamReader(SBALanguageService.class.getResourceAsStream("/" + entry.getValue()))))
+                                            .source(() -> new BufferedReader(new InputStreamReader(Objects.requireNonNull(SBALanguageService.class.getResourceAsStream("/" + entry.getValue())))))
                                             .build()
                                             .load(),
                                     BasicConfigurationNode.root(),

@@ -1,3 +1,7 @@
+plugins {
+    id 'org.screamingsandals.plugin-builder' version "${SCREAMING_PLUGIN_BUILDER_VERSION}" apply false
+}
+
 defaultTasks 'clean', 'screamCompile'
 
 allprojects {
@@ -5,20 +9,9 @@ allprojects {
     version = SBA_VERSION
 }
 
-buildscript {
-    repositories {
-        maven {
-            url = 'https://repo.screamingsandals.org/public'
-        }
-    }
-    dependencies {
-        classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
-    }
-}
-
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.screamingsandals.gradle.builder'
+    apply plugin: 'org.screamingsandals.plugin-builder'
 
     enableShadowPlugin()
 

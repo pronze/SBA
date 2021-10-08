@@ -25,8 +25,8 @@ public class GeneratorTask extends BaseGameTask {
 
     public GeneratorTask() {
         nextEvent = GameTierEvent.DIAMOND_GEN_UPGRADE_TIER_II;
-        diamond = Message.of(LangKeys.DIAMOND).asComponent();
-        emerald = Message.of(LangKeys.EMERALD).asComponent();
+        diamond = AdventureHelper.toLegacy(Message.of(LangKeys.DIAMOND).asComponent());
+        emerald = AdventureHelper.toLegacy(Message.of(LangKeys.EMERALD).asComponent());
 
         timerUpgrades = SBAConfig
                 .getInstance()
