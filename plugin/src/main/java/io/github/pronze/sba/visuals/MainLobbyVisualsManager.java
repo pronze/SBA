@@ -34,6 +34,7 @@ import io.github.pronze.sba.utils.ShopUtil;
 @Service
 public class MainLobbyVisualsManager implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
+
     private static Location location;
 
     private final Sidebar sidebar;
@@ -57,7 +58,7 @@ public class MainLobbyVisualsManager implements Listener {
                 .asComponent();
         sidebar.title(title);
 
-        Message.of(LangKeys.MAIN_LOBBY_SCOREBOARD_LINES)
+        final var lines = Message.of(LangKeys.MAIN_LOBBY_SCOREBOARD_LINES)
                 .placeholder("sba_version", SBA.getInstance().getVersion())
                 .placeholder("kills", playerWrapper -> {
                     final var playerStatistic  = Main
@@ -100,10 +101,9 @@ public class MainLobbyVisualsManager implements Listener {
                             .getPlayerStatisticsManager()
                             .getStatistic(playerWrapper.as(Player.class));
                     return AdventureHelper.toComponent(String.valueOf(playerStatistic.getKD()));
-                })
-                .getForAnyone()
-                .forEach(sidebar::bottomLine);
+                });
 
+        sidebar.bottomLine(lines);
         sidebar.show();
 
         SBA.getInstance().registerListener(this);

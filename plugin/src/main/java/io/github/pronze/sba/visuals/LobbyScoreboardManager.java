@@ -97,7 +97,7 @@ public class LobbyScoreboardManager implements Listener {
             }
         }.runTaskTimer(SBA.getPluginInstance(), 0L, 20L);
 
-        Message.of(LangKeys.LOBBY_SCOREBOARD_LINES)
+        final var lines = Message.of(LangKeys.LOBBY_SCOREBOARD_LINES)
                 .placeholder("sba_version", SBA.getInstance().getVersion())
                 .placeholder("date", DateUtils.getFormattedDate())
                 .placeholder("state", () -> {
@@ -144,15 +144,16 @@ public class LobbyScoreboardManager implements Listener {
                             mode = Component.text(size + "v" + size + "v" + size + "v" + size);
                     }
                     return mode;
-                }).getForAnyone()
-                .forEach(sidebar::bottomLine);
+                });
+
+        sidebar.bottomLine(lines);
 
         game.getConnectedPlayers()
                 .stream()
                 .map(PlayerMapper::wrapPlayer)
                 .forEach(sidebar::addViewer);
-        sidebar.show();
 
+        sidebar.show();
         getInstance().sidebarMap.put(game, Sidebar.of());
     }
 

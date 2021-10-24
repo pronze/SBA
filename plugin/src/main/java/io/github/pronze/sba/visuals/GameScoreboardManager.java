@@ -157,6 +157,8 @@ public class GameScoreboardManager {
                     });
                     return componentAtomicReference.get();
                 });
+
+        sidebar.bottomLine(scoreboardLines);
     }
 
     private static String getTeamBedStatus(RunningTeam team) {
