@@ -34,6 +34,15 @@ public interface AddonAPI {
     }
 
     /**
+     * Returns whether the SBA plugin instance has registered the API to bukkit.
+     *
+     * @return true if the API has been registered within bukkit's services manager, false otherwise
+     */
+    static boolean isAPIRegistered() {
+        return Bukkit.getServer().getServicesManager().getRegistration(AddonAPI.class) != null;
+    }
+
+    /**
      * Returns an Optional containing the GameStorage instance of the provided game, empty otherwise.
      *
      * @param game The game associated with the storage.

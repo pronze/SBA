@@ -145,6 +145,7 @@ public class SBA extends PluginContainer implements AddonAPI {
             return;
         }
 
+        // init SLib v1 InventoryListener to delegate old SLib actions to new one.
         InventoryListener.init(cachedPluginInstance);
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -154,7 +155,13 @@ public class SBA extends PluginContainer implements AddonAPI {
 
         getLogger().info("Plugin has finished loading!");
         registerAPI();
-        Logger.trace("API has been registered!");
+    }
+
+    @Override
+    public void disable() {
+        EventManager.getDefaultEventManager().unregisterAll();
+        EventManager.getDefaultEventManager().destroy();
+        Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
     }
 
     public void registerListener(@NotNull Listener listener) {
@@ -179,16 +186,8 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     private void registerAPI() {
-        if (Bukkit.getServer().getServicesManager().getRegistration(AddonAPI.class) == null) {
-            Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, cachedPluginInstance, ServicePriority.Normal);
-        }
-    }
-
-    @Override
-    public void disable() {
-        EventManager.getDefaultEventManager().unregisterAll();
-        EventManager.getDefaultEventManager().destroy();
-        Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
+        Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, cachedPluginInstance, ServicePriority.Normal);
+        Logger.trace("API has been registered!");
     }
 
     @Override
@@ -246,5 +245,3 @@ public class SBA extends PluginContainer implements AddonAPI {
         return cachedPluginInstance;
     }
 }
-
-
