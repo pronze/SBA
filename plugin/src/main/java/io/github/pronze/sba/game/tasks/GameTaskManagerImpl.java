@@ -1,7 +1,7 @@
 package io.github.pronze.sba.game.tasks;
 
-import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.manager.IGameTaskManager;
+import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.manager.GameTaskManager;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -9,24 +9,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
-public class GameTaskManager implements IGameTaskManager {
+@Service(initAnother = {
+        GeneratorTask.class,
+        HealPoolTask.class,
+        MinerTrapTask.class,
+        TrapTask.class
+})
+public class GameTaskManagerImpl implements GameTaskManager {
 
-    public static GameTaskManager getInstance() {
-        return ServiceManager.get(GameTaskManager.class);
+    public static GameTaskManagerImpl getInstance() {
+        return ServiceManager.get(GameTaskManagerImpl.class);
     }
 
-    private final List<BaseGameTask> tasks = new ArrayList<>();
-
-    public GameTaskManager() {
-        addTask(new GeneratorTask());
-        addTask(new HealPoolTask());
-        addTask(new TrapTask());
-        addTask(new MinerTrapTask());
-    }
+    private final List<GameTask> tasks = new ArrayList<>();
 
     @Override
-    public void addTask(@NotNull BaseGameTask task) {
+    public void addTask(@NotNull GameTask task) {
         if (tasks.contains(task)) {
             throw new UnsupportedOperationException("TaskManager already contains task: " + task.getClass().getSimpleName());
         }
@@ -34,7 +32,7 @@ public class GameTaskManager implements IGameTaskManager {
     }
 
     @Override
-    public void removeTask(@NotNull BaseGameTask task) {
+    public void removeTask(@NotNull GameTask task) {
         if (!tasks.contains(task)) {
             return;
         }
@@ -42,7 +40,7 @@ public class GameTaskManager implements IGameTaskManager {
     }
 
     @Override
-    public List<BaseGameTask> startTasks(@NotNull IArena arena) {
+    public List<GameTask> startTasks(@NotNull GameWrapper arena) {
         return tasks.stream()
                 .map(task -> task.start(arena))
                 .collect(Collectors.toList());

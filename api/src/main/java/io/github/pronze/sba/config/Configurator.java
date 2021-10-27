@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Represents a configurator implementation.
  */
-public interface IConfigurator {
+public interface Configurator {
     /**
      * Loads the default configuration of the plugin.
      */

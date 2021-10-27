@@ -2,6 +2,7 @@ package io.github.pronze.sba.game;
 
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * Represents an implementation for the RotatingGenerator.
  */
-public interface IRotatingGenerator {
+public interface RotatingGenerator {
 
     /**
      * Updates the hologram of the rotating generator with the specified lines.
@@ -46,4 +47,8 @@ public interface IRotatingGenerator {
      * @param player removes the player as a viewer to this RotatingGenerator
      */
     void removeViewer(@NotNull Player player);
+
+    boolean isType(Material material);
+
+    void incrementTier();
 }

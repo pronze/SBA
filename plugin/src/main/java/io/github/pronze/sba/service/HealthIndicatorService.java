@@ -2,8 +2,8 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.game.GameWrapperImpl;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
@@ -29,7 +29,7 @@ import java.util.Map;
         HealthIndicatorManager.class
 })
 public class HealthIndicatorService implements Listener {
-    private final Map<IArena, HealthIndicator> healthIndicatorMap = new HashMap<>();
+    private final Map<GameWrapperImpl, HealthIndicator> healthIndicatorMap = new HashMap<>();
 
     private boolean tabEnabled;
 
@@ -77,13 +77,13 @@ public class HealthIndicatorService implements Listener {
                 .map(PlayerMapper::wrapPlayer)
                 .forEach(healthIndicator::addTrackedPlayer);
 
-        healthIndicatorMap.put(ArenaManager.getInstance().get(game.getName()).orElseThrow(), healthIndicator);
+        healthIndicatorMap.put(GameWrapperManagerImpl.getInstance().get(game.getName()).orElseThrow(), healthIndicator);
     }
 
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
         final var playerWrapper = PlayerMapper.wrapPlayer(event.getPlayer());
-        final var healthIndicator = healthIndicatorMap.get(ArenaManager.getInstance().get(event.getGame().getName()).orElse(null));
+        final var healthIndicator = healthIndicatorMap.get(GameWrapperManagerImpl.getInstance().get(event.getGame().getName()).orElse(null));
         if (healthIndicator != null) {
             healthIndicator.removeViewer(playerWrapper);
             healthIndicator.removeTrackedPlayer(playerWrapper);
@@ -92,7 +92,7 @@ public class HealthIndicatorService implements Listener {
 
     @EventHandler
     public void onBedwarsGameEndingEvent(BedwarsGameEndingEvent event) {
-        final var arena = ArenaManager.getInstance().get(event.getGame().getName()).orElseThrow();
+        final var arena = GameWrapperManagerImpl.getInstance().get(event.getGame().getName()).orElseThrow();
         final var healthIndicator = healthIndicatorMap.get(arena);
         if (healthIndicator != null) {
             healthIndicator.destroy();

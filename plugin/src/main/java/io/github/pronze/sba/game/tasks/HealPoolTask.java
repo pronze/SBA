@@ -3,9 +3,8 @@ package io.github.pronze.sba.game.tasks;
 import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.screamingsandals.bedwars.Main;
 
-public class HealPoolTask extends BaseGameTask {
+public class HealPoolTask extends AbstractGameTaskImpl {
     private final double radius;
 
     public HealPoolTask() {
@@ -18,16 +17,19 @@ public class HealPoolTask extends BaseGameTask {
             return;
         }
 
-        arena.getGame().getRunningTeams()
-                .stream()
-                .filter(arena.getStorage()::arePoolEnabled)
-                .forEach(team -> team.getConnectedPlayers()
-                        .stream()
-                        .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
-                        .forEach(player -> {
-                            if (arena.getStorage().getTargetBlockLocation(team).orElseThrow().distanceSquared(player.getLocation()) <= radius) {
-                                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 30, 1));
-                            }
-                        }));
+        final var storage = arena.getStorage();
+        for (var runningTeam : arena.getGame().getRunningTeams()) {
+            if (!storage.arePoolEnabled(runningTeam)) {
+                continue;
+            }
+
+            for (var teamPlayer : runningTeam.getConnectedPlayers()) {
+                if (runningTeam.getTargetBlock().distanceSquared(teamPlayer.getLocation()) <= radius) {
+                    teamPlayer.addPotionEffect(new PotionEffect(
+                            PotionEffectType.REGENERATION, 30, 1
+                    ));
+                }
+            }
+        }
     }
 }

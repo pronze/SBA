@@ -1,6 +1,6 @@
 package io.github.pronze.sba.events;
 
-import io.github.pronze.sba.game.IRotatingGenerator;
+import io.github.pronze.sba.game.RotatingGenerator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.event.Cancellable;
@@ -14,7 +14,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 public class SBASpawnerTierUpgradeEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
     private final Game game;
-    private final IRotatingGenerator generator;
+    private final RotatingGenerator generator;
     private boolean cancelled = false;
 
     @Override

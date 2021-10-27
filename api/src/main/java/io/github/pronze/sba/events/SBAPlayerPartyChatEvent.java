@@ -1,6 +1,6 @@
 package io.github.pronze.sba.events;
 
-import io.github.pronze.sba.party.IParty;
+import io.github.pronze.sba.party.Party;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -17,7 +17,7 @@ public class SBAPlayerPartyChatEvent extends Event implements Cancellable {
     private static final HandlerList handlerList = new HandlerList();
 
     private final SBAPlayerWrapper player;
-    private final IParty party;
+    private final Party party;
     @Setter
     private Component message;
     private boolean cancelled;

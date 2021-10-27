@@ -1,19 +1,19 @@
 package io.github.pronze.sba;
 
 import io.github.pronze.sba.commands.CommandManager;
-import io.github.pronze.sba.config.IConfigurator;
+import io.github.pronze.sba.config.Configurator;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.game.IGameStorage;
-import io.github.pronze.sba.game.tasks.GameTaskManager;
+import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
+import io.github.pronze.sba.game.GameStorageImpl;
+import io.github.pronze.sba.game.tasks.GameTaskManagerImpl;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.inventories.SBAStoreInventory;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.listener.*;
-import io.github.pronze.sba.manager.IArenaManager;
-import io.github.pronze.sba.manager.IPartyManager;
-import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.manager.GameWrapperManager;
+import io.github.pronze.sba.manager.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
 import io.github.pronze.sba.specials.listener.BridgeEggListener;
@@ -79,9 +79,9 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SBAConfig.class,
         SBALanguageService.class,
         CommandManager.class,
-        ArenaManager.class,
-        PartyManager.class,
-        GameTaskManager.class,
+        GameWrapperManagerImpl.class,
+        io.github.pronze.sba.party.PartyManager.class,
+        GameTaskManagerImpl.class,
         SBAStoreInventory.class,
         SBAUpgradeStoreInventory.class,
         GamesInventory.class,
@@ -191,8 +191,8 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public Optional<IGameStorage> getGameStorage(Game game) {
-        return ArenaManager.getInstance().getGameStorage(game.getName());
+    public Optional<GameStorage> getGameStorage(Game game) {
+        return GameWrapperManagerImpl.getInstance().getGameStorage(game.getName());
     }
 
     @Override
@@ -216,13 +216,13 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public IArenaManager getArenaManager() {
-        return ArenaManager.getInstance();
+    public GameWrapperManager getGameWrapperManager() {
+        return GameWrapperManagerImpl.getInstance();
     }
 
     @Override
-    public IPartyManager getPartyManager() {
-        return PartyManager.getInstance();
+    public PartyManager getPartyManager() {
+        return io.github.pronze.sba.party.PartyManager.getInstance();
     }
 
     @Override
@@ -231,7 +231,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public IConfigurator getConfigurator() {
+    public Configurator getConfigurator() {
         return SBAConfig.getInstance();
     }
 

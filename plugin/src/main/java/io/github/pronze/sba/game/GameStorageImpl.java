@@ -10,11 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class GameStorage implements IGameStorage {
+public class GameStorageImpl implements GameStorage {
     private final Map<RunningTeam, GameTeamData> teamDataMap = new HashMap<>();
-    private RunningTeam team;
 
-    public GameStorage(Game game) {
+    public GameStorageImpl(Game game) {
         game.getRunningTeams().forEach(team -> teamDataMap.put(team, GameTeamData.of(team)));
     }
 

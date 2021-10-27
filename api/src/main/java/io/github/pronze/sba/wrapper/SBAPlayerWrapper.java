@@ -30,6 +30,13 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
         this.settings = ToggleableSetting.of(PlayerSetting.class);
     }
 
+    public void leaveFromGame() {
+        final var game = Main.getInstance().getGameOfPlayer(asBukkitPlayer());
+        if (game != null) {
+            game.leaveFromGame(asBukkitPlayer());
+        }
+    }
+
     public void sendMessage(String message) {
         getInstance().sendMessage(message);
     }
@@ -138,6 +145,10 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
                 .getInstance()
                 .getConfigurator()
                 .getInt("player-statistics.xp-to-level-up", 5000);
+    }
+
+    public Player asBukkitPlayer() {
+        return as(Player.class);
     }
 
     protected static int getDefaultShoutCoolDownTime() {

@@ -1,38 +1,35 @@
 package io.github.pronze.sba.mock;
+
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.*;
-import io.github.pronze.sba.game.tasks.BaseGameTask;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.ItemSpawner;
+import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.lib.npc.NPC;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
-public class MockArena implements IArena {
+public class MockArena implements GameWrapper {
     private final Map<UUID, MockInvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final Game game;
-    private final IGameStorage gameStorage;
+    private final GameStorageImpl gameStorage;
 
     @Override
-    public @NotNull IGameStorage getStorage() {
+    public @NotNull GameStorageImpl getStorage() {
         return gameStorage;
     }
 
     @Override
     public @NotNull Game getGame() {
         return game;
-    }
-
-    @Override
-    public @NotNull ScoreboardManager getScoreboardManager() {
-        return null;
     }
 
     @Override
@@ -88,10 +85,9 @@ public class MockArena implements IArena {
     }
 
     @Override
-    public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner, @NotNull Material material) {
+    public void createRotatingGenerator(org.screamingsandals.bedwars.api.game.@NotNull ItemSpawner itemSpawner, @NotNull Material rotationMaterial) {
 
     }
-
     @Override
     public @NotNull List<NPC> getStoreNPCS() {
         return List.of();
@@ -103,24 +99,32 @@ public class MockArena implements IArena {
     }
 
     @Override
-    public <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass) {
+    public Optional<InvisiblePlayer> getHiddenPlayer(@NotNull UUID playerUUID) {
         return Optional.empty();
     }
 
-
     @Override
-    public List<BaseGameTask> getGameTasks() {
-        return null;
-    }
-
-
-    @Override
-    public List<IRotatingGenerator> getRotatingGenerators() {
+    public List<Player> getConnectedPlayers() {
         return null;
     }
 
     @Override
-    public Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID) {
-        return Optional.empty();
+    public List<org.screamingsandals.bedwars.api.game.ItemSpawner> getItemSpawners() {
+        return null;
+    }
+
+    @Override
+    public List<GameStore> getGameStores() {
+        return null;
+    }
+
+    @Override
+    public World getGameWorld() {
+        return null;
+    }
+
+    @Override
+    public Location getSpectatorSpawn() {
+        return null;
     }
 }

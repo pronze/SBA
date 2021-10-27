@@ -21,6 +21,12 @@ public enum GeneratorUpgradeType {
         try {
             return GeneratorUpgradeType.valueOf(type.toUpperCase());
         } catch (IllegalArgumentException ex) {
+            if (type.toLowerCase().contains("diamond")) {
+                return GeneratorUpgradeType.DIAMOND;
+            }
+            if (type.toLowerCase().contains("emerald")) {
+                return GeneratorUpgradeType.EMERALD;
+            }
             return GeneratorUpgradeType.UNKNOWN;
         }
     }

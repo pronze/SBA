@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * Represents a GameStorage implementation.
  */
-public interface IGameStorage {
+public interface GameStorage {
 
     /**
      * Gets the target block location of the specified team.

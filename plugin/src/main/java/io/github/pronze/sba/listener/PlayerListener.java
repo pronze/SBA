@@ -4,9 +4,8 @@ import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -72,7 +71,7 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        final var arena = ArenaManager
+        final var arena = GameWrapperManagerImpl
                 .getInstance()
                 .get(game.getName())
                 .orElseThrow();
@@ -293,7 +292,7 @@ public class PlayerListener implements Listener {
 
             if (Main.isPlayerInGame(player)) {
                 final var game = Main.getInstance().getGameOfPlayer(player);
-                ArenaManager
+                GameWrapperManagerImpl
                         .getInstance()
                         .get(game.getName())
                         .ifPresent(arena -> arena.removeHiddenPlayer(player));
@@ -328,7 +327,7 @@ public class PlayerListener implements Listener {
 
             if (isInvis) {
                 final var playerGame = Main.getInstance().getGameOfPlayer(player);
-                ArenaManager
+                GameWrapperManagerImpl
                         .getInstance()
                         .get(playerGame.getName())
                         .ifPresent(arena -> arena.addHiddenPlayer(player));

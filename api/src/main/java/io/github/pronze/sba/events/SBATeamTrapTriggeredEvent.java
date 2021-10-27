@@ -1,6 +1,6 @@
 package io.github.pronze.sba.events;
 
-import io.github.pronze.sba.game.IArena;
+import io.github.pronze.sba.game.GameWrapper;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
@@ -17,7 +17,7 @@ public class SBATeamTrapTriggeredEvent extends Event implements Cancellable {
 
     private final Player trapped;
     private final RunningTeam team;
-    private final IArena arena;
+    private final GameWrapper arena;
     private boolean cancelled = false;
 
     public static HandlerList getHandlerList() {

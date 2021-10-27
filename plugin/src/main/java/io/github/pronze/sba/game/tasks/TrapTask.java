@@ -4,7 +4,6 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.potion.PotionEffect;
@@ -13,8 +12,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.utils.annotations.Service;
 
-public class TrapTask extends BaseGameTask {
+@Service
+public class TrapTask extends AbstractGameTaskImpl {
     private final double radius;
 
     public TrapTask() {
@@ -27,45 +28,51 @@ public class TrapTask extends BaseGameTask {
             return;
         }
 
-        arena.getGame().getRunningTeams()
-                .stream()
-                .filter(arena.getStorage()::areBlindTrapEnabled)
-                .forEach(team -> arena.getGame().getConnectedPlayers()
-                        .stream()
-                        .filter(player -> !Main.getPlayerGameProfile(player).isSpectator)
-                        .filter(player -> !team.getConnectedPlayers().contains(player))
-                        .forEach(player -> {
+        final var storage = arena.getStorage();
+        for (var runningTeam : arena.getGame().getRunningTeams()) {
+            if (!storage.areBlindTrapEnabled(runningTeam)) {
+                continue;
+            }
 
-                            if (arena.getStorage().getTargetBlockLocation(team).orElseThrow().distanceSquared(player.getLocation()) <= radius) {
-                                final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
-                                SBA.getPluginInstance().getServer().getPluginManager().callEvent(triggeredEvent);
+            for (var gamePlayer : arena.getConnectedPlayers()) {
+                if (Main.getPlayerGameProfile(gamePlayer).isSpectator) {
+                    continue;
+                }
 
-                                if (triggeredEvent.isCancelled()) {
-                                    return;
-                                }
+                if (runningTeam.getConnectedPlayers().contains(gamePlayer)) {
+                    continue;
+                }
 
-                                arena.getStorage().setPurchasedBlindTrap(team, false);
-                                player.addPotionEffect(new PotionEffect
-                                        (PotionEffectType.BLINDNESS, 20 * 3, 2));
+                if (runningTeam.getTargetBlock().distanceSquared(gamePlayer.getLocation()) <= radius) {
+                    final var triggeredEvent = new SBATeamTrapTriggeredEvent(gamePlayer, runningTeam, arena);
+                    SBA.getPluginInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
-                                if (arena.isPlayerHidden(player)) {
-                                    arena.removeHiddenPlayer(player);
-                                }
+                    if (triggeredEvent.isCancelled()) {
+                        return;
+                    }
 
-                                Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE)
-                                        .placeholder("team", arena.getGame().getTeamOfPlayer(player).getName())
-                                        .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
+                    arena.getStorage().setPurchasedBlindTrap(runningTeam, false);
+                    gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 3, 2));
 
-                                var title = Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE).asComponent();
-                                var subTitle = Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE).asComponent();
+                    if (arena.isPlayerHidden(gamePlayer)) {
+                        arena.removeHiddenPlayer(gamePlayer);
+                    }
 
-                                team.getConnectedPlayers().forEach(pl -> {
-                                    Sounds.playSound(pl, pl.getLocation(), Main.getInstance().getConfig().getString("sounds.on_trap_triggered"),
-                                            Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
-                                });
-                            }
-                        }));
+                    Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE)
+                            .placeholder("team", arena.getGame().getTeamOfPlayer(gamePlayer).getName())
+                            .send(PlayerMapper.wrapPlayer(gamePlayer));
 
+                    var title = Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE).asComponent();
+                    var subTitle = Message.of(LangKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE).asComponent();
+
+                    for (var teamPlayer : runningTeam.getConnectedPlayers()) {
+                        // alert team
+                        Sounds.playSound(teamPlayer,  teamPlayer.getLocation(), Main.getInstance().getConfig().getString("sounds.on_trap_triggered"),
+                                Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
+                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(teamPlayer), title, subTitle, 20, 60, 0);
+                    }
+                }
+            }
+        }
     }
 }

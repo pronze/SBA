@@ -1,5 +1,5 @@
 package io.github.pronze.sba.game;
-import io.github.pronze.sba.mock.MockArenaManager;
+import io.github.pronze.sba.mock.MockArenaManagerImpl;
 import io.github.pronze.sba.mock.MockGame;
 import io.github.pronze.sba.utils.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ArenaManagerTest {
-    private final MockArenaManager manager;
+    private final MockArenaManagerImpl manager;
     private final MockGame game;
 
     public ArenaManagerTest() {
-        manager = new MockArenaManager();
+        manager = new MockArenaManagerImpl();
         game = new MockGame("mockGame");
     }
 

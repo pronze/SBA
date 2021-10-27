@@ -3,7 +3,6 @@ package io.github.pronze.sba.game;
 import org.bukkit.entity.Player;
 
 public interface InvisiblePlayer {
-
     void vanish();
 
     void showPlayer();

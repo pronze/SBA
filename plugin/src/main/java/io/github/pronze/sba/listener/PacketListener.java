@@ -9,7 +9,7 @@ import org.screamingsandals.lib.packet.event.SPacketEvent;
 import org.screamingsandals.lib.utils.PacketMethod;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
 
 @Service
 public class PacketListener {
@@ -42,7 +42,7 @@ public class PacketListener {
                 return;
             }
 
-            final var maybeArena = ArenaManager
+            final var maybeArena = GameWrapperManagerImpl
                     .getInstance()
                     .get(playerGame.getName());
 
@@ -86,7 +86,7 @@ public class PacketListener {
                 return;
             }
 
-            final var maybeArena = ArenaManager
+            final var maybeArena = GameWrapperManagerImpl
                     .getInstance()
                     .get(playerGame.getName());
 

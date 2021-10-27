@@ -24,29 +24,33 @@ import org.screamingsandals.lib.slot.EquipmentSlotMapping;
 @Data
 public class InvisiblePlayerImpl implements InvisiblePlayer {
     private final Player hiddenPlayer;
-    private final Arena arena;
+    private final GameWrapperImpl arena;
     private boolean justEquipped;
     private boolean isHidden;
     protected BukkitTask armorHider;
 
     @Override
     public void vanish() {
+        Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
+        if (isHidden) {
+            return;
+        }
+
         final var wrappedPlayer = PlayerMapper.wrapPlayer(hiddenPlayer);
         final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
         if (team == null) {
             return;
         }
+
         final var invisTeamName = "i-" + team.getName();
 
-        arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
-
+        arena.getConnectedPlayers().forEach(connectedPlayers -> {
             final var maybeHolder = GameScoreboardManager.getInstance().getSidebar(arena);
             if (maybeHolder.isEmpty()) {
                 return;
             }
 
             final var sidebar = maybeHolder.get();
-
             if (sidebar.getTeam(invisTeamName).isEmpty()) {
                 sidebar.team(invisTeamName)
                         .nameTagVisibility(SClientboundSetPlayerTeamPacket.TagVisibility.NEVER)
@@ -60,17 +64,11 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
             }
 
             var invisibleScoreboardTeam = sidebar.getTeam(invisTeamName).orElseThrow();
-            if (!invisibleScoreboardTeam.players().contains(PlayerMapper.wrapPlayer(hiddenPlayer))) {
+            if (!invisibleScoreboardTeam.players().contains(wrappedPlayer)) {
                 invisibleScoreboardTeam.player(wrappedPlayer);
             }
         });
 
-
-        Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
-        if (isHidden) {
-            return;
-        }
-        isHidden = true;
         hideArmor();
         armorHider = new BukkitRunnable() {
             @Override
@@ -82,6 +80,8 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 }
             }
         }.runTaskTimer(SBA.getPluginInstance(), 0L, 20L);
+
+        isHidden = true;
     }
 
     private boolean isElligble() {
@@ -89,7 +89,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 && hiddenPlayer.getGameMode() == GameMode.SURVIVAL
                 && hiddenPlayer.isOnline()
                 && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
-                && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
+                && arena.getConnectedPlayers().contains(hiddenPlayer);
     }
 
     private void showArmor() {
@@ -145,7 +145,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         final var invisTeamName = "i-" + team.getName();
 
         //show nametag
-        arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
+        arena.getConnectedPlayers().forEach(connectedPlayers -> {
             final var maybeHolder = GameScoreboardManager.getInstance().getSidebar(arena);
             if (maybeHolder.isEmpty()) {
                 return;
@@ -161,8 +161,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
             }
 
             var invisibleScoreboardTeam = sidebar.getTeam(invisTeamName).orElseThrow();
-
-            if (invisibleScoreboardTeam.players().contains(PlayerMapper.wrapPlayer(hiddenPlayer))) {
+            if (invisibleScoreboardTeam.players().contains(wrappedPlayer)) {
                 invisibleScoreboardTeam.removePlayer(wrappedPlayer);
             }
 

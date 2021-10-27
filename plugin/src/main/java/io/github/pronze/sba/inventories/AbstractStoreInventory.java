@@ -2,9 +2,8 @@ package io.github.pronze.sba.inventories;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.IStoreInventory;
+import io.github.pronze.sba.game.StoreInventory;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -44,7 +43,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @RequiredArgsConstructor
-public abstract class AbstractStoreInventory implements IStoreInventory, Listener {
+public abstract class AbstractStoreInventory implements StoreInventory, Listener {
     private final Map<String, InventorySet> shopMap = new HashMap<>();
     @NotNull
     private final String shopPaths;

@@ -2,7 +2,7 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
 import io.github.pronze.sba.utils.Logger;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -97,7 +97,7 @@ public class NPCStoreService implements Listener {
 
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var npc = event.getVisual();
-        ArenaManager
+        GameWrapperManagerImpl
                 .getInstance()
                 .getArenaMap()
                 .values()

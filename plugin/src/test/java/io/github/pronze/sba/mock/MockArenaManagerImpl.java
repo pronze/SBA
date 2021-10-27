@@ -1,12 +1,12 @@
 package io.github.pronze.sba.mock;
 
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
+import io.github.pronze.sba.game.GameStorageImpl;
 import io.github.pronze.sba.utils.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 
-public class MockArenaManager extends ArenaManager {
+public class MockArenaManagerImpl extends GameWrapperManagerImpl {
 
     @Override
     public MockArena createArena(@NotNull Game game) {
@@ -14,7 +14,7 @@ public class MockArenaManager extends ArenaManager {
         if (getArenaMap().containsKey(gameName)) {
             throw new UnsupportedOperationException("Arena: " + gameName + " already exists!");
         }
-        final var arena = new MockArena(game, new GameStorage(game));
+        final var arena = new MockArena(game, new GameStorageImpl(game));
         Logger.trace("Creating arena for game: {}", gameName);
         getArenaMap().put(gameName, arena);
         return arena;

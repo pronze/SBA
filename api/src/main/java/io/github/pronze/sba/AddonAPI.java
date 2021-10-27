@@ -1,9 +1,9 @@
 package io.github.pronze.sba;
 
-import io.github.pronze.sba.config.IConfigurator;
-import io.github.pronze.sba.game.IGameStorage;
-import io.github.pronze.sba.manager.IArenaManager;
-import io.github.pronze.sba.manager.IPartyManager;
+import io.github.pronze.sba.config.Configurator;
+import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.manager.GameWrapperManager;
+import io.github.pronze.sba.manager.PartyManager;
 import io.github.pronze.sba.service.WrapperService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -46,9 +46,9 @@ public interface AddonAPI {
      * Returns an Optional containing the GameStorage instance of the provided game, empty otherwise.
      *
      * @param game The game associated with the storage.
-     * @return {@link IGameStorage} of game if exists, null otherwise
+     * @return {@link GameStorage} of game if exists, null otherwise
      */
-    Optional<IGameStorage> getGameStorage(@NotNull Game game);
+    Optional<GameStorage> getGameStorage(@NotNull Game game);
 
     /**
      *  Returns the wrapper object associated to the player containing additional player data.
@@ -82,16 +82,16 @@ public interface AddonAPI {
     /**
      * Returns the ArenaManager instance that is associated with the arena handling.
      *
-     * @return The {@link IArenaManager} instance that handles the creation or destruction of arenas.
+     * @return The {@link GameWrapperManager} instance that handles the creation or destruction of arenas.
      */
-    IArenaManager getArenaManager();
+    GameWrapperManager getGameWrapperManager();
 
     /**
      * Returns the PartyManager instance that is associated with Party related management.
      *
-     * @return {@link IPartyManager} instance that handles the creation and destruction of parties
+     * @return {@link PartyManager} instance that handles the creation and destruction of parties
      */
-    IPartyManager getPartyManager();
+    PartyManager getPartyManager();
 
     /**
      *
@@ -105,7 +105,7 @@ public interface AddonAPI {
      *
      * @return an instance of a Configurator which helps in the configuration of file based data
      */
-    IConfigurator getConfigurator();
+    Configurator getConfigurator();
 
     /**
      * Returns a boolean indicating if the plugin has recently been upgraded from an older version and is <br>

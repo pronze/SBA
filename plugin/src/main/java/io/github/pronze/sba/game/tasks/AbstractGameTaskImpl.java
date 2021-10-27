@@ -1,6 +1,6 @@
 package io.github.pronze.sba.game.tasks;
 
-import io.github.pronze.sba.game.IArena;
+import io.github.pronze.sba.game.GameWrapper;
 import lombok.Data;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
@@ -11,22 +11,23 @@ import org.screamingsandals.lib.tasker.task.TaskerTask;
 import java.util.UUID;
 
 @Data
-public abstract class BaseGameTask {
+public abstract class AbstractGameTaskImpl implements GameTask {
     private final UUID uuid;
-    protected IArena arena;
+    protected GameWrapper arena;
     protected Game game;
     private long duration;
     private TaskerTime timeUnit;
     private TaskerTask task;
     private boolean started;
 
-    public BaseGameTask() {
+    public AbstractGameTaskImpl() {
         this.uuid = UUID.randomUUID();
         this.timeUnit = TaskerTime.SECONDS;
         this.duration = 1L;
+        GameTaskManagerImpl.getInstance().addTask(this);
     }
 
-    public BaseGameTask start(IArena arena) {
+    public AbstractGameTaskImpl start(GameWrapper arena) {
         this.arena = arena;
         this.game = arena.getGame();
         if (task != null) {
@@ -43,7 +44,7 @@ public abstract class BaseGameTask {
         task = null;
     }
 
-    public void loopLogic() {
+    protected void loopLogic() {
         if (game.getStatus() != GameStatus.RUNNING) {
             task.cancel();
             task = null;
@@ -52,5 +53,5 @@ public abstract class BaseGameTask {
         run();
     }
 
-    public abstract void run();
+    protected abstract void run();
 }

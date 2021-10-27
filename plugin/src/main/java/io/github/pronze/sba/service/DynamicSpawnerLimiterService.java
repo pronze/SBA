@@ -3,9 +3,9 @@ package io.github.pronze.sba.service;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
-import io.github.pronze.sba.game.Arena;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.game.RotatingGenerator;
+import io.github.pronze.sba.game.GameWrapperImpl;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
+import io.github.pronze.sba.game.RotatingGeneratorImpl;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -60,13 +60,13 @@ public class DynamicSpawnerLimiterService implements Listener {
     }
 
     private void setAccordingly(Game game, boolean isUpgraded) {
-        final var arena = ArenaManager
+        final var arena = GameWrapperManagerImpl
                 .getInstance()
                 .get(game.getName())
                 .orElseThrow();
 
-        ((Arena) arena).getRotatingGenerators().stream()
-                .map(iRotatingGenerator -> (RotatingGenerator) iRotatingGenerator)
+        ((GameWrapperImpl) arena).getRotatingGenerators().stream()
+                .map(iRotatingGenerator -> (RotatingGeneratorImpl) iRotatingGenerator)
                 .filter(rotatingGenerator -> List.of(Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK).contains(rotatingGenerator.getStack().getType()))
                 .forEach(generator -> {
                     int limit = 4;

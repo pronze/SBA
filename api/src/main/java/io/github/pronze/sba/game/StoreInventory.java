@@ -10,7 +10,7 @@ import java.io.File;
 /**
  * Represents an implementation for the StoreInventory.
  */
-public interface IStoreInventory {
+public interface StoreInventory {
 
     /**
      * Opens the GameStore for the specified player.

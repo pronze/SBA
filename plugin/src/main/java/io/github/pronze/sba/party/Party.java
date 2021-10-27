@@ -10,13 +10,12 @@ import org.screamingsandals.lib.utils.AdventureHelper;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.data.PartyInviteData;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Party implements IParty {
+public class Party implements Party {
     @NotNull
     private SBAPlayerWrapper leader;
     private final UUID uuid;

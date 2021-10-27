@@ -2,7 +2,7 @@ package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.mock.MockArena;
-import io.github.pronze.sba.mock.MockArenaManager;
+import io.github.pronze.sba.mock.MockArenaManagerImpl;
 import io.github.pronze.sba.mock.MockGame;
 import io.github.pronze.sba.mock.MockPlayer;
 import io.github.pronze.sba.utils.Logger;
@@ -14,14 +14,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ArenaTest {
-    private final MockArenaManager manager;
+    private final MockArenaManagerImpl manager;
     private final MockGame game;
     private final MockPlayer mockPlayer;
     private final MockArena arena;
 
     public ArenaTest() {
         mockPlayer = new MockPlayer();
-        manager = new MockArenaManager();
+        manager = new MockArenaManagerImpl();
         game = new MockGame("mockGame");
         game.joinToGame(mockPlayer);
         arena = manager.createArena(game);

@@ -3,12 +3,11 @@ package io.github.pronze.sba.utils;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.game.IGameStorage;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
+import io.github.pronze.sba.game.GameStorageImpl;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
@@ -88,7 +87,7 @@ public class ShopUtil {
         return getMaterialFromArmorOrTools(material.name());
     }
 
-    public static boolean buyArmor(Player player, Material mat_boots, IGameStorage gameStorage, Game game) {
+    public static boolean buyArmor(Player player, Material mat_boots, GameStorageImpl gameStorage, Game game) {
         final var playerInventory = player.getInventory();
         final var playerBoots = playerInventory.getBoots();
         final var matName = getMaterialFromArmorOrTools(mat_boots);
@@ -266,7 +265,7 @@ public class ShopUtil {
             final var isEfficiency = itemInfo.getFirstPropertyByName("efficiency").isPresent();
 
             final var game = Main.getInstance().getGameOfPlayer(player);
-            final var arena = ArenaManager
+            final var arena = GameWrapperManagerImpl
                     .getInstance()
                     .get(game.getName())
                     .orElseThrow();

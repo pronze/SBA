@@ -1,22 +1,27 @@
 package io.github.pronze.sba.game;
 
+import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.data.GamePlayerData;
-import io.github.pronze.sba.game.tasks.BaseGameTask;
+import io.github.pronze.sba.game.tasks.GameTask;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.bedwars.game.ItemSpawner;
+import org.screamingsandals.bedwars.api.game.GameStore;
+import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
-
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Represents an arena implementation.
- */
-public interface IArena {
+public interface GameWrapper {
+
+    static GameWrapper of(@NotNull Game game) {
+        return AddonAPI.getInstance().getGameWrapperManager().wrapGame(game);
+    }
 
     /**
      * Gets the GameStorage of the current arena.
@@ -24,7 +29,7 @@ public interface IArena {
      * @return game storage of the current arena
      */
     @NotNull
-    IGameStorage getStorage();
+    GameStorage getStorage();
 
     /**
      * Gets the Game instance that has been linked to this Arena.
@@ -66,7 +71,7 @@ public interface IArena {
     boolean isPlayerHidden(@NotNull Player player);
 
     /**
-     * Removes the player from it's hidden state.
+     * Removes the player from its hidden state.
      *
      * @param player the player instance to remove
      */
@@ -113,19 +118,37 @@ public interface IArena {
      * @param <T> The Type of the task to query
      * @return an optional containing the task instance if present, empty otherwise.
      */
-    <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass);
+    <T extends GameTask> Optional<T> getTask(@NotNull Class<T> taskClass);
 
     /**
      *
      * @return
      */
-    List<BaseGameTask> getGameTasks();
+    List<GameTask> getGameTasks();
 
     /**
      *
      * @return a list containing all the rotating generators registered to the arena.
      */
-    List<IRotatingGenerator> getRotatingGenerators();
+    List<RotatingGenerator> getRotatingGenerators();
 
-    Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID);
+    Optional<InvisiblePlayer> getHiddenPlayer(@NotNull UUID playerUUID);
+
+    List<Player> getConnectedPlayers();
+
+    List<ItemSpawner> getItemSpawners();
+
+    List<GameStore> getGameStores();
+
+    World getGameWorld();
+
+    Location getSpectatorSpawn();
+
+    void registerUpgradeStoreNPC(@NotNull NPC npc);
+
+    void registerStoreNPC(@NotNull NPC npc);
+
+    void destroy();
+
+    Map<UUID, GamePlayerData> getPlayerDataMap();
 }

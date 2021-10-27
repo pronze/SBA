@@ -2,10 +2,9 @@ package io.github.pronze.sba.inventories;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.game.GameWrapperManagerImpl;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
@@ -103,7 +102,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     public Map.Entry<Boolean, Boolean> handlePurchase(Player player, ItemStack newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
         boolean shouldSellStack = true;
         final var game = Main.getInstance().getGameOfPlayer(player);
-        final var gameStorage = ArenaManager
+        final var gameStorage = GameWrapperManagerImpl
                 .getInstance()
                 .get(game.getName())
                 .orElseThrow()

@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.List;
 
 @Service
-public class SBAConfig implements IConfigurator {
+public class SBAConfig implements Configurator {
     public static HashMap<String, Integer> game_size = new HashMap<>();
 
     public static SBAConfig getInstance() {

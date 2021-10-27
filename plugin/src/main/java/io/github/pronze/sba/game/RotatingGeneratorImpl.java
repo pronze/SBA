@@ -1,7 +1,6 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.ShopUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.game.ItemSpawner;
+import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -29,11 +28,9 @@ import org.screamingsandals.lib.utils.Pair;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class RotatingGenerator implements IRotatingGenerator {
+public class RotatingGeneratorImpl implements RotatingGenerator {
     private Location location;
     private int time;
     @Getter
@@ -46,10 +43,10 @@ public class RotatingGenerator implements IRotatingGenerator {
 
     private BukkitTask hologramTask;
     private Hologram hologram;
-    private List<Item> spawnedItems;
+    private final List<Item> spawnedItems;
 
     @SuppressWarnings("unchecked")
-    public RotatingGenerator(ItemSpawner itemSpawner, ItemStack stack, Location location) {
+    public RotatingGeneratorImpl(ItemSpawner itemSpawner, ItemStack stack, Location location) {
         this.itemSpawner = itemSpawner;
         this.stack = stack;
         this.location = location;
@@ -83,6 +80,16 @@ public class RotatingGenerator implements IRotatingGenerator {
         hologram.removeViewer(PlayerMapper.wrapPlayer(player));
     }
 
+    @Override
+    public boolean isType(@NotNull Material material) {
+        return stack.getType() == material;
+    }
+
+    @Override
+    public void incrementTier() {
+        tierLevel += 1;
+    }
+
     @SuppressWarnings("unchecked")
     protected void scheduleTasks() {
         // cancel tasks if pending
@@ -91,7 +98,7 @@ public class RotatingGenerator implements IRotatingGenerator {
         hologramTask = new BukkitRunnable() {
             @Override
             public void run() {
-                boolean full = itemSpawner.getMaxSpawnedResources() <= spawnedItems.size();
+                boolean full = ((org.screamingsandals.bedwars.game.ItemSpawner) itemSpawner).getMaxSpawnedResources() <= spawnedItems.size();
                 if (!full) {
                     time--;
                 }

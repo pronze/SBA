@@ -2,7 +2,8 @@ package io.github.pronze.sba.visuals;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.Arena;
+import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.game.GameWrapperImpl;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.DateUtils;
@@ -31,13 +32,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class GameScoreboardManager {
-    private final static Map<Arena, Sidebar> sidebarMap = new HashMap<>();
+    private final static Map<GameWrapperImpl, Sidebar> sidebarMap = new HashMap<>();
 
     public static GameScoreboardManager getInstance() {
         return ServiceManager.get(GameScoreboardManager.class);
     }
 
-    public static void of(Arena arena) {
+    public static void of(GameWrapper arena) {
         final var game = (Game) arena.getGame();
         if (sidebarMap.containsKey(arena)) {
             throw new UnsupportedOperationException("Game: " + game.getName() + " has already been registered into GameScoreboardManager!");
@@ -224,11 +225,11 @@ public class GameScoreboardManager {
         sidebarMap.clear();
     }
 
-    public Optional<Sidebar> getSidebar(Arena query) {
+    public Optional<Sidebar> getSidebar(GameWrapperImpl query) {
         return Optional.ofNullable(sidebarMap.get(query));
     }
 
-    public void destroy(Arena query) {
+    public void destroy(GameWrapper query) {
         var iterator = sidebarMap.entrySet().iterator();
         while (iterator.hasNext()) {
             final var entry = iterator.next();
