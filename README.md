@@ -36,7 +36,7 @@ Supported Versions: [1.9.4-1.17]
 
 
 ## Snapshot builds
-Tired of waiting for a newer version of SBA to release?, get the latest version from [ScreamingSandals CI server](https://ci.screamingsandals.org/job/SBAHypixelify/)
+Tired of waiting for a newer version of SBA to release?, get the latest version from [ScreamingSandals CI server](https://ci.screamingsandals.org/job/SBA/)
 
 ## Credits
 Special thanks to the [ScreamingSandals team](https://github.com/ScreamingSandals) and [NotFoundName](https://github.com/notfoundname) (for his XpWars addon that helped in the creation of this one). This wouldn't have been possible without them.
