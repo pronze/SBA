@@ -2,7 +2,6 @@ package io.github.pronze.sba.inventories;
 
 import io.github.pronze.sba.events.SBAGamesInventoryOpenEvent;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -25,6 +24,8 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Objects;
+
 @Service(dependsOn = {
         SBAConfig.class,
         SimpleInventoriesCore.class
@@ -87,9 +88,8 @@ public class GamesInventory implements Listener {
             return;
         }
         final var format = inventoryMap.get(mode);
-        if (format != null) {
-            PlayerMapper.wrapPlayer(player).openInventory(format);
-        }
+        Objects.requireNonNull(format, "Could not query format for mode: " + mode);
+        PlayerMapper.wrapPlayer(player).openInventory(format);
     }
 
     public void onClick(PostClickEvent event) {
@@ -114,8 +114,6 @@ public class GamesInventory implements Listener {
                         .filter(Property::hasName)
                         .forEach(property -> {
                             switch (property.getPropertyName().toLowerCase()) {
-                                case "exit":
-                                    break;
                                 case "randomly_join":
                                     final var games = ShopUtil.getGamesWithSize(mode);
                                     if (games == null || games.isEmpty()) {
@@ -139,6 +137,7 @@ public class GamesInventory implements Listener {
                                     Main.getInstance().getGameByName(gameName).joinToGame(player);
                                     break;
                                 default:
+                                    Logger.trace("No action found for property: {}", property.getPropertyName());
                                     break;
                             }
                         });

@@ -3,21 +3,19 @@ package io.github.pronze.sba.visuals;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.GameWrapper;
-import io.github.pronze.sba.game.GameWrapperImpl;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.DateUtils;
+import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+import io.github.pronze.sba.wrapper.TeamWrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.RunningTeam;
-import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
@@ -32,15 +30,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class GameScoreboardManager {
-    private final static Map<GameWrapperImpl, Sidebar> sidebarMap = new HashMap<>();
+    private final static Map<GameWrapper, Sidebar> sidebarMap = new HashMap<>();
 
     public static GameScoreboardManager getInstance() {
         return ServiceManager.get(GameScoreboardManager.class);
     }
 
-    public static void of(GameWrapper arena) {
-        final var game = (Game) arena.getGame();
-        if (sidebarMap.containsKey(arena)) {
+    public static void of(GameWrapper game) {
+        if (sidebarMap.containsKey(game)) {
             throw new UnsupportedOperationException("Game: " + game.getName() + " has already been registered into GameScoreboardManager!");
         }
 
@@ -78,7 +75,7 @@ public class GameScoreboardManager {
                     if (sidebar.getTeam(team.getName()).isEmpty()) {
                         sidebar.team(team.getName())
                                 .friendlyFire(false)
-                                .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
+                                .color(NamedTextColor.NAMES.value(team.getChatColor().name().toLowerCase()));
                     }
 
                     var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
@@ -107,21 +104,18 @@ public class GameScoreboardManager {
             scoreboardLines = Message.of(LangKeys.SCOREBOARD_LINES_DEFAULT);
         }
 
-        final var generatorTask = arena.getTask(GeneratorTask.class).orElseThrow();
+        final var generatorTask = game.getTask(GeneratorTask.class).orElseThrow();
         scoreboardLines
                 .placeholder("beds", wrapper -> {
-                    final var data = arena.getPlayerData(wrapper.as(PlayerWrapper.class).getUuid())
-                            .orElseThrow();
+                    final var data = game.getPlayerData(wrapper.as(SBAPlayerWrapper.class).getUuid()).orElseThrow();
                     return AdventureHelper.toComponent(String.valueOf(data.getBedDestroys()));
                 })
                 .placeholder("dies", wrapper -> {
-                    final var data = arena.getPlayerData(wrapper.as(PlayerWrapper.class).getUuid())
-                            .orElseThrow();
+                    final var data = game.getPlayerData(wrapper.as(SBAPlayerWrapper.class).getUuid()).orElseThrow();
                     return AdventureHelper.toComponent(String.valueOf(data.getFinalKills()));
                 })
                 .placeholder("finalkills", wrapper -> {
-                    final var data = arena.getPlayerData(wrapper.as(PlayerWrapper.class).getUuid())
-                            .orElseThrow();
+                    final var data = game.getPlayerData(wrapper.as(SBAPlayerWrapper.class).getUuid()).orElseThrow();
                     return AdventureHelper.toComponent(String.valueOf(data.getFinalKills()));
                 })
                 .placeholder("kills", wrapper -> {
@@ -134,16 +128,16 @@ public class GameScoreboardManager {
                 .placeholder("game", game.getName())
                 .placeholder("date", DateUtils.getFormattedDate())
                 .placeholder("team_bed_status", wrapper -> {
-                    final var player = wrapper.as(Player.class);
-                    final var playerTeam = game.getTeamOfPlayer(player);
+                    final var playerWrapper = wrapper.as(SBAPlayerWrapper.class);
+                    final var playerTeam = playerWrapper.getGame().getTeamOfPlayer(playerWrapper);
                     final var teamStatus = playerTeam != null ? getTeamBedStatus(playerTeam) : "";
                     return AdventureHelper.toComponent(teamStatus);
                 })
                 .placeholder("tier", generatorTask.getNextTierName().replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent())
                 .placeholder("sba_version", SBA.getInstance().getVersion())
                 .placeholder("team_status", wrapper -> {
-                    final var player = wrapper.as(Player.class);
-                    final var playerTeam = game.getTeamOfPlayer(player);
+                    final var playerWrapper = wrapper.as(SBAPlayerWrapper.class);
+                    final var playerTeam = game.getTeamOfPlayer(playerWrapper);
 
                     var componentAtomicReference = new AtomicReference<Component>(Component.empty());
 
@@ -154,7 +148,7 @@ public class GameScoreboardManager {
                                 you = AdventureHelper.toLegacy(Message.of(LangKeys.SCOREBOARD_YOU_MESSAGE).asComponent());
                             }
                         }
-                        componentAtomicReference.set(componentAtomicReference.get().append(AdventureHelper.toComponent(getTeamStatusFormat(game, t).replace("%you%", you))));
+                        componentAtomicReference.set(componentAtomicReference.get().append(AdventureHelper.toComponent("\n" + getTeamStatusFormat(game, t).replace("%you%", you))));
                     });
                     return componentAtomicReference.get();
                 });
@@ -162,13 +156,13 @@ public class GameScoreboardManager {
         sidebar.bottomLine(scoreboardLines);
     }
 
-    private static String getTeamBedStatus(RunningTeam team) {
+    private static String getTeamBedStatus(RunningTeamWrapper team) {
         return team.isDead() ?
                 SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717") :
                 SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
     }
 
-    private static String getTeamStatusFormat(Game game, RunningTeam team) {
+    private static String getTeamStatusFormat(RunningTeamWrapper team) {
         String alive = SBAConfig
                 .getInstance()
                 .node("team-status", "alive")
@@ -181,10 +175,7 @@ public class GameScoreboardManager {
 
         String status = team.isTargetBlockExists() ? alive : destroyed;
 
-        String formattedTeam = TeamColor
-                .valueOf(team.getColor().name())
-                .chatColor
-                .toString()
+        String formattedTeam = team.getChatColor().toString()
                 + team.getName().charAt(0);
 
         return status
@@ -194,12 +185,12 @@ public class GameScoreboardManager {
                 .replace("%players%", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
     }
 
-    private static String getTeamStatusFormat(Game game, Team team) {
+    private static String getTeamStatusFormat(GameWrapper game, TeamWrapper team) {
         return game
                 .getRunningTeams()
                 .stream()
                 .filter(t -> t.getName().equalsIgnoreCase(team.getName()))
-                .map(runningTeam -> getTeamStatusFormat(game, runningTeam))
+                .map(GameScoreboardManager::getTeamStatusFormat)
                 .findAny()
                 .orElseGet(() -> {
                     final var destroyed = SBAConfig
@@ -207,8 +198,7 @@ public class GameScoreboardManager {
                             .node("team-status", "eliminated")
                             .getString("%color% %team% §c\u2718 %you%");
 
-                    final var formattedTeam = TeamColor
-                            .valueOf(team.getColor().name()).chatColor.toString()
+                    final var formattedTeam = team.getChatColor().toString()
                             + team.getName().charAt(0);
 
                     return destroyed
@@ -225,7 +215,7 @@ public class GameScoreboardManager {
         sidebarMap.clear();
     }
 
-    public Optional<Sidebar> getSidebar(GameWrapperImpl query) {
+    public Optional<Sidebar> getSidebar(GameWrapper query) {
         return Optional.ofNullable(sidebarMap.get(query));
     }
 
@@ -242,8 +232,8 @@ public class GameScoreboardManager {
         }
     }
 
-    public void addViewer(Player player) {
-        final var playerGame = Main.getInstance().getGameOfPlayer(player);
+    public void addViewer(PlayerWrapper player) {
+        final var playerGame = player.as(SBAPlayerWrapper.class).getGame();
         if (playerGame == null) {
             return;
         }
@@ -251,7 +241,7 @@ public class GameScoreboardManager {
         final var wrapper = PlayerMapper.wrapPlayer(player);
         for (var entry : sidebarMap.entrySet()) {
             final var arena = entry.getKey();
-            if (arena.getGame() != playerGame) {
+            if (arena != playerGame) {
                 continue;
             }
 
@@ -262,7 +252,7 @@ public class GameScoreboardManager {
         }
     }
 
-    public void removeViewer(Player player) {
+    public void removeViewer(PlayerWrapper player) {
         final var wrapper = PlayerMapper.wrapPlayer(player);
         sidebarMap.values()
                 .stream()

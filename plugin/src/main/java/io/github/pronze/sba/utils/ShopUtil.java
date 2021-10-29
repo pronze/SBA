@@ -3,6 +3,7 @@ package io.github.pronze.sba.utils;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
+import io.github.pronze.sba.game.GameStorage;
 import io.github.pronze.sba.game.GameWrapperManagerImpl;
 import io.github.pronze.sba.game.GameStorageImpl;
 import io.github.pronze.sba.game.StoreType;
@@ -87,7 +88,7 @@ public class ShopUtil {
         return getMaterialFromArmorOrTools(material.name());
     }
 
-    public static boolean buyArmor(Player player, Material mat_boots, GameStorageImpl gameStorage, Game game) {
+    public static boolean buyArmor(Player player, Material mat_boots, GameStorage gameStorage, Game game) {
         final var playerInventory = player.getInventory();
         final var playerBoots = playerInventory.getBoots();
         final var matName = getMaterialFromArmorOrTools(mat_boots);

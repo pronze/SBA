@@ -5,6 +5,7 @@ import io.github.pronze.sba.game.GameWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GameWrapperManager {
@@ -15,12 +16,6 @@ public interface GameWrapperManager {
      * @return the created GameWrapper instance.
      */
     GameWrapper wrapGame(@NotNull Game game);
-
-    /**
-     * Removes an GameWrapper from the Manager.
-     * @param game the game instance to unregister
-     */
-    void removeArena(@NotNull Game game);
 
     /**
      * Gets an optional of arena by querying the specified arena name.
@@ -35,4 +30,6 @@ public interface GameWrapperManager {
      * @return an optional containing the game storage instance which may or may not be empty depending on the query.
      */
     Optional<GameStorage> getGameStorage(String gameName);
+
+    List<GameWrapper> getRegisteredGameWrappers();
 }

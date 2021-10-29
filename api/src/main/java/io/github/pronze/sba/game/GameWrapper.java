@@ -3,15 +3,22 @@ package io.github.pronze.sba.game;
 import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.tasks.GameTask;
+import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+import io.github.pronze.sba.wrapper.TeamWrapper;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.player.PlayerWrapper;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,7 +141,7 @@ public interface GameWrapper {
 
     Optional<InvisiblePlayer> getHiddenPlayer(@NotNull UUID playerUUID);
 
-    List<Player> getConnectedPlayers();
+    List<SBAPlayerWrapper> getConnectedPlayers();
 
     List<ItemSpawner> getItemSpawners();
 
@@ -148,7 +155,28 @@ public interface GameWrapper {
 
     void registerStoreNPC(@NotNull NPC npc);
 
-    void destroy();
+    void unregisterUpgradeStoreNPC(@NotNull NPC npc);
+
+    void unregisterStoreNPC(@NotNull NPC npc);
+
+    void start();
+
+    void stop();
 
     Map<UUID, GamePlayerData> getPlayerDataMap();
+
+    @NotNull
+    List<RunningTeamWrapper> getRunningTeams();
+
+    RunningTeamWrapper getTeamOfPlayer(PlayerWrapper player);
+
+    String getName();
+
+    GameStatus getStatus();
+
+    int countAvailableTeams();
+
+    String getFormattedTimeLeft();
+
+    List<TeamWrapper> getAvailableTeams();
 }

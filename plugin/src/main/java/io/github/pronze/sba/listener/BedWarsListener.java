@@ -9,12 +9,14 @@ import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
+import io.github.pronze.sba.wrapper.event.*;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,6 +29,7 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.event.OnEvent;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
@@ -55,9 +58,13 @@ public class BedWarsListener implements Listener {
         SBA.getInstance().registerListener(this);
     }
 
-    @EventHandler
-    public void onStarted(BedwarsGameStartedEvent event) {
-        final var gameWrapper = GameWrapper.of(event.getGame());
+    @OnEvent
+    public void onStarted(BWGameStartedEvent event) {
+        final var gameWrapper = event.getGame();
+
+        // safety measure to make sure previous game data was cleared.
+        gameWrapper.stop();
+        gameWrapper.start();
 
         // send game start message
         Message.of(LangKeys.GAME_START_MESSAGE)
@@ -131,56 +138,32 @@ public class BedWarsListener implements Listener {
         }
     }
 
-    // fix for listener handles during BedWars reload.
     @EventHandler
-    public void onBwReload(PluginEnableEvent event) {
-        final var pluginName = event.getPlugin().getName();
-        if (pluginName.equalsIgnoreCase(Main.getInstance().getName())) {
-            if (!SBA.getPluginInstance().isEnabled()) {
-                return;
-            }
-            Logger.trace("Re registering listeners!");
-            final var listeners = SBA.getInstance().getRegisteredListeners();
-            listeners.forEach(SBA.getInstance()::unregisterListener);
-            listeners.forEach(SBA.getInstance()::registerListener);
-            Logger.trace("Registration complete!");
-        }
-    }
+    public void onTargetBlockDestroyed(BWTargetBlockDestroyedEvent event) {
+        final var gameWrapper = event.getGame();
 
-    @EventHandler
-    public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent event) {
-        final var gameWrapper = GameWrapper.of(event.getGame());
-
-        final var team = event.getTeam();
+        final var destroyedTeam = event.getDestroyedTeam();
         // send bed destroyed message to all players of the team
         final var title = Message.of(LangKeys.BED_DESTROYED_TITLE).asComponent();
         final var subtitle = Message.of(LangKeys.BED_DESTROYED_SUBTITLE).asComponent();
 
-        for (var teamPlayer : team.getConnectedPlayers()) {
+        for (var teamPlayer : destroyedTeam.getConnectedPlayers()) {
             SBAUtil.sendTitle(PlayerMapper.wrapPlayer(teamPlayer), title, subtitle, 0, 40, 20);
         }
 
-        final var destroyer = event.getPlayer();
+        final var destroyer = event.getDestroyer();
         if (destroyer != null) {
-            gameWrapper.getPlayerData(destroyer.getUniqueId())
+            gameWrapper.getPlayerData(destroyer.getUuid())
                     .ifPresent(destroyerData -> destroyerData.setBedDestroys(destroyerData.getBedDestroys() + 1));
         }
     }
 
     @EventHandler
-    public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
-        final var game = e.getGame();
-        GameWrapperManagerImpl
-                .getInstance()
-                .removeArena(game);
-    }
+    public void onBedWarsGameEndingEvent(BWGameEndingEvent event) {
+        final var gameWrapper = event.getGame();
 
-    @EventHandler
-    public void onOver(BedwarsGameEndingEvent event) {
-        final var gameWrapper = GameWrapper.of(event.getGame());
-
-        final var winner = event.getWinningTeam();
-        if (winner != null) {
+        final var winningTeam = event.getWinningTeam();
+        if (winningTeam != null) {
             final var nullStr = AdventureHelper.toLegacy(Message.of(LangKeys.NONE).asComponent());
 
             String firstKillerName = nullStr;
@@ -224,16 +207,16 @@ public class BedWarsListener implements Listener {
 
             var victoryTitle = Message.of(LangKeys.VICTORY_TITLE).asComponent();
 
-            final var WinTeamPlayers = new ArrayList<String>();
-            winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
-            winner.getConnectedPlayers().forEach(pl ->
+            final var winningTeamPlayerNames = new ArrayList<String>();
+            winningTeam.getConnectedPlayers().forEach(player -> winningTeamPlayerNames.add(AdventureHelper.toLegacy(player.getDisplayName())));
+            winningTeam.getConnectedPlayers().forEach(pl ->
                     SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, Component.empty(), 0, 90, 0));
 
 
             Message.of(LangKeys.OVERSTATS_MESSAGE)
-                    .placeholder("color", org.screamingsandals.bedwars.game.TeamColor.valueOf(winner.getColor().name()).chatColor.toString())
-                    .placeholder("win_team", winner.getName())
-                    .placeholder("winners", WinTeamPlayers.toString())
+                    .placeholder("color", winningTeam.getChatColor().toString())
+                    .placeholder("win_team", winningTeam.getName())
+                    .placeholder("winners", winningTeamPlayerNames.toString())
                     .placeholder("first_killer_name", firstKillerName)
                     .placeholder("second_killer_name", secondKillerName)
                     .placeholder("third_killer_name", thirdKillerName)
@@ -245,9 +228,9 @@ public class BedWarsListener implements Listener {
     }
 
     @EventHandler
-    public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
+    public void onBWLobbyJoin(BWPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        final var task = runnableCache.get(player.getUniqueId());
+        final var task = runnableCache.get(player.getUuid());
         final var game = (Game) e.getGame();
         if (task != null) {
             SBAUtil.cancelTask(task);
@@ -279,11 +262,11 @@ public class BedWarsListener implements Listener {
                             }
                         } else {
                             this.cancel();
-                            runnableCache.remove(player.getUniqueId());
+                            runnableCache.remove(player.getUuid());
                         }
                     }
                 }.runTaskTimer(SBA.getPluginInstance(), 3L, 20L);
-                runnableCache.put(player.getUniqueId(), bukkitTask);
+                runnableCache.put(player.getUuid(), bukkitTask);
                 break;
             case RUNNING:
                 final var arena = GameWrapperManagerImpl
@@ -297,16 +280,15 @@ public class BedWarsListener implements Listener {
     }
 
     @EventHandler
-    public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
+    public void onBedWarsPlayerLeave(BWPlayerLeaveEvent e) {
         final var player = e.getPlayer();
-        final var task = runnableCache.get(player.getUniqueId());
-        final var game = e.getGame();
+        final var task = runnableCache.get(player.getUuid());
         GameScoreboardManager.getInstance().removeViewer(player);
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
-        runnableCache.remove(player.getUniqueId());
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+        runnableCache.remove(player.getUuid());
+        player.as(Player.class).setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -356,4 +338,19 @@ public class BedWarsListener implements Listener {
                 });
     }
 
+    // fix for listener handles during BedWars reload.
+    @EventHandler
+    public void onBwReload(PluginEnableEvent event) {
+        final var pluginName = event.getPlugin().getName();
+        if (pluginName.equalsIgnoreCase(Main.getInstance().getName())) {
+            if (!SBA.getPluginInstance().isEnabled()) {
+                return;
+            }
+            Logger.trace("Re registering listeners!");
+            final var listeners = SBA.getInstance().getRegisteredListeners();
+            listeners.forEach(SBA.getInstance()::unregisterListener);
+            listeners.forEach(SBA.getInstance()::registerListener);
+            Logger.trace("Registration complete!");
+        }
+    }
 }

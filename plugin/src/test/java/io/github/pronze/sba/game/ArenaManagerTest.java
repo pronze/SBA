@@ -26,7 +26,7 @@ public class ArenaManagerTest {
     @BeforeEach
     public void registerArena() {
         manager.createArena(game);
-        assertTrue(manager.getRegisteredArenas()
+        assertTrue(manager.getRegisteredGameWrappers()
                 .stream()
                 .anyMatch(arena -> arena.getGame().getName().equalsIgnoreCase(game.getName())));
     }
@@ -34,7 +34,7 @@ public class ArenaManagerTest {
     @Test
     public void removeArena() {
         manager.removeArena(game);
-        assertFalse(manager.getRegisteredArenas()
+        assertFalse(manager.getRegisteredGameWrappers()
                 .stream()
                 .anyMatch(arena -> arena.getGame().getName().equalsIgnoreCase(game.getName())));
     }

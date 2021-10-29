@@ -1,10 +1,10 @@
 package io.github.pronze.sba.game;
 
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.world.LocationHolder;
 
 import java.util.List;
 
@@ -28,25 +28,25 @@ public interface RotatingGenerator {
      * Sets the location of the hologram and rotating entity.
      * @param location the location to teleport the entity to
      */
-    void setLocation(@NotNull Location location);
+    void setLocation(@NotNull LocationHolder location);
 
     /**
      * Spawns the RotatingGenerator for the specified viewers with packets.
      * @param viewers the viewers to be displayed this generator
      */
-    void spawn(@NotNull List<Player> viewers);
+    void spawn();
 
     /**
      *
      * @param player adds the player as a viewer to this RotatingGenerator
      */
-    void addViewer(@NotNull Player player);
+    void addViewer(@NotNull PlayerWrapper player);
 
     /**
      *
      * @param player removes the player as a viewer to this RotatingGenerator
      */
-    void removeViewer(@NotNull Player player);
+    void removeViewer(@NotNull PlayerWrapper player);
 
     boolean isType(Material material);
 

@@ -2,11 +2,12 @@ package io.github.pronze.sba;
 
 import io.github.pronze.sba.config.Configurator;
 import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.manager.GameWrapperManager;
 import io.github.pronze.sba.manager.PartyManager;
-import io.github.pronze.sba.service.WrapperService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -48,15 +49,7 @@ public interface AddonAPI {
      * @param game The game associated with the storage.
      * @return {@link GameStorage} of game if exists, null otherwise
      */
-    Optional<GameStorage> getGameStorage(@NotNull Game game);
-
-    /**
-     *  Returns the wrapper object associated to the player containing additional player data.
-     *
-     * @param player The player instance to obtain the wrapper from.
-     * @return the {@link SBAPlayerWrapper} object linked to the specific player
-     */
-    SBAPlayerWrapper getPlayerWrapper(Player player);
+    Optional<GameStorage> getGameStorage(@NotNull GameWrapper game);
 
     /**
      * Returns a boolean indicating if the plugin is running in debug mode.
@@ -93,12 +86,6 @@ public interface AddonAPI {
      */
     PartyManager getPartyManager();
 
-    /**
-     *
-     * @return an instance of the PlayerWrapperService that is associated with wrapping player
-     * instances into objects that contain additional data
-     */
-    WrapperService<Player, SBAPlayerWrapper> getPlayerWrapperService();
 
     /**
      * Look into IConfigurator getter methods to get certain settings from the config.
@@ -120,4 +107,16 @@ public interface AddonAPI {
      * @return an instance of the SBA plugin.
      */
     JavaPlugin getJavaPlugin();
+
+    void unregisterListener(@NotNull Listener listener);
+
+    void registerListener(@NotNull Listener listener);
+
+    /**
+     * Returns the wrapper object associated to the player containing additional player data.
+     *
+     * @param player The player instance to obtain the wrapper from.
+     * @return the {@link SBAPlayerWrapper} object linked to the specific player
+     */
+    SBAPlayerWrapper wrapPlayer(Player player);
 }

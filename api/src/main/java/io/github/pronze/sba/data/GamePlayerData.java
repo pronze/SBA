@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.player.PlayerWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ public class GamePlayerData {
      * @param player the player to create for
      * @return GamePlayerData object linked to the player.
      */
-    public static GamePlayerData of(@NotNull Player player) {
+    public static GamePlayerData of(@NotNull PlayerWrapper player) {
         return new GamePlayerData(player.getName());
     }
 }

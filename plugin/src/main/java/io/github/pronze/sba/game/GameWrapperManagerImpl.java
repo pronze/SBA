@@ -3,9 +3,12 @@ package io.github.pronze.sba.game;
 import io.github.pronze.sba.manager.GameWrapperManager;
 import io.github.pronze.sba.utils.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,8 +24,21 @@ public class GameWrapperManagerImpl implements GameWrapperManager {
 
     private final Map<String, GameWrapper> registeredWrappers = new HashMap<>();
 
-    public List<GameWrapper> getRegisteredArenas() {
+    @Override
+    public List<GameWrapper> getRegisteredGameWrappers() {
         return List.copyOf(registeredWrappers.values());
+    }
+
+    @OnPostEnable
+    public void onPostEnable() {
+        Runnable registrationTask = () -> {
+            Main.getInstance().getGames().forEach(game -> registeredWrappers.put(game.getName(), wrapGame(game)));
+        };
+        if (Main.getInstance().getGames().isEmpty()) {
+            Tasker.build(registrationTask).afterOneTick().start();
+        } else {
+            registrationTask.run();
+        }
     }
 
     @Override
@@ -31,16 +47,10 @@ public class GameWrapperManagerImpl implements GameWrapperManager {
         if (registeredWrappers.containsKey(gameName)) {
             return registeredWrappers.get(gameName);
         }
-        Logger.trace("Creating arena for game: {}", gameName);
+        Logger.trace("Registering wrapper for game: {}", gameName);
         final var arena = new GameWrapperImpl(game);
         registeredWrappers.put(gameName, arena);
         return arena;
-    }
-
-    @Override
-    public void removeArena(@NotNull Game game) {
-        Logger.trace("Removing arena for game: {}", game.getName());
-        registeredWrappers.remove(game.getName());
     }
 
     @Override

@@ -1,11 +1,11 @@
 package io.github.pronze.sba.data;
 
+import io.github.pronze.sba.wrapper.RunningTeamWrapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.Team;
+import org.screamingsandals.lib.world.LocationHolder;
 
 /**
  * Represents the data of a team.
@@ -54,14 +54,14 @@ public class GameTeamData {
     /**
      * Location of the target block of the team.
      */
-    private final Location targetBlockLoc;
+    private final LocationHolder targetBlockLoc;
 
     /**
      * Constructs a new GameTeamData instance.
      * @param team the team for construction of GameTeamData instance
      * @return a new GameTeamData instance
      */
-    public static GameTeamData of(@NotNull Team team) {
-        return new GameTeamData(team.getTargetBlock());
+    public static GameTeamData of(@NotNull RunningTeamWrapper team) {
+        return new GameTeamData(team.getTargetBlockLocation());
     }
 }

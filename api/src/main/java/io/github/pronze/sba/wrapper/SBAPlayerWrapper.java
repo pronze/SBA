@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.data.ToggleableSetting;
+import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.lang.LangKeys;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,8 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.lib.lang.Message;
 
+import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,9 +25,12 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
     private int shoutCooldown;
     private final ToggleableSetting<PlayerSetting> settings;
 
-    public SBAPlayerWrapper(Player player) {
-        super(player.getName(), player.getUniqueId());
+    public static SBAPlayerWrapper of(Player player) {
+        return new SBAPlayerWrapper(player.getName(), player.getUniqueId());
+    }
 
+    public SBAPlayerWrapper(String playerName, UUID playerUUID) {
+        super(playerName, playerUUID);
         // default values
         this.shoutCooldown = 0;
         this.settings = ToggleableSetting.of(PlayerSetting.class);
@@ -35,6 +41,14 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
         if (game != null) {
             game.leaveFromGame(asBukkitPlayer());
         }
+    }
+
+    public GameWrapper getGame() {
+        final var game = Main.getInstance().getGameOfPlayer(asBukkitPlayer());
+        if (game == null) {
+            return null;
+        }
+        return GameWrapper.of(game);
     }
 
     public void sendMessage(String message) {

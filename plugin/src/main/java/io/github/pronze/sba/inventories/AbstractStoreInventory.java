@@ -50,19 +50,18 @@ public abstract class AbstractStoreInventory implements StoreInventory, Listener
 
     @OnPostEnable
     public void onPostEnable() {
-        Arrays.stream(shopPaths.split(","))
-                .forEach(path -> {
-                    var shopFile = SBA
-                            .getPluginInstance()
-                            .getDataFolder()
-                            .toPath()
-                            .resolve(path)
-                            .toFile();
+        for (var path : shopPaths.split(",")) {
+            var shopFile = SBA
+                    .getPluginInstance()
+                    .getDataFolder()
+                    .toPath()
+                    .resolve(path)
+                    .toFile();
 
-                    if (!shopFile.exists()) {
-                        SBA.getInstance().saveResource(path, false);
-                    }
-                });
+            if (!shopFile.exists()) {
+                SBA.getInstance().saveResource(path, false);
+            }
+        }
 
         SBA.getInstance().registerListener(this);
         loadNewShop("default", null, true);
@@ -75,12 +74,10 @@ public abstract class AbstractStoreInventory implements StoreInventory, Listener
     @Override
     public void openForPlayer(@NotNull SBAPlayerWrapper player, @NotNull GameStore store) {
         try {
-            var parent = true;
-            parent = store.getUseParent();
             String fileName = store.getShopFile();
-
             if (fileName != null) {
                 var file = ShopUtil.normalizeShopFile(fileName);
+                var parent = store.getUseParent();
                 var name = (parent ? "+" : "-") + file.getAbsolutePath();
                 if (!shopMap.containsKey(name)) {
                     loadNewShop(name, file, parent);
@@ -331,8 +328,12 @@ public abstract class AbstractStoreInventory implements StoreInventory, Listener
                         .placeholder("material", type.getItemName())
                         .send(event.getPlayer());
             }
+
             Sounds.playSound(player, player.getLocation(),
-                    Main.getConfigurator().config.getString("sounds.item_buy.sound"), Sounds.ENTITY_ITEM_PICKUP, (float) Main.getConfigurator().config.getDouble("sounds.item_buy.volume"), (float) Main.getConfigurator().config.getDouble("sounds.item_buy.pitch"));
+                    Main.getConfigurator().config.getString("sounds.item_buy.sound"),
+                    Sounds.ENTITY_ITEM_PICKUP,
+                    (float) Main.getConfigurator().config.getDouble("sounds.item_buy.volume"),
+                    (float) Main.getConfigurator().config.getDouble("sounds.item_buy.pitch"));
         }
     }
 

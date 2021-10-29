@@ -4,6 +4,9 @@ import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.tasks.GameTask;
 import io.github.pronze.sba.game.tasks.GameTaskManagerImpl;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
+import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+import io.github.pronze.sba.wrapper.TeamWrapper;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -11,9 +14,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.BasicWrapper;
+import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,7 +33,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     private final List<NPC> upgradeStoreNPCS;
     private final GameStorage storage;
 
-    public GameWrapperImpl(@NotNull Game game) {
+    protected GameWrapperImpl(@NotNull Game game) {
         super(game);
         this.rotatingGenerators = new ArrayList<>();
         this.invisiblePlayers = new HashMap<>();
@@ -35,11 +41,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
         this.gameTasks = new ArrayList<>();
         this.storeNPCS = new ArrayList<>();
         this.upgradeStoreNPCS = new ArrayList<>();
-
-        this.storage = new GameStorageImpl(game);
-        this.gameTasks.addAll(GameTaskManagerImpl.getInstance().startTasks(this));
-        getConnectedPlayers().forEach(player -> registerPlayerData(player.getUniqueId(), GamePlayerData.of(player)));
-        GameScoreboardManager.of(this);
+        this.storage = new GameStorageImpl(this);
     }
 
     @NotNull
@@ -109,8 +111,8 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
 
     @Override
     public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner, @NotNull Material rotationMaterial) {
-        final var generator = new RotatingGeneratorImpl(itemSpawner, new ItemStack(rotationMaterial), itemSpawner.getLocation());
-        generator.spawn(getConnectedPlayers());
+        final var generator = new RotatingGeneratorImpl(itemSpawner, new ItemStack(rotationMaterial), LocationMapper.wrapLocation(itemSpawner.getLocation()));
+        getConnectedPlayers().forEach(generator::addViewer);
         rotatingGenerators.add(generator);
     }
 
@@ -151,8 +153,11 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     }
 
     @Override
-    public List<Player> getConnectedPlayers() {
-        return wrappedObject.getConnectedPlayers();
+    public List<SBAPlayerWrapper> getConnectedPlayers() {
+        return wrappedObject.getConnectedPlayers()
+                .stream()
+                .map(SBAPlayerWrapper::of)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -190,7 +195,24 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     }
 
     @Override
-    public void destroy() {
+    public void unregisterUpgradeStoreNPC(@NotNull NPC npc) {
+        upgradeStoreNPCS.remove(npc);
+    }
+
+    @Override
+    public void unregisterStoreNPC(@NotNull NPC npc) {
+        storeNPCS.remove(npc);
+    }
+
+    @Override
+    public void start() {
+        this.gameTasks.addAll(GameTaskManagerImpl.getInstance().startTasks(this));
+        getConnectedPlayers().forEach(player -> registerPlayerData(player.getUuid(), GamePlayerData.of(player)));
+        GameScoreboardManager.of(this);
+    }
+
+    @Override
+    public void stop() {
         GameScoreboardManager.getInstance().destroy(this);
 
         gameTasks.forEach(GameTask::stop);
@@ -205,11 +227,56 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
         storeNPCS.clear();
         upgradeStoreNPCS.clear();
 
+        playerDataMap.clear();
+        storage.clear();
+
         getInvisiblePlayers().forEach(this::removeHiddenPlayer);
     }
 
     @Override
     public Map<UUID, GamePlayerData> getPlayerDataMap() {
         return Map.copyOf(playerDataMap);
+    }
+
+    @NotNull
+    @Override
+    public List<RunningTeamWrapper> getRunningTeams() {
+        return wrappedObject.getRunningTeams()
+                .stream()
+                .map(RunningTeamWrapper::of)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public RunningTeamWrapper getTeamOfPlayer(PlayerWrapper player) {
+        return RunningTeamWrapper.of(wrappedObject.getTeamOfPlayer(player.as(Player.class)));
+    }
+
+    @Override
+    public String getName() {
+        return wrappedObject.getName();
+    }
+
+    @Override
+    public GameStatus getStatus() {
+        return wrappedObject.getStatus();
+    }
+
+    @Override
+    public int countAvailableTeams() {
+        return wrappedObject.countAvailableTeams();
+    }
+
+    @Override
+    public String getFormattedTimeLeft() {
+        return ((org.screamingsandals.bedwars.game.Game) wrappedObject).getFormattedTimeLeft();
+    }
+
+    @Override
+    public List<TeamWrapper> getAvailableTeams() {
+        return wrappedObject.getAvailableTeams()
+                .stream()
+                .map(TeamWrapper::of)
+                .collect(Collectors.toList());
     }
 }

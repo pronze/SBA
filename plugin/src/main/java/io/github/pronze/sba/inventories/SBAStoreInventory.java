@@ -66,14 +66,12 @@ public class SBAStoreInventory extends AbstractStoreInventory {
 
     @Override
     public Map.Entry<Boolean, Boolean> handlePurchase(Player player, ItemStack newItem, ItemStack materialItem, PlayerItemInfo info, ItemSpawnerType type) {
-        final var game = Main.getInstance().getGameOfPlayer(player);
-        var gameStorage = SBA
-                .getInstance()
-                .getGameStorage(game)
-                .orElseThrow();
+        final var wrappedPlayer = SBAPlayerWrapper.of(player);
+        final var wrappedGame = wrappedPlayer.getGame();
+        final var gameStorage = wrappedGame.getStorage();
 
         final var typeName = newItem.getType().name();
-        final var team = game.getTeamOfPlayer(player);
+        final var team = wrappedGame.getTeamOfPlayer(wrappedPlayer);
 
         final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
         /**
@@ -81,7 +79,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
          */
         switch (afterUnderscore.toLowerCase()) {
             case "sword":
-                final var sharpness = gameStorage.getSharpnessLevel(team).orElseThrow();
+                final var sharpness = team.getSharpnessLevel();
                 if (sharpness > 0 && sharpness < 5) {
                     newItem.addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
                 }
@@ -98,7 +96,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
             case "chestplate":
             case "helmet":
             case "leggings":
-                return Map.entry(ShopUtil.buyArmor(player, newItem.getType(), gameStorage, game), false);
+                return Map.entry(ShopUtil.buyArmor(player, newItem.getType(), gameStorage, wrappedGame.getGame()), false);
             case "pickaxe":
                 final var efficiency = gameStorage.getEfficiencyLevel(team).orElseThrow();
                 if (efficiency > 0 && efficiency < 5) {

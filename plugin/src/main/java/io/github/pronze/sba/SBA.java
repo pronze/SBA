@@ -164,6 +164,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
     }
 
+    @Override
     public void registerListener(@NotNull Listener listener) {
         if (registeredListeners.contains(listener)) {
             return;
@@ -172,6 +173,12 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.trace("Registered listener: {}", listener.getClass().getSimpleName());
     }
 
+    @Override
+    public SBAPlayerWrapper wrapPlayer(Player player) {
+        return PlayerWrapperService.wrapPlayer(player);
+    }
+
+    @Override
     public void unregisterListener(@NotNull Listener listener) {
         if (!registeredListeners.contains(listener)) {
             return;
@@ -193,11 +200,6 @@ public class SBA extends PluginContainer implements AddonAPI {
     @Override
     public Optional<GameStorage> getGameStorage(Game game) {
         return GameWrapperManagerImpl.getInstance().getGameStorage(game.getName());
-    }
-
-    @Override
-    public SBAPlayerWrapper getPlayerWrapper(Player player) {
-        return PlayerWrapperService.getInstance().get(player).orElse(null);
     }
 
     @Override
@@ -223,11 +225,6 @@ public class SBA extends PluginContainer implements AddonAPI {
     @Override
     public PartyManager getPartyManager() {
         return io.github.pronze.sba.party.PartyManager.getInstance();
-    }
-
-    @Override
-    public WrapperService<Player, SBAPlayerWrapper> getPlayerWrapperService() {
-        return PlayerWrapperService.getInstance();
     }
 
     @Override

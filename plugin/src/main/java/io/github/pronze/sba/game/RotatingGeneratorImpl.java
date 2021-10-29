@@ -5,10 +5,8 @@ import io.github.pronze.sba.utils.ShopUtil;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -21,17 +19,17 @@ import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.item.builder.ItemFactory;
 import org.screamingsandals.lib.lang.Message;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.Pair;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-import org.screamingsandals.lib.world.LocationMapper;
+import org.screamingsandals.lib.world.LocationHolder;
 
 import java.util.List;
 
 public class RotatingGeneratorImpl implements RotatingGenerator {
-    private Location location;
+    private LocationHolder location;
     private int time;
     @Getter
     @Setter
@@ -46,7 +44,7 @@ public class RotatingGeneratorImpl implements RotatingGenerator {
     private final List<Item> spawnedItems;
 
     @SuppressWarnings("unchecked")
-    public RotatingGeneratorImpl(ItemSpawner itemSpawner, ItemStack stack, Location location) {
+    public RotatingGeneratorImpl(ItemSpawner itemSpawner, ItemStack stack, LocationHolder location) {
         this.itemSpawner = itemSpawner;
         this.stack = stack;
         this.location = location;
@@ -55,29 +53,28 @@ public class RotatingGeneratorImpl implements RotatingGenerator {
     }
 
     @Override
-    public void spawn(@NotNull List<Player> viewers) {
+    public void spawn() {
         final var holoHeight = SBAConfig.getInstance()
                 .node("floating-generator", "height").getDouble(2.0);
 
-        hologram = HologramManager.hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
+        hologram = HologramManager.hologram(location.add(0, holoHeight, 0));
         hologram.item(ItemFactory.build(stack).orElseThrow())
                 .itemPosition(Hologram.ItemPosition.BELOW)
                 .rotationMode(Hologram.RotationMode.Y)
                 .rotationTime(Pair.of(1, TaskerTime.TICKS));
 
         hologram.show();
-        viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
         scheduleTasks();
     }
 
     @Override
-    public void addViewer(@NotNull Player player) {
-        hologram.addViewer(PlayerMapper.wrapPlayer(player));
+    public void addViewer(@NotNull PlayerWrapper player) {
+        hologram.addViewer(player);
     }
 
     @Override
-    public void removeViewer(@NotNull Player player) {
-        hologram.removeViewer(PlayerMapper.wrapPlayer(player));
+    public void removeViewer(@NotNull PlayerWrapper player) {
+        hologram.removeViewer(player);
     }
 
     @Override
@@ -141,7 +138,7 @@ public class RotatingGeneratorImpl implements RotatingGenerator {
     }
 
     @Override
-    public void setLocation(@NotNull Location location) {
+    public void setLocation(@NotNull LocationHolder location) {
         this.location = location;
     }
 }
