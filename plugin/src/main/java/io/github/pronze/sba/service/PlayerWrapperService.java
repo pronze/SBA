@@ -23,6 +23,10 @@ public class PlayerWrapperService {
         PlayerMapper.UNSAFE_getPlayerConverter()
                 .registerW2P(SBAPlayerWrapper.class, wrapper -> {
                     if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
+                        // make sure no recursion occurs
+                        if (wrapper instanceof SBAPlayerWrapper) {
+                            return (SBAPlayerWrapper) wrapper;
+                        }
                         return new SBAPlayerWrapper(wrapper.getName(), wrapper.getUuid());
                     }
                     return null;

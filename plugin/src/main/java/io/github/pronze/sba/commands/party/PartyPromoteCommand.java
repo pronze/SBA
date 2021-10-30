@@ -3,8 +3,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
-import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.party.PartyManagerImpl;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -26,7 +25,7 @@ public class PartyPromoteCommand {
     @OnPostEnable
     public void onPostEnable() {
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("promote", (ctx, s) -> {
-            final var optionalParty = PartyManager
+            final var optionalParty = PartyManagerImpl
                     .getInstance()
                     .getPartyOf(PlayerMapper
                             .wrapPlayer((Player)ctx.getSender())

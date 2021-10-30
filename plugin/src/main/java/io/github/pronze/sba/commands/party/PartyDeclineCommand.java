@@ -2,8 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
-import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.party.PartyManagerImpl;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +36,7 @@ public class PartyDeclineCommand {
             return;
         }
 
-        PartyManager
+        PartyManagerImpl
                 .getInstance()
                 .getInvitedPartyOf(player)
                 .ifPresentOrElse(party -> {
@@ -60,7 +59,7 @@ public class PartyDeclineCommand {
                             .send(party.getMembers());
 
                     if (party.getMembers().size() == 1) {
-                        PartyManager
+                        PartyManagerImpl
                                 .getInstance()
                                 .disband(party.getUUID());
                     }

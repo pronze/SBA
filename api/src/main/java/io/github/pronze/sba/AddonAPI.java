@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.game.Game;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 import java.util.Optional;
@@ -42,14 +41,6 @@ public interface AddonAPI {
     static boolean isAPIRegistered() {
         return Bukkit.getServer().getServicesManager().getRegistration(AddonAPI.class) != null;
     }
-
-    /**
-     * Returns an Optional containing the GameStorage instance of the provided game, empty otherwise.
-     *
-     * @param game The game associated with the storage.
-     * @return {@link GameStorage} of game if exists, null otherwise
-     */
-    Optional<GameStorage> getGameStorage(@NotNull GameWrapper game);
 
     /**
      * Returns a boolean indicating if the plugin is running in debug mode.

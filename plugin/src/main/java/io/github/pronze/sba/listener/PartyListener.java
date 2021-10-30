@@ -2,7 +2,7 @@ package io.github.pronze.sba.listener;
 
 import io.github.pronze.sba.events.SBAPlayerPartyChatEvent;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.party.PartyManagerImpl;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
@@ -63,7 +63,7 @@ public class PartyListener implements Listener {
                 .wrapPlayer(player)
                 .as(SBAPlayerWrapper.class);
 
-        final var maybeParty = PartyManager
+        final var maybeParty = PartyManagerImpl
                 .getInstance()
                 .getPartyOf(wrappedPlayer);
 

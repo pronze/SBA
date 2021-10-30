@@ -2,7 +2,7 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.events.SBAPlayerPartyDisbandEvent;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.party.PartyManagerImpl;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,6 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 
 @Service
 public class PartyDisbandCommand {
@@ -36,7 +35,7 @@ public class PartyDisbandCommand {
             return;
         }
 
-        PartyManager
+        PartyManagerImpl
                 .getInstance()
                 .getPartyOf(player)
                 .ifPresentOrElse(party -> {

@@ -1,10 +1,8 @@
 package io.github.pronze.sba.inventories;
 
-import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -14,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.game.GameStore;
@@ -39,12 +36,12 @@ import java.util.Objects;
 })
 public class SBAStoreInventory extends AbstractStoreInventory {
 
-    public static SBAStoreInventory getInstance() {
-        return ServiceManager.get(SBAStoreInventory.class);
-    }
-
     public SBAStoreInventory() {
         super("shops/shop.yml");
+    }
+
+    public static SBAStoreInventory getInstance() {
+        return ServiceManager.get(SBAStoreInventory.class);
     }
 
     @SneakyThrows
@@ -88,7 +85,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
                     Arrays.stream(player.getInventory().getContents().clone())
                             .filter(Objects::nonNull)
                             .filter(itemStack -> itemStack.getType().name().endsWith("SWORD"))
-                            .filter(itemStack ->  !itemStack.isSimilar(newItem))
+                            .filter(itemStack -> !itemStack.isSimilar(newItem))
                             .forEach(sword -> player.getInventory().removeItem(sword));
                 }
                 break;

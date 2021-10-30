@@ -15,7 +15,7 @@ import io.github.pronze.sba.utils.SBAUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Party implements Party {
+public class PartyImpl implements PartyImpl {
     @NotNull
     private SBAPlayerWrapper leader;
     private final UUID uuid;
@@ -24,7 +24,7 @@ public class Party implements Party {
     private final Map<UUID, PartyInviteData> inviteDataMap;
     private final PartySetting settings;
 
-    public Party(@NotNull SBAPlayerWrapper leader) {
+    public PartyImpl(@NotNull SBAPlayerWrapper leader) {
         this.leader = leader;
         this.uuid = UUID.randomUUID();
         this.members = new ArrayList<>();

@@ -1,13 +1,17 @@
 package io.github.pronze.sba.inventories;
 
 import io.github.pronze.sba.events.SBAGamesInventoryOpenEvent;
+import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -36,16 +40,16 @@ public class GamesInventory implements Listener {
         return ServiceManager.get(GamesInventory.class);
     }
 
-    private final static HashMap<Integer, String> labels = new HashMap<>() {
+    private final static HashMap<GameMode, String> labels = new HashMap<>() {
         {
-            put(1, "solo");
-            put(2, "double");
-            put(3, "triple");
-            put(4, "squad");
+            put(GameMode.SOLOS, "solo");
+            put(GameMode.DOUBLES, "double");
+            put(GameMode.TRIPLES, "triple");
+            put(GameMode.SQUADS, "squad");
         }
     };
 
-    private final HashMap<Integer, InventorySet> inventoryMap = new HashMap<>();
+    private final HashMap<GameMode, InventorySet> inventoryMap = new HashMap<>();
 
     @OnPostEnable
     public void loadInventory() {
@@ -81,9 +85,9 @@ public class GamesInventory implements Listener {
         }
     }
 
-    public void openForPlayer(Player player, int mode) {
-        final var event = new SBAGamesInventoryOpenEvent(player, mode);
-        Bukkit.getServer().getPluginManager().callEvent(event);
+    public void openForPlayer(PlayerWrapper player, GameMode mode) {
+        final var event = new SBAGamesInventoryOpenEvent(player.as(SBAPlayerWrapper.class), mode);
+        EventManager.fire(event);
         if (event.isCancelled()) {
             return;
         }
@@ -92,12 +96,16 @@ public class GamesInventory implements Listener {
         PlayerMapper.wrapPlayer(player).openInventory(format);
     }
 
+    public void openForPlayer(PlayerWrapper player, int mode) {
+        openForPlayer(player, GameMode.fromInt(mode));
+    }
+
     public void onClick(PostClickEvent event) {
         final var mode = inventoryMap.keySet()
                 .stream()
                 .filter(key -> event.getFormat() == inventoryMap.get(key))
                 .findFirst()
-                .orElse(1);
+                .orElse(GameMode.SQUADS);
 
         final var item = event.getItem();
         final var stack = item.getStack();
@@ -115,7 +123,7 @@ public class GamesInventory implements Listener {
                         .forEach(property -> {
                             switch (property.getPropertyName().toLowerCase()) {
                                 case "randomly_join":
-                                    final var games = ShopUtil.getGamesWithSize(mode);
+                                    final var games = ShopUtil.getGamesWithSize(mode.ordinal());
                                     if (games == null || games.isEmpty()) {
                                         couldNotFindGameMessage.send(playerWrapper);
                                         return;

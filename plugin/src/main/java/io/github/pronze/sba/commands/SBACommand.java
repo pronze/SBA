@@ -13,6 +13,7 @@ import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.leangen.geantyref.TypeToken;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -203,15 +204,16 @@ public class SBACommand {
             final @NotNull Player player,
             final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode
     ) {
+        final var wrappedPlayer = SBAPlayerWrapper.of(player);
         if (!gamesInvEnabled) {
             Message.of(LangKeys.GAMES_INV_DISABLED)
-                    .send(PlayerMapper.wrapPlayer(player));
+                    .send(wrappedPlayer);
             return;
         }
         final int mode = ShopUtil.getIntFromMode(gameMode);
         GamesInventory
                 .getInstance()
-                .openForPlayer(player, mode);
+                .openForPlayer(wrappedPlayer, mode);
     }
 
     @CommandMethod("sba upgrade")

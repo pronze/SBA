@@ -4,8 +4,8 @@ import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.Configurator;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.game.GameWrapperManagerImpl;
-import io.github.pronze.sba.game.GameStorageImpl;
 import io.github.pronze.sba.game.tasks.GameTaskManagerImpl;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.inventories.SBAStoreInventory;
@@ -14,6 +14,7 @@ import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.listener.*;
 import io.github.pronze.sba.manager.GameWrapperManager;
 import io.github.pronze.sba.manager.PartyManager;
+import io.github.pronze.sba.party.PartyManagerImpl;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
 import io.github.pronze.sba.specials.listener.BridgeEggListener;
@@ -23,6 +24,7 @@ import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
+import io.github.pronze.sba.wrapper.BedWarsAPIWrapper;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -80,7 +82,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SBALanguageService.class,
         CommandManager.class,
         GameWrapperManagerImpl.class,
-        io.github.pronze.sba.party.PartyManager.class,
+        PartyManagerImpl.class,
         GameTaskManagerImpl.class,
         SBAStoreInventory.class,
         SBAUpgradeStoreInventory.class,
@@ -104,6 +106,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PopupTowerListener.class,
         NPCStoreService.class,
         FirstStartConfigReplacer.class,
+        BedWarsAPIWrapper.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 
@@ -198,11 +201,6 @@ public class SBA extends PluginContainer implements AddonAPI {
     }
 
     @Override
-    public Optional<GameStorage> getGameStorage(Game game) {
-        return GameWrapperManagerImpl.getInstance().getGameStorage(game.getName());
-    }
-
-    @Override
     public boolean isDebug() {
         return SBAConfig.getInstance().getBoolean("debug.enabled", false);
     }
@@ -224,7 +222,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public PartyManager getPartyManager() {
-        return io.github.pronze.sba.party.PartyManager.getInstance();
+        return PartyManagerImpl.getInstance();
     }
 
     @Override

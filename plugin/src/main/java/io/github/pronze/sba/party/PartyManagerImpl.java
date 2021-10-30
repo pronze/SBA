@@ -19,19 +19,19 @@ import java.util.UUID;
 @Service(dependsOn = {
         Logger.class
 })
-public class PartyManager implements io.github.pronze.sba.manager.PartyManager {
+public class PartyManagerImpl implements io.github.pronze.sba.manager.PartyManager {
 
-    public static PartyManager getInstance() {
-        return ServiceManager.get(PartyManager.class);
+    public static PartyManagerImpl getInstance() {
+        return ServiceManager.get(PartyManagerImpl.class);
     }
 
-    private final Map<UUID, Party> partyMap = new HashMap<>();
+    private final Map<UUID, PartyImpl> partyMap = new HashMap<>();
 
-    public PartyManager() {}
+    public PartyManagerImpl() {}
 
     @Override
-    public Optional<Party> createParty(@NotNull SBAPlayerWrapper leader) {
-        final var party = new Party(leader);
+    public Optional<PartyImpl> createParty(@NotNull SBAPlayerWrapper leader) {
+        final var party = new PartyImpl(leader);
         final var partyCreateEvent = new SBAPlayerPartyCreatedEvent(leader, party);
         SBA.getPluginInstance()
                 .getServer()
@@ -43,7 +43,7 @@ public class PartyManager implements io.github.pronze.sba.manager.PartyManager {
     }
 
     @Override
-    public Optional<Party> get(@NotNull SBAPlayerWrapper leader) {
+    public Optional<PartyImpl> get(@NotNull SBAPlayerWrapper leader) {
         return partyMap
                 .values()
                 .stream()
@@ -52,7 +52,7 @@ public class PartyManager implements io.github.pronze.sba.manager.PartyManager {
     }
 
     @Override
-    public Optional<Party> get(@NotNull UUID partyUUID) {
+    public Optional<PartyImpl> get(@NotNull UUID partyUUID) {
         if (!partyMap.containsKey(partyUUID)) {
             return Optional.empty();
         }
@@ -60,12 +60,12 @@ public class PartyManager implements io.github.pronze.sba.manager.PartyManager {
     }
 
     @Override
-    public Optional<Party> getOrCreate(@NotNull SBAPlayerWrapper player) {
+    public Optional<PartyImpl> getOrCreate(@NotNull SBAPlayerWrapper player) {
         return getPartyOf(player).or(() -> createParty(player));
     }
 
     @Override
-    public Optional<Party> getPartyOf(@NotNull SBAPlayerWrapper player) {
+    public Optional<PartyImpl> getPartyOf(@NotNull SBAPlayerWrapper player) {
         return partyMap.values()
                 .stream()
                 .filter(party -> party.getMembers().contains(player))
@@ -73,7 +73,7 @@ public class PartyManager implements io.github.pronze.sba.manager.PartyManager {
     }
 
     @Override
-    public Optional<Party> getInvitedPartyOf(@NotNull SBAPlayerWrapper player) {
+    public Optional<PartyImpl> getInvitedPartyOf(@NotNull SBAPlayerWrapper player) {
         return partyMap.values()
                 .stream()
                 .filter(party -> party.isInvited(player))
@@ -93,7 +93,7 @@ public class PartyManager implements io.github.pronze.sba.manager.PartyManager {
         getPartyOf(leader).ifPresent(this::disband);
     }
 
-    private void disband(@NotNull Party party) {
+    private void disband(@NotNull PartyImpl party) {
         Logger.trace("Disbandoning party: {}", party.debugInfo());
         final var disbandMessage = SBA
                 .getInstance()

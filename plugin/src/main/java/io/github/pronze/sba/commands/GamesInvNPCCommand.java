@@ -17,7 +17,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 public class GamesInvNPCCommand {
 
     @OnPostEnable
-    public void onPostEnabled() {
+    public void onPostEnable() {
         CommandManager.getInstance().getAnnotationParser().parse(this);
     }
 

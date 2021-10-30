@@ -1,10 +1,11 @@
 package io.github.pronze.sba.service;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.lib.lang.SBALanguageService;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
@@ -34,6 +35,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service(dependsOn = {
         PlayerMapper.class,
@@ -41,12 +43,13 @@ import java.util.Objects;
 })
 public class GamesInventoryService implements Listener {
 
-    private final List<Location> soloNPCLocations = new ArrayList<>();
-    private final List<Location> doubleNPCLocations = new ArrayList<>();
-    private final List<Location> tripleNPCLocations = new ArrayList<>();
-    private final List<Location> squadsNPCLocations = new ArrayList<>();
-    private final List<NPC> npcs = new ArrayList<>();
-    private final List<Integer> entityEditMap = new ArrayList<>();
+    private final Multimap<GameMode, NPC> npcMap;
+    private final List<Integer> entityEditMap;
+
+    public GamesInventoryService() {
+        npcMap = ArrayListMultimap.create();
+        entityEditMap = new ArrayList<>();
+    }
 
     public static GamesInventoryService getInstance() {
         return ServiceManager.get(GamesInventoryService.class);
@@ -60,11 +63,11 @@ public class GamesInventoryService implements Listener {
         if (file.exists()) {
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
-            checkAndAdd(config, GameMode.SOLOS, soloNPCLocations);
-            checkAndAdd(config, GameMode.DOUBLES, doubleNPCLocations);
-            checkAndAdd(config, GameMode.TRIPLES, tripleNPCLocations);
-            checkAndAdd(config, GameMode.SQUADS, squadsNPCLocations);
+            for (var gameMode : GameMode.values()) {
+                checkAndAdd(config, gameMode);
+            }
         }
+
         Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
             if (MainLobbyVisualsManager.isInWorld(player.getLocation())) {
                 addViewer(PlayerMapper.wrapPlayer(player));
@@ -73,51 +76,31 @@ public class GamesInventoryService implements Listener {
     }
 
     @SuppressWarnings("unchecked")
-    private void checkAndAdd(YamlConfiguration config, GameMode mode, List<Location> locations) {
+    private void checkAndAdd(YamlConfiguration config, GameMode mode) {
         final var node = config.get(mode.name().toLowerCase());
-        if (node != null) {
-            locations.clear();
-            locations.addAll((List<Location>) node);
-            locations.forEach(location -> npcs.add(NPC.of(LocationMapper.wrapLocation(location))
-                            .setDisplayName(Message.of(LangKeys.GAMES_INV_DISPLAY_NAME)
-                            .placeholder("%mode%", mode.strVal())
-                            .getForAnyone())
-                            .show()));
+        if (node instanceof List) {
+            final var locations = (List<Location>) node;
+            locations.forEach(location -> addNPC(mode, location));
         }
     }
 
     public void addNPC(@NotNull GameMode mode, @NotNull Location location) {
-        npcs.add(NPC.of(LocationMapper.wrapLocation(location))
+        if (mode == GameMode.UNKNOWN) {
+            throw new UnsupportedOperationException("Registration with mode unknown??");
+        }
+
+        final var npc = NPC.of(LocationMapper.wrapLocation(location))
                 .setDisplayName(Message.of(LangKeys.GAMES_INV_DISPLAY_NAME)
                         .placeholder("mode", mode.strVal())
-                        .getForAnyone())
-                .show());
-
-        switch (mode) {
-            case SOLOS:
-                soloNPCLocations.add(location);
-                break;
-            case DOUBLES:
-                doubleNPCLocations.add(location);
-                break;
-            case TRIPLES:
-                tripleNPCLocations.add(location);
-                break;
-            case SQUADS:
-                squadsNPCLocations.add(location);
-                break;
-        }
+                        .getForAnyone());
+        npcMap.put(mode, npc);
         update();
     }
 
     public void removeNPC(PlayerWrapper remover, @NotNull NPC npc) {
-        final var loc = Objects.requireNonNull(npc.getLocation()).as(Location.class);
-        if (soloNPCLocations.contains(loc) || doubleNPCLocations.contains(loc) || tripleNPCLocations.contains(loc) || squadsNPCLocations.contains(loc)) {
+        if (npcMap.containsValue(npc)) {
             Message.of(LangKeys.NPC_REMOVED).send(remover);
-            soloNPCLocations.remove(loc);
-            doubleNPCLocations.remove(loc);
-            tripleNPCLocations.remove(loc);
-            squadsNPCLocations.remove(loc);
+            npcMap.values().removeIf(npc::equals);
             npc.destroy();
             update();
         }
@@ -132,10 +115,13 @@ public class GamesInventoryService implements Listener {
                 file.createNewFile();
             }
 
-            config.set("solos", soloNPCLocations);
-            config.set("doubles", doubleNPCLocations);
-            config.set("triples", tripleNPCLocations);
-            config.set("squads", squadsNPCLocations);
+            for (var key : npcMap.keySet()) {
+                final var locations = npcMap.get(key)
+                        .stream()
+                        .map(NPC::getLocation)
+                        .collect(Collectors.toList());
+                config.set(key.name().toLowerCase(), locations);
+            }
             config.save(file);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -143,24 +129,23 @@ public class GamesInventoryService implements Listener {
     }
 
     public void addViewer(@NotNull PlayerWrapper player) {
-        npcs.forEach(npc -> npc.addViewer(player));
+        npcMap.values().forEach(npc -> npc.addViewer(player));
     }
 
     public void removeViewer(@NotNull PlayerWrapper player) {
-        npcs.forEach(npc -> npc.removeViewer(player));
+        npcMap.values().forEach(npc -> npc.removeViewer(player));
     }
 
     @OnPreDisable
     public void destroy() {
-        npcs.forEach(NPC::destroy);
-        npcs.clear();
+        npcMap.values().forEach(NPC::destroy);
+        npcMap.clear();
         update();
     }
 
     @OnEvent
     public void onPlayerJoin(SPlayerJoinEvent e) {
         final var player = e.getPlayer();
-
         Tasker.build(() -> {
             if (MainLobbyVisualsManager.isInWorld(player.getLocation().as(Location.class)) && player.isOnline()) {
                 addViewer(player);
@@ -169,9 +154,9 @@ public class GamesInventoryService implements Listener {
     }
 
     public boolean isNPCAtLocation(@NotNull LocationHolder location) {
-        return npcs.stream()
+        return npcMap.values()
+                .stream()
                 .map(NPC::getLocation)
-                .filter(Objects::nonNull)
                 .anyMatch(npcLoc -> npcLoc.equals(location));
     }
 
@@ -197,24 +182,18 @@ public class GamesInventoryService implements Listener {
             }
         }
 
-        // TODO: bruh make the indentifcation process better
-        final var npcLocation = Objects.requireNonNull(event.getVisual().getLocation()).as(Location.class);
-        final var isSolo = soloNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isDouble = doubleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isTriple = tripleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isSquad = squadsNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        int mode = 1;
-        if (isDouble) {
-            mode = 2;
-        } else if (isTriple) {
-            mode = 3;
-        } else if (isSquad) {
-            mode = 4;
-        } else if (!isSolo) {
-            return;
+        for (var key : npcMap.keySet()) {
+            final var npcs = npcMap.get(key);
+            final var maybeNPC = npcs.stream()
+                    .filter(npc -> event.getVisual().equals(npc))
+                    .findAny();
+
+            if (maybeNPC.isPresent()) {
+                GamesInventory
+                        .getInstance()
+                        .openForPlayer(event.getPlayer(), key.ordinal());
+                break;
+            }
         }
-        GamesInventory
-                .getInstance()
-                .openForPlayer(event.getPlayer().as(Player.class), mode);
     }
 }
