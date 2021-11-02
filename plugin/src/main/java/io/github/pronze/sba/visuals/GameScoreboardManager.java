@@ -2,18 +2,19 @@ package io.github.pronze.sba.visuals;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import io.github.pronze.sba.wrapper.TeamWrapper;
+import io.github.pronze.sba.wrapper.team.TeamWrapper;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.lib.lang.Message;
@@ -36,7 +37,7 @@ public class GameScoreboardManager {
         return ServiceManager.get(GameScoreboardManager.class);
     }
 
-    public static void of(GameWrapper game) {
+    public static void of(@NotNull GameWrapper game) {
         if (sidebarMap.containsKey(game)) {
             throw new UnsupportedOperationException("Game: " + game.getName() + " has already been registered into GameScoreboardManager!");
         }
@@ -215,8 +216,9 @@ public class GameScoreboardManager {
         sidebarMap.clear();
     }
 
-    public Optional<Sidebar> getSidebar(GameWrapper query) {
-        return Optional.ofNullable(sidebarMap.get(query));
+    @NotNull
+    public Sidebar getSidebar(GameWrapper query) {
+        return Objects.requireNonNull(sidebarMap.get(query), "GameScoreboardManager has not been registered for arena: " + query.getName());
     }
 
     public void destroy(GameWrapper query) {
@@ -232,7 +234,7 @@ public class GameScoreboardManager {
         }
     }
 
-    public void addViewer(PlayerWrapper player) {
+    public void addViewer(@NotNull PlayerWrapper player) {
         final var playerGame = player.as(SBAPlayerWrapper.class).getGame();
         if (playerGame == null) {
             return;
@@ -252,7 +254,7 @@ public class GameScoreboardManager {
         }
     }
 
-    public void removeViewer(PlayerWrapper player) {
+    public void removeViewer(@NotNull PlayerWrapper player) {
         final var wrapper = PlayerMapper.wrapPlayer(player);
         sidebarMap.values()
                 .stream()

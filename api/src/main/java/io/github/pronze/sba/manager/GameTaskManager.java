@@ -1,6 +1,6 @@
 package io.github.pronze.sba.manager;
 
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import io.github.pronze.sba.game.tasks.GameTask;
 import org.jetbrains.annotations.NotNull;
 

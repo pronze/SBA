@@ -1,8 +1,6 @@
 package io.github.pronze.sba;
 
 import io.github.pronze.sba.config.Configurator;
-import io.github.pronze.sba.game.GameStorage;
-import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.manager.GameWrapperManager;
 import io.github.pronze.sba.manager.PartyManager;
 import org.bukkit.Bukkit;
@@ -11,8 +9,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-
-import java.util.Optional;
 
 /**
  * Represents the API for SBA

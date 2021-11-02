@@ -1,179 +1,178 @@
 package io.github.pronze.sba.game;
 
-import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import lombok.Data;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.GameMode;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.item.meta.PotionEffectHolder;
 import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
 import org.screamingsandals.lib.packet.SClientboundSetPlayerTeamPacket;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.player.gamemode.GameModeHolder;
 import org.screamingsandals.lib.slot.EquipmentSlotMapping;
+import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.tasker.task.TaskState;
+import org.screamingsandals.lib.tasker.task.TaskerTask;
+
+import java.util.Objects;
 
 @Data
 public class InvisiblePlayerImpl implements InvisiblePlayer {
-    private final Player hiddenPlayer;
-    private final GameWrapperImpl arena;
+    private final PlayerWrapper player;
+    private final GameWrapper arena;
     private boolean justEquipped;
     private boolean isHidden;
-    protected BukkitTask armorHider;
+    protected TaskerTask task;
 
     @Override
     public void vanish() {
-        Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
+        Logger.trace("Hiding player: {} for invisibility", player.getName());
         if (isHidden) {
             return;
         }
 
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(hiddenPlayer);
-        final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
+        final var team = arena.getTeamOfPlayer(player);
         if (team == null) {
             return;
         }
 
         final var invisTeamName = "i-" + team.getName();
 
-        arena.getConnectedPlayers().forEach(connectedPlayers -> {
-            final var maybeHolder = GameScoreboardManager.getInstance().getSidebar(arena);
-            if (maybeHolder.isEmpty()) {
-                return;
-            }
+        hideArmor();
 
-            final var sidebar = maybeHolder.get();
+        arena.getConnectedPlayers().forEach(connectedPlayers -> {
+            final var sidebar = GameScoreboardManager.getInstance().getSidebar(arena);
             if (sidebar.getTeam(invisTeamName).isEmpty()) {
                 sidebar.team(invisTeamName)
                         .nameTagVisibility(SClientboundSetPlayerTeamPacket.TagVisibility.NEVER)
                         .friendlyFire(false)
-                        .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
+                        .color(NamedTextColor.NAMES.value(team.getChatColor().name().toLowerCase()));
             }
 
             var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
-            if (sidebarTeam.players().contains(wrappedPlayer)) {
-                sidebarTeam.removePlayer(wrappedPlayer);
+            if (sidebarTeam.players().contains(player)) {
+                sidebarTeam.removePlayer(player);
             }
 
             var invisibleScoreboardTeam = sidebar.getTeam(invisTeamName).orElseThrow();
-            if (!invisibleScoreboardTeam.players().contains(wrappedPlayer)) {
-                invisibleScoreboardTeam.player(wrappedPlayer);
+            if (!invisibleScoreboardTeam.players().contains(player)) {
+                invisibleScoreboardTeam.player(player);
             }
         });
 
-        hideArmor();
-        armorHider = new BukkitRunnable() {
-            @Override
-            public void run() {
-                if (!isElligble() || !isHidden) {
-                    showPlayer();
-                    this.cancel();
-                    arena.removeHiddenPlayer(hiddenPlayer);
+        if (task != null) {
+            if (task.getState() != TaskState.CANCELLED) {
+                try {
+                    task.cancel();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
-        }.runTaskTimer(SBA.getPluginInstance(), 0L, 20L);
+        }
 
+        task = Tasker.build(taskBase -> () -> {
+            if (!isEligible() || !isHidden) {
+                showPlayer();
+                taskBase.cancel();
+                arena.removeHiddenPlayer(player);
+            }
+        }).repeat(1L, TaskerTime.SECONDS).start();
         isHidden = true;
-    }
-
-    private boolean isElligble() {
-        return arena.getGame().getStatus() == GameStatus.RUNNING
-                && hiddenPlayer.getGameMode() == GameMode.SURVIVAL
-                && hiddenPlayer.isOnline()
-                && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
-                && arena.getConnectedPlayers().contains(hiddenPlayer);
-    }
-
-    private void showArmor() {
-        final var boots = hiddenPlayer.getInventory().getBoots();
-        final var helmet = hiddenPlayer.getInventory().getHelmet();
-        final var chestplate = hiddenPlayer.getInventory().getChestplate();
-        final var leggings = hiddenPlayer.getInventory().getLeggings();
-
-        arena.getGame()
-                .getConnectedPlayers()
-                .forEach(pl -> getEquipPacket(
-                        convert(helmet),
-                        convert(chestplate),
-                        convert(leggings),
-                        convert(boots)).sendPacket(PlayerMapper.wrapPlayer(pl)));
-    }
-
-    public Item convert(ItemStack itemStack) {
-        return ItemFactory.build(itemStack).orElse(ItemFactory.getAir());
-    }
-
-    private void hideArmor() {
-        var hiddenPlayerTeam = arena.getGame().getTeamOfPlayer(hiddenPlayer);
-        final var airStack = ItemFactory.getAir();
-        arena.getGame()
-                .getConnectedPlayers()
-                .stream()
-                .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
-                .forEach(pl -> {
-                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(), hiddenPlayer.getName());
-                    getEquipPacket(airStack, airStack, airStack, airStack).sendPacket(PlayerMapper.wrapPlayer(pl));
-                });
-    }
-
-    private SClientboundSetEquipmentPacket getEquipPacket(Item helmet, Item chestPlate, Item leggings, Item boots) {
-        final var packet = new SClientboundSetEquipmentPacket();
-        packet.entityId(hiddenPlayer.getEntityId());
-        final var slots = packet.slots();
-        slots.put(EquipmentSlotMapping.resolve("HEAD").orElseThrow(), helmet);
-        slots.put(EquipmentSlotMapping.resolve("CHEST").orElseThrow(), chestPlate);
-        slots.put(EquipmentSlotMapping.resolve("LEGS").orElseThrow(), leggings);
-        slots.put(EquipmentSlotMapping.resolve("FEET").orElseThrow(), boots);
-        return packet;
     }
 
     @Override
     public void showPlayer() {
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(hiddenPlayer);
-        final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
+        final var team = arena.getTeamOfPlayer(player);
         if (team == null) {
             return;
         }
         final var invisTeamName = "i-" + team.getName();
 
-        //show nametag
         arena.getConnectedPlayers().forEach(connectedPlayers -> {
-            final var maybeHolder = GameScoreboardManager.getInstance().getSidebar(arena);
-            if (maybeHolder.isEmpty()) {
-                return;
-            }
-
-            final var sidebar = maybeHolder.get();
-
+            final var sidebar = GameScoreboardManager.getInstance().getSidebar(arena);
             if (sidebar.getTeam(invisTeamName).isEmpty()) {
                 sidebar.team(invisTeamName)
                         .nameTagVisibility(SClientboundSetPlayerTeamPacket.TagVisibility.NEVER)
                         .friendlyFire(false)
-                        .color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name().toLowerCase()));
+                        .color(NamedTextColor.NAMES.value(team.getChatColor().name().toLowerCase()));
             }
 
             var invisibleScoreboardTeam = sidebar.getTeam(invisTeamName).orElseThrow();
-            if (invisibleScoreboardTeam.players().contains(wrappedPlayer)) {
-                invisibleScoreboardTeam.removePlayer(wrappedPlayer);
+            if (invisibleScoreboardTeam.players().contains(player)) {
+                invisibleScoreboardTeam.removePlayer(player);
             }
 
             var sidebarTeam = sidebar.getTeam(team.getName()).orElseThrow();
-            if (!sidebarTeam.players().contains(wrappedPlayer)) {
-                sidebarTeam.player(wrappedPlayer);
+            if (!sidebarTeam.players().contains(player)) {
+                sidebarTeam.player(player);
             }
         });
-        SBAUtil.cancelTask(armorHider);
+
+        if (task.getState() != TaskState.CANCELLED) {
+            try {
+                task.cancel();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+
         showArmor();
+        Logger.trace("Un hiding player: {}", player.getName());
+        player.removePotionEffect(PotionEffectHolder.of(PotionEffectType.INVISIBILITY));
         isHidden = false;
-        Logger.trace("Un hiding player: {}", hiddenPlayer.getName());
-        hiddenPlayer.removePotionEffect(PotionEffectType.INVISIBILITY);
+    }
+
+    private boolean isEligible() {
+        return player.isOnline()
+                && arena.getStatus() == GameStatus.RUNNING
+                && player.getGameMode() == GameModeHolder.of("SURVIVAL")
+                && player.hasPotionEffect(PotionEffectHolder.of(PotionEffectType.INVISIBILITY))
+                && arena.isPlayerConnected(player);
+    }
+
+    private void showArmor() {
+        final var boots = player.getPlayerInventory().getBoots();
+        final var helmet = player.getPlayerInventory().getHelmet();
+        final var chestplate = player.getPlayerInventory().getChestplate();
+        final var leggings = player.getPlayerInventory().getLeggings();
+
+        for (var gamePlayer : arena.getConnectedPlayers()) {
+            getEquipPacket(helmet, chestplate, leggings, boots).sendPacket(gamePlayer);
+        }
+    }
+
+    protected Item nullSafe(Item item) {
+        return Objects.requireNonNullElse(item, ItemFactory.getAir());
+    }
+
+    protected void hideArmor() {
+        var hiddenPlayerTeam = arena.getTeamOfPlayer(player);
+        final var airStack = ItemFactory.getAir();
+
+        for (var gamePlayer : arena.getConnectedPlayers()) {
+            if (hiddenPlayerTeam.getConnectedPlayers().contains(gamePlayer)) {
+                continue;
+            }
+
+            Logger.trace("Hiding player: {} from: {}", player.getName(), gamePlayer.getName());
+            getEquipPacket(airStack, airStack, airStack, airStack).sendPacket(gamePlayer);
+        }
+    }
+
+    protected SClientboundSetEquipmentPacket getEquipPacket(Item helmet, Item chestPlate, Item leggings, Item boots) {
+        final var packet = new SClientboundSetEquipmentPacket();
+        packet.entityId(player.getEntityId());
+        final var slots = packet.slots();
+        slots.put(EquipmentSlotMapping.resolve("HEAD").orElseThrow(),  nullSafe(helmet));
+        slots.put(EquipmentSlotMapping.resolve("CHEST").orElseThrow(), nullSafe(chestPlate));
+        slots.put(EquipmentSlotMapping.resolve("LEGS").orElseThrow(),  nullSafe(leggings));
+        slots.put(EquipmentSlotMapping.resolve("FEET").orElseThrow(),  nullSafe(boots));
+        return packet;
     }
 }

@@ -1,10 +1,8 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GameTeamData;
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
-import org.bukkit.Location;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.RunningTeam;
 
 import java.util.Optional;
 

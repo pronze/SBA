@@ -1,10 +1,10 @@
 package io.github.pronze.sba.wrapper.event;
 
 import io.github.pronze.sba.AddonAPI;
-import io.github.pronze.sba.game.GameWrapper;
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import io.github.pronze.sba.wrapper.TeamWrapper;
+import io.github.pronze.sba.wrapper.team.TeamWrapper;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;

@@ -13,7 +13,10 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.tasker.task.TaskState;
+import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -56,10 +59,22 @@ public class SBAUtil {
         }
     }
 
-    public static void cancelTask(BukkitTask task) {
+    public static void cancelTask(@Nullable BukkitTask task) {
         if (task != null) {
             if (Bukkit.getScheduler().isCurrentlyRunning(task.getTaskId()) || Bukkit.getScheduler().isQueued(task.getTaskId())) {
                 task.cancel();
+            }
+        }
+    }
+
+    public static void cancelTask(@Nullable TaskerTask task) {
+        if (task != null) {
+            if (task.getState() != TaskState.CANCELLED && task.getState() != TaskState.FINISHED) {
+                try {
+                    task.cancel();
+                } catch (Throwable t) {
+                    Logger.error("Exception cancelling task of id: {}, {}" + task.getId(), t);
+                }
             }
         }
     }
@@ -132,28 +147,9 @@ public class SBAUtil {
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, String title, String subTitle, int fadeIn, int stay, int fadeOut) {
-        sendTitle(player, AdventureHelper.toComponent(title), AdventureHelper.toComponent(subTitle), fadeIn, stay, fadeOut);
-    }
-
-    public static void sendTitle(PlayerWrapper player, Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
-        var titleComponent = net.kyori.adventure.title.Title.title(
-                title,
-                subtitle,
-                Title.Times.of(
-                        Duration.ofMillis(fadeIn * 50L),
-                        Duration.ofMillis(stay * 50L),
-                        Duration.ofMillis(fadeOut * 50L)
-                )
-        );
-
-        player.showTitle(titleComponent);
-    }
-
     public static String capitalizeFirstLetter(@NotNull String toCap) {
         return toCap.substring(0, 1).toUpperCase() + toCap.substring(1).toLowerCase();
     }
-
 
     private static final BlockFace[] axis = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
     private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };

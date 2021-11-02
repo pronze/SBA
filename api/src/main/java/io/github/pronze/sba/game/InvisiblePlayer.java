@@ -1,13 +1,13 @@
 package io.github.pronze.sba.game;
 
-import org.bukkit.entity.Player;
+import org.screamingsandals.lib.player.PlayerWrapper;
 
 public interface InvisiblePlayer {
     void vanish();
 
     void showPlayer();
 
-    Player getHiddenPlayer();
+    PlayerWrapper getPlayer();
 
     void setHidden(boolean hidden);
 

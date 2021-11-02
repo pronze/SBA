@@ -1,6 +1,6 @@
-package io.github.pronze.sba.wrapper;
+package io.github.pronze.sba.wrapper.team;
 
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import org.bukkit.ChatColor;
 import org.screamingsandals.bedwars.api.Team;
 import org.screamingsandals.lib.utils.BasicWrapper;

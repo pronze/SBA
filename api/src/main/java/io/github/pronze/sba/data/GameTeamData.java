@@ -1,6 +1,6 @@
 package io.github.pronze.sba.data;
 
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

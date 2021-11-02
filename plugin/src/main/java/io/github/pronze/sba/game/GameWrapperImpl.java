@@ -1,25 +1,30 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GamePlayerData;
+import io.github.pronze.sba.data.GameStoreData;
 import io.github.pronze.sba.game.tasks.GameTask;
 import io.github.pronze.sba.game.tasks.GameTaskManagerImpl;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import io.github.pronze.sba.wrapper.TeamWrapper;
-import org.bukkit.Location;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
+import io.github.pronze.sba.wrapper.store.GameStoreWrapper;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.team.TeamWrapper;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
+import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.BasicWrapper;
+import org.screamingsandals.lib.world.LocationHolder;
 import org.screamingsandals.lib.world.LocationMapper;
+import org.screamingsandals.lib.world.WorldHolder;
+import org.screamingsandals.lib.world.WorldMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +36,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     private final List<GameTask> gameTasks;
     private final List<NPC> storeNPCS;
     private final List<NPC> upgradeStoreNPCS;
+    private final List<GameStoreData> gameStoreData;
     private final GameStorage storage;
 
     protected GameWrapperImpl(@NotNull Game game) {
@@ -41,21 +47,26 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
         this.gameTasks = new ArrayList<>();
         this.storeNPCS = new ArrayList<>();
         this.upgradeStoreNPCS = new ArrayList<>();
+        this.gameStoreData = new ArrayList<>();
         this.storage = new GameStorageImpl(this);
+
+        final var gameStoreList = ((org.screamingsandals.bedwars.game.Game) game).getGameStoreList();
+        gameStoreList.forEach(gameStore -> gameStoreData.add(GameStoreData.of(gameStore)));
+        ((org.screamingsandals.bedwars.game.Game) game).getGameStoreList().clear();
     }
 
     @NotNull
     @Override
-    public List<Player> getInvisiblePlayers() {
+    public List<PlayerWrapper> getInvisiblePlayers() {
         return invisiblePlayers
                 .values()
                 .stream()
-                .map(InvisiblePlayer::getHiddenPlayer)
+                .map(InvisiblePlayer::getPlayer)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void addHiddenPlayer(@NotNull Player player) {
+    public void addHiddenPlayer(@NotNull PlayerWrapper player) {
         if (invisiblePlayers.containsKey(player.getUniqueId())) {
             return;
         }
@@ -65,7 +76,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     }
 
     @Override
-    public void removeHiddenPlayer(@NotNull Player player) {
+    public void removeHiddenPlayer(@NotNull PlayerWrapper player) {
         final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());
         if (invisiblePlayer != null) {
             invisiblePlayer.setHidden(false);
@@ -105,7 +116,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     }
 
     @Override
-    public boolean isPlayerHidden(@NotNull Player player) {
+    public boolean isPlayerHidden(@NotNull PlayerWrapper player) {
         return invisiblePlayers.containsKey(player.getUniqueId());
     }
 
@@ -166,18 +177,22 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     }
 
     @Override
-    public List<org.screamingsandals.bedwars.api.game.GameStore> getGameStores() {
-        return wrappedObject.getGameStores();
+    public List<GameStoreWrapper> getGameStores() {
+        return wrappedObject.getGameStores()
+                .stream()
+                .map(gameStore -> (GameStore) gameStore)
+                .map(GameStoreWrapper::of)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public World getGameWorld() {
-        return wrappedObject.getGameWorld();
+    public WorldHolder getGameWorld() {
+        return WorldMapper.wrapWorld(wrappedObject.getGameWorld());
     }
 
     @Override
-    public Location getSpectatorSpawn() {
-        return wrappedObject.getSpectatorSpawn();
+    public LocationHolder getSpectatorSpawn() {
+        return LocationMapper.wrapLocation(wrappedObject.getSpectatorSpawn());
     }
 
     @Override
@@ -253,7 +268,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     }
 
     @Override
-    public String getName() {
+    public @NotNull String getName() {
         return wrappedObject.getName();
     }
 
@@ -278,5 +293,27 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
                 .stream()
                 .map(TeamWrapper::of)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isPlayerConnected(@NotNull UUID queryId) {
+        return getConnectedPlayers()
+                .stream()
+                .anyMatch(sbaPlayerWrapper -> sbaPlayerWrapper.getUniqueId().equals(queryId));
+    }
+
+    @Override
+    public boolean isPlayerConnected(@NotNull PlayerWrapper player) {
+        return isPlayerConnected(player.getUniqueId());
+    }
+
+    @Override
+    public int getMinPlayers() {
+        return wrappedObject.getMinPlayers();
+    }
+
+    @Override
+    public @NotNull List<GameStoreData> getGameStoreData() {
+        return List.copyOf(gameStoreData);
     }
 }

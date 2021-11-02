@@ -3,8 +3,6 @@ package io.github.pronze.sba;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.Configurator;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.GameStorage;
-import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.game.GameWrapperManagerImpl;
 import io.github.pronze.sba.game.tasks.GameTaskManagerImpl;
 import io.github.pronze.sba.inventories.GamesInventory;
@@ -35,7 +33,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
@@ -53,7 +50,6 @@ import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 

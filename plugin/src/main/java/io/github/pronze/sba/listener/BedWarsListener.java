@@ -1,61 +1,62 @@
 package io.github.pronze.sba.listener;
 
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.events.SBAFinalKillEvent;
-import io.github.pronze.sba.game.GameWrapper;
-import io.github.pronze.sba.game.GameWrapperImpl;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.utils.SBAUtil;
+import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.wrapper.event.*;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Bat;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.event.EventManager;
+import org.screamingsandals.lib.event.EventPriority;
 import org.screamingsandals.lib.event.OnEvent;
+import org.screamingsandals.lib.event.player.SPlayerDeathEvent;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.tasker.task.TaskerTask;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.game.GameWrapperManagerImpl;
-import io.github.pronze.sba.utils.SBAUtil;
-import io.github.pronze.sba.utils.ShopUtil;
-import org.screamingsandals.lib.utils.reflect.Reflect;
-import org.screamingsandals.lib.world.LocationMapper;
+import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class BedWarsListener implements Listener {
-    private static LivingEntity mockEntity = null;
-
-    private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
+    private final Map<UUID, TaskerTask> runnableCache = new HashMap<>();
 
     @OnPostEnable
     public void registerListener() {
         SBA.getInstance().registerListener(this);
+    }
+
+    @OnPreDisable
+    public void onDisable() {
+        runnableCache
+                .values()
+                .forEach(SBAUtil::cancelTask);
+        runnableCache.clear();
     }
 
     @OnEvent
@@ -75,7 +76,7 @@ public class BedWarsListener implements Listener {
                         .collect(Collectors.toList()));
 
         // spawn rotating generators
-        if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
+        if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean(true)) {
             for (var itemSpawner : gameWrapper.getItemSpawners()) {
                 for (var entry : SBAConfig.getInstance().node("floating-generator", "mapping").childrenMap().entrySet()) {
                     if (itemSpawner.getItemSpawnerType().getMaterial().name().equalsIgnoreCase(((String) entry.getKey()).toUpperCase())) {
@@ -86,38 +87,20 @@ public class BedWarsListener implements Listener {
         }
 
         if (SBAConfig.getInstance().node("replace-stores-with-npc").getBoolean(true)) {
-            gameWrapper.getGameStores().forEach(store -> {
-                final var nonAPIStore = (GameStore) store;
-                final var villager = nonAPIStore.kill();
-                if (villager != null) {
-                    Main.unregisterGameEntity(villager);
+            gameWrapper.getGameStoreData().forEach(storeData -> {
+                NPCSkin skin;
+                List<Component> name;
+
+                final var file = storeData.getShopFile();
+                if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+                    skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+                    name = NPCStoreService.getInstance().getUpgradeShopText();
+                } else {
+                    skin = NPCStoreService.getInstance().getShopSkin();
+                    name = NPCStoreService.getInstance().getShopText();
                 }
 
-                if (mockEntity == null) {
-                    // find a better version independent way to mock entities lol
-                    mockEntity = (Bat) gameWrapper.getGameWorld().spawnEntity(gameWrapper.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                    mockEntity.setAI(false);
-                }
-
-                // set fake entity to avoid bw listener npe
-                Reflect.setField(nonAPIStore, "entity", mockEntity);
-
-                NPCSkin skin = null;
-                List<Component> name = null;
-                final var file = store.getShopFile();
-                try {
-                    if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
-                        skin = NPCStoreService.getInstance().getUpgradeShopSkin();
-                        name = NPCStoreService.getInstance().getUpgradeShopText();
-                    } else {
-                        skin = NPCStoreService.getInstance().getShopSkin();
-                        name = NPCStoreService.getInstance().getShopText();
-                    }
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-
-                final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+                final var npc = NPC.of(storeData.getLocation())
                         .setDisplayName(name)
                         .setShouldLookAtPlayer(true)
                         .setTouchable(true)
@@ -138,7 +121,7 @@ public class BedWarsListener implements Listener {
         }
     }
 
-    @EventHandler
+    @OnEvent
     public void onTargetBlockDestroyed(BWTargetBlockDestroyedEvent event) {
         final var gameWrapper = event.getGame();
 
@@ -148,17 +131,18 @@ public class BedWarsListener implements Listener {
         final var subtitle = Message.of(LangKeys.BED_DESTROYED_SUBTITLE).asComponent();
 
         for (var teamPlayer : destroyedTeam.getConnectedPlayers()) {
-            SBAUtil.sendTitle(PlayerMapper.wrapPlayer(teamPlayer), title, subtitle, 0, 40, 20);
+            teamPlayer.sendTitle(title, subtitle, 0, 40, 20);
         }
 
         final var destroyer = event.getDestroyer();
         if (destroyer != null) {
-            gameWrapper.getPlayerData(destroyer.getUuid())
-                    .ifPresent(destroyerData -> destroyerData.setBedDestroys(destroyerData.getBedDestroys() + 1));
+            gameWrapper
+                    .getPlayerData(destroyer.getUuid())
+                    .ifPresent(GamePlayerData::incrementBedDestroyedCounter);
         }
     }
 
-    @EventHandler
+    @OnEvent
     public void onBedWarsGameEndingEvent(BWGameEndingEvent event) {
         final var gameWrapper = event.getGame();
 
@@ -209,8 +193,7 @@ public class BedWarsListener implements Listener {
 
             final var winningTeamPlayerNames = new ArrayList<String>();
             winningTeam.getConnectedPlayers().forEach(player -> winningTeamPlayerNames.add(AdventureHelper.toLegacy(player.getDisplayName())));
-            winningTeam.getConnectedPlayers().forEach(pl ->
-                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, Component.empty(), 0, 90, 0));
+            winningTeam.getConnectedPlayers().forEach(pl -> pl.sendTitle(victoryTitle, Component.empty(), 0, 90, 0));
 
 
             Message.of(LangKeys.OVERSTATS_MESSAGE)
@@ -228,53 +211,50 @@ public class BedWarsListener implements Listener {
     }
 
     @EventHandler
-    public void onBWLobbyJoin(BWPlayerJoinedEvent e) {
-        final var player = e.getPlayer();
-        final var task = runnableCache.get(player.getUuid());
-        final var game = (Game) e.getGame();
-        if (task != null) {
-            SBAUtil.cancelTask(task);
-        }
+    public void onBWLobbyJoin(BWPlayerJoinedEvent event) {
+        final var playerWrapper = event.getPlayer();
 
-        switch (game.getStatus()) {
+        var task = runnableCache.get(playerWrapper.getUuid());
+        SBAUtil.cancelTask(task);
+
+        final var gameWrapper = event.getGame();
+        switch (gameWrapper.getStatus()) {
             case WAITING:
-                var bukkitTask = new BukkitRunnable() {
-                    int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
-                    @Override
-                    public void run() {
-                        if (game.getStatus() == GameStatus.WAITING) {
-                            if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
-                                String time = game.getFormattedTimeLeft();
+                task = Tasker.build(taskBase -> {
+                    return new Runnable() {
+                        int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
 
-                                if (!time.contains("0-1")) {
-                                    String[] units = time.split(":");
-                                    int seconds = Integer.parseInt(units[1]) + 1;
-                                    if (buffer == seconds) return;
-                                    buffer = seconds;
-                                    if (seconds <= 10) {
-                                        var message = Message.of(LangKeys.GAME_STARTS_IN_MESSAGE)
-                                                .placeholder("seconds", String.valueOf(seconds))
-                                                .asComponent();
-                                        player.sendMessage(message);
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                        @Override
+                        public void run() {
+                            if (gameWrapper.getStatus() == GameStatus.WAITING) {
+                                if (gameWrapper.getConnectedPlayers().size() >= gameWrapper.getMinPlayers()) {
+                                    String time = gameWrapper.getFormattedTimeLeft();
+                                    if (!time.contains("0-1")) {
+                                        String[] units = time.split(":");
+                                        int seconds = Integer.parseInt(units[1]) + 1;
+                                        if (buffer == seconds) return;
+                                        buffer = seconds;
+                                        if (seconds <= 10) {
+                                            var message = Message.of(LangKeys.GAME_STARTS_IN_MESSAGE)
+                                                    .placeholder("seconds", String.valueOf(seconds))
+                                                    .asComponent();
+                                            playerWrapper.sendMessage(message);
+                                            playerWrapper.sendTitle(ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                                        }
                                     }
                                 }
+                            } else {
+                                taskBase.cancel();
+                                runnableCache.remove(playerWrapper.getUuid());
                             }
-                        } else {
-                            this.cancel();
-                            runnableCache.remove(player.getUuid());
                         }
-                    }
-                }.runTaskTimer(SBA.getPluginInstance(), 3L, 20L);
-                runnableCache.put(player.getUuid(), bukkitTask);
+                    };
+                }).delay(3L, TaskerTime.TICKS).repeat(1L, TaskerTime.SECONDS).start();
+                runnableCache.put(playerWrapper.getUuid(), task);
                 break;
             case RUNNING:
-                final var arena = GameWrapperManagerImpl
-                        .getInstance()
-                        .get(game.getName())
-                        .orElseThrow();
-                GameScoreboardManager.getInstance().addViewer(player);
-                arena.getRotatingGenerators().forEach(generator -> generator.addViewer(player));
+                GameScoreboardManager.getInstance().addViewer(playerWrapper);
+                gameWrapper.getRotatingGenerators().forEach(generator -> generator.addViewer(playerWrapper));
                 break;
         }
     }
@@ -282,60 +262,51 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeave(BWPlayerLeaveEvent e) {
         final var player = e.getPlayer();
+
         final var task = runnableCache.get(player.getUuid());
-        GameScoreboardManager.getInstance().removeViewer(player);
-        if (task != null) {
-            SBAUtil.cancelTask(task);
-        }
+        SBAUtil.cancelTask(task);
         runnableCache.remove(player.getUuid());
+
+        GameScoreboardManager.getInstance().removeViewer(player);
         player.as(Player.class).setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
-        final var victim = e.getEntity();
-        if (!Main.isPlayerInGame(victim)) {
+    @OnEvent(priority = EventPriority.LOWEST)
+    public void onBedWarsPlayerKilledEvent(SPlayerDeathEvent event) {
+        final var victim = event.getPlayer().as(SBAPlayerWrapper.class);
+        if (!victim.isInGame()) {
             return;
         }
-        final var game = Main.getInstance().getGameOfPlayer(victim);
-        // query arena instance for access to Victim/Killer data
-        GameWrapperManagerImpl
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> {
-                    // player has died, increment death counter
-                    arena.getPlayerData(victim.getUniqueId())
-                            .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
-                    final var killer = victim.getKiller();
-                    //killer is present
-                    if (killer != null) {
-                        Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());
-                        // get victim game profile
-                        final var gVictim = Main.getPlayerGameProfile(victim);
+        final var gameWrapper = victim.getGame();
+        gameWrapper
+                .getPlayerData(victim.getUniqueId())
+                .ifPresent(GamePlayerData::incrementDeathCounter);
 
-                        if (gVictim == null || gVictim.isSpectator) return;
+        final var killer = event.getKiller();
+        if (killer != null) {
+            Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());
 
-                        // get victim team to check if it was a final kill or not
-                        final var victimTeam = game.getTeamOfPlayer(victim);
-                        if (victimTeam != null) {
-                            arena.getPlayerData(killer.getUniqueId())
-                                    .ifPresent(killerData -> {
-                                        Logger.trace("Incrementing killer kills to: {}", killerData.getKills() + 1);
-                                        // increment kill counter for killer
-                                        killerData.setKills(killerData.getKills() + 1);
-                                        if (!victimTeam.isAlive()) {
-                                            // increment final kill counter for killer
-                                            killerData.setFinalKills(killerData.getFinalKills() + 1);
-                                            Bukkit.getPluginManager().callEvent(new SBAFinalKillEvent(game, victim, killer));
-                                            if (SBAConfig.getInstance().node("final-kill-lightning").getBoolean(true)) {
-                                                victim.getWorld().strikeLightningEffect(victim.getLocation());
-                                            }
-                                        }
-                                    });
-                        }
+            final var victimTeam = gameWrapper.getTeamOfPlayer(victim);
+            if (victimTeam != null) {
+                final var maybeData = gameWrapper.getPlayerData(killer.getUuid());
+                if (maybeData.isEmpty()) {
+                    return;
+                }
+
+                final var killerData = maybeData.get();
+                killerData.incrementKillCounter();
+
+                Logger.trace("Incremented killer kills to: {}", killerData.getKills());
+                if (!victimTeam.isAlive()) {
+                    killerData.incrementFinalKillCounter();
+                    EventManager.fire(new SBAFinalKillEvent(gameWrapper, victim, killer));
+                    if (SBAConfig.getInstance().node("final-kill-lightning").getBoolean(true)) {
+                        victim.getLocation().getWorld().as(World.class).strikeLightningEffect(victim.getLocation().as(Location.class));
                     }
-                });
+                }
+            }
+        }
     }
 
     // fix for listener handles during BedWars reload.

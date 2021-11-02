@@ -1,23 +1,26 @@
-package io.github.pronze.sba.game;
+package io.github.pronze.sba.wrapper.game;
 
 import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.data.GamePlayerData;
+import io.github.pronze.sba.data.GameStoreData;
+import io.github.pronze.sba.game.GameStorage;
+import io.github.pronze.sba.game.InvisiblePlayer;
+import io.github.pronze.sba.game.RotatingGenerator;
 import io.github.pronze.sba.game.tasks.GameTask;
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import io.github.pronze.sba.wrapper.TeamWrapper;
-import org.bukkit.Location;
+import io.github.pronze.sba.wrapper.store.GameStoreWrapper;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.team.TeamWrapper;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.RunningTeam;
+import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.world.LocationHolder;
+import org.screamingsandals.lib.world.WorldHolder;
 
 import java.util.List;
 import java.util.Map;
@@ -75,21 +78,21 @@ public interface GameWrapper {
      * @param player the player instance to query
      * @return true if the player is hidden from game players, false otherwise
      */
-    boolean isPlayerHidden(@NotNull Player player);
+    boolean isPlayerHidden(@NotNull PlayerWrapper player);
 
     /**
      * Removes the player from its hidden state.
      *
      * @param player the player instance to remove
      */
-    void removeHiddenPlayer(@NotNull Player player);
+    void removeHiddenPlayer(@NotNull PlayerWrapper player);
 
     /**
      * Adds the player as a hidden player in the arena.
      *
      * @param player the player instance to add
      */
-    void addHiddenPlayer(@NotNull Player player);
+    void addHiddenPlayer(@NotNull PlayerWrapper player);
 
     /**
      * Gets a list of players that are current invisible in the arena.
@@ -97,7 +100,7 @@ public interface GameWrapper {
      * @return a list of players that are currently invisible in the arena
      */
     @NotNull
-    List<Player> getInvisiblePlayers();
+    List<PlayerWrapper> getInvisiblePlayers();
 
     /**
      * Creates a floating generator above the location of spawner. This generator is upgradable.
@@ -145,11 +148,11 @@ public interface GameWrapper {
 
     List<ItemSpawner> getItemSpawners();
 
-    List<GameStore> getGameStores();
+    List<GameStoreWrapper> getGameStores();
 
-    World getGameWorld();
+    WorldHolder getGameWorld();
 
-    Location getSpectatorSpawn();
+    LocationHolder getSpectatorSpawn();
 
     void registerUpgradeStoreNPC(@NotNull NPC npc);
 
@@ -168,8 +171,9 @@ public interface GameWrapper {
     @NotNull
     List<RunningTeamWrapper> getRunningTeams();
 
-    RunningTeamWrapper getTeamOfPlayer(PlayerWrapper player);
+    RunningTeamWrapper getTeamOfPlayer(@NotNull PlayerWrapper player);
 
+    @NotNull
     String getName();
 
     GameStatus getStatus();
@@ -179,4 +183,13 @@ public interface GameWrapper {
     String getFormattedTimeLeft();
 
     List<TeamWrapper> getAvailableTeams();
+
+    boolean isPlayerConnected(@NotNull UUID queryId);
+
+    boolean isPlayerConnected(@NotNull PlayerWrapper player);
+
+    int getMinPlayers();
+
+    @NotNull
+    List<GameStoreData> getGameStoreData();
 }

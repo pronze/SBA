@@ -263,6 +263,8 @@ public class SBAConfig implements Configurator {
                     .section("generator-splitter")
                         .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
                         .back()
+                    .section("sounds")
+                        .key("on_trap_triggered").defValue("entity.enderman.teleport")
                     .key("replace-stores-with-npc").defValue(true);
 
             generator.saveIfModified();

@@ -1,7 +1,7 @@
 package io.github.pronze.sba.manager;
 
 import io.github.pronze.sba.game.GameStorage;
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
 

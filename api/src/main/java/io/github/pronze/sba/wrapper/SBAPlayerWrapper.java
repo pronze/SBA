@@ -4,34 +4,44 @@ import com.google.common.base.Strings;
 import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.data.ToggleableSetting;
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import io.github.pronze.sba.lang.LangKeys;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.lib.lang.Message;
+import org.screamingsandals.lib.player.ExtendablePlayerWrapper;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.UUID;
+import java.time.Duration;
 
 @Getter
 @Setter
-public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper {
+public class SBAPlayerWrapper extends ExtendablePlayerWrapper {
     private int shoutCooldown;
     private final ToggleableSetting<PlayerSetting> settings;
 
     public static SBAPlayerWrapper of(Player player) {
-        return new SBAPlayerWrapper(player.getName(), player.getUniqueId());
+        return new SBAPlayerWrapper(PlayerMapper.wrapPlayer(player));
     }
 
-    public SBAPlayerWrapper(String playerName, UUID playerUUID) {
-        super(playerName, playerUUID);
+    public SBAPlayerWrapper(@NotNull PlayerWrapper playerWrapper) {
+        super(playerWrapper);
         // default values
         this.shoutCooldown = 0;
         this.settings = ToggleableSetting.of(PlayerSetting.class);
+    }
+
+    public int getEntityId() {
+        return asBukkitPlayer().getEntityId();
     }
 
     public void leaveFromGame() {
@@ -165,5 +175,26 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
 
     protected static int getDefaultShoutCoolDownTime() {
         return AddonAPI.getInstance().getConfigurator().getInt("shout.time-out", 60);
+    }
+
+    public void sendTitle(@NotNull String title, @NotNull String subTitle, int fadeIn, int stay, int fadeOut) {
+        sendTitle(AdventureHelper.toComponent(title), AdventureHelper.toComponent(subTitle), fadeIn, stay, fadeOut);
+    }
+
+    public void sendTitle(@NotNull Component title, @NotNull Component subtitle, int fadeIn, int stay, int fadeOut) {
+        var titleComponent = net.kyori.adventure.title.Title.title(
+                title,
+                subtitle,
+                Title.Times.of(
+                        Duration.ofMillis(fadeIn * 50L),
+                        Duration.ofMillis(stay * 50L),
+                        Duration.ofMillis(fadeOut * 50L)
+                )
+        );
+        showTitle(titleComponent);
+    }
+
+    public boolean isInGame() {
+        return BedWarsAPIWrapper.isPlayerInGame(this);
     }
 }

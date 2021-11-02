@@ -1,8 +1,8 @@
-package io.github.pronze.sba.wrapper;
+package io.github.pronze.sba.wrapper.team;
 
-import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.data.GameTeamData;
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -68,11 +68,7 @@ public class RunningTeamWrapper extends BasicWrapper<RunningTeam> {
     }
 
     public GameTeamData getTeamData() {
-        return AddonAPI.getInstance()
-                .getGameStorage(getGame())
-                .orElseThrow()
-                .getTeamData(this)
-                .orElseThrow();
+        return getGame().getStorage().getTeamData(this).orElseThrow();
     }
 
     public Integer getSharpnessLevel() {

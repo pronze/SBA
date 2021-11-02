@@ -7,6 +7,7 @@ import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
@@ -53,7 +54,7 @@ public class GeneratorTask extends AbstractGameTaskImpl {
                 }
 
                 // check to see if the spawners exist
-                var emptyQuery = game.getItemSpawners()
+                var emptyQuery = gameWrapper.getItemSpawners()
                         .stream()
                         .filter(itemSpawner -> itemSpawner.getItemSpawnerType().getMaterial() == upgradeType.getMaterial())
                         .findAny()
@@ -63,18 +64,18 @@ public class GeneratorTask extends AbstractGameTaskImpl {
                     return;
                 }
 
-                for (var itemSpawner : game.getItemSpawners()) {
+                for (var itemSpawner : gameWrapper.getItemSpawners()) {
                     if (itemSpawner.getItemSpawnerType().getMaterial() == upgradeType.getMaterial()) {
                         itemSpawner.addToCurrentLevel(SBAConfig.getInstance().getDouble("upgrades.multiplier", 0.25));
                     }
                 }
 
-                for (var rotatingGenerator : arena.getRotatingGenerators()) {
+                for (var rotatingGenerator : gameWrapper.getRotatingGenerators()) {
                     if (rotatingGenerator.isType(type)) {
-                        final var event = new SBASpawnerTierUpgradeEvent(game, rotatingGenerator);
-                        Bukkit.getServer().getPluginManager().callEvent(event);
+                        final var event = new SBASpawnerTierUpgradeEvent(gameWrapper, rotatingGenerator);
+                        EventManager.fire(event);
                         if (event.isCancelled()) {
-                            return;
+                            continue;
                         }
                         rotatingGenerator.incrementTier();
                     }
@@ -86,7 +87,7 @@ public class GeneratorTask extends AbstractGameTaskImpl {
                     Message.of(LangKeys.GENERATOR_UPGRADE_MESSAGE)
                             .placeholder("MatName", matName)
                             .placeholder("tier", nextEvent.getTranslatedTitle())
-                            .send(game
+                            .send(gameWrapper
                                     .getConnectedPlayers()
                                     .stream()
                                     .map(PlayerMapper::wrapPlayer)

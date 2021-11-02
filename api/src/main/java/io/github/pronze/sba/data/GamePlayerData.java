@@ -17,6 +17,16 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PUBLIC, staticName = "of")
 @Data
 public class GamePlayerData {
+
+    /**
+     * Constructs a new GamePlayerData instance.
+     * @param player the player to create for
+     * @return GamePlayerData object linked to the player.
+     */
+    public static GamePlayerData of(@NotNull PlayerWrapper player) {
+        return new GamePlayerData(player.getName());
+    }
+
     /**
      * Name of the game player.
      */
@@ -48,12 +58,19 @@ public class GamePlayerData {
     @NotNull
     private List<ItemStack> inventory = new ArrayList<>();
 
-    /**
-     * Constructs a new GamePlayerData instance.
-     * @param player the player to create for
-     * @return GamePlayerData object linked to the player.
-     */
-    public static GamePlayerData of(@NotNull PlayerWrapper player) {
-        return new GamePlayerData(player.getName());
+    public void incrementKillCounter() {
+        kills += 1;
+    }
+
+    public void incrementDeathCounter() {
+        deaths += 1;
+    }
+
+    public void incrementFinalKillCounter() {
+        finalKills += 1;
+    }
+
+    public void incrementBedDestroyedCounter() {
+        bedDestroys += 1;
     }
 }

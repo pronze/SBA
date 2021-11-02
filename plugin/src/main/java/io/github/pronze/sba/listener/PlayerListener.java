@@ -281,7 +281,6 @@ public class PlayerListener implements Listener {
                             .placeholder("%player%", player.getName())
                             .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).collect(Collectors.toList()));
                 });
-        SBA.getInstance().getPlayerWrapperService().unregister(player);
     }
 
     @EventHandler
@@ -295,7 +294,7 @@ public class PlayerListener implements Listener {
                 GameWrapperManagerImpl
                         .getInstance()
                         .get(game.getName())
-                        .ifPresent(arena -> arena.removeHiddenPlayer(player));
+                        .ifPresent(arena -> arena.removeHiddenPlayer(PlayerMapper.wrapPlayer(player)));
 
                 if (event.getCause() == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION) {
                     event.setDamage(SBAConfig.getInstance().node("explosion-damage").getDouble(1.0D));
@@ -330,7 +329,7 @@ public class PlayerListener implements Listener {
                 GameWrapperManagerImpl
                         .getInstance()
                         .get(playerGame.getName())
-                        .ifPresent(arena -> arena.addHiddenPlayer(player));
+                        .ifPresent(arena -> arena.addHiddenPlayer(PlayerMapper.wrapPlayer(player)));
             }
         }
     }
@@ -338,7 +337,6 @@ public class PlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
-        SBA.getInstance().getPlayerWrapperService().register(player);
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
             if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {

@@ -2,6 +2,7 @@ package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.manager.GameWrapperManager;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;

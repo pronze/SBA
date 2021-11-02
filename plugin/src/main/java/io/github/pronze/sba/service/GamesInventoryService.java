@@ -7,6 +7,7 @@ import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
+import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -14,6 +15,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.Server;
+import org.screamingsandals.lib.entity.EntityBasic;
 import org.screamingsandals.lib.event.OnEvent;
 import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
 import org.screamingsandals.lib.lang.Message;
@@ -33,6 +36,7 @@ import org.screamingsandals.lib.world.LocationMapper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -45,10 +49,12 @@ public class GamesInventoryService implements Listener {
 
     private final Multimap<GameMode, NPC> npcMap;
     private final List<Integer> entityEditMap;
+    private final YamlConfiguration config;
 
     public GamesInventoryService() {
         npcMap = ArrayListMultimap.create();
         entityEditMap = new ArrayList<>();
+        config = new YamlConfiguration();
     }
 
     public static GamesInventoryService getInstance() {
@@ -59,24 +65,23 @@ public class GamesInventoryService implements Listener {
     @OnPostEnable
     public void loadGamesInv() {
         SBA.getInstance().registerListener(this);
+
         final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(), "npc.yml");
         if (file.exists()) {
-            YamlConfiguration config = new YamlConfiguration();
             config.load(file);
-            for (var gameMode : GameMode.values()) {
-                checkAndAdd(config, gameMode);
-            }
+            Arrays.stream(GameMode.values())
+                    .forEach(this::checkAndAdd);
         }
 
-        Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
-            if (MainLobbyVisualsManager.isInWorld(player.getLocation())) {
-                addViewer(PlayerMapper.wrapPlayer(player));
+        Tasker.build(() -> Server.getConnectedPlayers().forEach(playerWrapper -> {
+            if (MainLobbyVisualsManager.isInWorld(playerWrapper.getLocation().as(Location.class))) {
+                addViewer(playerWrapper);
             }
         })).delay(1L, TaskerTime.SECONDS).start();
     }
 
     @SuppressWarnings("unchecked")
-    private void checkAndAdd(YamlConfiguration config, GameMode mode) {
+    private void checkAndAdd(GameMode mode) {
         final var node = config.get(mode.name().toLowerCase());
         if (node instanceof List) {
             final var locations = (List<Location>) node;
@@ -85,14 +90,8 @@ public class GamesInventoryService implements Listener {
     }
 
     public void addNPC(@NotNull GameMode mode, @NotNull Location location) {
-        if (mode == GameMode.UNKNOWN) {
-            throw new UnsupportedOperationException("Registration with mode unknown??");
-        }
-
         final var npc = NPC.of(LocationMapper.wrapLocation(location))
-                .setDisplayName(Message.of(LangKeys.GAMES_INV_DISPLAY_NAME)
-                        .placeholder("mode", mode.strVal())
-                        .getForAnyone());
+                .setDisplayName(Message.of(LangKeys.GAMES_INV_DISPLAY_NAME).placeholder("mode", mode.strVal()).getForAnyone());
         npcMap.put(mode, npc);
         update();
     }
@@ -165,11 +164,12 @@ public class GamesInventoryService implements Listener {
         entityEditMap.clear();
     }
 
-    public void addEditable(PlayerWrapper player) {
-        if (entityEditMap.contains(player.as(Player.class).getEntityId())) {
+    public void addEditable(@NotNull PlayerWrapper player) {
+        final var sWrapper = player.as(SBAPlayerWrapper.class);
+        if (entityEditMap.contains(sWrapper.getEntityId())) {
             return;
         }
-        entityEditMap.add(player.as(Player.class).getEntityId());
+        entityEditMap.add(sWrapper.getEntityId());
         Tasker.build(() -> entityEditMap.remove(Integer.valueOf(player.as(Player.class).getEntityId()))).delay(5L, TaskerTime.SECONDS).start();
     }
 

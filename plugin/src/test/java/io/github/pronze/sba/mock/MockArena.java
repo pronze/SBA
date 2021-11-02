@@ -2,6 +2,7 @@ package io.github.pronze.sba.mock;
 
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.*;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -54,37 +55,6 @@ public class MockArena implements GameWrapper {
     }
 
     @Override
-    public boolean isPlayerHidden(@NotNull Player player) {
-        return invisiblePlayers.containsKey(player.getUniqueId());
-    }
-
-    @Override
-    public void removeHiddenPlayer(@NotNull Player player) {
-        final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());
-        if (invisiblePlayer != null) {
-            invisiblePlayer.showPlayer();
-            invisiblePlayers.remove(player.getUniqueId());
-        }
-    }
-
-    @Override
-    public void addHiddenPlayer(@NotNull Player player) {
-        if (invisiblePlayers.containsKey(player.getUniqueId())) return;
-        final var invisiblePlayer = new MockInvisiblePlayer(player, this);
-        invisiblePlayer.vanish();
-        invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
-    }
-
-    @Override
-    public @NotNull List<Player> getInvisiblePlayers() {
-        return invisiblePlayers
-                .values()
-                .stream()
-                .map(InvisiblePlayerImpl::getHiddenPlayer)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void createRotatingGenerator(org.screamingsandals.bedwars.api.game.@NotNull ItemSpawner itemSpawner, @NotNull Material rotationMaterial) {
 
     }
@@ -103,28 +73,9 @@ public class MockArena implements GameWrapper {
         return Optional.empty();
     }
 
-    @Override
-    public List<Player> getConnectedPlayers() {
-        return null;
-    }
 
     @Override
     public List<org.screamingsandals.bedwars.api.game.ItemSpawner> getItemSpawners() {
         return null;
     }
 
-    @Override
-    public List<GameStore> getGameStores() {
-        return null;
-    }
-
-    @Override
-    public World getGameWorld() {
-        return null;
-    }
-
-    @Override
-    public Location getSpectatorSpawn() {
-        return null;
-    }
-}

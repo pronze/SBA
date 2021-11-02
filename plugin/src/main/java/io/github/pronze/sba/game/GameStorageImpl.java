@@ -1,11 +1,11 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GameTeamData;
-import io.github.pronze.sba.wrapper.RunningTeamWrapper;
+import io.github.pronze.sba.wrapper.game.GameWrapper;
+import io.github.pronze.sba.wrapper.team.RunningTeamWrapper;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.api.RunningTeam;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
