@@ -25,7 +25,6 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
-import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -170,26 +169,12 @@ public class Arena implements IArena {
                 // set fake entity to avoid bw listener npe
                 Reflect.setField(nonAPIStore, "entity", mockEntity);
 
-                NPCSkin skin = null;
                 List<Component> name = null;
                 final var file = store.getShopFile();
-                try {
-                    if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
-                        skin = NPCStoreService.getInstance().getUpgradeShopSkin();
-                        name = NPCStoreService.getInstance().getUpgradeShopText();
-                    } else {
-                        skin = NPCStoreService.getInstance().getShopSkin();
-                        name = NPCStoreService.getInstance().getShopText();
-                    }
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
 
                 final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
                         .setDisplayName(name)
-                        .setShouldLookAtViewer(true)
-                        .setTouchable(true)
-                        .setSkin(skin);
+                        .setTouchable(true);
 
                 if (file != null && file.equals("upgradeShop.yml")) {
                     upgradeStoreNPCS.add(npc);

@@ -196,14 +196,14 @@ public class GamesInventoryService implements Listener {
 
     @OnEvent
     public void onNPCTouch(NPCInteractEvent event) {
-        if (event.getInteractType() == NPCInteractEvent.InteractType.RIGHT_CLICK) {
+        if (event.getInteractType() == org.screamingsandals.lib.utils.InteractType.RIGHT_CLICK) {
             if (entityEditMap.contains(event.getPlayer().as(Player.class).getEntityId())) {
-                removeNPC(event.getPlayer(), event.getNpc());
+                removeNPC(event.getPlayer(), event.getVisual());
                 return;
             }
         }
 
-        final var npcLocation = Objects.requireNonNull(event.getNpc().getLocation()).as(Location.class);
+        final var npcLocation = Objects.requireNonNull(event.getVisual().getLocation()).as(Location.class);
         final var isSolo = soloNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
         final var isDouble = doubleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
         final var isTriple = tripleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);

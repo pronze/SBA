@@ -15,7 +15,6 @@ import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
-import org.screamingsandals.lib.npc.NPCSkin;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.AdventureHelper;
@@ -40,9 +39,6 @@ public class NPCStoreService implements Listener {
 
     private final GameStore shopStore;
     private final GameStore upgradeStore;
-
-    private NPCSkin shopSkin;
-    private NPCSkin upgradeShopSkin;
 
     private final List<Component> shopText = new ArrayList<>();
     private final List<Component> upgradeShopText = new ArrayList<>();
@@ -71,21 +67,11 @@ public class NPCStoreService implements Listener {
     public void onPostEnabled() {
         SBA.getInstance().registerListener(this);
         EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
-
-        shopSkin = new NPCSkin(
-                SBAConfig.getInstance().node("shop", "normal-shop", "skin", "value").getString(),
-                SBAConfig.getInstance().node("shop", "normal-shop", "skin", "signature").getString()
-        );
-
-        upgradeShopSkin = new NPCSkin(
-                SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "value").getString(),
-                SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "signature").getString()
-        );
     }
 
     public void onNPCTouched(NPCInteractEvent event) {
         Logger.trace("Clicked NPC with click type: {}", event.getInteractType().name());
-        if (event.getInteractType() == NPCInteractEvent.InteractType.LEFT_CLICK) {
+        if (event.getInteractType() == org.screamingsandals.lib.utils.InteractType.LEFT_CLICK) {
             return;
         }
 
@@ -95,7 +81,7 @@ public class NPCStoreService implements Listener {
         }
 
         final var game = Main.getInstance().getGameOfPlayer(player);
-        final var npc = event.getNpc();
+        final var npc = event.getVisual();
         ArenaManager
                 .getInstance()
                 .getArenaMap()
