@@ -31,16 +31,10 @@ subprojects {
         mavenLocal()
         mavenCentral()
         maven {
-            url = uri('https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven')
-        }
-        maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
         }
         maven {
             url = uri('https://repo.screamingsandals.org/public')
-        }
-        maven {
-            url = uri('https://gitlab.hoznet.dev/api/v4/projects/9/packages/maven')
         }
         maven {
             url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
@@ -68,7 +62,6 @@ subprojects {
         relocate 'net.kyori', 'io.github.pronze.lib.kyori'
         relocate 'cloud.commandframework', 'io.github.pronze.lib.cloud'
         relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
-        relocate 'pronze.lib', 'io.github.pronze.lib.pronzelib'
         relocate 'org.screamingsandals.lib', 'io.github.pronze.lib.screaminglib'
         relocate 'org.screamingsandals.simpleinventories', 'io.github.pronze.lib.simpleinventories'
     }

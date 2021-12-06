@@ -29,7 +29,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import java.util.*;
 
 @Service

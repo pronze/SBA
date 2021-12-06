@@ -48,7 +48,7 @@ import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
-import pronze.lib.scoreboards.ScoreboardManager;
+import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +60,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         id = "SBA",
         authors = {"pronze"},
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.6-SNAPSHOT"
+        version = "1.5.6-dev27"
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
@@ -68,6 +68,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "PlaceholderAPI"
 )
 @Init(services = {
+        Logger.class,
         Tasker.class,
         PacketMapper.class,
         HologramManager.class,
@@ -76,7 +77,6 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         NPCManager.class,
         UpdateChecker.class,
         SBAConfig.class,
-        Logger.class,
         LanguageService.class,
         CommandManager.class,
         ArenaManager.class,

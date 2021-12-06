@@ -7,3 +7,5 @@
 gradle-app.setting
 !gradle-wrapper.jar
 .gradletasknamecache
+*/bin/*
+*.class

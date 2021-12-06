@@ -12,7 +12,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
-
+/*
 @Service
 public class PartyDebugCommand {
 
@@ -37,3 +37,4 @@ public class PartyDebugCommand {
                         sender.sendMessage("This user is not in a party!"));
     }
 }
+*/

@@ -13,7 +13,7 @@ import io.github.pronze.sba.events.SBAPlayerPartyLeaveEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-
+/*
 @Service
 public class PartyLeaveCommand {
 
@@ -99,3 +99,4 @@ public class PartyLeaveCommand {
     }
 
 }
+*/

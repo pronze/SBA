@@ -13,7 +13,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-
+/*
 @Service
 public class PartyDisbandCommand {
 
@@ -71,3 +71,4 @@ public class PartyDisbandCommand {
                         .send(player));
     }
 }
+*/

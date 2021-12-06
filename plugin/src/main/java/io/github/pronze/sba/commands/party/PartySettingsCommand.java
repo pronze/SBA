@@ -16,7 +16,7 @@ import io.github.pronze.sba.events.SBAPlayerPartyUnmutedEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-
+/*
 @Service
 public class PartySettingsCommand {
 
@@ -146,4 +146,4 @@ public class PartySettingsCommand {
                         .get(MessageKeys.PARTY_MESSAGE_ERROR)
                         .send(player));
     }
-}
+}*/

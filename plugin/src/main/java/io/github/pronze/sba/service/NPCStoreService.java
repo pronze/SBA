@@ -71,9 +71,9 @@ public class NPCStoreService implements Listener {
 
     public void onNPCTouched(NPCInteractEvent event) {
         Logger.trace("Clicked NPC with click type: {}", event.getInteractType().name());
-        if (event.getInteractType() == org.screamingsandals.lib.utils.InteractType.LEFT_CLICK) {
-            return;
-        }
+        //if (event.getInteractType() == org.screamingsandals.lib.utils.InteractType.LEFT_CLICK) {
+        //    return;
+        //}
 
         final var player = event.getPlayer().as(Player.class);
         if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {

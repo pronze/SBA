@@ -17,16 +17,6 @@ public class UpdateChecker {
         if (SBA.getInstance().isSnapshot()) {
             return;
         }
-
-        new Thread(() -> {
-            try (final var inputStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=79505").openStream(); Scanner scanner = new Scanner(inputStream)) {
-                if (scanner.hasNext()) {
-                    promptUpdate(scanner.next());
-                }
-            } catch (IOException exception) {
-                exception.printStackTrace();
-            }
-        }).start();
     }
 
     private void promptUpdate(@NotNull String version) {

@@ -14,7 +14,7 @@ import io.github.pronze.sba.events.SBAPlayerPartyInviteDeclineEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-
+/*
 @Service
 public class PartyDeclineCommand {
 
@@ -79,3 +79,4 @@ public class PartyDeclineCommand {
                         .forEach(player::sendMessage));
     }
 }
+*/

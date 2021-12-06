@@ -11,7 +11,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-
+/*
 @Service
 public class PartyChatCommand {
 
@@ -37,3 +37,4 @@ public class PartyChatCommand {
                 .send(player);
     }
 }
+*/

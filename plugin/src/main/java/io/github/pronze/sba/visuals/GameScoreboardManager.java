@@ -19,8 +19,8 @@ import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
 import org.screamingsandals.lib.tasker.Tasker;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
+import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 

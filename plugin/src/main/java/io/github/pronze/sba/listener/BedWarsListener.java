@@ -28,8 +28,8 @@ import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
+import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.HashMap;
 import java.util.Map;

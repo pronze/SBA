@@ -79,7 +79,8 @@ public class Logger {
     }
 
     public static void setMode(Level level) {
-        instance.level = level;
+        if(instance != null)
+            instance.level = level;
     }
 
     public enum Level {
