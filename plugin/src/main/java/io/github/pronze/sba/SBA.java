@@ -2,6 +2,7 @@ package io.github.pronze.sba;
 
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.listener.GeneratorSplitterListener;
+import io.github.pronze.sba.service.HealthIndicatorService;
 import io.github.pronze.sba.service.SBWConfigModifier;
 import io.github.pronze.sba.visuals.scoreboard.GameLobbyScoreboardManager;
 import io.github.pronze.sba.visuals.scoreboard.GameScoreboardManager;
@@ -51,7 +52,10 @@ import java.util.List;
         // visuals
         GameLobbyScoreboardManager.class,
         GameScoreboardManager.class,
-        LobbyScoreboardManager.class
+        LobbyScoreboardManager.class,
+
+        // services
+        HealthIndicatorService.class
 })
 public class SBA extends PluginContainer implements SBWAddonAPI {
     private LoggerWrapper logger;

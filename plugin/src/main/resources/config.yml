@@ -3,6 +3,10 @@ locale: en_US
 player-stats:
   xp-to-level-up: 5000
 
+health-indicator:
+  enabled: true
+  show-health-in-tablist: true
+
 generator-splitter:
   enabled: true
   sounds-enabled: true
