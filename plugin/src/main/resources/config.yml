@@ -1,0 +1,4 @@
+locale: en_US
+
+player-stats:
+  xp-to-level-up: 5000

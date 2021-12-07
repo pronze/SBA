@@ -1,6 +1,6 @@
 package io.github.pronze.sba;
 
-import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.lang.LangKeys;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -19,8 +19,6 @@ public class SBALanguageServiceTest {
     @SneakyThrows
     @Test
     public void test() {
-        Logger.mockMode();
-
         File tempFile = File.createTempFile("test", "language");
         try(var input = SBALanguageServiceTest.class.getResourceAsStream("/languages/language_en.yml")) {
             assert input != null;
