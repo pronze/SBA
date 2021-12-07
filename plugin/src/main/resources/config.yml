@@ -2,3 +2,11 @@ locale: en_US
 
 player-stats:
   xp-to-level-up: 5000
+
+generator-splitter:
+  enabled: true
+  sounds-enabled: true
+  allowed-materials:
+    - GOLD_INGOT
+    - IRON_INGOT
+    - EMERALD

@@ -1,12 +1,12 @@
 package io.github.pronze.sba;
 
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.listener.GeneratorSplitterListener;
 import io.github.pronze.sba.service.SBWConfigModifier;
 import io.github.pronze.sba.visuals.scoreboard.GameLobbyScoreboardManager;
 import io.github.pronze.sba.visuals.scoreboard.GameScoreboardManager;
 import io.github.pronze.sba.visuals.scoreboard.LobbyScoreboardManager;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
@@ -16,7 +16,6 @@ import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.plugin.PluginContainer;
-import org.screamingsandals.lib.plugin.PluginManager;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
@@ -41,9 +40,15 @@ import java.util.List;
 })
 @Init(services = {
         UpdateChecker.class,
+
+        // configuration
         SBAConfig.class,
         SBWConfigModifier.class,
 
+        // listeners
+        GeneratorSplitterListener.class,
+
+        // visuals
         GameLobbyScoreboardManager.class,
         GameScoreboardManager.class,
         LobbyScoreboardManager.class
