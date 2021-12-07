@@ -122,6 +122,7 @@ public class ShopUtil {
 
         final var boots = new ItemStack(mat_boots);
         final var leggings = new ItemStack(Material.valueOf(matName + "_LEGGINGS"));
+        final var chestplate = new ItemStack(Material.valueOf(matName + "_CHESTPLATE"));
 
         final var level = gameStorage.getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow();
         if (level != 0) {
@@ -131,8 +132,12 @@ public class ShopUtil {
 
         playerInventory.setLeggings(null);
         playerInventory.setBoots(null);
+        //if (SBAConfig.getInstance().node("upgrade-item","boots").getBoolean(true))
         playerInventory.setBoots(boots);
-        playerInventory.setLeggings(leggings);
+        if (SBAConfig.getInstance().node("upgrade-item","leggings").getBoolean(true))
+            playerInventory.setLeggings(leggings);
+        if (SBAConfig.getInstance().node("upgrade-item","chestplate").getBoolean(true))
+            playerInventory.setChestplate(chestplate);
         return true;
     }
 

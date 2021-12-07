@@ -70,7 +70,7 @@ public class GeneratorSplitterListener implements Listener {
             }
 
             removeHash(item.getItemStack(), SPLITTER_HASH);
-            Logger.trace("GSL: Hit spawned item!");
+            //Logger.trace("GSL: Hit spawned item!");
             player.getWorld().getNearbyEntities(player.getLocation(), 3, 3, 3)
                     .stream()
                     .filter(entity -> !entity.equals(player))

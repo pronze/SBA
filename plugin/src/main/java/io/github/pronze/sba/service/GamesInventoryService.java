@@ -5,6 +5,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
@@ -12,6 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.event.OnEvent;
 import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
@@ -44,7 +46,15 @@ public class GamesInventoryService implements Listener {
     private final List<Location> tripleNPCLocations = new ArrayList<>();
     private final List<Location> squadsNPCLocations = new ArrayList<>();
     private final List<NPC> npcs = new ArrayList<>();
+    private final List<NPC> soloNpcs = new ArrayList<>();
+    private final List<NPC> doubleNpcs = new ArrayList<>();
+    private final List<NPC> tripleNpcs = new ArrayList<>();
+    private final List<NPC> squadsNpcs = new ArrayList<>();
     private final List<Integer> entityEditMap = new ArrayList<>();
+
+    public List<NPC> getNpcs() {
+        return npcs;
+    }
 
     public static GamesInventoryService getInstance() {
         return ServiceManager.get(GamesInventoryService.class);
@@ -58,10 +68,10 @@ public class GamesInventoryService implements Listener {
         if (file.exists()) {
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
-            checkAndAdd(config, GameMode.SOLOS, soloNPCLocations);
-            checkAndAdd(config, GameMode.DOUBLES, doubleNPCLocations);
-            checkAndAdd(config, GameMode.TRIPLES, tripleNPCLocations);
-            checkAndAdd(config, GameMode.SQUADS, squadsNPCLocations);
+            checkAndAdd(config, GameMode.SOLOS, soloNPCLocations,soloNpcs);
+            checkAndAdd(config, GameMode.DOUBLES, doubleNPCLocations,doubleNpcs);
+            checkAndAdd(config, GameMode.TRIPLES, tripleNPCLocations,tripleNpcs);
+            checkAndAdd(config, GameMode.SQUADS, squadsNPCLocations,squadsNpcs);
         }
         Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
             if (MainLobbyVisualsManager.isInWorld(player.getLocation())) {
@@ -71,18 +81,22 @@ public class GamesInventoryService implements Listener {
     }
 
     @SuppressWarnings("unchecked")
-    private void checkAndAdd(YamlConfiguration config, GameMode mode, List<Location> locations) {
+    private void checkAndAdd(YamlConfiguration config, GameMode mode, List<Location> locations, List<NPC> npcList) {
         final var node = config.get(mode.name().toLowerCase());
         if (node != null) {
             locations.clear();
             locations.addAll((List<Location>) node);
-            locations.forEach(location -> npcs.add(NPC.of(LocationMapper.wrapLocation(location))
-                            .setDisplayName(LanguageService
-                            .getInstance()
-                            .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
-                            .replace("%mode%", mode.strVal())
-                            .toComponentList())
-                            .show()));
+            locations.forEach(location -> {
+                NPC n = NPC.of(LocationMapper.wrapLocation(location))
+                        .setDisplayName(LanguageService
+                                .getInstance()
+                                .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
+                                .replace("%mode%", mode.strVal())
+                                .toComponentList())
+                        .show();
+                npcs.add(n);
+                npcList.add(n);
+            });
         }
     }
 
@@ -114,7 +128,8 @@ public class GamesInventoryService implements Listener {
 
     public void removeNPC(PlayerWrapper remover, @NotNull NPC npc) {
         final var loc = Objects.requireNonNull(npc.getLocation()).as(Location.class);
-        if (soloNPCLocations.contains(loc) || doubleNPCLocations.contains(loc) || tripleNPCLocations.contains(loc) || squadsNPCLocations.contains(loc)) {
+        if (soloNPCLocations.contains(loc) || doubleNPCLocations.contains(loc) || tripleNPCLocations.contains(loc)
+                || squadsNPCLocations.contains(loc)) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.NPC_REMOVED)
@@ -128,10 +143,10 @@ public class GamesInventoryService implements Listener {
         }
     }
 
-
     public void update() {
         try {
-            final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(), "npc.yml");
+            final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(),
+                    "npc.yml");
             YamlConfiguration config = new YamlConfiguration();
 
             if (!file.exists()) {
@@ -191,7 +206,8 @@ public class GamesInventoryService implements Listener {
             return;
         }
         entityEditMap.add(player.as(Player.class).getEntityId());
-        Tasker.build(() -> entityEditMap.remove(Integer.valueOf(player.as(Player.class).getEntityId()))).delay(5L, TaskerTime.SECONDS).start();
+        Tasker.build(() -> entityEditMap.remove(Integer.valueOf(player.as(Player.class).getEntityId())))
+                .delay(5L, TaskerTime.SECONDS).start();
     }
 
     @OnEvent
@@ -203,11 +219,13 @@ public class GamesInventoryService implements Listener {
             }
         }
 
-        final var npcLocation = Objects.requireNonNull(event.getVisual().getLocation()).as(Location.class);
-        final var isSolo = soloNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isDouble = doubleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isTriple = tripleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isSquad = squadsNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
+        NPC clicked=event.getVisual();
+
+        final var isSolo = soloNpcs.stream().anyMatch(n -> n == clicked);
+        final var isDouble = doubleNpcs.stream().anyMatch(n -> n == clicked);
+        final var isTriple = tripleNpcs.stream().anyMatch(n -> n == clicked);
+        final var isSquad = squadsNpcs.stream().anyMatch(n -> n == clicked);
+
         int mode = 1;
         if (isDouble) {
             mode = 2;
@@ -216,10 +234,18 @@ public class GamesInventoryService implements Listener {
         } else if (isSquad) {
             mode = 4;
         } else if (!isSolo) {
+            Logger.trace("not solo");
             return;
         }
-        GamesInventory
+        final int md = mode;
+        new BukkitRunnable() {
+            public void run() {
+                GamesInventory
                 .getInstance()
-                .openForPlayer(event.getPlayer().as(Player.class), mode);
+                .openForPlayer(event.getPlayer().as(Player.class), md);
+            }
+        }.runTask(SBA.getPluginInstance());
+       
     }
+
 }

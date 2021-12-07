@@ -28,7 +28,7 @@ import java.util.function.Function;
 
 @Service(initAnother = {
         SBACommand.class,
-        //GamesInvNPCCommand.class,
+        GamesInvNPCCommand.class,
         ShoutCommand.class,
         //PartyCommand.class
 })

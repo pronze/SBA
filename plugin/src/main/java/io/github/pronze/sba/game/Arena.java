@@ -30,6 +30,7 @@ import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 import net.kyori.adventure.text.TextComponent;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -153,7 +154,7 @@ public class Arena implements IArena {
                     });
         }
 
-        if (false && SBAConfig.getInstance().node("replace-stores-with-npc").getBoolean(true)) {
+        if (SBAConfig.getInstance().node("replace-stores-with-npc").getBoolean(true)) {
             game.getGameStores().forEach(store -> {
                 final var nonAPIStore = (GameStore) store;
                 final var villager = nonAPIStore.kill();
@@ -169,14 +170,28 @@ public class Arena implements IArena {
 
                 // set fake entity to avoid bw listener npe
                 Reflect.setField(nonAPIStore, "entity", mockEntity);
+                final var file = store.getShopFile();
 
                 List<Component> name = new ArrayList<Component>();
-                name.add(Component.text("SHOP"));
+                NPCSkin skin = null;
+                try {
+                    if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+                        skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+                        name = NPCStoreService.getInstance().getUpgradeShopText();
+                    } else {
+                        skin = NPCStoreService.getInstance().getShopSkin();
+                        name = NPCStoreService.getInstance().getShopText();
+                    }
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
 
-                final var file = store.getShopFile();
+                
 
                 final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
                         .setDisplayName(name)
+                        .setShouldLookAtPlayer(true)
+                        .setSkin(skin)
                         .setTouchable(true);
 
                 if (file != null && file.equals("upgradeShop.yml")) {
