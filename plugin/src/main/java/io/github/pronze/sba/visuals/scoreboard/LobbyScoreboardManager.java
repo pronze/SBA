@@ -50,7 +50,7 @@ public final class LobbyScoreboardManager implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
-        if (!config.node("main-lobby", "enabled")
+        if (!config.node("main-lobby", "scoreboard", "enabled")
                 .getBoolean(false)) {
             return;
         }
@@ -103,6 +103,7 @@ public final class LobbyScoreboardManager implements Listener {
                             .getStatistic(playerWrapper.as(Player.class));
                     return AdventureHelper.toComponent(String.valueOf(playerStatistic.getKD()));
                 });
+
 
         sidebar.bottomLine(lines);
         sidebar.show();

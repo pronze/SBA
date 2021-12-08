@@ -7,6 +7,7 @@ import io.github.pronze.sba.game.GameManagerImpl;
 import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.DateProviderService;
+import io.github.pronze.sba.visuals.scoreboard.task.SidebarAnimatedTitleTask;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -122,28 +123,15 @@ public final class GameLobbyScoreboardManager implements Listener {
 
         final var sidebar = Sidebar.of();
         final var animatedTitle = Message.of(LangKeys.ANIMATED_BEDWARS_TITLE).getForAnyone();
-        sidebar.title(animatedTitle.get(0));
 
-        Tasker.build(taskBase -> new Runnable() {
-            int anim_title_pos = 0;
-
-            @Override
-            public void run() {
-                if (game.getStatus() != GameStatus.WAITING) {
-                    return;
-                }
-
-                anim_title_pos += 1;
-                if (anim_title_pos >= animatedTitle.size()) {
-                    anim_title_pos = 0;
-                }
-
-                sidebar.title(animatedTitle.get(anim_title_pos));
-            }
-        }).async().repeat(2L, TaskerTime.TICKS).start();
+        Tasker.build(taskBase -> new SidebarAnimatedTitleTask(sidebar, animatedTitle, () -> true, taskBase))
+                .async()
+                .repeat(2L, TaskerTime.TICKS)
+                .start();
 
         Tasker.build(() -> {
             if (game.getStatus() != GameStatus.WAITING) {
+                // we could instead listen to BedWarsGameStatusChangedEvent
                 return;
             }
 

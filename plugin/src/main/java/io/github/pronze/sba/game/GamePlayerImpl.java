@@ -5,12 +5,14 @@ import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.statistics.PlayerStatistic;
 import org.screamingsandals.lib.player.ExtendablePlayerWrapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Optional;
 
 public final class GamePlayerImpl extends ExtendablePlayerWrapper {
     private final PlayerStatistic statistic;
@@ -27,6 +29,10 @@ public final class GamePlayerImpl extends ExtendablePlayerWrapper {
         this.statistic = statistic;
     }
 
+    @NotNull
+    public Optional<Game> getGame() {
+        return Optional.ofNullable(Main.getInstance().getGameOfPlayer(as(Player.class)));
+    }
 
     public void destroy() {
 

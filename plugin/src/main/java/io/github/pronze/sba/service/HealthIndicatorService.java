@@ -87,10 +87,9 @@ public class HealthIndicatorService implements Listener {
 
     @EventHandler
     public void onBedWarsGameEndingEvent(BedwarsGameEndingEvent event) {
-        final var healthIndicator = healthIndicatorMap.get(event.getGame());
-        if (healthIndicator != null) {
+        healthIndicatorMap.computeIfPresent(event.getGame(), (game, healthIndicator) -> {
             healthIndicator.destroy();
-            healthIndicatorMap.remove(event.getGame());
-        }
+            return null;
+        });
     }
 }
