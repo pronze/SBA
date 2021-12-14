@@ -1,7 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import org.screamingsandals.lib.utils.annotations.Service;
-/*
+
 @Service(initAnother = {
         PartyAcceptCommand.class,
         PartyChatCommand.class,
@@ -19,4 +19,3 @@ import org.screamingsandals.lib.utils.annotations.Service;
 public class PartyCommand {
 
 }
-*/

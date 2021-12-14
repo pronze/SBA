@@ -68,12 +68,12 @@ public class Party implements IParty {
         Logger.trace("Adding player: {} to party: {}", player.getName(), debugInfo());
         invitedPlayers.remove(player);
         members.add(player);
-        leader.getSettings().disable(PlayerSetting.IN_PARTY);
+        //leader.getSettings().disable(PlayerSetting.IN_PARTY);
         if (inviteDataMap.containsKey(player.getInstance().getUniqueId())) {
             final var inviteData = inviteDataMap.get(player.getInstance().getUniqueId());
             if (inviteData != null) {
                 SBAUtil.cancelTask(inviteData.getInviteTask());
-                player.getSettings().disable(PlayerSetting.IN_PARTY);
+                player.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
                 inviteDataMap.remove(player.getInstance().getUniqueId());
             }
         }
@@ -100,7 +100,7 @@ public class Party implements IParty {
         Logger.trace("Replacing leader: {} with: {} in party of uuid: {}",
                 leader.getName(), player.getName(), debugInfo());
         leader = player;
-        leader.getSettings().disable(PlayerSetting.IN_PARTY);
+        //leader.getSettings().disable(PlayerSetting.IN_PARTY);
         if (!members.contains(leader)) {
             members.add(leader);
         }
@@ -118,13 +118,13 @@ public class Party implements IParty {
         Logger.trace("Player: {} has invited: {} to party: {}", player.getName(),
                 invitee.getName(), debugInfo());
         invitedPlayers.add(invitee);
-        invitee.getSettings().enable(PlayerSetting.IN_PARTY);
+        invitee.getSettings().enable(PlayerSetting.INVITED_TO_PARTY);
 
         final var inviteTask = new BukkitRunnable() {
             @Override
             public void run() {
                 Logger.trace("IParty invitation expired for: {} of party: {}", invitee.getName(), debugInfo());
-                invitee.getSettings().disable(PlayerSetting.IN_PARTY);
+                invitee.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
                 inviteDataMap.remove(invitee.getInstance().getUniqueId());
                 if (shouldDisband()) {
                     SBA.getInstance()
@@ -166,7 +166,7 @@ public class Party implements IParty {
         }
 
         invitedPlayers.remove(invitee);
-        invitee.getSettings().disable(PlayerSetting.IN_PARTY);
+        invitee.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
     }
 
     @Override

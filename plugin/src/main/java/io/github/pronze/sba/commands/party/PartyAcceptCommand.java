@@ -13,7 +13,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
-/*
+
 @Service
 public class PartyAcceptCommand {
 
@@ -30,14 +30,7 @@ public class PartyAcceptCommand {
                 .wrapPlayer(playerArg)
                 .as(SBAPlayerWrapper.class);
 
-        if (!player.getSettings().isToggled(PlayerSetting.INVITED_TO_PARTY)) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.PARTY_MESSAGE_NOT_INVITED)
-                    .send(player);
-            return;
-        }
-
+      
         final var optionalParty = PartyManager
                 .getInstance()
                 .getInvitedPartyOf(player);
@@ -66,8 +59,7 @@ public class PartyAcceptCommand {
                     .send(party.getMembers().toArray(SBAPlayerWrapper[]::new));
         }, () -> LanguageService
                 .getInstance()
-                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                .get(MessageKeys.PARTY_MESSAGE_NOT_INVITED)
                 .send(player));
     }
 }
-*/

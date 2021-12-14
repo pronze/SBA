@@ -18,7 +18,7 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 
 import java.util.List;
 import java.util.stream.Collectors;
-/*
+
 @Service
 public class PartyKickCommand {
 
@@ -111,4 +111,3 @@ public class PartyKickCommand {
                 );
     }
 }
-*/

@@ -23,7 +23,6 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
     public SBAPlayerWrapper(Player player) {
         super(org.screamingsandals.lib.player.PlayerMapper.getPlayer(player.getUniqueId()).get());
 
-        // default values
         this.shoutCooldown = 0;
         this.settings = ToggleableSetting.of(PlayerSetting.class);
     }

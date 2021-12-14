@@ -115,7 +115,7 @@ public class PartyManager implements IPartyManager {
         });
 
         party.getInvitedPlayers().forEach(invitedPlayer -> {
-            invitedPlayer.getSettings().disable(PlayerSetting.IN_PARTY);
+            invitedPlayer.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
             party.removeInvitedPlayer(invitedPlayer);
             final var wrapperImpl = PlayerMapper
                     .wrapPlayer(invitedPlayer.getInstance())

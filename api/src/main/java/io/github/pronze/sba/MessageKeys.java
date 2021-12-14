@@ -131,5 +131,6 @@ public class MessageKeys {
     public static final String[] ADDED_NPC = {"added-npc"};
     public static final String[] NPC_ALREADY_SPAWNED = {"npc-already-available"};
     public static final String[] REMOVABLE_NPC_TOGGLE = {"removable-npc-toggle"};
+    public static final String[] SKIN_NPC_TOGGLE = {"skin-npc-toggle"};
     public static final String[] NPC_REMOVED = {"npc-removed"};
 }

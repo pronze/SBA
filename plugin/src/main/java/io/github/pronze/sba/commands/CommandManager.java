@@ -12,7 +12,7 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
-//import io.github.pronze.sba.commands.party.PartyCommand;
+import io.github.pronze.sba.commands.party.PartyCommand;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -30,7 +30,7 @@ import java.util.function.Function;
         SBACommand.class,
         GamesInvNPCCommand.class,
         ShoutCommand.class,
-        //PartyCommand.class
+        PartyCommand.class
 })
 @Getter
 public class CommandManager {

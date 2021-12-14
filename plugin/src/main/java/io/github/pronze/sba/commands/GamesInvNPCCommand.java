@@ -7,6 +7,8 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.GamesInventoryService;
+
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -26,13 +28,13 @@ public class GamesInvNPCCommand {
     @CommandPermission("sba.spawnnpc")
     private void commandSpawn(final @NotNull Player player,
                               final @NotNull @Argument("mode") GameMode mode) {
-        if (GamesInventoryService.getInstance().isNPCAtLocation(LocationMapper.wrapLocation(player.getLocation()))) {
+        /*if (GamesInventoryService.getInstance().isNPCAtLocation(LocationMapper.wrapLocation(player.getLocation()))) {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.NPC_ALREADY_SPAWNED)
                     .send(PlayerMapper.wrapPlayer(player));
             return;
-        }
+        }*/
 
         GamesInventoryService.getInstance().addNPC(mode, player.getLocation());
         GamesInventoryService.getInstance().addViewer(PlayerMapper.wrapPlayer(player));
@@ -49,6 +51,16 @@ public class GamesInvNPCCommand {
                 .getInstance()
                 .get(MessageKeys.REMOVABLE_NPC_TOGGLE)
                 .send(PlayerMapper.wrapPlayer(player));
-        GamesInventoryService.getInstance().addEditable(PlayerMapper.wrapPlayer(player));
+        GamesInventoryService.getInstance().addEditable(PlayerMapper.wrapPlayer(player),GamesInventoryService.Action.Remove,null);
+    }
+
+    @CommandMethod("sba gamesinv editnpc <skin>")
+    @CommandPermission("sba.editnpc")
+    private void commandEdit(final @NotNull Player player,final @NotNull @Argument("skin") String skin) {
+        LanguageService
+                .getInstance()
+                .get(MessageKeys.SKIN_NPC_TOGGLE)
+                .send(PlayerMapper.wrapPlayer(player));
+        GamesInventoryService.getInstance().addEditable(PlayerMapper.wrapPlayer(player),GamesInventoryService.Action.Skin,skin);
     }
 }
