@@ -1,7 +1,7 @@
 # SBA 
 
 This addon is to the ScreamingBedWars Plugin made by ScreamingSandals, it's made to hypixelify certain elements of the plugin such as store,
-player behavior, events, scoreboard and so on. Download this plugin directly from the CI servers [SBA CI server](https://github.com/boiscljo/SBA/actions/workflows/gradle-publish.yml)
+player behavior, events, scoreboard and so on. Download this plugin directly from the CI servers [SBA CI server](https://github.com/pronze/SBA/actions/workflows/gradle-publish.yml)
 
 Supported Versions: [1.9.4-1.18.1]
 
@@ -36,7 +36,7 @@ Supported Versions: [1.9.4-1.18.1]
 
 
 ## Snapshot builds
-Tired of waiting for a newer version of SBA to release?, get the latest version from [SBA CI server](https://github.com/boiscljo/SBA/actions/workflows/gradle-publish.yml)
+Tired of waiting for a newer version of SBA to release?, get the latest version from [SBA CI server](https://github.com/pronze/SBA/actions/workflows/gradle-publish.yml)
 
 ## Credits
 Special thanks to the [ScreamingSandals team](https://github.com/ScreamingSandals) and [NotFoundName](https://github.com/notfoundname) (for his XpWars addon that helped in the creation of this one). This wouldn't have been possible without them. 
