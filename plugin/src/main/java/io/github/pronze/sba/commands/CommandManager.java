@@ -74,7 +74,7 @@ public class CommandManager {
 
         if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
             try {
-                //manager.registerBrigadier();
+                manager.registerBrigadier();
             } catch (Exception e) {
                 Logger.error("Could not register Brigadier\r{}", e);
             }

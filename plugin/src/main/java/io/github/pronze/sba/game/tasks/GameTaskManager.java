@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,13 @@ public class GameTaskManager implements IGameTaskManager {
 
     @Override
     public List<BaseGameTask> startTasks(@NotNull IArena arena) {
-        return tasks.stream()
+        List<BaseGameTask> l = new ArrayList<>(4);
+        l.add(new GeneratorTask());
+        l.add(new HealPoolTask());
+        l.add(new TrapTask());
+        l.add(new MinerTrapTask());
+
+        return l.stream()
                 .map(task -> task.start(arena))
                 .collect(Collectors.toList());
     }

@@ -149,8 +149,11 @@ public class Arena implements IArena {
             game.getItemSpawners()
                     .forEach(itemSpawner -> {
                         for (var entry : SBAConfig.getInstance().node("floating-generator", "mapping").childrenMap().entrySet()) {
-                            if (itemSpawner.getItemSpawnerType().getMaterial().name().equalsIgnoreCase(((String) entry.getKey()).toUpperCase())) {
-                                createRotatingGenerator((ItemSpawner) itemSpawner, Material.valueOf(entry.getValue().getString("AIR")));
+                            if (itemSpawner.getItemSpawnerType().getMaterial().name()
+                                    .equalsIgnoreCase(((String) entry.getKey()).toUpperCase())) {
+                                var material = Material.valueOf(entry.getValue().getString("AIR"));
+                                Logger.trace("createRotatingGenerator({},{})", itemSpawner, material);
+                                createRotatingGenerator((ItemSpawner) itemSpawner, material);
                             }
                         }
                     });
@@ -252,6 +255,24 @@ public class Arena implements IArena {
 
         getInvisiblePlayers().forEach(this::removeHiddenPlayer);
 
+    }
+    public void removeVisualsForPlayer(Player player)
+    {
+        rotatingGenerators.forEach(gen -> gen.removeViewer(player));
+        storeNPCS.forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
+        upgradeStoreNPCS.forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
+    }
+    public void addVisualsForPlayer(Player player)
+    {
+        rotatingGenerators.forEach(gen -> gen.addViewer(player));
+        storeNPCS.forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
+        upgradeStoreNPCS.forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
+    }
+    public void removePlayerFromGame(Player player)
+    {
+        scoreboardManager.removeScoreboard(player);
+        removeVisualsForPlayer(player);
+        
     }
     public void onOver(BedwarsGameEndingEvent e) {
         // destroy scoreboard manager instance and GameTask, we do not need these anymore

@@ -137,4 +137,9 @@ public interface IArena {
     List<IRotatingGenerator> getRotatingGenerators();
 
     Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID);
+
+    void removePlayerFromGame(Player player);
+
+    void removeVisualsForPlayer(Player player);
+    void addVisualsForPlayer(Player player);
 }

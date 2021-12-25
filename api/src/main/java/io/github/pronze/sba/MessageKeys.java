@@ -67,7 +67,9 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_KICKED = {"party", "message", "kicked"};
     public static final String[] PARTY_MESSAGE_PLAYER_NOT_FOUND = {"party", "message", "player-not-found"};
     public static final String[] PARTY_MESSAGE_CANNOT_INVITE_YOURSELF = {"party", "message", "cannot-invite-yourself"};
-    public static final String[] PARTY_MESSAGE_ALREADY_MUTED = {"party", "message", "already-muted"};
+    public static final String[] PARTY_MESSAGE_ALREADY_MUTED = { "party", "message", "already-muted" };
+    public static final String[] PARTY_MESSAGE_SELF_ALREADY_IN_PARTY = {"party", "message", "already-in-party"};
+    
     public static final String[] PARTY_MESSAGE_NOT_INVITED = {"party", "message", "not-invited"};
     public static final String[] PARTY_MESSAGE_MAX_INVITE_SIZE_REACHED = {"party", "message", "max-invite-size"};
     public static final String[] PARTY_MESSAGE_DECLINE_INCOMING = {"party", "message", "declined"};

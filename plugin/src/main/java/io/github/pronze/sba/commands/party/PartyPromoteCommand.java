@@ -22,80 +22,81 @@ import java.util.stream.Collectors;
 @Service
 public class PartyPromoteCommand {
 
-    @OnPostEnable
-    public void onPostEnable() {
-        CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("promote", (ctx, s) -> {
-            final var optionalParty = PartyManager
-                    .getInstance()
-                    .getPartyOf(PlayerMapper
-                            .wrapPlayer((Player)ctx.getSender())
-                            .as(SBAPlayerWrapper.class));
-            if (optionalParty.isEmpty()) {
-                return List.of();
-            }
-            return optionalParty.get()
-                    .getMembers()
-                    .stream()
-                    .map(SBAPlayerWrapper::getName)
-                    .collect(Collectors.toList());
-        });
-        CommandManager.getInstance().getAnnotationParser().parse(this);
-    }
+        static boolean init = false;
 
-    @CommandMethod("party promote <player>")
-    private void commandPromote(
-            final @NotNull Player playerArg,
-            final @NotNull @Argument(value = "player", suggestions = "promote") Player toPromote
-    ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
-
-        final var args = PlayerMapper
-                .wrapPlayer(toPromote)
-                .as(SBAPlayerWrapper.class);
-
-        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
-                    .send(player);
-            return;
+        @OnPostEnable
+        public void onPostEnable() {
+                if (init)
+                        return;
+                CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("promote",
+                                (ctx, s) -> {
+                                        final var optionalParty = PartyManager
+                                                        .getInstance()
+                                                        .getPartyOf(SBA.getInstance()
+                                                                        .getPlayerWrapper(((Player) ctx.getSender())));
+                                        if (optionalParty.isEmpty()) {
+                                                return List.of();
+                                        }
+                                        return optionalParty.get()
+                                                        .getMembers()
+                                                        .stream()
+                                                        .map(SBAPlayerWrapper::getName)
+                                                        .collect(Collectors.toList());
+                                });
+                CommandManager.getInstance().getAnnotationParser().parse(this);
+                init = true;
         }
 
-        SBA
-                .getInstance()
-                .getPartyManager()
-                .getPartyOf(player)
-                .ifPresentOrElse(party -> {
-                    if (!party.getPartyLeader().equals(player)) {
+        @CommandMethod("party|p promote <player>")
+        private void commandPromote(
+                        final @NotNull Player playerArg,
+                        final @NotNull @Argument(value = "player", suggestions = "promote") Player toPromote) {
+                final var player = SBA.getInstance().getPlayerWrapper((playerArg));
+
+                final var args = SBA.getInstance().getPlayerWrapper((toPromote));
+
+                if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
                         LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
-                                .send(player);
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                         return;
-                    }
+                }
 
-                    final var partyPromoteEvent = new SBAPlayerPartyPromoteEvent(player, args);
-                    SBA
-                            .getPluginInstance()
-                            .getServer()
-                            .getPluginManager()
-                            .callEvent(partyPromoteEvent);
+                SBA
+                                .getInstance()
+                                .getPartyManager()
+                                .getPartyOf(player)
+                                .ifPresentOrElse(party -> {
+                                        if (!party.getPartyLeader().equals(player)) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                                .send(player);
+                                                return;
+                                        }
 
-                    if (partyPromoteEvent.isCancelled()) return;
+                                        final var partyPromoteEvent = new SBAPlayerPartyPromoteEvent(player, args);
+                                        SBA
+                                                        .getPluginInstance()
+                                                        .getServer()
+                                                        .getPluginManager()
+                                                        .callEvent(partyPromoteEvent);
 
-                    party.setPartyLeader(args);
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                            .replace("%player%", args.getName())
-                            .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
+                                        if (partyPromoteEvent.isCancelled())
+                                                return;
 
-                }, () -> LanguageService
-                        .getInstance()
-                        .get(MessageKeys.PARTY_MESSAGE_ERROR)
-                        .send(player));
-    }
+                                        party.setPartyLeader(args);
+                                        LanguageService
+                                                        .getInstance()
+                                                        .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
+                                                        .replace("%player%", args.getName())
+                                                        .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
+
+                                }, () -> LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                .send(player));
+        }
 
 }

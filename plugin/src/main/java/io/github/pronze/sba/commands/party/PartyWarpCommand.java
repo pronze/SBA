@@ -20,18 +20,20 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 @Service
 public class PartyWarpCommand {
 
+    static boolean init = false;
+
     @OnPostEnable
-    public void onPostEnable() {
+    public void onPostEnabled() {
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
-    @CommandMethod("party warp")
+    @CommandMethod("party|p warp")
     private void commandWarp(
-            final @NotNull Player playerArg
-    ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+            final @NotNull Player playerArg) {
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -92,7 +94,8 @@ public class PartyWarpCommand {
                                 .filter(member -> !member.equals(player))
                                 .forEach(member -> {
                                     if (Main.getInstance().isPlayerPlayingAnyGame(member.getInstance())) {
-                                        Main.getInstance().getGameOfPlayer(member.getInstance()).leaveFromGame(member.getInstance());
+                                        Main.getInstance().getGameOfPlayer(member.getInstance())
+                                                .leaveFromGame(member.getInstance());
                                     }
                                     PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
                                     LanguageService

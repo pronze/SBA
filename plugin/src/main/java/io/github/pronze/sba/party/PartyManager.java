@@ -104,9 +104,7 @@ public class PartyManager implements IPartyManager {
         party.getMembers().forEach(member -> {
             member.getSettings().disable(PlayerSetting.IN_PARTY);
             party.removePlayer(member);
-            final var wrapperImpl = PlayerMapper
-                    .wrapPlayer(member.getInstance())
-                    .as(SBAPlayerWrapper.class);
+            final var wrapperImpl = SBA.getInstance().getPlayerWrapper((member.getInstance()));
             if (!wrapperImpl.isOnline()) {
                 return;
             }
@@ -117,9 +115,7 @@ public class PartyManager implements IPartyManager {
         party.getInvitedPlayers().forEach(invitedPlayer -> {
             invitedPlayer.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
             party.removeInvitedPlayer(invitedPlayer);
-            final var wrapperImpl = PlayerMapper
-                    .wrapPlayer(invitedPlayer.getInstance())
-                    .as(SBAPlayerWrapper.class);
+            final var wrapperImpl = SBA.getInstance().getPlayerWrapper((invitedPlayer.getInstance()));
             if (!wrapperImpl.isOnline()) {
                 return;
             }

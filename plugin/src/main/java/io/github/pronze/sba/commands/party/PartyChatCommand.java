@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -14,19 +15,19 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
 public class PartyChatCommand {
-
+    static boolean init = false;
     @OnPostEnable
-    public void onPostEnable() {
+    public void onPostEnabled() {
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
-
-    @CommandMethod("party chat")
+    @CommandMethod("party|p chat")
     private void commandChat(
             final @NotNull Player playerArg
     ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         player.getSettings().toggle(PlayerSetting.PARTY_CHAT_ENABLED);
 

@@ -20,23 +20,23 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 @Service
 public class PartyInviteCommand {
 
-    @OnPostEnable
-    public void onPostEnable() {
-        CommandManager.getInstance().getAnnotationParser().parse(this);
-    }
+        static boolean init = false;
+        @OnPostEnable
+        public void onPostEnabled() {
+            if (init)
+                return;
+            CommandManager.getInstance().getAnnotationParser().parse(this);
+            init = true;
+        }
 
-    @CommandMethod("party invite <invitee>")
+    @CommandMethod("party|p invite <invitee>")
     private void commandInvite(
             final @NotNull Player playerArg,
             final @NotNull @Argument("invitee") Player invitee
     ) {
-        final var invitedPlayer = PlayerMapper
-                .wrapPlayer(invitee)
-                .as(SBAPlayerWrapper.class);
+        final var invitedPlayer = SBA.getInstance().getPlayerWrapper((invitee));
 
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (invitedPlayer.equals(player)) {
             LanguageService

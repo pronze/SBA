@@ -4,6 +4,7 @@ import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
@@ -22,9 +23,13 @@ import java.util.List;
 @Service
 public class ShoutCommand {
 
+    static boolean init = false;
     @OnPostEnable
-    public void onPostEnable() {
+    public void onPostEnabled() {
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
     @CommandMethod("shout <args>")
@@ -35,8 +40,7 @@ public class ShoutCommand {
     ) {
         final var args = List.of(argsParam);
 
-        final var wrapper = PlayerMapper
-                .wrapPlayer(player);
+        final var wrapper = SBA.getInstance().getPlayerWrapper(player);
 
         if(!Main.getInstance().isPlayerPlayingAnyGame(player)){
             LanguageService

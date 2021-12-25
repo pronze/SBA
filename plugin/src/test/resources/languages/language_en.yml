@@ -21,6 +21,7 @@ bed-destroyed:
     - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was incinerated by %destroyer%</gray>"
 added-npc: "<green>Successfully added GamesInventory NPC!"
 removable-npc-toggle: "<green>Right click the NPC you want to remove! <gray>[Timeout: 5 seconds]"
+skin-npc-toggle: "<green>Right click the NPC you want to change skin! <gray>[Timeout: 5 seconds]"
 npc-already-available: "<red>There is already an NPC at this location!</red>"
 npc-removed: "<green>NPC has been removed!"
 already-purchased: "<red><bold>You already purchased the same %thing%</bold>"

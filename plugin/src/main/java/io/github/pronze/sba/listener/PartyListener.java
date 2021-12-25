@@ -24,9 +24,7 @@ public class PartyListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
-        final var player = PlayerMapper
-                .wrapPlayer(event.getPlayer())
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((event.getPlayer()));
 
         if (player.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED) && player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             event.setCancelled(true);

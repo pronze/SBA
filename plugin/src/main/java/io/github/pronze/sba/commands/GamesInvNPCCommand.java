@@ -19,9 +19,13 @@ import org.screamingsandals.lib.world.LocationMapper;
 @Service
 public class GamesInvNPCCommand {
 
+    static boolean init = false;
     @OnPostEnable
     public void onPostEnabled() {
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
     @CommandMethod("sba gamesinv spawnnpc <mode>")

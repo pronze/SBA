@@ -12,12 +12,16 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 @Service
 public class PartyHelpCommand {
 
+    static boolean init = false;
     @OnPostEnable
-    public void onPostEnable() {
+    public void onPostEnabled() {
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
-    @CommandMethod("party help")
+    @CommandMethod("party|p help")
     private void commandHelp(
             final @NotNull Player sender
     ) {

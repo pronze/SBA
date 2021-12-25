@@ -65,7 +65,7 @@ public class GeneratorSplitterListener implements Listener {
             final var playerTeam = game.getTeamOfPlayer(player);
 
             if (!APIUtils.unhashFromInvisibleString(item.getItemStack(), SPLITTER_HASH)) {
-                Logger.trace("GSL: Not spawned item!");
+                //Logger.trace("GSL: Not spawned item!");
                 return;
             }
 

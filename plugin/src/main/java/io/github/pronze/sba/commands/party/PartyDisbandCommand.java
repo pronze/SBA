@@ -17,18 +17,20 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 @Service
 public class PartyDisbandCommand {
 
-    @OnPostEnable
-    public void onPostEnable() {
-        CommandManager.getInstance().getAnnotationParser().parse(this);
-    }
+        static boolean init = false;
+        @OnPostEnable
+        public void onPostEnabled() {
+            if (init)
+                return;
+            CommandManager.getInstance().getAnnotationParser().parse(this);
+            init = true;
+        }
 
-    @CommandMethod("party disband")
+    @CommandMethod("party|p disband")
     private void commandDisband(
             final @NotNull Player playerArg
     ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService

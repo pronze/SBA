@@ -13,3 +13,4 @@ gradle-app.setting
 .settings\
 .classpath
 .project
+.vscode/settings.json

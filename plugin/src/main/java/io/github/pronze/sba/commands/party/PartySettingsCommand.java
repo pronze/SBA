@@ -20,12 +20,18 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 @Service
 public class PartySettingsCommand {
 
-    @OnPostEnable
-    public void onPostEnable() {
-        CommandManager.getInstance().getAnnotationParser().parse(this);
-    }
+        static boolean init = false;
 
-    @CommandMethod("party settings")
+        @OnPostEnable
+        public void onPostEnabled() {
+                if (init)
+                        return;
+                CommandManager.getInstance().getAnnotationParser().parse(this);
+                init = true;
+        }
+
+
+    @CommandMethod("party|p settings")
     private void commandSettings(
             final @NotNull Player player
     ) {
@@ -35,13 +41,11 @@ public class PartySettingsCommand {
                 .send(PlayerMapper.wrapPlayer(player));
     }
 
-    @CommandMethod("party mute")
+    @CommandMethod("party|p mute")
     private void commandMute(
             final @NotNull Player playerArg
     ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -91,13 +95,11 @@ public class PartySettingsCommand {
                         .send(player));
     }
 
-    @CommandMethod("party unmute")
+    @CommandMethod("party|p unmute")
     private void commandUnmute(
             final @NotNull Player playerArg
     ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService

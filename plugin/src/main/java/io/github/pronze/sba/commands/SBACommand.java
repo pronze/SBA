@@ -36,13 +36,17 @@ import java.util.regex.Pattern;
 @Service
 public class SBACommand {
     private boolean gamesInvEnabled;
-
+    static boolean init = false;
+    
     @OnPostEnable
     public void onPostEnabled() {
+        if (init)
+            return;
         gamesInvEnabled = SBAConfig.getInstance().getBoolean("games-inventory.enabled", true);
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("gameMode", (commandSenderCommandContext, s) -> List.of("solo", "double", "triple", "squad"));
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("maps", (ctx, s) -> Main.getGameNames());
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
     @CommandMethod("sba reload")

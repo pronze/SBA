@@ -5,6 +5,7 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.GamesInventoryService;
 import io.github.pronze.sba.service.NPCStoreService;
+import io.github.pronze.sba.service.PlayerWrapperService;
 import lombok.NonNull;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
@@ -50,8 +51,7 @@ public class SBAUtil {
                     SBAConfig.getInstance().getDouble(section + ".y", 0),
                     SBAConfig.getInstance().getDouble(section + ".z", 0),
                     (float) SBAConfig.getInstance().getDouble(section + ".yaw", 0),
-                    (float) SBAConfig.getInstance().getDouble(section + ".pitch", 0)
-            ));
+                    (float) SBAConfig.getInstance().getDouble(section + ".pitch", 0)));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();
@@ -60,8 +60,10 @@ public class SBAUtil {
 
     public static void cancelTask(BukkitTask task) {
         if (task != null) {
-            if (Bukkit.getScheduler().isCurrentlyRunning(task.getTaskId()) || Bukkit.getScheduler().isQueued(task.getTaskId())) {
+            if (Bukkit.getScheduler().isCurrentlyRunning(task.getTaskId())
+                    || Bukkit.getScheduler().isQueued(task.getTaskId())) {
                 task.cancel();
+                Logger.trace("cancelTask {}", task);
             }
         }
     }
@@ -87,32 +89,55 @@ public class SBAUtil {
             Bukkit.getPluginManager().callEvent(new PluginDisableEvent(plugin));
             Reflect.setField(plugin, "isEnabled", false);
         } catch (Throwable ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while disabling " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while disabling "
+                    + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
         }
 
         try {
             Bukkit.getScheduler().cancelTasks(plugin);
         } catch (Throwable ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while cancelling tasks for "
+                    + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
         }
 
         try {
-            Bukkit.getServicesManager().unregisterAll(plugin);
+            // Bukkit.getServicesManager().unregisterAll(plugin);
         } catch (Throwable ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering services for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            Bukkit.getLogger().log(Level.SEVERE,
+                    "Error occurred (in the plugin loader) while unregistering services for "
+                            + plugin.getDescription().getFullName() + " (Is it up to date?)",
+                    ex);
         }
 
         try {
-            HandlerList.unregisterAll(plugin);
+            var handlers = HandlerList.getRegisteredListeners(plugin);
+            Logger.trace("-----------------------{}-----------------", handlers.size());
+            for (var handler : handlers) {
+                if (handler.getListener().toString().contains("io.github.pronze.sba") ||
+                        handler.getListener().toString().contains("io.github.pronze.lib.screaming") ||
+                        handler.getListener().toString().contains("io.github.pronze.lib.simpleinventories") ||
+                        handler.getListener().toString().contains("org.screamingsandals.bedwars.lib.sgui") ||
+                        handler.getListener().toString().contains("io.github.pronze.lib.bedwars")) {
+                    HandlerList.unregisterAll(handler.getListener());
+                }
+                Logger.trace("handler {}", handler.getListener().toString());
+            }
+            Logger.trace("-----------------------{}-----------------", handlers.size());
+
+            // HandlerList.unregisterAll(plugin);
         } catch (Throwable ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering events for "
+                    + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
         }
 
         try {
             Bukkit.getMessenger().unregisterIncomingPluginChannel(plugin);
             Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
         } catch (Throwable ex) {
-            Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while unregistering plugin channels for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            Bukkit.getLogger().log(Level.SEVERE,
+                    "Error occurred (in the plugin loader) while unregistering plugin channels for "
+                            + plugin.getDescription().getFullName() + " (Is it up to date?)",
+                    ex);
         }
 
         try {
@@ -121,12 +146,15 @@ public class SBAUtil {
             }
         } catch (Throwable ex) {
             // older versions don't even have chunk tickets
-            //Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader) while removing chunk tickets for " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            // Bukkit.getLogger().log(Level.SEVERE, "Error occurred (in the plugin loader)
+            // while removing chunk tickets for " + plugin.getDescription().getFullName() +
+            // " (Is it up to date?)", ex);
         }
     }
 
     public static void reloadPlugin(@NonNull JavaPlugin plugin) {
         disablePlugin(plugin);
+        // PlayerWrapperService.getInstance().reload();
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
         if (plugin == SBA.getPluginInstance()) {
             SBAConfig.getInstance().forceReload();
@@ -135,16 +163,15 @@ public class SBAUtil {
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+    public static void sendTitle(PlayerWrapper player, String title, String subtitle, int fadeIn, int stay,
+            int fadeOut) {
         var titleComponent = net.kyori.adventure.title.Title.title(
                 AdventureHelper.toComponent(title),
                 AdventureHelper.toComponent(subtitle),
                 Title.Times.of(
                         Duration.ofMillis(fadeIn * 50L),
                         Duration.ofMillis(stay * 50L),
-                        Duration.ofMillis(fadeOut * 50L)
-                )
-        );
+                        Duration.ofMillis(fadeOut * 50L)));
 
         player.showTitle(titleComponent);
     }
@@ -153,9 +180,9 @@ public class SBAUtil {
         return toCap.substring(0, 1).toUpperCase() + toCap.substring(1).toLowerCase();
     }
 
-
     private static final BlockFace[] axis = { BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST };
-    private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST, BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
+    private static final BlockFace[] radial = { BlockFace.NORTH, BlockFace.NORTH_EAST, BlockFace.EAST,
+            BlockFace.SOUTH_EAST, BlockFace.SOUTH, BlockFace.SOUTH_WEST, BlockFace.WEST, BlockFace.NORTH_WEST };
 
     public static BlockFace yawToFace(float yaw, boolean useSubCardinalDirections) {
         if (useSubCardinalDirections)

@@ -30,16 +30,18 @@ public class PlayerWrapperService implements WrapperService<Player, SBAPlayerWra
     }
 
     private final Map<UUID, SBAPlayerWrapper> playerData = new ConcurrentHashMap<>();
-
+    private static boolean init = false;
     @OnPostEnable
     public void registerMapping() {
-        PlayerMapper.UNSAFE_getPlayerConverter()
-                .registerW2P(SBAPlayerWrapper.class, wrapper -> {
-                    if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
-                        return playerData.get(wrapper.getUuid());
-                    }
-                    return null;
-                });
+        if(!init)
+            PlayerMapper.UNSAFE_getPlayerConverter()
+                    .registerW2P(SBAPlayerWrapper.class, wrapper -> {
+                        if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
+                            return playerData.get(wrapper.getUuid());
+                        }
+                        return null;
+                    });
+        init = true;
         Bukkit.getOnlinePlayers().forEach(this::register);
     }
 

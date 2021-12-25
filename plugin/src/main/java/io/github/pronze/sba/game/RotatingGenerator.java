@@ -17,6 +17,7 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
@@ -61,6 +62,8 @@ public class RotatingGenerator implements IRotatingGenerator {
 
     @Override
     public void spawn(@NotNull List<Player> viewers) {
+        Logger.trace("RotatingGenerator::spawn ({},{})", this,viewers);
+
         final var holoHeight = SBAConfig.getInstance()
                 .node("floating-generator", "height").getDouble(2.0);
 
@@ -70,7 +73,7 @@ public class RotatingGenerator implements IRotatingGenerator {
                 .rotationMode(Hologram.RotationMode.Y)
                 .rotationTime(Pair.of(1, TaskerTime.TICKS));
 
-        hologram.show();
+        //hologram.show();
         viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
         scheduleTasks();
     }
@@ -93,6 +96,9 @@ public class RotatingGenerator implements IRotatingGenerator {
         hologramTask = new BukkitRunnable() {
             @Override
             public void run() {
+                hologram.show();
+                //Logger.trace("RotatingGenerator::hologramTask ({},{})", this,hologramTask);
+
                 boolean full = itemSpawner.getMaxSpawnedResources() <= spawnedItems.size();
                 if (!full) {
                     time--;
@@ -146,6 +152,8 @@ public class RotatingGenerator implements IRotatingGenerator {
     }
 
     public void destroy() {
+        Logger.trace("RotatingGenerator::destroy ({})", this);
+
         SBAUtil.cancelTask(hologramTask);
         if (hologram != null) {
             hologram.destroy();

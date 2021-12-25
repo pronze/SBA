@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -46,6 +47,8 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onStarted(BedwarsGameStartedEvent e) {
+        Logger.trace("SBA onStarted{}", e);
+
         final var game = e.getGame();
         final var arena = ArenaManager
                 .getInstance()
@@ -73,6 +76,8 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
+        Logger.trace("SBA onTargetBlockDestroyed{}", e);
+
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -82,6 +87,8 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
+        Logger.trace("SBA onPostRebuildingEvent{}", e);
+
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -94,6 +101,8 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onOver(BedwarsGameEndingEvent e) {
+        Logger.trace("SBA onOver{}", e);
+
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
@@ -103,6 +112,8 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
+        Logger.trace("SBA onBWLobbyJoin{}", e);
+
         final var player = e.getPlayer();
         final var wrappedPlayer = SBA.getInstance().getPlayerWrapper((player));
         final var task = runnableCache.get(player.getUniqueId());
@@ -225,6 +236,8 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
+        Logger.trace("SBA EonBedWarsPlayerLeave{}", e);
+
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
@@ -232,8 +245,8 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .get(game.getName())
                 .ifPresent(arena -> {
-                    final var scoreboardManager = arena.getScoreboardManager();
-                    scoreboardManager.removeScoreboard(player);
+                    arena.removeVisualsForPlayer(player);
+                    arena.removePlayerFromGame(player);
                 });
 
         if (task != null) {
@@ -247,10 +260,10 @@ public class BedWarsListener implements Listener {
                 .ifPresent(Scoreboard::destroy);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
-
     @EventHandler(priority = EventPriority.LOWEST)
-    public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
-        final var victim = e.getEntity();
+    public void onBedWarsPlayerRespawnEvent(PlayerRespawnEvent e) {
+        final var victim = e.getPlayer();
+
         if (!Main.isPlayerInGame(victim)) {
             return;
         }
@@ -260,6 +273,25 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .get(game.getName())
                 .ifPresent(arena -> {
+                    arena.addVisualsForPlayer(victim);
+                });
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
+        final var victim = e.getEntity();
+       
+        if (!Main.isPlayerInGame(victim)) {
+            return;
+        }
+        Logger.trace("SBA ENTITY DIED :: {}", victim.getEntityId());
+        final var game = Main.getInstance().getGameOfPlayer(victim);
+        // query arena instance for access to Victim/Killer data
+        ArenaManager
+                .getInstance()
+                .get(game.getName())
+                .ifPresent(arena -> {
+                    arena.removeVisualsForPlayer(victim);
                     // player has died, increment death counter
                     arena.getPlayerData(victim.getUniqueId())
                             .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));

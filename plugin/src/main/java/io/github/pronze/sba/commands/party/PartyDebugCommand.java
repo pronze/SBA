@@ -16,19 +16,21 @@ import io.github.pronze.sba.commands.CommandManager;
 @Service
 public class PartyDebugCommand {
 
+    static boolean init = false;
     @OnPostEnable
-    public void onPostEnable() {
+    public void onPostEnabled() {
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
-    @CommandMethod("party debug <player>")
+    @CommandMethod("party|p debug <player>")
     private void commandDebug(
             final @NotNull CommandSender sender,
             final @NotNull @Argument("player") Player playerArg
     ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         PartyManager
                 .getInstance()

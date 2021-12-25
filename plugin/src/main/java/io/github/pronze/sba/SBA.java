@@ -41,6 +41,7 @@ import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
@@ -200,7 +201,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public SBAPlayerWrapper getPlayerWrapper(Player player) {
-        return PlayerWrapperService.getInstance().get(player).orElse(null);
+        return PlayerWrapperService.getInstance().get(player).orElseGet(()->PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
     }
 
     @Override
@@ -210,7 +211,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public boolean isSnapshot() {
-        return getVersion().contains("SNAPSHOT");
+        return getVersion().contains("SNAPSHOT") || getVersion().contains("dev");
     }
 
     @Override
