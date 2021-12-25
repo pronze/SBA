@@ -8,6 +8,7 @@ import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import net.kyori.adventure.text.Component;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPostRebuildingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
@@ -234,8 +236,7 @@ public class Arena implements IArena {
         }
     }
 
-    public void onOver(BedwarsGameEndingEvent e) {
-        // destroy scoreboard manager instance and GameTask, we do not need these anymore
+    public void onOver(BedwarsPostRebuildingEvent e) {
         scoreboardManager.destroy();
         gameTasks.forEach(BaseGameTask::stop);
         gameTasks.clear();
@@ -250,6 +251,10 @@ public class Arena implements IArena {
         upgradeStoreNPCS.clear();
 
         getInvisiblePlayers().forEach(this::removeHiddenPlayer);
+
+    }
+    public void onOver(BedwarsGameEndingEvent e) {
+        // destroy scoreboard manager instance and GameTask, we do not need these anymore
 
         final var winner = e.getWinningTeam();
         if (winner != null) {

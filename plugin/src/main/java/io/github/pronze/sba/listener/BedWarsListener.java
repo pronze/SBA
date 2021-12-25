@@ -85,6 +85,10 @@ public class BedWarsListener implements Listener {
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
+                .get(game.getName())
+                .ifPresent(arena -> ((Arena)arena).onOver(e));
+        ArenaManager
+                .getInstance()
                 .removeArena(game);
     }
 
@@ -100,9 +104,7 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        final var wrappedPlayer = PlayerMapper
-                .wrapPlayer(player)
-                .as(SBAPlayerWrapper.class);
+        final var wrappedPlayer = SBA.getInstance().getPlayerWrapper((player));
         final var task = runnableCache.get(player.getUniqueId());
         final var game = (Game) e.getGame();
         if (task != null) {
