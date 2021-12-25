@@ -1,4 +1,5 @@
 package io.github.pronze.sba.commands;
+
 import cloud.commandframework.CommandTree;
 import cloud.commandframework.annotations.AnnotationParser;
 import cloud.commandframework.annotations.Argument;
@@ -22,6 +23,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
+
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 
 import java.util.function.Function;
@@ -45,16 +48,17 @@ public class CommandManager {
 
     @OnEnable
     public void onEnable(JavaPlugin plugin) {
-        final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction =
-                CommandExecutionCoordinator.simpleCoordinator();
+        if (manager != null)
+            return;
+        final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction = CommandExecutionCoordinator
+                .simpleCoordinator();
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();
         try {
             this.manager = new PaperCommandManager<>(
                     plugin,
                     executionCoordinatorFunction,
                     mapperFunction,
-                    mapperFunction
-            );
+                    mapperFunction);
         } catch (final Exception e) {
             Bukkit.getLogger().severe("Failed to initialize the command manager");
             /* Disable the plugin */
@@ -66,26 +70,27 @@ public class CommandManager {
         minecraftHelp = new MinecraftHelp<>(
                 "/sba help",
                 bukkitAudiences::sender,
-                manager
-        );
+                manager);
 
         if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
-            manager.registerBrigadier();
+            try {
+                //manager.registerBrigadier();
+            } catch (Exception e) {
+                Logger.error("Could not register Brigadier\r{}", e);
+            }
         }
 
         if (manager.queryCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
             manager.registerAsynchronousCompletions();
         }
-        final Function<ParserParameters, CommandMeta> commandMetaFunction = p ->
-                CommandMeta.simple()
-                        .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
-                        .build();
+        final Function<ParserParameters, CommandMeta> commandMetaFunction = p -> CommandMeta.simple()
+                .with(CommandMeta.DESCRIPTION, p.get(StandardParameters.DESCRIPTION, "No description"))
+                .build();
 
         annotationParser = new AnnotationParser<>(
                 manager,
                 CommandSender.class,
-                commandMetaFunction
-        );
+                commandMetaFunction);
         annotationParser.parse(this);
     }
 
@@ -93,8 +98,8 @@ public class CommandManager {
     @CommandDescription("Help menu")
     private void commandHelp(
             final @NonNull CommandSender sender,
-            final @Argument("query") @Greedy String query
-    ) {
+            final @Argument("query") @Greedy String query) {
+        sender.sendMessage("commandHelp");
         minecraftHelp.queryCommands(query == null ? "" : query, sender);
     }
 }
