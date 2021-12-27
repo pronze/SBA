@@ -365,8 +365,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             if (type == null) {
                 return;
             }
-            ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player);
+            event.setStack(item=ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
         }
+        event.setStack(item);
 
         itemInfo.getProperties().forEach(property -> {
             if (property.hasName()) {
@@ -382,14 +383,14 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 propertyData.putIfAbsent("name", property.getPropertyName());
 
                 var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
-                        player, item.as(ItemStack.class), propertyData);
+                        player, event.getStack().as(ItemStack.class), propertyData);
                 Bukkit.getServer().getPluginManager().callEvent(applyEvent);
 
-                event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(item));
+                event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(event.getStack()));
             }
         });
 
-        event.setStack(item);
+        
         onPostGenerateItem(event);
     }
 

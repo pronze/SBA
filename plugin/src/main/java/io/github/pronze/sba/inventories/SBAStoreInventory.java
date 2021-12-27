@@ -55,7 +55,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
 
     @Override
     public void onPostGenerateItem(ItemRenderEvent event) {
-        ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.NORMAL);
+       event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.NORMAL));
     }
 
     @Override
