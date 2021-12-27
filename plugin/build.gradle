@@ -1,14 +1,21 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator', 'npc')
         .version(SCREAMINGLIB_VERSION)
-        .simpleInventories(SIMPLEINVENTORIES_VERSION)
         .enableAnnotationProcessor()
         .build()
 
 dependencies {
     implementation project(':SBA-API')
 
+    implementation 'org.screamingsandals.lib:utils-common:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:core-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:hologram-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:placeholders-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:healthindicator-bukkit:' + SCREAMINGLIB_VERSION
+    implementation 'org.screamingsandals.lib:npc-bukkit:' + SCREAMINGLIB_VERSION
+    implementation "org.screamingsandals.simpleinventories:core-bukkit:"+SIMPLEINVENTORIES_VERSION, {
+                        exclude group: 'org.screamingsandals.lib' // causes problems
+                    }
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
 
     implementation 'me.lucko:commodore:' + COMMODORE_VERSION, {

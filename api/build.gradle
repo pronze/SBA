@@ -1,7 +1,8 @@
 dependencies {
     compileOnly "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_TEXT_MINIMESSAGE_VERSION
-    compileOnly "org.screamingsandals.lib:sender:" + SCREAMINGLIB_VERSION
+    compileOnly "org.screamingsandals.lib:shared-core:" + SCREAMINGLIB_VERSION
     compileOnly "org.screamingsandals.lib:core-bukkit:" + SCREAMINGLIB_VERSION
-    compileOnly "org.screamingsandals.lib:utils-bukkit:" + SCREAMINGLIB_VERSION
-    compileOnly "org.screamingsandals.lib:npc-bukkit:" + SCREAMINGLIB_VERSION
+    //compileOnly "org.screamingsandals.lib:utils-common:" + SCREAMINGLIB_VERSION
+    //compileOnly "org.screamingsandals.lib:hologram-common:" + SCREAMINGLIB_VERSION
+    compileOnly "org.screamingsandals.lib:npc-common:" + SCREAMINGLIB_VERSION
 }

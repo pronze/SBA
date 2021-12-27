@@ -61,7 +61,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         id = "SBA",
         authors = {"pronze"},
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.6"
+        version = "1.5.6" 
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
@@ -70,7 +70,6 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 )
 @Init(services = {
         Logger.class,
-        Tasker.class,
         PacketMapper.class,
         HologramManager.class,
         HealthIndicatorManager.class,

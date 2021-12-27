@@ -41,14 +41,16 @@ import java.util.stream.Collectors;
 
 public class ShopUtil {
 
-    public static final List<String> romanNumerals = List.of("NONE", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X");
+    public static final List<String> romanNumerals = List.of("NONE", "I", "II", "III", "IV", "V", "VI", "VII", "VIII",
+            "IX", "X");
     public static final List<String> orderOfArmor = List.of("GOLDEN,GOLD", "CHAINMAIL", "IRON", "DIAMOND", "NETHERITE");
     public static final List<String> orderOfTools = List.of("WOODEN,WOOD", "STONE", "GOLDEN,GOLD", "IRON", "DIAMOND");
 
     @NotNull
     public static Integer getLevelFromMaterialName(@NotNull String name, final List<String> list) {
         name = name.substring(0, name.contains("_") ? name.lastIndexOf("_") : name.length());
-        @NotNull String finalName = name;
+        @NotNull
+        String finalName = name;
         return list.stream()
                 .filter(value -> Arrays.stream(value.split(",")).anyMatch(names -> names.equalsIgnoreCase(finalName)))
                 .map(list::indexOf)
@@ -132,15 +134,14 @@ public class ShopUtil {
 
         playerInventory.setLeggings(null);
         playerInventory.setBoots(null);
-        //if (SBAConfig.getInstance().node("upgrade-item","boots").getBoolean(true))
+        // if (SBAConfig.getInstance().node("upgrade-item","boots").getBoolean(true))
         playerInventory.setBoots(boots);
-        if (SBAConfig.getInstance().node("upgrade-item","leggings").getBoolean(true))
+        if (SBAConfig.getInstance().node("upgrade-item", "leggings").getBoolean(true))
             playerInventory.setLeggings(leggings);
-        if (SBAConfig.getInstance().node("upgrade-item","chestplate").getBoolean(true))
+        if (SBAConfig.getInstance().node("upgrade-item", "chestplate").getBoolean(true))
             playerInventory.setChestplate(chestplate);
         return true;
     }
-
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
         return mapOfWords.entrySet()
@@ -164,7 +165,6 @@ public class ShopUtil {
 
         return gameList;
     }
-
 
     public static <K, V> K getKey(Map<K, V> map, V value) {
         return map.keySet()
@@ -216,20 +216,22 @@ public class ShopUtil {
 
         final var newItemLevel = currentItemLevel - 1;
         final var newMaterialName = getMaterialFromLevel(newItemLevel, itemType);
-        final var newMaterial = Material.valueOf(newMaterialName + currentItem.getType().name().substring(currentItem.getType().name().lastIndexOf("_")).toUpperCase());
+        final var newMaterial = Material.valueOf(newMaterialName
+                + currentItem.getType().name().substring(currentItem.getType().name().lastIndexOf("_")).toUpperCase());
         final var newStack = new ItemStack(newMaterial);
         newStack.addEnchantments(currentItem.getEnchantments());
         return newStack;
     }
 
     public static int getIntFromMode(String mode) {
-        return mode.equalsIgnoreCase("Solo") ? 1 : mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 : mode.equalsIgnoreCase("Squads") ? 4 : 0;
+        return mode.equalsIgnoreCase("Solo") ? 1
+                : mode.equalsIgnoreCase("Double") ? 2
+                        : mode.equalsIgnoreCase("Triples") ? 3 : mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
     public static String translateColors(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
-
 
     public static void sendMessage(Player player, List<String> message) {
         message.forEach(st -> player.sendMessage(translateColors(st)));
@@ -261,7 +263,7 @@ public class ShopUtil {
         return map;
     }
 
-    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type, Player player) {
+    public static Item setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type, Player player) {
         var enabled = itemInfo.getFirstPropertyByName("generateLore")
                 .map(property -> property.getPropertyData().getBoolean())
                 .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
@@ -280,44 +282,52 @@ public class ShopUtil {
                     .orElseThrow();
 
             if (isSharp) {
-                final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
+                final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
                 final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                    price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices
+                            .get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
             }
 
             if (isProt) {
-                final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
+                final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
                 final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                    price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(
+                            arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
             }
 
             if (isEfficiency) {
-                final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
+                final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
                 final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                    price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(
+                            arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
             }
 
             String finalPrice = price;
             final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
-                    .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
+                    .map(property -> property.getPropertyData().childrenList().stream()
+                            .map(ConfigurationNode::getString))
                     .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
                     .map(s -> s
                             .replaceAll("%price%", finalPrice)
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
                     .map(s -> ChatColor.translateAlternateColorCodes('&', s))
-                    .map(AdventureHelper::toComponent).collect(Collectors.toCollection((Supplier<ArrayList<Component>>) ArrayList::new));
+                    .map(AdventureHelper::toComponent)
+                    .collect(Collectors.toCollection((Supplier<ArrayList<Component>>) ArrayList::new));
             newList.addAll(originalList);
 
-            item.getLore().clear();
-            item.getLore().addAll(newList);
+            return item.withItemLore(newList);
         }
+        return item;
     }
 
     public static String getNameOrCustomNameOfItem(Item item) {
@@ -325,12 +335,13 @@ public class ShopUtil {
             if (item.getDisplayName() != null) {
                 return AdventureHelper.toLegacy(item.getDisplayName());
             }
-            if (item.getLocalizedName() != null) {
-                return AdventureHelper.toLegacy(item.getLocalizedName());
-            }
+            /*
+             * if (item.getLocalizedName() != null) {
+             * return AdventureHelper.toLegacy(item.getLocalizedName());
+             * }
+             */
         } catch (Throwable ignored) {
         }
-
 
         var normalItemName = item.getMaterial().platformName().replace("_", " ").toLowerCase();
         var sArray = normalItemName.split(" ");
@@ -342,7 +353,6 @@ public class ShopUtil {
         return stringBuilder.toString().trim();
     }
 
-
     public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
         for (var item : player.getInventory().getArmorContents()) {
             if (item != null) {
@@ -351,34 +361,36 @@ public class ShopUtil {
         }
     }
 
-    public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type, int maxLevel) {
+    public static Item clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type,
+            int maxLevel) {
         if (type == StoreType.UPGRADES) {
             level = level + 1;
         }
         if (level > maxLevel) {
-            item.getLore().clear();
-            LanguageService
+
+            item = item.withItemLore(LanguageService
                     .getInstance()
                     .get(MessageKeys.SHOP_MAX_ENCHANT)
-                    .toComponentList()
-                    .forEach(item::addLore);
+                    .toComponentList());
+
             if (item.getEnchantments() != null) {
                 item.getEnchantments().clear();
             }
         } else if (level > 0) {
-            item.addEnchant(EnchantmentMapping.resolve(enchantment).orElseThrow().newLevel(level));
+            item = item.withEnchantment(EnchantmentMapping.resolve(enchantment).orElseThrow().withLevel(level));
         }
+        return item;
     }
-
 
     /**
      * Applies enchants to displayed items in SBA store inventory.
-     * Enchants are applied and are dependent on the team upgrades the player's team has.
+     * Enchants are applied and are dependent on the team upgrades the player's team
+     * has.
      *
      * @param item
      * @param event
      */
-    public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreType type) {
+    public static Item applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreType type) {
         final var player = event.getPlayer().as(Player.class);
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var typeName = item.getMaterial().platformName();
@@ -386,55 +398,70 @@ public class ShopUtil {
 
         var prices = event.getInfo().getOriginal().getPrices();
         if (!prices.isEmpty()) {
-            item.addLore(LanguageService
-                    .getInstance()
-                    .get(MessageKeys.CLICK_TO_PURCHASE)
-                    .toComponent());
+
+            ArrayList<Component> lore = new ArrayList<>(item.getLore());
+            
+            lore.add(
+                    (LanguageService
+                            .getInstance()
+                            .get(MessageKeys.CLICK_TO_PURCHASE)
+                            .toComponent()));
+            item = item.withItemLore(lore);
         }
 
-        SBA.getInstance()
-                .getGameStorage(game)
-                .ifPresent(gameStorage -> {
-                    final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
-                    switch (afterUnderscore.toLowerCase()) {
-                        case "sword":
-                            int sharpness = gameStorage.getSharpnessLevel(runningTeam).orElseThrow();
-                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type, SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
-                            break;
-                        case "chestplate":
-                        case "boots":
-                            int protection = gameStorage.getProtectionLevel(runningTeam).orElseThrow();
-                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type, SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4));
-                            break;
-                        case "pickaxe":
-                            final int efficiency = gameStorage.getEfficiencyLevel(runningTeam).orElseThrow();
-                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type, SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2));
-                            break;
-                    }
-                });
+        var maybeStorage = SBA.getInstance()
+                .getGameStorage(game);
+        if (maybeStorage.isPresent()) {
+            var gameStorage = maybeStorage.get();
+            final var afterUnderscore = typeName
+                    .substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
+            switch (afterUnderscore.toLowerCase()) {
+                case "sword":
+                    int sharpness = gameStorage.getSharpnessLevel(runningTeam).orElseThrow();
+                    item = clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type,
+                            SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
+                    break;
+                case "chestplate":
+                case "boots":
+                    int protection = gameStorage.getProtectionLevel(runningTeam).orElseThrow();
+                    item = clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type,
+                            SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4));
+                    break;
+                case "pickaxe":
+                    final int efficiency = gameStorage.getEfficiencyLevel(runningTeam).orElseThrow();
+                    item = clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type,
+                            SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2));
+                    break;
+            }
+
+        }
+        return item;
     }
 
-    //TODO:
+    // TODO:
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         final var backItemMeta = backItem.getItemMeta();
 
-        //   backItemMeta.setDisplayName(Message.of());
-//
+        // backItemMeta.setDisplayName(Message.of());
+        //
         // backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
-        //localOptionsBuilder.backItem(backItem);
+        // localOptionsBuilder.backItem(backItem);
 
-        //final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");
-        //pageBackItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_BACK).asComponent());
-        //localOptionsBuilder.pageBackItem(pageBackItem);
+        // final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback",
+        // "ARROW");
+        // pageBackItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_BACK).asComponent());
+        // localOptionsBuilder.pageBackItem(pageBackItem);
 
-        //final var pageForwardItem = MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
-        //pageForwardItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_FORWARD).asComponent());
-        //localOptionsBuilder.pageForwardItem(pageForwardItem);
+        // final var pageForwardItem =
+        // MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
+        // pageForwardItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_FORWARD).asComponent());
+        // localOptionsBuilder.pageForwardItem(pageForwardItem);
 
-        //final var cosmeticItem = MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");
+        // final var cosmeticItem =
+        // MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");
         localOptionsBuilder
-                //  .cosmeticItem(cosmeticItem)
+                // .cosmeticItem(cosmeticItem)
                 .renderHeaderStart(600)
                 .renderFooterStart(600)
                 .renderOffset(9)
@@ -451,6 +478,5 @@ public class ShopUtil {
             return "§7";
         }
     }
-
 
 }

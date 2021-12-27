@@ -269,12 +269,14 @@ public class BedWarsListener implements Listener {
         }
         final var game = Main.getInstance().getGameOfPlayer(victim);
         // query arena instance for access to Victim/Killer data
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> {
-                    arena.addVisualsForPlayer(victim);
-                });
+        Tasker.build(()->{
+            ArenaManager
+            .getInstance()
+            .get(game.getName())
+            .ifPresent(arena -> {
+                arena.addVisualsForPlayer(victim);
+            });
+        }).afterOneTick().start();
     }
     
     @EventHandler(priority = EventPriority.LOWEST)

@@ -189,7 +189,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             Bukkit.getLogger().warning("Wrong shop.yml configuration!");
             Bukkit.getLogger().warning("Check validity of your YAML!");
             ex.printStackTrace();
-            loadDefault(inventorySet);
+            //loadDefault(inventorySet);
         }
 
         shopMap.put(name, inventorySet);
