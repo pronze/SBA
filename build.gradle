@@ -6,7 +6,7 @@ defaultTasks 'clean', 'screamCompile'
 
 allprojects {
     group = 'io.pronze.hypixelify'
-    version = SBA_VERSION
+    version = SBA_VERSION as Object
 }
 
 subprojects {
@@ -21,7 +21,7 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
+        mavenLocal() // Debug builds
         mavenCentral()
         maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')

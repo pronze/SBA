@@ -1,13 +1,13 @@
-package io.github.pronze.sba.visuals.scoreboard;
+package io.github.pronze.sba.visual.sidebar;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.event.GameWrapperRegistrationEvent;
-import io.github.pronze.sba.game.GameManagerImpl;
-import io.github.pronze.sba.game.GameWrapper;
+import io.github.pronze.sba.game.ArenaType;
+import io.github.pronze.sba.game.GamePlayer;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.DateProviderService;
-import io.github.pronze.sba.visuals.scoreboard.task.SidebarAnimatedTitleTask;
+import io.github.pronze.sba.visual.sidebar.task.SidebarAnimatedTitleTask;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
@@ -19,36 +19,28 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.event.OnEvent;
 import org.screamingsandals.lib.event.player.SPlayerLeaveEvent;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.sidebar.Sidebar;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.utils.logger.LoggerWrapper;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Service
-public final class GameLobbyScoreboardManager implements Listener {
+public final class GameLobbySidebarManager implements Listener {
     private final DateProviderService service;
     private final SBA plugin;
     private final LoggerWrapper logger;
-    private final GameManagerImpl gameManager;
     private final SBAConfig config;
-    private final Map<GameWrapper, Sidebar> sidebarMap = new HashMap<>();
 
     @OnPostEnable
     public void onPostEnable() {
@@ -58,24 +50,39 @@ public final class GameLobbyScoreboardManager implements Listener {
         plugin.registerListener(this);
     }
 
-    private void addViewer(@NotNull PlayerWrapper playerWrapper, @NotNull Game game) {
-        logger.trace("Adding viewer: {} to game lobby scoreboard!", playerWrapper.getName());
-        final var maybeWrappedGame = gameManager.getWrappedGame(game);
+    private void addViewer(@NotNull GamePlayer gamePlayer) {
+        logger.trace("Adding viewer: {} to game lobby scoreboard!", gamePlayer.getName());
+        final var maybeWrappedGame = gamePlayer.getGame();
         if (maybeWrappedGame.isEmpty()) {
-            // probably blacklisted.
             return;
         }
 
-        final var sidebar = sidebarMap.get(maybeWrappedGame.get());
-        sidebar.addViewer(playerWrapper);
+        final var gameWrapper = maybeWrappedGame.get();
+        final var maybeSidebar = gameWrapper.getSidebar(ArenaType.LOBBY);
+        if (maybeSidebar.isEmpty()) {
+            return;
+        }
+
+        final var sidebar = maybeSidebar.get();
+        sidebar.addViewer(gamePlayer);
     }
 
-    private void removeViewer(@NotNull PlayerWrapper playerWrapper) {
-        logger.trace("Removing viewer: {} from game lobby scoreboard!", playerWrapper.getName());
-        sidebarMap.values()
-                .stream()
-                .filter(sidebar -> sidebar.getViewers().contains(playerWrapper))
-                .forEach(sidebar -> sidebar.removeViewer(playerWrapper));
+    private void removeViewer(@NotNull GamePlayer gamePlayer) {
+        logger.trace("Removing viewer: {} from game lobby scoreboard!", gamePlayer.getName());
+
+        final var maybeWrappedGame = gamePlayer.getGame();
+        if (maybeWrappedGame.isEmpty()) {
+            return;
+        }
+
+        final var gameWrapper = maybeWrappedGame.get();
+        final var maybeSidebar = gameWrapper.getSidebar(ArenaType.LOBBY);
+        if (maybeSidebar.isEmpty()) {
+            return;
+        }
+
+        final var sidebar = maybeSidebar.get();
+        sidebar.removeViewer(gamePlayer);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -84,6 +91,7 @@ public final class GameLobbyScoreboardManager implements Listener {
                 .getConnectedPlayers()
                 .stream()
                 .map(PlayerMapper::wrapPlayer)
+                .map(playerWrapper -> playerWrapper.as(GamePlayer.class))
                 .forEach(this::removeViewer);
     }
 
@@ -96,20 +104,24 @@ public final class GameLobbyScoreboardManager implements Listener {
         }
 
         final var player = event.getPlayer();
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
-        addViewer(wrappedPlayer, game);
+        final var wrappedPlayer = PlayerMapper
+                .wrapPlayer(player)
+                .as(GamePlayer.class);
+        addViewer(wrappedPlayer);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent event) {
         final var player = event.getPlayer();
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
+        final var wrappedPlayer = PlayerMapper
+                .wrapPlayer(player)
+                .as(GamePlayer.class);
         removeViewer(wrappedPlayer);
     }
 
     @OnEvent
     public void onPlayerLeave(SPlayerLeaveEvent event) {
-        removeViewer(event.getPlayer());
+        removeViewer(event.getPlayer().as(GamePlayer.class));
     }
 
     @OnEvent(priority = org.screamingsandals.lib.event.EventPriority.HIGHEST)
@@ -212,13 +224,6 @@ public final class GameLobbyScoreboardManager implements Listener {
 
         sidebar.bottomLine(lines);
         sidebar.show();
-        sidebarMap.put(gameWrapper, sidebar);
-    }
-
-    @OnPreDisable
-    public void onPreDisable() {
-        sidebarMap.values()
-                .forEach(Sidebar::destroy);
-        sidebarMap.clear();
+        gameWrapper.registerSidebar(ArenaType.LOBBY, sidebar);
     }
 }

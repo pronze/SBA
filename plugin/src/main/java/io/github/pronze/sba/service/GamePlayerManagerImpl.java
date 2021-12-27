@@ -1,6 +1,7 @@
 package io.github.pronze.sba.service;
 
-import io.github.pronze.sba.game.GamePlayerImpl;
+import io.github.pronze.sba.game.GamePlayer;
+import io.github.pronze.sba.game.InvisiblePlayer;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.Server;
@@ -20,9 +21,9 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
-public final class GamePlayerManagerImpl {
+public final class GamePlayerManagerImpl implements GamePlayerManager {
     private final LoggerWrapper logger;
-    private final Map<UUID, GamePlayerImpl> wrappedPlayers = new HashMap<>();
+    private final Map<UUID, GamePlayer> wrappedPlayers = new HashMap<>();
 
     @OnEnable
     public void onEnable() {
@@ -32,10 +33,10 @@ public final class GamePlayerManagerImpl {
 
     private void registerMappings() {
         PlayerMapper.UNSAFE_getPlayerConverter()
-                .registerW2P(GamePlayerImpl.class, playerWrapper -> {
-                   if (playerWrapper instanceof GamePlayerImpl) {
+                .registerW2P(GamePlayer.class, playerWrapper -> {
+                   if (playerWrapper instanceof GamePlayer) {
                        // prevent infinite wrapping recursion
-                       return (GamePlayerImpl) playerWrapper;
+                       return (GamePlayer) playerWrapper;
                    }
 
                    if (wrappedPlayers.containsKey(playerWrapper.getUuid())) {
@@ -50,21 +51,34 @@ public final class GamePlayerManagerImpl {
 
                    return maybeWrapper.get();
                 });
+
+        // mappings for invisible players.
+        PlayerMapper.UNSAFE_getPlayerConverter()
+                .registerW2P(InvisiblePlayer.class, playerWrapper -> {
+                   if (playerWrapper instanceof InvisiblePlayer) {
+                       return (InvisiblePlayer) playerWrapper;
+                   }
+
+                   // TODO: query arenas.
+
+                    return null;
+                });
     }
 
     @NotNull
-    public Optional<GamePlayerImpl> registerPlayer(@NotNull PlayerWrapper player) {
+    public Optional<GamePlayer> registerPlayer(@NotNull PlayerWrapper player) {
         final var uuid = player.getUuid();
         if (wrappedPlayers.containsKey(uuid)) {
             return Optional.empty();
         }
 
-        final var wrappedPlayer = new GamePlayerImpl(player);
+        final var wrappedPlayer = new GamePlayer(player);
         wrappedPlayers.put(uuid, wrappedPlayer);
         logger.trace("Registered player wrapper: [name: {}, uuid: {}]", player.getName(), player.getUniqueId());
         return Optional.of(wrappedPlayer);
     }
 
+    @Override
     public void unregisterPlayer(@NotNull PlayerWrapper player) {
         final var uuid = player.getUuid();
         if (!wrappedPlayers.containsKey(uuid)) {

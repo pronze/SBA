@@ -1,11 +1,13 @@
-#This is in a example inventory file for games inventory GUI!
+# This is in an example inventory file for games inventory GUI!, don't forget to remove the .disabled extension if you want to use this file
 
 data:
-  - stack: "RED_BED;1;§aBed Wars §7(Squads);§7Play Bed Wars {§7Squads}; ;§eClick to play!"
+  - stack: "RED_BED;1;§aBed Wars §7(Solo);§7Play Bed Wars {§7Solo}; ;§eClick to play!"
     row: 1
     column: 3
     properties:
       - name: randomly_join
+        games:
+          - test
 
   - stack: "BARRIER;1;§cExit"
     row: 3
@@ -19,33 +21,37 @@ data:
     row: 3
     column: 8
 
-  - stack: "OAK_SIGN;1;§aMap Selector §7(Squads);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!"
+  - stack: "OAK_SIGN;1;§aMap Selector §7(Solo);§7Pick which map you want to play;§7from a list of available servers.; ;§eClick to browse!"
     row: 1
     column: 5
     options:
       rows: 6
       render_actual_rows: 6
     items:
-      - stack: "FIREWORK;1;§7Random Map;§8Squads; ;§aClick to Play"
+      - stack: "FIREWORK;1;§7Random Map;§8Solo; ;§aClick to Play"
         row: 4
         column: 3
         properties:
           - name: randomly_join
+            games:
+              - test
 
-      - stack: "DIAMOND;1;§aRandom Favorite;§8Squads; ;§aClick to Play"
+      - stack: "DIAMOND;1;§aRandom Favorite;§8Solo; ;§aClick to Play"
         row: 4
         column: 5
         properties:
           - name: randomly_join
+            games:
+              - test
 
       - stack: "ARROW;1;§aGo Back;§7To Play Bed Wars"
         row: 5
         column: 4
         locate: main
 
-      - stack: "PAPER;1;§aWaterfall;§8Squads; ;§aClick to play"
+      - stack: "PAPER;1;§aJust casual test map;§8Solo; ;§aClick to play"
         row: 1
         column: 2
         properties:
           - name: join
-          - gameName: test
+            gameName: test

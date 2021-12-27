@@ -1,10 +1,10 @@
-package io.github.pronze.sba.visuals.scoreboard;
+package io.github.pronze.sba.visual.sidebar;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.GamePlayerImpl;
+import io.github.pronze.sba.game.GamePlayer;
 import io.github.pronze.sba.lang.LangKeys;
-import io.github.pronze.sba.utils.LocationUtils;
+import io.github.pronze.sba.util.LocationUtils;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -38,7 +38,7 @@ import org.screamingsandals.lib.world.WorldHolder;
 
 @RequiredArgsConstructor
 @Service
-public final class LobbyScoreboardManager implements Listener {
+public final class LobbySidebarManager implements Listener {
     private final SBA plugin;
     private final SBAConfig config;
     private final LoggerWrapper logger;
@@ -80,15 +80,15 @@ public final class LobbyScoreboardManager implements Listener {
                     return AdventureHelper.toComponent(String.valueOf(playerStatistic.getDeaths()));
                 })
                 .placeholder("level", playerWrapper -> {
-                    final var sbaWrapper = playerWrapper.as(GamePlayerImpl.class);
+                    final var sbaWrapper = playerWrapper.as(GamePlayer.class);
                     return AdventureHelper.toComponent("§7" + sbaWrapper.getLevel() + "✫");
                 })
                 .placeholder("progress", playerWrapper -> {
-                    final var sbaWrapper = playerWrapper.as(GamePlayerImpl.class);
+                    final var sbaWrapper = playerWrapper.as(GamePlayer.class);
                     return AdventureHelper.toComponent(sbaWrapper.getFormattedProgress());
                 })
                 .placeholder("bar", playerWrapper -> {
-                    final var sbaWrapper = playerWrapper.as(GamePlayerImpl.class);
+                    final var sbaWrapper = playerWrapper.as(GamePlayer.class);
                     return AdventureHelper.toComponent(sbaWrapper.getCompletedBoxes());
                 })
                 .placeholder("wins", playerWrapper -> {
@@ -103,7 +103,6 @@ public final class LobbyScoreboardManager implements Listener {
                             .getStatistic(playerWrapper.as(Player.class));
                     return AdventureHelper.toComponent(String.valueOf(playerStatistic.getKD()));
                 });
-
 
         sidebar.bottomLine(lines);
         sidebar.show();
@@ -140,7 +139,7 @@ public final class LobbyScoreboardManager implements Listener {
 
     @OnEvent
     public void onPlayerJoin(SPlayerJoinEvent event) {
-        final var gamePlayer = event.getPlayer().as(GamePlayerImpl.class);
+        final var gamePlayer = event.getPlayer().as(GamePlayer.class);
         Tasker.build(() -> {
              if (isInWorld(gamePlayer.getLocation())
                     && !Main.isPlayerInGame(gamePlayer.as(Player.class))
@@ -170,7 +169,7 @@ public final class LobbyScoreboardManager implements Listener {
         final var player = event.getPlayer();
         final var wrappedPlayer = PlayerMapper
                 .wrapPlayer(player)
-                .as(GamePlayerImpl.class);
+                .as(GamePlayer.class);
 
         removeViewer(wrappedPlayer);
     }
@@ -180,7 +179,7 @@ public final class LobbyScoreboardManager implements Listener {
         final var player = event.getPlayer();
         final var wrappedPlayer = PlayerMapper
                 .wrapPlayer(player)
-                .as(GamePlayerImpl.class);
+                .as(GamePlayer.class);
 
         Tasker.build(() -> {
             if (isInWorld(wrappedPlayer.getLocation())

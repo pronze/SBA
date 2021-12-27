@@ -1,6 +1,6 @@
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'tasker', 'hologram', 'placeholders', 'sidebar', 'healthindicator', 'npc', 'sidebar')
+        .modules('core', 'hologram', 'healthindicator', 'npc', 'sidebar', 'packets', 'command')
         .universalModules('lang')
         .version(SCREAMINGLIB_VERSION)
         .simpleInventories(SIMPLEINVENTORIES_VERSION)
@@ -8,31 +8,23 @@ ScreamingLibBuilder()
         .build()
 
 dependencies {
-    implementation project(':SBA-API')
-
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
+
+    implementation project(':SBA-API')
 
     implementation 'me.lucko:commodore:' + COMMODORE_VERSION, {
         exclude group: 'com.mojang', module: 'brigadier'
     }
 
-    implementation 'cloud.commandframework:cloud-minecraft-extras:' + CLOUD_COMMANDS_VERSION
-    implementation "cloud.commandframework:cloud-paper:" + CLOUD_COMMANDS_VERSION
-    implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION
+    implementation 'cloud.commandframework:cloud-minecraft-extras:' + CLOUD_EXTRAS_VERSION, {
+        exclude group: 'net.kyori'
+    }
 
-    implementation "net.kyori:adventure-text-minimessage:" + KYORI_ADVENTURE_TEXT_MINIMESSAGE_VERSION
-    implementation "net.kyori:adventure-platform-bukkit:" + KYORI_ADVENTURE_PLATFORM_BUKKIT_VERSION
+    implementation "cloud.commandframework:cloud-annotations:" + CLOUD_ANNOTATIONS_VERSION, {
+        exclude group: 'net.kyori'
+    }
 
-    implementation 'org.spongepowered:configurate-core:' + CONFIGURATE_VERSION
-    implementation 'org.spongepowered:configurate-yaml:' + CONFIGURATE_VERSION
-
-    implementation 'io.github.pronze.language.sba:SBALanguage:v1-SNAPSHOT'
-
-    testImplementation 'org.spigotmc:spigot:1.17.1-R0.1-SNAPSHOT'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:' + JUPITER_VERSION
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:' + JUPITER_VERSION
-    testImplementation 'org.screamingsandals.bedwars:BedWars:' + BEDWARS_VERSION
-    testImplementation 'org.screamingsandals.bedwars:BedWars-API:' + BEDWARS_VERSION
+    implementation 'io.github.pronze.language.sba:SBALanguage:' + SBA_LANGUAGE_VERSION
 }
 
 test {

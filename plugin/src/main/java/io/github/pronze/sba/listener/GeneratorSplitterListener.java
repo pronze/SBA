@@ -28,6 +28,7 @@ import org.screamingsandals.lib.utils.logger.LoggerWrapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import static org.screamingsandals.bedwars.api.APIUtils.BEDWARS_NAMESPACED_KEY;
 
 @RequiredArgsConstructor
 @Service
@@ -42,7 +43,8 @@ public final class GeneratorSplitterListener implements Listener {
     @SneakyThrows
     @OnPostEnable
     public void onPostEnable() {
-        if (!config.node("generator-splitter", "enabled").getBoolean(true)) {
+        if (!config.node("generator-splitter", "enabled")
+                .getBoolean(true)) {
             return;
         }
 
@@ -69,15 +71,13 @@ public final class GeneratorSplitterListener implements Listener {
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var playerTeam = game.getTeamOfPlayer(player);
 
-        if (!APIUtils.unhashFromInvisibleString(item.getItemStack(), SPLITTER_HASH)) {
+        if (playerTeam == null
+                || !APIUtils.unhashFromInvisibleString(item.getItemStack(), SPLITTER_HASH)
+                || !allowedMaterials.contains(item.getItemStack().getType())) {
             return;
         }
 
-        if (!allowedMaterials.contains(item.getItemStack().getType())) {
-            return;
-        }
-
-        removeHash(item.getItemStack(), SPLITTER_HASH);
+        removeHash(item.getItemStack());
         logger.trace("Detected spawned item, trying to split..");
         player.getWorld().getNearbyEntities(player.getLocation(), 3, 0, 3)
                 .stream()
@@ -89,7 +89,6 @@ public final class GeneratorSplitterListener implements Listener {
                     final var nearbyPlayerTeam = game.getTeamOfPlayer(nearbyPlayer);
                     if (nearbyPlayerTeam == playerTeam) {
                         nearbyPlayer.getInventory().addItem(item.getItemStack().clone());
-
                         if (config.node("generator-splitter", "sounds-enabled").getBoolean(true)) {
                             Sounds.playSound(nearbyPlayer, nearbyPlayer.getLocation(),
                                     "ENTITY_ITEM_PICKUP",
@@ -99,10 +98,10 @@ public final class GeneratorSplitterListener implements Listener {
                 });
     }
 
-    private static void removeHash(@NotNull ItemStack stack, @NotNull String hash) {
+    private static void removeHash(@NotNull ItemStack stack) {
         final var meta = stack.getItemMeta();
         try {
-            final var key = new NamespacedKey((Plugin) BedwarsAPI.getInstance(), APIUtils.BEDWARS_NAMESPACED_KEY);
+            final var key = new NamespacedKey((Plugin) BedwarsAPI.getInstance(), BEDWARS_NAMESPACED_KEY);
             var container = meta.getPersistentDataContainer();
             container.remove(key);
         } catch (Throwable ignored) {
@@ -111,11 +110,12 @@ public final class GeneratorSplitterListener implements Listener {
             if (lore == null) {
                 lore = new ArrayList<>();
             }
-            lore.removeIf(convertToInvisibleString(hash)::equals);
+            lore.removeIf(convertToInvisibleString(GeneratorSplitterListener.SPLITTER_HASH)::equals);
             meta.setLore(lore);
         }
         stack.setItemMeta(meta);
     }
+
 
     private static String convertToInvisibleString(String s) {
         StringBuilder hidden = new StringBuilder();

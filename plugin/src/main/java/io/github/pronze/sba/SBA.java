@@ -4,9 +4,9 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.listener.GeneratorSplitterListener;
 import io.github.pronze.sba.service.HealthIndicatorService;
 import io.github.pronze.sba.service.SBWConfigModifier;
-import io.github.pronze.sba.visuals.scoreboard.GameLobbyScoreboardManager;
-import io.github.pronze.sba.visuals.scoreboard.GameScoreboardManager;
-import io.github.pronze.sba.visuals.scoreboard.LobbyScoreboardManager;
+import io.github.pronze.sba.visual.sidebar.GameLobbySidebarManager;
+import io.github.pronze.sba.visual.sidebar.GameSidebarManager;
+import io.github.pronze.sba.visual.sidebar.LobbySidebarManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -26,7 +26,6 @@ import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.utils.logger.LoggerWrapper;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +49,9 @@ import java.util.List;
         GeneratorSplitterListener.class,
 
         // visuals
-        GameLobbyScoreboardManager.class,
-        GameScoreboardManager.class,
-        LobbyScoreboardManager.class,
+        GameLobbySidebarManager.class,
+        GameSidebarManager.class,
+        LobbySidebarManager.class,
 
         // services
         HealthIndicatorService.class
@@ -76,7 +75,7 @@ public class SBA extends PluginContainer implements SBWAddonAPI {
         }
 
         // init SLib v1 InventoryListener to delegate old SLib actions to new one.
-        InventoryListener.init(as(JavaPlugin.class));
+        InventoryListener.init(asJavaPlugin());
 
         logger.trace("SBA v{} has been enabled!", getPluginDescription().getVersion());
         registerAPI();
@@ -112,7 +111,7 @@ public class SBA extends PluginContainer implements SBWAddonAPI {
     }
 
     private void registerAPI() {
-        Bukkit.getServer().getServicesManager().register(SBWAddonAPI.class, this, as(JavaPlugin.class), ServicePriority.Normal);
+        Bukkit.getServer().getServicesManager().register(SBWAddonAPI.class, this, asJavaPlugin(), ServicePriority.Normal);
         logger.trace("API has been registered!");
     }
 

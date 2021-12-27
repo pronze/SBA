@@ -1,4 +1,4 @@
-package io.github.pronze.sba.visuals.scoreboard.task;
+package io.github.pronze.sba.visual.sidebar.task;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

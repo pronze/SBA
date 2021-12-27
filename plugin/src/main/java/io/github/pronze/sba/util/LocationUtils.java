@@ -1,17 +1,18 @@
-package io.github.pronze.sba.utils;
+package io.github.pronze.sba.util;
 
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.world.LocationHolder;
 import org.screamingsandals.lib.world.WorldMapper;
 import org.spongepowered.configurate.ConfigurationNode;
+
 import java.util.Optional;
 
 @UtilityClass
 public class LocationUtils {
 
     @NotNull
-    public Optional<LocationHolder> locationFromNode(ConfigurationNode locationNode) {
+    public Optional<LocationHolder> locationFromNode(@NotNull ConfigurationNode locationNode) {
         try {
             final var world = WorldMapper.getWorld(locationNode.node("world").getString()).orElseThrow();
             final var x = locationNode.node("x").getDouble(0.0D);

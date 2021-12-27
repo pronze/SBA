@@ -1,10 +1,12 @@
-package io.github.pronze.sba.visuals.scoreboard;
+package io.github.pronze.sba.visual.sidebar;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
-import io.github.pronze.sba.game.GameManagerImpl;
-import io.github.pronze.sba.game.GamePlayerImpl;
+import io.github.pronze.sba.game.ArenaType;
+import io.github.pronze.sba.service.GameManagerImpl;
+import io.github.pronze.sba.game.GamePlayer;
+import io.github.pronze.sba.game.task.GeneratorTask;
 import io.github.pronze.sba.lang.LangKeys;
 import io.github.pronze.sba.service.DateProviderService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,6 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.lang.Message;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.sidebar.Sidebar;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
@@ -35,14 +36,12 @@ import org.screamingsandals.lib.tasker.task.TaskBase;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.utils.logger.LoggerWrapper;
 import java.util.*;
 
 @RequiredArgsConstructor
 @Service
-public final class GameScoreboardManager implements Listener {
-    private final Map<Game, Sidebar> sidebarMap = new HashMap<>();
+public final class GameSidebarManager implements Listener {
     private final LoggerWrapper logger;
     private final SBA plugin;
     private final SBAConfig config;
@@ -84,28 +83,28 @@ public final class GameScoreboardManager implements Listener {
             scoreboardLines = Message.of(LangKeys.SCOREBOARD_LINES_DEFAULT);
         }
 
-        //final var generatorTask = game.getTask(GeneratorTask.class).orElseThrow();
+        final var generatorTask = gameWrapper.getRunningGameTask(GeneratorTask.class).orElseThrow();
         scoreboardLines
                 .placeholder("beds", wrapper -> gameWrapper
-                        .getPlayerData(wrapper.as(GamePlayerImpl.class).getUuid())
+                        .getPlayerData(wrapper.as(GamePlayer.class).getUuid())
                         .map(GamePlayerData::getBedDestroys)
                         .map(String::valueOf)
                         .map(AdventureHelper::toComponent)
                         .orElse(null))
                 .placeholder("deaths", wrapper -> gameWrapper
-                        .getPlayerData(wrapper.as(GamePlayerImpl.class).getUuid())
+                        .getPlayerData(wrapper.as(GamePlayer.class).getUuid())
                         .map(GamePlayerData::getDeaths)
                         .map(String::valueOf)
                         .map(AdventureHelper::toComponent)
                         .orElse(null))
                 .placeholder("finalkills", wrapper -> gameWrapper
-                        .getPlayerData(wrapper.as(GamePlayerImpl.class).getUuid())
+                        .getPlayerData(wrapper.as(GamePlayer.class).getUuid())
                         .map(GamePlayerData::getFinalKills)
                         .map(String::valueOf)
                         .map(AdventureHelper::toComponent)
                         .orElse(null))
                 .placeholder("kills", wrapper -> gameWrapper
-                        .getPlayerData(wrapper.as(GamePlayerImpl.class).getUuid())
+                        .getPlayerData(wrapper.as(GamePlayer.class).getUuid())
                         .map(GamePlayerData::getKills)
                         .map(String::valueOf)
                         .map(AdventureHelper::toComponent)
@@ -118,11 +117,13 @@ public final class GameScoreboardManager implements Listener {
                         .map(this::getTeamBedStatus)
                         .map(AdventureHelper::toComponent)
                         .orElse(Component.empty()))
-                // TODO:
-              //.placeholder("tier", generatorTask.getNextTierName().replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent())
+                .placeholder("tier", () -> Message.of(LangKeys.FLOATING_GENERATOR_SIDEBAR_EVENT_TEXT)
+                        .placeholder("tier", generatorTask.getNextTierName().replace("-", " "))
+                        .placeholder("time", generatorTask.getTimeLeftForNextEvent())
+                        .asComponent())
                 .placeholder("sba_version", plugin.getPluginDescription().getVersion())
                 .placeholder("team_status", wrapper -> {
-                    final var playerWrapper = wrapper.as(GamePlayerImpl.class);
+                    final var playerWrapper = wrapper.as(GamePlayer.class);
                     final var playerTeam = game.getTeamOfPlayer(playerWrapper.as(Player.class));
 
                     var component = Component.empty();
@@ -147,7 +148,7 @@ public final class GameScoreboardManager implements Listener {
                 });
 
         sidebar.bottomLine(scoreboardLines);
-        sidebarMap.put(game, sidebar);
+        gameWrapper.registerSidebar(ArenaType.GAME, sidebar);
 
         game.getConnectedPlayers()
                 .stream()
@@ -155,21 +156,39 @@ public final class GameScoreboardManager implements Listener {
                 .forEach(sidebar::addViewer);
     }
 
-    private void addViewer(@NotNull PlayerWrapper playerWrapper, @NotNull Game game) {
-        if (!sidebarMap.containsKey(game)) {
+    private void addViewer(@NotNull GamePlayer gamePlayer) {
+        logger.trace("Adding viewer: {} to game scoreboard!", gamePlayer.getName());
+        final var maybeWrappedGame = gamePlayer.getGame();
+        if (maybeWrappedGame.isEmpty()) {
             return;
         }
 
-        final var sidebar = sidebarMap.get(game);
-        sidebar.addViewer(playerWrapper);
+        final var gameWrapper = maybeWrappedGame.get();
+        final var maybeSidebar = gameWrapper.getSidebar(ArenaType.GAME);
+        if (maybeSidebar.isEmpty()) {
+            return;
+        }
+
+        final var sidebar = maybeSidebar.get();
+        sidebar.addViewer(gamePlayer);
     }
 
-    private void removeViewer(@NotNull PlayerWrapper playerWrapper) {
-        logger.trace("Removing viewer: {} from game scoreboard!", playerWrapper.getName());
-        sidebarMap.values()
-                .stream()
-                .filter(sidebar -> sidebar.getViewers().contains(playerWrapper))
-                .forEach(sidebar -> sidebar.removeViewer(playerWrapper));
+    private void removeViewer(@NotNull GamePlayer gamePlayer) {
+        logger.trace("Removing viewer: {} from game scoreboard!", gamePlayer.getName());
+
+        final var maybeWrappedGame = gamePlayer.getGame();
+        if (maybeWrappedGame.isEmpty()) {
+            return;
+        }
+
+        final var gameWrapper = maybeWrappedGame.get();
+        final var maybeSidebar = gameWrapper.getSidebar(ArenaType.LOBBY);
+        if (maybeSidebar.isEmpty()) {
+            return;
+        }
+
+        final var sidebar = maybeSidebar.get();
+        sidebar.removeViewer(gamePlayer);
     }
 
 
@@ -177,42 +196,32 @@ public final class GameScoreboardManager implements Listener {
     public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent event) {
         final var game = event.getGame();
 
-        if (game.getStatus() != GameStatus.RUNNING
-                || !sidebarMap.containsKey(game)) {
+        if (game.getStatus() != GameStatus.RUNNING) {
             return;
         }
 
-        removeViewer(PlayerMapper.wrapPlayer(event.getPlayer()));
+        removeViewer(PlayerMapper.wrapPlayer(event.getPlayer()).as(GamePlayer.class));
     }
 
     @EventHandler
     public void onBedWarsPlayerJoinedEvent(BedwarsPlayerJoinedEvent event) {
         final var game = event.getGame();
 
-        if (game.getStatus() != GameStatus.RUNNING
-                || !sidebarMap.containsKey(game)) {
+        if (game.getStatus() != GameStatus.RUNNING) {
             return;
         }
 
         // joined as spectator, let's give him a scoreboard.
-        addViewer(PlayerMapper.wrapPlayer(event.getPlayer()), game);
+        addViewer(PlayerMapper.wrapPlayer(event.getPlayer()).as(GamePlayer.class));
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBedWarsGameEndEvent(BedwarsGameEndEvent event) {
-        sidebarMap.computeIfPresent(event.getGame(), ((game, sidebar) -> {
-            sidebar.destroy();
-            return null;
-        }));
+        final var game = event.getGame();
+        gameManager.getWrappedGame(game)
+                        .ifPresent(gameWrapper -> gameWrapper.unregisterSidebar(ArenaType.GAME));
     }
 
-    @OnPreDisable
-    public void onPreDisable() {
-        sidebarMap
-                .values()
-                .forEach(Sidebar::destroy);
-        sidebarMap.clear();
-    }
 
     private String getTeamBedStatus(@NotNull RunningTeam team) {
         return team.isDead() ?
