@@ -296,7 +296,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                 newItem = applyEvent.getStack();
             }
         }
-
+        
         return Map.entry(shouldSellStack, false);
     }
 
