@@ -3,7 +3,6 @@ package io.github.pronze.sba.service;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.event.GameWrapperRegistrationEvent;
 import io.github.pronze.sba.event.GameWrapperUnregisteredEvent;
-import io.github.pronze.sba.game.GameManager;
 import io.github.pronze.sba.game.GameWrapper;
 import io.github.pronze.sba.game.GameWrapperImpl;
 import lombok.RequiredArgsConstructor;
@@ -86,5 +85,11 @@ public final class GameManagerImpl implements GameManager {
     @NotNull
     public Optional<GameWrapper> getWrappedGame(@NotNull String gameName) {
         return Optional.ofNullable(wrappedGames.get(gameName));
+    }
+
+    @NotNull
+    @Override
+    public Map<String, GameWrapper> getRegisteredGames() {
+        return Map.copyOf(wrappedGames);
     }
 }

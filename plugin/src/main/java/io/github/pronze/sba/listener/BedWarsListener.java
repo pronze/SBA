@@ -7,31 +7,39 @@ import io.github.pronze.sba.game.GamePlayer;
 import io.github.pronze.sba.lang.LangKeys;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.title.Title;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.lib.lang.Message;
+import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.tasker.task.TaskBase;
 import org.screamingsandals.lib.tasker.task.TaskState;
 import org.screamingsandals.lib.tasker.task.TaskerTask;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.logger.LoggerWrapper;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -45,6 +53,25 @@ public class BedWarsListener implements Listener {
     @OnPostEnable
     public void onPostEnable() {
         plugin.registerListener(this);
+    }
+
+    @EventHandler
+    public void onBedWarsGameStartedEvent(BedwarsGameStartedEvent event) {
+        final var game = event.getGame();
+        final var maybeWrapper = gameManager.getWrappedGame(game);
+        if (maybeWrapper.isEmpty()) {
+            return;
+        }
+
+        final var gameWrapper = maybeWrapper.get();
+        gameWrapper.start();
+
+        Message.of(LangKeys.GAME_START_MESSAGE)
+                .send(game
+                        .getConnectedPlayers()
+                        .stream()
+                        .map(PlayerMapper::wrapPlayer)
+                        .collect(Collectors.toList()));
     }
 
     @EventHandler

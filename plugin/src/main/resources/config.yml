@@ -1,5 +1,26 @@
 locale: en_US
 
+npc-stores:
+  enabled: true
+  type:
+    upgrades:
+      name: "Upgrades Store"
+      look-at-player: true
+      display-name:
+        - "§bITEM SHOP"
+        - "§e§lRIGHT CLICK"
+      shop-file: "upgradeShop.yml"
+      skin: "UncleJayM"
+    standard:
+      name: "Store"
+      look-at-player: true
+      display-name:
+        - "§bTEAM"
+        - "§bUPGRADES"
+        - "§e§lRIGHT CLICK"
+      shop-file: "shop.yml"
+      skin: "Misat11"
+
 player-stats:
   xp-to-level-up: 5000
 

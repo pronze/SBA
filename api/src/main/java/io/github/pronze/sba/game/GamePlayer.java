@@ -2,7 +2,8 @@ package io.github.pronze.sba.game;
 
 import com.google.common.base.Strings;
 import io.github.pronze.sba.Permission;
-import io.github.pronze.sba.SBWAddonAPI;
+import io.github.pronze.sba.config.MainConfig;
+import io.github.pronze.sba.service.GameManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -40,9 +41,7 @@ public class GamePlayer extends ExtendablePlayerWrapper {
         if (game == null) {
             return Optional.empty();
         }
-
-        final var gameManager = SBWAddonAPI.getInstance().getGameManager();
-        return gameManager.getWrappedGame(game);
+        return GameManager.getInstance().getWrappedGame(game);
     }
 
     public void destroy() {
@@ -69,9 +68,8 @@ public class GamePlayer extends ExtendablePlayerWrapper {
     public String getFormattedProgress() {
         var maxLimit  = getTotalXPToLevelUp();
 
-        final var format =  SBWAddonAPI
+        final var format =  MainConfig
                 .getInstance()
-                .getConfigurator()
                 .node("main-lobby", "progress-format")
                 .getString("§b%progress%§7/§a%total%")
                 .replace("%total%", roundAndFormat(maxLimit));
@@ -103,9 +101,8 @@ public class GamePlayer extends ExtendablePlayerWrapper {
     }
 
     public int getTotalXPToLevelUp() {
-        return SBWAddonAPI
+        return MainConfig
                 .getInstance()
-                .getConfigurator()
                 .node("player-statistics", "xp-to-level-up")
                 .getInt(5000);
     }

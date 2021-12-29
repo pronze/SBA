@@ -15,7 +15,7 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 @RequiredArgsConstructor
 @Service
-public final class SBAConfig implements ConfiguratorAPI {
+public final class SBAConfig implements MainConfig {
 
     @ConfigFile("config.yml")
     private final YamlConfigurationLoader loader;

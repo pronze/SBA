@@ -1,15 +1,19 @@
 package io.github.pronze.sba.game;
 
-import io.github.pronze.sba.SBWAddonAPI;
+import io.github.pronze.sba.config.MainConfig;
 import io.github.pronze.sba.data.GamePlayerData;
+import io.github.pronze.sba.data.GameStoreData;
 import io.github.pronze.sba.game.task.GameTask;
+import io.github.pronze.sba.service.GameTaskProvider;
 import io.github.pronze.sba.visual.generator.RotatingGenerator;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.sidebar.Sidebar;
 import org.screamingsandals.lib.utils.BasicWrapper;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.util.*;
 
@@ -17,8 +21,10 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     private final Map<UUID, GamePlayerData> playerDataMap = new HashMap<>();
     private final Map<UUID, InvisiblePlayer> invisiblePlayers = new HashMap<>();
     private final Map<ArenaType, Sidebar> sidebarMap = new HashMap<>();
+    private final Map<GameStoreData, NPC> npcMap = new HashMap<>();
     private final List<RotatingGenerator> rotatingGenerators = new ArrayList<>();
     private final List<GameTask> gameTasks = new ArrayList<>();
+    private final List<GameStoreData> gameStoreData = new ArrayList<>();
 
     @Getter
     @Setter
@@ -26,6 +32,31 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
 
     public GameWrapperImpl(@NotNull Game game) {
         super(game);
+        registerGameStores();
+    }
+
+    private void registerGameStores() {
+        wrappedObject.getGameStoreList().forEach(gameStore -> {
+            final var shopFile = gameStore.getShopFile();
+
+            final var query = MainConfig
+                    .getInstance()
+                    .node("npc-stores")
+                    .childrenList()
+                    .stream()
+                    .filter(configurationNode -> shopFile.equalsIgnoreCase(configurationNode.node("shop-file").getString()))
+                    .findAny();
+
+            ConfigurationNode npcNode;
+            if (query.isPresent()) {
+                npcNode = query.get();
+            } else {
+                npcNode = MainConfig.getInstance().node("npc-stores", "standard");
+            }
+
+            gameStoreData.add(GameStoreData.of(npcNode, gameStore));
+        });
+        wrappedObject.getGameStoreList().clear();
     }
 
     @Override
@@ -57,6 +88,9 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
             return null;
         }));
 
+        npcMap.values().forEach(NPC::destroy);
+        npcMap.clear();
+
         running = false;
     }
 
@@ -67,7 +101,7 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
         }
 
         // start game tasks.
-        SBWAddonAPI.getInstance().getGameTaskManager().startTasks(this);
+        GameTaskProvider.getInstance().startTasks(this);
         running = true;
     }
 
@@ -212,6 +246,23 @@ public class GameWrapperImpl extends BasicWrapper<Game> implements GameWrapper {
     @Override
     public List<InvisiblePlayer> getInvisiblePlayers() {
         return List.copyOf(invisiblePlayers.values());
+    }
+
+    @NotNull
+    @Override
+    public List<GameStoreData> getGameStoreData() {
+        return List.copyOf(gameStoreData);
+    }
+
+    @Override
+    public void registerStoreNPC(@NotNull GameStoreData gameStoreData, @NotNull NPC npc) {
+        npcMap.put(gameStoreData, npc);
+    }
+
+    @NotNull
+    @Override
+    public Map<GameStoreData, NPC> getRegisteredNPCS() {
+        return Map.copyOf(npcMap);
     }
 
     @NotNull

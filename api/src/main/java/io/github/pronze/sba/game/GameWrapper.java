@@ -1,17 +1,21 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.data.GamePlayerData;
+import io.github.pronze.sba.data.GameStoreData;
 import io.github.pronze.sba.game.task.GameTask;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.sidebar.Sidebar;
+import org.screamingsandals.lib.utils.RawValueHolder;
+import org.screamingsandals.lib.utils.Wrapper;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface GameWrapper {
+public interface GameWrapper extends Wrapper, RawValueHolder {
 
     void destroy();
 
@@ -63,4 +67,12 @@ public interface GameWrapper {
 
     @NotNull
     List<InvisiblePlayer> getInvisiblePlayers();
+
+    @NotNull
+    List<GameStoreData> getGameStoreData();
+
+    void registerStoreNPC(@NotNull GameStoreData gameStoreData, @NotNull NPC npc);
+
+    @NotNull
+    Map<GameStoreData, NPC> getRegisteredNPCS();
 }

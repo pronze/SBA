@@ -3,6 +3,8 @@ package io.github.pronze.sba.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.GamePlayer;
 import io.github.pronze.sba.service.GameManagerImpl;
+import io.github.pronze.sba.service.GameTaskProvider;
+import io.github.pronze.sba.service.GameTaskProviderImpl;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -65,7 +67,6 @@ public final class InvisiblePlayerListener implements Listener {
             }
         }
     }
-
 
     @OnEvent
     public void onEquipment(SPacketEvent event) {
