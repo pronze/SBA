@@ -41,7 +41,7 @@ public class Logger {
             return;
         }
         if (instance.level.getLevel() >= Level.TRACE.getLevel()) {
-            //instance.logger.info(getMessage(message, params));
+            instance.logger.info(getMessage(message, params));
         }
     }
 

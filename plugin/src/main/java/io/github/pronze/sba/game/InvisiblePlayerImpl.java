@@ -12,10 +12,13 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.NameTagVisibility;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.slot.EquipmentSlotHolder;
 import org.screamingsandals.lib.slot.EquipmentSlotMapping;
 
 import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
@@ -31,6 +34,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
     @Override
     public void vanish() {
+        Logger.trace("InvisiblePlayerImpl.vanish{}", hiddenPlayer);
         final var team = arena.getGame().getTeamOfPlayer(hiddenPlayer);
         if (team == null) {
             return;
@@ -49,7 +53,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
             if (!holder.hasTeamEntry(invisTeamName)) {
                 holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam.setNameTagVisibility(NameTagVisibility.NEVER));
+                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam.setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.NEVER));
             }
             final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
 
@@ -84,7 +88,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
     private boolean isElligble() {
        return arena.getGame().getStatus() == GameStatus.RUNNING
-               && hiddenPlayer.getGameMode() == GameMode.SURVIVAL
+               && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE)
                && hiddenPlayer.isOnline()
                && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
                && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);

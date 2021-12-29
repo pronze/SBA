@@ -92,6 +92,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 player.openInventory(shopMap.get("default"));
             }
         } catch (Throwable ignored) {
+            Logger.error("[SBA] Your shop is invalid! Check it out or contact us on Discord. {}",ignored);
             player.sendMessage("[SBA] Your shop is invalid! Check it out or contact us on Discord.");
         }
     }
@@ -357,6 +358,11 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         var player = event.getPlayer().as(Player.class);
         var game = Main.getInstance().getGameOfPlayer(player);
 
+        if(itemInfo.getStack().getMaterial().is(Material.POTION))
+        {
+            var itemB= item.as(ItemStack.class);
+            Logger.trace("{}",itemB);
+        }
         var prices = itemInfo.getOriginal().getPrices();
         if (!prices.isEmpty()) {
             var priceObject = prices.get(0);

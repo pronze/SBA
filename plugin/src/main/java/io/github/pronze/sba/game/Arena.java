@@ -29,6 +29,7 @@ import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
 import net.kyori.adventure.text.TextComponent;
@@ -80,8 +81,12 @@ public class Arena implements IArena {
             return;
         }
         final var invisiblePlayer = new InvisiblePlayerImpl(player, this);
-        invisiblePlayer.vanish();
         invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
+
+        Tasker.build(()->{
+            invisiblePlayer.vanish();
+        }).afterOneTick().start();
+
     }
 
     @Override

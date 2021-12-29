@@ -26,6 +26,7 @@ import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -346,7 +347,7 @@ public class PlayerListener implements Listener {
                             .anyMatch(potionEffect -> potionEffect.getType().getName().equalsIgnoreCase(PotionEffectType.INVISIBILITY.getName()));
                 }
             }
-
+            
             if (isInvis) {
                 final var playerGame = Main.getInstance().getGameOfPlayer(player);
                 ArenaManager
@@ -354,6 +355,8 @@ public class PlayerListener implements Listener {
                         .get(playerGame.getName())
                         .ifPresent(arena -> arena.addHiddenPlayer(player));
             }
+            
+            event.setReplacement(new ItemStack(Material.AIR));
         }
     }
 
