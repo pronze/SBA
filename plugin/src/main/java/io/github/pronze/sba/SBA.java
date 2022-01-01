@@ -22,6 +22,7 @@ import io.github.pronze.sba.specials.listener.PopupTowerListener;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.utils.Logger.Level;
 import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -29,10 +30,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
+import io.github.pronze.sba.VersionInfo;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
@@ -59,9 +62,9 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 
 @Plugin(
         id = "SBA",
-        authors = {"pronze"},
+        authors = {"pronze","boiscljo"},
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.6" 
+        version = VersionInfo.VERSION
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
@@ -131,6 +134,13 @@ public class SBA extends PluginContainer implements AddonAPI {
         instance = this;
         cachedPluginInstance = instance.getPluginDescription().as(JavaPlugin.class);
         Logger.init(cachedPluginInstance);
+
+        if (Main.getVersionNumber() < 109) {
+            showErrorMessage("Minecraft server is running versions below 1.9.4, please upgrade!");
+            Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+            return;
+        }
+
         ScoreboardManager.init(cachedPluginInstance);
     }
 
@@ -139,13 +149,11 @@ public class SBA extends PluginContainer implements AddonAPI {
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
+            Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
 
-        if (Main.getVersionNumber() < 109) {
-            showErrorMessage("Minecraft server is running versions below 1.9.4, please upgrade!");
-            return;
-        }
+       
 
         InventoryListener.init(cachedPluginInstance);
 
@@ -153,10 +161,13 @@ public class SBA extends PluginContainer implements AddonAPI {
             Logger.trace("Registering SBAExpansion...");
             new SBAExpansion().register();
         }
-
-        getLogger().info("Plugin has finished loading!");
+        
+        Logger.info("Plugin has finished loading!");
         registerAPI();
+        Logger.info("SBA Initialized on JAVA {}", System.getProperty("java.version"));
         Logger.trace("API has been registered!");
+
+        Logger.setMode(Level.ERROR);
     }
 
     public void registerListener(@NotNull Listener listener) {

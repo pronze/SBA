@@ -38,8 +38,10 @@ buildscript {
     dependencies {
         classpath 'org.screamingsandals.gradle:builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
     }
+    dependencies {
+        classpath "com.github.gmazzo:gradle-buildconfig-plugin:${BUILDCONFIG_VERSION}"
+    }
 }
-
 
 allprojects {
     group = 'io.pronze.hypixelify'
@@ -49,6 +51,7 @@ allprojects {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.screamingsandals.plugin-builder'
+    
     //apply plugin: 'org.screamingsandals.gradle.builder'
 
     enableShadowPlugin()

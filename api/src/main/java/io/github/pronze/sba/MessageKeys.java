@@ -23,7 +23,7 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_INVITE_EXPIRED = {"party", "message", "invite-expired"};
     public static final String[] PARTY_MESSAGE_LEADER_JOIN_LEAVE = {"party", "message", "leader-join-leave"};
     public static final String[] PARTY_CHAT_FORMAT = {"party", "chat-format"};
-    public static final String[] GAMES_INV_DISABLED = {"gamesinv_disabled"};
+    public static final String[] GAMES_INV_DISABLED = {"gamesinv","disabled"};
     public static final String[] GAME_END_MESSAGE = {"game-end"};
     public static final String[] DIAMOND = {"diamond"};
     public static final String[] EMERALD = {"emerald"};
@@ -79,7 +79,9 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_HELP = {"party", "message", "help"};
     public static final String[] COMMAND_CANNOT_EXECUTE = {"command_cannot_do"};
     public static final String[] COMMAND_SUCCESSFULLY_UPGRADED = {"command_upgraded"};
-    public static final String[] GAMESINV_GENERATED = {"gamesinv_generated"};
+    public static final String[] GAMESINV_GENERATED = { "gamesinv","generated" };
+    public static final String[] GAMESINV_NO_MAPS_WITH_NAME = { "gamesinv","error","missing-arena" };
+    public static final String[] GAMESINV_NO_MAPS = {"gamesinv","error","missing-map-argument"};
     public static final String[] CANNOT_DO_COMMAND = {"command_cannot_do"};
     public static final String[] COMMAND_CANCEL_UPGRADE = {"command_cancel_upgrade"};
     public static final String[] MESSAGE_NOT_IN_GAME = {"not_in_game"};

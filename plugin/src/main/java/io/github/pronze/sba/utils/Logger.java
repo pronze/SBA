@@ -34,7 +34,13 @@ public class Logger {
     protected static void mockDebug(String message, Object... params) {
         System.out.println(getMessage(message, params));
     }
-
+    public static void info(@NonNull String message, Object... params) {
+        if (instance.testMode) {
+            mockDebug(message, params);
+            return;
+        }
+        instance.logger.info(getMessage(message, params));
+    }
     public static void trace(@NonNull String message, Object... params) {
         if (instance.testMode) {
             mockDebug(message, params);

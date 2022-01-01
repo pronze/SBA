@@ -151,20 +151,7 @@ public class ShopUtil {
                 .collect(Collectors.toList());
     }
 
-    public static List<Game> getGamesWithSize(int size) {
-        final List<String> maps = getAllKeysForValue(SBAConfig.game_size, size);
-        if (maps == null || maps.isEmpty())
-            return null;
-
-        final ArrayList<Game> gameList = new ArrayList<>();
-
-        maps.forEach(map -> {
-            if (Main.getGameNames().contains(map))
-                gameList.add(Main.getGame(map));
-        });
-
-        return gameList;
-    }
+    
 
     public static <K, V> K getKey(Map<K, V> map, V value) {
         return map.keySet()

@@ -24,6 +24,7 @@ import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class LobbyScoreboardManager implements Listener {
@@ -101,40 +102,45 @@ public class LobbyScoreboardManager implements Listener {
 
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = Math.max(needplayers, 0);
-        int s = SBAConfig.game_size.getOrDefault(game.getName(), 4);
+        // int s = SBAConfig.game_size.getOrDefault(game.getName(), 4);
         String mode;
-        switch (s) {
-            case 1:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_SOLO_PREFIX)
-                        .toString();
-                break;
-            case 2:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX)
-                        .toString();
-                break;
-            case 3:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX)
-                        .toString();
-                break;
-            case 4:
-                mode = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX)
-                        .toString();
-                break;
-            default:
-                mode = s + "v" + s + "v" + s + "v" + s;
+
+        int s = game.getAvailableTeams().get(0).getMaxPlayers();
+
+        if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 1)) {
+            mode = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.LOBBY_SCOREBOARD_SOLO_PREFIX)
+                    .toString();
         }
+        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 2)) {
+            mode = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX)
+                    .toString();
+        }
+        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 3)) {
+            mode = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX)
+                    .toString();
+        }
+        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 4)) {
+            mode = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX)
+                    .toString();
+        } else {
+            List<String> teamSize = game.getAvailableTeams().stream().map(m -> m.getMaxPlayers()).map(String::valueOf)
+                    .collect(Collectors.toList());
+            mode = String.join("v", teamSize);
+        }
+        // mode = s + "v" + s + "v" + s + "v" + s;
 
         if (game.countConnectedPlayers() >= game.getMinPlayers()
                 && game.getStatus() == GameStatus.WAITING) {
-            final var time = ((org.screamingsandals.bedwars.game.Game)Main.getInstance().getGameByName(game.getName())).getFormattedTimeLeft();
+            final var time = ((org.screamingsandals.bedwars.game.Game) Main.getInstance().getGameByName(game.getName()))
+                    .getFormattedTimeLeft();
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
                 var seconds = Integer.parseInt(units[1]) + 1;

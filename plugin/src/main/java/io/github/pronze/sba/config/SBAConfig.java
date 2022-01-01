@@ -21,7 +21,6 @@ import java.util.List;
 
 @Service
 public class SBAConfig implements IConfigurator {
-    public static HashMap<String, Integer> game_size = new HashMap<>();
 
     public static SBAConfig getInstance() {
         return ServiceManager.get(SBAConfig.class);
@@ -303,11 +302,6 @@ public class SBAConfig implements IConfigurator {
             e.printStackTrace();
         }
 
-        node("lobby-scoreboard")
-                .node("player-size")
-                .node("games")
-                .childrenMap()
-                .forEach((key, val) -> game_size.put((String) key, val.getInt(4)));
     }
 
     public void forceReload() {
