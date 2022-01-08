@@ -24,8 +24,10 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 @Service(dependsOn = {
         SBAConfig.class,
@@ -131,6 +133,8 @@ public class GamesInventory implements Listener {
                                         couldNotFindGameMessage.send(playerWrapper);
                                         return;
                                     }
+                                    Collections.shuffle(games, new Random());
+
                                     games.stream()
                                             .filter(game -> game.getStatus() == GameStatus.WAITING)
                                             .findAny()

@@ -27,7 +27,7 @@ public class Logger {
 
     public static void init(JavaPlugin plugin) {
         instance = new Logger();
-        instance.level = Level.ALL;
+        instance.level = Level.ERROR;
         instance.logger = plugin.getLogger();
     }
 

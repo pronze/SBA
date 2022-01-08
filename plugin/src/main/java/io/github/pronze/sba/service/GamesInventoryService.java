@@ -248,7 +248,7 @@ public class GamesInventoryService implements Listener {
 
     @OnEvent
     public void onPlayerJoin(SPlayerJoinEvent e) {
-        final var player = e.getPlayer();
+        final var player = e.player();
 
         Tasker.build(() -> {
             if (MainLobbyVisualsManager.isInWorld(player.getLocation().as(Location.class)) && player.isOnline()) {
@@ -293,26 +293,26 @@ public class GamesInventoryService implements Listener {
 
     @OnEvent
     public void onNPCTouch(NPCInteractEvent event) {
-        if (event.getInteractType() == org.screamingsandals.lib.utils.InteractType.RIGHT_CLICK) {
-            if (entityEditMap.containsKey(event.getPlayer().as(Player.class).getEntityId())) {
-                Action a = entityEditMap.get(event.getPlayer().as(Player.class).getEntityId());
+        if (event.interactType() == org.screamingsandals.lib.utils.InteractType.RIGHT_CLICK) {
+            if (entityEditMap.containsKey(event.player().as(Player.class).getEntityId())) {
+                Action a = entityEditMap.get(event.player().as(Player.class).getEntityId());
                 if (a == Action.Remove) {
-                    removeNPC(event.getPlayer(), event.getVisual());
+                    removeNPC(event.player(), event.visual());
                 } else if (a == Action.Skin) {
-                    setNpcSkin(event.getPlayer(), event.getVisual());
+                    setNpcSkin(event.player(), event.visual());
                 }
                 return;
             }
         }
 
-        NPC clicked = event.getVisual();
+        NPC clicked = event.visual();
 
         NPCs.stream().filter(n -> n.npc == clicked).findAny().ifPresent(c -> {
             new BukkitRunnable() {
                 public void run() {
                     GamesInventory
                             .getInstance()
-                            .openForPlayer(event.getPlayer().as(Player.class), c.mode);
+                            .openForPlayer(event.player().as(Player.class), c.mode);
                 }
             }.runTask(SBA.getPluginInstance());
         });

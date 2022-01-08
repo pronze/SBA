@@ -92,13 +92,13 @@ public class NPCStoreService implements Listener {
         // return;
         // }
 
-        final var player = event.getPlayer().as(Player.class);
+        final var player = event.player().as(Player.class);
         if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
             return;
         }
 
         final var game = Main.getInstance().getGameOfPlayer(player);
-        final var npc = event.getVisual();
+        final var npc = event.visual();
         
         ArenaManager
                 .getInstance()

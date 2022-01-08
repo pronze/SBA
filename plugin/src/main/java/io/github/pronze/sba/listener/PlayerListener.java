@@ -364,6 +364,27 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
         SBA.getInstance().getPlayerWrapperService().register(player);
+
+        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
+        {
+            if (player.hasPermission("minecraft.admin.command_feedback")) {
+                Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
+                    player.sendMessage("§c[SBA]: Plugin has detected ProtocolLib");
+                    player.sendMessage(
+                            "§cSBA isn't compatible with ProtocolLib, please remove the plugin or you might not be able to join games");
+                }, 40L);
+            }
+        }
+        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics"))
+        {
+            if(player.hasPermission("minecraft.admin.command_feedback"))
+            {
+                Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
+                    player.sendMessage("§c[SBA]: Plugin has detected OldCombatMechanics");
+                    player.sendMessage("§cSBA isn't compatible with OldCombatMechanics, please remove the plugin or you might not be able to view NPC and spawners");
+                }, 40L);
+            }
+        }
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
             if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {

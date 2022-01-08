@@ -278,7 +278,6 @@ public class BedWarsListener implements Listener {
             });
         }).afterOneTick().start();
     }
-    
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
         final var victim = e.getEntity();

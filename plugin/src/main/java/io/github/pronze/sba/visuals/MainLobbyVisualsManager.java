@@ -20,6 +20,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -37,13 +38,31 @@ public class MainLobbyVisualsManager implements Listener {
     private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
+    private boolean enabled;
+
+    public static MainLobbyVisualsManager getInstance() {
+        return ServiceManager.get(MainLobbyVisualsManager.class);
+    }
 
     @OnPostEnable
     public void registerListener() {
+        SBA.getInstance().registerListener(this);
+
+        load();
+    }
+
+    public void reload()
+    {
+        disable();
+        load();
+    }
+    public void load()
+    {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
+            enabled=false;
             return;
         }
-        SBA.getInstance().registerListener(this);
+        enabled=true;
         SBAUtil.readLocationFromConfig("main-lobby").ifPresentOrElse(location -> {
             MainLobbyVisualsManager.location = location;
             Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> Bukkit
@@ -66,8 +85,11 @@ public class MainLobbyVisualsManager implements Listener {
         return player.getScoreboard().getObjective(MAIN_LOBBY_OBJECTIVE) != null;
     }
 
+  
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
+        if (!enabled)
+            return;
         if (!SBAConfig.getInstance().node("main-lobby","custom-chat").getBoolean(true)) return;
         final var player = e.getPlayer();
         final var db = SBA.getInstance().getPlayerWrapperService().get(player).orElseThrow();
@@ -99,11 +121,15 @@ public class MainLobbyVisualsManager implements Listener {
     public void disable() {
         Set.copyOf(scoreboardMap.keySet()).forEach(this::remove);
         scoreboardMap.clear();
-        HandlerList.unregisterAll(this);
+        enabled = false;
+        //HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
+        if (!enabled)
+            return;
+
         final var player = e.getPlayer();
 
         Bukkit.getServer().getScheduler()
@@ -117,6 +143,9 @@ public class MainLobbyVisualsManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
+        if (!enabled)
+            return;
+
         final var player = e.getPlayer();
         if (player.isOnline() && isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
             create(player);
@@ -131,6 +160,9 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void create(Player player) {
+        if (!enabled)
+            return;
+
         Logger.trace("Creating scoreboard for player: {} in the main lobby", player.getName());
         final var playerData = SBA
                 .getInstance()
@@ -218,6 +250,8 @@ public class MainLobbyVisualsManager implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
+        if (!enabled)
+            return;
         Tasker.build(() -> {
             if (isInWorld(player.getLocation()) && player.isOnline()) {
                 create(player);

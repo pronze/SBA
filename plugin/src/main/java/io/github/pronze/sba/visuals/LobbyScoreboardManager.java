@@ -16,6 +16,7 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.config.SBAConfig;
@@ -29,6 +30,10 @@ import java.util.stream.Collectors;
 @Service
 public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+
+    public static LobbyScoreboardManager getInstance() {
+        return ServiceManager.get(LobbyScoreboardManager.class);
+    }
 
     @OnPostEnable
     public void registerListener() {

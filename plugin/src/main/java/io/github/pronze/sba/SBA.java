@@ -60,17 +60,11 @@ import java.util.Optional;
 
 import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 
-@Plugin(
-        id = "SBA",
-        authors = {"pronze","boiscljo"},
-        loadTime = Plugin.LoadTime.POSTWORLD,
-        version = VersionInfo.VERSION
-)
+@Plugin(id = "SBA", authors = { "pronze",
+        "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies =
-        "PlaceholderAPI"
-)
+}, softDependencies = "PlaceholderAPI")
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -152,16 +146,23 @@ public class SBA extends PluginContainer implements AddonAPI {
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
-
-       
-
+        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
+            Logger.error("[SBA]: Plugin has detected ProtocolLib");
+            Logger.error(
+                    "SBA isn't compatible with ProtocolLib, please remove the plugin or you might not be able to join games");
+        }
+        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics")) {
+            Logger.error("[SBA]: Plugin has detected OldCombatMechanics");
+            Logger.error(
+                    "SBA isn't compatible with OldCombatMechanics, please remove the plugin or you might not be able to view NPC and spawners");
+        }
         InventoryListener.init(cachedPluginInstance);
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
             Logger.trace("Registering SBAExpansion...");
             new SBAExpansion().register();
         }
-        
+
         Logger.info("Plugin has finished loading!");
         registerAPI();
         Logger.info("SBA Initialized on JAVA {}", System.getProperty("java.version"));
@@ -193,7 +194,8 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     private void registerAPI() {
         if (Bukkit.getServer().getServicesManager().getRegistration(AddonAPI.class) == null) {
-            Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, cachedPluginInstance, ServicePriority.Normal);
+            Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, cachedPluginInstance,
+                    ServicePriority.Normal);
         }
     }
 
@@ -211,7 +213,8 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public SBAPlayerWrapper getPlayerWrapper(Player player) {
-        return PlayerWrapperService.getInstance().get(player).orElseGet(()->PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
+        return PlayerWrapperService.getInstance().get(player)
+                .orElseGet(() -> PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
     }
 
     @Override
@@ -264,5 +267,3 @@ public class SBA extends PluginContainer implements AddonAPI {
         return instance.getPluginDescription().as(JavaPlugin.class);
     }
 }
-
-
