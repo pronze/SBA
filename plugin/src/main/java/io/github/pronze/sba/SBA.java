@@ -64,7 +64,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies = "PlaceholderAPI")
+}, softDependencies = { "PlaceholderAPI" ,"ViaVersion"})
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -146,10 +146,10 @@ public class SBA extends PluginContainer implements AddonAPI {
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
-        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
-            Logger.error("[SBA]: Plugin has detected ProtocolLib");
+        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
+            Logger.error("[SBA]: Plugin has detected ProtocolLib and ViaVersion");
             Logger.error(
-                    "SBA isn't compatible with ProtocolLib, please remove the plugin or you might not be able to join games");
+                    "There is a current bug that prevent NPC from working with clients that use a different version than the server. Such player would get automatically kicked as soon as a NPC shows");
         }
         if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics")) {
             Logger.error("[SBA]: Plugin has detected OldCombatMechanics");

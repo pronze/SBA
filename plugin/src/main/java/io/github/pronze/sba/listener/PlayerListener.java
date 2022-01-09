@@ -365,13 +365,13 @@ public class PlayerListener implements Listener {
         final var player = e.getPlayer();
         SBA.getInstance().getPlayerWrapperService().register(player);
 
-        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib"))
+        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ViaVersion"))
         {
             if (player.hasPermission("minecraft.admin.command_feedback")) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
-                    player.sendMessage("§c[SBA]: Plugin has detected ProtocolLib");
+                    player.sendMessage("§c[SBA]: Plugin has detected ProtocolLib and ViaVersion");
                     player.sendMessage(
-                            "§cSBA isn't compatible with ProtocolLib, please remove the plugin or you might not be able to join games");
+                            "§cThere is a current bug that prevent NPC from working with clients that use a different version than the server. Such player would get automatically kicked as soon as a NPC shows");
                 }, 40L);
             }
         }
