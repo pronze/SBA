@@ -365,23 +365,13 @@ public class PlayerListener implements Listener {
         final var player = e.getPlayer();
         SBA.getInstance().getPlayerWrapperService().register(player);
 
-        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ViaVersion"))
-        {
-            if (player.hasPermission("minecraft.admin.command_feedback")) {
-                Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
-                    player.sendMessage("§c[SBA]: Plugin has detected ProtocolLib and ViaVersion");
-                    player.sendMessage(
-                            "§cThere is a current bug that prevent NPC from working with clients that use a different version than the server. Such player would get automatically kicked as soon as a NPC shows");
-                }, 40L);
-            }
-        }
-        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics"))
+        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics") && !Bukkit.getPluginManager().isPluginEnabled("ViaVersion"))
         {
             if(player.hasPermission("minecraft.admin.command_feedback"))
             {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
                     player.sendMessage("§c[SBA]: Plugin has detected OldCombatMechanics");
-                    player.sendMessage("§cSBA isn't compatible with OldCombatMechanics, please remove the plugin or you might not be able to view NPC and spawners");
+                    player.sendMessage("§cSBA isn't compatible with OldCombatMechanics, please remove the plugin, install OCMFixer or ViaVersion to be able to view NPC and spawners");
                 }, 40L);
             }
         }

@@ -67,7 +67,7 @@ public class Logger {
             return;
         }
         if (instance.level.getLevel() >= Level.ERROR.getLevel()) {
-            instance.logger.warning(getMessage(message, params));
+            instance.logger.severe(getMessage(message, params));
         }
     }
 

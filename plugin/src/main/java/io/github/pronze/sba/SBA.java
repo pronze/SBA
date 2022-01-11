@@ -55,6 +55,7 @@ import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,7 +65,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies = { "PlaceholderAPI" ,"ViaVersion"})
+}, softDependencies = { "PlaceholderAPI", "ViaVersion" })
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -146,15 +147,18 @@ public class SBA extends PluginContainer implements AddonAPI {
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
-        if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
-            Logger.error("[SBA]: Plugin has detected ProtocolLib and ViaVersion");
-            Logger.error(
-                    "There is a current bug that prevent NPC from working with clients that use a different version than the server. Such player would get automatically kicked as soon as a NPC shows");
+        else
+        {
+            Logger.info("SBA initialized using Bedwars {}", BedwarsAPI.getInstance().getPluginVersion());
+            if(!List.of("0.2.20","0.2.21","0.2.22").stream().anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals))
+            {
+                Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.22 or you might encounter bugs");
+            }
         }
-        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics")) {
+        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics") && !Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
             Logger.error("[SBA]: Plugin has detected OldCombatMechanics");
             Logger.error(
-                    "SBA isn't compatible with OldCombatMechanics, please remove the plugin or you might not be able to view NPC and spawners");
+                    "SBA isn't compatible with OldCombatMechanics, please remove the plugin, install OCMFixer or install ViaVersion to be able to view NPC and spawners");
         }
         InventoryListener.init(cachedPluginInstance);
 

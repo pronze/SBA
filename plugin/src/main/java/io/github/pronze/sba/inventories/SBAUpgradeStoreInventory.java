@@ -32,6 +32,7 @@ import org.screamingsandals.simpleinventories.inventory.InventorySet;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Service(dependsOn = {
@@ -98,7 +99,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     }
 
     @Override
-    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, ItemStack newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
+    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
         boolean shouldSellStack = true;
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var gameStorage = ArenaManager
@@ -291,9 +292,10 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             break;
                     }
                 }
-                var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem, propertyData);
+                var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
-                newItem = applyEvent.getStack();
+                newItem.set(applyEvent.getStack());
+            
             }
         }
         

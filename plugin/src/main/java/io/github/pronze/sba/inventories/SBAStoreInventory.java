@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service(dependsOn = {
         SimpleInventoriesCore.class,
@@ -64,14 +65,14 @@ public class SBAStoreInventory extends AbstractStoreInventory {
     }
 
     @Override
-    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, ItemStack newItem, ItemStack materialItem, PlayerItemInfo info, ItemSpawnerType type) {
+    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, ItemStack materialItem, PlayerItemInfo info, ItemSpawnerType type) {
         final var game = Main.getInstance().getGameOfPlayer(player);
         var gameStorage = SBA
                 .getInstance()
                 .getGameStorage(game)
                 .orElseThrow();
 
-        final var typeName = newItem.getType().name();
+        final var typeName = newItem.get().getType().name();
         final var team = game.getTeamOfPlayer(player);
 
         final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
@@ -82,14 +83,14 @@ public class SBAStoreInventory extends AbstractStoreInventory {
             case "sword":
                 final var sharpness = gameStorage.getSharpnessLevel(team).orElseThrow();
                 if (sharpness > 0 && sharpness < 5) {
-                    newItem.addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+                    newItem.get().addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
                 }
 
                 if (SBAConfig.getInstance().node("replace-sword-on-upgrade").getBoolean(true)) {
                     Arrays.stream(player.getInventory().getContents().clone())
                             .filter(Objects::nonNull)
                             .filter(itemStack -> itemStack.getType().name().endsWith("SWORD"))
-                            .filter(itemStack ->  !itemStack.isSimilar(newItem))
+                            .filter(itemStack ->  !itemStack.isSimilar(newItem.get()))
                             .forEach(sword -> player.getInventory().removeItem(sword));
                 }
                 break;
@@ -97,11 +98,11 @@ public class SBAStoreInventory extends AbstractStoreInventory {
             case "chestplate":
             case "helmet":
             case "leggings":
-                return Map.entry(ShopUtil.buyArmor(player, newItem.getType(), gameStorage, game), false);
+                return Map.entry(ShopUtil.buyArmor(player, newItem.get().getType(), gameStorage, game), false);
             case "pickaxe":
                 final var efficiency = gameStorage.getEfficiencyLevel(team).orElseThrow();
                 if (efficiency > 0 && efficiency < 5) {
-                    newItem.addEnchantment(Enchantment.DIG_SPEED, efficiency);
+                    newItem.get().addEnchantment(Enchantment.DIG_SPEED, efficiency);
                 }
                 break;
         }

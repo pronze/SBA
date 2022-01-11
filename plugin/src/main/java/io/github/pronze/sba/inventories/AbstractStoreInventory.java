@@ -43,6 +43,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RequiredArgsConstructor
 public abstract class AbstractStoreInventory implements IStoreInventory, Listener {
@@ -319,7 +320,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
         }
 
-        final var result  = handlePurchase(player, newItem, materialItem.as(ItemStack.class), itemInfo, type);
+        AtomicReference<ItemStack> newItemRef = new AtomicReference<ItemStack>(newItem);
+        final var result = handlePurchase(player, newItemRef, materialItem.as(ItemStack.class), itemInfo, type);
+        newItem = newItemRef.get();
         final var shouldSellStack = result.getKey();
         final var shouldBuyStack = result.getValue();
 
@@ -404,7 +407,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     public abstract void onPreGenerateItem(ItemRenderEvent event);
 
-    public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, ItemStack newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
+    public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
 
     @NotNull
     public abstract InventorySetBuilder getInventorySetBuilder();
