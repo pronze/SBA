@@ -24,6 +24,8 @@ import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.Controllable;
+import org.screamingsandals.lib.item.Item;
+import org.screamingsandals.lib.item.builder.ItemFactory;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
@@ -51,8 +53,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
             "blindtrap",
             "minertrap",
             "healpool",
-            "dragon"
-    );
+            "dragon");
 
     public static List<Integer> sharpnessPrices = new ArrayList<>();
     public static List<Integer> protectionPrices = new ArrayList<>();
@@ -83,9 +84,12 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                         efficiencyPrices.add(value);
                     }
                 });
-        Logger.trace("Protection prices: {}", protectionPrices.stream().map(String::valueOf).collect(Collectors.toList()));
-        Logger.trace("Efficiency prices: {}", efficiencyPrices.stream().map(String::valueOf).collect(Collectors.toList()));
-        Logger.trace("Sharpness prices: {}", sharpnessPrices.stream().map(String::valueOf).collect(Collectors.toList()));
+        Logger.trace("Protection prices: {}",
+                protectionPrices.stream().map(String::valueOf).collect(Collectors.toList()));
+        Logger.trace("Efficiency prices: {}",
+                efficiencyPrices.stream().map(String::valueOf).collect(Collectors.toList()));
+        Logger.trace("Sharpness prices: {}",
+                sharpnessPrices.stream().map(String::valueOf).collect(Collectors.toList()));
     }
 
     @Override
@@ -99,7 +103,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     }
 
     @Override
-    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
+    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
+            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
         boolean shouldSellStack = true;
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var gameStorage = ArenaManager
@@ -119,17 +124,18 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                 if (!(converted instanceof Map)) {
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
-                //noinspection unchecked
+                // noinspection unchecked
                 var propertyData = (Map<String, Object>) converted;
 
-                //temporary fix
+                // temporary fix
                 propertyData.putIfAbsent("name", propertyName);
 
                 if (upgradeProperties.contains(propertyName)) {
                     switch (propertyName) {
                         case "sharpness":
                             var teamSharpnessLevel = gameStorage.getSharpnessLevel(team).orElseThrow();
-                            var maxSharpnessLevel = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1);
+                            var maxSharpnessLevel = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness")
+                                    .getInt(1);
 
                             if (teamSharpnessLevel >= maxSharpnessLevel) {
                                 shouldSellStack = false;
@@ -140,9 +146,12 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             } else {
                                 teamSharpnessLevel = teamSharpnessLevel + 1;
                                 var ePrice = sharpnessPrices.get(teamSharpnessLevel);
-                                materialItem = type.getStack(ePrice);
 
-                                if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
+                                materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                                                                                                 // type.getStack(ePrice)));
+
+                                if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
+                                        materialItem.get().getAmount())) {
                                     gameStorage.setSharpnessLevel(team, teamSharpnessLevel);
                                     Integer finalTeamSharpnessLevel = teamSharpnessLevel;
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -156,17 +165,20 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                                 .filter(Objects::nonNull)
                                                 .forEach(item -> {
                                                     if (item.getType().name().endsWith("SWORD")) {
-                                                        item.addEnchantment(Enchantment.DAMAGE_ALL, finalTeamSharpnessLevel);
+                                                        item.addEnchantment(Enchantment.DAMAGE_ALL,
+                                                                finalTeamSharpnessLevel);
                                                     }
                                                 });
                                     });
-                                }
+                                } else
+                                    shouldSellStack = false;
                             }
                             break;
 
                         case "efficiency":
                             var efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElseThrow();
-                            var maxEfficiencyLevel = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2);
+                            var maxEfficiencyLevel = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency")
+                                    .getInt(2);
 
                             if (efficiencyLevel >= maxEfficiencyLevel) {
                                 shouldSellStack = false;
@@ -177,9 +189,11 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             } else {
                                 efficiencyLevel = efficiencyLevel + 1;
                                 var ePrice = efficiencyPrices.get(efficiencyLevel);
-                                materialItem = type.getStack(ePrice);
+                                materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                                                                                                 // type.getStack(ePrice)));
 
-                                if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
+                                if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
+                                        materialItem.get().getAmount())) {
                                     gameStorage.setEfficiencyLevel(team, efficiencyLevel);
                                     Integer finalTeamEfficiencyLevel = efficiencyLevel;
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -193,11 +207,13 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                                 .filter(Objects::nonNull)
                                                 .forEach(item -> {
                                                     if (item.getType().name().endsWith("PICKAXE")) {
-                                                        item.addEnchantment(Enchantment.DIG_SPEED, finalTeamEfficiencyLevel);
+                                                        item.addEnchantment(Enchantment.DIG_SPEED,
+                                                                finalTeamEfficiencyLevel);
                                                     }
                                                 });
                                     });
-                                }
+                                } else
+                                    shouldSellStack = false;
                             }
                             break;
                         case "blindtrap":
@@ -214,8 +230,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         .toString();
 
                                 gameStorage.setPurchasedBlindTrap(team, true);
-                                team.getConnectedPlayers().forEach(pl ->
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), blindnessTrapTitle, "", 20, 40, 20));
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
+                                        blindnessTrapTitle, "", 20, 40, 20));
                             }
                             break;
 
@@ -233,8 +249,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         .toString();
 
                                 gameStorage.setPurchasedMinerTrap(team, true);
-                                team.getConnectedPlayers().forEach(pl ->
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), minerTrapTitle, "", 20, 40, 20));
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
+                                        minerTrapTitle, "", 20, 40, 20));
                             }
                             break;
 
@@ -253,13 +269,15 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         .toComponent();
 
                                 gameStorage.setPurchasedPool(team, true);
-                                team.getConnectedPlayers().forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
+                                team.getConnectedPlayers().forEach(
+                                        pl -> PlayerMapper.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
                             }
                             break;
 
                         case "protection":
                             var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElseThrow();
-                            var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
+                            var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection")
+                                    .getInt(4);
 
                             if (teamProtectionLevel >= maxProtectionLevel) {
                                 shouldSellStack = false;
@@ -270,9 +288,11 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             } else {
                                 teamProtectionLevel = teamProtectionLevel + 1;
                                 var ePrice = protectionPrices.get(teamProtectionLevel);
-                                materialItem = type.getStack(ePrice);
+                                materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                                                                                                 // type.getStack(ePrice)));
 
-                                if (player.getInventory().containsAtLeast(materialItem, materialItem.getAmount())) {
+                                if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
+                                        materialItem.get().getAmount())) {
                                     gameStorage.setProtectionLevel(team, teamProtectionLevel);
                                     ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
 
@@ -287,7 +307,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         ShopUtil.addEnchantsToPlayerArmor(teamPlayer, finalTeamProtectionLevel);
                                         PlayerMapper.wrapPlayer(teamPlayer).sendMessage(upgradeMessage);
                                     });
-                                }
+                                } else
+                                    shouldSellStack = false;
                             }
                             break;
                     }
@@ -295,10 +316,10 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                 var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
                 newItem.set(applyEvent.getStack());
-            
+
             }
         }
-        
+
         return Map.entry(shouldSellStack, false);
     }
 
@@ -306,28 +327,38 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     public @NotNull InventorySetBuilder getInventorySetBuilder() {
         return SimpleInventoriesCore
                 .builder()
-                .categoryOptions(localOptionsBuilder ->
-                        localOptionsBuilder
-                                .backItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "shopback"), "BARRIER"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
-                                )
-                                .pageBackItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "pageback"), "ARROW"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent())
-                                )
-                                .pageForwardItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "pageforward"), "BARRIER"), itemBuilder ->
-                                        itemBuilder.name(LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_FORWARD).toComponent())
-                                )
-                                .cosmeticItem(SBAConfig.getInstance().readDefinedItem(SBAConfig.getInstance().node("shop", "upgrade-shop", "shopcosmetic"), "AIR"))
-                                .rows(SBAConfig.getInstance().node("shop", "upgrade-shop", "rows").getInt(4))
-                                .renderActualRows(SBAConfig.getInstance().node("shop", "upgrade-shop", "render-actual-rows").getInt(6))
-                                .renderOffset(SBAConfig.getInstance().node("shop", "upgrade-shop", "render-offset").getInt(9))
-                                .renderHeaderStart(SBAConfig.getInstance().node("shop", "upgrade-shop", "render-header-start").getInt(0))
-                                .renderFooterStart(SBAConfig.getInstance().node("shop", "upgrade-shop", "render-footer-start").getInt(45))
-                                .itemsOnRow(SBAConfig.getInstance().node("shop", "upgrade-shop", "items-on-row").getInt(9))
-                                .showPageNumber(SBAConfig.getInstance().node("shop", "upgrade-shop", "show-page-numbers").getBoolean(true))
-                                .inventoryType(SBAConfig.getInstance().node("shop", "upgrade-shop", "inventory-type").getString("CHEST"))
-                                .prefix(LanguageService.getInstance().get(MessageKeys.SHOP_NAME).toComponent())
-                )
+                .categoryOptions(localOptionsBuilder -> localOptionsBuilder
+                        .backItem(
+                                SBAConfig.getInstance().readDefinedItem(
+                                        SBAConfig.getInstance().node("shop", "upgrade-shop", "shopback"), "BARRIER"),
+                                itemBuilder -> itemBuilder.name(
+                                        LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent()))
+                        .pageBackItem(
+                                SBAConfig.getInstance().readDefinedItem(
+                                        SBAConfig.getInstance().node("shop", "upgrade-shop", "pageback"), "ARROW"),
+                                itemBuilder -> itemBuilder.name(
+                                        LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_BACK).toComponent()))
+                        .pageForwardItem(
+                                SBAConfig.getInstance().readDefinedItem(
+                                        SBAConfig.getInstance().node("shop", "upgrade-shop", "pageforward"), "BARRIER"),
+                                itemBuilder -> itemBuilder.name(
+                                        LanguageService.getInstance().get(MessageKeys.SHOP_PAGE_FORWARD).toComponent()))
+                        .cosmeticItem(SBAConfig.getInstance().readDefinedItem(
+                                SBAConfig.getInstance().node("shop", "upgrade-shop", "shopcosmetic"), "AIR"))
+                        .rows(SBAConfig.getInstance().node("shop", "upgrade-shop", "rows").getInt(4))
+                        .renderActualRows(
+                                SBAConfig.getInstance().node("shop", "upgrade-shop", "render-actual-rows").getInt(6))
+                        .renderOffset(SBAConfig.getInstance().node("shop", "upgrade-shop", "render-offset").getInt(9))
+                        .renderHeaderStart(
+                                SBAConfig.getInstance().node("shop", "upgrade-shop", "render-header-start").getInt(0))
+                        .renderFooterStart(
+                                SBAConfig.getInstance().node("shop", "upgrade-shop", "render-footer-start").getInt(45))
+                        .itemsOnRow(SBAConfig.getInstance().node("shop", "upgrade-shop", "items-on-row").getInt(9))
+                        .showPageNumber(SBAConfig.getInstance().node("shop", "upgrade-shop", "show-page-numbers")
+                                .getBoolean(true))
+                        .inventoryType(SBAConfig.getInstance().node("shop", "upgrade-shop", "inventory-type")
+                                .getString("CHEST"))
+                        .prefix(LanguageService.getInstance().get(MessageKeys.SHOP_NAME).toComponent()))
 
                 // old shop format compatibility
                 .variableToProperty("upgrade", "upgrade")
@@ -343,7 +374,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
             if (SBAConfig.getInstance().node("shop", "upgrade-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened upgrades store!", event.getPlayer().getName());
-                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class), (GameStore) event.getStore());
+                openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class),
+                        (GameStore) event.getStore());
             }
         }
     }

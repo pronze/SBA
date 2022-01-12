@@ -365,16 +365,6 @@ public class PlayerListener implements Listener {
         final var player = e.getPlayer();
         SBA.getInstance().getPlayerWrapperService().register(player);
 
-        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics") && !Bukkit.getPluginManager().isPluginEnabled("ViaVersion"))
-        {
-            if(player.hasPermission("minecraft.admin.command_feedback"))
-            {
-                Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
-                    player.sendMessage("§c[SBA]: Plugin has detected OldCombatMechanics");
-                    player.sendMessage("§cSBA isn't compatible with OldCombatMechanics, please remove the plugin, install OCMFixer or ViaVersion to be able to view NPC and spawners");
-                }, 40L);
-            }
-        }
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
             if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {

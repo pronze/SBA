@@ -18,6 +18,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -65,7 +66,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
     }
 
     @Override
-    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, ItemStack materialItem, PlayerItemInfo info, ItemSpawnerType type) {
+    public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
         final var game = Main.getInstance().getGameOfPlayer(player);
         var gameStorage = SBA
                 .getInstance()

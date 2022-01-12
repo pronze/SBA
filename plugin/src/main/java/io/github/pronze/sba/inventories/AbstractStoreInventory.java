@@ -321,11 +321,25 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
 
         AtomicReference<ItemStack> newItemRef = new AtomicReference<ItemStack>(newItem);
-        final var result = handlePurchase(player, newItemRef, materialItem.as(ItemStack.class), itemInfo, type);
+        AtomicReference<Item> newMaterialItemRef = new AtomicReference<Item>(materialItem);
+        final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type);
         newItem = newItemRef.get();
+        materialItem = newMaterialItemRef.get();
         final var shouldSellStack = result.getKey();
         final var shouldBuyStack = result.getValue();
 
+        // purchase failed, player does not have enough resources to purchase
+        if (!shouldBuyStack && !shouldSellStack) {
+            if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
+                LanguageService
+                        .getInstance()
+                        .get(MessageKeys.CANNOT_BUY)
+                        .replace("%material%", type.getItemName())
+                        .send(event.getPlayer());
+            }
+            return;
+        }
+        
         if (shouldBuyStack) {
             buyStack(newItem, player);
         }
@@ -407,7 +421,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     public abstract void onPreGenerateItem(ItemRenderEvent event);
 
-    public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, ItemStack materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
+    public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
 
     @NotNull
     public abstract InventorySetBuilder getInventorySetBuilder();

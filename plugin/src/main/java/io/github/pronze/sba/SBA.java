@@ -155,11 +155,7 @@ public class SBA extends PluginContainer implements AddonAPI {
                 Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.22 or you might encounter bugs");
             }
         }
-        if (Bukkit.getPluginManager().isPluginEnabled("OldCombatMechanics") && !Bukkit.getPluginManager().isPluginEnabled("ViaVersion")) {
-            Logger.error("[SBA]: Plugin has detected OldCombatMechanics");
-            Logger.error(
-                    "SBA isn't compatible with OldCombatMechanics, please remove the plugin, install OCMFixer or install ViaVersion to be able to view NPC and spawners");
-        }
+       
         InventoryListener.init(cachedPluginInstance);
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
