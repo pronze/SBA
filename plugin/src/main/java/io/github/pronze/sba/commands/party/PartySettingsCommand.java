@@ -30,122 +30,123 @@ public class PartySettingsCommand {
                 init = true;
         }
 
+        
+        //   @CommandMethod("party|p settings")
+        //   private void commandSettings(
+        //   final @NotNull Player player
+        //   ) {
+        //   LanguageService
+        //   .getInstance()
+        //   .get(MessageKeys.COMMAND_PARTY_SETTINGS_GET_HELP)
+        //   .send(PlayerMapper.wrapPlayer(player));
+        //   }
+         
 
-    @CommandMethod("party|p settings")
-    private void commandSettings(
-            final @NotNull Player player
-    ) {
-        LanguageService
-                .getInstance()
-                .get(MessageKeys.COMMAND_PARTY_SETTINGS_GET_HELP)
-                .send(PlayerMapper.wrapPlayer(player));
-    }
+        @CommandMethod("party|p mute")
+        private void commandMute(
+                        final @NotNull Player playerArg) {
+                final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
-    @CommandMethod("party|p mute")
-    private void commandMute(
-            final @NotNull Player playerArg
-    ) {
-        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
+                if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
+                        LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
+                        return;
+                }
 
-        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
-                    .send(player);
-            return;
+                PartyManager
+                                .getInstance()
+                                .getPartyOf(player)
+                                .ifPresentOrElse(party -> {
+                                        if (!player.equals(party.getPartyLeader())) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                                .send(player);
+                                                return;
+                                        }
+
+                                        if (party.getSettings().getChat() == PartySetting.Chat.UNMUTE) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ALREADY_MUTED)
+                                                                .replace("%isMuted%", "unmuted")
+                                                                .send(player);
+                                        }
+
+                                        final var muteEvent = new SBAPlayerPartyMutedEvent(player, party);
+                                        SBA
+                                                        .getPluginInstance()
+                                                        .getServer()
+                                                        .getPluginManager()
+                                                        .callEvent(muteEvent);
+                                        if (muteEvent.isCancelled())
+                                                return;
+
+                                        party.getSettings().setChat(PartySetting.Chat.MUTED);
+                                        party.getMembers().forEach(member -> LanguageService
+                                                        .getInstance()
+                                                        .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
+                                                        .replace("%mode%", "muted")
+                                                        .send(member));
+                                }, () -> LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                .send(player));
         }
 
-        PartyManager
-                .getInstance()
-                .getPartyOf(player)
-                .ifPresentOrElse(party -> {
-                    if (!player.equals(party.getPartyLeader())) {
+        @CommandMethod("party|p unmute")
+        private void commandUnmute(
+                        final @NotNull Player playerArg) {
+                final var player = SBA.getInstance().getPlayerWrapper((playerArg));
+
+                if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
                         LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
-                                .send(player);
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
                         return;
-                    }
+                }
 
-                    if (party.getSettings().getChat() == PartySetting.Chat.UNMUTE) {
-                        LanguageService
+                PartyManager
                                 .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ALREADY_MUTED)
-                                .replace("%isMuted%", "unmuted")
-                                .send(player);
-                    }
+                                .getPartyOf(player)
+                                .ifPresentOrElse(party -> {
+                                        if (!player.equals(party.getPartyLeader())) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                                .send(player);
+                                                return;
+                                        }
 
-                    final var muteEvent = new SBAPlayerPartyMutedEvent(player, party);
-                    SBA
-                            .getPluginInstance()
-                            .getServer()
-                            .getPluginManager()
-                            .callEvent(muteEvent);
-                    if (muteEvent.isCancelled()) return;
+                                        if (party.getSettings().getChat() == PartySetting.Chat.MUTED) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ALREADY_MUTED)
+                                                                .replace("%isMuted%", "unmuted")
+                                                                .send(player);
+                                                return;
+                                        }
 
-                    party.getSettings().setChat(PartySetting.Chat.MUTED);
-                    party.getMembers().forEach(member -> LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
-                            .replace("%mode%", "muted")
-                            .send(member));
-                }, () -> LanguageService
-                        .getInstance()
-                        .get(MessageKeys.PARTY_MESSAGE_ERROR)
-                        .send(player));
-    }
+                                        final var unmuteEvent = new SBAPlayerPartyUnmutedEvent(player, party);
+                                        SBA.getPluginInstance()
+                                                        .getServer()
+                                                        .getPluginManager()
+                                                        .callEvent(unmuteEvent);
+                                        if (unmuteEvent.isCancelled())
+                                                return;
 
-    @CommandMethod("party|p unmute")
-    private void commandUnmute(
-            final @NotNull Player playerArg
-    ) {
-        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
-
-        if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
-            LanguageService
-                    .getInstance()
-                    .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
-                    .send(player);
-            return;
+                                        party.getSettings().setChat(PartySetting.Chat.MUTED);
+                                        LanguageService
+                                                        .getInstance()
+                                                        .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
+                                                        .replace("%mode%", "unmuted")
+                                                        .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
+                                }, () -> LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                .send(player));
         }
-
-        PartyManager
-                .getInstance()
-                .getPartyOf(player)
-                .ifPresentOrElse(party -> {
-                    if (!player.equals(party.getPartyLeader())) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
-                                .send(player);
-                        return;
-                    }
-
-                    if (party.getSettings().getChat() == PartySetting.Chat.MUTED) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ALREADY_MUTED)
-                                .replace("%isMuted%", "unmuted")
-                                .send(player);
-                        return;
-                    }
-
-                    final var unmuteEvent = new SBAPlayerPartyUnmutedEvent(player, party);
-                    SBA.getPluginInstance()
-                            .getServer()
-                            .getPluginManager()
-                            .callEvent(unmuteEvent);
-                    if (unmuteEvent.isCancelled()) return;
-
-                    party.getSettings().setChat(PartySetting.Chat.MUTED);
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED)
-                            .replace("%mode%", "unmuted")
-                            .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
-                }, () -> LanguageService
-                        .getInstance()
-                        .get(MessageKeys.PARTY_MESSAGE_ERROR)
-                        .send(player));
-    }
 }
