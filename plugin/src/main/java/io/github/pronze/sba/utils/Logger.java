@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Service
 public class Logger {
     private static Logger instance;
-    private Level level;
+    private Level level = Level.ERROR;
     private java.util.logging.Logger logger;
     private boolean testMode;
 
@@ -91,9 +91,9 @@ public class Logger {
 
     public enum Level {
         DISABLED(0),
-        TRACE(1),
+        ERROR(1),
         WARNING(2),
-        ERROR(3),
+        TRACE(3),
         ALL(4);
 
         @Getter
