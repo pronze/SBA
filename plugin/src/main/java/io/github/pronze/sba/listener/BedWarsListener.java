@@ -7,10 +7,13 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,6 +25,7 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
@@ -32,8 +36,10 @@ import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -82,7 +88,7 @@ public class BedWarsListener implements Listener {
         ArenaManager
                 .getInstance()
                 .get(game.getName())
-                .ifPresent(arena -> ((Arena)arena).onTargetBlockDestroyed(e));
+                .ifPresent(arena -> ((Arena) arena).onTargetBlockDestroyed(e));
     }
 
     @EventHandler
@@ -93,7 +99,7 @@ public class BedWarsListener implements Listener {
         ArenaManager
                 .getInstance()
                 .get(game.getName())
-                .ifPresent(arena -> ((Arena)arena).onOver(e));
+                .ifPresent(arena -> ((Arena) arena).onOver(e));
         ArenaManager
                 .getInstance()
                 .removeArena(game);
@@ -107,7 +113,7 @@ public class BedWarsListener implements Listener {
         ArenaManager
                 .getInstance()
                 .get(game.getName())
-                .ifPresent(arena -> ((Arena)arena).onOver(e));
+                .ifPresent(arena -> ((Arena) arena).onOver(e));
     }
 
     @EventHandler
@@ -172,7 +178,8 @@ public class BedWarsListener implements Listener {
                                 .filter(member -> !member.equals(player))
                                 .forEach(member -> {
                                     if (Main.getInstance().isPlayerPlayingAnyGame(member.getInstance())) {
-                                        Main.getInstance().getGameOfPlayer(member.getInstance()).leaveFromGame(member.getInstance());
+                                        Main.getInstance().getGameOfPlayer(member.getInstance())
+                                                .leaveFromGame(member.getInstance());
                                     }
                                     PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
                                     LanguageService
@@ -186,7 +193,8 @@ public class BedWarsListener implements Listener {
         switch (game.getStatus()) {
             case WAITING:
                 var bukkitTask = new BukkitRunnable() {
-                    int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
+                    int buffer = 1; // fixes the bug where it constantly shows will start in 1 second
+
                     @Override
                     public void run() {
                         if (game.getStatus() == GameStatus.WAITING) {
@@ -196,7 +204,8 @@ public class BedWarsListener implements Listener {
                                 if (!time.contains("0-1")) {
                                     String[] units = time.split(":");
                                     int seconds = Integer.parseInt(units[1]) + 1;
-                                    if (buffer == seconds) return;
+                                    if (buffer == seconds)
+                                        return;
                                     buffer = seconds;
                                     if (seconds <= 10) {
                                         var message = LanguageService
@@ -208,7 +217,8 @@ public class BedWarsListener implements Listener {
                                         message = seconds == 1 ? message
                                                 .replace("seconds", "second") : message;
                                         player.sendMessage(message);
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
+                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player),
+                                                ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
                                     }
                                 }
                             }
@@ -237,7 +247,6 @@ public class BedWarsListener implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
         Logger.trace("SBA EonBedWarsPlayerLeave{}", e);
-
         final var player = e.getPlayer();
         final var task = runnableCache.get(player.getUniqueId());
         final var game = e.getGame();
@@ -260,6 +269,7 @@ public class BedWarsListener implements Listener {
                 .ifPresent(Scoreboard::destroy);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBedWarsPlayerRespawnEvent(PlayerRespawnEvent e) {
         final var victim = e.getPlayer();
@@ -269,19 +279,45 @@ public class BedWarsListener implements Listener {
         }
         final var game = Main.getInstance().getGameOfPlayer(victim);
         // query arena instance for access to Victim/Killer data
-        Tasker.build(()->{
+        Tasker.build(() -> {
             ArenaManager
-            .getInstance()
-            .get(game.getName())
-            .ifPresent(arena -> {
-                arena.addVisualsForPlayer(victim);
-            });
+                    .getInstance()
+                    .get(game.getName())
+                    .ifPresent(arena -> {
+                        arena.addVisualsForPlayer(victim);
+                    });
         }).afterOneTick().start();
     }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onBedwarsPlayerPlay(PlayerGameModeChangeEvent e) {
+        final var player = e.getPlayer();
+
+        if (!Main.isPlayerInGame(player)) {
+            return;
+        }
+        Logger.trace("Bedwars player {} changed gamemode from {} to {} ", player.getName(), player.getGameMode(),
+                e.getNewGameMode());
+        if (player.getGameMode() == GameMode.SURVIVAL) {
+            Logger.trace("Ignoring gamemode change as they were already playing", player);
+            return;
+        }
+        if (e.getNewGameMode() != GameMode.SURVIVAL) {
+            Logger.trace("Ignoring gamemode change as they did not respawn", player);
+            return;
+        }
+        Logger.trace("Player {} started playing", player);
+        Tasker.build(() -> {
+            final var game = Main.getInstance().getGameOfPlayer(player);
+            ShopUtil.applyTeamUpgrades(player, game); 
+        }).delay(2, TaskerTime.TICKS).start();
+
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
         final var victim = e.getEntity();
-       
+
         if (!Main.isPlayerInGame(victim)) {
             return;
         }
@@ -298,13 +334,14 @@ public class BedWarsListener implements Listener {
                             .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
                     final var killer = victim.getKiller();
-                    //killer is present
+                    // killer is present
                     if (killer != null) {
                         Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());
                         // get victim game profile
                         final var gVictim = Main.getPlayerGameProfile(victim);
 
-                        if (gVictim == null || gVictim.isSpectator) return;
+                        if (gVictim == null || gVictim.isSpectator)
+                            return;
 
                         // get victim team to check if it was a final kill or not
                         final var victimTeam = game.getTeamOfPlayer(victim);
@@ -317,7 +354,8 @@ public class BedWarsListener implements Listener {
                                         if (!victimTeam.isAlive()) {
                                             // increment final kill counter for killer
                                             killerData.setFinalKills(killerData.getFinalKills() + 1);
-                                            Bukkit.getPluginManager().callEvent(new SBAFinalKillEvent(game, victim, killer));
+                                            Bukkit.getPluginManager()
+                                                    .callEvent(new SBAFinalKillEvent(game, victim, killer));
                                             if (SBAConfig.getInstance().node("final-kill-lightning").getBoolean(true)) {
                                                 victim.getWorld().strikeLightningEffect(victim.getLocation());
                                             }

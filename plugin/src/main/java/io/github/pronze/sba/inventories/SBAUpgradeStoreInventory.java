@@ -269,6 +269,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         .toComponent();
 
                                 gameStorage.setPurchasedPool(team, true);
+                                shouldSellStack = true;
                                 team.getConnectedPlayers().forEach(
                                         pl -> PlayerMapper.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
                             }

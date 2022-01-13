@@ -151,8 +151,6 @@ public class ShopUtil {
                 .collect(Collectors.toList());
     }
 
-    
-
     public static <K, V> K getKey(Map<K, V> map, V value) {
         return map.keySet()
                 .stream()
@@ -387,7 +385,7 @@ public class ShopUtil {
         if (!prices.isEmpty()) {
 
             ArrayList<Component> lore = new ArrayList<>(item.getLore());
-            
+
             lore.add(
                     (LanguageService
                             .getInstance()
@@ -464,6 +462,39 @@ public class ShopUtil {
         } else {
             return "§7";
         }
+    }
+
+    public static void applyTeamUpgrades(@NotNull Player player, Game game) {
+        final var team = game.getTeamOfPlayer(player);
+        final var gameStorage = ArenaManager
+                .getInstance()
+                .get(game.getName())
+                .orElseThrow()
+                .getStorage();
+        final var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (teamProtectionLevel > 0)
+            ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
+        final var finalTeamSharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
+        final var finalTeamEfficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
+
+        Logger.trace("Player teamProtectionLevel {}", teamProtectionLevel);
+        Logger.trace("Player finalTeamSharpnessLevel {}", finalTeamSharpnessLevel);
+        Logger.trace("Player finalTeamEfficiencyLevel {}", finalTeamEfficiencyLevel);
+
+        Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .forEach(item -> {
+                    if (finalTeamSharpnessLevel > 0)
+                        if (item.getType().name().endsWith("SWORD")) {
+                            item.addEnchantment(Enchantment.DAMAGE_ALL,
+                                    finalTeamSharpnessLevel);
+                        }
+                    if (finalTeamEfficiencyLevel > 0)
+                        if (item.getType().name().endsWith("PICKAXE")) {
+                            item.addEnchantment(Enchantment.DIG_SPEED,
+                                    finalTeamEfficiencyLevel);
+                        }
+                });
     }
 
 }

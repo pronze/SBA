@@ -76,9 +76,8 @@ public class PlayerListener implements Listener {
                 .orElseThrow();
 
         final var itemArr = new ArrayList<ItemStack>();
-        final var sword = Main.isLegacy() ?
-                new ItemStack(Material.valueOf("WOOD_SWORD")) :
-                new ItemStack(Material.WOODEN_SWORD);
+        final var sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD"))
+                : new ItemStack(Material.WOODEN_SWORD);
 
         Arrays.stream(player
                 .getInventory()
@@ -114,12 +113,14 @@ public class PlayerListener implements Listener {
         if (SBAConfig.getInstance().getBoolean("give-killer-resources", true)) {
             final var killer = e.getEntity().getKiller();
 
-            if (killer != null && Main.getInstance().isPlayerPlayingAnyGame(killer) && killer.getGameMode() == GameMode.SURVIVAL) {
+            if (killer != null && Main.getInstance().isPlayerPlayingAnyGame(killer)
+                    && killer.getGameMode() == GameMode.SURVIVAL) {
                 Arrays.stream(player.getInventory().getContents())
                         .filter(Objects::nonNull)
                         .forEach(drop -> {
                             if (generatorDropItems.contains(drop.getType())) {
-                                killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name().toLowerCase().replace("_", " "));
+                                killer.sendMessage("+" + drop.getAmount() + " "
+                                        + drop.getType().name().toLowerCase().replace("_", " "));
                                 killer.getInventory().addItem(drop);
                             }
                         });
@@ -155,7 +156,7 @@ public class PlayerListener implements Listener {
                         return;
                     }
 
-                    //send custom title because we disabled BedWars from showing any title
+                    // send custom title because we disabled BedWars from showing any title
                     if (livingTime > 0) {
                         SBAUtil.sendTitle(wrappedPlayer, respawnTitle,
                                 respawnSubtitle.replace("%time%", String.valueOf(livingTime)),
@@ -168,7 +169,6 @@ public class PlayerListener implements Listener {
                                 .send(wrappedPlayer);
                         livingTime--;
                     }
-
 
                     if (livingTime == 0) {
                         if (gVictim.isSpectator && buffer > 0) {
@@ -187,7 +187,9 @@ public class PlayerListener implements Listener {
                             SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
-                                    Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player).getColor());
+                                    Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player)
+                                            .getColor());
+                            ShopUtil.applyTeamUpgrades(player, game);
                             this.cancel();
                         }
                     }
@@ -201,11 +203,13 @@ public class PlayerListener implements Listener {
         if (event.getCurrentItem() == null)
             return;
 
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player))
+            return;
 
         final var player = (Player) event.getWhoClicked();
 
-        if (!Main.isPlayerInGame(player)) return;
+        if (!Main.isPlayerInGame(player))
+            return;
 
         if (SBAConfig.getInstance().getBoolean("disable-armor-inventory-movement", true) &&
                 event.getSlotType() == SlotType.ARMOR)
@@ -216,9 +220,11 @@ public class PlayerListener implements Listener {
         final var clickedInventory = event.getClickedInventory();
         final var typeName = event.getCurrentItem().getType().name();
 
-        if (clickedInventory == null) return;
+        if (clickedInventory == null)
+            return;
 
-        if (clickedInventory.equals(bottomSlot) && SBAConfig.getInstance().getBoolean("block-players-putting-certain-items-onto-chest", true)
+        if (clickedInventory.equals(bottomSlot)
+                && SBAConfig.getInstance().getBoolean("block-players-putting-certain-items-onto-chest", true)
                 && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST)
                 && bottomSlot.getType() == InventoryType.PLAYER) {
             if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
@@ -231,13 +237,14 @@ public class PlayerListener implements Listener {
         }
     }
 
-
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
         final var player = evt.getPlayer();
 
-        if (!Main.isPlayerInGame(player)) return;
-        if (!SBAConfig.getInstance().getBoolean("block-item-drops", true)) return;
+        if (!Main.isPlayerInGame(player))
+            return;
+        if (!SBAConfig.getInstance().getBoolean("block-item-drops", true))
+            return;
 
         final var ItemDrop = evt.getItemDrop().getItemStack();
         final var type = ItemDrop.getType();
@@ -247,7 +254,6 @@ public class PlayerListener implements Listener {
             player.getInventory().remove(ItemDrop);
         }
     }
-
 
     @EventHandler
     public void itemDamage(PlayerItemDamageEvent event) {
@@ -302,7 +308,8 @@ public class PlayerListener implements Listener {
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
                             .replace("%player%", player.getName())
-                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).toArray(SBAPlayerWrapper[]::new));
+                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member))
+                                    .toArray(SBAPlayerWrapper[]::new));
                 });
         SBA.getInstance().getPlayerWrapperService().unregister(player);
     }
@@ -332,7 +339,8 @@ public class PlayerListener implements Listener {
         final var item = event.getItem();
         final var player = event.getPlayer();
 
-        if (!Main.isPlayerInGame(player)) return;
+        if (!Main.isPlayerInGame(player))
+            return;
 
         if (item.getType() == Material.POTION) {
             final var potionMeta = (PotionMeta) item.getItemMeta();
@@ -344,10 +352,11 @@ public class PlayerListener implements Listener {
                     isInvis = potionMeta
                             .getCustomEffects()
                             .stream()
-                            .anyMatch(potionEffect -> potionEffect.getType().getName().equalsIgnoreCase(PotionEffectType.INVISIBILITY.getName()));
+                            .anyMatch(potionEffect -> potionEffect.getType().getName()
+                                    .equalsIgnoreCase(PotionEffectType.INVISIBILITY.getName()));
                 }
             }
-            
+
             if (isInvis) {
                 final var playerGame = Main.getInstance().getGameOfPlayer(player);
                 ArenaManager
@@ -355,7 +364,7 @@ public class PlayerListener implements Listener {
                         .get(playerGame.getName())
                         .ifPresent(arena -> arena.addHiddenPlayer(player));
             }
-            
+
             event.setReplacement(new ItemStack(Material.AIR));
         }
     }
@@ -368,13 +377,13 @@ public class PlayerListener implements Listener {
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
             if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
-                    player.sendMessage("§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
+                    player.sendMessage(
+                            "§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
                     player.sendMessage("Type /sba upgrade to upgrade file");
                     player.sendMessage("§cif you want to cancel the upgrade files do /sba cancel");
                 }, 40L);
             }
         }
     }
-
 
 }
