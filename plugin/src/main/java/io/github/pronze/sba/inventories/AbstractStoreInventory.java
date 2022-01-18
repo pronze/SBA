@@ -113,7 +113,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 .buy(this::onShopTransaction)
                 .render(this::onGeneratingItem)
                 // old shop format compatibility
-                .variableToProperty("upgrade", "upgrade")
+                /*.variableToProperty("upgrade", "upgrade")
                 .variableToProperty("generate-lore", "generateLore")
                 .variableToProperty("generated-lore-text", "generatedLoreText")
                 .variableToProperty("currency-changer", "currencyChanger")
@@ -182,7 +182,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                         }
                     }
                     return "";
-                })
+                })*/
                 .getInventorySet();
 
         try {

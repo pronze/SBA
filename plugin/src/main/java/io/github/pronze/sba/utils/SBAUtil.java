@@ -154,7 +154,6 @@ public class SBAUtil {
 
     public static void reloadPlugin(@NonNull JavaPlugin plugin) {
         disablePlugin(plugin);
-        // PlayerWrapperService.getInstance().reload();
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
         if (plugin == SBA.getPluginInstance()) {
             SBAConfig.getInstance().forceReload();

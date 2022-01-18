@@ -90,6 +90,11 @@ public class Arena implements IArena {
 
     }
 
+    public void updateHiddenPlayer(@NotNull Player player)
+    {
+        invisiblePlayers.get(player.getUniqueId()).refresh();
+    }
+
     @Override
     public void removeHiddenPlayer(@NotNull Player player) {
         final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());

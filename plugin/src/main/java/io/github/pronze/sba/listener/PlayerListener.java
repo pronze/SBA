@@ -369,6 +369,24 @@ public class PlayerListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEquipt(PlayerItemHeldEvent event) {
+        final var player = event.getPlayer();
+
+        if (!Main.isPlayerInGame(player))
+            return;
+
+        final var playerGame = Main.getInstance().getGameOfPlayer(player);
+        ArenaManager
+                .getInstance()
+                .get(playerGame.getName())
+                .ifPresent(arena -> {
+                    if (arena.isPlayerHidden(player)) {
+                        arena.updateHiddenPlayer(player);
+                    }
+                });
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();

@@ -15,10 +15,10 @@ bed-destroyed:
   title: "<red><bold>BED DESTROYED!</bold>"
   sub-title: "You will no longer respawn!"
   messages:
-    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was destroyed by %destroyer%</gray>"
-    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>got memed by %destroyer%</gray>"
-    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was deep fried by %destroyer%</gray>"
-    - "<white><bold>BED DESTRUCTION > </white></bold> %team% Bed <gray>was incinerated by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </bold></white> %team% Bed <gray>was destroyed by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </bold></white> %team% Bed <gray>got memed by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </bold></white> %team% Bed <gray>was deep fried by %destroyer%</gray>"
+    - "<white><bold>BED DESTRUCTION > </bold></white> %team% Bed <gray>was incinerated by %destroyer%</gray>"
 added-npc: "<green>Successfully added GamesInventory NPC!"
 removable-npc-toggle: "<green>Right click the NPC you want to remove! <gray>[Timeout: 5 seconds]"
 skin-npc-toggle: "<green>Right click the NPC you want to change the skin of! <gray>[Timeout: 5 seconds]"
@@ -113,7 +113,7 @@ games-inventory:
   npc:
     display-name:
       - "<aqua>Bed Wars</aqua> <gray>%mode%</gray>"
-      - "<yellow><bold>CLICK TO PLAY</yellow></bold>"
+      - "<yellow><bold>CLICK TO PLAY</bold></yellow>"
 game-start:
   message:
     - "<green>▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬"
@@ -376,7 +376,7 @@ shop:
     - "Maximum Enchant"
     - "Your team already has maximum Enchant."
 death-messages:
-  final-kill: "<aqua><bold>FINAL KILL!</aqua></bold>"
+  final-kill: "<aqua><bold>FINAL KILL!</bold></aqua>"
   void-death: "%player% <gray>fell into the void</gray>"
   void-kill: "%player% <gray>was knocked into the void by %killer%.</gray>"
   generic: "%player% <gray>died.</gray>"

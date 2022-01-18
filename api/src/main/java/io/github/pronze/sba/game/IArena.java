@@ -142,4 +142,6 @@ public interface IArena {
 
     void removeVisualsForPlayer(Player player);
     void addVisualsForPlayer(Player player);
+
+    void updateHiddenPlayer(@NotNull Player player);
 }

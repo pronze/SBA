@@ -20,7 +20,7 @@ import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
 import org.screamingsandals.lib.slot.EquipmentSlotHolder;
 import org.screamingsandals.lib.slot.EquipmentSlotMapping;
-
+import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
 import org.screamingsandals.lib.player.PlayerMapper;
 
@@ -53,7 +53,8 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
             if (!holder.hasTeamEntry(invisTeamName)) {
                 holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam.setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.NEVER));
+                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam
+                        .setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.NEVER));
             }
             final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
 
@@ -66,7 +67,6 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 invisibleScoreboardTeam.addEntry(hiddenPlayer.getName());
             }
         });
-
 
         Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
         if (isHidden) {
@@ -87,11 +87,11 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
     }
 
     private boolean isElligble() {
-       return arena.getGame().getStatus() == GameStatus.RUNNING
-               && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE)
-               && hiddenPlayer.isOnline()
-               && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
-               && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
+        return arena.getGame().getStatus() == GameStatus.RUNNING
+                && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE)
+                && hiddenPlayer.isOnline()
+                && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
+                && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
     }
 
     private void showArmor() {
@@ -99,14 +99,14 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         final var helmet = hiddenPlayer.getInventory().getHelmet();
         final var chestplate = hiddenPlayer.getInventory().getChestplate();
         final var leggings = hiddenPlayer.getInventory().getLeggings();
-
+        final var currentHand = hiddenPlayer.getInventory().getItemInMainHand();
         arena.getGame()
                 .getConnectedPlayers()
                 .forEach(pl -> getEquipPacket(
                         convert(helmet),
                         convert(chestplate),
                         convert(leggings),
-                        convert(boots)).sendPacket(PlayerMapper.wrapPlayer(pl)));
+                        convert(boots), convert(currentHand)).sendPacket(PlayerMapper.wrapPlayer(pl)));
     }
 
     public Item convert(ItemStack itemStack) {
@@ -121,19 +121,49 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 .stream()
                 .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
                 .forEach(pl -> {
-                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(), hiddenPlayer.getName());
-                    getEquipPacket(airStack, airStack, airStack, airStack).sendPacket(PlayerMapper.wrapPlayer(pl));
+                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(),
+                            hiddenPlayer.getName());
+                    getEquipPacket(airStack, airStack, airStack, airStack,
+                            convert(hiddenPlayer.getInventory().getItemInMainHand()))
+                                    .sendPacket(PlayerMapper.wrapPlayer(pl));
                 });
     }
 
-    private SClientboundSetEquipmentPacket getEquipPacket(Item helmet, Item chestPlate, Item leggings, Item boots) {
+    public void refresh() {
+        // TODO Auto-generated method stub
+        final var airStack = ItemFactory.getAir();
+        var hiddenPlayerTeam = arena.getGame().getTeamOfPlayer(hiddenPlayer);
+        Tasker.build(()->{
+        arena.getGame()
+                .getConnectedPlayers()
+                .stream()
+                .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
+                .forEach(pl -> {
+                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(),
+                            hiddenPlayer.getName());
+                    getEquipPacket(airStack, airStack, airStack, airStack,
+                            convert(hiddenPlayer.getInventory().getItemInMainHand()))
+                                    .sendPacket(PlayerMapper.wrapPlayer(pl));
+                });
+        }).afterOneTick().start();
+
+    }
+
+    private SClientboundSetEquipmentPacket getEquipPacket(Item helmet, Item chestPlate, Item leggings, Item boots,
+            Item hand) {
         final var packet = new SClientboundSetEquipmentPacket();
         packet.entityId(hiddenPlayer.getEntityId());
         final var slots = packet.slots();
-        slots.put(EquipmentSlotMapping.resolve("HEAD").orElseThrow(), helmet);
-        slots.put(EquipmentSlotMapping.resolve("CHEST").orElseThrow(), chestPlate);
-        slots.put(EquipmentSlotMapping.resolve("LEGS").orElseThrow(), leggings);
-        slots.put(EquipmentSlotMapping.resolve("FEET").orElseThrow(), boots);
+        if (hand != null)
+            slots.put(EquipmentSlotMapping.resolve("HAND").orElseThrow(), hand);
+        if (helmet != null)
+            slots.put(EquipmentSlotMapping.resolve("HEAD").orElseThrow(), helmet);
+        if (chestPlate != null)
+            slots.put(EquipmentSlotMapping.resolve("CHEST").orElseThrow(), chestPlate);
+        if (leggings != null)
+            slots.put(EquipmentSlotMapping.resolve("LEGS").orElseThrow(), leggings);
+        if (boots != null)
+            slots.put(EquipmentSlotMapping.resolve("FEET").orElseThrow(), boots);
         return packet;
     }
 
@@ -145,7 +175,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         }
         final var invisTeamName = "i-" + team.getName();
 
-        //show nametag
+        // show nametag
         arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
             final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
             final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
@@ -157,7 +187,8 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
             if (!holder.hasTeamEntry(invisTeamName)) {
                 holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam.setNameTagVisibility(NameTagVisibility.NEVER));
+                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam
+                        .setNameTagVisibility(NameTagVisibility.NEVER));
             }
             final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
 
@@ -176,4 +207,29 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         Logger.trace("Un hiding player: {}", hiddenPlayer.getName());
         hiddenPlayer.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
+
+    @Override
+    public Player getHiddenPlayer() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void setHidden(boolean hidden) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public boolean isJustEquipped() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setJustEquipped(boolean justEquipped) {
+        // TODO Auto-generated method stub
+
+    }
+
 }
