@@ -197,7 +197,7 @@ public class Arena implements IArena {
                 }
 
                 final var file = store.getShopFile();
-
+                
                 List<Component> name = new ArrayList<Component>();
                 NPCSkin skin = null;
                 try {

@@ -102,6 +102,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PopupTowerListener.class,
         NPCStoreService.class,
         FirstStartConfigReplacer.class,
+        GameModeListener.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 
@@ -166,6 +167,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.info("Plugin has finished loading!");
         registerAPI();
         Logger.info("SBA Initialized on JAVA {}", System.getProperty("java.version"));
+        Logger.info("SBA Commit is on par with {}", VersionInfo.COMMIT);
         Logger.trace("API has been registered!");
 
         Logger.setMode(Level.ERROR);

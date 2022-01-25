@@ -25,6 +25,7 @@ import org.screamingsandals.bedwars.api.game.GameStatus;
 
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -133,8 +134,10 @@ public class GamesInventory implements Listener {
                                         couldNotFindGameMessage.send(playerWrapper);
                                         return;
                                     }
-                                    Collections.shuffle(games, new Random());
 
+                                    Random r = new Random();
+                                    games.sort(Comparator.comparing(c->((Game)c).getConnectedPlayers().size()).reversed().thenComparing(c->r.nextInt()));
+                                    
                                     games.stream()
                                             .filter(game -> game.getStatus() == GameStatus.WAITING)
                                             .findAny()

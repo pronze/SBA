@@ -88,6 +88,7 @@ public class SBAConfig implements IConfigurator {
                     .key("version").defValue(plugin.getDescription().getVersion())
                     .key("locale").defValue("en")
                     .key("prefix").defValue("[SBA]")
+                    .key("editing-hologram-enabled").defValue(true)
                     .section("debug")
                         .key("enabled").defValue(false)
                         .back()

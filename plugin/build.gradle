@@ -4,6 +4,7 @@ buildConfig {
     className('VersionInfo')
     packageName('io.github.pronze.sba')
     buildConfigField('String', 'VERSION', "\"${SBA_VERSION}\"")
+    buildConfigField('String', 'COMMIT', "\"${revision}\"")
 }
 
 ScreamingLibBuilder()

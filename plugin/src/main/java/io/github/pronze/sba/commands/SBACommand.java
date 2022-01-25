@@ -84,6 +84,7 @@ public class SBACommand {
         String a = Bukkit.getServer().getClass().getPackage().getName();
         String version = a.substring(a.lastIndexOf('.') + 1);
         sender.sendMessage("Server version : " + version);
+        sender.sendMessage("Commit id : "+io.github.pronze.sba.VersionInfo.COMMIT);
         sender.sendMessage("Server : " + Bukkit.getServer().getVersion());
 
         for (var plugin : Bukkit.getServer().getPluginManager().getPlugins()) {

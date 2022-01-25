@@ -41,6 +41,24 @@ buildscript {
     dependencies {
         classpath "com.github.gmazzo:gradle-buildconfig-plugin:${BUILDCONFIG_VERSION}"
     }
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        // Add dependency for build script,
+        // so we can access Git from our
+        // build script.
+        classpath 'org.ajoberstar:grgit:1.1.0'
+    }
+}
+ext {
+    // Open the Git repository in the current directory.
+    git = org.ajoberstar.grgit.Grgit.open(file('.'))
+ 
+    // Get commit id of HEAD.
+    revision = git.head().abbreviatedId
+    // Alternative is using abbreviatedId of head() method.
+    // revision = git.head().abbreviatedId
 }
 
 allprojects {
