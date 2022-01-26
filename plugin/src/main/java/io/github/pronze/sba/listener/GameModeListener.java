@@ -44,6 +44,7 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.packet.SClientboundSetPlayerTeamPacket.CollisionRule;
 
 @Service
 public class GameModeListener implements Listener {
@@ -165,12 +166,12 @@ public class GameModeListener implements Listener {
 
             Tasker.build(() -> {
                 for (var npc : npcs.values()) {
-                    if (npc.getLocation().getWorld().getName() == player.getWorld().getName()) {
+                    if (npc.location().getWorld().getName() == player.getWorld().getName()) {
                         npc.addViewer(PlayerMapper.wrapPlayer(player));
                     }
                 }
                 for (var holo : holograms.values()) {
-                    if (holo.getLocation().getWorld().getName() == player.getWorld().getName()) {
+                    if (holo.location().getWorld().getName() == player.getWorld().getName()) {
                         holo.addViewer(PlayerMapper.wrapPlayer(player));
                     }
                 }
@@ -187,9 +188,10 @@ public class GameModeListener implements Listener {
                 name = "shop.yml";
 
             NPC npc = NPC.of(LocationMapper.wrapLocation(l))
-                    .setShouldLookAtPlayer(true)
-                    .setDisplayName(List.of(Component.text(name)
+                    .lookAtPlayer(true)
+                    .displayName(List.of(Component.text(name)
                             .color(TextColor.color(139, 69, 19))))
+                    .collisionRule(CollisionRule.NEVER)
                     .show();
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (l.getWorld() == p.getWorld()) {
@@ -222,11 +224,11 @@ public class GameModeListener implements Listener {
                         }
                     }
 
-                    hologram.setItem(ItemFactory.build(spawners.getItemSpawnerType().getStack()).orElseThrow())
-                            .setItemPosition(Hologram.ItemPosition.BELOW)
-                            .setRotationMode(Hologram.RotationMode.Y)
-                            .setRotationTime(Pair.of(1, TaskerTime.TICKS))
-                            .setRotationIncrement(18);
+                    hologram.item(ItemFactory.build(spawners.getItemSpawnerType().getStack()).orElseThrow())
+                            .itemPosition(Hologram.ItemPosition.BELOW)
+                            .rotationMode(Hologram.RotationMode.Y)
+                            .rotationTime(Pair.of(1, TaskerTime.TICKS))
+                            .rotationIncrement(18);
 
                     holograms.put(spawners, hologram);
                 }

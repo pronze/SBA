@@ -68,10 +68,10 @@ public class RotatingGenerator implements IRotatingGenerator {
                 .node("floating-generator", "height").getDouble(2.0);
 
         hologram = HologramManager.hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
-        hologram.setItem(ItemFactory.build(stack).orElseThrow())
-                .setItemPosition(Hologram.ItemPosition.BELOW)
-                .setRotationMode(Hologram.RotationMode.Y)
-                .setRotationTime(Pair.of(1, TaskerTime.TICKS));
+        hologram.item(ItemFactory.build(stack).orElseThrow())
+                .itemPosition(Hologram.ItemPosition.BELOW)
+                .rotationMode(Hologram.RotationMode.Y)
+                .rotationTime(Pair.of(1, TaskerTime.TICKS));
 
         hologram.show();
         viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));

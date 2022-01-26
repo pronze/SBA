@@ -213,10 +213,10 @@ public class Arena implements IArena {
                 }
 
                 final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
-                        .setDisplayName(name)
-                        .setShouldLookAtPlayer(true)
-                        .setSkin(skin)
-                        .setTouchable(true);
+                        .displayName(name)
+                        .lookAtPlayer(true)
+                        .skin(skin)
+                        .touchable(true);
 
                 if (file != null && file.equals("upgradeShop.yml")) {
                     upgradeStoreNPCS.add(npc);

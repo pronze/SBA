@@ -108,7 +108,7 @@ public class GamesInventoryService implements Listener {
                 Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
                 NPC n = createNpc(GameMode.fromInt(npc.mode), npc.location);
                 if (npc.skin != null) {
-                    n.setSkin(new NPCSkin(
+                    n.skin(new NPCSkin(
                             npc.skin,
                             npc.skin_signature));
                 }
@@ -144,8 +144,8 @@ public class GamesInventoryService implements Listener {
 
     private NPC createNpc(GameMode mode, Location location) {
         return NPC.of(LocationMapper.wrapLocation(location))
-                .setShouldLookAtPlayer(true)
-                .setDisplayName(LanguageService
+                .lookAtPlayer(true)
+                .displayName(LanguageService
                         .getInstance()
                         .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
                         .replace("%mode%", mode.strVal())
@@ -280,7 +280,7 @@ public class GamesInventoryService implements Listener {
         NPCSkin.retrieveSkin(argument).whenComplete((skin, exp) -> {
             if (skin != null) {
                 NPCs.stream().filter(n -> n.npc == visual).findAny().ifPresent(c -> {
-                    visual.setSkin(skin);
+                    visual.skin(skin);
                     c.skin = skin.getValue();
                     c.skin_signature = skin.getSignature();
                     update();

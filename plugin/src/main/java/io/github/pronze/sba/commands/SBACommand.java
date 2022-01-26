@@ -114,8 +114,8 @@ public class SBACommand {
         var player = SBA.getInstance().getPlayerWrapper(sender);
         NPC npc = NPC.of(LocationMapper.wrapLocation(sender.getLocation()))
                 .addViewer(player)
-                .setShouldLookAtPlayer(true)
-                .setDisplayName(List.of(Component.text("Test NPC, will despawn after 10 seconds").color(TextColor.color(139,69,19))))
+                .lookAtPlayer(true)
+                .displayName(List.of(Component.text("Test NPC, will despawn after 10 seconds").color(TextColor.color(139,69,19))))
                 .show();
         Tasker.build(() -> {
             npc.destroy();
