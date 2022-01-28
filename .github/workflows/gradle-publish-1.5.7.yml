@@ -1,5 +1,4 @@
-name: Build and publish SBA dev edition
-
+name: Pre-Builds 1.5.7
 on:
   push:
     branches: [ 1.5.7 ]
