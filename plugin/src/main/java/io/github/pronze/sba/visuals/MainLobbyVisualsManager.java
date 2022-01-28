@@ -112,7 +112,14 @@ public class MainLobbyVisualsManager implements Listener {
                 if (SBA.getPluginInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                     format = PlaceholderAPI.setPlaceholders(player, format);
                 }
-                e.setFormat(format);
+                final var msgToSend = format;
+                Bukkit.getServer().getOnlinePlayers().forEach(p -> {
+                    p.sendMessage(msgToSend);
+                });
+            
+                //e.getRecipients().clear();
+                e.setCancelled(true);
+                //e.setFormat(format);
             }
         }
     }
