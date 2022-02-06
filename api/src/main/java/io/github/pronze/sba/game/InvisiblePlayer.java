@@ -1,18 +1,22 @@
 package io.github.pronze.sba.game;
 
-import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import java.util.List;
 
 public interface InvisiblePlayer {
 
-    void vanish();
+    void show();
 
-    void showPlayer();
+    void hide();
 
-    Player getHiddenPlayer();
+    void removeHidden(@NotNull GamePlayer gamePlayer);
 
-    void setHidden(boolean hidden);
+    @NotNull
+    List<GamePlayer> getHiddenFrom();
 
-    boolean isJustEquipped();
+    boolean isJustHidden();
 
-    void setJustEquipped(boolean justEquipped);
+    void setJustHidden(boolean isJustHidden);
+
+    boolean isHidden();
 }

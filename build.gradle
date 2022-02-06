@@ -1,24 +1,17 @@
+plugins {
+    id 'org.screamingsandals.plugin-builder' version "${SCREAMING_PLUGIN_BUILDER_VERSION}" apply false
+}
+
 defaultTasks 'clean', 'screamCompile'
 
 allprojects {
     group = 'io.pronze.hypixelify'
-    version = SBA_VERSION
-}
-
-buildscript {
-    repositories {
-        maven {
-            url = 'https://repo.screamingsandals.org/public'
-        }
-    }
-    dependencies {
-        classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
-    }
+    version = SBA_VERSION as Object
 }
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.screamingsandals.gradle.builder'
+    apply plugin: 'org.screamingsandals.plugin-builder'
 
     enableShadowPlugin()
 
@@ -28,19 +21,10 @@ subprojects {
     }
 
     repositories {
-        mavenLocal()
+        mavenLocal() // Debug builds
         mavenCentral()
         maven {
-            url = uri('https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven')
-        }
-        maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
-        }
-        maven {
-            url = uri('https://repo.screamingsandals.org/public')
-        }
-        maven {
-            url = uri('https://gitlab.hoznet.dev/api/v4/projects/9/packages/maven')
         }
         maven {
             url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
@@ -52,7 +36,7 @@ subprojects {
             url = uri('https://repo.maven.apache.org/maven2/')
         }
         maven {
-            url = uri('https://repo.screamingsandals.org/')
+            url = uri('https://repo.screamingsandals.org/releases')
         }
     }
 
@@ -63,14 +47,13 @@ subprojects {
     }
 
     shadowJar {
-        relocate 'org.spongepowered.configurate', 'io.github.pronze.lib.configurate'
-        relocate 'org.yaml.snakeyaml', 'io.github.pronze.lib.snakeyaml'
-        relocate 'net.kyori', 'io.github.pronze.lib.kyori'
-        relocate 'cloud.commandframework', 'io.github.pronze.lib.cloud'
-        relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
-        relocate 'pronze.lib', 'io.github.pronze.lib.pronzelib'
-        relocate 'org.screamingsandals.lib', 'io.github.pronze.lib.screaminglib'
-        relocate 'org.screamingsandals.simpleinventories', 'io.github.pronze.lib.simpleinventories'
+        relocate 'org.spongepowered.configurate', 'io.github.pronze.ext.configurate'
+        relocate 'org.yaml.snakeyaml', 'io.github.pronze.ext.snakeyaml'
+        relocate 'net.kyori', 'io.github.pronze.ext.kyori'
+        relocate 'cloud.commandframework', 'io.github.pronze.ext.cloud'
+        relocate 'me.lucko.commodore', 'io.github.pronze.ext.commodore'
+        relocate 'org.screamingsandals.lib', 'io.github.pronze.ext.screaminglib'
+        relocate 'org.screamingsandals.simpleinventories', 'io.github.pronze.ext.simpleinventories'
     }
 
     tasks.withType(JavaCompile) {

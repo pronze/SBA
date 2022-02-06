@@ -1,0 +1,97 @@
+locale: en_US
+
+npc-stores:
+  enabled: true
+  type:
+    upgrades:
+      name: "Upgrades Store"
+      look-at-player: true
+      display-name:
+        - "§bITEM SHOP"
+        - "§e§lRIGHT CLICK"
+      shop-file: "upgradeShop.yml"
+      skin: "UncleJayM"
+    standard:
+      name: "Store"
+      look-at-player: true
+      display-name:
+        - "§bTEAM"
+        - "§bUPGRADES"
+        - "§e§lRIGHT CLICK"
+      shop-file: "shop.yml"
+      skin: "Misat11"
+
+player-stats:
+  xp-to-level-up: 5000
+
+health-indicator:
+  enabled: true
+  show-health-in-tablist: true
+
+generator-splitter:
+  enabled: true
+  sounds-enabled: true
+  allowed-materials:
+    - GOLD_INGOT
+    - IRON_INGOT
+    - EMERALD
+
+game-scoreboard:
+  enabled: true
+  team-status:
+    alive: "%color% %team% §a\u2713 §8%you%"
+    destroyed: "%color% %team% §a§f%players%§8 %you%"
+    eliminated: "%color% %team% §c\u2718 %you%"
+    bed-destroyed: "§c\u2717"
+    bed-exists: "§c\u2713"
+
+  title: "&e&lBED WARS"
+
+lobby-scoreboard:
+  enabled: true
+
+main-lobby:
+  enabled: false
+  scoreboard:
+    enabled: true
+
+floating-generator:
+  enabled: true
+  height: 2.0
+
+shout:
+  enabled: true
+  time-out:
+    enabled: true
+    time: 60
+
+explosion-jumping:
+  enabled: true
+  fall-damage: 3.0
+  detection-distance: 5.0
+  acceleration-y: 1.0
+  y-throttle: 2.0
+  launch-multiplier: 3.4
+
+# soft-coded game-modes.
+game-modes:
+  # TODO: additional game-mode configuration
+  solos:
+    display-name: "Solos"
+    maps:
+      - test
+
+  doubles:
+    display-name: "Doubles"
+    maps:
+      - test
+
+  triples:
+    display-name: "Triples"
+    maps:
+      - test
+
+  squads:
+    display-name: "Squads"
+    maps:
+      - test

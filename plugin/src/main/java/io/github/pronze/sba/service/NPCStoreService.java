@@ -2,90 +2,90 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.utils.Logger;
-import lombok.Getter;
-import lombok.SneakyThrows;
-import net.kyori.adventure.text.Component;
+import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.game.GameStore;
-import org.screamingsandals.lib.event.EventManager;
-import org.screamingsandals.lib.npc.NPCManager;
-import org.screamingsandals.lib.npc.NPCSkin;
+import org.screamingsandals.lib.event.OnEvent;
+import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
-import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.utils.InteractType;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
+@RequiredArgsConstructor
 @Service(dependsOn = {
-        NPCManager.class
+        GameManagerImpl.class
 })
-@Getter
-public class NPCStoreService implements Listener {
-
-    public static NPCStoreService getInstance() {
-        return ServiceManager.get(NPCStoreService.class);
-    }
-
-    private final GameStore shopStore;
-    private final GameStore upgradeStore;
-
-    private NPCSkin shopSkin;
-    private NPCSkin upgradeShopSkin;
-
-    private final List<Component> shopText = new ArrayList<>();
-    private final List<Component> upgradeShopText = new ArrayList<>();
-
-    @SneakyThrows
-    public NPCStoreService() {
-        shopStore = new GameStore(null, "shop.yml", false, SBAConfig.getInstance().node("shop", "normal-shop", "name").getString(), false, false);
-        upgradeStore = new GameStore(null, "upgradeShop.yml", false, SBAConfig.getInstance().node("shop", "upgrade-shop", "name").getString(), false, false);
-
-        shopText.clear();
-        shopText.addAll(Objects.requireNonNull(SBAConfig.getInstance().node("shop", "normal-shop", "entity-name")
-                        .getList(String.class))
-                .stream()
-                .map(AdventureHelper::toComponent)
-                .collect(Collectors.toList()));
-
-        upgradeShopText.clear();
-        upgradeShopText.addAll(Objects.requireNonNull(SBAConfig.getInstance().node("shop", "upgrade-shop", "entity-name")
-                        .getList(String.class))
-                .stream()
-                .map(AdventureHelper::toComponent)
-                .collect(Collectors.toList()));
-    }
+public final class NPCStoreService implements Listener {
+    private final GameManagerImpl gameManager;
+    private final SBAConfig config;
 
     @OnPostEnable
-    public void onPostEnabled() {
-        SBA.getInstance().registerListener(this);
-        EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
-
-        shopSkin = new NPCSkin(
-                SBAConfig.getInstance().node("shop", "normal-shop", "skin", "value").getString(),
-                SBAConfig.getInstance().node("shop", "normal-shop", "skin", "signature").getString()
-        );
-
-        upgradeShopSkin = new NPCSkin(
-                SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "value").getString(),
-                SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "signature").getString()
-        );
+    public void onPostEnable(SBA plugin) {
+        plugin.registerListener(this);
     }
 
+    @EventHandler
+    public void onBedWarsGameStartedEvent(BedwarsGameStartedEvent event) {
+        final var game = event.getGame();
+        final var maybeWrapper = gameManager.getWrappedGame(game);
+        if (maybeWrapper.isEmpty()) {
+            return;
+        }
+
+        final var gameWrapper = maybeWrapper.get();
+
+        if (config.node("npc-stores", "enabled").getBoolean(true)) {
+            gameWrapper.getGameStoreData().forEach(gameStoreData -> {
+                final var npc = NPC.of(gameStoreData.getLocation());
+                final var npcNode = gameStoreData.getNode();
+
+                try {
+                    final var displayName = Objects.requireNonNull(npcNode.node("display-name").getList(String.class))
+                            .stream()
+                            .map(AdventureHelper::toComponent)
+                            .map(TextComponent::asComponent)
+                            .collect(Collectors.toList());
+
+                    npc.setDisplayName(displayName);
+                } catch (SerializationException ex) {
+                    ex.printStackTrace();
+                }
+
+                npc.setShouldLookAtPlayer(npcNode.node("look-at-player").getBoolean(true));
+                npc.setTouchable(true);
+
+                NPCSkin.retrieveSkin(npcNode.node("skin").getString()).thenAccept(npcSkin -> {
+                    npc.setSkin(npcSkin);
+                    game.getConnectedPlayers()
+                            .stream()
+                            .map(PlayerMapper::wrapPlayer)
+                            .forEach(npc::addViewer);
+                    npc.show();
+                });
+
+                gameWrapper.registerStoreNPC(gameStoreData, npc);
+            });
+        }
+    }
+
+    @OnEvent
     public void onNPCTouched(NPCInteractEvent event) {
-        Logger.trace("Clicked NPC with click type: {}", event.getInteractType().name());
-        if (event.getInteractType() == NPCInteractEvent.InteractType.LEFT_CLICK) {
+        if (event.getInteractType() != InteractType.RIGHT_CLICK) {
             return;
         }
 
@@ -95,18 +95,18 @@ public class NPCStoreService implements Listener {
         }
 
         final var game = Main.getInstance().getGameOfPlayer(player);
-        final var npc = event.getNpc();
-        ArenaManager
-                .getInstance()
-                .getArenaMap()
+        final var npc = event.getVisual();
+        gameManager
+                .getRegisteredGames()
                 .values()
-                .stream()
-                .filter(iArena -> iArena.getStoreNPCS().contains(npc) || iArena.getUpgradeStoreNPCS().contains(npc))
-                .forEach(arena -> {
-                    GameStore store = arena.getStoreNPCS().contains(npc) ? shopStore : upgradeStore;
-                    BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
-                            player, store, null);
-                    Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
-                });
+                .forEach(gameWrapper -> gameWrapper.getRegisteredNPCS().forEach(((gameStoreData, npc1) -> {
+                    if (npc1.equals(npc)) {
+                        final var npcNode = gameStoreData.getNode();
+                        final var store = new GameStore(null, npcNode.node("shop-file").getString(), false, npcNode.node("name").getString(), false, false);
+                        BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                                player, store, null);
+                        Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
+                    }
+                })));
     }
 }

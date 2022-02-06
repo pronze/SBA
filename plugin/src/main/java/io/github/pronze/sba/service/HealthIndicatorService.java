@@ -2,8 +2,7 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.game.ArenaManager;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.event.EventHandler;
@@ -14,7 +13,6 @@ import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.healthindicator.HealthIndicator;
-import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -25,42 +23,39 @@ import org.screamingsandals.lib.visuals.Visual;
 import java.util.HashMap;
 import java.util.Map;
 
-@Service(dependsOn = {
-        HealthIndicatorManager.class
-})
+@RequiredArgsConstructor
+@Service
 public class HealthIndicatorService implements Listener {
-    private final Map<IArena, HealthIndicator> healthIndicatorMap = new HashMap<>();
+    private final Map<Game, HealthIndicator> healthIndicatorMap = new HashMap<>();
 
+    private final SBA plugin;
+    private final SBAConfig config;
     private boolean tabEnabled;
 
     @OnPostEnable
-    public void postEnabled() {
-        this.tabEnabled = SBAConfig
-                .getInstance()
-                .node("show-health-in-tablist")
-                .getBoolean();
-
-        boolean tagEnabled = SBAConfig
-                .getInstance()
-                .node("show-health-under-player-name")
-                .getBoolean();
-
-        if (!tagEnabled) {
+    public void postEnable() {
+        if (!config.node("health-indicator", "enabled").getBoolean(true)) {
             return;
         }
 
-        SBA.getInstance().registerListener(this);
+        this.tabEnabled = config
+                .node("show-health-in-tablist")
+                .getBoolean(true);
+
+        plugin.registerListener(this);
     }
 
     @OnPreDisable
     public void onDestroy() {
-        healthIndicatorMap.values().forEach(Visual::destroy);
+        healthIndicatorMap
+                .values()
+                .forEach(Visual::destroy);
         healthIndicatorMap.clear();
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onGameStart(BedwarsGameStartedEvent event) {
-        final Game game = event.getGame();
+        final var game = event.getGame();
         final var healthIndicator = HealthIndicator.of()
                 .symbol(Component.text("\u2665", NamedTextColor.RED))
                 .showHealthInTabList(tabEnabled)
@@ -77,13 +72,13 @@ public class HealthIndicatorService implements Listener {
                 .map(PlayerMapper::wrapPlayer)
                 .forEach(healthIndicator::addTrackedPlayer);
 
-        healthIndicatorMap.put(ArenaManager.getInstance().get(game.getName()).orElseThrow(), healthIndicator);
+        healthIndicatorMap.put(game, healthIndicator);
     }
 
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
         final var playerWrapper = PlayerMapper.wrapPlayer(event.getPlayer());
-        final var healthIndicator = healthIndicatorMap.get(ArenaManager.getInstance().get(event.getGame().getName()).orElse(null));
+        final var healthIndicator = healthIndicatorMap.get(event.getGame());
         if (healthIndicator != null) {
             healthIndicator.removeViewer(playerWrapper);
             healthIndicator.removeTrackedPlayer(playerWrapper);
@@ -91,13 +86,10 @@ public class HealthIndicatorService implements Listener {
     }
 
     @EventHandler
-    public void onBedwarsGameEndingEvent(BedwarsGameEndingEvent event) {
-        final var arena = ArenaManager.getInstance().get(event.getGame().getName()).orElseThrow();
-        final var healthIndicator = healthIndicatorMap.get(arena);
-        if (healthIndicator != null) {
+    public void onBedWarsGameEndingEvent(BedwarsGameEndingEvent event) {
+        healthIndicatorMap.computeIfPresent(event.getGame(), (game, healthIndicator) -> {
             healthIndicator.destroy();
-            healthIndicatorMap.remove(arena);
-        }
+            return null;
+        });
     }
-
 }

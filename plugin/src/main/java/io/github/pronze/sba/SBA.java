@@ -1,170 +1,99 @@
 package io.github.pronze.sba;
 
-import io.github.pronze.sba.commands.CommandManager;
-import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.game.IGameStorage;
-import io.github.pronze.sba.game.tasks.GameTaskManager;
-import io.github.pronze.sba.inventories.GamesInventory;
-import io.github.pronze.sba.inventories.SBAStoreInventory;
-import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
-import io.github.pronze.sba.lang.ILanguageService;
-import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.listener.*;
-import io.github.pronze.sba.manager.IArenaManager;
-import io.github.pronze.sba.manager.IPartyManager;
-import io.github.pronze.sba.party.PartyManager;
-import io.github.pronze.sba.placeholderapi.SBAExpansion;
-import io.github.pronze.sba.service.*;
-import io.github.pronze.sba.specials.listener.BridgeEggListener;
-import io.github.pronze.sba.specials.listener.PopupTowerListener;
-import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.FirstStartConfigReplacer;
-import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.visuals.LobbyScoreboardManager;
-import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
-import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+import io.github.pronze.sba.listener.GeneratorSplitterListener;
+import io.github.pronze.sba.service.HealthIndicatorService;
+import io.github.pronze.sba.service.SBWConfigModifier;
+import io.github.pronze.sba.visual.sidebar.GameLobbySidebarManager;
+import io.github.pronze.sba.visual.sidebar.GameSidebarManager;
+import io.github.pronze.sba.visual.sidebar.LobbySidebarManager;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.lib.event.EventManager;
-import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
-import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.npc.NPCManager;
-import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
-import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
-import pronze.lib.scoreboards.ScoreboardManager;
-
+import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
+import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
+import org.screamingsandals.lib.utils.logger.LoggerWrapper;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 
 @Plugin(
         id = "SBA",
         authors = {"pronze"},
         loadTime = Plugin.LoadTime.POSTWORLD,
-        version = "1.5.6-SNAPSHOT"
+        version = "2.0-SNAPSHOT"
 )
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies =
-        "PlaceholderAPI"
-)
-@Init(services = {
-        Tasker.class,
-        PacketMapper.class,
-        HologramManager.class,
-        HealthIndicatorManager.class,
-        SimpleInventoriesCore.class,
-        NPCManager.class,
-        UpdateChecker.class,
-        SBAConfig.class,
-        Logger.class,
-        LanguageService.class,
-        CommandManager.class,
-        ArenaManager.class,
-        PartyManager.class,
-        GameTaskManager.class,
-        SBAStoreInventory.class,
-        SBAUpgradeStoreInventory.class,
-        GamesInventory.class,
-        PlayerWrapperService.class,
-        GamesInventoryService.class,
-        HealthIndicatorService.class,
-        PacketListener.class,
-        DateUtils.class,
-        BedWarsListener.class,
-        GameChatListener.class,
-        PartyListener.class,
-        PlayerListener.class,
-        GeneratorSplitterListener.class,
-        ExplosionVelocityControlListener.class,
-        LobbyScoreboardManager.class,
-        MainLobbyVisualsManager.class,
-        DynamicSpawnerLimiterService.class,
-        BedwarsCustomMessageModifierListener.class,
-        BridgeEggListener.class,
-        PopupTowerListener.class,
-        NPCStoreService.class,
-        FirstStartConfigReplacer.class,
 })
-public class SBA extends PluginContainer implements AddonAPI {
+@Init(services = {
+        UpdateChecker.class,
 
-    private static SBA instance;
+        // configuration
+        SBAConfig.class,
+        SBWConfigModifier.class,
 
-    public static SBA getInstance() {
-        return instance;
-    }
+        // listeners
+        GeneratorSplitterListener.class,
 
-    private JavaPlugin cachedPluginInstance;
+        // visuals
+        GameLobbySidebarManager.class,
+        GameSidebarManager.class,
+        LobbySidebarManager.class,
+
+        // services
+        HealthIndicatorService.class
+})
+public class SBA extends PluginContainer implements SBWAddonAPI {
+    private LoggerWrapper logger;
     private final List<Listener> registeredListeners = new ArrayList<>();
 
-    public static JavaPlugin getPluginInstance() {
-        if (instance == null) {
-            throw new UnsupportedOperationException("SBA has not yet been initialized!");
-        }
-        if (instance.cachedPluginInstance == null) {
-            instance.cachedPluginInstance = (JavaPlugin) instance.getPluginDescription().as(JavaPlugin.class);
-        }
-        return instance.cachedPluginInstance;
+    @OnEnable
+    public void onEnable(LoggerWrapper logger) {
+        this.logger = logger;
     }
 
-    @Override
-    public void enable() {
-        instance = this;
-        cachedPluginInstance = instance.getPluginDescription().as(JavaPlugin.class);
-        Logger.init(cachedPluginInstance);
-        ScoreboardManager.init(cachedPluginInstance);
-    }
-
-    @Override
-    public void postEnable() {
+    @OnPostEnable
+    public void onPostEnable() {
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
-            showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
-                    "you have the right one installed, and it's enabled properly!");
+            Bukkit.getLogger().warning("Could not find Screaming-BedWars plugin!, " +
+                    "make sure you have the right one installed, and it's enabled properly!");
+            Bukkit.getPluginManager().disablePlugin(as(JavaPlugin.class));
             return;
         }
 
-        if (Main.getVersionNumber() < 109) {
-            showErrorMessage("Minecraft server is running versions below 1.9.4, please upgrade!");
-            return;
-        }
+        // init SLib v1 InventoryListener to delegate old SLib actions to new one.
+        InventoryListener.init(asJavaPlugin());
 
-        InventoryListener.init(cachedPluginInstance);
-
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            Logger.trace("Registering SBAExpansion...");
-            new SBAExpansion().register();
-        }
-
-        getLogger().info("Plugin has finished loading!");
+        logger.trace("SBA v{} has been enabled!", getPluginDescription().getVersion());
         registerAPI();
-        Logger.trace("API has been registered!");
+    }
+
+    @OnPreDisable
+    public void onPreDisable() {
+        Tasker.cancelAll();
+        EventManager.getDefaultEventManager().unregisterAll();
+        EventManager.getDefaultEventManager().destroy();
     }
 
     public void registerListener(@NotNull Listener listener) {
         if (registeredListeners.contains(listener)) {
             return;
         }
-        Bukkit.getServer().getPluginManager().registerEvents(listener, getPluginInstance());
-        Logger.trace("Registered listener: {}", listener.getClass().getSimpleName());
+        Bukkit.getServer().getPluginManager().registerEvents(listener, as(JavaPlugin.class));
+        logger.trace("Registered listener: {}", listener.getClass().getSimpleName());
     }
 
     public void unregisterListener(@NotNull Listener listener) {
@@ -173,85 +102,20 @@ public class SBA extends PluginContainer implements AddonAPI {
         }
         HandlerList.unregisterAll(listener);
         registeredListeners.remove(listener);
-        Logger.trace("Unregistered listener: {}", listener.getClass().getSimpleName());
+        logger.trace("Unregistered listener: {}", listener.getClass().getSimpleName());
     }
 
+    @NotNull
     public List<Listener> getRegisteredListeners() {
         return List.copyOf(registeredListeners);
     }
 
     private void registerAPI() {
-        if (Bukkit.getServer().getServicesManager().getRegistration(AddonAPI.class) == null) {
-            Bukkit.getServer().getServicesManager().register(AddonAPI.class, this, cachedPluginInstance, ServicePriority.Normal);
-        }
+        Bukkit.getServer().getServicesManager().register(SBWAddonAPI.class, this, asJavaPlugin(), ServicePriority.Normal);
+        logger.trace("API has been registered!");
     }
 
-    @Override
-    public void disable() {
-        EventManager.getDefaultEventManager().unregisterAll();
-        EventManager.getDefaultEventManager().destroy();
-        Bukkit.getServer().getServicesManager().unregisterAll(getPluginInstance());
-    }
-
-    @Override
-    public Optional<IGameStorage> getGameStorage(Game game) {
-        return ArenaManager.getInstance().getGameStorage(game.getName());
-    }
-
-    @Override
-    public SBAPlayerWrapper getPlayerWrapper(Player player) {
-        return PlayerWrapperService.getInstance().get(player).orElse(null);
-    }
-
-    @Override
-    public boolean isDebug() {
-        return SBAConfig.getInstance().getBoolean("debug.enabled", false);
-    }
-
-    @Override
     public boolean isSnapshot() {
-        return getVersion().contains("SNAPSHOT");
-    }
-
-    @Override
-    public String getVersion() {
-        return getPluginDescription().getVersion();
-    }
-
-    @Override
-    public IArenaManager getArenaManager() {
-        return ArenaManager.getInstance();
-    }
-
-    @Override
-    public IPartyManager getPartyManager() {
-        return PartyManager.getInstance();
-    }
-
-    @Override
-    public WrapperService<Player, SBAPlayerWrapper> getPlayerWrapperService() {
-        return PlayerWrapperService.getInstance();
-    }
-
-    @Override
-    public IConfigurator getConfigurator() {
-        return SBAConfig.getInstance();
-    }
-
-    @Override
-    public boolean isPendingUpgrade() {
-        return !getVersion().equalsIgnoreCase(SBAConfig.getInstance().node("version").getString());
-    }
-
-    @Override
-    public ILanguageService getLanguageService() {
-        return LanguageService.getInstance();
-    }
-
-    @Override
-    public JavaPlugin getJavaPlugin() {
-        return instance.getPluginDescription().as(JavaPlugin.class);
+        return getPluginDescription().getVersion().toLowerCase().contains("version");
     }
 }
-
-

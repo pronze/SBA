@@ -1,296 +1,199 @@
 package io.github.pronze.sba.listener;
 
-import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.events.SBAFinalKillEvent;
-import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import org.bukkit.Bukkit;
+import io.github.pronze.sba.service.GameManagerImpl;
+import io.github.pronze.sba.game.GamePlayer;
+import io.github.pronze.sba.lang.LangKeys;
+import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.title.Title;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.*;
+import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
-import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
+import org.screamingsandals.lib.lang.Message;
+import org.screamingsandals.lib.npc.NPC;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
+import org.screamingsandals.lib.tasker.task.TaskBase;
+import org.screamingsandals.lib.tasker.task.TaskState;
+import org.screamingsandals.lib.tasker.task.TaskerTask;
+import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.game.Arena;
-import io.github.pronze.sba.game.ArenaManager;
-import io.github.pronze.sba.utils.SBAUtil;
-import io.github.pronze.sba.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import org.screamingsandals.lib.utils.logger.LoggerWrapper;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class BedWarsListener implements Listener {
-    private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
+    private final Map<UUID, TaskerTask> taskCache = new HashMap<>();
+    private final SBA plugin;
+    private final GameManagerImpl gameManager;
+    private final SBAConfig config;
+    private final LoggerWrapper logger;
 
     @OnPostEnable
-    public void registerListener() {
-        SBA.getInstance().registerListener(this);
+    public void onPostEnable() {
+        plugin.registerListener(this);
     }
 
     @EventHandler
-    public void onStarted(BedwarsGameStartedEvent e) {
-        final var game = e.getGame();
-        final var arena = ArenaManager
-                .getInstance()
-                .createArena(game);
-
-        ((Arena) arena).onGameStarted();
-    }
-
-    @EventHandler
-    public void onBwReload(PluginEnableEvent event) {
-        final var pluginName = event.getPlugin().getName();
-        if (pluginName.equalsIgnoreCase(Main.getInstance().getName())) {
-            if (!SBA.getPluginInstance().isEnabled()) {
-                return;
-            }
-            Logger.trace("Re registering listeners!");
-            final var listeners = SBA.getInstance().getRegisteredListeners();
-
-            listeners.forEach(SBA.getInstance()::unregisterListener);
-            listeners.forEach(SBA.getInstance()::registerListener);
-
-            Logger.trace("Registration complete!");
+    public void onBedWarsGameStartedEvent(BedwarsGameStartedEvent event) {
+        final var game = event.getGame();
+        final var maybeWrapper = gameManager.getWrappedGame(game);
+        if (maybeWrapper.isEmpty()) {
+            return;
         }
+
+        final var gameWrapper = maybeWrapper.get();
+        gameWrapper.start();
+
+        Message.of(LangKeys.GAME_START_MESSAGE)
+                .send(game
+                        .getConnectedPlayers()
+                        .stream()
+                        .map(PlayerMapper::wrapPlayer)
+                        .collect(Collectors.toList()));
     }
 
     @EventHandler
-    public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        final var game = e.getGame();
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> ((Arena)arena).onTargetBlockDestroyed(e));
-    }
+    public void onBWPlayerJoinedEvent(BedwarsPlayerJoinedEvent event) {
+        final var gamePlayer = PlayerMapper
+                .wrapPlayer(event.getPlayer())
+                .as(GamePlayer.class);
 
-    @EventHandler
-    public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
-        final var game = e.getGame();
-        ArenaManager
-                .getInstance()
-                .removeArena(game);
-    }
-
-    @EventHandler
-    public void onOver(BedwarsGameEndingEvent e) {
-        final var game = e.getGame();
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> ((Arena)arena).onOver(e));
-    }
-
-    @EventHandler
-    public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
-        final var player = e.getPlayer();
-        final var wrappedPlayer = PlayerMapper
-                .wrapPlayer(player)
-                .as(SBAPlayerWrapper.class);
-        final var task = runnableCache.get(player.getUniqueId());
-        final var game = (Game) e.getGame();
-        if (task != null) {
-            SBAUtil.cancelTask(task);
+        var task = taskCache.get(gamePlayer.getUniqueId());
+        if (task != null
+                && task.getState() != TaskState.CANCELLED) {
+            task.cancel();
         }
-        SBA
-                .getInstance()
-                .getPartyManager()
-                .getPartyOf(wrappedPlayer)
-                .ifPresent(party -> {
-                    if (!wrappedPlayer.equals(party.getPartyLeader())) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
-                                .send(wrappedPlayer);
-                        return;
-                    }
-                    if (party.getMembers().size() == 1) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_NO_PLAYERS_TO_WARP)
-                                .send(wrappedPlayer);
-                        return;
-                    }
 
-                    LanguageService
-                            .getInstance()
-                            .get(MessageKeys.PARTY_MESSAGE_WARP)
-                            .send(wrappedPlayer);
-
-                    if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
-
-                        party.getMembers()
-                                .stream().filter(member -> !wrappedPlayer.equals(member))
-                                .forEach(member -> {
-                                    final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
-
-                                    Bukkit.getScheduler().runTask(SBA.getPluginInstance(), () -> {
-                                        if (game != memberGame) {
-                                            if (memberGame != null)
-                                                memberGame.leaveFromGame(member.getInstance());
-                                            game.joinToGame(member.getInstance());
-                                            LanguageService
-                                                    .getInstance()
-                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
-                                                    .send(member);
-                                        }
-                                    });
-                                });
-                    } else {
-                        final var leaderLocation = wrappedPlayer.getInstance().getLocation();
-                        party.getMembers()
-                                .stream()
-                                .filter(member -> !member.equals(player))
-                                .forEach(member -> {
-                                    if (Main.getInstance().isPlayerPlayingAnyGame(member.getInstance())) {
-                                        Main.getInstance().getGameOfPlayer(member.getInstance()).leaveFromGame(member.getInstance());
-                                    }
-                                    PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
-                                    LanguageService
-                                            .getInstance()
-                                            .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
-                                            .send(PlayerMapper.wrapPlayer(member.getInstance()));
-                                });
-                    }
-                });
+        final var game = event.getGame();
+        if (config.isGameBlacklisted(game)) {
+            return;
+        }
 
         switch (game.getStatus()) {
             case WAITING:
-                var bukkitTask = new BukkitRunnable() {
-                    int buffer = 1; //fixes the bug where it constantly shows will start in 1 second
-                    @Override
-                    public void run() {
-                        if (game.getStatus() == GameStatus.WAITING) {
-                            if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
-                                String time = game.getFormattedTimeLeft();
-
-                                if (!time.contains("0-1")) {
-                                    String[] units = time.split(":");
-                                    int seconds = Integer.parseInt(units[1]) + 1;
-                                    if (buffer == seconds) return;
-                                    buffer = seconds;
-                                    if (seconds <= 10) {
-                                        var message = LanguageService
-                                                .getInstance()
-                                                .get(MessageKeys.GAME_STARTS_IN_MESSAGE)
-                                                .replace("%seconds%", String.valueOf(seconds))
-                                                .toString();
-
-                                        message = seconds == 1 ? message
-                                                .replace("seconds", "second") : message;
-                                        player.sendMessage(message);
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), ShopUtil.translateColors("&c" + seconds), "", 0, 20, 0);
-                                    }
-                                }
-                            }
-                        } else {
-                            this.cancel();
-                            runnableCache.remove(player.getUniqueId());
-                        }
-                    }
-                }.runTaskTimer(SBA.getPluginInstance(), 3L, 20L);
-                runnableCache.put(player.getUniqueId(), bukkitTask);
+                task = Tasker.build(taskBase -> new CountdownUpdaterTask(gamePlayer, taskBase, game, taskCache))
+                        .delay(3L, TaskerTime.TICKS)
+                        .repeat(1L, TaskerTime.SECONDS)
+                        .start();
+                taskCache.put(gamePlayer.getUniqueId(), task);
                 break;
             case RUNNING:
-                final var arena = ArenaManager
-                        .getInstance()
-                        .get(game.getName())
+                final var gameWrapper = gameManager
+                        .getWrappedGame(game)
                         .orElseThrow();
-
-                arena.getScoreboardManager().createScoreboard(player);
-                ((Arena) arena).getRotatingGenerators().forEach(generator -> {
-                    generator.addViewer(player);
-                });
-                break;
+                gameWrapper.spectatorJoin(gamePlayer);
         }
     }
 
     @EventHandler
-    public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
-        final var player = e.getPlayer();
-        final var task = runnableCache.get(player.getUniqueId());
-        final var game = e.getGame();
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> {
-                    final var scoreboardManager = arena.getScoreboardManager();
-                    scoreboardManager.removeScoreboard(player);
-                });
+    public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent event) {
+        final var gamePlayer = PlayerMapper
+                .wrapPlayer(event.getPlayer())
+                .as(GamePlayer.class);
 
-        if (task != null) {
-            SBAUtil.cancelTask(task);
-        }
-        runnableCache.remove(player.getUniqueId());
+        taskCache.computeIfPresent(gamePlayer.getUniqueId(), ((uuid, taskerTask) -> {
+            if (taskerTask.getState() != TaskState.CANCELLED) {
+                taskerTask.cancel();
+            }
+            return null;
+        }));
 
-        ScoreboardManager
-                .getInstance()
-                .fromCache(player.getUniqueId())
-                .ifPresent(Scoreboard::destroy);
-        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-    }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onBedWarsPlayerKilledEvent(PlayerDeathEvent e) {
-        final var victim = e.getEntity();
-        if (!Main.isPlayerInGame(victim)) {
+        final var maybeGame = gamePlayer.getGame();
+        if (maybeGame.isEmpty()) {
             return;
         }
-        final var game = Main.getInstance().getGameOfPlayer(victim);
-        // query arena instance for access to Victim/Killer data
-        ArenaManager
-                .getInstance()
-                .get(game.getName())
-                .ifPresent(arena -> {
-                    // player has died, increment death counter
-                    arena.getPlayerData(victim.getUniqueId())
-                            .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
-                    final var killer = victim.getKiller();
-                    //killer is present
-                    if (killer != null) {
-                        Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());
-                        // get victim game profile
-                        final var gVictim = Main.getPlayerGameProfile(victim);
-
-                        if (gVictim == null || gVictim.isSpectator) return;
-
-                        // get victim team to check if it was a final kill or not
-                        final var victimTeam = game.getTeamOfPlayer(victim);
-                        if (victimTeam != null) {
-                            arena.getPlayerData(killer.getUniqueId())
-                                    .ifPresent(killerData -> {
-                                        Logger.trace("Incrementing killer kills to: {}", killerData.getKills() + 1);
-                                        // increment kill counter for killer
-                                        killerData.setKills(killerData.getKills() + 1);
-                                        if (!victimTeam.isAlive()) {
-                                            // increment final kill counter for killer
-                                            killerData.setFinalKills(killerData.getFinalKills() + 1);
-                                            Bukkit.getPluginManager().callEvent(new SBAFinalKillEvent(game, victim, killer));
-                                            if (SBAConfig.getInstance().node("final-kill-lightning").getBoolean(true)) {
-                                                victim.getWorld().strikeLightningEffect(victim.getLocation());
-                                            }
-                                        }
-                                    });
-                        }
-                    }
-                });
+        final var game = maybeGame.get();
+        game.leaveFromGame(gamePlayer);
     }
 
+    // fix for listener handles during BedWars reload.
+    @EventHandler
+    public void onBwReload(PluginEnableEvent event) {
+        final var pluginName = event.getPlugin().getName();
+
+        if (pluginName.equalsIgnoreCase(Main.getInstance().getName())
+                && plugin.as(JavaPlugin.class).isEnabled()) {
+            logger.trace("Re-registering listeners!");
+            final var listeners = plugin.getRegisteredListeners();
+            listeners.forEach(plugin::unregisterListener);
+            listeners.forEach(plugin::registerListener);
+            logger.trace("Registration complete!");
+        }
+    }
+
+    @RequiredArgsConstructor
+    private static class CountdownUpdaterTask implements Runnable {
+        private final GamePlayer gamePlayer;
+        private final TaskBase taskBase;
+        private final Game game;
+        private final Map<UUID, TaskerTask> taskCache;
+        private int buffer;
+
+        @Override
+        public void run() {
+            if (!gamePlayer.isOnline()
+                    || game.getStatus() != GameStatus.WAITING) {
+                taskBase.cancel();
+                taskCache.remove(gamePlayer.getUniqueId());
+                return;
+            }
+
+            if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
+                final var time = ((org.screamingsandals.bedwars.game.Game) game).getFormattedTimeLeft();
+                if (time.contains("0-1")) {
+                    // bug wars problem
+                    return;
+                }
+
+                String[] units = time.split(":");
+                int seconds = (Integer.parseInt(units[0]) * 60) + Integer.parseInt(units[1]) + 1;
+                if (buffer == seconds) {
+                    // make sure it does not repeatedly glitch on non-countdown moments.
+                    return;
+                }
+
+                // update buffer
+                buffer = seconds;
+
+                if (seconds <= 10) {
+                    final var message = Message.of(LangKeys.GAME_STARTS_IN_MESSAGE)
+                            .placeholder("seconds", String.valueOf(seconds))
+                            .asComponent();
+
+                    gamePlayer.sendMessage(message);
+
+                    final var title = Title.title(
+                            Component.text("§c" + seconds),
+                            Component.empty(),
+                            Title.Times.of(Duration.ofMillis(0), Duration.ofMillis(1000), Duration.ofMillis(0)
+                            ));
+                    gamePlayer.showTitle(title);
+                }
+            }
+        }
+    }
 }
+
