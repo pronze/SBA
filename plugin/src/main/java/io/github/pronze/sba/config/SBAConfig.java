@@ -66,6 +66,7 @@ public class SBAConfig implements IConfigurator {
             }
 
             saveFile("languages/language_en.yml");
+            saveFile("languages/language_ru.yml");
 
             saveFile("games-inventory/solo.yml");
             saveFile("games-inventory/double.yml");
@@ -268,7 +269,10 @@ public class SBAConfig implements IConfigurator {
                         .back()
                     .section("generator-splitter")
                         .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
-                        .back()
+                    .back()
+                    .section("upgrade-item")
+                    .key("leggings").defValue(true)
+                    .key("chestplate").defValue(false)
                     .key("replace-stores-with-npc").defValue(true);
 
             generator.saveIfModified();
