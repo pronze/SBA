@@ -1,4 +1,5 @@
 package io.github.pronze.sba.config;
+import io.github.pronze.sba.fix.BungeecordNPC;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.Logger;
 import net.md_5.bungee.api.ChatColor;
@@ -84,6 +85,7 @@ public class SBAConfig implements IConfigurator {
 
             configurationNode = loader.load();
 
+            
             generator = new ConfigGenerator(loader, configurationNode);
             generator.start()
                     .key("version").defValue(plugin.getDescription().getVersion())
@@ -271,15 +273,16 @@ public class SBAConfig implements IConfigurator {
                         .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
                     .back()
                     .section("upgrade-item")
-                    .key("leggings").defValue(true)
-                    .key("chestplate").defValue(false)
+                        .key("leggings").defValue(true)
+                        .key("chestplate").defValue(false)
+                        .back() 
                     .key("replace-stores-with-npc").defValue(true);
 
             generator.saveIfModified();
             if (!node("debug", "enabled").getBoolean()) {
                 Logger.setMode(Logger.Level.DISABLED);
             }
-
+            
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -389,8 +392,18 @@ public class SBAConfig implements IConfigurator {
         return list;
     }
 
+    public void set(String path, Object value)
+    {
+        try {
+            node(path).set(value);
+            generator.saveIfModified();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public Integer getInt(String path, Integer def) {
+        
         return node((Object[])path.split("\\.")).getInt(def);
     }
 
