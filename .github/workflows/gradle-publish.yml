@@ -24,6 +24,12 @@ jobs:
         with:
           path: './gradle.properties'
           property: 'SBA_VERSION'
+      - name: Declare some variables
+        id: vars
+        shell: bash
+        run: |
+            echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+            echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: Build with Gradle
         run: ./gradlew
         env:
@@ -41,7 +47,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ steps.read_property.outputs.value }}
+          tag_name: ${{ steps.read_property.outputs.value }}.${{ steps.vars.outputs.sha_short }}"
           release_name: Release ${{ steps.read_property.outputs.value }}
           body: Latest release
           draft: false
