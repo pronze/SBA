@@ -18,6 +18,12 @@ jobs:
           cache: 'gradle'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+      - name: Read value from Properties-file
+        id: read_property
+        uses: Reedyuk/read-properties@v1.0.1
+        with:
+          path: './gradle.properties'
+          property: 'SBA_VERSION'
       - name: Build with Gradle
         run: ./gradlew
         env:
@@ -35,8 +41,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ steps.read_property.outputs.value }}
+          release_name: Release ${{ steps.read_property.outputs.value }}
           body: Latest release
           draft: false
           prerelease: true
@@ -48,4 +54,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: plugin/build/libs/SBA*[!s].jar
+          asset_name: ${{ steps.read_property.outputs.value }}.jar
           asset_content_type: application/java-archive
