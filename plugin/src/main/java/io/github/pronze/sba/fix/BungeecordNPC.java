@@ -32,9 +32,9 @@ public class BungeecordNPC extends BaseFix {
             cfg = SBAConfig.getInstance();
         if(isProblematic)
         {
-            cfg.set("editing-hologram-enabled", false);
-            cfg.set("npc.enabled", false);
-            cfg.set("replace-stores-with-npc", false);
+            //cfg.set("editing-hologram-enabled", false);
+            //cfg.set("npc.enabled", false);
+            //cfg.set("replace-stores-with-npc", false);
         }
     }
     public boolean CanRunNPC()
@@ -48,6 +48,6 @@ public class BungeecordNPC extends BaseFix {
 
     @Override
     public void warn() {
-        Logger.warn("NPC currently don't work under bungeecord, disabling NPC");
+        Logger.warn("NPC currently don't work under bungeecord, consider disabling NPC");
     }
 }

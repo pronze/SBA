@@ -29,3 +29,11 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           path: plugin/build/libs/SBA*[!s].jar
+      - name: upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./plugin/build/libs/SBA*[!s].jar
+          asset_content_type: application/java-archive
