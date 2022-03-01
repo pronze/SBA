@@ -1,6 +1,9 @@
 package io.github.pronze.sba.fix;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
 
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.Logger;
@@ -10,9 +13,18 @@ public class BungeecordNPC extends BaseFix {
     private boolean isProblematic = false;
     public void detect()
     {
-        var isBungee = Bukkit.getServer().spigot().getSpigotConfig().getBoolean("settings.bungeecord");
-        var isOffline = !Bukkit.getServer().spigot().getConfig().getBoolean("online-mode");
-
+        boolean isBungee = false;
+        boolean isOffline = false;
+        File file = new File("spigot.yml");
+        try {
+            isBungee = YamlConfiguration.loadConfiguration(file).getBoolean("settings.bungeecord");
+        } catch (Throwable e) {
+            //TODO: handle exception
+        }
+        
+        isOffline = !Bukkit.getServer().spigot().getConfig().getBoolean("online-mode");
+        //System.err.println("isBungee:" + isBungee);
+        //System.err.println("isOffline:" + isOffline);
         isProblematic = isBungee && isOffline;
     }
 
