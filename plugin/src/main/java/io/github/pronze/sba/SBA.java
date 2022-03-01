@@ -3,6 +3,8 @@ package io.github.pronze.sba;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.fix.BaseFix;
+import io.github.pronze.sba.fix.BungeecordNPC;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
@@ -107,7 +109,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 public class SBA extends PluginContainer implements AddonAPI {
 
     private static SBA instance;
-
+    private List<BaseFix> fixs;
     public static SBA getInstance() {
         return instance;
     }
@@ -136,12 +138,18 @@ public class SBA extends PluginContainer implements AddonAPI {
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
+        fixs = List.of(BungeecordNPC.getInstance());
 
+        for (BaseFix fix : fixs) {
+            fix.detect();
+        }
+        
         ScoreboardManager.init(cachedPluginInstance);
     }
 
     @Override
     public void postEnable() {
+        
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
@@ -156,7 +164,11 @@ public class SBA extends PluginContainer implements AddonAPI {
                 Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.22 or you might encounter bugs");
             }
         }
-       
+        for (BaseFix fix : fixs) {
+            fix.fix(SBAConfig.getInstance());
+            if(fix.IsProblematic())
+                fix.warn();
+        }
         InventoryListener.init(cachedPluginInstance);
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
@@ -170,7 +182,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.info("SBA Commit is on par with {}", VersionInfo.COMMIT);
         Logger.trace("API has been registered!");
 
-        Logger.setMode(Level.ERROR);
+        Logger.setMode(Level.WARNING);
     }
 
     public void registerListener(@NotNull Listener listener) {

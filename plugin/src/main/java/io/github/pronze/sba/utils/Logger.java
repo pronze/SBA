@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Service
 public class Logger {
     private static Logger instance;
-    private Level level = Level.ERROR;
+    private Level level = Level.WARNING;
     private java.util.logging.Logger logger;
     private boolean testMode;
 
@@ -27,7 +27,7 @@ public class Logger {
 
     public static void init(JavaPlugin plugin) {
         instance = new Logger();
-        instance.level = Level.ERROR;
+        instance.level = Level.WARNING;
         instance.logger = plugin.getLogger();
     }
 

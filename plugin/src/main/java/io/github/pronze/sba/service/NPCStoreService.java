@@ -110,9 +110,13 @@ public class NPCStoreService implements Listener {
                                                 || iArena.getUpgradeStoreNPCS().contains(npc))
                                 .forEach(arena -> {
 
-                                        
-                                        GameStore store = arena.getStoreNPCS().contains(npc) ? shopStore : upgradeStore;
-                                        Logger.trace("Opening shop: {},{}", event.player(),store);
+                                        GameStore store = null;
+                                        if (arena.getUpgradeStoreNPCS().contains(npc))
+                                                store = upgradeStore;
+                                        else //if (arena.getStoreNPCS().contains(npc))
+                                                store = shopStore;
+
+                                        Logger.trace("Opening shop: {},{}", event.player(), store);
 
                                         BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
                                                         player, store, null);

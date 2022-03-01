@@ -101,7 +101,7 @@ public class SBACommand {
         if (enabled)
             Logger.setMode(Level.ALL);
         else
-            Logger.setMode(Level.ERROR);
+            Logger.setMode(Level.WARNING);
 
     }
 
