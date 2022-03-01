@@ -62,7 +62,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     private final Map<String, InventorySet> shopMap = new HashMap<>();
 
     public SBAUpgradeStoreInventory(Controllable controllable) {
-        super("shops/upgradeShop.yml");
+        super("upgradeShop.yml");
         controllable.postEnable(this::loadPrices);
     }
 

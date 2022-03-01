@@ -45,13 +45,13 @@ public class SBAStoreInventory extends AbstractStoreInventory {
     }
 
     public SBAStoreInventory() {
-        super("shops/shop.yml");
+        super("shop.yml");
     }
 
     @SneakyThrows
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
-        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(SBAStoreInventory.class.getResource("/shops/shop.yml").toURI())));
+        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(SBAStoreInventory.class.getResource("/shop.yml").toURI())));
         inventorySet.getMainSubInventory().process();
     }
 
@@ -142,7 +142,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
         final var shopFile = event.getStore().getShopFile();
-        if ((shopFile != null && shopFile.equalsIgnoreCase("shop.yml")) || event.getStore().getUseParent()) {
+        if (shopFile ==null || (shopFile != null && shopFile.equalsIgnoreCase("shop.yml")) || event.getStore().getUseParent()) {
             if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened store!", event.getPlayer().getName());

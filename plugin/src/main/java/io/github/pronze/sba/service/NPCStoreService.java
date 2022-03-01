@@ -106,17 +106,17 @@ public class NPCStoreService implements Listener {
                                 .getArenaMap()
                                 .values()
                                 .stream()
-                                .filter(iArena -> iArena.getStoreNPCS().contains(npc)
-                                                || iArena.getUpgradeStoreNPCS().contains(npc))
+                                .filter(iArena -> iArena.getStores().values().contains(npc))
                                 .forEach(arena -> {
 
                                         GameStore store = null;
-                                        if (arena.getUpgradeStoreNPCS().contains(npc))
-                                                store = upgradeStore;
-                                        else //if (arena.getStoreNPCS().contains(npc))
-                                                store = shopStore;
+                                        for(var i : arena.getStores().entrySet())
+                                        {
+                                                if(i.getValue().equals(npc))
+                                                        store = (GameStore)i.getKey();
+                                        }
 
-                                        Logger.trace("Opening shop: {},{}", event.player(), store);
+                                        Logger.trace("Opening shop: {},{}", event.player().getName(), store.getShopFile());
 
                                         BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
                                                         player, store, null);

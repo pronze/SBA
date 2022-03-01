@@ -44,8 +44,9 @@ public class Arena implements IArena {
     private final Map<UUID, InvisiblePlayer> invisiblePlayers;
     private final Map<UUID, GamePlayerData> playerDataMap;
     private final List<BaseGameTask> gameTasks;
-    private final List<NPC> storeNPCS;
-    private final List<NPC> upgradeStoreNPCS;
+    //private final List<NPC> storeNPCS;
+    //private final List<NPC> upgradeStoreNPCS;
+    private final Map<org.screamingsandals.bedwars.api.game.GameStore, NPC> stores;
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
@@ -56,8 +57,9 @@ public class Arena implements IArena {
         this.invisiblePlayers = new HashMap<>();
         this.playerDataMap = new HashMap<>();
         this.gameTasks = new ArrayList<>();
-        this.storeNPCS = new ArrayList<>();
-        this.upgradeStoreNPCS = new ArrayList<>();
+        //this.storeNPCS = new ArrayList<>();
+        //this.upgradeStoreNPCS = new ArrayList<>();
+        this.stores = new HashMap<>();
 
         this.storage = new GameStorage(game);
         this.gameTasks.addAll(GameTaskManager.getInstance().startTasks(this));
@@ -218,11 +220,7 @@ public class Arena implements IArena {
                         .skin(skin)
                         .touchable(true);
 
-                if (file != null && file.equals("upgradeShop.yml")) {
-                    upgradeStoreNPCS.add(npc);
-                } else {
-                    storeNPCS.add(npc);
-                }
+                stores.putIfAbsent(store, npc);
 
                 game.getConnectedPlayers()
                         .stream()
@@ -265,11 +263,8 @@ public class Arena implements IArena {
         rotatingGenerators.forEach(IRotatingGenerator::destroy);
         rotatingGenerators.clear();
 
-        storeNPCS.forEach(NPC::destroy);
-        upgradeStoreNPCS.forEach(NPC::destroy);
-
-        storeNPCS.clear();
-        upgradeStoreNPCS.clear();
+        stores.values().forEach(NPC::destroy);
+        stores.clear();
 
         getInvisiblePlayers().forEach(this::removeHiddenPlayer);
 
@@ -277,14 +272,12 @@ public class Arena implements IArena {
 
     public void removeVisualsForPlayer(Player player) {
         rotatingGenerators.forEach(gen -> gen.removeViewer(player));
-        storeNPCS.forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
-        upgradeStoreNPCS.forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
+        stores.values().forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
     }
 
     public void addVisualsForPlayer(Player player) {
         rotatingGenerators.forEach(gen -> gen.addViewer(player));
-        storeNPCS.forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
-        upgradeStoreNPCS.forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
+        stores.values().forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
     }
 
     public void removePlayerFromGame(Player player) {
@@ -380,18 +373,7 @@ public class Arena implements IArena {
         rotatingGenerators.add(generator);
     }
 
-    @NotNull
-    @Override
-    public List<NPC> getStoreNPCS() {
-        return List.copyOf(storeNPCS);
-    }
-
-    @NotNull
-    @Override
-    public List<NPC> getUpgradeStoreNPCS() {
-        return List.copyOf(upgradeStoreNPCS);
-    }
-
+   
     @SuppressWarnings("unchecked")
     @Override
     public <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass) {
@@ -414,5 +396,10 @@ public class Arena implements IArena {
     @Override
     public Optional<InvisiblePlayer> getHiddenPlayer(UUID playerUUID) {
         return Optional.ofNullable(invisiblePlayers.get(playerUUID));
+    }
+
+    @Override
+    public @NotNull Map<org.screamingsandals.bedwars.api.game.GameStore, NPC> getStores() {
+        return Map.copyOf(stores);
     }
 }

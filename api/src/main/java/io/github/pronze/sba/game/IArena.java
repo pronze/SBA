@@ -6,11 +6,13 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import io.github.pronze.sba.manager.ScoreboardManager;
 import org.screamingsandals.lib.npc.NPC;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -108,13 +110,7 @@ public interface IArena {
      * @return a list containing all the normal store npc's registered to the arena.
      */
     @NotNull
-    List<NPC> getStoreNPCS();
-
-    /**
-     * @return a list containing all the upgrade store npc's registered to the arena.
-     */
-    @NotNull
-    List<NPC> getUpgradeStoreNPCS();
+    Map<GameStore,NPC> getStores();
 
     /**
      * Gets the GameTask for this arena.

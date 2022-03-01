@@ -12,6 +12,8 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.kyori.adventure.text.Component;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -223,15 +225,16 @@ public class ShopUtil {
     }
 
     public static File normalizeShopFile(String name) {
+        var dataFolder = Bukkit.getPluginManager().getPlugin("BedWars").getDataFolder();
         if (name.split("\\.").length > 1) {
-            return SBA.getPluginInstance().getDataFolder().toPath().resolve(name).toFile();
+            return dataFolder.toPath().resolve(name).toFile();
         }
 
-        var fileg = SBA.getPluginInstance().getDataFolder().toPath().resolve(name + ".groovy").toFile();
+        var fileg = dataFolder.toPath().resolve(name + ".groovy").toFile();
         if (fileg.exists()) {
             return fileg;
         }
-        return SBA.getPluginInstance().getDataFolder().toPath().resolve(name + ".yml").toFile();
+        return dataFolder.toPath().resolve(name + ".yml").toFile();
     }
 
     public static Map<?, ?> nullValuesAllowingMap(Object... objects) {

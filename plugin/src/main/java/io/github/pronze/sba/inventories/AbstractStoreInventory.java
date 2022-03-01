@@ -59,11 +59,11 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                             .getPluginInstance()
                             .getDataFolder()
                             .toPath()
-                            .resolve(path)
+                            .resolve("shops/"+path)
                             .toFile();
 
                     if (!shopFile.exists()) {
-                        SBA.getInstance().saveResource(path, false);
+                        SBA.getInstance().saveResource("shops/"+path, false);
                     }
                 });
 
@@ -106,83 +106,12 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 .animationsEnabled(true)
                 .call(categoryBuilder -> {
                     var pathStr = SBA.getPluginInstance().getDataFolder().getAbsolutePath();
-                    pathStr = pathStr +  "/" +  (file != null ? "shops/" + file.getName() : shopPaths.split(",")[0]);
+                    pathStr = pathStr +  "/" +  (file != null ? file.getName() : shopPaths.split(",")[0]);
                     categoryBuilder.include(Include.of(Paths.get(pathStr)));
                 })
                 .preClick(this::onPreAction)
                 .buy(this::onShopTransaction)
                 .render(this::onGeneratingItem)
-                // old shop format compatibility
-                /*.variableToProperty("upgrade", "upgrade")
-                .variableToProperty("generate-lore", "generateLore")
-                .variableToProperty("generated-lore-text", "generatedLoreText")
-                .variableToProperty("currency-changer", "currencyChanger")
-                .define("team", (key, player, playerItemInfo, arguments) -> {
-                    var gPlayer = Main.getPlayerGameProfile(player.as(Player.class));
-                    var team = gPlayer.getGame().getPlayerTeam(gPlayer);
-                    if (arguments.length > 0) {
-                        String fa = arguments[0];
-                        switch (fa) {
-                            case "color":
-                                return team.teamInfo.color.name();
-                            case "chatcolor":
-                                return team.teamInfo.color.chatColor.toString();
-                            case "maxplayers":
-                                return Integer.toString(team.teamInfo.maxPlayers);
-                            case "players":
-                                return Integer.toString(team.players.size());
-                            case "hasBed":
-                                return Boolean.toString(team.isBed);
-                        }
-                    }
-                    return team.getName();
-                })
-                .define("spawner", (key, player, playerItemInfo, arguments) -> {
-                    var gPlayer = Main.getPlayerGameProfile(player.as(Player.class));
-                    Game game = gPlayer.getGame();
-                    if (arguments.length > 2) {
-                        String upgradeBy = arguments[0];
-                        String upgrade = arguments[1];
-                        UpgradeStorage upgradeStorage = UpgradeRegistry.getUpgrade("spawner");
-                        if (upgradeStorage == null) {
-                            return null;
-                        }
-                        List<Upgrade> upgrades = null;
-                        switch (upgradeBy) {
-                            case "name":
-                                upgrades = upgradeStorage.findItemSpawnerUpgrades(game, upgrade);
-                                break;
-                            case "team":
-                                upgrades = upgradeStorage.findItemSpawnerUpgrades(game, game.getTeamOfPlayer(player.as(Player.class)));
-                                break;
-                        }
-
-                        if (upgrades != null && !upgrades.isEmpty()) {
-                            String what = "level";
-                            if (arguments.length > 3) {
-                                what = arguments[2];
-                            }
-                            double heighest = Double.MIN_VALUE;
-                            switch (what) {
-                                case "level":
-                                    for (Upgrade upgrad : upgrades) {
-                                        if (upgrad.getLevel() > heighest) {
-                                            heighest = upgrad.getLevel();
-                                        }
-                                    }
-                                    return String.valueOf(heighest);
-                                case "initial":
-                                    for (Upgrade upgrad : upgrades) {
-                                        if (upgrad.getInitialLevel() > heighest) {
-                                            heighest = upgrad.getInitialLevel();
-                                        }
-                                    }
-                                    return String.valueOf(heighest);
-                            }
-                        }
-                    }
-                    return "";
-                })*/
                 .getInventorySet();
 
         try {
@@ -200,7 +129,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     @SneakyThrows
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
-        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(Objects.requireNonNull(SBA.class.getResource("/" + shopPaths.split(",")[0])).toURI())));
+        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(Objects.requireNonNull(SBA.class.getResource("/shops/" + shopPaths.split(",")[0])).toURI())));
         inventorySet.getMainSubInventory().process();
     }
 

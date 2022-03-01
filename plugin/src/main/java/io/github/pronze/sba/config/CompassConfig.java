@@ -22,7 +22,7 @@ import io.github.pronze.sba.utils.SBAUtil;
 import java.io.File;
 import java.util.*;
 import java.util.List;
-
+/*
 @Service
 public class CompassConfig implements IConfigurator {
 
@@ -50,7 +50,6 @@ public class CompassConfig implements IConfigurator {
     public void loadDefaults() {
         this.dataFolder = plugin.getDataFolder();
 
-        /* To avoid config confusions */
         deleteFile("compass.yml");
 
         try {
@@ -267,3 +266,4 @@ public class CompassConfig implements IConfigurator {
         return ItemFactory.build(def).orElse(ItemFactory.getAir());
     }
 }
+*/
