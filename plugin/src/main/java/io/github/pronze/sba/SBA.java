@@ -280,4 +280,8 @@ public class SBA extends PluginContainer implements AddonAPI {
     public JavaPlugin getJavaPlugin() {
         return instance.getPluginDescription().as(JavaPlugin.class);
     }
+
+    public static org.bukkit.plugin.Plugin getBedwarsPlugin() {
+        return Bukkit.getPluginManager().getPlugin("BedWars");
+    }
 }

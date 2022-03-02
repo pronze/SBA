@@ -125,7 +125,7 @@ public class NPCStoreService implements Listener {
                                                 public void run() {
                                                         Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
                                                 }
-                                        }.runTask(SBA.getInstance().getPluginInstance());
+                                        }.runTask(SBA.getPluginInstance());
 
                                 });
         }

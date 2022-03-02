@@ -225,7 +225,7 @@ public class ShopUtil {
     }
 
     public static File normalizeShopFile(String name) {
-        var dataFolder = Bukkit.getPluginManager().getPlugin("BedWars").getDataFolder();
+        var dataFolder = SBA.getBedwarsPlugin().getDataFolder();
         if (name.split("\\.").length > 1) {
             return dataFolder.toPath().resolve(name).toFile();
         }

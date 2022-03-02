@@ -142,7 +142,7 @@ public class SBAStoreInventory extends AbstractStoreInventory {
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
         final var shopFile = event.getStore().getShopFile();
-        if (shopFile ==null || (shopFile != null && shopFile.equalsIgnoreCase("shop.yml")) || event.getStore().getUseParent()) {
+        if (shopFile == null || !shopFile.equalsIgnoreCase("upgradeShop.yml") || event.getStore().getUseParent()) {
             if (SBAConfig.getInstance().node("shop", "normal-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 Logger.trace("Player: {} has opened store!", event.getPlayer().getName());

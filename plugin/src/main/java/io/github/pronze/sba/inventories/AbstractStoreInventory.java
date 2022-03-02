@@ -40,8 +40,11 @@ import org.screamingsandals.simpleinventories.inventory.InventorySet;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -63,7 +66,15 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                             .toFile();
 
                     if (!shopFile.exists()) {
-                        SBA.getInstance().saveResource("shops/"+path, false);
+                        SBA.getInstance().saveResource("shops/" + path, false);
+                        try {
+                            Files.copy(
+                                SBA.getPluginInstance().getDataFolder().toPath().resolve("shops/"+path),
+                                SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(path),
+                                StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException e) {
+                            Logger.error("Could not copy file {} from SBA/shops/{} to Bedwars/{}", path);
+                        }
                     }
                 });
 
@@ -105,7 +116,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 .genericShopPriceTypeRequired(true)
                 .animationsEnabled(true)
                 .call(categoryBuilder -> {
-                    var pathStr = SBA.getPluginInstance().getDataFolder().getAbsolutePath();
+                    var pathStr = SBA.getBedwarsPlugin().getDataFolder().getAbsolutePath();
                     pathStr = pathStr +  "/" +  (file != null ? file.getName() : shopPaths.split(",")[0]);
                     categoryBuilder.include(Include.of(Paths.get(pathStr)));
                 })
