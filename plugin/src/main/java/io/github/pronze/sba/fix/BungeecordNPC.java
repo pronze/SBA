@@ -13,7 +13,7 @@ public class BungeecordNPC extends BaseFix {
     private boolean isProblematic = false;
     public void detect()
     {
-        boolean isBungee = false;
+        /*boolean isBungee = false;
         boolean isOffline = false;
         File file = new File("spigot.yml");
         try {
@@ -25,7 +25,8 @@ public class BungeecordNPC extends BaseFix {
         isOffline = !Bukkit.getServer().spigot().getConfig().getBoolean("online-mode");
         //System.err.println("isBungee:" + isBungee);
         //System.err.println("isOffline:" + isOffline);
-        isProblematic = isBungee && isOffline;
+        isProblematic = isBungee && isOffline;*/
+        isProblematic = false;
     }
 
     public static BungeecordNPC getInstance() {

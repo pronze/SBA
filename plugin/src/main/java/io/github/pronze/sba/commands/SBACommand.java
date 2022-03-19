@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class SBACommand {
     private boolean gamesInvEnabled;
     static boolean init = false;
-    static List<String> allGameModes = List.of("solo", "double", "triple", "squad");
+    static List<String> allGameModes = List.of("solo", "double", "triples", "squads");
 
     @OnPostEnable
     public void onPostEnabled() {

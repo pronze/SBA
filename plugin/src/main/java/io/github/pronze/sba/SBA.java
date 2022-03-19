@@ -159,9 +159,9 @@ public class SBA extends PluginContainer implements AddonAPI {
         else
         {
             Logger.info("SBA initialized using Bedwars {}", BedwarsAPI.getInstance().getPluginVersion());
-            if(!List.of("0.2.20","0.2.21","0.2.22").stream().anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals))
+            if(!List.of("0.2.20","0.2.21","0.2.22","0.2.23").stream().anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals))
             {
-                Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.22 or you might encounter bugs");
+                Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.23. ");
             }
         }
         for (BaseFix fix : fixs) {
