@@ -174,7 +174,6 @@ public class PopupTower {
         }
     }
 
-
     public void placeBlock(Location loc, Material mat) {
         if (!isLocationSafe(loc)) {
             return;
@@ -190,7 +189,7 @@ public class PopupTower {
 
     public boolean isLocationSafe(Location location) {
         final var locBlock = location.getBlock();
-        return (locBlock.getType() == Material.AIR || Main.isBreakableBlock(location.getBlock().getType()) || game.getRegion().isBlockAddedDuringGame(location)) && !isTargetBlockNear(targetBlocks, location) && !isEntranceLocation(location);
+        return !SpawnerProtection.getInstance().isProtected(game, location) && (locBlock.getType() == Material.AIR || Main.isBreakableBlock(location.getBlock().getType()) || game.getRegion().isBlockAddedDuringGame(location)) && !isTargetBlockNear(targetBlocks, location) && !isEntranceLocation(location);
     }
 
     public boolean isEntranceLocation(Location toCheck) {

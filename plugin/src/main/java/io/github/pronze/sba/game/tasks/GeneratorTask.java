@@ -82,32 +82,33 @@ public class GeneratorTask extends BaseGameTask {
                             itemSpawner.addToCurrentLevel(multiplier);
                         }
                     });
+                    if (matName != null)
+                    {
+                        Material finalType = type;
+                        arena.getRotatingGenerators().stream()
+                                .map(generator -> (RotatingGenerator) generator)
+                                .filter(generator -> generator.getStack().getType() == finalType)
+                                .forEach(generator -> {
+                                    final var event = new SBASpawnerTierUpgradeEvent(game, generator);
+                                    Bukkit.getServer().getPluginManager().callEvent(event);
+                                    if (event.isCancelled()) {
+                                        return;
+                                    }
+                                    generator.setTierLevel(generator.getTierLevel() + 1);
+                                });
 
-
-                    Material finalType = type;
-                    arena.getRotatingGenerators().stream()
-                            .map(generator -> (RotatingGenerator) generator)
-                            .filter(generator -> generator.getStack().getType() == finalType)
-                            .forEach(generator -> {
-                                final var event = new SBASpawnerTierUpgradeEvent(game, generator);
-                                Bukkit.getServer().getPluginManager().callEvent(event);
-                                if (event.isCancelled()) {
-                                    return;
-                                }
-                                generator.setTierLevel(generator.getTierLevel() + 1);
-                            });
-
-                    if (showUpgradeMessage && finalType != null) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
-                                .replace("%MatName%", matName)
-                                .replace("%tier%", tierName)
-                                .send(game
-                                        .getConnectedPlayers()
-                                        .stream()
-                                        .map(PlayerMapper::wrapPlayer)
-                                        .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
+                        if (showUpgradeMessage && finalType != null) {
+                            LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.GENERATOR_UPGRADE_MESSAGE)
+                                    .replace("%MatName%", matName)
+                                    .replace("%tier%", tierName)
+                                    .send(game
+                                            .getConnectedPlayers()
+                                            .stream()
+                                            .map(PlayerMapper::wrapPlayer)
+                                            .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
+                        }
                     }
                 }
                 nextEvent = nextEvent.getNextEvent();

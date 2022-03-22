@@ -3,6 +3,7 @@ package io.github.pronze.sba.specials.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.PopupTower;
+import io.github.pronze.sba.specials.SpawnerProtection;
 import io.github.pronze.sba.utils.SBAUtil;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
@@ -59,16 +60,18 @@ public class PopupTowerListener implements Listener {
                     PopupTower tower = new PopupTower(
                             game,
                             TeamColor.fromApiColor(team.getColor()).getWool().getType(),
-                            player.getLocation().getBlock().getRelative(playerFace).getRelative(BlockFace.DOWN).getLocation(),
-                            playerFace
-                    );
-                    tower.createTower();
+                            player.getLocation().getBlock().getRelative(playerFace).getRelative(BlockFace.DOWN)
+                                    .getLocation(),
+                            playerFace);
+                    if (!SpawnerProtection.getInstance().isProtected(game, player.getLocation().getBlock()
+                            .getRelative(playerFace).getRelative(BlockFace.DOWN).getLocation()))
+                        tower.createTower();
                 }
             }
         }
     }
 
-    //TODO: configurable properties
+    // TODO: configurable properties
     private String applyProperty(BedwarsApplyPropertyToBoughtItem event) {
         return POPUP_TOWER_PREFIX;
     }

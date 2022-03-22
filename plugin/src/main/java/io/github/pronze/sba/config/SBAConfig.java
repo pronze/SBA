@@ -295,7 +295,12 @@ public class SBAConfig implements IConfigurator {
                     .key("leggings").defValue(true)
                     .key("chestplate").defValue(false)
                     .back()
-                    .key("replace-stores-with-npc").defValue(true);
+                    .key("replace-stores-with-npc").defValue(true)
+                    .section("automatic-protection")
+                    .key("spawner-diameter").defValue(5)
+                    .key("team-spawn-diameter").defValue(9)
+                    .key("store-diameter").defValue(1)
+                    ;
 
             generator.saveIfModified();
             if (!node("debug", "enabled").getBoolean()) {
@@ -388,7 +393,7 @@ public class SBAConfig implements IConfigurator {
 
             moveFileIfNeeded("shop.yml");
             moveFileIfNeeded("upgradeShop.yml");
-         
+
             final var langFiles = langFolder.listFiles();
             if (langFiles != null)
                 Arrays.stream(langFiles).forEach(File::delete);
