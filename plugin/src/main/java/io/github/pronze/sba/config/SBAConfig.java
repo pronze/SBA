@@ -298,8 +298,8 @@ public class SBAConfig implements IConfigurator {
                     .key("replace-stores-with-npc").defValue(true)
                     .section("automatic-protection")
                     .key("spawner-diameter").defValue(5)
-                    .key("team-spawn-diameter").defValue(9)
-                    .key("store-diameter").defValue(1)
+                    .key("team-spawn-diameter").defValue(3)
+                    .key("store-diameter").defValue(3)
                     ;
 
             generator.saveIfModified();

@@ -64,7 +64,14 @@ public class SpawnerProtectionListener implements Listener {
         
         final var playerGame = Main.getInstance().getGameOfPlayer(player);
 
-        if(SpawnerProtection.getInstance().isProtected(playerGame, event.getBlock().getLocation()))
+        if (SpawnerProtection.getInstance().isProtected(playerGame, event.getBlock().getLocation()))
+        {
             event.setCancelled(true);
+            final var component = LanguageService
+            .getInstance()
+            .get(MessageKeys.SPAWNER_PROTECTION)
+                    .toComponent();
+            PlayerMapper.wrapSender(player).sendMessage(component);
+        }
     }
 }

@@ -19,6 +19,7 @@ import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.placeholderapi.SBAExpansion;
 import io.github.pronze.sba.service.*;
+import io.github.pronze.sba.specials.SpawnerProtection;
 import io.github.pronze.sba.specials.listener.BridgeEggListener;
 import io.github.pronze.sba.specials.listener.PopupTowerListener;
 import io.github.pronze.sba.utils.DateUtils;
@@ -104,7 +105,9 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         PopupTowerListener.class,
         NPCStoreService.class,
         FirstStartConfigReplacer.class,
-        GameModeListener.class
+        GameModeListener.class,
+        SpawnerProtection.class,
+        SpawnerProtectionListener.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 

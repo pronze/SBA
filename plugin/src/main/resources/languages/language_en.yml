@@ -402,3 +402,4 @@ team-eliminated:
   - ""
   - "<white><bold>TEAM ELIMINATED > %team% Team <red>has been eliminated!"
   - ""
+spawner-protection: "<red><bold>You cannot place a block here"

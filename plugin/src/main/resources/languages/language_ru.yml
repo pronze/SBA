@@ -401,3 +401,4 @@ team-eliminated:
   - ""
   - "<white><bold>КОМАНДА УНИЧТОЖЕНА > %team% команда <red>была уничтожена!"
   - ""
+spawner-protection: "<red><bold>Вы не можете разместить блок здесь"

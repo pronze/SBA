@@ -1,6 +1,7 @@
 package io.github.pronze.sba.placeholderapi;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -40,7 +41,7 @@ public class SBAExpansion extends PlaceholderExpansion {
         %sba_game_gametime%
         %sba_game_minplayers%
         %sba_game_maxplayers%
-
+    
         %sba_game_<GAME>_status%
         %sba_game_<GAME>_teams%
         %sba_game_<GAME>_players%
@@ -48,7 +49,11 @@ public class SBAExpansion extends PlaceholderExpansion {
         %sba_game_<GAME>_gametime%
         %sba_game_<GAME>_minplayers%
         %sba_game_<GAME>_maxplayers%
-
+    
+        %sba_team_enchant_protection%
+        %sba_team_enchant_efficiency%
+        %sba_team_enchant_sharpness%
+    
         %sba_version%
     */ 
     @Override
@@ -70,9 +75,11 @@ public class SBAExpansion extends PlaceholderExpansion {
                     return Integer.toString(database.getIntegerProgress());
             }
         } else if (identifiers[0].equalsIgnoreCase("game")) {
-            if (identifiers.length < 2) return null;
-            final Game game = identifiers.length==2? Main.getInstance().getGameOfPlayer(player) : Main.getInstance().getGameByName(identifiers[1]);
-            switch (identifiers.length==2?identifiers[1]:identifiers[2]) {
+            if (identifiers.length < 2) return identifier;
+            final Game game = identifiers.length == 2 ? Main.getInstance().getGameOfPlayer(player)
+                    : Main.getInstance().getGameByName(identifiers[1]);
+            int offset = identifiers.length == 2 ? 1 : 2;
+            switch (identifiers[offset]) {
                 case "status":
                     return game.getStatus().toString();
                 case "teams":
@@ -87,6 +94,24 @@ public class SBAExpansion extends PlaceholderExpansion {
                     return Integer.toString(game.getMinPlayers());
                 case "maxplayers":
                     return Integer.toString(game.getMaxPlayers());
+            }
+        } else if (identifiers[0].equalsIgnoreCase("team")) {
+            final Game game = Main.getInstance().getGameOfPlayer(player);
+            final var gameStorage = ArenaManager.getInstance().getGameStorage(game.getName());
+            var team = game.getTeamOfPlayer(player);
+            if (gameStorage == null)
+                return identifier;
+            switch (identifiers[1]) {
+                case "enchant":
+                switch (identifiers[2]) {
+                    case "protection":
+                        return gameStorage.get().getProtectionLevel(team).orElse(0).toString();
+                    case "efficiency":
+                        return gameStorage.get().getEfficiencyLevel(team).orElse(0).toString();
+                    case "sharpness":
+                        return gameStorage.get().getSharpnessLevel(team).orElse(0).toString();
+                }
+                break;
             }
         } else if (identifiers[0].equalsIgnoreCase("version")) {
             return SBA.getInstance().getVersion();
