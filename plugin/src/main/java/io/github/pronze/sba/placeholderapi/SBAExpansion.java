@@ -26,6 +26,31 @@ public class SBAExpansion extends PlaceholderExpansion {
         return SBA.getInstance().getVersion();
     }
 
+    /*
+        List of placeholders
+    
+        %sba_player_level%
+        %sba_player_xp%
+        %sba_player_progress%
+    
+        %sba_game_status%
+        %sba_game_teams%
+        %sba_game_players%
+        %sba_game_time%
+        %sba_game_gametime%
+        %sba_game_minplayers%
+        %sba_game_maxplayers%
+
+        %sba_game_<GAME>_status%
+        %sba_game_<GAME>_teams%
+        %sba_game_<GAME>_players%
+        %sba_game_<GAME>_time%
+        %sba_game_<GAME>_gametime%
+        %sba_game_<GAME>_minplayers%
+        %sba_game_<GAME>_maxplayers%
+
+        %sba_version%
+    */ 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String identifier) {
         Logger.trace("Placeholder '" + identifier + "' was requested.");
@@ -45,9 +70,9 @@ public class SBAExpansion extends PlaceholderExpansion {
                     return Integer.toString(database.getIntegerProgress());
             }
         } else if (identifiers[0].equalsIgnoreCase("game")) {
-            if (identifiers.length <= 2) return null;
-            final Game game = Main.getInstance().getGameByName(identifiers[1]);
-            switch (identifiers[2]) {
+            if (identifiers.length < 2) return null;
+            final Game game = identifiers.length==2? Main.getInstance().getGameOfPlayer(player) : Main.getInstance().getGameByName(identifiers[1]);
+            switch (identifiers.length==2?identifiers[1]:identifiers[2]) {
                 case "status":
                     return game.getStatus().toString();
                 case "teams":
