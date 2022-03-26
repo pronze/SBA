@@ -113,13 +113,13 @@ public class SBAUtil {
             var handlers = HandlerList.getRegisteredListeners(plugin);
             Logger.trace("-----------------------{}-----------------", handlers.size());
             for (var handler : handlers) {
-                if (handler.getListener().toString().contains("io.github.pronze.sba") ||
-                        handler.getListener().toString().contains("io.github.pronze.lib.screaming") ||
-                        handler.getListener().toString().contains("io.github.pronze.lib.simpleinventories") ||
-                        handler.getListener().toString().contains("org.screamingsandals.bedwars.lib.sgui") ||
-                        handler.getListener().toString().contains("io.github.pronze.lib.bedwars")) {
+                //if (handler.getListener().toString().contains("io.github.pronze.sba") ||
+                //        handler.getListener().toString().contains("io.github.pronze.lib.screaming") ||
+                //        handler.getListener().toString().contains("io.github.pronze.lib.simpleinventories") ||
+                //        handler.getListener().toString().contains("org.screamingsandals.bedwars.lib.sgui") ||
+                //        handler.getListener().toString().contains("io.github.pronze.lib.bedwars")) {
                     HandlerList.unregisterAll(handler.getListener());
-                }
+                //}
                 Logger.trace("handler {}", handler.getListener().toString());
             }
             Logger.trace("-----------------------{}-----------------", handlers.size());

@@ -70,7 +70,12 @@ public class TrapTask extends BaseGameTask {
                                         .toString();
 
                                 team.getConnectedPlayers().forEach(pl -> {
-                                    Sounds.playSound(pl, pl.getLocation(), Main.getInstance().getConfig().getString("sounds.on_trap_triggered"),
+                                    String sound = SBAConfig.getInstance().getString("sounds.on_trap_triggered",
+                                            "ENTITY_ENDER_DRAGON_GROWL");
+                                    if (sound == null)
+                                        sound = "ENTITY_ENDER_DRAGON_GROWL";
+                                    Sounds.playSound(pl, pl.getLocation(),
+                                            sound,
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
                                     SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
                                 });

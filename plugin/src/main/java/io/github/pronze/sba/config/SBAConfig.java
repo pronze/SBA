@@ -275,7 +275,10 @@ public class SBAConfig implements IConfigurator {
                     .section("upgrade-item")
                         .key("leggings").defValue(true)
                         .key("chestplate").defValue(false)
-                        .back() 
+                    .back()
+                    .section("sounds")
+                    .key("on_trap_triggered").defValue("ENTITY_ENDER_DRAGON_GROWL")
+                    .back()
                     .key("replace-stores-with-npc").defValue(true);
 
             generator.saveIfModified();
