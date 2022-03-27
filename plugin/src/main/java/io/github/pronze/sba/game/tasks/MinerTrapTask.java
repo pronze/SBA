@@ -38,7 +38,8 @@ public class MinerTrapTask extends BaseGameTask {
                         .filter(player -> !team.getConnectedPlayers().contains(player))
                         .forEach(player -> {
 
-                            if (arena.getStorage().getTargetBlockLocation(team).orElseThrow().distanceSquared(player.getLocation()) <= radius) {
+                            if (arena.getStorage().getTargetBlockLocation(team).orElseThrow()
+                                    .distanceSquared(player.getLocation()) <= radius) {
                                 final var triggeredEvent = new SBATeamTrapTriggeredEvent(player, team, arena);
                                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(triggeredEvent);
 
@@ -47,8 +48,7 @@ public class MinerTrapTask extends BaseGameTask {
                                 }
 
                                 arena.getStorage().setPurchasedMinerTrap(team, false);
-                                player.addPotionEffect(new PotionEffect
-                                    (PotionEffectType.SLOW_DIGGING, 20 * 10, 2));
+                                player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW_DIGGING, 20 * 10, 2));
 
                                 if (arena.isPlayerHidden(player)) {
                                     arena.removeHiddenPlayer(player);
@@ -56,7 +56,8 @@ public class MinerTrapTask extends BaseGameTask {
 
                                 LanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_MINER_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
+                                        .get(MessageKeys.TEAM_MINER_TRAP_TRIGGERED_MESSAGE)
+                                        .replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
                                         .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
 
                                 var title = LanguageService
@@ -70,7 +71,12 @@ public class MinerTrapTask extends BaseGameTask {
                                         .toString();
 
                                 team.getConnectedPlayers().forEach(pl -> {
-                                    Sounds.playSound(pl, pl.getLocation(), Main.getInstance().getConfig().getString("sounds.on_trap_triggered"),
+                                    String sound = SBAConfig.getInstance().getString("sounds.on_trap_triggered",
+                                            "ENTITY_ENDER_DRAGON_GROWL");
+                                    if (sound == null)
+                                        sound = "ENTITY_ENDER_DRAGON_GROWL";
+                                    Sounds.playSound(pl, pl.getLocation(),
+                                            sound,
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
                                     SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
                                 });

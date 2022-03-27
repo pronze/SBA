@@ -21,7 +21,7 @@ public class GameStorage implements IGameStorage {
     @Override
     public Optional<Location> getTargetBlockLocation(@NotNull RunningTeam team) {
         if (!teamDataMap.containsKey(team)) {
-            return Optional.empty();
+            teamDataMap.put(team, GameTeamData.of(team));
         }
         return Optional.ofNullable(teamDataMap.get(team).getTargetBlockLoc());
     }
@@ -29,7 +29,7 @@ public class GameStorage implements IGameStorage {
     @Override
     public Optional<Integer> getSharpnessLevel(@NotNull RunningTeam team) {
         if (!teamDataMap.containsKey(team)) {
-            return Optional.empty();
+            teamDataMap.put(team, GameTeamData.of(team));
         }
         return Optional.of(teamDataMap.get(team).getSharpness());
     }
@@ -37,7 +37,7 @@ public class GameStorage implements IGameStorage {
     @Override
     public Optional<Integer> getProtectionLevel(@NotNull RunningTeam team) {
         if (!teamDataMap.containsKey(team)) {
-            return Optional.empty();
+            teamDataMap.put(team, GameTeamData.of(team));
         }
         return Optional.of(teamDataMap.get(team).getProtection());
     }
@@ -45,7 +45,7 @@ public class GameStorage implements IGameStorage {
     @Override
     public Optional<Integer> getEfficiencyLevel(@NotNull RunningTeam team) {
         if (!teamDataMap.containsKey(team)) {
-            return Optional.empty();
+            teamDataMap.put(team, GameTeamData.of(team));
         }
         return Optional.of(teamDataMap.get(team).getEfficiency());
     }

@@ -300,7 +300,12 @@ public class SBAConfig implements IConfigurator {
                     .key("spawner-diameter").defValue(5)
                     .key("team-spawn-diameter").defValue(3)
                     .key("store-diameter").defValue(3)
-                    ;
+                    .back()
+                    .section("sounds")
+                    .key("on_trap_triggered").defValue("ENTITY_ENDER_DRAGON_GROWL")
+                    .back()
+                    .key("replace-stores-with-npc").defValue(true);
+
 
             generator.saveIfModified();
             if (!node("debug", "enabled").getBoolean()) {
