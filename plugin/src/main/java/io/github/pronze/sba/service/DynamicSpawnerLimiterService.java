@@ -6,6 +6,8 @@ import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
 import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.RotatingGenerator;
+import io.github.pronze.sba.utils.Logger;
+
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +26,7 @@ import java.util.Map;
 
 @Service
 public class DynamicSpawnerLimiterService implements Listener {
-    private final Map<String, Map<Integer, Integer> > limiters  = new HashMap<>();
+    private final Map<String, Map<Integer, Integer>> limiters = new HashMap<>();
 
     public static DynamicSpawnerLimiterService getInstance() {
         return ServiceManager.get(DynamicSpawnerLimiterService.class);
@@ -33,6 +35,7 @@ public class DynamicSpawnerLimiterService implements Listener {
     public static final int romanToInteger2(String s) {
 
         Map<Character, Integer> values = new LinkedHashMap<>();
+        values.put('0', 0);
         values.put('I', 1);
         values.put('V', 5);
         values.put('X', 10);
@@ -51,30 +54,33 @@ public class DynamicSpawnerLimiterService implements Listener {
         }
         return number;
     }
-    
+
     @OnPostEnable
     public void onPostEnable() {
         SBA.getInstance().registerListener(this);
         load();
     }
 
-    public void reload()
-    {
+    public void reload() {
         limiters.clear();
         load();
     }
+
     private void load() {
         var subkeys = SBAConfig.getInstance().getSubKeys("upgrades.limit");
-        for(var key : subkeys)
-        {
-            var parts = key.split("-");
-            var item = parts[0].toLowerCase();
-            var number = romanToInteger2(parts.length > 1 ? parts[1] : "I");
-            if (!limiters.containsKey(item))
-            {
-                limiters.put(item, new HashMap<>());
+        for (var key : subkeys) {
+            try {
+                var parts = key.split("-");
+                var item = parts[0].toLowerCase();
+                var number = romanToInteger2(parts.length > 1 ? parts[1] : "I");
+                if (!limiters.containsKey(item)) {
+                    limiters.put(item, new HashMap<>());
+                }
+                limiters.get(item).putIfAbsent(number,
+                        SBAConfig.getInstance().node("upgrades", "limit", key).getInt(1));
+            } catch (Throwable t) {
+                Logger.error("Key not in right format {};Expecting RESSOURCE-ROMAN_NUMERAL:TIME;{}", key, t);
             }
-            limiters.get(item).putIfAbsent(number, SBAConfig.getInstance().node("upgrades", "limit", key).getInt(1));
         }
     }
 
@@ -89,32 +95,30 @@ public class DynamicSpawnerLimiterService implements Listener {
         setAccordingly(event.getGame(), true);
     }
 
-    private int getTier(Game game, ItemSpawner spawner)
-    {
+    private int getTier(Game game, ItemSpawner spawner) {
         final var arena = ArenaManager
-        .getInstance()
-        .get(game.getName())
+                .getInstance()
+                .get(game.getName())
                 .orElseThrow();
-        
+
         var rotating = ((Arena) arena).getRotatingGenerators().stream()
-        .map(iRotatingGenerator -> (RotatingGenerator) iRotatingGenerator)
+                .map(iRotatingGenerator -> (RotatingGenerator) iRotatingGenerator)
                 .filter(generator -> generator.getItemSpawner() == spawner).findFirst();
 
-        if(rotating.isPresent())
+        if (rotating.isPresent())
             return rotating.get().getTierLevel();
         else
             return 1;
     }
+
     private void setAccordingly(Game game, boolean isUpgraded) {
-        for (var spawner : game.getItemSpawners())
-        {
+        for (var spawner : game.getItemSpawners()) {
             var material = spawner.getItemSpawnerType().getName().toLowerCase();
-            if(limiters.containsKey(material))
-            {
+            if (limiters.containsKey(material)) {
                 var limiter = limiters.get(material);
                 var tier = getTier(game, spawner);
-                if(limiter.containsKey(tier))
-                Reflect.setField(spawner, "maxSpawnedResources", limiter.get(tier));
+                if (limiter.containsKey(tier))
+                    Reflect.setField(spawner, "maxSpawnedResources", limiter.get(tier));
             }
         }
     }
