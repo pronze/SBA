@@ -44,8 +44,8 @@ public class Arena implements IArena {
     private final Map<UUID, InvisiblePlayer> invisiblePlayers;
     private final Map<UUID, GamePlayerData> playerDataMap;
     private final List<BaseGameTask> gameTasks;
-    //private final List<NPC> storeNPCS;
-    //private final List<NPC> upgradeStoreNPCS;
+    // private final List<NPC> storeNPCS;
+    // private final List<NPC> upgradeStoreNPCS;
     private final Map<org.screamingsandals.bedwars.api.game.GameStore, NPC> stores;
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
@@ -57,8 +57,8 @@ public class Arena implements IArena {
         this.invisiblePlayers = new HashMap<>();
         this.playerDataMap = new HashMap<>();
         this.gameTasks = new ArrayList<>();
-        //this.storeNPCS = new ArrayList<>();
-        //this.upgradeStoreNPCS = new ArrayList<>();
+        // this.storeNPCS = new ArrayList<>();
+        // this.upgradeStoreNPCS = new ArrayList<>();
         this.stores = new HashMap<>();
 
         this.storage = new GameStorage(game);
@@ -92,8 +92,7 @@ public class Arena implements IArena {
 
     }
 
-    public void updateHiddenPlayer(@NotNull Player player)
-    {
+    public void updateHiddenPlayer(@NotNull Player player) {
         invisiblePlayers.get(player.getUniqueId()).refresh();
     }
 
@@ -159,75 +158,84 @@ public class Arena implements IArena {
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
             game.getItemSpawners()
                     .forEach(itemSpawner -> {
+                        boolean found = false;
                         for (var entry : SBAConfig.getInstance().node("floating-generator", "mapping").childrenMap()
                                 .entrySet()) {
                             if (itemSpawner.getItemSpawnerType().getMaterial().name()
                                     .equalsIgnoreCase(((String) entry.getKey()).toUpperCase())) {
+                                found = true;
                                 var material = Material.valueOf(entry.getValue().getString("AIR"));
-                                Logger.trace("createRotatingGenerator({},{})", itemSpawner, material);
                                 createRotatingGenerator((ItemSpawner) itemSpawner, material);
                             }
                         }
+                        if (!found)
+                            createRotatingGenerator((ItemSpawner) itemSpawner, Material.AIR);
                     });
         }
 
         if (SBAConfig.getInstance().node("replace-stores-with-npc").getBoolean(true)) {
-            if (game.getGameStores().size() == 0) {
-                Logger.error("Game does not contain GameStore, is something preventing the spawning of the stores?");
+            try {
+                if (game.getGameStores().size() == 0) {
+                    Logger.error(
+                            "Game does not contain GameStore, is something preventing the spawning of the stores?");
+                }
+                game.getGameStores().forEach(store -> {
+                    Logger.trace("Replacing store {}", store);
+                    final var nonAPIStore = (GameStore) store;
+                    try {
+                        final var villager = nonAPIStore.kill();
+                        if (villager != null) {
+                            Main.unregisterGameEntity(villager);
+                        }
+
+                        if (mockEntity == null) {
+                            // find a better version independent way to mock entities lol
+                            mockEntity = (Bat) game.getGameWorld()
+                                    .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                            mockEntity.setAI(false);
+                        }
+
+                        // set fake entity to avoid bw listener npe
+                        Reflect.setField(nonAPIStore, "entity", mockEntity);
+                    } catch (Throwable t) {
+                        Logger.error(
+                                "SBA cannot unspawn the store, is something preventing the spawning of the stores?");
+                        t.printStackTrace();
+                    }
+
+                    final var file = store.getShopFile();
+
+                    List<Component> name = new ArrayList<Component>();
+                    NPCSkin skin = null;
+                    try {
+                        if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+                            skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+                            name = NPCStoreService.getInstance().getUpgradeShopText();
+                        } else {
+                            skin = NPCStoreService.getInstance().getShopSkin();
+                            name = NPCStoreService.getInstance().getShopText();
+                        }
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+
+                    final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+                            .displayName(name)
+                            .lookAtPlayer(true)
+                            .skin(skin)
+                            .touchable(true);
+
+                    stores.putIfAbsent(store, npc);
+
+                    game.getConnectedPlayers()
+                            .stream()
+                            .map(PlayerMapper::wrapPlayer)
+                            .forEach(npc::addViewer);
+                    npc.show();
+                });
+            } catch (Throwable t) {
+                Logger.warn("Disabling NPC due to an exception during creation of NPC: {}. ", t);
             }
-            game.getGameStores().forEach(store -> {
-                Logger.trace("Replacing store {}", store);
-                final var nonAPIStore = (GameStore) store;
-                try {
-                    final var villager = nonAPIStore.kill();
-                    if (villager != null) {
-                        Main.unregisterGameEntity(villager);
-                    }
-
-                    if (mockEntity == null) {
-                        // find a better version independent way to mock entities lol
-                        mockEntity = (Bat) game.getGameWorld()
-                                .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                        mockEntity.setAI(false);
-                    }
-
-                    // set fake entity to avoid bw listener npe
-                    Reflect.setField(nonAPIStore, "entity", mockEntity);
-                } catch (Throwable t) {
-                    Logger.error("SBA cannot unspawn the store, is something preventing the spawning of the stores?");
-                    t.printStackTrace();
-                }
-
-                final var file = store.getShopFile();
-                
-                List<Component> name = new ArrayList<Component>();
-                NPCSkin skin = null;
-                try {
-                    if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
-                        skin = NPCStoreService.getInstance().getUpgradeShopSkin();
-                        name = NPCStoreService.getInstance().getUpgradeShopText();
-                    } else {
-                        skin = NPCStoreService.getInstance().getShopSkin();
-                        name = NPCStoreService.getInstance().getShopText();
-                    }
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-
-                final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
-                        .displayName(name)
-                        .lookAtPlayer(true)
-                        .skin(skin)
-                        .touchable(true);
-
-                stores.putIfAbsent(store, npc);
-
-                game.getConnectedPlayers()
-                        .stream()
-                        .map(PlayerMapper::wrapPlayer)
-                        .forEach(npc::addViewer);
-                npc.show();
-            });
         }
     }
 
@@ -271,12 +279,18 @@ public class Arena implements IArena {
     }
 
     public void removeVisualsForPlayer(Player player) {
-        rotatingGenerators.forEach(gen -> gen.removeViewer(player));
+        rotatingGenerators.forEach(gen -> {
+            if (((RotatingGenerator) gen).getStack().getType() != Material.AIR)
+                gen.removeViewer(player);
+        });
         stores.values().forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
     }
 
     public void addVisualsForPlayer(Player player) {
-        rotatingGenerators.forEach(gen -> gen.addViewer(player));
+        rotatingGenerators.forEach(gen -> {
+            if (((RotatingGenerator) gen).getStack().getType() != Material.AIR)
+                gen.addViewer(player);
+        });
         stores.values().forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
     }
 
@@ -369,11 +383,11 @@ public class Arena implements IArena {
     public void createRotatingGenerator(@NotNull ItemSpawner itemSpawner, @NotNull Material rotationMaterial) {
         final var generator = new RotatingGenerator(itemSpawner, new ItemStack(rotationMaterial),
                 itemSpawner.getLocation());
-        generator.spawn(game.getConnectedPlayers());
+        if (generator.getStack().getType() != Material.AIR)
+            generator.spawn(game.getConnectedPlayers());
         rotatingGenerators.add(generator);
     }
 
-   
     @SuppressWarnings("unchecked")
     @Override
     public <T extends BaseGameTask> Optional<T> getTask(@NotNull Class<T> taskClass) {

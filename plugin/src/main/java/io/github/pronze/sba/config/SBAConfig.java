@@ -20,12 +20,15 @@ import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import io.github.pronze.sba.utils.SBAUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 public class SBAConfig implements IConfigurator {
@@ -97,52 +100,46 @@ public class SBAConfig implements IConfigurator {
 
             generator = new ConfigGenerator(loader, configurationNode);
             generator.start()
-                    .key("version").defValue(plugin.getDescription().getVersion())
-                    .key("locale").defValue("en")
-                    .key("prefix").defValue("[SBA]")
-                    .key("editing-hologram-enabled").defValue(true)
-                    .section("debug")
-                    .key("enabled").defValue(false)
-                    .back()
-                    .key("disable-item-damage").defValue(true)
-                    .key("permanent-items").defValue(false)
-                    .section("tnt-fireball-jumping")
-                    .key("source-damage").defValue(1)
-                    .key("acceleration-y").defValue(0.8)
-                    .key("reduce-y").defValue(2.0)
-                    .key("launch-multiplier").defValue(3.4)
-                    .key("detection-distance").defValue(8.0D)
-                    .key("fall-damage").defValue(3.0D)
-                    .back()
-                    .key("explosion-damage").defValue(0.25)
-                    .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))
-                    .key("block-item-drops").defValue(true)
-                    .key("allowed-item-drops")
-                    .defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "OBSIDIAN",
-                            "TNT"))
-                    .key("give-killer-resources").defValue(true)
-                    .key("replace-sword-on-upgrade").defValue(true)
-                    .key("block-players-putting-certain-items-onto-chest").defValue(true)
-                    .key("disable-armor-inventory-movement").defValue(true)
-                    .key("final-kill-lightning").defValue(true)
-                    .section("floating-generator")
-                    .section("mapping")
-                    .key("EMERALD").defValue("EMERALD_BLOCK")
-                    .key("DIAMOND").defValue("DIAMOND_BLOCK")
-                    .back()
-                    .key("enabled").defValue(true)
-                    .key("height").defValue(2.5)
-                    .back()
-                    .section("upgrades")
-                    .key("timer-upgrades-enabled").defValue(true)
-                    .key("show-upgrade-message").defValue(true)
-                    .key("trap-detection-range").defValue(7)
-                    .key("multiplier").defValue(0.25)
-                    .section("limit")
-                    .key("Sharpness").defValue(1)
-                    .key("Protection").defValue(4)
-                    .key("Efficiency").defValue(2)
-                    .key("Iron").defValue(48)
+            .key("version").defValue(plugin.getDescription().getVersion())
+            .key("locale").defValue("en")
+            .key("prefix").defValue("[SBA]")
+            .key("editing-hologram-enabled").defValue(true)
+            .section("debug")
+            .key("enabled").defValue(false)
+            .back()
+            .key("disable-item-damage").defValue(true)
+            .key("permanent-items").defValue(false)
+            .section("tnt-fireball-jumping")
+            .key("source-damage").defValue(1)
+            .key("acceleration-y").defValue(0.8)
+            .key("reduce-y").defValue(2.0)
+            .key("launch-multiplier").defValue(3.4)
+            .key("detection-distance").defValue(8.0D)
+            .key("fall-damage").defValue(3.0D)
+            .back()
+            .key("explosion-damage").defValue(0.25)
+            .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))
+            .key("block-item-drops").defValue(true)
+            .key("allowed-item-drops")
+            .defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "OBSIDIAN",
+                    "TNT"))
+            .key("give-killer-resources").defValue(true)
+            .key("replace-sword-on-upgrade").defValue(true)
+            .key("block-players-putting-certain-items-onto-chest").defValue(true)
+            .key("disable-armor-inventory-movement").defValue(true)
+            .key("final-kill-lightning").defValue(true)
+            .section("floating-generator")
+            .section("mapping")
+            .key("EMERALD").defValue("EMERALD_BLOCK")
+            .key("DIAMOND").defValue("DIAMOND_BLOCK")
+            .back()
+            .key("enabled").defValue(true)
+            .key("height").defValue(2.5)
+                    .back();
+            generator.saveIfModified();
+                    
+            if(!configurationNode.hasChild("upgrades"))
+            generator.start().section("upgrades").section("limit").key("Iron").defValue(48)
                     .key("Gold").defValue(8)
                     .key("Diamond-I").defValue(4)
                     .key("Emerald-I").defValue(4)
@@ -152,6 +149,28 @@ public class SBAConfig implements IConfigurator {
                     .key("Emerald-III").defValue(8)
                     .key("Diamond-IV").defValue(12)
                     .key("Emerald-IV").defValue(12)
+                    .back()
+                    .section("time")
+                    .key("Diamond-II").defValue(300)
+                    .key("Emerald-II").defValue(700)
+                    .key("Diamond-III").defValue(1000)
+                    .key("Emerald-III").defValue(1300)
+                    .key("Diamond-IV").defValue(1500)
+                    .key("Emerald-IV").defValue(1800)
+                    .back()
+                    ;
+            generator.saveIfModified();
+
+            generator.start()
+                    .section("upgrades")
+                    .key("timer-upgrades-enabled").defValue(true)
+                    .key("show-upgrade-message").defValue(true)
+                    .key("trap-detection-range").defValue(7)
+                    .key("multiplier").defValue(0.25)
+                    .section("limit")
+                    .key("Sharpness").defValue(1)
+                    .key("Protection").defValue(4)
+                    .key("Efficiency").defValue(2)
                     .back()
                     .section("prices")
                     .key("Sharpness-I").defValue(4)
@@ -166,14 +185,6 @@ public class SBAConfig implements IConfigurator {
                     .key("Efficiency-II").defValue(8)
                     .key("Efficiency-III").defValue(12)
                     .key("Efficiency-IV").defValue(16)
-                    .back()
-                    .section("time")
-                    .key("Diamond-II").defValue(300)
-                    .key("Emerald-II").defValue(700)
-                    .key("Diamond-III").defValue(1000)
-                    .key("Emerald-III").defValue(1300)
-                    .key("Diamond-IV").defValue(1500)
-                    .key("Emerald-IV").defValue(1800)
                     .back()
                     .back()
                     .section("date")
@@ -306,7 +317,6 @@ public class SBAConfig implements IConfigurator {
                     .back()
                     .key("replace-stores-with-npc").defValue(true);
 
-
             generator.saveIfModified();
             if (!node("debug", "enabled").getBoolean()) {
                 Logger.setMode(Logger.Level.DISABLED);
@@ -437,6 +447,17 @@ public class SBAConfig implements IConfigurator {
             ex.printStackTrace();
         }
         return list;
+    }
+
+    @Override
+    public List<String> getSubKeys(String string) {
+        try {
+            return node((Object[]) string.split("\\.")).childrenMap().keySet().stream().map(o -> o.toString())
+                    .collect(Collectors.toList());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return List.of();
     }
 
     public void set(String path, Object value) {

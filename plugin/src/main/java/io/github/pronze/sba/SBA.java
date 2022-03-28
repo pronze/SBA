@@ -54,6 +54,7 @@ import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
@@ -162,10 +163,17 @@ public class SBA extends PluginContainer implements AddonAPI {
         else
         {
             Logger.info("SBA initialized using Bedwars {}", BedwarsAPI.getInstance().getPluginVersion());
-            if(!List.of("0.2.20","0.2.21","0.2.22","0.2.23").stream().anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals))
-            {
+            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23").stream()
+                    .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
                 Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.23. ");
             }
+        }
+        if (Reflect.has("com.mohistmc.MohistMC"))
+        {
+            showErrorMessage("MohistMC isn't a supported server by BedWars or SBA, it introduce bugs in the Bukkit API making it unfit for BedWars or SBA");
+            Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+            Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
+            return;
         }
         for (BaseFix fix : fixs) {
             fix.fix(SBAConfig.getInstance());
