@@ -5,6 +5,8 @@ import io.github.pronze.sba.config.IConfigurator;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.fix.BaseFix;
 import io.github.pronze.sba.fix.BungeecordNPC;
+import io.github.pronze.sba.fix.MagmaFix;
+import io.github.pronze.sba.fix.MohistFix;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
@@ -142,7 +144,10 @@ public class SBA extends PluginContainer implements AddonAPI {
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
-        fixs = List.of(BungeecordNPC.getInstance());
+        fixs = new ArrayList<>();
+        fixs.add(BungeecordNPC.getInstance());
+        fixs.add(new MohistFix());
+        fixs.add(new MagmaFix());
 
         for (BaseFix fix : fixs) {
             fix.detect();
@@ -170,15 +175,17 @@ public class SBA extends PluginContainer implements AddonAPI {
         }
         if (Reflect.has("com.mohistmc.MohistMC"))
         {
-            showErrorMessage("MohistMC isn't a supported server by BedWars or SBA, it introduce bugs in the Bukkit API making it unfit for BedWars or SBA");
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
-            Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
             return;
         }
         for (BaseFix fix : fixs) {
             fix.fix(SBAConfig.getInstance());
             if(fix.IsProblematic())
                 fix.warn();
+            if(fix.IsCritical())
+            {
+                Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+            }
         }
         InventoryListener.init(cachedPluginInstance);
 

@@ -7,4 +7,5 @@ public abstract class BaseFix {
     public abstract void fix(SBAConfig cfg);
     public abstract void warn();
     public abstract boolean IsProblematic();
+    public abstract boolean IsCritical();
 }

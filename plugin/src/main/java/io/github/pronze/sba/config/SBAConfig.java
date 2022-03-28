@@ -193,6 +193,9 @@ public class SBAConfig implements IConfigurator {
                     .section("lobby-scoreboard")
                     .key("enabled").defValue(true)
                     .back()
+                    .section("game-scoreboard")
+                    .key("enabled").defValue(true)
+                    .back()
                     .key("first_start").defValue(true)
                     .section("shout")
                     .key("time-out").defValue(60)
@@ -340,30 +343,6 @@ public class SBAConfig implements IConfigurator {
             } catch (IOException e) {
                 Logger.error("Could not copy file {} from SBA/shops/{} to Bedwars/{}", path);
             }
-    }
-
-    @OnPostEnable
-    public void postEnable() {
-        var gameSection = generator
-                .start()
-                .section("lobby-scoreboard")
-                .section("player-size")
-                .section("games");
-
-        Main.getGameNames().forEach(gameName -> {
-            try {
-                gameSection.key(gameName).defValue(4);
-            } catch (SerializationException e) {
-                e.printStackTrace();
-            }
-        });
-
-        try {
-            generator.saveIfModified();
-        } catch (ConfigurateException e) {
-            e.printStackTrace();
-        }
-
     }
 
     public void forceReload() {

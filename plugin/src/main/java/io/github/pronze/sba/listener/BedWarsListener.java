@@ -235,8 +235,8 @@ public class BedWarsListener implements Listener {
                         .getInstance()
                         .get(game.getName())
                         .orElseThrow();
-
-                arena.getScoreboardManager().createScoreboard(player);
+                if(SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
+                    arena.getScoreboardManager().createScoreboard(player);
                 ((Arena) arena).getRotatingGenerators().forEach(generator -> {
                     generator.addViewer(player);
                 });

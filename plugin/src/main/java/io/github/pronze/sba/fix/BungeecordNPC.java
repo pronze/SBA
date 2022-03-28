@@ -58,7 +58,10 @@ public class BungeecordNPC extends BaseFix {
     {
         return isProblematic;
     }
-
+    public boolean IsCritical()
+    {
+        return false;
+    }
     @Override
     public void warn() {
         Logger.warn("NPC currently don't work under bungeecord, consider disabling NPC");

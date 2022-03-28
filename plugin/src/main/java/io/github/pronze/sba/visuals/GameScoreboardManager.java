@@ -46,7 +46,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
                     .toStringList());
         }
-        game.getConnectedPlayers().forEach(this::createScoreboard);
+        if(SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
+            game.getConnectedPlayers().forEach(this::createScoreboard);
     }
 
     public Optional<Scoreboard> getScoreboard(@NotNull UUID playerUUID) {
