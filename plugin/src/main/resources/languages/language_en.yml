@@ -218,6 +218,22 @@ main-lobby:
 party:
   chat-format: "<blue>Party </blue><gray>>></gray> %name%<white>: %message%"
   message:
+    went-public:
+      - "<gold>-----------------------------------------------------"
+      - "<yellow>Party gamemode has been set to public games."
+      - "<gold>-----------------------------------------------------"
+    went-private: 
+      - "<gold>-----------------------------------------------------"
+      - "<yellow>Party gamemode has been set to private games"
+      - "<gold>-----------------------------------------------------"
+    went-open:
+      - "<gold>-----------------------------------------------------"
+      - "<yellow>Anyone can join the party with /p join %host%."
+      - "<gold>-----------------------------------------------------"
+    went-closed: 
+      - "<gold>-----------------------------------------------------"
+      - "<yellow>Party has been set to invite only"
+      - "<gold>-----------------------------------------------------"
     cannot-invite:
       - "<gold>-----------------------------------------------------"
       - "<red>You cannot invite this player to your party!"

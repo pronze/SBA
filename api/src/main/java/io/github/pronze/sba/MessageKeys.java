@@ -76,7 +76,13 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_DECLINE_OUTGOING = {"party", "message", "declined-user"};
     public static final String[] PARTY_MESSAGE_ERROR = {"party", "message", "error"};
     public static final String[] PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED = {"party", "message", "chat-enable-disabled"};
-    public static final String[] PARTY_MESSAGE_HELP = {"party", "message", "help"};
+    public static final String[] PARTY_MESSAGE_HELP = { "party", "message", "help" };
+    
+    public static final String[] PARTY_WENT_PUBLIC = {"party", "message", "went-public"};
+    public static final String[] PARTY_WENT_PRIVATE = {"party", "message", "went-private"};
+    public static final String[] PARTY_WENT_OPEN = { "party", "message", "went-open" };
+    public static final String[] PARTY_WENT_CLOSED = { "party", "message", "went-closed" };
+    
     public static final String[] COMMAND_CANNOT_EXECUTE = {"command_cannot_do"};
     public static final String[] COMMAND_SUCCESSFULLY_UPGRADED = {"command_upgraded"};
     public static final String[] GAMESINV_GENERATED = { "gamesinv","generated" };

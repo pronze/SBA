@@ -4,6 +4,8 @@ import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.party.PartySetting;
+import io.github.pronze.sba.party.PartySetting.GameMode;
+import io.github.pronze.sba.party.PartySetting.Invite;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -30,17 +32,112 @@ public class PartySettingsCommand {
                 init = true;
         }
 
-        
-        //   @CommandMethod("party|p settings")
-        //   private void commandSettings(
-        //   final @NotNull Player player
-        //   ) {
-        //   LanguageService
-        //   .getInstance()
-        //   .get(MessageKeys.COMMAND_PARTY_SETTINGS_GET_HELP)
-        //   .send(PlayerMapper.wrapPlayer(player));
-        //   }
-         
+        // @CommandMethod("party|p settings")
+        // private void commandSettings(
+        // final @NotNull Player player
+        // ) {
+        // LanguageService
+        // .getInstance()
+        // .get(MessageKeys.COMMAND_PARTY_SETTINGS_GET_HELP)
+        // .send(PlayerMapper.wrapPlayer(player));
+        // }
+        @CommandMethod("party|p stream")
+        private void commandStream(
+                        final @NotNull Player playerArg) {
+                commandOpen(playerArg);
+        }
+
+        @CommandMethod("stream")
+        private void commandStream2(
+                        final @NotNull Player playerArg) {
+                commandOpen(playerArg);
+        }
+
+        @CommandMethod("party|p open")
+        private void commandOpen(
+                        final @NotNull Player playerArg) {
+                final var player = SBA.getInstance().getPlayerWrapper((playerArg));
+                if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
+                        LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
+                        return;
+                }
+                PartyManager
+                                .getInstance()
+                                .getPartyOf(player)
+                                .ifPresentOrElse(party -> {
+                                        if (!player.equals(party.getPartyLeader())) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                                .send(player);
+                                                return;
+                                        }
+
+                                        if (party.getSettings().getInvite() == Invite.NONE) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_WENT_OPEN)
+                                                                .send(player);
+                                                party.getSettings().setInvite(Invite.ALL);
+                                        } else {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_WENT_CLOSED)
+                                                                .send(player);
+                                                party.getSettings().setInvite(Invite.NONE);
+                                        }
+                                }, () -> LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                .send(player));
+        }
+
+        @CommandMethod("party|p private")
+        private void commandPrivate(
+                        final @NotNull Player playerArg) {
+                final var player = SBA.getInstance().getPlayerWrapper((playerArg));
+                if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
+                        LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
+                                        .send(player);
+                        return;
+                }
+                PartyManager
+                                .getInstance()
+                                .getPartyOf(player)
+                                .ifPresentOrElse(party -> {
+                                        if (!player.equals(party.getPartyLeader())) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                                .send(player);
+                                                return;
+                                        }
+
+                                        if (party.getSettings().getGamemode() == GameMode.PUBLIC) {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_WENT_PRIVATE)
+                                                                .replace("%host%", player.getName())
+                                                                .send(player);
+                                                party.getSettings().setGamemode(GameMode.PRIVATE);
+                                        } else {
+                                                LanguageService
+                                                                .getInstance()
+                                                                .get(MessageKeys.PARTY_WENT_PUBLIC)
+                                                                .replace("%host%", player.getName())
+                                                                .send(player);
+                                                party.getSettings().setGamemode(GameMode.PUBLIC);
+                                        }
+                                }, () -> LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                                .send(player));
+        }
 
         @CommandMethod("party|p mute")
         private void commandMute(

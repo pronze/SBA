@@ -5,6 +5,7 @@ import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyInviteAcceptEvent;
 import io.github.pronze.sba.party.PartyManager;
+import io.github.pronze.sba.party.PartySetting.Invite;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -44,9 +45,15 @@ public class PartyJoinCommand {
                         return;
                 }
 
-                final var optionalParty = PartyManager
+                var optionalParty = PartyManager
                                 .getInstance()
-                                .getInvitedPartyOf(user);
+                                .getPartyOf(user);
+                if(optionalParty.isEmpty() || (optionalParty.get().getSettings().getInvite() == Invite.ALL))
+                {
+                        optionalParty = PartyManager
+                                        .getInstance()
+                                        .getInvitedPartyOf(player);
+                }
 
                 optionalParty.ifPresentOrElse(party -> {
                         final var acceptEvent = new SBAPlayerPartyInviteAcceptEvent(player, party);
