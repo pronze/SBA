@@ -9,6 +9,7 @@ import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -41,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class BedWarsListener implements Listener {
@@ -116,6 +118,16 @@ public class BedWarsListener implements Listener {
                 .ifPresent(arena -> ((Arena) arena).onOver(e));
     }
 
+    public io.github.pronze.sba.party.PartySetting.GameMode gamemodeOf(Player connectedPlayer) {
+        AtomicReference<io.github.pronze.sba.party.PartySetting.GameMode> ref = new AtomicReference<>(
+                io.github.pronze.sba.party.PartySetting.GameMode.PUBLIC);
+        SBA.getInstance().getPartyManager().getPartyOf(SBA.getInstance().getPlayerWrapper(connectedPlayer))
+                .ifPresent(party -> {
+                    ref.set(party.getSettings().getGamemode());
+                });
+        return ref.get();
+    }
+
     @EventHandler
     public void onBWLobbyJoin(BedwarsPlayerJoinedEvent e) {
         Logger.trace("SBA onBWLobbyJoin{}", e);
@@ -127,11 +139,21 @@ public class BedWarsListener implements Listener {
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
+
         SBA
                 .getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
-                .ifPresent(party -> {
+                .ifPresentOrElse(party -> {
+                    if (party.getSettings().getGamemode() == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
+                        game.getConnectedPlayers().forEach(connectedPlayer -> {
+                            if (!party.getMembers().contains(SBA.getInstance().getPlayerWrapper(connectedPlayer))) {
+                                game.leaveFromGame(player);
+                                // Prevent joining
+                                return;
+                            }
+                        });
+                    }
                     if (!wrappedPlayer.equals(party.getPartyLeader())) {
                         LanguageService
                                 .getInstance()
@@ -188,6 +210,12 @@ public class BedWarsListener implements Listener {
                                             .send(PlayerMapper.wrapPlayer(member.getInstance()));
                                 });
                     }
+                }, () -> {
+                    game.getConnectedPlayers().forEach(connectedPlayer -> {
+                        if (gamemodeOf(connectedPlayer) == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
+                            game.leaveFromGame(player);
+                        }
+                    });
                 });
 
         switch (game.getStatus()) {
@@ -235,7 +263,7 @@ public class BedWarsListener implements Listener {
                         .getInstance()
                         .get(game.getName())
                         .orElseThrow();
-                if(SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
+                if (SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
                     arena.getScoreboardManager().createScoreboard(player);
                 ((Arena) arena).getRotatingGenerators().forEach(generator -> {
                     generator.addViewer(player);
@@ -309,7 +337,7 @@ public class BedWarsListener implements Listener {
         Logger.trace("Player {} started playing", player);
         Tasker.build(() -> {
             final var game = Main.getInstance().getGameOfPlayer(player);
-            ShopUtil.applyTeamUpgrades(player, game); 
+            ShopUtil.applyTeamUpgrades(player, game);
         }).delay(2, TaskerTime.TICKS).start();
 
     }
