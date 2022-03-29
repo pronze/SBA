@@ -57,42 +57,41 @@ public class PartySettingsCommand {
         private void commandOpen(
                         final @NotNull Player playerArg) {
                 final var player = SBA.getInstance().getPlayerWrapper((playerArg));
-                if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
-                        LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.PARTY_MESSAGE_NOT_IN_PARTY)
-                                        .send(player);
-                        return;
-                }
-                PartyManager
-                                .getInstance()
-                                .getPartyOf(player)
-                                .ifPresentOrElse(party -> {
-                                        if (!player.equals(party.getPartyLeader())) {
-                                                LanguageService
-                                                                .getInstance()
-                                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
-                                                                .send(player);
-                                                return;
-                                        }
 
-                                        if (party.getSettings().getInvite() == Invite.NONE) {
-                                                LanguageService
-                                                                .getInstance()
-                                                                .get(MessageKeys.PARTY_WENT_OPEN)
-                                                                .send(player);
-                                                party.getSettings().setInvite(Invite.ALL);
-                                        } else {
-                                                LanguageService
-                                                                .getInstance()
-                                                                .get(MessageKeys.PARTY_WENT_CLOSED)
-                                                                .send(player);
-                                                party.getSettings().setInvite(Invite.NONE);
-                                        }
-                                }, () -> LanguageService
+                var playerParty = PartyManager
+                                .getInstance()
+                                .getPartyOf(player);
+                if (playerParty.isEmpty())
+                        playerParty = PartyManager.getInstance().createParty(player);
+
+                playerParty.ifPresentOrElse(party -> {
+                        if (!player.equals(party.getPartyLeader())) {
+                                LanguageService
                                                 .getInstance()
-                                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
-                                                .send(player));
+                                                .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
+                                                .send(player);
+                                return;
+                        }
+
+                        if (party.getSettings().getInvite() == Invite.NONE) {
+                                LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_WENT_CLOSED)
+                                                .replace("%host%",player.getName())
+                                                .send(player);
+                                party.getSettings().setInvite(Invite.ALL);
+                        } else {
+                                LanguageService
+                                                .getInstance()
+                                                .get(MessageKeys.PARTY_WENT_OPEN)
+                                                .replace("%host%",player.getName())
+                                                .send(player);
+                                party.getSettings().setInvite(Invite.NONE);
+                        }
+                }, () -> LanguageService
+                                .getInstance()
+                                .get(MessageKeys.PARTY_MESSAGE_ERROR)
+                                .send(player));
         }
 
         @CommandMethod("party|p private")

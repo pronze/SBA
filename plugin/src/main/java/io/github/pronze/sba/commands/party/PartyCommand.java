@@ -10,6 +10,7 @@ import org.screamingsandals.lib.utils.annotations.Service;
         PartyDisbandCommand.class,
         PartyHelpCommand.class,
         PartyInviteCommand.class,
+        PartyJoinCommand.class,
         PartyKickCommand.class,
         PartyLeaveCommand.class,
         PartyPromoteCommand.class,
