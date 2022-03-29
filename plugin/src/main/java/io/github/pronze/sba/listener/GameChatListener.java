@@ -65,10 +65,12 @@ public class GameChatListener implements Listener {
                         }
 
                         var colorName = game.getTeamOfPlayer(player).getColor().name().toUpperCase();
+                        var teamName = game.getTeamOfPlayer(player).getName();
                         var color = TeamColor.fromApiColor(game.getTeamOfPlayer(player).getColor()).chatColor.toString();
                         format = format
                                 .replace("%color%", color)
-                                .replace("%team%", colorName);
+                                .replace("%color_name%", colorName)
+                                .replace("%team%", teamName);
                     }
 
                     var message = event.getMessage().replace(allChatPrefix, "");
