@@ -5,6 +5,8 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
+import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +18,8 @@ import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -183,27 +187,25 @@ public class LobbyScoreboardManager implements Listener {
 
         final var holder = scoreboard.getHolder();
         game.getRunningTeams().forEach(team -> {
-            if (!holder.hasTeamEntry(team.getName())) {
-                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+            if (!holder.getTeam(team.getName()).isPresent()) {
+                holder.team(team.getName()).color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.toString()));
             }
-            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+            final var scoreboardTeam = holder.getTeam(team.getName()).orElse(holder.team(team.getName()));
 
-            new HashSet<>(scoreboardTeam.getEntries())
+            new HashSet<>(scoreboardTeam.players())
                     .stream()
                     .filter(Objects::nonNull)
-                    .map(Bukkit::getPlayerExact)
-                    .filter(Objects::nonNull)
                     .forEach(teamPlayer -> {
-                        if (!team.getConnectedPlayers().contains(teamPlayer)) {
-                            scoreboardTeam.removeEntry(teamPlayer.getName());
+                        if (!team.getConnectedPlayers().contains(teamPlayer.as(Player.class))) {
+                            scoreboardTeam.removePlayer(teamPlayer);
                         }
                     });
 
             team.getConnectedPlayers()
                     .stream()
-                    .map(Player::getName)
-                    .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
-                    .forEach(scoreboardTeam::addEntry);
+                    .map(PlayerMapper::wrapPlayer)
+                    .filter(playerName -> !scoreboardTeam.players().contains(playerName))
+                    .forEach(scoreboardTeam::player);
         });
         return lines;
     }

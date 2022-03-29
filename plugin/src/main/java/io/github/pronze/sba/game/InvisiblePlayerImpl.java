@@ -5,6 +5,9 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Data;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +25,7 @@ import org.screamingsandals.lib.slot.EquipmentSlotHolder;
 import org.screamingsandals.lib.slot.EquipmentSlotMapping;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
+import org.screamingsandals.lib.packet.SClientboundSetPlayerTeamPacket.TagVisibility;
 import org.screamingsandals.lib.player.PlayerMapper;
 
 @Data
@@ -51,21 +55,17 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
             final var holder = maybeHolder.get().getHolder();
 
-            if (!holder.hasTeamEntry(invisTeamName)) {
-                holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam
-                        .setOption(Option.NAME_TAG_VISIBILITY, OptionStatus.NEVER));
-            }
-            final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
+            if (!holder.getTeam(invisTeamName).isPresent()) {
+                holder.team(invisTeamName).nameTagVisibility(TagVisibility.NEVER);//.color(holder.getTeam(team.getName()).get().color());
+                //holder.team(invisTeamName).color(NamedTextColor.nearestTo(TextColor))
 
-            holder.getTeamEntry(team.getName()).ifPresent(entry -> {
-                if (entry.hasEntry(hiddenPlayer.getName())) {
-                    entry.removeEntry(hiddenPlayer.getName());
-                }
-            });
-            if (!invisibleScoreboardTeam.hasEntry(hiddenPlayer.getName())) {
-                invisibleScoreboardTeam.addEntry(hiddenPlayer.getName());
+                //holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
             }
+            final var invisibleScoreboardTeam = holder.getTeam(invisTeamName).get();
+
+            invisibleScoreboardTeam.player(PlayerMapper.wrapPlayer(hiddenPlayer));
+            holder.getTeam(team.getName()).get().removePlayer(PlayerMapper.wrapPlayer(hiddenPlayer));
+
         });
 
         Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
@@ -185,21 +185,17 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
             final var holder = maybeHolder.get().getHolder();
 
-            if (!holder.hasTeamEntry(invisTeamName)) {
-                holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-                holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam
-                        .setNameTagVisibility(NameTagVisibility.NEVER));
-            }
-            final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
+            
+            if (!holder.getTeam(invisTeamName).isPresent()) {
+                holder.team(invisTeamName).nameTagVisibility(TagVisibility.NEVER);//.color(holder.getTeam(team.getName()).get().color());
+                //holder.team(invisTeamName).color(NamedTextColor.nearestTo(TextColor))
 
-            if (invisibleScoreboardTeam.hasEntry(hiddenPlayer.getName())) {
-                invisibleScoreboardTeam.removeEntry(hiddenPlayer.getName());
+                //holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
             }
-            holder.getTeamEntry(team.getName()).ifPresent(entry -> {
-                if (!entry.hasEntry(hiddenPlayer.getName())) {
-                    entry.addEntry(hiddenPlayer.getName());
-                }
-            });
+            final var invisibleScoreboardTeam = holder.getTeam(invisTeamName).get();
+
+            invisibleScoreboardTeam.removePlayer(PlayerMapper.wrapPlayer(hiddenPlayer));
+            holder.getTeam(team.getName()).get().player(PlayerMapper.wrapPlayer(hiddenPlayer));
         });
         SBAUtil.cancelTask(armorHider);
         showArmor();

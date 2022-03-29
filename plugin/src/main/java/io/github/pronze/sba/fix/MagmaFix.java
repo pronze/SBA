@@ -15,8 +15,11 @@ public class MagmaFix extends BaseFix {
 
     @Override
     public void fix(SBAConfig cfg) {
-        cfg.set("lobby-scoreboard.enabled", false);
-        cfg.set("game-scoreboard.enabled", false);
+        if(isProblematic)
+        {
+            cfg.set("lobby-scoreboard.enabled", false);
+            cfg.set("game-scoreboard.enabled", false);
+        }
     }
 
     @Override

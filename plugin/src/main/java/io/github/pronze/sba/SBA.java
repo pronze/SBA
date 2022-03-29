@@ -51,6 +51,7 @@ import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.PluginContainer;
+import org.screamingsandals.lib.sidebar.SidebarManager;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
@@ -110,7 +111,8 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         FirstStartConfigReplacer.class,
         GameModeListener.class,
         SpawnerProtection.class,
-        SpawnerProtectionListener.class
+        SpawnerProtectionListener.class,
+        SidebarManager.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 

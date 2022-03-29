@@ -85,7 +85,7 @@ public class ScoreboardManager implements Listener
     public void addToCache(final Scoreboard board) {
         //Logger.trace("ScoreboardManager.addToCache");
         Objects.requireNonNull(board, "Board cannot be null!");
-        this.cachedBoards.put(board.getHolder().getPlayer().getUniqueId(), board);
+        this.cachedBoards.put(board.getPlayer().getUniqueId(), board);
     }
     
     public void removeFromCache(final UUID uuid) {

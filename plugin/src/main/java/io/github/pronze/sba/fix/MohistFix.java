@@ -17,7 +17,8 @@ public class MohistFix extends BaseFix {
 
     @Override
     public void fix(SBAConfig cfg) {
-        Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
+        if(isProblematic)
+            Bukkit.getServer().getPluginManager().disablePlugin(Main.getInstance());
     }
 
     @Override

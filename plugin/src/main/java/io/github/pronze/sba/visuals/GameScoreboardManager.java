@@ -6,6 +6,8 @@ import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
+import net.kyori.adventure.text.format.NamedTextColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -18,6 +20,8 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
+
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
@@ -80,15 +84,16 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
 
         final var holder = scoreboard.getHolder();
         Tasker.build(() -> game.getRunningTeams().forEach(team -> {
-            if (!holder.hasTeamEntry(team.getName())) {
-                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+            if (!holder.getTeam(team.getName()).isPresent()) {
+                holder.team(team.getName());//.color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name()));
             }
 
-            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+            final var scoreboardTeam = holder.getTeam(team.getName()).orElse(holder.team(team.getName()));
             team.getConnectedPlayers()
                     .forEach(teamPlayer -> {
-                        if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
-                            scoreboardTeam.addEntry(teamPlayer.getName());
+                        var wrapped = PlayerMapper.wrapPlayer(teamPlayer);
+                        if (!scoreboardTeam.players().contains(wrapped)) {
+                            scoreboardTeam.player(wrapped);
                         }
                     });
         })).afterOneTick().start();

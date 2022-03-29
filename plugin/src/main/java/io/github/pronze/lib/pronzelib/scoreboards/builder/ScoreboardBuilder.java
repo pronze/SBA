@@ -5,13 +5,15 @@
 package io.github.pronze.lib.pronzelib.scoreboards.builder;
 
 import java.util.HashMap;
-import io.github.pronze.lib.pronzelib.scoreboards.holder.ScoreboardHolder;
 import java.util.function.BiConsumer;
 import java.util.Objects;
 import io.github.pronze.lib.pronzelib.scoreboards.api.UpdateCallback;
+import net.kyori.adventure.text.Component;
 import io.github.pronze.lib.pronzelib.scoreboards.api.PlaceholderFunction;
 import java.util.List;
 import org.bukkit.entity.Player;
+import org.screamingsandals.lib.sidebar.Sidebar;
+
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import java.util.Map;
 
@@ -103,12 +105,9 @@ public class ScoreboardBuilder
         this.scoreboard.setOccupyMaxHeight(this.occupyHeight);
         this.scoreboard.setOccupyMaxWidth(this.occupyWidth);
         this.scoreboard.setUpdateTaskInterval(this.interval);
-        final ScoreboardHolder scoreboardHolder = this.scoreboard.getHolder();
-        if (this.objectiveName != null) {
-            scoreboardHolder.registerObjective(this.objectiveName);
-        }
+        final Sidebar scoreboardHolder = this.scoreboard.getHolder();
         if (this.title != null) {
-            scoreboardHolder.setTitle(this.title);
+            scoreboardHolder.title(Component.text(this.title));
         }
         if (this.lines != null) {
             this.scoreboard.setLines(this.lines);

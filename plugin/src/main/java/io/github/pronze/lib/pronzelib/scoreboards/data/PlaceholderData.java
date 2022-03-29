@@ -4,26 +4,27 @@
 
 package io.github.pronze.lib.pronzelib.scoreboards.data;
 
-import io.github.pronze.lib.pronzelib.scoreboards.holder.ScoreboardHolder;
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import org.bukkit.entity.Player;
+import org.screamingsandals.lib.player.PlayerWrapper;
 
 public class PlaceholderData
 {
-    private final Player player;
-    private final ScoreboardHolder holder;
+    private final PlayerWrapper player;
+    private final Scoreboard holder;
     private final String line;
     
-    public PlaceholderData(final Player player, final ScoreboardHolder holder, final String line) {
+    public PlaceholderData(final PlayerWrapper player, final Scoreboard holder, final String line) {
         this.player = player;
         this.holder = holder;
         this.line = line;
     }
     
-    public Player getPlayer() {
+    public PlayerWrapper getPlayer() {
         return this.player;
     }
     
-    public ScoreboardHolder getHolder() {
+    public Scoreboard getHolder() {
         return this.holder;
     }
     
