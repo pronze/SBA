@@ -87,6 +87,8 @@ public class SBAConfig implements IConfigurator {
             saveFile("games-inventory/triple.yml");
             saveFile("games-inventory/squad.yml");
 
+            saveFile("shops/moved-to-bedwars.txt");
+
             saveShop("shop.yml", false);
             saveShop("upgradeShop.yml", false);
 
