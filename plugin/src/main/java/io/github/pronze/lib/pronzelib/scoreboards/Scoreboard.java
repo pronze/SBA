@@ -12,6 +12,8 @@ import org.bukkit.Bukkit;
 import io.github.pronze.lib.pronzelib.scoreboards.animations.ScoreboardAnimator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -112,7 +114,7 @@ public class Scoreboard {
         // Logger.trace("Scoreboard refresh");
         if (lines != null) {
             var list2 = new ArrayList<Component>(
-                    lines.stream().map(l -> (Component) Component.text(this.setPlaceholders(l))).toList());
+                lines.stream().map(l -> (Component) Component.text(this.setPlaceholders(l))).collect(Collectors.toList()));
             if (list2 != null)
                 Collections.reverse(list2);
             holder.setLines(list2);

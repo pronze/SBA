@@ -143,5 +143,7 @@ public class MessageKeys {
     public static final String[] REMOVABLE_NPC_TOGGLE = {"removable-npc-toggle"};
     public static final String[] SKIN_NPC_TOGGLE = {"skin-npc-toggle"};
     public static final String[] NPC_REMOVED = {"npc-removed"};
-    public static final String[] SPAWNER_PROTECTION = {"spawner-protection"};
+    public static final String[] SPAWNER_PROTECTION = { "spawner-protection" };
+    
+    public static final String[] MESSAGE_ARENA_BUSY = {"message-arena-busy"};
 }

@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -24,6 +25,7 @@ import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
+import org.screamingsandals.bedwars.utils.MiscUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
@@ -42,7 +44,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
 
 @Service
 public class BedWarsListener implements Listener {
@@ -139,17 +143,45 @@ public class BedWarsListener implements Listener {
         if (task != null) {
             SBAUtil.cancelTask(task);
         }
-
+        AtomicBoolean isCancelled = new AtomicBoolean();
+        isCancelled.set(false);
         SBA
                 .getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer)
                 .ifPresentOrElse(party -> {
+                    Logger.trace("Player {} has a party ", player);
                     if (party.getSettings().getGamemode() == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
+                        Logger.trace("Player {} party is private ", player);
                         game.getConnectedPlayers().forEach(connectedPlayer -> {
                             if (!party.getMembers().contains(SBA.getInstance().getPlayerWrapper(connectedPlayer))) {
-                                game.leaveFromGame(player);
+                                isCancelled.set(true);
+                                Logger.trace(
+                                        "Preventing join as someone from outside the party is already in the game: {}",
+                                        connectedPlayer);
+
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.MESSAGE_ARENA_BUSY)
+                                        .replace("%game%", game.getName())
+                                        .send(wrappedPlayer);
                                 // Prevent joining
+                                return;
+                            }
+                        });
+                    } else {
+                        Logger.trace("Player {} party is public ", player);
+
+                        game.getConnectedPlayers().forEach(connectedPlayer -> {
+                            if (gamemodeOf(
+                                    connectedPlayer) == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
+                                isCancelled.set(true);
+                                Logger.trace("Preventing joindue as a private party is in the lobby");
+                                LanguageService
+                                        .getInstance()
+                                        .get(MessageKeys.MESSAGE_ARENA_BUSY)
+                                        .replace("%game%", game.getName())
+                                        .send(wrappedPlayer);
                                 return;
                             }
                         });
@@ -159,13 +191,7 @@ public class BedWarsListener implements Listener {
                                 .getInstance()
                                 .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
                                 .send(wrappedPlayer);
-                        return;
-                    }
-                    if (party.getMembers().size() == 1) {
-                        LanguageService
-                                .getInstance()
-                                .get(MessageKeys.PARTY_MESSAGE_NO_PLAYERS_TO_WARP)
-                                .send(wrappedPlayer);
+                        isCancelled.set(true);
                         return;
                     }
 
@@ -213,10 +239,21 @@ public class BedWarsListener implements Listener {
                 }, () -> {
                     game.getConnectedPlayers().forEach(connectedPlayer -> {
                         if (gamemodeOf(connectedPlayer) == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
-                            game.leaveFromGame(player);
+                            Logger.trace("Preventing joindue as a private party is in the lobby");
+                            isCancelled.set(true);
+                            LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.MESSAGE_ARENA_BUSY)
+                                    .replace("%game%", game.getName())
+                                    .send(wrappedPlayer);
+                            return;
                         }
                     });
                 });
+        if (isCancelled.get()) {
+            game.leaveFromGame(player);
+            return;
+        }
 
         switch (game.getStatus()) {
             case WAITING:
@@ -339,6 +376,30 @@ public class BedWarsListener implements Listener {
             final var game = Main.getInstance().getGameOfPlayer(player);
             ShopUtil.applyTeamUpgrades(player, game);
         }).delay(2, TaskerTime.TICKS).start();
+
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBedWarsPlayerKilledEvent(EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof Player)) {
+            return;
+        }
+        final var attacker = (Player) e.getDamager();
+
+        if (!Main.isPlayerInGame(attacker)) {
+            return;
+        }
+
+        final var game = (Game) Main.getInstance().getGameOfPlayer(attacker);
+
+        if (!game.isProtectionActive(attacker)) {
+            return;
+        }
+
+        game.removeProtectedPlayer(attacker);
+        if (Main.getConfigurator().config.getBoolean("respawn.show-messages")) {
+            MiscUtils.sendActionBarMessage(attacker, i18nonly("respawn_protection_end"));
+        }
 
     }
 

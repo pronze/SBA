@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
@@ -47,12 +48,13 @@ public class LobbyScoreboardManager implements Listener {
         SBA.getInstance().registerListener(this);
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        if (e.getGame().getStatus() == GameStatus.WAITING) {
-            Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> createBoard(player, e.getGame()), 3L);
-        }
+        if(e.getGame().getConnectedPlayers().contains(player))
+            if (e.getGame().getStatus() == GameStatus.WAITING) {
+                Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> createBoard(player, e.getGame()), 3L);
+            }
     }
 
     private void createBoard(Player player, Game game) {
