@@ -22,6 +22,9 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import io.github.pronze.sba.utils.SBAUtil;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -84,8 +87,8 @@ public class SBAConfig implements IConfigurator {
             saveFile("games-inventory/triple.yml");
             saveFile("games-inventory/squad.yml");
 
-            saveFile("shops/shop.yml");
-            saveFile("shops/upgradeShop.yml");
+            saveShop("shop.yml", false);
+            saveShop("upgradeShop.yml", false);
 
             moveFileIfNeeded("shop.yml");
             moveFileIfNeeded("upgradeShop.yml");
@@ -100,65 +103,64 @@ public class SBAConfig implements IConfigurator {
 
             generator = new ConfigGenerator(loader, configurationNode);
             generator.start()
-            .key("version").defValue(plugin.getDescription().getVersion())
-            .key("locale").defValue("en")
-            .key("prefix").defValue("[SBA]")
-            .key("editing-hologram-enabled").defValue(true)
-            .section("debug")
-            .key("enabled").defValue(false)
-            .back()
-            .key("disable-item-damage").defValue(true)
-            .key("permanent-items").defValue(false)
-            .section("tnt-fireball-jumping")
-            .key("source-damage").defValue(1)
-            .key("acceleration-y").defValue(0.8)
-            .key("reduce-y").defValue(2.0)
-            .key("launch-multiplier").defValue(3.4)
-            .key("detection-distance").defValue(8.0D)
-            .key("fall-damage").defValue(3.0D)
-            .back()
-            .key("explosion-damage").defValue(0.25)
-            .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))
-            .key("block-item-drops").defValue(true)
-            .key("allowed-item-drops")
-            .defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "OBSIDIAN",
-                    "TNT"))
-            .key("give-killer-resources").defValue(true)
-            .key("replace-sword-on-upgrade").defValue(true)
-            .key("block-players-putting-certain-items-onto-chest").defValue(true)
-            .key("disable-armor-inventory-movement").defValue(true)
-            .key("final-kill-lightning").defValue(true)
-            .section("floating-generator")
-            .section("mapping")
-            .key("EMERALD").defValue("EMERALD_BLOCK")
-            .key("DIAMOND").defValue("DIAMOND_BLOCK")
-            .back()
-            .key("enabled").defValue(true)
-            .key("height").defValue(2.5)
+                    .key("version").defValue(plugin.getDescription().getVersion())
+                    .key("locale").defValue("en")
+                    .key("prefix").defValue("[SBA]")
+                    .key("editing-hologram-enabled").defValue(true)
+                    .section("debug")
+                    .key("enabled").defValue(false)
+                    .back()
+                    .key("disable-item-damage").defValue(true)
+                    .key("permanent-items").defValue(false)
+                    .section("tnt-fireball-jumping")
+                    .key("source-damage").defValue(1)
+                    .key("acceleration-y").defValue(0.8)
+                    .key("reduce-y").defValue(2.0)
+                    .key("launch-multiplier").defValue(3.4)
+                    .key("detection-distance").defValue(8.0D)
+                    .key("fall-damage").defValue(3.0D)
+                    .back()
+                    .key("explosion-damage").defValue(0.25)
+                    .key("running-generator-drops").defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT"))
+                    .key("block-item-drops").defValue(true)
+                    .key("allowed-item-drops")
+                    .defValue(List.of("DIAMOND", "IRON_INGOT", "EMERALD", "GOLD_INGOT", "GOLDEN_APPLE", "OBSIDIAN",
+                            "TNT"))
+                    .key("give-killer-resources").defValue(true)
+                    .key("replace-sword-on-upgrade").defValue(true)
+                    .key("block-players-putting-certain-items-onto-chest").defValue(true)
+                    .key("disable-armor-inventory-movement").defValue(true)
+                    .key("final-kill-lightning").defValue(true)
+                    .section("floating-generator")
+                    .section("mapping")
+                    .key("EMERALD").defValue("EMERALD_BLOCK")
+                    .key("DIAMOND").defValue("DIAMOND_BLOCK")
+                    .back()
+                    .key("enabled").defValue(true)
+                    .key("height").defValue(2.5)
                     .back();
             generator.saveIfModified();
-                    
-            if(!configurationNode.hasChild("upgrades"))
-            generator.start().section("upgrades").section("limit").key("Iron").defValue(48)
-                    .key("Gold").defValue(8)
-                    .key("Diamond-I").defValue(4)
-                    .key("Emerald-I").defValue(4)
-                    .key("Diamond-II").defValue(6)
-                    .key("Emerald-II").defValue(6)
-                    .key("Diamond-III").defValue(8)
-                    .key("Emerald-III").defValue(8)
-                    .key("Diamond-IV").defValue(12)
-                    .key("Emerald-IV").defValue(12)
-                    .back()
-                    .section("time")
-                    .key("Diamond-II").defValue(300)
-                    .key("Emerald-II").defValue(700)
-                    .key("Diamond-III").defValue(1000)
-                    .key("Emerald-III").defValue(1300)
-                    .key("Diamond-IV").defValue(1500)
-                    .key("Emerald-IV").defValue(1800)
-                    .back()
-                    ;
+
+            if (!configurationNode.hasChild("upgrades"))
+                generator.start().section("upgrades").section("limit").key("Iron").defValue(48)
+                        .key("Gold").defValue(8)
+                        .key("Diamond-I").defValue(4)
+                        .key("Emerald-I").defValue(4)
+                        .key("Diamond-II").defValue(6)
+                        .key("Emerald-II").defValue(6)
+                        .key("Diamond-III").defValue(8)
+                        .key("Emerald-III").defValue(8)
+                        .key("Diamond-IV").defValue(12)
+                        .key("Emerald-IV").defValue(12)
+                        .back()
+                        .section("time")
+                        .key("Diamond-II").defValue(300)
+                        .key("Emerald-II").defValue(700)
+                        .key("Diamond-III").defValue(1000)
+                        .key("Emerald-III").defValue(1300)
+                        .key("Diamond-IV").defValue(1500)
+                        .key("Emerald-IV").defValue(1800)
+                        .back();
             generator.saveIfModified();
 
             generator.start()
@@ -333,16 +335,16 @@ public class SBAConfig implements IConfigurator {
     private void moveFileIfNeeded(String path) {
         var path1 = Bukkit.getPluginManager().getPlugin("SBA").getDataFolder().toPath().resolve("shops/" + path);
         var path2 = SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(path);
-
-        if (!path2.toFile().exists() || path1.toFile().lastModified() > path2.toFile().lastModified())
-            try {
-                Files.copy(
-                        path1,
-                        path2,
-                        StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                Logger.error("Could not copy file {} from SBA/shops/{} to Bedwars/{}", path);
-            }
+        if (path1.toFile().exists())
+            if (!path2.toFile().exists() || path1.toFile().lastModified() > path2.toFile().lastModified())
+                try {
+                    Files.copy(
+                            path1,
+                            path2,
+                            StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                    Logger.error("Could not copy file {} from SBA/shops/{} to Bedwars/{}", path);
+                }
     }
 
     public void forceReload() {
@@ -377,13 +379,30 @@ public class SBAConfig implements IConfigurator {
         saveFile(fileName, fileName);
     }
 
+    public void saveShop(String fileName, boolean force) {
+
+        var path2 = SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(fileName);
+        System.out.println("Saving shop '" + fileName + "' at '"+path2+"'");
+        if (!path2.toFile().exists() || force)
+            try (var input = SBAConfig.class.getResourceAsStream("/shops/" + fileName)) {
+                try (var output = new FileOutputStream(path2.toFile())) {
+                    if (input != null)
+                        input.transferTo(output);
+                }
+            } catch (IOException e) {
+                Logger.error("Could not save store {} due to {}", fileName, e);
+            }
+
+    }
+
     @Override
     public void upgrade() {
         try {
             node("version").set(plugin.getDescription().getVersion());
             saveConfig();
-            plugin.saveResource("shops/shop.yml", true);
-            plugin.saveResource("shops/upgradeShop.yml", true);
+
+            saveShop("shop.yml", true);
+            saveShop("upgradeShop.yml", true);
 
             moveFileIfNeeded("shop.yml");
             moveFileIfNeeded("upgradeShop.yml");

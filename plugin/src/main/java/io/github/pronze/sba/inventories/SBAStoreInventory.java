@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Service(dependsOn = {
         SimpleInventoriesCore.class,
+        SBAConfig.class
 })
 public class SBAStoreInventory extends AbstractStoreInventory {
 

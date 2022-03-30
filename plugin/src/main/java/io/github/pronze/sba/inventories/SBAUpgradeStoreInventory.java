@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 @Service(dependsOn = {
         SimpleInventoriesCore.class,
+        SBAConfig.class
 })
 public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
 

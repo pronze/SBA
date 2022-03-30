@@ -40,6 +40,7 @@ import org.screamingsandals.simpleinventories.inventory.InventorySet;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -58,24 +59,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     public void onPostEnable() {
         Arrays.stream(shopPaths.split(","))
                 .forEach(path -> {
-                    var shopFile = SBA
-                            .getPluginInstance()
-                            .getDataFolder()
-                            .toPath()
-                            .resolve("shops/"+path)
-                            .toFile();
-
-                    if (!shopFile.exists()) {
-                        SBA.getInstance().saveResource("shops/" + path, false);
-                        try {
-                            Files.copy(
-                                SBA.getPluginInstance().getDataFolder().toPath().resolve("shops/"+path),
-                                SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(path),
-                                StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            Logger.error("Could not copy file {} from SBA/shops/{} to Bedwars/{}", path);
-                        }
-                    }
+                    SBAConfig.getInstance().saveShop(path, false);
                 });
 
         SBA.getInstance().registerListener(this);
@@ -104,7 +88,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 player.openInventory(shopMap.get("default"));
             }
         } catch (Throwable ignored) {
-            Logger.error("[SBA] Your shop is invalid! Check it out or contact us on Discord. {}",ignored);
+            Logger.error("[SBA] Your shop is invalid! Check it out or contact us on Discord. {}", ignored);
             player.sendMessage("[SBA] Your shop is invalid! Check it out or contact us on Discord.");
         }
     }
@@ -117,7 +101,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 .animationsEnabled(true)
                 .call(categoryBuilder -> {
                     var pathStr = SBA.getBedwarsPlugin().getDataFolder().getAbsolutePath();
-                    pathStr = pathStr +  "/" +  (file != null ? file.getName() : shopPaths.split(",")[0]);
+                    pathStr = pathStr + "/" + (file != null ? file.getName() : shopPaths.split(",")[0]);
                     categoryBuilder.include(Include.of(Paths.get(pathStr)));
                 })
                 .preClick(this::onPreAction)
@@ -131,7 +115,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             Bukkit.getLogger().warning("Wrong shop.yml configuration!");
             Bukkit.getLogger().warning("Check validity of your YAML!");
             ex.printStackTrace();
-            //loadDefault(inventorySet);
+            // loadDefault(inventorySet);
         }
 
         shopMap.put(name, inventorySet);
@@ -140,10 +124,10 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     @SneakyThrows
     private void loadDefault(InventorySet inventorySet) {
         inventorySet.getMainSubInventory().dropContents();
-        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(Path.of(Objects.requireNonNull(SBA.class.getResource("/shops/" + shopPaths.split(",")[0])).toURI())));
+        inventorySet.getMainSubInventory().getWaitingQueue().add(Include.of(
+                Path.of(Objects.requireNonNull(SBA.class.getResource("/shops/" + shopPaths.split(",")[0])).toURI())));
         inventorySet.getMainSubInventory().process();
     }
-
 
     private void onShopTransaction(OnTradeEvent event) {
         if (event.isCancelled()) {
@@ -247,14 +231,15 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 if (!(converted instanceof Map)) {
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
-                //noinspection unchecked
+                // noinspection unchecked
                 var propertyData = (Map<String, Object>) converted;
 
-                //temporary fix
+                // temporary fix
                 propertyData.putIfAbsent("name", property.getPropertyName());
 
                 var applyEvent = new BedwarsApplyPropertyToBoughtItem(game, player, newItem, propertyData);
-                Logger.trace("Calling event: {} for property: {}", applyEvent.getClass().getSimpleName(), property.getPropertyName());
+                Logger.trace("Calling event: {} for property: {}", applyEvent.getClass().getSimpleName(),
+                        property.getPropertyName());
                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
                 newItem = applyEvent.getStack();
             }
@@ -279,7 +264,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
             return;
         }
-        
+
         if (shouldBuyStack) {
             buyStack(newItem, player);
         }
@@ -296,7 +281,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                         .send(event.getPlayer());
             }
             Sounds.playSound(player, player.getLocation(),
-                    Main.getConfigurator().config.getString("sounds.item_buy.sound"), Sounds.ENTITY_ITEM_PICKUP, (float) Main.getConfigurator().config.getDouble("sounds.item_buy.volume"), (float) Main.getConfigurator().config.getDouble("sounds.item_buy.pitch"));
+                    Main.getConfigurator().config.getString("sounds.item_buy.sound"), Sounds.ENTITY_ITEM_PICKUP,
+                    (float) Main.getConfigurator().config.getDouble("sounds.item_buy.volume"),
+                    (float) Main.getConfigurator().config.getDouble("sounds.item_buy.pitch"));
         }
     }
 
@@ -315,10 +302,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         var player = event.getPlayer().as(Player.class);
         var game = Main.getInstance().getGameOfPlayer(player);
 
-        if(itemInfo.getStack().getMaterial().is(Material.POTION))
-        {
-            var itemB= item.as(ItemStack.class);
-            Logger.trace("{}",itemB);
+        if (itemInfo.getStack().getMaterial().is(Material.POTION)) {
+            var itemB = item.as(ItemStack.class);
+            Logger.trace("{}", itemB);
         }
         var prices = itemInfo.getOriginal().getPrices();
         if (!prices.isEmpty()) {
@@ -328,7 +314,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             if (type == null) {
                 return;
             }
-            event.setStack(item=ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
+            event.setStack(item = ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
         }
         event.setStack(item);
 
@@ -339,10 +325,10 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                     converted = ShopUtil.nullValuesAllowingMap("value", converted);
                 }
 
-                //noinspection unchecked
+                // noinspection unchecked
                 var propertyData = (Map<String, Object>) converted;
 
-                //temporary fix
+                // temporary fix
                 propertyData.putIfAbsent("name", property.getPropertyName());
 
                 var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
@@ -353,7 +339,6 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
         });
 
-        
         onPostGenerateItem(event);
     }
 
@@ -361,7 +346,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     public abstract void onPreGenerateItem(ItemRenderEvent event);
 
-    public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem, AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
+    public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
+            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
 
     @NotNull
     public abstract InventorySetBuilder getInventorySetBuilder();
