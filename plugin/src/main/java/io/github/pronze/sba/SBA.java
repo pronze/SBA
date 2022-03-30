@@ -43,6 +43,7 @@ import org.screamingsandals.bedwars.Main;
 import io.github.pronze.sba.VersionInfo;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.lib.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
@@ -124,6 +125,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     private JavaPlugin cachedPluginInstance;
     private final List<Listener> registeredListeners = new ArrayList<>();
+    private Metrics metrics;
 
     public static JavaPlugin getPluginInstance() {
         if (instance == null) {
@@ -156,6 +158,9 @@ public class SBA extends PluginContainer implements AddonAPI {
         }
         
         ScoreboardManager.init(cachedPluginInstance);
+
+        int pluginId = 14804; // <-- Replace with the id of your plugin!
+        metrics = new Metrics(cachedPluginInstance, pluginId);
     }
 
     @Override
