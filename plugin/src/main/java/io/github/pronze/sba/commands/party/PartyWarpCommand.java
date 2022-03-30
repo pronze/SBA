@@ -1,6 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -31,6 +32,7 @@ public class PartyWarpCommand {
     }
 
     @CommandMethod("party|p warp")
+    @CommandPermission("sba.party")
     private void commandWarp(
             final @NotNull Player playerArg) {
         final var player = SBA.getInstance().getPlayerWrapper((playerArg));

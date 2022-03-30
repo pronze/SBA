@@ -1,6 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.party.PartySetting;
@@ -42,18 +43,21 @@ public class PartySettingsCommand {
         // .send(PlayerMapper.wrapPlayer(player));
         // }
         @CommandMethod("party|p stream")
+        @CommandPermission("sba.party.public")
         private void commandStream(
                         final @NotNull Player playerArg) {
                 commandOpen(playerArg);
         }
 
         @CommandMethod("stream")
+        @CommandPermission("sba.party.public")
         private void commandStream2(
                         final @NotNull Player playerArg) {
                 commandOpen(playerArg);
         }
 
         @CommandMethod("party|p open")
+        @CommandPermission("sba.party.public")
         private void commandOpen(
                         final @NotNull Player playerArg) {
                 final var player = SBA.getInstance().getPlayerWrapper((playerArg));
@@ -95,6 +99,7 @@ public class PartySettingsCommand {
         }
 
         @CommandMethod("party|p private")
+        @CommandPermission("sba.party.private")
         private void commandPrivate(
                         final @NotNull Player playerArg) {
                 final var player = SBA.getInstance().getPlayerWrapper((playerArg));
@@ -139,6 +144,7 @@ public class PartySettingsCommand {
         }
 
         @CommandMethod("party|p mute")
+        @CommandPermission("sba.party")
         private void commandMute(
                         final @NotNull Player playerArg) {
                 final var player = SBA.getInstance().getPlayerWrapper((playerArg));
@@ -193,6 +199,7 @@ public class PartySettingsCommand {
         }
 
         @CommandMethod("party|p unmute")
+        @CommandPermission("sba.party")
         private void commandUnmute(
                         final @NotNull Player playerArg) {
                 final var player = SBA.getInstance().getPlayerWrapper((playerArg));

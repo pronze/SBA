@@ -59,6 +59,7 @@ public class CommandManager {
                     executionCoordinatorFunction,
                     mapperFunction,
                     mapperFunction);
+
         } catch (final Exception e) {
             Bukkit.getLogger().severe("Failed to initialize the command manager");
             /* Disable the plugin */
@@ -92,6 +93,7 @@ public class CommandManager {
                 CommandSender.class,
                 commandMetaFunction);
         annotationParser.parse(this);
+
     }
 
     @CommandMethod("sba help [query]")

@@ -1,6 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -28,6 +29,7 @@ public class PartyDeclineCommand {
         }
 
     @CommandMethod("party|p decline")
+    @CommandPermission("sba.party")
     private void commandDecline(
             final @NotNull Player playerArg
     ) {

@@ -12,12 +12,15 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import net.kyori.adventure.text.Component;
+
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
@@ -208,7 +211,7 @@ public class Arena implements IArena {
                     List<Component> name = new ArrayList<Component>();
                     NPCSkin skin = null;
                     try {
-                        if (file != null && file.equalsIgnoreCase("upgradeShop.yml")) {
+                        if (file != null && StringUtils.containsIgnoreCase(file,"upgrade")) {
                             skin = NPCStoreService.getInstance().getUpgradeShopSkin();
                             name = NPCStoreService.getInstance().getUpgradeShopText();
                         } else {

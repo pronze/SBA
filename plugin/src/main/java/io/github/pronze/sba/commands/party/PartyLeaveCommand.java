@@ -1,6 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.entity.Player;
@@ -28,6 +29,7 @@ public class PartyLeaveCommand {
         }
 
         @CommandMethod("party|p leave")
+        @CommandPermission("sba.party")
         private void commandLeave(
                         final @NotNull Player playerArg) {
                 final var player = SBA.getInstance().getPlayerWrapper((playerArg));

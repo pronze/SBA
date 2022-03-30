@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -31,6 +32,7 @@ public class PartyInviteCommand {
         }
 
         @CommandMethod("party|p <invitee>")
+        @CommandPermission("sba.party")
         private void commandInviteWithout(
                         final @NotNull Player playerArg,
                         final @NotNull @Argument("invitee") Player invitee) {
@@ -38,6 +40,7 @@ public class PartyInviteCommand {
         }
 
         @CommandMethod("party|p invite <invitee>")
+        @CommandPermission("sba.party")
         private void commandInvite(
                         final @NotNull Player playerArg,
                         final @NotNull @Argument("invitee") Player invitee) {

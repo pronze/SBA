@@ -39,9 +39,6 @@ public class NPCStoreService implements Listener {
                 return ServiceManager.get(NPCStoreService.class);
         }
 
-        private final GameStore shopStore;
-        private final GameStore upgradeStore;
-
         private NPCSkin shopSkin;
         private NPCSkin upgradeShopSkin;
 
@@ -50,11 +47,6 @@ public class NPCStoreService implements Listener {
 
         @SneakyThrows
         public NPCStoreService() {
-                shopStore = new GameStore(null, "shop.yml", false,
-                                SBAConfig.getInstance().node("shop", "normal-shop", "name").getString(), false, false);
-                upgradeStore = new GameStore(null, "upgradeShop.yml", false,
-                                SBAConfig.getInstance().node("shop", "upgrade-shop", "name").getString(), false, false);
-
                 shopText.clear();
                 shopText.addAll(Objects
                                 .requireNonNull(SBAConfig.getInstance().node("shop", "normal-shop", "entity-name")

@@ -218,6 +218,13 @@ main-lobby:
 party:
   chat-format: "<blue>Party </blue><gray>>></gray> %name%<white>: %message%"
   message:
+    list:
+      - "<gold>-----------------------------------------------------"
+      - "<gold>Party Members (%count%)"
+      - ""
+      - "<yellow>Party Leader<gray>: %leader%"
+      - "<yellow>Party Members<gray>: %members%"
+      - "<gold>-----------------------------------------------------"
     went-public:
       - "<gold>-----------------------------------------------------"
       - "<yellow>Party gamemode has been set to public games."

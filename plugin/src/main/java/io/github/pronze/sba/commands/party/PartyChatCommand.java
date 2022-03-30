@@ -1,6 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -23,7 +24,9 @@ public class PartyChatCommand {
         CommandManager.getInstance().getAnnotationParser().parse(this);
         init = true;
     }
+
     @CommandMethod("party|p chat")
+    @CommandPermission("sba.party")
     private void commandChat(
             final @NotNull Player playerArg
     ) {

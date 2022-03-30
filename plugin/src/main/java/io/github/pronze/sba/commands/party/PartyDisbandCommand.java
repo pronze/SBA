@@ -1,5 +1,6 @@
 package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyDisbandEvent;
 import io.github.pronze.sba.party.PartyManager;
@@ -26,7 +27,8 @@ public class PartyDisbandCommand {
             init = true;
         }
 
-    @CommandMethod("party|p disband")
+        @CommandMethod("party|p disband")
+        @CommandPermission("sba.party")
     private void commandDisband(
             final @NotNull Player playerArg
     ) {

@@ -1,5 +1,6 @@
 package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ public class PartyHelpCommand {
     }
 
     @CommandMethod("party|p help")
+    @CommandPermission("sba.party")
     private void commandHelp(
             final @NotNull Player sender
     ) {

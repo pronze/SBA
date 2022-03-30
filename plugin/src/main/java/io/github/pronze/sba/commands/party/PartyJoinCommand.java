@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyInviteAcceptEvent;
 import io.github.pronze.sba.party.PartyManager;
@@ -30,6 +31,7 @@ public class PartyJoinCommand {
         }
 
         @CommandMethod("party|p join <user>")
+        @CommandPermission("sba.party")
         private void commandAccept(
                         final @NotNull Player playerArg,
                         final @NotNull @Argument("user") Player userArg) {

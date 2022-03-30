@@ -77,7 +77,8 @@ public class MessageKeys {
     public static final String[] PARTY_MESSAGE_ERROR = {"party", "message", "error"};
     public static final String[] PARTY_MESSAGE_CHAT_ENABLED_OR_DISABLED = {"party", "message", "chat-enable-disabled"};
     public static final String[] PARTY_MESSAGE_HELP = { "party", "message", "help" };
-    
+    public static final String[] PARTY_LIST = { "party", "message", "list" };
+
     public static final String[] PARTY_WENT_PUBLIC = {"party", "message", "went-public"};
     public static final String[] PARTY_WENT_PRIVATE = {"party", "message", "went-private"};
     public static final String[] PARTY_WENT_OPEN = { "party", "message", "went-open" };
@@ -146,4 +147,6 @@ public class MessageKeys {
     public static final String[] SPAWNER_PROTECTION = { "spawner-protection" };
     
     public static final String[] MESSAGE_ARENA_BUSY = {"message-arena-busy"};
-}
+    
+};
+

@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -48,6 +49,7 @@ public class PartyPromoteCommand {
         }
 
         @CommandMethod("party|p promote <player>")
+        @CommandPermission("sba.party")
         private void commandPromote(
                         final @NotNull Player playerArg,
                         final @NotNull @Argument(value = "player", suggestions = "promote") Player toPromote) {

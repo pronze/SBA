@@ -2,6 +2,7 @@ package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.party.PartyManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -26,6 +27,7 @@ public class PartyDebugCommand {
     }
 
     @CommandMethod("party|p debug <player>")
+    @CommandPermission("sba.party")
     private void commandDebug(
             final @NotNull CommandSender sender,
             final @NotNull @Argument("player") Player playerArg
