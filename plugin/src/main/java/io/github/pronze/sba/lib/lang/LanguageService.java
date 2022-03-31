@@ -78,8 +78,10 @@ public class LanguageService implements ILanguageService {
             fallbackFile.createNewFile();
 
             try (var input = LanguageService.class.getResourceAsStream("/languages/language_en.yml")) {
+                if (input == null)
+                        throw new Exception("Input is null while setting up fallback message");
                 try (var output = new FileOutputStream(fallbackFile)) {
-                    assert input != null;
+                    
                     input.transferTo(output);
                 }
             }
