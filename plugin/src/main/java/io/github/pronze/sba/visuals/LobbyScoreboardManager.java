@@ -144,15 +144,15 @@ public class LobbyScoreboardManager implements Listener {
 
         if (game.countConnectedPlayers() >= game.getMinPlayers()
                 && game.getStatus() == GameStatus.WAITING) {
-            final var time = ((org.screamingsandals.bedwars.game.Game) Main.getInstance().getGameByName(game.getName()))
-                    .getFormattedTimeLeft();
+            final var gameImpl = ((org.screamingsandals.bedwars.game.Game) game);
+            final var time =  gameImpl.getFormattedTimeLeft();
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
-                var seconds = Integer.parseInt(units[1]) + 1;
+                int seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0])*60;
                 state = LanguageService
                         .getInstance()
                         .get(MessageKeys.LOBBY_SCOREBOARD_STATE)
-                        .replace("%countdown%", String.valueOf(seconds))
+                        .replace("%countdown%", seconds <=60 ? String.valueOf(seconds): gameImpl.getFormattedTimeLeft())
                         .toString();
             }
         }
