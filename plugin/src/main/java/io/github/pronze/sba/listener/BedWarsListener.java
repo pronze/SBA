@@ -265,10 +265,9 @@ public class BedWarsListener implements Listener {
                         if (game.getStatus() == GameStatus.WAITING) {
                             if (game.getConnectedPlayers().size() >= game.getMinPlayers()) {
                                 String time = game.getFormattedTimeLeft();
-
                                 if (!time.contains("0-1")) {
                                     String[] units = time.split(":");
-                                    int seconds = Integer.parseInt(units[1]) + 1;
+                                    int seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0])*60;
                                     if (buffer == seconds)
                                         return;
                                     buffer = seconds;
@@ -276,7 +275,7 @@ public class BedWarsListener implements Listener {
                                         var message = LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.GAME_STARTS_IN_MESSAGE)
-                                                .replace("%seconds%", String.valueOf(seconds))
+                                                .replace("%seconds%", seconds<=60? String.valueOf(seconds):game.getFormattedTimeLeft() )
                                                 .toString();
 
                                         message = seconds == 1 ? message
