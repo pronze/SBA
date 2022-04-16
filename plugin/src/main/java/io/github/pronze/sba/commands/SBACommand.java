@@ -363,6 +363,26 @@ public class SBACommand {
         PlayerMapper.wrapSender(sender).sendMessage(upgraded);
     }
 
+    @CommandMethod("sba updateplugin")
+    @CommandPermission("sba.updateplugin")
+    @CommandDescription("upgrade plugin version")
+    private void commandUpdatePlugin(
+            final @NotNull CommandSender sender) {
+
+        if (!SBA.getInstance().isPendingUpdate()) {
+            final var cannotExecute = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.COMMAND_CANNOT_EXECUTE)
+                    .toString();
+
+            PlayerMapper.wrapSender(sender).sendMessage(cannotExecute);
+            return;
+        }
+
+        SBA.getInstance().update(sender);
+
+    }
+
     @CommandMethod("sba cancel")
     @CommandDescription("cancel configuration upgrades")
     @CommandPermission("sba.cancel")

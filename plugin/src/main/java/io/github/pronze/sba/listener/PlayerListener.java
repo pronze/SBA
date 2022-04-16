@@ -3,6 +3,7 @@ package io.github.pronze.sba.listener;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.UpdateChecker;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
@@ -393,7 +394,7 @@ public class PlayerListener implements Listener {
         SBA.getInstance().getPlayerWrapperService().register(player);
 
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
-            if (SBA.getInstance().isPendingUpgrade()) {
+            if (SBA.getInstance().isPendingUpgrade() ) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
                     player.sendMessage(
                             "§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
@@ -402,6 +403,15 @@ public class PlayerListener implements Listener {
                 }, 40L);
             }
         }
+        if (player.hasPermission(Permissions.UPDATE.getKey())) {
+            {
+                if (SBA.getInstance().isPendingUpdate() && SBAConfig.getInstance().shouldWarnPlayerAboutUpdate()) {
+                    
+                    Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
+                        UpdateChecker.getInstance().sendToUser(player);
+                    }, 40L);
+                }
+            }
+        }
     }
-
 }

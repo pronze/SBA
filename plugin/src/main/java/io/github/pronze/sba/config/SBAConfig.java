@@ -322,7 +322,11 @@ public class SBAConfig implements IConfigurator {
                     .section("sounds")
                     .key("on_trap_triggered").defValue("ENTITY_ENDER_DRAGON_GROWL")
                     .back()
-                    .key("replace-stores-with-npc").defValue(true);
+                    .key("replace-stores-with-npc").defValue(true)
+                    .section("update-checker")
+                    .key("console").defValue(true)
+                    .key("admins").defValue(true)
+                    .back();
 
             generator.saveIfModified();
             if (!node("debug", "enabled").getBoolean()) {
@@ -334,6 +338,19 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
+    public boolean shouldCheckUpdate()
+    {
+        return shouldWarnConsoleAboutUpdate() || shouldWarnPlayerAboutUpdate();
+    }
+
+    public boolean shouldWarnConsoleAboutUpdate()
+    {
+        return getBoolean("update-checker.console", true);
+    }
+    public boolean shouldWarnPlayerAboutUpdate()
+    {
+        return getBoolean("update-checker.admins", true);
+    }
     private void moveFileIfNeeded(String path) {
         var path1 = Bukkit.getPluginManager().getPlugin("SBA").getDataFolder().toPath().resolve("shops/" + path);
         var path2 = SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(path);
@@ -510,4 +527,6 @@ public class SBAConfig implements IConfigurator {
 
         return ItemFactory.build(def).orElse(ItemFactory.getAir());
     }
+
+   
 }

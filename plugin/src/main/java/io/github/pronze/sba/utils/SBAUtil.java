@@ -86,7 +86,6 @@ public class SBAUtil {
     public static void disablePlugin(@NotNull JavaPlugin plugin) {
         // thank you Misat for this :)
 
-        
         try {
             String message = String.format("Disabling %s", plugin.getDescription().getFullName());
             plugin.getLogger().info(message);
@@ -104,26 +103,24 @@ public class SBAUtil {
                     + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
         }
 
-        try {
+        /*try {
             // Bukkit.getServicesManager().unregisterAll(plugin);
         } catch (Throwable ex) {
             Bukkit.getLogger().log(Level.SEVERE,
                     "Error occurred (in the plugin loader) while unregistering services for "
                             + plugin.getDescription().getFullName() + " (Is it up to date?)",
                     ex);
-        }
+        }*/
 
         try {
             var handlers = HandlerList.getRegisteredListeners(plugin);
             Logger.trace("-----------------------{}-----------------", handlers.size());
             for (var handler : handlers) {
-                //if (handler.getListener().toString().contains("io.github.pronze.sba") ||
-                //        handler.getListener().toString().contains("io.github.pronze.lib.screaming") ||
-                //        handler.getListener().toString().contains("io.github.pronze.lib.simpleinventories") ||
-                //        handler.getListener().toString().contains("org.screamingsandals.bedwars.lib.sgui") ||
-                //        handler.getListener().toString().contains("io.github.pronze.lib.bedwars")) {
+                String id = handler.getListener().toString();
+                if (!id.contains("BukkitAudiencesImpl") && !id.contains("CloudBukkitListener")
+                        && !id.contains("CommodoreImpl$ServerReloadListener")) {
                     HandlerList.unregisterAll(handler.getListener());
-                //}
+                }
                 Logger.trace("handler {}", handler.getListener().toString());
             }
             Logger.trace("-----------------------{}-----------------", handlers.size());

@@ -112,13 +112,14 @@ subprojects {
     }
 
     shadowJar {
-        relocate 'org.spongepowered.configurate', 'io.github.pronze.lib.configurate'
-        relocate 'org.yaml.snakeyaml', 'io.github.pronze.lib.snakeyaml'
-        relocate 'net.kyori', 'io.github.pronze.lib.kyori'
-        relocate 'cloud.commandframework', 'io.github.pronze.lib.cloud'
-        relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
-        relocate 'org.screamingsandals.lib', 'io.github.pronze.lib.screaminglib'
-        relocate 'org.screamingsandals.simpleinventories', 'io.github.pronze.lib.simpleinventories'
+        minimize()
+        relocate 'org.spongepowered.configurate', 'sba.configurate'
+        relocate 'org.yaml.snakeyaml', 'sba.snakeyaml'
+        relocate 'net.kyori', 'sba.kyori'
+        relocate 'cloud.commandframework', 'sba.cloud'
+        relocate 'me.lucko.commodore', 'sba.commodore'
+        relocate 'org.screamingsandals.lib', 'sba.screaminglib'
+        relocate 'org.screamingsandals.simpleinventories', 'sba.simpleinventories'
     }
 
     tasks.withType(JavaCompile) {

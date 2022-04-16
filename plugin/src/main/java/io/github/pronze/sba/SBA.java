@@ -32,6 +32,7 @@ import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -308,5 +309,13 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     public static org.bukkit.plugin.Plugin getBedwarsPlugin() {
         return Bukkit.getPluginManager().getPlugin("BedWars");
+    }
+
+    public boolean isPendingUpdate() {
+        return UpdateChecker.getInstance().isPendingUpdate();
+    }
+
+    public void update(@NotNull CommandSender sender) {
+        UpdateChecker.getInstance().update(sender);
     }
 }
