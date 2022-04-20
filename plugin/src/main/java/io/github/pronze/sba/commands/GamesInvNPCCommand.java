@@ -41,7 +41,7 @@ public class GamesInvNPCCommand {
         }*/
 
         GamesInventoryService.getInstance().addNPC(mode, player.getLocation());
-        GamesInventoryService.getInstance().addViewer(PlayerMapper.wrapPlayer(player));
+        GamesInventoryService.getInstance().addViewer(player);
         LanguageService
                 .getInstance()
                 .get(MessageKeys.ADDED_NPC)

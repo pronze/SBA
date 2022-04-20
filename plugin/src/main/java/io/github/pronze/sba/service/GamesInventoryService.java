@@ -120,9 +120,7 @@ public class GamesInventoryService implements Listener {
             update();
         }
         Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
-            if (MainLobbyVisualsManager.isInWorld(player.getLocation())) {
-                addViewer(PlayerMapper.wrapPlayer(player));
-            }
+            addViewer(player);
         })).delay(1L, TaskerTime.SECONDS).start();
     }
 
@@ -231,17 +229,19 @@ public class GamesInventoryService implements Listener {
         }
     }
 
-    public void addViewer(@NotNull PlayerWrapper player) {
+    public void addViewer(@NotNull Player player) {
+        removeViewer(player);
         Logger.trace("addViewer", player.getName());
 
         NPCs.forEach(npc -> {
             Logger.trace("npc::addViewer", player.getName());
-            npc.npc.addViewer(player);
+            if (npc.location.getWorld().equals(player.getWorld()))
+                npc.npc.addViewer(PlayerMapper.wrapPlayer(player));
         });
     }
 
-    public void removeViewer(@NotNull PlayerWrapper player) {
-        NPCs.forEach(npc -> npc.npc.removeViewer(player));
+    public void removeViewer(@NotNull Player player) {
+        NPCs.forEach(npc -> npc.npc.removeViewer(PlayerMapper.wrapPlayer(player)));
     }
 
     @OnPreDisable
@@ -259,7 +259,7 @@ public class GamesInventoryService implements Listener {
         final var player = e.getPlayer();
         Tasker.build(() -> {
             if (player.isOnline()) {
-                addViewer(PlayerMapper.wrapPlayer(player));
+                addViewer(player);
             }
         }).delay(1L, TaskerTime.TICKS).start();
     }
@@ -269,7 +269,7 @@ public class GamesInventoryService implements Listener {
         final var player = e.getPlayer();
         Tasker.build(() -> {
             if (player.isOnline()) {
-                addViewer(PlayerMapper.wrapPlayer(player));
+                addViewer(player);
             }
         }).delay(1L, TaskerTime.TICKS).start();
     }
