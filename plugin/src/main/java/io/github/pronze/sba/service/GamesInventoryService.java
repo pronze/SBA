@@ -14,7 +14,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.event.OnEvent;
@@ -229,7 +232,12 @@ public class GamesInventoryService implements Listener {
     }
 
     public void addViewer(@NotNull PlayerWrapper player) {
-        NPCs.forEach(npc -> npc.npc.addViewer(player));
+        Logger.trace("addViewer", player.getName());
+
+        NPCs.forEach(npc -> {
+            Logger.trace("npc::addViewer", player.getName());
+            npc.npc.addViewer(player);
+        });
     }
 
     public void removeViewer(@NotNull PlayerWrapper player) {
@@ -246,15 +254,24 @@ public class GamesInventoryService implements Listener {
         update();
     }
 
-    @OnEvent
-    public void onPlayerJoin(SPlayerJoinEvent e) {
-        final var player = e.player();
-
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
+        final var player = e.getPlayer();
         Tasker.build(() -> {
-            if (MainLobbyVisualsManager.isInWorld(player.getLocation().as(Location.class)) && player.isOnline()) {
-                addViewer(player);
+            if (player.isOnline()) {
+                addViewer(PlayerMapper.wrapPlayer(player));
             }
-        }).delay(1L, TaskerTime.SECONDS).start();
+        }).delay(1L, TaskerTime.TICKS).start();
+    }
+
+    @EventHandler
+    public void onPlayerChangeWorld(PlayerChangedWorldEvent e) {
+        final var player = e.getPlayer();
+        Tasker.build(() -> {
+            if (player.isOnline()) {
+                addViewer(PlayerMapper.wrapPlayer(player));
+            }
+        }).delay(1L, TaskerTime.TICKS).start();
     }
 
     @OnPreDisable

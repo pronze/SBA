@@ -48,7 +48,7 @@ public class UpdateChecker {
     @OnPostEnable
     public void checkForUpdates() {
         if (SBA.getInstance().isSnapshot()) {
-            // return;
+             return;
         }
         if (SBAConfig.getInstance().shouldCheckUpdate())
             new Thread(() -> {

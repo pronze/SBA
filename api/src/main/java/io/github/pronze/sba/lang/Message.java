@@ -1,4 +1,5 @@
 package io.github.pronze.sba.lang;
+
 import io.github.pronze.sba.AddonAPI;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,9 @@ import org.screamingsandals.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)
@@ -26,7 +30,26 @@ public class Message {
     public Message replace(String key, String value) {
         original = original
                 .stream()
-                .map(str-> str.replaceAll(key, value))
+                .map(str -> str.replaceAll(key, value))
+                .collect(Collectors.toList());
+        return this;
+    }
+
+    public Message replace(String key, Supplier<String> replacer) {
+        original = original
+                .stream()
+                .map(str -> {
+                    return replacer.get();
+                })
+                .collect(Collectors.toList());
+        return this;
+    }
+
+    public Message replace(Function<String, String> replacer) {
+        var pattern = Pattern.compile("%([a-zA-Z_.,0-9]+)%");
+        original = original
+                .stream()
+                .map(str -> pattern.matcher(str).replaceAll(mr->replacer.apply(mr.group(1))))
                 .collect(Collectors.toList());
         return this;
     }
