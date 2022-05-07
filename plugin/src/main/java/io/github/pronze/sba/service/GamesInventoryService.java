@@ -108,14 +108,18 @@ public class GamesInventoryService implements Listener {
             });
 
             NPCs.forEach(npc -> {
-                Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
-                NPC n = createNpc(GameMode.fromInt(npc.mode), npc.location);
-                if (npc.skin != null) {
-                    n.skin(new NPCSkin(
-                            npc.skin,
-                            npc.skin_signature));
+                try {
+                    Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
+                    NPC n = createNpc(GameMode.fromInt(npc.mode), npc.location);
+                    if (npc.skin != null) {
+                        n.skin(new NPCSkin(
+                                npc.skin,
+                                npc.skin_signature));
+                    }
+                    npc.npc = n;
+                } catch (Throwable t) {
+                    Logger.error("{}", t);
                 }
-                npc.npc = n;
             });
             update();
         }
@@ -236,12 +240,16 @@ public class GamesInventoryService implements Listener {
         NPCs.forEach(npc -> {
             Logger.trace("npc::addViewer", player.getName());
             if (npc.location.getWorld().equals(player.getWorld()))
-                npc.npc.addViewer(PlayerMapper.wrapPlayer(player));
+                if (npc.npc != null)
+                    npc.npc.addViewer(PlayerMapper.wrapPlayer(player));
         });
     }
 
     public void removeViewer(@NotNull Player player) {
-        NPCs.forEach(npc -> npc.npc.removeViewer(PlayerMapper.wrapPlayer(player)));
+        NPCs.forEach(npc -> {
+            if (npc.npc != null)
+                npc.npc.removeViewer(PlayerMapper.wrapPlayer(player));
+        });
     }
 
     @OnPreDisable

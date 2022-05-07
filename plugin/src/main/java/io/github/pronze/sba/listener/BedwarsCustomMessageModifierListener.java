@@ -4,6 +4,8 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
+
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -77,7 +79,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
         final var messages = LanguageService
                 .getInstance()
                 .get(MessageKeys.DEATH_MESSAGES_PVP_REGULAR)
-                .replace("%player%", victimTeamColorStr + event.getVictim().getName());
+                .replace("%player%", victimTeamColorStr + event.getVictim().getDisplayName()+ChatColor.RESET);
 
 
         final var killer = victim.getKiller();
@@ -85,7 +87,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
             final var killerTeam = event.getGame().getTeamOfPlayer(killer);
             final var killerTeamColorStr = TeamColor.fromApiColor(killerTeam.getColor()).chatColor.toString();
 
-            messages.replace("%killer%", killerTeamColorStr + killer.getName());
+            messages.replace("%killer%", killerTeamColorStr + killer.getDisplayName()+ChatColor.RESET);
             final var list = messages.toStringList();
             event.setMessage(list.get(RANDOM.nextInt(list.size())));
 
@@ -96,8 +98,8 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     message = LanguageService
                             .getInstance()
                             .get(MessageKeys.DEATH_MESSAGES_VOID_KILL)
-                            .replace("%player%", victimTeamColorStr + victim.getName())
-                            .replace("%killer%", killerTeamColorStr + killer.getName());
+                            .replace("%player%", victimTeamColorStr + victim.getDisplayName()+ChatColor.RESET)
+                            .replace("%killer%", killerTeamColorStr + killer.getDisplayName()+ChatColor.RESET);
                     event.setMessage(message.toString());
                 }
             }
@@ -106,7 +108,9 @@ public class BedwarsCustomMessageModifierListener implements Listener {
             message = LanguageService
                     .getInstance()
                     .get(MessageKeys.DEATH_MESSAGES_GENERIC)
-                    .replace("%player%", victimTeamColorStr + victim.getName());
+                    .replace("%player%", victimTeamColorStr + victim.getDisplayName()+ChatColor.RESET);
+
+                    
             event.setMessage(message.toString());
 
             final var lastDamageCause = victim.getLastDamageCause();
@@ -115,7 +119,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     message = LanguageService
                             .getInstance()
                             .get(MessageKeys.DEATH_MESSAGES_VOID_DEATH)
-                            .replace("%player%", victimTeamColorStr + victim.getName());
+                            .replace("%player%", victimTeamColorStr + victim.getDisplayName()+ChatColor.RESET);
                     event.setMessage(message.toString());
                 }
             }

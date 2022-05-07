@@ -33,7 +33,6 @@ dependencies {
         exclude group: 'net.kyori'
     }
 }
-
 test {
     useJUnitPlatform()
 }
