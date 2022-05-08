@@ -108,21 +108,23 @@ public class GamesInventoryService implements Listener {
             });
 
             NPCs.forEach(npc -> {
-                Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
-                NPC n = createNpc(GameMode.fromInt(npc.mode), npc.location);
-                if (npc.skin != null) {
-                    n.skin(new NPCSkin(
-                            npc.skin,
-                            npc.skin_signature));
+                try {
+                    Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
+                    NPC n = createNpc(GameMode.fromInt(npc.mode), npc.location);
+                    if (npc.skin != null) {
+                        n.skin(new NPCSkin(
+                                npc.skin,
+                                npc.skin_signature));
+                    }
+                    npc.npc = n;
+                } catch (Throwable t) {
+                    Logger.error("{}", t);
                 }
-                npc.npc = n;
             });
             update();
         }
         Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
-            if (MainLobbyVisualsManager.isInWorld(player.getLocation())) {
-                addViewer(PlayerMapper.wrapPlayer(player));
-            }
+            addViewer(player);
         })).delay(1L, TaskerTime.SECONDS).start();
     }
 
@@ -231,17 +233,22 @@ public class GamesInventoryService implements Listener {
         }
     }
 
-    public void addViewer(@NotNull PlayerWrapper player) {
+    public void addViewer(@NotNull Player player) {
         Logger.trace("addViewer", player.getName());
 
         NPCs.forEach(npc -> {
             Logger.trace("npc::addViewer", player.getName());
-            npc.npc.addViewer(player);
+            if (npc.location.getWorld().equals(player.getWorld()))
+                if (npc.npc != null)
+                    npc.npc.addViewer(PlayerMapper.wrapPlayer(player));
         });
     }
 
-    public void removeViewer(@NotNull PlayerWrapper player) {
-        NPCs.forEach(npc -> npc.npc.removeViewer(player));
+    public void removeViewer(@NotNull Player player) {
+        NPCs.forEach(npc -> {
+            if (npc.npc != null)
+                npc.npc.removeViewer(PlayerMapper.wrapPlayer(player));
+        });
     }
 
     @OnPreDisable
@@ -259,7 +266,7 @@ public class GamesInventoryService implements Listener {
         final var player = e.getPlayer();
         Tasker.build(() -> {
             if (player.isOnline()) {
-                addViewer(PlayerMapper.wrapPlayer(player));
+                addViewer(player);
             }
         }).delay(1L, TaskerTime.TICKS).start();
     }
@@ -269,7 +276,7 @@ public class GamesInventoryService implements Listener {
         final var player = e.getPlayer();
         Tasker.build(() -> {
             if (player.isOnline()) {
-                addViewer(PlayerMapper.wrapPlayer(player));
+                addViewer(player);
             }
         }).delay(1L, TaskerTime.TICKS).start();
     }

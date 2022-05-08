@@ -4,6 +4,7 @@ import io.github.pronze.sba.wrapper.PlayerSetting;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -30,7 +31,8 @@ public class GameChatListener implements Listener {
         final var player = event.getPlayer();
         final var playerWrapper = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
 
-        if (playerWrapper.getSettings().isToggled(PlayerSetting.IN_PARTY) && playerWrapper.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED)) {
+        if (playerWrapper.getSettings().isToggled(PlayerSetting.IN_PARTY)
+                && playerWrapper.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED)) {
             // PartyChatListener will take care of this.
             return;
         }
@@ -49,15 +51,19 @@ public class GameChatListener implements Listener {
                             .getInstance()
                             .node("chat-format", "game-chat", "all-chat-prefix").getString();
 
+                    boolean all = false;
+                    boolean spectator = false;
                     if (bedwarsPlayer.isSpectator) {
                         format = SBAConfig
                                 .getInstance()
                                 .node("chat-format", "game-chat", "format-spectator").getString();
+                        spectator = true;
                     } else {
                         if (event.getMessage().startsWith(allChatPrefix)) {
                             format = SBAConfig
                                     .getInstance()
                                     .node("chat-format", "game-chat", "all-chat-format").getString();
+                            all = true;
                         } else {
                             format = SBAConfig
                                     .getInstance()
@@ -79,14 +85,34 @@ public class GameChatListener implements Listener {
                     }
 
                     format = format
-                            .replace("%player%", player.getName())
+                            .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                             .replace("%message%", message);
                     if (Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                         format = PlaceholderAPI.setPlaceholders(player, format);
                     }
 
-                    String finalFormat = format;
-                    game.getConnectedPlayers().forEach(gamePlayer -> gamePlayer.sendMessage(finalFormat));
+                    final String finalFormat = format;
+
+                    if (all)
+                    {
+                        game.getConnectedPlayers().forEach(gamePlayer -> gamePlayer.sendMessage(finalFormat));
+                    }
+                    else if (spectator)
+                    {
+                        game.getConnectedPlayers().forEach(gamePlayer -> {
+                            if(Main.getPlayerGameProfile(gamePlayer).isSpectator)
+                                gamePlayer.sendMessage(finalFormat);
+                        });
+                    }
+                    else // Team
+                    {
+                        var teamName = game.getTeamOfPlayer(player).getName();
+                        game.getConnectedPlayers().forEach(gamePlayer -> {
+                            if(teamName.equals(game.getTeamOfPlayer(gamePlayer).getName())||
+                                Main.getPlayerGameProfile(gamePlayer).isSpectator)
+                                gamePlayer.sendMessage(finalFormat);
+                        });
+                    }
                 }
             } else if (game.getStatus() == GameStatus.WAITING) {
                 if (SBAConfig.getInstance().node("chat-format", "lobby-chat", "enabled").getBoolean()) {
@@ -102,7 +128,7 @@ public class GameChatListener implements Listener {
                     lobbyChatFormat = lobbyChatFormat
                             .replace("%color%", teamColor == null ? "" : teamColor)
                             .replace("%message%", event.getMessage())
-                            .replace("%player%", player.getName());
+                            .replace("%player%", player.getDisplayName() + ChatColor.RESET);
 
                     if (Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                         lobbyChatFormat = PlaceholderAPI

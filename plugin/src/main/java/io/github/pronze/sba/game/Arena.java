@@ -14,6 +14,8 @@ import io.github.pronze.sba.visuals.GameScoreboardManager;
 import net.kyori.adventure.text.Component;
 
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.EntityType;
@@ -46,6 +48,7 @@ public class Arena implements IArena {
     private final List<IRotatingGenerator> rotatingGenerators;
     private final Map<UUID, InvisiblePlayer> invisiblePlayers;
     private final Map<UUID, GamePlayerData> playerDataMap;
+    private final Map<UUID, String> displayNames;
     private final List<BaseGameTask> gameTasks;
     // private final List<NPC> storeNPCS;
     // private final List<NPC> upgradeStoreNPCS;
@@ -59,6 +62,7 @@ public class Arena implements IArena {
         this.rotatingGenerators = new ArrayList<>();
         this.invisiblePlayers = new HashMap<>();
         this.playerDataMap = new HashMap<>();
+        this.displayNames = new HashMap<>();
         this.gameTasks = new ArrayList<>();
         // this.storeNPCS = new ArrayList<>();
         // this.upgradeStoreNPCS = new ArrayList<>();
@@ -211,7 +215,7 @@ public class Arena implements IArena {
                     List<Component> name = new ArrayList<Component>();
                     NPCSkin skin = null;
                     try {
-                        if (file != null && StringUtils.containsIgnoreCase(file,"upgrade")) {
+                        if (file != null && StringUtils.containsIgnoreCase(file, "upgrade")) {
                             skin = NPCStoreService.getInstance().getUpgradeShopSkin();
                             name = NPCStoreService.getInstance().getUpgradeShopText();
                         } else {
@@ -240,6 +244,9 @@ public class Arena implements IArena {
                 Logger.warn("Disabling NPC due to an exception during creation of NPC: {}. ", t);
             }
         }
+        game.getConnectedPlayers().forEach(p -> {
+            this.displayNames.put(p.getUniqueId(), p.getDisplayName());
+        });
     }
 
     // non api event handler
@@ -316,6 +323,7 @@ public class Arena implements IArena {
 
             String firstKillerName = nullStr;
             int firstKillerScore = 0;
+            UUID firstKillerUUID=null;
 
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
@@ -323,11 +331,13 @@ public class Arena implements IArena {
                 if (kills > 0 && kills > firstKillerScore) {
                     firstKillerScore = kills;
                     firstKillerName = playerData.getName();
+                    firstKillerUUID = entry.getKey();
                 }
             }
 
             String secondKillerName = nullStr;
             int secondKillerScore = 0;
+            UUID secondKillerUUID=null;
 
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
@@ -337,11 +347,14 @@ public class Arena implements IArena {
                 if (kills > 0 && kills > secondKillerScore && !name.equalsIgnoreCase(firstKillerName)) {
                     secondKillerName = name;
                     secondKillerScore = kills;
+                    secondKillerUUID = entry.getKey();
                 }
             }
 
             String thirdKillerName = nullStr;
             int thirdKillerScore = 0;
+            UUID thirdKillerUUID=null;
+
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
                 final var kills = playerData.getKills();
@@ -350,16 +363,21 @@ public class Arena implements IArena {
                         !name.equalsIgnoreCase(secondKillerName)) {
                     thirdKillerName = name;
                     thirdKillerScore = kills;
+                    thirdKillerUUID = entry.getKey();
                 }
             }
-
+            firstKillerName = replaceNameWithDisplayName(nullStr, firstKillerName, firstKillerUUID);
+            secondKillerName = replaceNameWithDisplayName(nullStr, secondKillerName,secondKillerUUID);
+            thirdKillerName = replaceNameWithDisplayName(nullStr, thirdKillerName,thirdKillerUUID);
+            
             var victoryTitle = LanguageService
                     .getInstance()
                     .get(MessageKeys.VICTORY_TITLE)
                     .toString();
 
             final var WinTeamPlayers = new ArrayList<String>();
-            winner.getConnectedPlayers().forEach(player -> WinTeamPlayers.add(player.getDisplayName()));
+            winner.getConnectedPlayers()
+                    .forEach(player -> WinTeamPlayers.add(player.getDisplayName() + ChatColor.RESET));
             winner.getConnectedPlayers()
                     .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, "", 0, 90, 0));
 
@@ -380,6 +398,22 @@ public class Arena implements IArena {
                     .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer)
                             .toArray(PlayerWrapper[]::new));
         }
+    }
+
+    private String replaceNameWithDisplayName(final String nullStr, String firstKillerName, UUID playeruuid) {
+        if (!firstKillerName.equals(nullStr))
+        {
+            var firstPlayer = Bukkit.getPlayer(firstKillerName);
+            if(firstPlayer!=null)
+            {
+                firstKillerName = firstPlayer.getDisplayName() + ChatColor.RESET;
+            }
+            else
+            {
+                firstKillerName = this.displayNames.get(playeruuid);
+            }
+        }
+        return firstKillerName;
     }
 
     @Override
