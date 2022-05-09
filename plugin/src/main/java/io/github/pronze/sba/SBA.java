@@ -47,7 +47,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.bstats.bukkit.Metrics;
 import org.screamingsandals.bedwars.lib.sgui.listeners.InventoryListener;
 import org.screamingsandals.lib.event.EventManager;
-import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
+import org.screamingsandals.lib.healthindicator.HealthIndicatorManager2;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
@@ -79,7 +79,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         Logger.class,
         PacketMapper.class,
         HologramManager.class,
-        HealthIndicatorManager.class,
+        HealthIndicatorManager2.class,
         SimpleInventoriesCore.class,
         NPCManager.class,
         UpdateChecker.class,

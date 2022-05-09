@@ -13,8 +13,8 @@ import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.lib.healthindicator.HealthIndicator;
-import org.screamingsandals.lib.healthindicator.HealthIndicatorManager;
+import org.screamingsandals.lib.healthindicator.HealthIndicator2;
+import org.screamingsandals.lib.healthindicator.HealthIndicatorManager2;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -24,14 +24,17 @@ import org.screamingsandals.lib.visuals.Visual;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @Service(dependsOn = {
-        HealthIndicatorManager.class
+        HealthIndicatorManager2.class
 })
 public class HealthIndicatorService implements Listener {
-    private final Map<IArena, HealthIndicator> healthIndicatorMap = new HashMap<>();
+    private final Map<IArena, HealthIndicator2> healthIndicatorMap = new HashMap<>();
 
     private boolean tabEnabled;
+
+    
 
     @OnPostEnable
     public void postEnabled() {
@@ -61,7 +64,7 @@ public class HealthIndicatorService implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onGameStart(BedwarsGameStartedEvent event) {
         final Game game = event.getGame();
-        final var healthIndicator = HealthIndicator.of()
+        final var healthIndicator = HealthIndicator2.of()
                 .symbol(Component.text("\u2665", NamedTextColor.RED))
                 .showHealthInTabList(tabEnabled)
                 .show()
