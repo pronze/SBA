@@ -353,8 +353,8 @@ public class Arena implements IArena {
 
             String thirdKillerName = nullStr;
             int thirdKillerScore = 0;
-            UUID thirdKillerUUID=null;
-
+            UUID thirdKillerUUID = null;
+            
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
                 final var kills = playerData.getKills();

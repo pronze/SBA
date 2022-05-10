@@ -140,7 +140,8 @@ public class SBAConfig implements IConfigurator {
                     .back()
                     .key("enabled").defValue(true)
                     .key("height").defValue(2.5)
-                    .back();
+                    .back()
+                    ;
             generator.saveIfModified();
 
             if (!configurationNode.hasChild("upgrades"))
@@ -208,6 +209,7 @@ public class SBAConfig implements IConfigurator {
                     .section("game")
                     .key("tab-health").defValue(true)
                     .key("tag-health").defValue(true)
+                    .key("name-provider").defValue("%player%")
                     .back()
                     .section("games-inventory")
                     .key("enabled").defValue(true)
