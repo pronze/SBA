@@ -366,7 +366,11 @@ public class PlayerListener implements Listener {
                         .ifPresent(arena -> arena.addHiddenPlayer(player));
             }
 
-            event.setReplacement(new ItemStack(Material.AIR));
+            try{
+                event.setReplacement(new ItemStack(Material.AIR));
+            }
+            catch(Throwable t){
+            }
         }
     }
 
