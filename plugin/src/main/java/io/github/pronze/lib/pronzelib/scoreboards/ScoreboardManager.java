@@ -18,6 +18,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.UUID;
 import java.util.Map;
 import org.bukkit.event.Listener;
+
+import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.plugin.Session;
 import io.github.pronze.sba.utils.Logger;
 
 public class ScoreboardManager implements Listener
@@ -37,6 +39,7 @@ public class ScoreboardManager implements Listener
     public static ScoreboardManager init(final JavaPlugin plugin) {
         //Logger.trace("ScoreboardManager.init");
         Objects.requireNonNull(plugin, "Plugin instance cannot be null");
+        Session.makeSession(plugin);
         if (ScoreboardManager.instance != null) {
             ScoreboardManager.instance.onDisable();
         }

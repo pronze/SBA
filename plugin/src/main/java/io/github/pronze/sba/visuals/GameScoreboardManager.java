@@ -82,7 +82,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 })
                 .build();
 
-        final var holder = scoreboard.getHolder();
+        /*final var holder = scoreboard.getHolder();
         Tasker.build(() -> game.getRunningTeams().forEach(team -> {
             if (!holder.getTeam(team.getName()).isPresent()) {
                 holder.team(team.getName());//.color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name()));
@@ -96,7 +96,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             scoreboardTeam.player(wrapped);
                         }
                     });
-        })).afterOneTick().start();
+        })).afterOneTick().start();*/
 
 
         scoreboardMap.put(player.getUniqueId(), scoreboard);

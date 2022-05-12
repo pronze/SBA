@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.function.BiConsumer;
 import java.util.Objects;
 import io.github.pronze.lib.pronzelib.scoreboards.api.UpdateCallback;
+import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.ConfigBoard;
+import io.github.pronze.sba.utils.Logger;
 import net.kyori.adventure.text.Component;
 import io.github.pronze.lib.pronzelib.scoreboards.api.PlaceholderFunction;
 import java.util.List;
@@ -100,14 +102,14 @@ public class ScoreboardBuilder
     }
     
     public Scoreboard build() {
+        Logger.trace("ScoreboardBuilder::build");
         Objects.requireNonNull(this.holder, "Holder cannot be null");
         (this.scoreboard = new Scoreboard(this.holder)).setAnimationTaskInterval(this.animationInterval);
         this.scoreboard.setOccupyMaxHeight(this.occupyHeight);
         this.scoreboard.setOccupyMaxWidth(this.occupyWidth);
         this.scoreboard.setUpdateTaskInterval(this.interval);
-        final Sidebar scoreboardHolder = this.scoreboard.getHolder();
         if (this.title != null) {
-            scoreboardHolder.title(Component.text(this.title));
+            this.scoreboard.setAnimatedTitle(List.of(this.title));
         }
         if (this.lines != null) {
             this.scoreboard.setLines(this.lines);

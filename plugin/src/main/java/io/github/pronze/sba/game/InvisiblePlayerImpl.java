@@ -46,7 +46,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         final var invisTeamName = "i-" + team.getName();
 
         // hide nametag
-        arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
+        /*arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
             final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
             final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
             if (maybeHolder.isEmpty()) {
@@ -66,7 +66,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
             invisibleScoreboardTeam.player(PlayerMapper.wrapPlayer(hiddenPlayer));
             holder.getTeam(team.getName()).get().removePlayer(PlayerMapper.wrapPlayer(hiddenPlayer));
 
-        });
+        });*/
 
         Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
         if (isHidden) {
@@ -176,7 +176,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         final var invisTeamName = "i-" + team.getName();
 
         // show nametag
-        arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
+        /*arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
             final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
             final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
             if (maybeHolder.isEmpty()) {
@@ -196,7 +196,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
             invisibleScoreboardTeam.removePlayer(PlayerMapper.wrapPlayer(hiddenPlayer));
             holder.getTeam(team.getName()).get().player(PlayerMapper.wrapPlayer(hiddenPlayer));
-        });
+        });*/
         SBAUtil.cancelTask(armorHider);
         showArmor();
         isHidden = false;

@@ -187,7 +187,7 @@ public class LobbyScoreboardManager implements Listener {
             lines.add(line);
         });
 
-        final var holder = scoreboard.getHolder();
+        /*final var holder = scoreboard.getHolder();
         game.getRunningTeams().forEach(team -> {
             if (!holder.getTeam(team.getName()).isPresent()) {
                 holder.team(team.getName()).color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.toString()));
@@ -208,7 +208,7 @@ public class LobbyScoreboardManager implements Listener {
                     .map(PlayerMapper::wrapPlayer)
                     .filter(playerName -> !scoreboardTeam.players().contains(playerName))
                     .forEach(scoreboardTeam::player);
-        });
+        });*/
         return lines;
     }
 }
