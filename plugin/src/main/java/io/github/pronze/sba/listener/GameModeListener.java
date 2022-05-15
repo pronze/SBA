@@ -156,7 +156,6 @@ public class GameModeListener implements Listener {
             // this.gameCreator = gameCreator;
 
             game = gameCreator.getGame();
-            Logger.trace("Starting editing holograms for game {}", game.getName());
             villagerStores = (Map<String, GameStore>) Reflect.getField(gameCreator, "villagerstores");
         }
 
@@ -166,12 +165,12 @@ public class GameModeListener implements Listener {
 
             Tasker.build(() -> {
                 for (var npc : npcs.values()) {
-                    if (npc.location().getWorld().getName() == player.getWorld().getName()) {
+                    if (npc.location().getWorld().getName().equals(player.getWorld().getName())) {
                         npc.addViewer(PlayerMapper.wrapPlayer(player));
                     }
                 }
                 for (var holo : holograms.values()) {
-                    if (holo.location().getWorld().getName() == player.getWorld().getName()) {
+                    if (holo.location().getWorld().getName().equals(player.getWorld().getName())) {
                         holo.addViewer(PlayerMapper.wrapPlayer(player));
                     }
                 }

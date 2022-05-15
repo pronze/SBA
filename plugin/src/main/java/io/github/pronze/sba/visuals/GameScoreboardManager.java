@@ -59,8 +59,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     }
 
     public void createScoreboard(@NotNull Player player) {
-        Logger.trace("Creating board for player: {}", player.getName());
-
         final var scoreboardOptional = ScoreboardManager.getInstance()
                 .fromCache(player.getUniqueId());
         scoreboardOptional.ifPresent(Scoreboard::destroy);
@@ -82,23 +80,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 })
                 .build();
 
-        /*final var holder = scoreboard.getHolder();
-        Tasker.build(() -> game.getRunningTeams().forEach(team -> {
-            if (!holder.getTeam(team.getName()).isPresent()) {
-                holder.team(team.getName());//.color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.name()));
-            }
-
-            final var scoreboardTeam = holder.getTeam(team.getName()).orElse(holder.team(team.getName()));
-            team.getConnectedPlayers()
-                    .forEach(teamPlayer -> {
-                        var wrapped = PlayerMapper.wrapPlayer(teamPlayer);
-                        if (!scoreboardTeam.players().contains(wrapped)) {
-                            scoreboardTeam.player(wrapped);
-                        }
-                    });
-        })).afterOneTick().start();*/
-
-
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
@@ -107,7 +88,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
             final var scoreboard = scoreboardMap.get(player.getUniqueId());
             if (scoreboard != null) {
                 scoreboard.destroy();
-                Logger.trace("Destroyed board of player: {}", player.getName());
             }
             scoreboardMap.remove(player.getUniqueId());
         }
@@ -116,7 +96,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     public void destroy() {
         scoreboardMap.values().forEach(Scoreboard::destroy);
         scoreboardMap.clear();
-        Logger.trace("Destroyed scoreboard for all players of arena: {}", arena.getGame().getName());
         if (updateTask != null) {
             if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
                 updateTask.cancel();

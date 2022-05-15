@@ -12,6 +12,7 @@ import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -299,7 +300,7 @@ public class PlayerListener implements Listener {
                                     LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                            .replace("%player%", member.getName())
+                                            .replace("%player%", member.as(Player.class).getDisplayName() + ChatColor.RESET)
                                             .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                 }, () -> SBA.getInstance().getPartyManager()
@@ -308,7 +309,7 @@ public class PlayerListener implements Listener {
                     LanguageService
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
-                            .replace("%player%", player.getName())
+                            .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                             .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member))
                                     .toArray(SBAPlayerWrapper[]::new));
                 });

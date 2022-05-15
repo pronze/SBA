@@ -58,8 +58,6 @@ public class LobbyScoreboardManager implements Listener {
     }
 
     private void createBoard(Player player, Game game) {
-        Logger.trace("Creating board for player: {}", player.getName());
-
         final var scoreboardOptional = ScoreboardManager.getInstance()
                 .fromCache(player.getUniqueId());
         scoreboardOptional.ifPresent(Scoreboard::destroy);
@@ -113,7 +111,6 @@ public class LobbyScoreboardManager implements Listener {
 
         int needplayers = game.getMinPlayers() - game.getConnectedPlayers().size();
         needplayers = Math.max(needplayers, 0);
-        // int s = SBAConfig.game_size.getOrDefault(game.getName(), 4);
         String mode;
 
         int s = game.getAvailableTeams().get(0).getMaxPlayers();
@@ -186,29 +183,6 @@ public class LobbyScoreboardManager implements Listener {
                 line = PlaceholderAPI.setPlaceholders(player, line);
             lines.add(line);
         });
-
-        /*final var holder = scoreboard.getHolder();
-        game.getRunningTeams().forEach(team -> {
-            if (!holder.getTeam(team.getName()).isPresent()) {
-                holder.team(team.getName()).color(NamedTextColor.NAMES.value(TeamColor.fromApiColor(team.getColor()).chatColor.toString()));
-            }
-            final var scoreboardTeam = holder.getTeam(team.getName()).orElse(holder.team(team.getName()));
-
-            new HashSet<>(scoreboardTeam.players())
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .forEach(teamPlayer -> {
-                        if (!team.getConnectedPlayers().contains(teamPlayer.as(Player.class))) {
-                            scoreboardTeam.removePlayer(teamPlayer);
-                        }
-                    });
-
-            team.getConnectedPlayers()
-                    .stream()
-                    .map(PlayerMapper::wrapPlayer)
-                    .filter(playerName -> !scoreboardTeam.players().contains(playerName))
-                    .forEach(scoreboardTeam::player);
-        });*/
         return lines;
     }
 }

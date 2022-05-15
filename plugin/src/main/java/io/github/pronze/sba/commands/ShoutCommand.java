@@ -99,7 +99,7 @@ public class ShoutCommand {
                 .getInstance()
                 .get(MessageKeys.SHOUT_FORMAT)
                 .replace("%color%", color)
-                .replace("%player%", player.getName())
+                .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                 .replace("%message%", strBuilder.toString())
                 .replace("%team%", team == null ? "" : team.getName())
                 .toComponent();

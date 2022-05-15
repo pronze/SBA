@@ -4,6 +4,8 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.wrapper.PlayerSetting;
+
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -61,7 +63,7 @@ public class PartyLeaveCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_OFFLINE_QUIT)
-                                                        .replace("%player%", player.getName())
+                                                        .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
                                                         .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                         LanguageService
@@ -86,8 +88,8 @@ public class PartyLeaveCommand {
                                                                         LanguageService
                                                                                         .getInstance()
                                                                                         .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                                                                        .replace("%player%", member
-                                                                                                        .getName())
+                                                                                        .replace("%player%", member.as(Player.class)
+                                                                                                        .getDisplayName() + ChatColor.RESET)
                                                                                         .send(player);
                                                                 }, () -> SBA
                                                                                 .getInstance()
@@ -97,7 +99,7 @@ public class PartyLeaveCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
-                                                        .replace("%player%", player.getName())
+                                                        .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
                                                         .send(party.getMembers().stream()
                                                                         .filter(member -> !player.equals(member))
                                                                         .toArray(SBAPlayerWrapper[]::new));

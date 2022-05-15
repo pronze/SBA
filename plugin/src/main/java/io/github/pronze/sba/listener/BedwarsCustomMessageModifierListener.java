@@ -60,7 +60,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                 .getInstance()
                 .get(MessageKeys.BED_DESTROYED_MESSAGES)
                 .replace("%team%", teamColorStr + event.getDestroyedTeam().getName())
-                .replace("%destroyer%", destroyerTeamColorStr + event.getDestroyer().getName())
+                .replace("%destroyer%", destroyerTeamColorStr + event.getDestroyer().getDisplayName())
                 .toComponentList();
 
         final var randomlyChosen = messages.get(RANDOM.nextInt(messages.size()));

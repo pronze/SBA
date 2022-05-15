@@ -245,7 +245,7 @@ public class Arena implements IArena {
             }
         }
         game.getConnectedPlayers().forEach(p -> {
-            this.displayNames.put(p.getUniqueId(), p.getDisplayName());
+            this.displayNames.put(p.getUniqueId(), p.getDisplayName() + ChatColor.RESET);
         });
     }
 

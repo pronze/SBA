@@ -8,6 +8,8 @@ import io.github.pronze.sba.party.PartySetting;
 import io.github.pronze.sba.party.PartySetting.GameMode;
 import io.github.pronze.sba.party.PartySetting.Invite;
 import io.github.pronze.sba.wrapper.PlayerSetting;
+
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -81,14 +83,14 @@ public class PartySettingsCommand {
                                 LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.PARTY_WENT_CLOSED)
-                                                .replace("%host%",player.getName())
+                                                .replace("%host%",player.as(Player.class).getDisplayName() + ChatColor.RESET)
                                                 .send(player);
                                 party.getSettings().setInvite(Invite.ALL);
                         } else {
                                 LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.PARTY_WENT_OPEN)
-                                                .replace("%host%",player.getName())
+                                                .replace("%host%",player.as(Player.class).getDisplayName() + ChatColor.RESET)
                                                 .send(player);
                                 party.getSettings().setInvite(Invite.NONE);
                         }
@@ -126,14 +128,14 @@ public class PartySettingsCommand {
                                                 LanguageService
                                                                 .getInstance()
                                                                 .get(MessageKeys.PARTY_WENT_PRIVATE)
-                                                                .replace("%host%", player.getName())
+                                                                .replace("%host%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
                                                                 .send(player);
                                                 party.getSettings().setGamemode(GameMode.PRIVATE);
                                         } else {
                                                 LanguageService
                                                                 .getInstance()
                                                                 .get(MessageKeys.PARTY_WENT_PUBLIC)
-                                                                .replace("%host%", player.getName())
+                                                                .replace("%host%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
                                                                 .send(player);
                                                 party.getSettings().setGamemode(GameMode.PUBLIC);
                                         }

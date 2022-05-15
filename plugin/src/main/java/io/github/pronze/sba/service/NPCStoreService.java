@@ -108,8 +108,6 @@ public class NPCStoreService implements Listener {
                                                         store = (GameStore)i.getKey();
                                         }
 
-                                        Logger.trace("Opening shop: {},{}", event.player().getName(), store.getShopFile());
-
                                         BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
                                                         player, store, null);
 

@@ -5,6 +5,8 @@ import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
+
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -68,7 +70,7 @@ public class PartyDeclineCommand {
                     LanguageService
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_DECLINE_INCOMING)
-                            .replace("%player%", player.getName())
+                            .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
                             .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                     if (party.getMembers().size() == 1) {

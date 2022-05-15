@@ -12,6 +12,7 @@ import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -161,7 +162,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.UGPRADE_TEAM_SHARPNESS)
-                                                .replace("%player%", player.getName())
+                                                .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                                 .send(PlayerMapper.wrapPlayer(teamPlayer));
 
                                         Arrays.stream(teamPlayer.getInventory().getContents())
@@ -203,7 +204,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.UPGRADE_TEAM_EFFICIENCY)
-                                                .replace("%player%", player.getName())
+                                                .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                                 .send(PlayerMapper.wrapPlayer(teamPlayer));
 
                                         Arrays.stream(teamPlayer.getInventory().getContents())
@@ -268,7 +269,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                 var purchaseHealPoolMessage = LanguageService
                                         .getInstance()
                                         .get(MessageKeys.PURCHASED_HEAL_POOL_MESSAGE)
-                                        .replace("%player%", player.getName())
+                                        .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                         .toComponent();
 
                                 gameStorage.setPurchasedPool(team, true);
@@ -303,7 +304,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     var upgradeMessage = LanguageService
                                             .getInstance()
                                             .get(MessageKeys.UPGRADE_TEAM_PROTECTION)
-                                            .replace("%player%", player.getName())
+                                            .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                             .toComponent();
 
                                     final var finalTeamProtectionLevel = teamProtectionLevel;
@@ -377,7 +378,6 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
         if ((shopFile != null && StringUtils.containsIgnoreCase(shopFile,"upgrade"))) {
             if (SBAConfig.getInstance().node("shop", "upgrade-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
-                Logger.trace("Player: {} has opened upgrades store!", event.getPlayer().getName());
                 openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class),
                         (GameStore) event.getStore());
             }

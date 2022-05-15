@@ -5,6 +5,8 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.events.SBAPlayerPartyInviteAcceptEvent;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
+
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -59,7 +61,7 @@ public class PartyAcceptCommand {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_MESSAGE_ACCEPTED)
-                    .replace("%player%", player.getName())
+                    .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
                     .send(party.getMembers().toArray(SBAPlayerWrapper[]::new));
         }, () -> LanguageService
                 .getInstance()

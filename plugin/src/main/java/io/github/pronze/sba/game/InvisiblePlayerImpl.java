@@ -43,32 +43,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         if (team == null) {
             return;
         }
-        final var invisTeamName = "i-" + team.getName();
-
-        // hide nametag
-        /*arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
-            final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
-            final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
-            if (maybeHolder.isEmpty()) {
-                return;
-            }
-
-            final var holder = maybeHolder.get().getHolder();
-
-            if (!holder.getTeam(invisTeamName).isPresent()) {
-                holder.team(invisTeamName).nameTagVisibility(TagVisibility.NEVER);//.color(holder.getTeam(team.getName()).get().color());
-                //holder.team(invisTeamName).color(NamedTextColor.nearestTo(TextColor))
-
-                //holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-            }
-            final var invisibleScoreboardTeam = holder.getTeam(invisTeamName).get();
-
-            invisibleScoreboardTeam.player(PlayerMapper.wrapPlayer(hiddenPlayer));
-            holder.getTeam(team.getName()).get().removePlayer(PlayerMapper.wrapPlayer(hiddenPlayer));
-
-        });*/
-
-        Logger.trace("Hiding player: {} for invisibility", hiddenPlayer.getName());
+        
         if (isHidden) {
             return;
         }
@@ -121,8 +96,6 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 .stream()
                 .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
                 .forEach(pl -> {
-                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(),
-                            hiddenPlayer.getName());
                     getEquipPacket(airStack, airStack, airStack, airStack,
                             convert(hiddenPlayer.getInventory().getItemInMainHand()))
                                     .sendPacket(PlayerMapper.wrapPlayer(pl));
@@ -139,8 +112,6 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 .stream()
                 .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
                 .forEach(pl -> {
-                    Logger.trace("Sending hide packets to player: {} for hider: {}", pl.getName(),
-                            hiddenPlayer.getName());
                     getEquipPacket(airStack, airStack, airStack, airStack,
                             convert(hiddenPlayer.getInventory().getItemInMainHand()))
                                     .sendPacket(PlayerMapper.wrapPlayer(pl));
@@ -173,34 +144,10 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         if (team == null) {
             return;
         }
-        final var invisTeamName = "i-" + team.getName();
-
-        // show nametag
-        /*arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
-            final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
-            final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
-            if (maybeHolder.isEmpty()) {
-                return;
-            }
-
-            final var holder = maybeHolder.get().getHolder();
-
-            
-            if (!holder.getTeam(invisTeamName).isPresent()) {
-                holder.team(invisTeamName).nameTagVisibility(TagVisibility.NEVER);//.color(holder.getTeam(team.getName()).get().color());
-                //holder.team(invisTeamName).color(NamedTextColor.nearestTo(TextColor))
-
-                //holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
-            }
-            final var invisibleScoreboardTeam = holder.getTeam(invisTeamName).get();
-
-            invisibleScoreboardTeam.removePlayer(PlayerMapper.wrapPlayer(hiddenPlayer));
-            holder.getTeam(team.getName()).get().player(PlayerMapper.wrapPlayer(hiddenPlayer));
-        });*/
+       
         SBAUtil.cancelTask(armorHider);
         showArmor();
         isHidden = false;
-        Logger.trace("Un hiding player: {}", hiddenPlayer.getName());
         hiddenPlayer.removePotionEffect(PotionEffectType.INVISIBILITY);
     }
 

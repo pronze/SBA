@@ -360,17 +360,12 @@ public class BedWarsListener implements Listener {
         if (!Main.isPlayerInGame(player)) {
             return;
         }
-        Logger.trace("Bedwars player {} changed gamemode from {} to {} ", player.getName(), player.getGameMode(),
-                e.getNewGameMode());
         if (player.getGameMode() == GameMode.SURVIVAL) {
-            Logger.trace("Ignoring gamemode change as they were already playing", player);
             return;
         }
         if (e.getNewGameMode() != GameMode.SURVIVAL) {
-            Logger.trace("Ignoring gamemode change as they did not respawn", player);
             return;
         }
-        Logger.trace("Player {} started playing", player);
         Tasker.build(() -> {
             final var game = Main.getInstance().getGameOfPlayer(player);
             ShopUtil.applyTeamUpgrades(player, game);
@@ -424,7 +419,6 @@ public class BedWarsListener implements Listener {
                     final var killer = victim.getKiller();
                     // killer is present
                     if (killer != null) {
-                        Logger.trace("Killer: {} has killed Player: {}", killer.getName(), victim.getName());
                         // get victim game profile
                         final var gVictim = Main.getPlayerGameProfile(victim);
 

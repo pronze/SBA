@@ -6,6 +6,7 @@ import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -105,7 +106,7 @@ public class MainLobbyVisualsManager implements Listener {
             if (chatFormat != null) {
                 var format = chatFormat
                         .replace("%level%", String.valueOf(db.getLevel()))
-                        .replace("%name%", e.getPlayer().getName())
+                        .replace("%name%", e.getPlayer().getDisplayName() + ChatColor.RESET)
                         .replace("%message%", e.getMessage())
                         .replace("%color%", ShopUtil.ChatColorChanger(e.getPlayer()));
 
@@ -170,7 +171,6 @@ public class MainLobbyVisualsManager implements Listener {
         if (!enabled)
             return;
 
-        Logger.trace("Creating scoreboard for player: {} in the main lobby", player.getName());
         final var playerData = SBA
                 .getInstance()
                 .getPlayerWrapperService()
