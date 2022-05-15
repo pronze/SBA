@@ -18,8 +18,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
@@ -84,7 +87,7 @@ public class SBACommand {
         String a = Bukkit.getServer().getClass().getPackage().getName();
         String version = a.substring(a.lastIndexOf('.') + 1);
         sender.sendMessage("Server version : " + version);
-        sender.sendMessage("Commit id : "+io.github.pronze.sba.VersionInfo.COMMIT);
+        sender.sendMessage("Commit id : " + io.github.pronze.sba.VersionInfo.COMMIT);
         sender.sendMessage("Server : " + Bukkit.getServer().getVersion());
 
         for (var plugin : Bukkit.getServer().getPluginManager().getPlugins()) {
@@ -115,7 +118,8 @@ public class SBACommand {
         NPC npc = NPC.of(LocationMapper.wrapLocation(sender.getLocation()))
                 .addViewer(player)
                 .lookAtPlayer(true)
-                .displayName(List.of(Component.text("Test NPC, will despawn after 10 seconds").color(TextColor.color(139,69,19))))
+                .displayName(List.of(
+                        Component.text("Test NPC, will despawn after 10 seconds").color(TextColor.color(139, 69, 19))))
                 .show();
         Tasker.build(() -> {
             npc.destroy();
@@ -178,27 +182,27 @@ public class SBACommand {
             final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode,
             final @NotNull @Argument(value = "maps", suggestions = "maps") String[] mapsArg) {
 
-        if(gameMode==null)
-        {
-            allGameModes.forEach(g->commandGenerate(sender, g, null));
+        if (gameMode == null) {
+            allGameModes.forEach(g -> commandGenerate(sender, g, null));
             return;
         }
-        
+
         final var stringedGameMode = SBAUtil.capitalizeFirstLetter(gameMode);
-        List<String> mapsTmp=null;
-        if (mapsArg == null || mapsArg.length ==0) {
+        List<String> mapsTmp = null;
+        if (mapsArg == null || mapsArg.length == 0) {
             final var message = LanguageService
                     .getInstance()
                     .get(MessageKeys.GAMESINV_NO_MAPS)
                     .toComponent();
 
-            mapsTmp= Main.getGameNames().stream().filter(
-                gname-> Main.getGame(gname).getAvailableTeams().stream().allMatch(t->t.getMaxPlayers() == ShopUtil.getIntFromMode(gameMode))
-            ).collect(Collectors.toList());
-            
+            mapsTmp = Main.getGameNames().stream().filter(
+                    gname -> Main.getGame(gname).getAvailableTeams().stream()
+                            .allMatch(t -> t.getMaxPlayers() == ShopUtil.getIntFromMode(gameMode)))
+                    .collect(Collectors.toList());
+
             PlayerMapper.wrapSender(sender).sendMessage(message);
         }
-        final var maps =  mapsTmp!=null?mapsTmp:List.of(mapsArg);
+        final var maps = mapsTmp != null ? mapsTmp : List.of(mapsArg);
         Logger.trace("Generating Games Inventory file for game mode: {}", gameMode);
         final var file = new File(SBA.getPluginInstance().getDataFolder(), "games-inventory/" + gameMode + ".yml");
         if (file.exists()) {
@@ -209,17 +213,20 @@ public class SBACommand {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-       /* var node = SBAConfig.getInstance().node("lobby-scoreboard", "player-size", "games");
-        maps.forEach(arg -> {
-            try {
-                node.node(arg).set(Integer.class, ShopUtil.getIntFromMode(gameMode));
-                SBAConfig.getInstance().saveConfig();
-                SBAConfig.getInstance().forceReload();
-                SBAConfig.getInstance().postEnable();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        });*/
+        /*
+         * var node = SBAConfig.getInstance().node("lobby-scoreboard", "player-size",
+         * "games");
+         * maps.forEach(arg -> {
+         * try {
+         * node.node(arg).set(Integer.class, ShopUtil.getIntFromMode(gameMode));
+         * SBAConfig.getInstance().saveConfig();
+         * SBAConfig.getInstance().forceReload();
+         * SBAConfig.getInstance().postEnable();
+         * } catch (Exception ex) {
+         * ex.printStackTrace();
+         * }
+         * });
+         */
 
         final var loader = YamlConfigurationLoader.builder()
                 .path(file.getAbsoluteFile().toPath())
@@ -260,10 +267,9 @@ public class SBACommand {
                             final var row = new AtomicInteger(1);
                             maps
                                     .stream()
-                                    .map(mapName -> Pair.of(Main.getInstance().getGameByName(mapName),mapName))
+                                    .map(mapName -> Pair.of(Main.getInstance().getGameByName(mapName), mapName))
                                     .forEach(game -> {
-                                        if (game.getFirst() != null)
-                                    {
+                                        if (game.getFirst() != null) {
                                             col.set(col.get() + 1);
                                             if (col.get() >= 6) {
                                                 row.set(row.get() + 1);
@@ -279,15 +285,13 @@ public class SBACommand {
                                                     "column", String.valueOf(col.get()),
                                                     "properties", Map.of("name", "join",
                                                             "gameName", game.getFirst().getName())));
-                                        }
-                                        else
-                                        {
+                                        } else {
                                             final var message = LanguageService
                                                     .getInstance()
                                                     .get(MessageKeys.GAMESINV_NO_MAPS_WITH_NAME)
                                                     .replace("%name%", game.getSecond())
                                                     .toComponent();
-                                            PlayerMapper.wrapSender(sender).sendMessage(message);   
+                                            PlayerMapper.wrapSender(sender).sendMessage(message);
                                         }
                                     });
                         }
@@ -308,7 +312,6 @@ public class SBACommand {
                     .replace("%gamemode%", gameMode)
                     .toComponent();
             PlayerMapper.wrapSender(sender).sendMessage(generated);
-            
 
             GamesInventoryService.getInstance().destroy();
             GamesInventoryService.getInstance().loadGamesInv();
@@ -336,6 +339,32 @@ public class SBACommand {
         GamesInventory
                 .getInstance()
                 .openForPlayer(player, mode);
+    }
+
+    @CommandMethod("sba store open [shop]")
+    @CommandDescription("open Game store for player")
+    @CommandPermission("sba.openshop")
+    private void sbaGameStoreOpen(
+            final @NotNull Player player,
+            final @NotNull @Argument("shop") String gameMode) {
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        if(game!=null)
+        {
+            GameStore store = null;
+            for (var i : game.getGameStores()) {
+                if ((gameMode==null) || (i.getShopFile()!=null && i.getShopFile().equals(gameMode)))
+                    store = i;
+            }
+
+            BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                    player, store, null);
+
+            new BukkitRunnable() {
+                public void run() {
+                    Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
+                }
+            }.runTask(SBA.getPluginInstance());
+        }
     }
 
     @CommandMethod("sba upgrade")
