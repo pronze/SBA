@@ -63,7 +63,6 @@ public class Scoreboard {
     private final HashMap<String, Object> persistentPlaceholders;
 
     public Scoreboard(final Player player) {
-        // Logger.trace("Scoreboard init (player)");
         this.ANIMATION_TASK_INTERVAL = 2L;
         this.UPDATE_TASK_INTERVAL = 20L;
         this.occupyMaxHeight = false;
@@ -83,19 +82,15 @@ public class Scoreboard {
     }
 
     public static ScoreboardBuilder builder() {
-        // Logger.trace("Scoreboard builder");
         return new ScoreboardBuilder();
     }
 
     public void setLines(List<String> lines) {
-        //Logger.trace("Scoreboard setLines[1] {}",lines);
         if (lines == null || lines.isEmpty()) {
             return;
         }
 
         lines = this.resizeContent(lines);
-        Logger.trace("Scoreboard setLines[2] {}",lines);
-        //Collections.reverse(lines);
         int i = 0;
 
         this.lines = lines;
@@ -104,8 +99,6 @@ public class Scoreboard {
     }
 
     public void setVisibility(final boolean visible) {
-
-        // Logger.trace("Scoreboard setVisibility"+visible);
         if (visible)
         {
             BoardPlayer.getBoardPlayer(player.as(Player.class)).attachConfigBoard(this.holder);
@@ -118,16 +111,9 @@ public class Scoreboard {
     }
 
     public void refresh() {
-        // Logger.trace("Scoreboard refresh");
         if (lines != null) {
-            /*var list2 = new ArrayList<Component>(
-                lines.stream().map(l -> (Component) Component.text(this.setPlaceholders(l))).collect(Collectors.toList()));
-            if (list2 != null)
-                Collections.reverse(list2);
-           */
             holder.setLines(lines.stream().map(l -> this.setPlaceholders(l)).collect(Collectors.toList()));
         }
-        //holder.update();
     }
 
     private @NotNull String setPlaceholders(String content) {
@@ -145,14 +131,12 @@ public class Scoreboard {
     }
 
     public void setTitle(final String title, final boolean animate) {
-        // Logger.trace("Scoreboard setTitle"+title+animate);
         Objects.requireNonNull(title, "Title cannot be null");
 
         this.holder.setTitle(List.of(title), ANIMATION_TASK_INTERVAL);
     }
 
     public void setAnimatedTitle(final List<String> animatedTitle) {
-        Logger.trace("Scoreboard::setAnimatedTitle({})", animatedTitle);
         if (animatedTitle == null || animatedTitle.isEmpty()) {
             throw new IllegalArgumentException("Animated title cannot be null or empty");
         }
@@ -201,55 +185,38 @@ public class Scoreboard {
                 newList.add(this.makeUnique(" ", newList));
             }
         }
-        // Logger.trace("Scoreboard.resizeContent {}", newList);
         return newList;
     }
 
     public void destroy() {
-        // Logger.trace("Scoreboard.destroy");
-
         holder.cancel();
 
-        Logger.trace("Destroy sidebar for {}", this.player.getName());
-        
         this.cancelTasks();
         ScoreboardManager.getInstance().removeFromCache(this.player.getUniqueId());
     }
 
     public void setPlaceholderHook(final PlaceholderFunction papiFunction) {
-        // Logger.trace("Scoreboard.setPlaceholderHook {}",papiFunction);
-
         this.papiFunction = (papiFunction);
     }
 
     public void addInternalPlaceholder(final String placeholder, final Object value) {
-        // Logger.trace("Scoreboard.addInternalPlaceholder {} {}",placeholder,value);
-
         this.persistentPlaceholders.put(placeholder, value.toString());
     }
 
     public void setUpdateTaskInterval(final long interval) {
-        // Logger.trace("Scoreboard.setUpdateTaskInterval {}",interval);
-
         this.UPDATE_TASK_INTERVAL = interval;
         this.startUpdateTask();
     }
 
     public void setAnimationTaskInterval(final long interval) {
-        // Logger.trace("Scoreboard.setAnimationTaskInterval {}",interval);
-
         this.ANIMATION_TASK_INTERVAL = interval;
     }
 
     public void setCallback(final UpdateCallback callback) {
-        // Logger.trace("Scoreboard.setCallback {}",callback);
-        Logger.trace("Scoreboard::setCallack");
         this.callback = callback;
     }
 
     protected void startUpdateTask() {
-        // Logger.trace("Scoreboard.startUpdateTask");
-
         this.cancelUpdateTask();
         this.updateTaskRunning = true;
         this.updateTask = new BukkitRunnable() {
@@ -274,20 +241,14 @@ public class Scoreboard {
     }
 
     public ConfigBoard getHolder() {
-        // Logger.trace("Scoreboard.getHolder");
-
         return this.holder;
     }
 
     public void setOccupyMaxHeight(final boolean occupyMaxHeight) {
-        // Logger.trace("Scoreboard.setOccupyMaxHeight {}",occupyMaxHeight);
-
         this.occupyMaxHeight = occupyMaxHeight;
     }
 
     public void setOccupyMaxWidth(final boolean occupyMaxWidth) {
-        // Logger.trace("Scoreboard.setOccupyMaxWidth {}",occupyMaxWidth);
-
         this.occupyMaxWidth = occupyMaxWidth;
     }
 

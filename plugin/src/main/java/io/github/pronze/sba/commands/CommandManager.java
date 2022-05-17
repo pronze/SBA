@@ -33,7 +33,8 @@ import java.util.function.Function;
         SBACommand.class,
         GamesInvNPCCommand.class,
         ShoutCommand.class,
-        PartyCommand.class
+        PartyCommand.class,
+        AICommand.class
 })
 @Getter
 public class CommandManager {

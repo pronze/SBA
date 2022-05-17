@@ -21,7 +21,7 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
     private final ToggleableSetting<PlayerSetting> settings;
 
     public SBAPlayerWrapper(Player player) {
-        super(org.screamingsandals.lib.player.PlayerMapper.getPlayer(player.getUniqueId()).get());
+        super(org.screamingsandals.lib.player.PlayerMapper.wrapPlayer(player));
 
         this.shoutCooldown = 0;
         this.settings = ToggleableSetting.of(PlayerSetting.class);

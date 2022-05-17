@@ -358,7 +358,6 @@ public class SBACommand {
 
             BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
                     player, store, null);
-
             new BukkitRunnable() {
                 public void run() {
                     Bukkit.getServer().getPluginManager().callEvent(openShopEvent);

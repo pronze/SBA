@@ -102,7 +102,6 @@ public class ScoreboardBuilder
     }
     
     public Scoreboard build() {
-        Logger.trace("ScoreboardBuilder::build");
         Objects.requireNonNull(this.holder, "Holder cannot be null");
         (this.scoreboard = new Scoreboard(this.holder)).setAnimationTaskInterval(this.animationInterval);
         this.scoreboard.setOccupyMaxHeight(this.occupyHeight);

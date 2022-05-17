@@ -132,6 +132,8 @@ public class PlayerListener implements Listener {
         final var gVictim = Main.getPlayerGameProfile(player);
         final var victimTeam = game.getTeamOfPlayer(player);
 
+        if(victimTeam ==null)
+            return;
         if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
                 victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
                 game.getTeamOfPlayer(player).isTargetBlockExists()) {

@@ -10,7 +10,15 @@ import io.github.pronze.sba.manager.ScoreboardManager;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
+import io.github.pronze.sba.utils.citizens.HologramTrait;
+import io.github.pronze.sba.utils.citizens.ReturnToStoreTrait;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
+import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.npc.MemoryNPCDataStore;
+import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.trait.Gravity;
+import net.citizensnpcs.trait.LookClose;
+import net.citizensnpcs.trait.SkinTrait;
 import net.kyori.adventure.text.Component;
 
 import org.apache.commons.lang.StringUtils;
@@ -56,6 +64,8 @@ public class Arena implements IArena {
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
+    private NPCRegistry citizenRegistry;
+    private Map<org.screamingsandals.bedwars.api.game.GameStore, net.citizensnpcs.api.npc.NPC> citizensStores;
 
     public Arena(@NotNull Game game) {
         this.game = game;
@@ -180,7 +190,7 @@ public class Arena implements IArena {
                     });
         }
 
-        if (SBAConfig.getInstance().node("replace-stores-with-npc").getBoolean(true)) {
+        if (SBAConfig.getInstance().replaceStoreWithNpc()) {
             try {
                 if (game.getGameStores().size() == 0) {
                     Logger.error(
@@ -243,6 +253,83 @@ public class Arena implements IArena {
             } catch (Throwable t) {
                 Logger.warn("Disabling NPC due to an exception during creation of NPC: {}. ", t);
             }
+        } else if (SBAConfig.getInstance().replaceStoreWithCitizen()) {
+            try {
+                citizensStores = new HashMap<>();
+                citizenRegistry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
+                if (game.getGameStores().size() == 0) {
+                    Logger.error(
+                            "Game does not contain GameStore, is something preventing the spawning of the stores?");
+                }
+
+                game.getGameStores().forEach(store -> {
+                    Logger.trace("Replacing store {}", store);
+                    final var nonAPIStore = (GameStore) store;
+                    net.citizensnpcs.api.npc.NPC npc;
+                    try {
+                        final var villager = nonAPIStore.kill();
+                        if (villager != null) {
+                            Main.unregisterGameEntity(villager);
+                            
+                            npc = citizenRegistry.createNPC(villager.getType(), "Name");
+                            LookClose look = npc.getOrAddTrait(net.citizensnpcs.trait.LookClose.class);
+                            look.lookClose(true);
+                            Gravity gravity = npc.getOrAddTrait(net.citizensnpcs.trait.Gravity.class);
+                            gravity.gravitate(true);
+                            gravity.setEnabled(true);
+                            if (nonAPIStore.getEntityType() == EntityType.PLAYER)
+                            {
+                                SkinTrait trait = npc.getOrAddTrait(SkinTrait.class);
+                                trait.setSkinName(nonAPIStore.getSkinName());
+                            }
+                            npc.data().setPersistent(net.citizensnpcs.api.npc.NPC.Metadata.SWIMMING, false);
+                            npc.spawn(nonAPIStore.getStoreLocation());
+                            npc.getOrAddTrait(ReturnToStoreTrait.class);
+                            LivingEntity entity = (LivingEntity) npc.getEntity();
+                            entity.setCustomNameVisible(false);
+                            npc.data().setPersistent(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA, false);
+
+                            npc.getNavigator().setTarget(nonAPIStore.getStoreLocation());
+
+                            if (mockEntity == null) {
+                                // find a better version independent way to mock entities lol
+                                mockEntity = (Bat) game.getGameWorld()
+                                        .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                                mockEntity.setAI(false);
+                            }
+                            // set fake entity to avoid bw listener npe
+                            Reflect.setField(nonAPIStore, "entity", mockEntity);
+
+                            final var file = store.getShopFile();
+
+                            List<Component> name = new ArrayList<Component>();
+                            NPCSkin skin = null;
+                            try {
+                                if (file != null && StringUtils.containsIgnoreCase(file, "upgrade")) {
+                                    skin = NPCStoreService.getInstance().getUpgradeShopSkin();
+                                    name = NPCStoreService.getInstance().getUpgradeShopText();
+                                } else {
+                                    skin = NPCStoreService.getInstance().getShopSkin();
+                                    name = NPCStoreService.getInstance().getShopText();
+                                }
+                            } catch (Throwable t) {
+                                t.printStackTrace();
+                            }
+
+                            HologramTrait holo = npc.getOrAddTrait(HologramTrait.class);
+                            holo.setLines(name);
+
+                            citizensStores.putIfAbsent(store, npc);
+                        }
+                    } catch (Throwable t) {
+                        Logger.error(
+                                "SBA cannot unspawn the store, is something preventing the spawning of the stores?");
+                        t.printStackTrace();
+                    }
+                });
+            } catch (Throwable t) {
+                Logger.warn("Disabling NPC due to an exception during creation of NPC: {}. ", t);
+            }
         }
         game.getConnectedPlayers().forEach(p -> {
             this.displayNames.put(p.getUniqueId(), p.getDisplayName() + ChatColor.RESET);
@@ -284,6 +371,15 @@ public class Arena implements IArena {
         stores.values().forEach(NPC::destroy);
         stores.clear();
 
+        if(citizensStores!=null)
+        {
+            citizensStores.values().forEach(npc->npc.destroy());
+            citizensStores.clear();
+        }
+        if (citizenRegistry != null)
+            citizenRegistry.deregisterAll();
+        
+
         getInvisiblePlayers().forEach(this::removeHiddenPlayer);
 
     }
@@ -323,7 +419,7 @@ public class Arena implements IArena {
 
             String firstKillerName = nullStr;
             int firstKillerScore = 0;
-            UUID firstKillerUUID=null;
+            UUID firstKillerUUID = null;
 
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
@@ -337,7 +433,7 @@ public class Arena implements IArena {
 
             String secondKillerName = nullStr;
             int secondKillerScore = 0;
-            UUID secondKillerUUID=null;
+            UUID secondKillerUUID = null;
 
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
@@ -354,7 +450,7 @@ public class Arena implements IArena {
             String thirdKillerName = nullStr;
             int thirdKillerScore = 0;
             UUID thirdKillerUUID = null;
-            
+
             for (Map.Entry<UUID, GamePlayerData> entry : playerDataMap.entrySet()) {
                 final var playerData = playerDataMap.get(entry.getKey());
                 final var kills = playerData.getKills();
@@ -367,9 +463,9 @@ public class Arena implements IArena {
                 }
             }
             firstKillerName = replaceNameWithDisplayName(nullStr, firstKillerName, firstKillerUUID);
-            secondKillerName = replaceNameWithDisplayName(nullStr, secondKillerName,secondKillerUUID);
-            thirdKillerName = replaceNameWithDisplayName(nullStr, thirdKillerName,thirdKillerUUID);
-            
+            secondKillerName = replaceNameWithDisplayName(nullStr, secondKillerName, secondKillerUUID);
+            thirdKillerName = replaceNameWithDisplayName(nullStr, thirdKillerName, thirdKillerUUID);
+
             var victoryTitle = LanguageService
                     .getInstance()
                     .get(MessageKeys.VICTORY_TITLE)
@@ -401,15 +497,11 @@ public class Arena implements IArena {
     }
 
     private String replaceNameWithDisplayName(final String nullStr, String firstKillerName, UUID playeruuid) {
-        if (!firstKillerName.equals(nullStr))
-        {
+        if (!firstKillerName.equals(nullStr)) {
             var firstPlayer = Bukkit.getPlayer(firstKillerName);
-            if(firstPlayer!=null)
-            {
+            if (firstPlayer != null) {
                 firstKillerName = firstPlayer.getDisplayName() + ChatColor.RESET;
-            }
-            else
-            {
+            } else {
                 firstKillerName = this.displayNames.get(playeruuid);
             }
         }
@@ -452,5 +544,10 @@ public class Arena implements IArena {
     @Override
     public @NotNull Map<org.screamingsandals.bedwars.api.game.GameStore, NPC> getStores() {
         return Map.copyOf(stores);
+    }
+
+    @Override
+    public @NotNull Map<org.screamingsandals.bedwars.api.game.GameStore, net.citizensnpcs.api.npc.NPC> getCitizensStores() {
+        return Map.copyOf(citizensStores);
     }
 }

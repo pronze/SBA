@@ -315,7 +315,6 @@ public class SBAConfig implements IConfigurator {
                     .key("leggings").defValue(true)
                     .key("chestplate").defValue(false)
                     .back()
-                    .key("replace-stores-with-npc").defValue(true)
                     .section("automatic-protection")
                     .key("spawner-diameter").defValue(5)
                     .key("team-spawn-diameter").defValue(3)
@@ -325,6 +324,7 @@ public class SBAConfig implements IConfigurator {
                     .key("on_trap_triggered").defValue("ENTITY_ENDER_DRAGON_GROWL")
                     .back()
                     .key("replace-stores-with-npc").defValue(true)
+                    .key("replace-stores-with-citizen").defValue(false)
                     .section("update-checker")
                     .key("console").defValue(true)
                     .key("admins").defValue(true)
@@ -340,6 +340,14 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
+    public boolean replaceStoreWithNpc()
+    {
+        return node("replace-stores-with-npc").getBoolean(true);
+    }
+    public boolean replaceStoreWithCitizen()
+    {
+        return node("replace-stores-with-citizen").getBoolean(false);
+    }
     public boolean shouldCheckUpdate()
     {
         return shouldWarnConsoleAboutUpdate() || shouldWarnPlayerAboutUpdate();

@@ -111,7 +111,7 @@ public interface IArena {
      */
     @NotNull
     Map<GameStore,NPC> getStores();
-
+    Map<GameStore, net.citizensnpcs.api.npc.NPC> getCitizensStores();
     /**
      * Gets the GameTask for this arena.
      *
@@ -140,4 +140,6 @@ public interface IArena {
     void addVisualsForPlayer(Player player);
 
     void updateHiddenPlayer(@NotNull Player player);
+
+    
 }

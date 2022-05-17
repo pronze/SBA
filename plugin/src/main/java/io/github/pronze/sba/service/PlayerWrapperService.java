@@ -37,9 +37,8 @@ public class PlayerWrapperService implements WrapperService<Player, SBAPlayerWra
             PlayerMapper.UNSAFE_getPlayerConverter()
                     .registerW2P(SBAPlayerWrapper.class, wrapper -> {
                         if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
-                            if(!playerData.containsKey(wrapper.getUuid()))
-                            {
-                                var player = Bukkit.getServer().getPlayer(wrapper.getUuid());
+                            if(!playerData.containsKey(wrapper.getUuid())){
+                                var player = wrapper.as(Player.class);// Bukkit.getServer().getPlayer(wrapper.getUuid());
                                 register(player);
                             }
                             return playerData.get(wrapper.getUuid());

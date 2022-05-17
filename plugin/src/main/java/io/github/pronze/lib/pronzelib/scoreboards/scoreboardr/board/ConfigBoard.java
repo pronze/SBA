@@ -55,24 +55,16 @@ public class ConfigBoard extends BukkitRunnable {
 
     public void setLines(List<String> lines)
     {
-        Logger.trace("ConfigBoard setLines {}",lines);
-
         for (int i = 0; i < lines.size() && i < rows.size();i++)
         {
-            Logger.trace("ConfigBoard editRow {}",i);
-
             rows.set(i, new Row(ScoreboardStrings.makeColoredStringList(List.of(lines.get(i))), 0));
         }
         while(rows.size() < lines.size())
         {
-            Logger.trace("ConfigBoard addRow {}",rows.size());
-
             rows.add(new Row(ScoreboardStrings.makeColoredStringList(List.of(lines.get(rows.size()))),0));
         }
         while(rows.size() > lines.size())
         {
-            Logger.trace("ConfigBoard removeRow {}",rows.size()-1);
-
             rows.remove(rows.size() - 1);
         }
     }
@@ -98,7 +90,6 @@ public class ConfigBoard extends BukkitRunnable {
 
     @Override
     public void run() {
-        Logger.trace("Running ConfigBoard update");
         if (!this.enabled) return;
 
         this.title.update();

@@ -28,6 +28,10 @@ import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.Logger.Level;
+import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
+import io.github.pronze.sba.utils.citizens.HologramTrait;
+import io.github.pronze.sba.utils.citizens.RespawnTrait;
+import io.github.pronze.sba.utils.citizens.ReturnToStoreTrait;
 import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -74,7 +78,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies = { "PlaceholderAPI", "ViaVersion" })
+}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens" })
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -114,12 +118,14 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         GameModeListener.class,
         SpawnerProtection.class,
         SpawnerProtectionListener.class,
-        SidebarManager.class
+        SidebarManager.class,
+        AIService.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 
     private static SBA instance;
     private List<BaseFix> fixs;
+
     public static SBA getInstance() {
         return instance;
     }
@@ -157,7 +163,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         for (BaseFix fix : fixs) {
             fix.detect();
         }
-        
+
         ScoreboardManager.init(cachedPluginInstance);
 
         int pluginId = 14804; // <-- Replace with the id of your plugin!
@@ -166,32 +172,28 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public void postEnable() {
-        
+
         if (Bukkit.getServer().getServicesManager().getRegistration(BedwarsAPI.class) == null) {
             showErrorMessage("Could not find Screaming-BedWars plugin!, make sure " +
                     "you have the right one installed, and it's enabled properly!");
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
-        }
-        else
-        {
+        } else {
             Logger.info("SBA initialized using Bedwars {}", BedwarsAPI.getInstance().getPluginVersion());
             if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23").stream()
                     .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
                 Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.23. ");
             }
         }
-        if (Reflect.has("com.mohistmc.MohistMC"))
-        {
+        if (Reflect.has("com.mohistmc.MohistMC")) {
             Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             return;
         }
         for (BaseFix fix : fixs) {
             fix.fix(SBAConfig.getInstance());
-            if(fix.IsProblematic())
+            if (fix.IsProblematic())
                 fix.warn();
-            if(fix.IsCritical())
-            {
+            if (fix.IsCritical()) {
                 Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             }
         }
@@ -209,6 +211,22 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.trace("API has been registered!");
 
         Logger.setMode(Level.WARNING);
+
+        if (getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
+                && getPluginInstance().getServer().getPluginManager().getPlugin("Citizens").isEnabled()) {
+            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(HologramTrait.class)
+                            .withName("SBAHologramTrait"));
+            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(ReturnToStoreTrait.class)
+                            .withName("ReturnToStoreTrait"));
+            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(RespawnTrait.class)
+                            .withName("RespawnTrait"));
+            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(FakeDeathTrait.class)
+                            .withName("FakeDeathTrait"));
+        }
     }
 
     public void registerListener(@NotNull Listener listener) {

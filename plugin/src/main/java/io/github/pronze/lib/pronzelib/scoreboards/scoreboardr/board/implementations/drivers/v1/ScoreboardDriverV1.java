@@ -55,7 +55,6 @@ public class ScoreboardDriverV1 implements IBoard {
 
     @Override
     public void setLine(int line, String content) {
-        Logger.trace("ScoreboardDriver::setline({},{})", line, content);
         if (content == null) {
             content = "";
         }

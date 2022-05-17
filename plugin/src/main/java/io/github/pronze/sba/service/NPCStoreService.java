@@ -10,6 +10,7 @@ import lombok.SneakyThrows;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
@@ -78,6 +79,59 @@ public class NPCStoreService implements Listener {
                                 SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "signature").getString());
         }
 
+        @EventHandler
+        public void rclick(net.citizensnpcs.api.event.NPCRightClickEvent event) {
+                var npc = event.getNPC();
+                // Handle a click on a NPC. The event has a getNPC() method.
+                // Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on
+                // this NPC!
+                final var player = event.getClicker();
+                npcClick(npc, player);
+        }
+
+        private void npcClick(net.citizensnpcs.api.npc.NPC npc, final Player player) {
+                if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
+                        return;
+                }
+                if (!SBAConfig.getInstance().replaceStoreWithCitizen()) {
+                        return;
+                }
+                final var game = Main.getInstance().getGameOfPlayer(player);
+                ArenaManager
+                                .getInstance()
+                                .getArenaMap()
+                                .values()
+                                .stream()
+                                .filter(iArena -> iArena.getCitizensStores().values().contains(npc))
+                                .forEach(arena -> {
+
+                                        GameStore store = null;
+                                        for (var i : arena.getCitizensStores().entrySet()) {
+                                                if (i.getValue().equals(npc))
+                                                        store = (GameStore) i.getKey();
+                                        }
+
+                                        BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                                                        player, store, null);
+
+                                        new BukkitRunnable() {
+                                                public void run() {
+                                                        Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
+                                                }
+                                        }.runTask(SBA.getPluginInstance());
+                                });
+        }
+
+        @EventHandler
+        public void lclick(net.citizensnpcs.api.event.NPCLeftClickEvent event) {
+                var npc = event.getNPC();
+                // Handle a click on a NPC. The event has a getNPC() method.
+                // Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on
+                // this NPC!
+                final var player = event.getClicker();
+                npcClick(npc, player);
+        }
+
         public void onNPCTouched(NPCInteractEvent event) {
                 Logger.trace("Clicked NPC with click type: {}", event.interactType().name());
                 // if (event.getInteractType() ==
@@ -102,10 +156,9 @@ public class NPCStoreService implements Listener {
                                 .forEach(arena -> {
 
                                         GameStore store = null;
-                                        for(var i : arena.getStores().entrySet())
-                                        {
-                                                if(i.getValue().equals(npc))
-                                                        store = (GameStore)i.getKey();
+                                        for (var i : arena.getStores().entrySet()) {
+                                                if (i.getValue().equals(npc))
+                                                        store = (GameStore) i.getKey();
                                         }
 
                                         BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,

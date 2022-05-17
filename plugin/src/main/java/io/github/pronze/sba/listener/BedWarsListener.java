@@ -4,6 +4,7 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBAFinalKillEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
@@ -332,6 +333,9 @@ public class BedWarsListener implements Listener {
                 .fromCache(player.getUniqueId())
                 .ifPresent(Scoreboard::destroy);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
+
+        if(AIService.getInstance().isNPC(player))
+            AIService.getInstance().getNPC(player).destroy();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

@@ -31,13 +31,11 @@ public class ScoreboardManager implements Listener
     private JavaPlugin plugin;
     
     public ScoreboardManager() {
-        //Logger.trace("ScoreboardManager.<init>");
         this.cachedBoards = new HashMap<UUID, Scoreboard>();
         this.toReset = true;
     }
     
     public static ScoreboardManager init(final JavaPlugin plugin) {
-        //Logger.trace("ScoreboardManager.init");
         Objects.requireNonNull(plugin, "Plugin instance cannot be null");
         Session.makeSession(plugin);
         if (ScoreboardManager.instance != null) {
@@ -56,27 +54,22 @@ public class ScoreboardManager implements Listener
     }
     
     public static boolean isLegacy() {
-        //Logger.trace("ScoreboardManager.isLegacy");
         return ScoreboardManager.instance.legacy;
     }
     
     public static void setResetBoardsOnDisabled(final boolean boardsOnDisabled) {
-        //Logger.trace("ScoreboardManager.setResetBoardsOnDisabled");
         ScoreboardManager.instance.toReset = boardsOnDisabled;
     }
     
     public static JavaPlugin getPluginInstance() {
-        //Logger.trace("ScoreboardManager.getPluginInstance");
         return ScoreboardManager.instance.plugin;
     }
     
     public static ScoreboardManager getInstance() {
-        //Logger.trace("ScoreboardManager.getInstance");
         return ScoreboardManager.instance;
     }
     
     public void onDisable() {
-        //Logger.trace("ScoreboardManager.onDisable");
         HandlerList.unregisterAll((Listener)ScoreboardManager.instance);
         if (!this.toReset) {
             return;
@@ -86,18 +79,15 @@ public class ScoreboardManager implements Listener
     }
     
     public void addToCache(final Scoreboard board) {
-        //Logger.trace("ScoreboardManager.addToCache");
         Objects.requireNonNull(board, "Board cannot be null!");
         this.cachedBoards.put(board.getPlayer().getUniqueId(), board);
     }
     
     public void removeFromCache(final UUID uuid) {
-        //Logger.trace("ScoreboardManager.removeFromCache");
         this.cachedBoards.remove(uuid);
     }
     
     public Optional<Scoreboard> fromCache(final UUID uuid) {
-        //Logger.trace("ScoreboardManager.fromCache");
         if (this.cachedBoards.containsKey(uuid)) {
             return Optional.of(this.cachedBoards.get(uuid));
         }
@@ -106,7 +96,6 @@ public class ScoreboardManager implements Listener
     
     @EventHandler
     public void onQuit(final PlayerQuitEvent e) {
-        //Logger.trace("ScoreboardManager.onQuit");
         final UUID uuid = e.getPlayer().getUniqueId();
         this.fromCache(uuid).ifPresent(Scoreboard::destroy);
         this.cachedBoards.remove(uuid);
