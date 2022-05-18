@@ -106,7 +106,9 @@ public class AIService implements Listener {
 
                         npc.spawn(loc);
                         npc.setProtected(false);
-                        npc.getOrAddTrait(FakeDeathTrait.class);
+                        FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
+
+                        fdt.setAutoTarget(true);
 
                         return (Player) npc.getEntity();
                 }
@@ -120,7 +122,12 @@ public class AIService implements Listener {
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageByEntityEvent event) {
-
+                if (event.getEntity().hasMetadata("FakeDeath")) {
+                        NPC npc = getNPC(event.getEntity());
+                        if (npc != null) {
+                                npc.getNavigator().setTarget(event.getDamager(), true);
+                        }
+                }
                 if (event.getEntity().hasMetadata("FakeDeath")) {
 
                         double damageCount = event.getFinalDamage();
@@ -134,8 +141,13 @@ public class AIService implements Listener {
                                 PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
                                 PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
                                 entity.setHealth(entity.getMaxHealth());
-                                if (event.getDamager() instanceof Player)
+                                if (event.getDamager() instanceof Player) {
                                         entity.setKiller((Player) event.getDamager());
+                                }
+                                NPC npc = getNPC(event.getEntity());
+                                if (npc != null) {
+                                        npc.getNavigator().cancelNavigation();
+                                }
                                 manualDispatchEvent(pde, Main.getInstance());
                                 manualDispatchEvent(pde, SBA.getPluginInstance());
 
@@ -143,14 +155,8 @@ public class AIService implements Listener {
                                 manualDispatchEvent(pre, SBA.getPluginInstance());
                         }
                 }
-                if (event.getEntity().hasMetadata("FakeDeath")) {
-                        NPC npc = getNPC(event.getEntity());
-                        if (npc != null) {
-                                npc.getNavigator().setTarget(event.getDamager(), true);
-                        }
-                }
-                if(event.getDamager().hasMetadata("FakeDeath") && event.getEntity() instanceof LivingEntity)
-                {
+
+                if (event.getDamager().hasMetadata("FakeDeath") && event.getEntity() instanceof LivingEntity) {
                         double damageCount = event.getFinalDamage();
                         LivingEntity entity = (LivingEntity) event.getEntity();
                         if (entity.getHealth() < damageCount) {
@@ -161,6 +167,7 @@ public class AIService implements Listener {
                         }
                 }
         }
+
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageByBlockEvent event) {
@@ -178,6 +185,10 @@ public class AIService implements Listener {
                                 entity.setHealth(entity.getMaxHealth());
                                 if (event.getDamager() instanceof Player)
                                         entity.setKiller((Player) event.getDamager());
+                                NPC npc = getNPC(event.getEntity());
+                                if (npc != null) {
+                                        npc.getNavigator().cancelNavigation();
+                                }
                                 manualDispatchEvent(pde, Main.getInstance());
                                 manualDispatchEvent(pde, SBA.getPluginInstance());
 
@@ -186,6 +197,7 @@ public class AIService implements Listener {
                         }
                 }
         }
+
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageEvent event) {
@@ -201,6 +213,10 @@ public class AIService implements Listener {
                                 PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
                                 PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
                                 entity.setHealth(entity.getMaxHealth());
+                                NPC npc = getNPC(event.getEntity());
+                                if (npc != null) {
+                                        npc.getNavigator().cancelNavigation();
+                                }
                                 manualDispatchEvent(pde, Main.getInstance());
                                 manualDispatchEvent(pde, SBA.getPluginInstance());
 
