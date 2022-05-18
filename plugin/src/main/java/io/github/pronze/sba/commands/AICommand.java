@@ -3,6 +3,7 @@ package io.github.pronze.sba.commands;
 import cloud.commandframework.annotations.Argument;
 import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
@@ -63,6 +64,7 @@ public class AICommand implements Listener {
     }
 
     @CommandMethod("sba ai join")
+    @CommandPermission("sba.ai")
     @CommandDescription("sba ai join")
     private void commandShout(
             final @NotNull Player player) {
@@ -79,10 +81,15 @@ public class AICommand implements Listener {
 
         if (game.getStatus() == GameStatus.WAITING) {
 
-            Player ai = AIService.getInstance().spawnAI(player.getLocation());
+            int maxPlayer = game.getMaxPlayers();
+            int current = game.countConnectedPlayers();
+            if(current < maxPlayer)
+            {
+                Player ai = AIService.getInstance().spawnAI(player.getLocation());
 
-            Logger.info("{}", ai);
-            game.joinToGame(ai);
+                Logger.info("{}", ai);
+                game.joinToGame(ai);
+            }
         }
     }
    

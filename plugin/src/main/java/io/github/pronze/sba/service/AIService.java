@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventException;
@@ -146,6 +147,17 @@ public class AIService implements Listener {
                         NPC npc = getNPC(event.getEntity());
                         if (npc != null) {
                                 npc.getNavigator().setTarget(event.getDamager(), true);
+                        }
+                }
+                if(event.getDamager().hasMetadata("FakeDeath") && event.getEntity() instanceof LivingEntity)
+                {
+                        double damageCount = event.getFinalDamage();
+                        LivingEntity entity = (LivingEntity) event.getEntity();
+                        if (entity.getHealth() < damageCount) {
+                                NPC npc = getNPC(event.getDamager());
+                                if (npc != null) {
+                                        npc.getNavigator().cancelNavigation();
+                                }
                         }
                 }
         }
