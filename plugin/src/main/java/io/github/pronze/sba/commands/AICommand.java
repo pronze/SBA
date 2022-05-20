@@ -23,6 +23,8 @@ import net.citizensnpcs.trait.CurrentLocation;
 import net.citizensnpcs.trait.Gravity;
 import net.citizensnpcs.trait.SkinTrait;
 import net.kyori.adventure.text.Component;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -83,14 +85,13 @@ public class AICommand implements Listener {
 
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
-            if(current < maxPlayer)
-            {
-                Player ai = AIService.getInstance().spawnAI(player.getLocation());
-
-                Logger.info("{}", ai);
-                game.joinToGame(ai);
+            if (current < maxPlayer) {
+                AIService.getInstance().spawnAI(player.getLocation()).thenAccept(ai -> {
+                    Logger.info("{}", ai);
+                    game.joinToGame(ai);
+                });
             }
         }
     }
-   
+
 }

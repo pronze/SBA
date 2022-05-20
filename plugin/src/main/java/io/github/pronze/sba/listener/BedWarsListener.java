@@ -421,16 +421,20 @@ public class BedWarsListener implements Listener {
                             .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
                     final var killer = victim.getKiller();
+                    Logger.trace("Killer: {}",killer);
                     // killer is present
                     if (killer != null) {
                         // get victim game profile
                         final var gVictim = Main.getPlayerGameProfile(victim);
+                        Logger.trace("gVictim: {}",gVictim);
 
-                        if (gVictim == null || gVictim.isSpectator)
+                        if (gVictim == null)
                             return;
 
                         // get victim team to check if it was a final kill or not
                         final var victimTeam = game.getTeamOfPlayer(victim);
+                        Logger.trace("victimTeam: {}",victimTeam);
+
                         if (victimTeam != null) {
                             arena.getPlayerData(killer.getUniqueId())
                                     .ifPresent(killerData -> {

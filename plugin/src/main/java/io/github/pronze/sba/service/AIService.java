@@ -5,13 +5,17 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.utils.Logger;
+import io.github.pronze.sba.utils.citizens.AIPlayer;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.citizensnpcs.api.CitizensAPI;
+import net.citizensnpcs.api.ai.AttackStrategy;
+import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.trait.SkinTrait;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,6 +34,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
@@ -41,17 +46,21 @@ import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.Tasker;
+import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -92,42 +101,71 @@ public class AIService implements Listener {
         }
 
         public NPC getNPC(Entity e) {
+                if (e instanceof AIPlayer)
+                {
+                        return ((AIPlayer) e).getNpc();
+                }
                 if (registry != null) {
                         return registry.getNPC(e);
                 }
                 return null;
         }
 
-        public Player spawnAI(Location loc) {
+        public CompletableFuture<Player> spawnAI(Location loc) {
+                CompletableFuture<Player> CompletableFuture = new CompletableFuture<Player>();  
                 if (registry != null) {
                         AtomicInteger count = new AtomicInteger(1);
                         registry.forEach(npc -> count.incrementAndGet());
                         final NPC npc = registry.createNPC(EntityType.PLAYER, "AI_" + count.get());
-
+                        npc.data().set("removefromtablist", false);
                         npc.spawn(loc);
                         npc.setProtected(false);
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
 
-                        fdt.setAutoTarget(true);
+                        npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
 
-                        return (Player) npc.getEntity();
+                        npc.getOrAddTrait(SkinTrait.class).setSkinName("robot");
+                        Tasker.build(() -> {
+                                Player ai = (Player) (npc.getEntity());
+                                CompletableFuture.complete(ai);
+                        }).delay(4, TaskerTime.SECONDS).start();
+                       
+
                 }
-                return null;
+                else
+                {
+                        CompletableFuture.complete(null);
+                }
+
+                return CompletableFuture;
         }
 
         public boolean isNPC(Player player) {
+                if (player instanceof AIPlayer)
+                {
+                        return true;
+                }
                 return registry != null && registry.isNPC(player);
         }
 
+        Method getPlayerHandle = null;
+        Field getPlayerKiller = null;
+        private Object getHandle(Player player) {
+                try {
+                        Method getHandle = this.getPlayerHandle == null
+                                        ? this.getPlayerHandle = player.getClass().getDeclaredMethod("getHandle")
+                                        : this.getPlayerHandle;
+                        // I think this is probably the simplest way to do this?
+                        return getHandle.invoke(player, getHandle);
+                } catch (Throwable e) {
+                        e.printStackTrace();
+                        return null;
+                }
+        }
+            
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageByEntityEvent event) {
-                if (event.getEntity().hasMetadata("FakeDeath")) {
-                        NPC npc = getNPC(event.getEntity());
-                        if (npc != null) {
-                                npc.getNavigator().setTarget(event.getDamager(), true);
-                        }
-                }
                 if (event.getEntity().hasMetadata("FakeDeath")) {
 
                         double damageCount = event.getFinalDamage();
@@ -135,24 +173,24 @@ public class AIService implements Listener {
                         Logger.trace("NPC Damage (By entity)");
 
                         if (entity.getHealth() < damageCount + 1) {
-                                Logger.trace("NPC WOULD HAVE DIED");
-                                event.setCancelled(true);
-
-                                PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
-                                PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
-                                entity.setHealth(entity.getMaxHealth());
                                 if (event.getDamager() instanceof Player) {
-                                        entity.setKiller((Player) event.getDamager());
+                                        try {
+                                                entity.setKiller((Player) event.getDamager());
+                                        } catch (Throwable nsm) {
+                                                Player killer = (Player) event.getDamager();
+                                                try {
+                                                        Object playerHandle = getHandle(entity);
+                                                        Object killerHandle = killer == null ? null : getHandle(killer);
+                                                        Field nmsPlayer = this.getPlayerKiller == null
+                                                                        ? this.getPlayerKiller = playerHandle.getClass()
+                                                                                        .getDeclaredField("killer")
+                                                                        : this.getPlayerKiller;
+                                                        nmsPlayer.set(playerHandle, killerHandle);
+                                                } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                }
+                                        }
                                 }
-                                NPC npc = getNPC(event.getEntity());
-                                if (npc != null) {
-                                        npc.getNavigator().cancelNavigation();
-                                }
-                                manualDispatchEvent(pde, Main.getInstance());
-                                manualDispatchEvent(pde, SBA.getPluginInstance());
-
-                                manualDispatchEvent(pre, Main.getInstance());
-                                manualDispatchEvent(pre, SBA.getPluginInstance());
                         }
                 }
 
@@ -169,35 +207,12 @@ public class AIService implements Listener {
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-        @SuppressWarnings("deprecation")
-        public void onDamage(EntityDamageByBlockEvent event) {
-                if (event.getEntity().hasMetadata("FakeDeath")) {
-                        double damageCount = event.getFinalDamage();
-                        Player entity = (Player) event.getEntity();
-                        Logger.trace("NPC Damage (By block)");
-
-                        if (entity.getHealth() < damageCount + 1) {
-                                Logger.trace("NPC WOULD HAVE DIED");
-                                event.setCancelled(true);
-
-                                PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
-                                PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
-                                entity.setHealth(entity.getMaxHealth());
-                                if (event.getDamager() instanceof Player)
-                                        entity.setKiller((Player) event.getDamager());
-                                NPC npc = getNPC(event.getEntity());
-                                if (npc != null) {
-                                        npc.getNavigator().cancelNavigation();
-                                }
-                                manualDispatchEvent(pde, Main.getInstance());
-                                manualDispatchEvent(pde, SBA.getPluginInstance());
-
-                                manualDispatchEvent(pre, Main.getInstance());
-                                manualDispatchEvent(pre, SBA.getPluginInstance());
-                        }
+        public void onGameModeChange(PlayerGameModeChangeEvent event)
+        {
+                if (event.getPlayer().hasMetadata("FakeDeath")) {
+                        Bukkit.getServer().getOnlinePlayers().forEach(pl -> pl.showPlayer(event.getPlayer()));
                 }
         }
-
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageEvent event) {
@@ -242,16 +257,10 @@ public class AIService implements Listener {
                                                         try {
                                                                 methods.add(method);
                                                                 method.invoke(listener, evt);
-                                                        } catch (IllegalAccessException e) {
+                                                        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                                                                 // TODO Auto-generated catch block
                                                                 e.printStackTrace();
-                                                        } catch (IllegalArgumentException e) {
-                                                                // TODO Auto-generated catch block
-                                                                e.printStackTrace();
-                                                        } catch (InvocationTargetException e) {
-                                                                // TODO Auto-generated catch block
-                                                                e.printStackTrace();
-                                                        }
+                                                        } 
                                                 }
                                 }
                         }
