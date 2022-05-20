@@ -60,7 +60,7 @@ public class FakeDeathTrait extends Trait {
     public FakeDeathTrait() {
         super("FakeDeathTrait");
     }
-
+private BedwarsBlockPlace blockPlace;
     // Run code when the NPC is spawned. Note that npc.getEntity() will be null
     // until this method is called.
     // This is called AFTER onAttach and AFTER Load when the server is started.
@@ -69,8 +69,12 @@ public class FakeDeathTrait extends Trait {
         if (npcEntity == null) {
             npcEntity = (Player) npc.getEntity();
             npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
-
+            npc.getTraits().forEach(t -> {
+                if (t instanceof BedwarsBlockPlace)
+                    blockPlace = (BedwarsBlockPlace) t;
+            });
             goals.clear();
+            goals.add(new DontCancelBlockBreak());
             goals.add(new AttackNearbyPlayerGoal());
             goals.add(new BuildBedDefenseGoal());
             goals.add(new GatherBlocks());
@@ -234,6 +238,19 @@ public class FakeDeathTrait extends Trait {
         public void doGoal() {
             // TODO Auto-generated method stub
 
+        }
+    }
+
+    public class DontCancelBlockBreak implements AiGoal {
+        @Override
+        public boolean isAvailable() {
+            
+            return blockPlace!=null && blockPlace.isBreaking();
+        }
+
+        @Override
+        public void doGoal() {
+            
         }
     }
 

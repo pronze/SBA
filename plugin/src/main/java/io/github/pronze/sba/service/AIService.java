@@ -6,6 +6,8 @@ import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.citizens.AIPlayer;
+import io.github.pronze.sba.utils.citizens.BedwarsBlockPlace;
+import io.github.pronze.sba.utils.citizens.BridgePillarTrait;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -123,7 +125,8 @@ public class AIService implements Listener {
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
-
+                        npc.addTrait(new BridgePillarTrait());
+                        npc.addTrait(new BedwarsBlockPlace());
                         npc.getOrAddTrait(SkinTrait.class).setSkinName("robot");
                         Tasker.build(() -> {
                                 Player ai = (Player) (npc.getEntity());
@@ -221,7 +224,7 @@ public class AIService implements Listener {
                         Player entity = (Player) event.getEntity();
                         Logger.trace("NPC Damage (general)");
 
-                        if (entity.getHealth() < damageCount + 1) {
+                        if (entity.getHealth() < damageCount + 1 || event.getCause() == DamageCause.VOID) {
                                 Logger.trace("NPC WOULD HAVE DIED");
                                 event.setCancelled(true);
 
