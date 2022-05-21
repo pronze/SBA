@@ -9,6 +9,7 @@ import io.github.pronze.sba.utils.citizens.AIPlayer;
 import io.github.pronze.sba.utils.citizens.BedwarsBlockPlace;
 import io.github.pronze.sba.utils.citizens.BridgePillarTrait;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
+import io.github.pronze.sba.utils.citizens.FakeDeathTrait.Strategy;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.citizensnpcs.api.CitizensAPI;
@@ -114,18 +115,22 @@ public class AIService implements Listener {
                 }
                 return null;
         }
-
         public CompletableFuture<Player> spawnAI(Location loc) {
+                return spawnAI(loc, Strategy.ANY);
+        }
+        public CompletableFuture<Player> spawnAI(Location loc, FakeDeathTrait.Strategy strategy) {
                 CompletableFuture<Player> CompletableFuture = new CompletableFuture<Player>();
                 if (registry != null) {
                         AtomicInteger count = new AtomicInteger(1);
                         registry.forEach(npc -> count.incrementAndGet());
                         final NPC npc = registry.createNPC(EntityType.PLAYER, "AI_" + count.get());
                         //npc.data().set("removefromtablist", false);
+                        FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
+                        fdt.setStrategy(strategy);
+
                         npc.spawn(loc);
                         npc.setProtected(false);
-                        FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
-
+                      
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
                         // npc.getNavigator().getLocalParameters().distanceMargin(0);
                         npc.getNavigator().getLocalParameters().stuckAction(new StuckAction() {
@@ -136,7 +141,7 @@ public class AIService implements Listener {
                                                         .getGameMode() == GameMode.SURVIVAL) {
                                                 die((Player) arg0.getEntity());
                                         }
-                                        return true;
+                                        return false;
                                 }
                         });
                         npc.getNavigator().getLocalParameters().attackRange(1.5f);
