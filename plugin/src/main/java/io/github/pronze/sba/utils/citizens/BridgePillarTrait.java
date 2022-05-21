@@ -56,6 +56,13 @@ public class BridgePillarTrait extends Trait {
                 || testBlock.getType() == Material.WATER;
     }
 
+    public boolean canBuildUp(Location loc)
+    {
+        Block testBlock = loc.getBlock();
+        return (isEmpty(testBlock) && isEmpty(testBlock.getRelative(BlockFace.DOWN))
+            && isEmpty(testBlock.getRelative(BlockFace.UP)))
+            ;
+    }
     private Location tryFindingJump(Location currentLocation, Location target) {
         Block b = currentLocation.getBlock();
         Block toPlace = null;
@@ -116,9 +123,9 @@ public class BridgePillarTrait extends Trait {
                     var horizontal = target.clone();
                     horizontal.setY(currentLocation.getY());
 
-                    if (target.getBlockY() > currentLocation.getBlockY() && blockPlace.isPlacable(currentLocation)) {
+                    if (target.getBlockY() > currentLocation.getBlockY() && blockPlace.isPlacable(currentLocation) && canBuildUp(currentLocation)) {
                         // Try building up
-                        if (blockPlace.placeBlockIfPossible(currentLocation)) {
+                        if (blockPlace.placeBlockIfPossible(currentLocation) ) {
                             Player aiPlayer = (Player) npc.getEntity();
                             aiPlayer.teleport(currentLocation.toBlockLocation().add(0.5, 1, 0.5));
                             locations.clear();

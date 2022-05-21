@@ -131,6 +131,7 @@ public class AIService implements Listener {
                                 @Override
                                 public boolean run(NPC arg0, Navigator arg1) {
                                         Logger.trace("NPC IS STUCK {}", arg0.getName());
+                                        die((Player) arg0.getEntity());
                                         return false;
                                 }
                         });
@@ -238,20 +239,24 @@ public class AIService implements Listener {
                                 Logger.trace("NPC WOULD HAVE DIED");
                                 event.setCancelled(true);
 
-                                PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
-                                PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
-                                entity.setHealth(entity.getMaxHealth());
-                                NPC npc = getNPC(event.getEntity());
-                                if (npc != null) {
-                                        npc.getNavigator().cancelNavigation();
-                                }
-                                manualDispatchEvent(pde, Main.getInstance());
-                                manualDispatchEvent(pde, SBA.getPluginInstance());
-
-                                manualDispatchEvent(pre, Main.getInstance());
-                                manualDispatchEvent(pre, SBA.getPluginInstance());
+                                die(entity);
                         }
                 }
+        }
+
+        private void die(Player entity) {
+                PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
+                PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
+                entity.setHealth(entity.getMaxHealth());
+                NPC npc = getNPC(entity);
+                if (npc != null) {
+                        npc.getNavigator().cancelNavigation();
+                }
+                manualDispatchEvent(pde, Main.getInstance());
+                manualDispatchEvent(pde, SBA.getPluginInstance());
+
+                manualDispatchEvent(pre, Main.getInstance());
+                manualDispatchEvent(pre, SBA.getPluginInstance());
         }
 
         private void manualDispatchEvent(Event evt, Plugin p) {
