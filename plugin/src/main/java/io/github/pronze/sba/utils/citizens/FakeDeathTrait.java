@@ -3,10 +3,13 @@ package io.github.pronze.sba.utils.citizens;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
@@ -29,6 +32,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.bukkit.utils.nms.Version;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
@@ -36,6 +40,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.world.LocationMapper;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.inventories.SBAStoreInventory;
 import io.github.pronze.sba.utils.Logger;
 import lombok.Data;
 import lombok.Getter;
@@ -60,7 +65,20 @@ public class FakeDeathTrait extends Trait {
     public FakeDeathTrait() {
         super("FakeDeathTrait");
     }
-private BedwarsBlockPlace blockPlace;
+
+    private BedwarsBlockPlace blockPlace_;
+
+    private BedwarsBlockPlace blockPlace() {
+        if (blockPlace_ != null)
+            return blockPlace_;
+
+        npc.getTraits().forEach(t -> {
+            if (t instanceof BedwarsBlockPlace)
+                blockPlace_ = (BedwarsBlockPlace) t;
+        });
+        return blockPlace_;
+    }
+
     // Run code when the NPC is spawned. Note that npc.getEntity() will be null
     // until this method is called.
     // This is called AFTER onAttach and AFTER Load when the server is started.
@@ -69,10 +87,7 @@ private BedwarsBlockPlace blockPlace;
         if (npcEntity == null) {
             npcEntity = (Player) npc.getEntity();
             npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
-            npc.getTraits().forEach(t -> {
-                if (t instanceof BedwarsBlockPlace)
-                    blockPlace = (BedwarsBlockPlace) t;
-            });
+
             goals.clear();
             goals.add(new DontCancelBlockBreak());
             goals.add(new AttackNearbyPlayerGoal());
@@ -197,7 +212,8 @@ private BedwarsBlockPlace blockPlace;
             for (Entity entity : entities) {
                 if (entity instanceof Player && !entity.equals(npc.getEntity())) {
                     Player possibleTarget = (Player) entity;
-                    if (possibleTarget.getGameMode() != GameMode.SURVIVAL&&possibleTarget.getGameMode() != GameMode.CREATIVE)
+                    if (possibleTarget.getGameMode() != GameMode.SURVIVAL
+                            && possibleTarget.getGameMode() != GameMode.CREATIVE)
                         continue;
                     Game targetGame = Main.getInstance().getGameOfPlayer(possibleTarget);
                     if (targetGame == null)
@@ -228,8 +244,68 @@ private BedwarsBlockPlace blockPlace;
     }
 
     public class BuildBedDefenseGoal implements AiGoal {
+
+        Block targetBlock = null;
+        List<Block> blockToBuild = new ArrayList<>();
+
+        public void floodFill(Block b, int depth) {
+            if (depth <= 2) {
+                if (!blockToBuild.contains(b))
+                    blockToBuild.add(b);
+
+                int cost = 1;
+                
+                floodFill(b.getRelative(BlockFace.EAST), depth + cost);
+                floodFill(b.getRelative(BlockFace.WEST), depth + cost);
+                floodFill(b.getRelative(BlockFace.NORTH), depth + cost);
+                floodFill(b.getRelative(BlockFace.SOUTH), depth + cost);
+                floodFill(b.getRelative(BlockFace.UP), depth + cost);
+            }
+        }
+        public Block findSecondBedBlock(Block b)
+        {
+            for (Block testBlock : List.of(
+                b.getRelative(BlockFace.EAST),
+                b.getRelative(BlockFace.WEST),
+                b.getRelative(BlockFace.NORTH),
+                b.getRelative(BlockFace.SOUTH)
+            )) {
+                Logger.trace("Testing {} for second bed block", testBlock);
+                if (testBlock.getType().toString().toUpperCase().contains("BED"))
+                    return testBlock;
+            }
+            return b;
+        }
         @Override
         public boolean isAvailable() {
+            if (blockPlace() == null)
+                return false;
+            if (targetBlock == null) {
+                Player aiPlayer = (Player) npc.getEntity();
+                Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
+                if (g != null) {
+                    var team = g.getTeamOfPlayer(aiPlayer);
+                    if (team != null) {
+                        targetBlock = team.getTargetBlock().getBlock();
+
+                        floodFill(targetBlock, 0);
+                        if (targetBlock.getType().toString().toUpperCase().contains("BED"))
+                        {
+                            floodFill(findSecondBedBlock(targetBlock), 0);
+                        }
+                    }
+                }
+            } else {
+                if (blockPlace().isEmpty(targetBlock)) {
+                    return false;
+                }
+
+                if (blockToBuild.stream()
+                        .anyMatch(b -> blockPlace().isEmpty(b) && blockPlace().isPlacable(b.getLocation()))) {
+                    return true;
+                }
+            }
+
             // TODO Auto-generated method stub
             return false;
         }
@@ -238,19 +314,32 @@ private BedwarsBlockPlace blockPlace;
         public void doGoal() {
             // TODO Auto-generated method stub
 
+            Block toPlace = blockToBuild.stream()
+                    .filter(b -> blockPlace().isEmpty(b) && blockPlace().isPlacable(b.getLocation()))
+                    .findFirst().orElse(null);
+
+            if (toPlace != null) {
+                npc.getNavigator().setTarget(toPlace.getLocation());
+                if (toPlace.getLocation().distance(npc.getEntity().getLocation()) < 3) {
+                    blockPlace().placeBlockIfPossible(toPlace.getLocation());
+                    if (toPlace.getLocation().distance(npc.getEntity().getLocation()) < 1) {
+                        npc.getEntity().teleport(toPlace.getLocation().toBlockLocation().add(0.5, 1, 0.5));
+                    }
+                }
+            }
         }
     }
 
     public class DontCancelBlockBreak implements AiGoal {
         @Override
         public boolean isAvailable() {
-            
-            return blockPlace!=null && blockPlace.isBreaking();
+
+            return blockPlace() != null && blockPlace().isBreaking();
         }
 
         @Override
         public void doGoal() {
-            
+
         }
     }
 
@@ -268,8 +357,24 @@ private BedwarsBlockPlace blockPlace;
         public void doGoal() {
             // TODO Auto-generated method stub
 
+            Player aiPlayer = (Player) npc.getEntity();
+            Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
+            for (var storeapi : g.getGameStores()) {
+                GameStore store = (GameStore) storeapi;
+
+            }
+
             // Target the shop
             // If distance is close enough to the shop get the block
+        }
+
+        public void iterateShop(Player aiPlayer, GameStore gs) {
+            if (gs.getShopFile() == null || !StringUtils.containsIgnoreCase(gs.getShopFile(), "upgrade")) {
+                var storeInv = SBAStoreInventory.getInstance().iterate(gs);
+                if (storeInv != null) {
+                    // storeInv.openInventory(SBA.getInstance().getPlayerWrapper(aiPlayer));
+                }
+            }
         }
     }
 

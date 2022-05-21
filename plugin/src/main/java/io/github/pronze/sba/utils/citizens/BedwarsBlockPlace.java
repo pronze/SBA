@@ -14,6 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 
+import gnu.trove.impl.unmodifiable.TUnmodifiableShortByteMap;
+import io.github.pronze.sba.specials.SpawnerProtection;
 import net.citizensnpcs.api.npc.BlockBreaker;
 import net.citizensnpcs.api.npc.BlockBreaker.BlockBreakerConfiguration;
 import net.citizensnpcs.api.trait.Trait;
@@ -25,8 +27,12 @@ public class BedwarsBlockPlace extends Trait {
     }
 
     int cooldown = 10;
+    int timerRefresh = 10;
     int blockBreakerCooldown = 0;
+    int blockBreakerTotal = 0;
     Block blockToBreak = null;
+    Location startBreak = null;
+    double cancelBreakMovement = 0.5;
 
     public Block getAgainst(Block toPlace) {
         for (Block testBlock : List.of(
@@ -41,6 +47,7 @@ public class BedwarsBlockPlace extends Trait {
         return null;
     }
 
+    
     public boolean placeBlockIfPossible(Location currentLocation) {
         if (cooldown > 0)
             return false;
@@ -66,7 +73,7 @@ public class BedwarsBlockPlace extends Trait {
                     } else {
                         inv.getInventoryView().remove(blockToPlace);
                     }
-                    cooldown = 2;
+                    cooldown = 0;
                     return true;
                 }
             }
@@ -86,8 +93,10 @@ public class BedwarsBlockPlace extends Trait {
         Player aiPlayer = (Player) npc.getEntity();
         var destroySpeed = b.getDestroySpeed(aiPlayer.getItemInHand());
 
-        blockBreakerCooldown = (int) (500 / destroySpeed);
+        blockBreakerCooldown = (int) (200 / destroySpeed);
+        blockBreakerTotal = (int) (200 / destroySpeed);
         blockToBreak = b;
+        startBreak = aiPlayer.getLocation();
 
         npc.getNavigator().cancelNavigation();
     }
@@ -103,16 +112,34 @@ public class BedwarsBlockPlace extends Trait {
         }
 
         if (blockToBreak != null) {
-            if (blockBreakerCooldown-- <= 0) {
-                Player aiPlayer = (Player) npc.getEntity();
+            Player aiPlayer = (Player) npc.getEntity();
+            if (aiPlayer.getLocation().distance(startBreak) > cancelBreakMovement) {
+                blockToBreak = null;
+                blockBreakerCooldown = 0;
+            } else if (blockBreakerCooldown-- <= 0) {
                 BlockBreakEvent bbe = new BlockBreakEvent(blockToBreak, aiPlayer);
                 Bukkit.getPluginManager().callEvent(bbe);
                 if (!bbe.isCancelled()) {
                     blockToBreak.breakNaturally(aiPlayer.getItemInHand());
                 }
+
                 blockToBreak = null;
+            } else {
+                if (timerRefresh++ > 10) {
+                    timerRefresh = 0;
+
+                    Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
+                    g.getConnectedPlayers().forEach(otherPlayer -> {
+                        otherPlayer.sendBlockDamage(blockToBreak.getLocation().toBlockLocation(),
+                                1 - ((float) blockBreakerCooldown / (float) blockBreakerTotal));
+                    });
+                }
             }
         }
+    }
+    public boolean isEmpty(Block testBlock) {
+        return testBlock.getType() == Material.AIR || testBlock.getType() == Material.LAVA
+                || testBlock.getType() == Material.WATER;
     }
 
     private ItemStack getBlock(Inventory inv) {
@@ -124,7 +151,16 @@ public class BedwarsBlockPlace extends Trait {
             }
         }
         return new ItemStack(Material.OAK_PLANKS);
-        // return is;
+        //return is;
+    }
+
+
+    public boolean isPlacable(Location currentLocation) { 
+        Player aiPlayer = (Player) npc.getEntity();
+
+        return !SpawnerProtection.getInstance().isProtected(Main.getInstance().getGameOfPlayer(aiPlayer),
+                currentLocation)
+        && getAgainst(currentLocation.getBlock())!=null;
     }
 
 }

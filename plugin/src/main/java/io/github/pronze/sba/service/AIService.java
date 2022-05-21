@@ -126,7 +126,7 @@ public class AIService implements Listener {
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
-                        npc.getNavigator().getLocalParameters().distanceMargin(0);
+                        //npc.getNavigator().getLocalParameters().distanceMargin(0);
                         npc.getNavigator().getLocalParameters().stuckAction(new StuckAction() {
                                 @Override
                                 public boolean run(NPC arg0, Navigator arg1) {

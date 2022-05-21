@@ -28,7 +28,7 @@ public class BridgePillarTrait extends Trait {
     private LinkedList<Location> locations = new LinkedList<>();
     @Getter
     @Setter
-    private double treashold = 1;
+    private double treashold = 3;
 
     @Override
     public void onSpawn() {
@@ -51,7 +51,7 @@ public class BridgePillarTrait extends Trait {
 
     int timer = 0;
 
-    private boolean isEmpty(Block testBlock) {
+    public boolean isEmpty(Block testBlock) {
         return testBlock.getType() == Material.AIR || testBlock.getType() == Material.LAVA
                 || testBlock.getType() == Material.WATER;
     }
@@ -116,12 +116,11 @@ public class BridgePillarTrait extends Trait {
                     var horizontal = target.clone();
                     horizontal.setY(currentLocation.getY());
 
-                    if (target.getBlockY() > currentLocation.getBlockY()) {
+                    if (target.getBlockY() > currentLocation.getBlockY() && blockPlace.isPlacable(currentLocation)) {
                         // Try building up
                         if (blockPlace.placeBlockIfPossible(currentLocation)) {
                             Player aiPlayer = (Player) npc.getEntity();
-                            Vector v = aiPlayer.getVelocity().setY(0.5);
-                            aiPlayer.setVelocity(v);
+                            aiPlayer.teleport(currentLocation.toBlockLocation().add(0.5, 1, 0.5));
                             locations.clear();
                         }
                     } else if (target.getBlockY() < currentLocation.getBlockY() - 3 && horizontal.distance(currentLocation) < 3) {
@@ -151,7 +150,7 @@ public class BridgePillarTrait extends Trait {
                             var distanceToTarget = testBlock.getLocation().distance(target);
                             if (testBlock.getType() == Material.AIR || testBlock.getType() == Material.LAVA
                                     || testBlock.getType() == Material.WATER) {
-                                if (distanceToTarget < testDistance) {
+                                if (distanceToTarget < testDistance && blockPlace.isPlacable(testBlock.getLocation())) {
                                     testDistance = distanceToTarget;
                                     toPlace = testBlock;
                                 }

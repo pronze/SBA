@@ -70,6 +70,29 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         return Optional.ofNullable(shopMap.get(key));
     }
 
+
+    public InventorySet iterate(@NotNull GameStore store)
+    {
+        try {
+            var parent = true;
+            parent = store.getUseParent();
+            String fileName = store.getShopFile();
+
+            if (fileName != null) {
+                var file = ShopUtil.normalizeShopFile(fileName);
+                var name = (parent ? "+" : "-") + file.getAbsolutePath();
+                if (!shopMap.containsKey(name)) {
+                    loadNewShop(name, file, parent);
+                }
+                return shopMap.get(name);
+            } else {
+
+            }
+        } catch (Throwable ignored) {
+            Logger.error("[SBA] Your shop is invalid! Check it out or contact us on Discord. {}", ignored);
+        }
+        return null;
+    }
     @Override
     public void openForPlayer(@NotNull SBAPlayerWrapper player, @NotNull GameStore store) {
         try {
