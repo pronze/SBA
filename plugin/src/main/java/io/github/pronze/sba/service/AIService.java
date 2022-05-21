@@ -18,9 +18,11 @@ import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.trait.GameModeTrait;
 import net.citizensnpcs.trait.SkinTrait;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -104,8 +106,7 @@ public class AIService implements Listener {
         }
 
         public NPC getNPC(Entity e) {
-                if (e instanceof AIPlayer)
-                {
+                if (e instanceof AIPlayer) {
                         return ((AIPlayer) e).getNpc();
                 }
                 if (registry != null) {
@@ -115,24 +116,27 @@ public class AIService implements Listener {
         }
 
         public CompletableFuture<Player> spawnAI(Location loc) {
-                CompletableFuture<Player> CompletableFuture = new CompletableFuture<Player>();  
+                CompletableFuture<Player> CompletableFuture = new CompletableFuture<Player>();
                 if (registry != null) {
                         AtomicInteger count = new AtomicInteger(1);
                         registry.forEach(npc -> count.incrementAndGet());
                         final NPC npc = registry.createNPC(EntityType.PLAYER, "AI_" + count.get());
-                        npc.data().set("removefromtablist", false);
+                        //npc.data().set("removefromtablist", false);
                         npc.spawn(loc);
                         npc.setProtected(false);
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
-                        //npc.getNavigator().getLocalParameters().distanceMargin(0);
+                        // npc.getNavigator().getLocalParameters().distanceMargin(0);
                         npc.getNavigator().getLocalParameters().stuckAction(new StuckAction() {
                                 @Override
                                 public boolean run(NPC arg0, Navigator arg1) {
                                         Logger.trace("NPC IS STUCK {}", arg0.getName());
-                                        die((Player) arg0.getEntity());
-                                        return false;
+                                        if (arg0.getOrAddTrait(GameModeTrait.class)
+                                                        .getGameMode() == GameMode.SURVIVAL) {
+                                                die((Player) arg0.getEntity());
+                                        }
+                                        return true;
                                 }
                         });
                         npc.getNavigator().getLocalParameters().attackRange(1.5f);
@@ -143,11 +147,8 @@ public class AIService implements Listener {
                                 Player ai = (Player) (npc.getEntity());
                                 CompletableFuture.complete(ai);
                         }).delay(4, TaskerTime.SECONDS).start();
-                       
 
-                }
-                else
-                {
+                } else {
                         CompletableFuture.complete(null);
                 }
 
@@ -155,8 +156,7 @@ public class AIService implements Listener {
         }
 
         public boolean isNPC(Player player) {
-                if (player instanceof AIPlayer)
-                {
+                if (player instanceof AIPlayer) {
                         return true;
                 }
                 return registry != null && registry.isNPC(player);
@@ -164,6 +164,7 @@ public class AIService implements Listener {
 
         Method getPlayerHandle = null;
         Field getPlayerKiller = null;
+
         private Object getHandle(Player player) {
                 try {
                         Method getHandle = this.getPlayerHandle == null
@@ -176,7 +177,7 @@ public class AIService implements Listener {
                         return null;
                 }
         }
-            
+
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageByEntityEvent event) {
@@ -220,13 +221,6 @@ public class AIService implements Listener {
                 }
         }
 
-        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
-        public void onGameModeChange(PlayerGameModeChangeEvent event)
-        {
-                if (event.getPlayer().hasMetadata("FakeDeath")) {
-                        Bukkit.getServer().getOnlinePlayers().forEach(pl -> pl.showPlayer(event.getPlayer()));
-                }
-        }
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         @SuppressWarnings("deprecation")
         public void onDamage(EntityDamageEvent event) {
@@ -275,10 +269,11 @@ public class AIService implements Listener {
                                                         try {
                                                                 methods.add(method);
                                                                 method.invoke(listener, evt);
-                                                        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                                                        } catch (IllegalAccessException | IllegalArgumentException
+                                                                        | InvocationTargetException e) {
                                                                 // TODO Auto-generated catch block
                                                                 e.printStackTrace();
-                                                        } 
+                                                        }
                                                 }
                                 }
                         }
