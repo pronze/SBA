@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.AttackStrategy;
+import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
 import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.api.npc.NPC;
@@ -125,6 +126,15 @@ public class AIService implements Listener {
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
+                        npc.getNavigator().getLocalParameters().distanceMargin(0);
+                        npc.getNavigator().getLocalParameters().stuckAction(new StuckAction() {
+                                @Override
+                                public boolean run(NPC arg0, Navigator arg1) {
+                                        Logger.trace("NPC IS STUCK {}", arg0.getName());
+                                        return false;
+                                }
+                        });
+                        npc.getNavigator().getLocalParameters().attackRange(1.5f);
                         npc.addTrait(new BridgePillarTrait());
                         npc.addTrait(new BedwarsBlockPlace());
                         npc.getOrAddTrait(SkinTrait.class).setSkinName("robot");

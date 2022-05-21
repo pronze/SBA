@@ -1,9 +1,12 @@
 package io.github.pronze.sba.utils.citizens;
 
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -25,6 +28,19 @@ public class BedwarsBlockPlace extends Trait {
     int blockBreakerCooldown = 0;
     Block blockToBreak = null;
 
+    public Block getAgainst(Block toPlace) {
+        for (Block testBlock : List.of(
+                toPlace.getRelative(BlockFace.DOWN),
+                toPlace.getRelative(BlockFace.EAST),
+                toPlace.getRelative(BlockFace.WEST),
+                toPlace.getRelative(BlockFace.NORTH),
+                toPlace.getRelative(BlockFace.SOUTH))) {
+            if (testBlock.getType().isSolid())
+                return testBlock;
+        }
+        return null;
+    }
+
     public boolean placeBlockIfPossible(Location currentLocation) {
         if (cooldown > 0)
             return false;
@@ -35,19 +51,24 @@ public class BedwarsBlockPlace extends Trait {
 
         Player aiPlayer = (Player) npc.getEntity();
         if (blockToPlace != null) {
-            BlockPlaceEvent placeEvent = new BlockPlaceEvent(block, block.getState(), block, blockToPlace, aiPlayer,
-                    true);
-            Bukkit.getPluginManager().callEvent(placeEvent);
-            if (!placeEvent.isCancelled()) {
-                block.setType(blockToPlace.getType());
 
-                if (blockToPlace.getAmount() > 1) {
-                    blockToPlace.setAmount(blockToPlace.getAmount() - 1);
-                } else {
-                    inv.getInventoryView().remove(blockToPlace);
+            var against = getAgainst(block);
+            if (against != null) {
+                BlockPlaceEvent placeEvent = new BlockPlaceEvent(block, block.getState(), against, blockToPlace,
+                        aiPlayer,
+                        true);
+                Bukkit.getPluginManager().callEvent(placeEvent);
+                if (!placeEvent.isCancelled()) {
+                    block.setType(blockToPlace.getType());
+
+                    if (blockToPlace.getAmount() > 1) {
+                        blockToPlace.setAmount(blockToPlace.getAmount() - 1);
+                    } else {
+                        inv.getInventoryView().remove(blockToPlace);
+                    }
+                    cooldown = 2;
+                    return true;
                 }
-                cooldown = 2;
-                return true;
             }
         }
         return false;

@@ -197,7 +197,7 @@ private BedwarsBlockPlace blockPlace;
             for (Entity entity : entities) {
                 if (entity instanceof Player && !entity.equals(npc.getEntity())) {
                     Player possibleTarget = (Player) entity;
-                    if (possibleTarget.getGameMode() != GameMode.SURVIVAL)
+                    if (possibleTarget.getGameMode() != GameMode.SURVIVAL&&possibleTarget.getGameMode() != GameMode.CREATIVE)
                         continue;
                     Game targetGame = Main.getInstance().getGameOfPlayer(possibleTarget);
                     if (targetGame == null)

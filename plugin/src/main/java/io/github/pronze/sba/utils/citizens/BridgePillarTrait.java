@@ -28,7 +28,7 @@ public class BridgePillarTrait extends Trait {
     private LinkedList<Location> locations = new LinkedList<>();
     @Getter
     @Setter
-    private double treashold = 2;
+    private double treashold = 1;
 
     @Override
     public void onSpawn() {
@@ -87,7 +87,7 @@ public class BridgePillarTrait extends Trait {
     @Override
     public void run() {
         if (timer-- <= 0) {
-            timer = 2;
+            timer = 4;
             if (isTracking && npc.getNavigator().isNavigating()) {
                 var currentLocation = npc.getOrAddTrait(CurrentLocation.class).getLocation();
                 locations.add(currentLocation);
@@ -108,10 +108,14 @@ public class BridgePillarTrait extends Trait {
                         current = tmp;
                     }
                 }
+               
 
-                if (distance < treashold) {
+                if (distance < treashold && !blockPlace.isBreaking()) {
                     // Stuck
                     var target = npc.getNavigator().getTargetAsLocation();
+                    var horizontal = target.clone();
+                    horizontal.setY(currentLocation.getY());
+
                     if (target.getBlockY() > currentLocation.getBlockY()) {
                         // Try building up
                         if (blockPlace.placeBlockIfPossible(currentLocation)) {
@@ -120,19 +124,20 @@ public class BridgePillarTrait extends Trait {
                             aiPlayer.setVelocity(v);
                             locations.clear();
                         }
-                    } else if (target.getBlockY() < currentLocation.getBlockY() - 3) {
+                    } else if (target.getBlockY() < currentLocation.getBlockY() - 3 && horizontal.distance(currentLocation) < 3) {
                         // Try building up
+
                         Block standingOn = currentLocation.getBlock().getRelative(BlockFace.DOWN);
                         Logger.trace("standingOn {}", standingOn);
                         if (blockPlace.isBreakableBlock(standingOn)) {
                             Player aiPlayer = (Player) npc.getEntity();
-                            aiPlayer.teleport(standingOn.getLocation().add(0.5, 1, 0.5));
+                            aiPlayer.teleport(standingOn.getLocation().toBlockLocation().add(0.5, 1, 0.5));
                             blockPlace.breakBlock(standingOn);
                             Logger.trace("starting breaking of {}", standingOn);
                         } else {
-                           // Player aiPlayer = (Player) npc.getEntity();
-                           // Location l = tryFindingJump(currentLocation, target);
-                           // aiPlayer.teleport(l);
+                            Player aiPlayer = (Player) npc.getEntity();
+                            Location l = tryFindingJump(currentLocation, target);
+                            aiPlayer.teleport(l);
                         }
                     } else {
                         Block b = currentLocation.getBlock().getRelative(BlockFace.DOWN);
@@ -154,7 +159,7 @@ public class BridgePillarTrait extends Trait {
                         }
                         if (toPlace != null) {
                             if (blockPlace.placeBlockIfPossible(toPlace.getLocation())) {
-                                npc.getEntity().teleport(toPlace.getLocation().clone().add(0, 1, 0));
+                                npc.getEntity().teleport(toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
                             }
                         }
                     }
