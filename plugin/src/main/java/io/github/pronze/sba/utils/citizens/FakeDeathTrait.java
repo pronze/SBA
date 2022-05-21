@@ -208,7 +208,7 @@ public class FakeDeathTrait extends Trait {
             target = null;
             double distance = Double.MAX_VALUE;
 
-            var entities = getNearbyEntities(10);
+            var entities = getNearbyEntities(25);
             for (Entity entity : entities) {
                 if (entity instanceof Player && !entity.equals(npc.getEntity())) {
                     Player possibleTarget = (Player) entity;
@@ -230,6 +230,40 @@ public class FakeDeathTrait extends Trait {
                         if (possibleDistance < distance) {
                             distance = possibleDistance;
                             target = possibleTarget;
+                        }
+                    }
+                }
+            }
+            Player aiPlayer = (Player) npc.getEntity();
+            Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
+            if (g != null && target==null) {
+                var team = g.getTeamOfPlayer(aiPlayer);
+                if (team != null) {
+                    Block targetBlock = team.getTargetBlock().getBlock();
+                    targetBlock.getWorld().getNearbyLivingEntities(targetBlock.getLocation(), 25);
+                    for (Entity entity : entities) {
+                        if (entity instanceof Player && !entity.equals(npc.getEntity())) {
+                            Player possibleTarget = (Player) entity;
+                            if (possibleTarget.getGameMode() != GameMode.SURVIVAL
+                                    && possibleTarget.getGameMode() != GameMode.CREATIVE)
+                                continue;
+                            Game targetGame = Main.getInstance().getGameOfPlayer(possibleTarget);
+                            if (targetGame == null)
+                                continue;
+                            var targetTeam = targetGame.getTeamOfPlayer(possibleTarget);
+                            if (targetTeam == null)
+                                continue;
+                            var ourTeam = targetGame.getTeamOfPlayer((Player) npc.getEntity());
+                            if (ourTeam == null)
+                                continue;
+                            if (!ourTeam.getName().equals(targetTeam.getName())) {
+                                double possibleDistance = possibleTarget.getLocation()
+                                        .distance(npc.getEntity().getLocation());
+                                if (possibleDistance < distance) {
+                                    distance = possibleDistance;
+                                    target = possibleTarget;
+                                }
+                            }
                         }
                     }
                 }
@@ -386,7 +420,7 @@ public class FakeDeathTrait extends Trait {
             target = null;
             double distance = Double.MAX_VALUE;
 
-            var entities = getNearbyEntities(10);
+            var entities = getNearbyEntities(25);
             for (Entity entity : entities) {
                 if (entity instanceof Item) {
                     Item possibleTarget = (Item) entity;

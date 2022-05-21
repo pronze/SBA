@@ -28,7 +28,7 @@ public class BridgePillarTrait extends Trait {
     private LinkedList<Location> locations = new LinkedList<>();
     @Getter
     @Setter
-    private double treashold = 3;
+    private double treashold = 1;
 
     @Override
     public void onSpawn() {
@@ -56,13 +56,12 @@ public class BridgePillarTrait extends Trait {
                 || testBlock.getType() == Material.WATER;
     }
 
-    public boolean canBuildUp(Location loc)
-    {
+    public boolean canBuildUp(Location loc) {
         Block testBlock = loc.getBlock();
         return (isEmpty(testBlock) && isEmpty(testBlock.getRelative(BlockFace.DOWN))
-            && isEmpty(testBlock.getRelative(BlockFace.UP)))
-            ;
+                && isEmpty(testBlock.getRelative(BlockFace.UP)));
     }
+
     private Location tryFindingJump(Location currentLocation, Location target) {
         Block b = currentLocation.getBlock();
         Block toPlace = null;
@@ -87,8 +86,16 @@ public class BridgePillarTrait extends Trait {
             }
             return toPlace.getLocation();
         }
-        
+
         return null;
+    }
+
+    public void teleport(Player aiPlayer, Location l) {
+        try {
+            aiPlayer.teleport(l);
+        } catch (Throwable ignored) {
+
+        }
     }
 
     @Override
@@ -115,7 +122,6 @@ public class BridgePillarTrait extends Trait {
                         current = tmp;
                     }
                 }
-               
 
                 if (distance < treashold && !blockPlace.isBreaking()) {
                     // Stuck
@@ -123,27 +129,29 @@ public class BridgePillarTrait extends Trait {
                     var horizontal = target.clone();
                     horizontal.setY(currentLocation.getY());
 
-                    if (target.getBlockY() > currentLocation.getBlockY() && blockPlace.isPlacable(currentLocation) && canBuildUp(currentLocation)) {
+                    if (target.getBlockY() > currentLocation.getBlockY()
+                            && blockPlace.isJumpPlacable(currentLocation)) {
                         // Try building up
-                        if (blockPlace.placeBlockIfPossible(currentLocation) ) {
+                        if (blockPlace.placeBlockIfPossible(currentLocation)) {
                             Player aiPlayer = (Player) npc.getEntity();
-                            aiPlayer.teleport(currentLocation.toBlockLocation().add(0.5, 1, 0.5));
+                            teleport(aiPlayer, currentLocation.toBlockLocation().add(0.5, 1, 0.5));
                             locations.clear();
                         }
-                    } else if (target.getBlockY() < currentLocation.getBlockY() - 3 && horizontal.distance(currentLocation) < 3) {
+                    } else if (target.getBlockY() < currentLocation.getBlockY() - 2
+                            && horizontal.distance(currentLocation) < 2) {
                         // Try building up
 
                         Block standingOn = currentLocation.getBlock().getRelative(BlockFace.DOWN);
                         Logger.trace("standingOn {}", standingOn);
                         if (blockPlace.isBreakableBlock(standingOn)) {
                             Player aiPlayer = (Player) npc.getEntity();
-                            aiPlayer.teleport(standingOn.getLocation().toBlockLocation().add(0.5, 1, 0.5));
+                            teleport(aiPlayer, standingOn.getLocation().toBlockLocation().add(0.5, 1, 0.5));
                             blockPlace.breakBlock(standingOn);
                             Logger.trace("starting breaking of {}", standingOn);
                         } else {
                             Player aiPlayer = (Player) npc.getEntity();
                             Location l = tryFindingJump(currentLocation, target);
-                            aiPlayer.teleport(l);
+                            teleport(aiPlayer, l);
                         }
                     } else {
                         Block b = currentLocation.getBlock().getRelative(BlockFace.DOWN);
@@ -165,7 +173,34 @@ public class BridgePillarTrait extends Trait {
                         }
                         if (toPlace != null) {
                             if (blockPlace.placeBlockIfPossible(toPlace.getLocation())) {
-                                npc.getEntity().teleport(toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
+                                npc.getEntity()
+                                        .teleport(toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
+                            }
+                        } else {
+                            // Is the path blocked
+                            b = currentLocation.getBlock();
+                            testDistance = Double.MAX_VALUE;
+                            Block toBreak = null;
+                            for (Block testBlock : List.of(
+                                    b.getRelative(BlockFace.EAST),
+                                    b.getRelative(BlockFace.WEST),
+                                    b.getRelative(BlockFace.NORTH),
+                                    b.getRelative(BlockFace.SOUTH),
+                                    b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP))) {
+                                var distanceToTarget = testBlock.getLocation().distance(target);
+                                if (blockPlace.isBreakableBlock(testBlock)) {
+                                    if (distanceToTarget < testDistance
+                                            && blockPlace.isPlacable(testBlock.getLocation())) {
+                                        testDistance = distanceToTarget;
+                                        toBreak = testBlock;
+                                    }
+                                }
+                            }
+                            if (toBreak != null) {
+                                blockPlace.breakBlock(toBreak);
                             }
                         }
                     }

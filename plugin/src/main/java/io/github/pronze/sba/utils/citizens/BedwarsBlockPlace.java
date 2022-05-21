@@ -93,8 +93,8 @@ public class BedwarsBlockPlace extends Trait {
         Player aiPlayer = (Player) npc.getEntity();
         var destroySpeed = b.getDestroySpeed(aiPlayer.getItemInHand());
 
-        blockBreakerCooldown = (int) (200 / destroySpeed);
-        blockBreakerTotal = (int) (200 / destroySpeed);
+        blockBreakerCooldown = (int) (100 / destroySpeed);
+        blockBreakerTotal = (int) (100 / destroySpeed);
         blockToBreak = b;
         startBreak = aiPlayer.getLocation();
 
@@ -155,12 +155,20 @@ public class BedwarsBlockPlace extends Trait {
     }
 
 
+    public boolean isJumpPlacable(Location currentLocation)
+    {
+        Block b1 = currentLocation.getBlock();
+
+        return isPlacable(currentLocation) && isEmpty(b1.getRelative(BlockFace.UP))
+                && isEmpty(b1.getRelative(BlockFace.UP).getRelative(BlockFace.UP));
+    }
+
     public boolean isPlacable(Location currentLocation) { 
         Player aiPlayer = (Player) npc.getEntity();
 
         return !SpawnerProtection.getInstance().isProtected(Main.getInstance().getGameOfPlayer(aiPlayer),
                 currentLocation)
-        && getAgainst(currentLocation.getBlock())!=null;
+        && getAgainst(currentLocation.getBlock())!=null && isEmpty(currentLocation.getBlock());
     }
 
 }
