@@ -88,7 +88,14 @@ public class AICommand implements Listener {
             if (current < maxPlayer) {
                 AIService.getInstance().spawnAI(player.getLocation()).thenAccept(ai -> {
                     Logger.info("{}", ai);
-                    game.joinToGame(ai);
+                    int current_ = game.countConnectedPlayers();
+                    if (current_ < maxPlayer) {
+                        game.joinToGame(ai);
+                    }
+                    else
+                    {
+                        AIService.getInstance().getNPC(ai).destroy();
+                    }
                 });
             }
         }
