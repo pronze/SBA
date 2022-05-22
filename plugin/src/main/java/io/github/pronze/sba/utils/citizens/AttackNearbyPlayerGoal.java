@@ -8,6 +8,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait.AiGoal;
+import io.github.pronze.sba.utils.citizens.FakeDeathTrait.Strategy;
 
 public class AttackNearbyPlayerGoal implements FakeDeathTrait.AiGoal {
     /**
@@ -29,12 +30,14 @@ public class AttackNearbyPlayerGoal implements FakeDeathTrait.AiGoal {
         target = null;
         double distance = Double.MAX_VALUE;
 
-        var entities = this.fakeDeathTrait.getNearbyEntities(25);
+        int range = 25;
+        if(fakeDeathTrait.getStrategy() == Strategy.AGRESSIVE)
+            range = 5;
+        var entities = this.fakeDeathTrait.getNearbyEntities(range);
         for (Entity entity : entities) {
             if (entity instanceof Player && !entity.equals(this.fakeDeathTrait.getNPC().getEntity())) {
                 Player possibleTarget = (Player) entity;
-                if (possibleTarget.getGameMode() != GameMode.SURVIVAL
-                        && possibleTarget.getGameMode() != GameMode.CREATIVE)
+                if (possibleTarget.getGameMode() != GameMode.SURVIVAL)
                     continue;
                 Game targetGame = Main.getInstance().getGameOfPlayer(possibleTarget);
                 if (targetGame == null)
@@ -61,12 +64,11 @@ public class AttackNearbyPlayerGoal implements FakeDeathTrait.AiGoal {
             var team = g.getTeamOfPlayer(aiPlayer);
             if (team != null) {
                 Block targetBlock = team.getTargetBlock().getBlock();
-                targetBlock.getWorld().getNearbyLivingEntities(targetBlock.getLocation(), 25);
+                targetBlock.getWorld().getNearbyLivingEntities(targetBlock.getLocation(), range);
                 for (Entity entity : entities) {
                     if (entity instanceof Player && !entity.equals(this.fakeDeathTrait.getNPC().getEntity())) {
                         Player possibleTarget = (Player) entity;
-                        if (possibleTarget.getGameMode() != GameMode.SURVIVAL
-                                && possibleTarget.getGameMode() != GameMode.CREATIVE)
+                        if (possibleTarget.getGameMode() != GameMode.SURVIVAL)
                             continue;
                         Game targetGame = Main.getInstance().getGameOfPlayer(possibleTarget);
                         if (targetGame == null)

@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -40,7 +41,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.citizensnpcs.api.trait.Trait;
-import net.citizensnpcs.api.trait.trait.Inventory;
 import net.kyori.adventure.text.Component;
 
 @Data()
@@ -96,6 +96,7 @@ public class FakeDeathTrait extends Trait {
 
         goals.clear();
         goals.add(new DontCancelBlockBreak(this));
+        goals.add(new GatherBlocks(this));
         // goals.add(new AttackNearbyPlayerGoal(this));
         if (strategy == Strategy.DEFENSIVE)
             goals.add(new BuildBedDefenseGoal(this));
@@ -103,7 +104,6 @@ public class FakeDeathTrait extends Trait {
             goals.add(new AttackOtherGoal(this));
         else if (strategy == Strategy.BALANCED)
             goals.add(new BalancedGoal(this));
-        goals.add(new GatherBlocks(this));
         goals.add(new GatherRessource(this));
         goals.add(new CancelNavigation(this));
 
@@ -136,12 +136,11 @@ public class FakeDeathTrait extends Trait {
         if (timerPickup-- <= 0) {
             timerPickup = 5;
             var entities = getNearbyEntities(3);
-            Inventory inv = npc.getOrAddTrait(Inventory.class);
             for (Entity entity : entities) {
                 if (entity instanceof Item) {
                     Item itemEntity = (Item) entity;
                     ItemStack is = itemEntity.getItemStack();
-                    int space = getAmountOfSpaceFor(is, inv);
+                    int space = getAmountOfSpaceFor(is, getNpcEntity().getInventory());
                     if (space > 0) {
                         if (Version.isVersion(1, 12)) {
                             EntityPickupItemEvent pickupEvent = new EntityPickupItemEvent(
@@ -150,7 +149,9 @@ public class FakeDeathTrait extends Trait {
                                     Math.max(0, is.getAmount() - space));
                             Bukkit.getPluginManager().callEvent(pickupEvent);
                             if (!pickupEvent.isCancelled()) {
-                                inv.getInventoryView().addItem(pickupEvent.getItem().getItemStack());
+                                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
+                                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
+                                blockPlace().getBlock(getNpcEntity().getInventory());
                                 if (pickupEvent.getRemaining() > 0) {
                                     itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
                                 } else {
@@ -162,10 +163,13 @@ public class FakeDeathTrait extends Trait {
                                     (Player) npc.getEntity(),
                                     itemEntity,
                                     Math.max(0, is.getAmount() - space));
+
                             Bukkit.getPluginManager().callEvent(pickupEvent);
 
                             if (!pickupEvent.isCancelled()) {
-                                inv.getInventoryView().addItem(pickupEvent.getItem().getItemStack());
+                                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
+                                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
+                                blockPlace().getBlock(getNpcEntity().getInventory());
                                 if (pickupEvent.getRemaining() > 0) {
                                     itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
                                 } else {
@@ -185,7 +189,7 @@ public class FakeDeathTrait extends Trait {
         var oneStack = new ItemStack(m).getMaxStackSize();
         int space = 0;
 
-        var inventoryContent = inv.getInventoryView().getStorageContents();
+        var inventoryContent = inv.getStorageContents();
 
         for (int index = 0; index < inventoryContent.length; index++) {
             var itemStack = inventoryContent[index];
@@ -194,7 +198,7 @@ public class FakeDeathTrait extends Trait {
             }
         }
 
-        var inventoryStock = inv.getInventoryView().all(m.getType());
+        var inventoryStock = inv.all(m.getType());
         for (var stack : inventoryStock.entrySet()) {
             var comparedStack = new ItemStack(stack.getValue());
             comparedStack.setAmount(1);

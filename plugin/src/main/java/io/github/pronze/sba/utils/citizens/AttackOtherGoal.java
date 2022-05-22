@@ -34,7 +34,8 @@ public class AttackOtherGoal implements FakeDeathTrait.AiGoal {
     public boolean isAvailable() {
         if (this.fakeDeathTrait.blockPlace() == null)
             return false;
-
+        if (this.fakeDeathTrait.blockPlace().isInNeedOfBlock())
+            return false;
         Player aiPlayer = (Player) this.fakeDeathTrait.getNPC().getEntity();
         Location currentLocation = fakeDeathTrait.getNPC().getEntity().getLocation();
 

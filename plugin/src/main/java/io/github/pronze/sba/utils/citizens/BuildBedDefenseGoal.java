@@ -61,6 +61,8 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
     public boolean isAvailable() {
         if (this.fakeDeathTrait.blockPlace() == null)
             return false;
+        if (this.fakeDeathTrait.blockPlace().isInNeedOfBlock())
+            return false;
         if (targetBlock == null) {
             Player aiPlayer = (Player) this.fakeDeathTrait.getNPC().getEntity();
             Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
@@ -81,7 +83,8 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
             }
 
             if (blockToBuild.stream()
-                    .anyMatch(b -> this.fakeDeathTrait.blockPlace().isEmpty(b) && this.fakeDeathTrait.blockPlace().isPlacable(b.getLocation()))) {
+                    .anyMatch(b -> this.fakeDeathTrait.blockPlace().isEmpty(b)
+                            && this.fakeDeathTrait.blockPlace().isPlacable(b.getLocation()))) {
                 return true;
             }
         }
@@ -95,7 +98,8 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
         // TODO Auto-generated method stub
 
         Block toPlace = blockToBuild.stream()
-                .filter(b -> this.fakeDeathTrait.blockPlace().isEmpty(b) && this.fakeDeathTrait.blockPlace().isPlacable(b.getLocation()))
+                .filter(b -> this.fakeDeathTrait.blockPlace().isEmpty(b)
+                        && this.fakeDeathTrait.blockPlace().isPlacable(b.getLocation()))
                 .findFirst().orElse(null);
 
         if (toPlace != null) {
@@ -103,13 +107,14 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
             if (toPlace.getLocation().distance(this.fakeDeathTrait.getNPC().getEntity().getLocation()) < 3) {
                 this.fakeDeathTrait.blockPlace().placeBlockIfPossible(toPlace.getLocation());
                 if (toPlace.getLocation().distance(this.fakeDeathTrait.getNPC().getEntity().getLocation()) < 1) {
-                    this.fakeDeathTrait.getNPC().getEntity().teleport(toPlace.getLocation().toBlockLocation().add(0.5, 1, 0.5));
+                    this.fakeDeathTrait.getNPC().getEntity()
+                            .teleport(toPlace.getLocation().toBlockLocation().add(0.5, 1, 0.5));
                 }
             }
         }
     }
 
     public boolean isOver() {
-        return blockToBuild.stream().allMatch(b->!this.fakeDeathTrait.blockPlace().isEmpty(b));
+        return blockToBuild.stream().allMatch(b -> !this.fakeDeathTrait.blockPlace().isEmpty(b));
     }
 }

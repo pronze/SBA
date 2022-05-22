@@ -132,7 +132,7 @@ public class AIService implements Listener {
                         npc.setProtected(false);
                       
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
-                        // npc.getNavigator().getLocalParameters().distanceMargin(0);
+                        npc.getNavigator().getLocalParameters().distanceMargin(1);
                         npc.getNavigator().getLocalParameters().stuckAction(new StuckAction() {
                                 @Override
                                 public boolean run(NPC arg0, Navigator arg1) {
@@ -150,6 +150,7 @@ public class AIService implements Listener {
                         npc.getOrAddTrait(SkinTrait.class).setSkinName("robot");
                         Tasker.build(() -> {
                                 Player ai = (Player) (npc.getEntity());
+                                ai.setCanPickupItems(true);
                                 CompletableFuture.complete(ai);
                         }).delay(4, TaskerTime.SECONDS).start();
 

@@ -10,16 +10,18 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 
 import gnu.trove.impl.unmodifiable.TUnmodifiableShortByteMap;
 import io.github.pronze.sba.specials.SpawnerProtection;
+import lombok.Getter;
+import lombok.Setter;
 import net.citizensnpcs.api.npc.BlockBreaker;
 import net.citizensnpcs.api.npc.BlockBreaker.BlockBreakerConfiguration;
 import net.citizensnpcs.api.trait.Trait;
-import net.citizensnpcs.api.trait.trait.Inventory;
 
 public class BedwarsBlockPlace extends Trait {
     public BedwarsBlockPlace() {
@@ -33,6 +35,9 @@ public class BedwarsBlockPlace extends Trait {
     Block blockToBreak = null;
     Location startBreak = null;
     double cancelBreakMovement = 0.5;
+    @Getter
+    @Setter
+    private boolean isInNeedOfBlock = false;
 
     public Block getAgainst(Block toPlace) {
         for (Block testBlock : List.of(
@@ -47,16 +52,14 @@ public class BedwarsBlockPlace extends Trait {
         return null;
     }
 
-    
     public boolean placeBlockIfPossible(Location currentLocation) {
         if (cooldown > 0)
             return false;
         var block = currentLocation.getBlock();
-
-        Inventory inv = npc.getOrAddTrait(Inventory.class);
-        ItemStack blockToPlace = getBlock(inv);
-
         Player aiPlayer = (Player) npc.getEntity();
+        ItemStack blockToPlace = getBlock(aiPlayer.getInventory());
+
+        
         if (blockToPlace != null) {
 
             var against = getAgainst(block);
@@ -71,7 +74,7 @@ public class BedwarsBlockPlace extends Trait {
                     if (blockToPlace.getAmount() > 1) {
                         blockToPlace.setAmount(blockToPlace.getAmount() - 1);
                     } else {
-                        inv.getInventoryView().remove(blockToPlace);
+                        aiPlayer.getInventory().remove(blockToPlace);
                     }
                     cooldown = 0;
                     return true;
@@ -137,12 +140,13 @@ public class BedwarsBlockPlace extends Trait {
             }
         }
     }
+
     public boolean isEmpty(Block testBlock) {
         return testBlock.getType() == Material.AIR || testBlock.getType() == Material.LAVA
                 || testBlock.getType() == Material.WATER;
     }
 
-    private ItemStack getBlock(Inventory inv) {
+    public ItemStack getBlock(Inventory inv) {
         ItemStack is = null;
         for (var item : inv.getContents()) {
             if (item != null) {
@@ -150,25 +154,24 @@ public class BedwarsBlockPlace extends Trait {
                     is = item;
             }
         }
-        return new ItemStack(Material.OAK_PLANKS);
-        //return is;
+        // return new ItemStack(Material.OAK_PLANKS);
+        isInNeedOfBlock = is == null;
+        return is;
     }
 
-
-    public boolean isJumpPlacable(Location currentLocation)
-    {
+    public boolean isJumpPlacable(Location currentLocation) {
         Block b1 = currentLocation.getBlock();
 
         return isPlacable(currentLocation) && isEmpty(b1.getRelative(BlockFace.UP))
                 && isEmpty(b1.getRelative(BlockFace.UP).getRelative(BlockFace.UP));
     }
 
-    public boolean isPlacable(Location currentLocation) { 
+    public boolean isPlacable(Location currentLocation) {
         Player aiPlayer = (Player) npc.getEntity();
 
         return !SpawnerProtection.getInstance().isProtected(Main.getInstance().getGameOfPlayer(aiPlayer),
                 currentLocation)
-        && getAgainst(currentLocation.getBlock())!=null && isEmpty(currentLocation.getBlock());
+                && getAgainst(currentLocation.getBlock()) != null && isEmpty(currentLocation.getBlock());
     }
 
 }

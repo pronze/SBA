@@ -62,6 +62,12 @@ public class BridgePillarTrait extends Trait {
                 && isEmpty(testBlock.getRelative(BlockFace.UP)));
     }
 
+    public boolean canMove(Location loc) {
+        Block testBlock = loc.getBlock();
+        return (isEmpty(testBlock.getRelative(BlockFace.DOWN))
+                && isEmpty(testBlock.getRelative(BlockFace.UP)));
+    }
+
     private Location tryFindingJump(Location currentLocation, Location target) {
         Block b = currentLocation.getBlock();
         Block toPlace = null;
@@ -164,7 +170,8 @@ public class BridgePillarTrait extends Trait {
                                 b.getRelative(BlockFace.SOUTH))) {
                             var distanceToTarget = testBlock.getLocation().distance(target);
                             if (testBlock.getType() == Material.AIR || testBlock.getType() == Material.LAVA
-                                    || testBlock.getType() == Material.WATER) {
+                                    || testBlock.getType() == Material.WATER
+                                            && canMove(testBlock.getRelative(BlockFace.UP).getLocation())) {
                                 if (distanceToTarget < testDistance && blockPlace.isPlacable(testBlock.getLocation())) {
                                     testDistance = distanceToTarget;
                                     toPlace = testBlock;
@@ -177,6 +184,7 @@ public class BridgePillarTrait extends Trait {
                                         .teleport(toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
                             }
                         } else {
+                            Location toMove = null;
                             // Is the path blocked
                             b = currentLocation.getBlock();
                             testDistance = Double.MAX_VALUE;
@@ -185,22 +193,50 @@ public class BridgePillarTrait extends Trait {
                                     b.getRelative(BlockFace.EAST),
                                     b.getRelative(BlockFace.WEST),
                                     b.getRelative(BlockFace.NORTH),
+                                    b.getRelative(BlockFace.SOUTH))) {
+                                if (canMove(testBlock.getLocation())) {
+                                    var distanceToTarget = testBlock.getLocation().distance(target);
+                                    if (distanceToTarget < testDistance
+                                            && blockPlace.isPlacable(testBlock.getLocation())) {
+                                        testDistance = distanceToTarget;
+                                        toMove = testBlock.getLocation().clone().add(0.5,0,0.5);
+                                    }
+                                }
+                            }
+                            for (Block testBlock : List.of(
+                                    b.getRelative(BlockFace.EAST),
+                                    b.getRelative(BlockFace.WEST),
+                                    b.getRelative(BlockFace.NORTH),
                                     b.getRelative(BlockFace.SOUTH),
+                                    b.getRelative(BlockFace.EAST).getRelative(BlockFace.DOWN),
+                                    b.getRelative(BlockFace.WEST).getRelative(BlockFace.DOWN),
+                                    b.getRelative(BlockFace.NORTH).getRelative(BlockFace.DOWN),
+                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.DOWN),
                                     b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP),
                                     b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP),
                                     b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP))) {
+                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                                    b.getRelative(BlockFace.UP).getRelative(BlockFace.UP))) {
                                 var distanceToTarget = testBlock.getLocation().distance(target);
                                 if (blockPlace.isBreakableBlock(testBlock)) {
                                     if (distanceToTarget < testDistance
                                             && blockPlace.isPlacable(testBlock.getLocation())) {
                                         testDistance = distanceToTarget;
                                         toBreak = testBlock;
+                                        toMove = null;
                                     }
                                 }
                             }
+                            
                             if (toBreak != null) {
                                 blockPlace.breakBlock(toBreak);
+                            } else if(toMove!=null) {
+                                Player aiPlayer = (Player) npc.getEntity();
+                                teleport(aiPlayer, toMove);
                             }
                         }
                     }
