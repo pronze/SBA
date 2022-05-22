@@ -97,7 +97,7 @@ public class FakeDeathTrait extends Trait {
         goals.clear();
         goals.add(new DontCancelBlockBreak(this));
         goals.add(new GatherBlocks(this));
-        // goals.add(new AttackNearbyPlayerGoal(this));
+        goals.add(new AttackNearbyPlayerGoal(this));
         if (strategy == Strategy.DEFENSIVE)
             goals.add(new BuildBedDefenseGoal(this));
         else if (strategy == Strategy.AGRESSIVE)

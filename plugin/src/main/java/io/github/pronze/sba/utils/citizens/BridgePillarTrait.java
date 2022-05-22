@@ -13,6 +13,9 @@ import org.bukkit.util.Vector;
 import io.github.pronze.sba.utils.Logger;
 import lombok.Getter;
 import lombok.Setter;
+import net.citizensnpcs.api.ai.Navigator;
+import net.citizensnpcs.api.ai.StuckAction;
+import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.trait.Trait;
 import net.citizensnpcs.trait.CurrentLocation;
 
@@ -28,7 +31,7 @@ public class BridgePillarTrait extends Trait {
     private LinkedList<Location> locations = new LinkedList<>();
     @Getter
     @Setter
-    private double treashold = 1;
+    private double treashold = 2.3;
 
     @Override
     public void onSpawn() {
@@ -37,6 +40,15 @@ public class BridgePillarTrait extends Trait {
             if (t instanceof BedwarsBlockPlace)
                 blockPlace = (BedwarsBlockPlace) t;
         });
+        npc.getNavigator().getLocalParameters().stuckAction(
+            new StuckAction() {
+                @Override
+                public boolean run(NPC arg0, Navigator arg1) {
+                        Logger.trace("NPC IS STUCK {}", arg0.getName());
+                        return unstuck(arg0.getEntity().getLocation());
+                }
+        }
+        );
     }
 
     @Override
@@ -130,118 +142,130 @@ public class BridgePillarTrait extends Trait {
                 }
 
                 if (distance < treashold && !blockPlace.isBreaking()) {
-                    // Stuck
-                    var target = npc.getNavigator().getTargetAsLocation();
-                    var horizontal = target.clone();
-                    horizontal.setY(currentLocation.getY());
-
-                    if (target.getBlockY() > currentLocation.getBlockY()
-                            && blockPlace.isJumpPlacable(currentLocation)) {
-                        // Try building up
-                        if (blockPlace.placeBlockIfPossible(currentLocation)) {
-                            Player aiPlayer = (Player) npc.getEntity();
-                            teleport(aiPlayer, currentLocation.toBlockLocation().add(0.5, 1, 0.5));
-                            locations.clear();
-                        }
-                    } else if (target.getBlockY() < currentLocation.getBlockY() - 2
-                            && horizontal.distance(currentLocation) < 2) {
-                        // Try building up
-
-                        Block standingOn = currentLocation.getBlock().getRelative(BlockFace.DOWN);
-                        Logger.trace("standingOn {}", standingOn);
-                        if (blockPlace.isBreakableBlock(standingOn)) {
-                            Player aiPlayer = (Player) npc.getEntity();
-                            teleport(aiPlayer, standingOn.getLocation().toBlockLocation().add(0.5, 1, 0.5));
-                            blockPlace.breakBlock(standingOn);
-                            Logger.trace("starting breaking of {}", standingOn);
-                        } else {
-                            Player aiPlayer = (Player) npc.getEntity();
-                            Location l = tryFindingJump(currentLocation, target);
-                            teleport(aiPlayer, l);
-                        }
-                    } else {
-                        Block b = currentLocation.getBlock().getRelative(BlockFace.DOWN);
-                        Block toPlace = null;
-                        double testDistance = Double.MAX_VALUE;
-                        for (Block testBlock : List.of(
-                                b.getRelative(BlockFace.EAST),
-                                b.getRelative(BlockFace.WEST),
-                                b.getRelative(BlockFace.NORTH),
-                                b.getRelative(BlockFace.SOUTH))) {
-                            var distanceToTarget = testBlock.getLocation().distance(target);
-                            if (testBlock.getType() == Material.AIR || testBlock.getType() == Material.LAVA
-                                    || testBlock.getType() == Material.WATER
-                                            && canMove(testBlock.getRelative(BlockFace.UP).getLocation())) {
-                                if (distanceToTarget < testDistance && blockPlace.isPlacable(testBlock.getLocation())) {
-                                    testDistance = distanceToTarget;
-                                    toPlace = testBlock;
-                                }
-                            }
-                        }
-                        if (toPlace != null) {
-                            if (blockPlace.placeBlockIfPossible(toPlace.getLocation())) {
-                                npc.getEntity()
-                                        .teleport(toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
-                            }
-                        } else {
-                            Location toMove = null;
-                            // Is the path blocked
-                            b = currentLocation.getBlock();
-                            testDistance = Double.MAX_VALUE;
-                            Block toBreak = null;
-                            for (Block testBlock : List.of(
-                                    b.getRelative(BlockFace.EAST),
-                                    b.getRelative(BlockFace.WEST),
-                                    b.getRelative(BlockFace.NORTH),
-                                    b.getRelative(BlockFace.SOUTH))) {
-                                if (canMove(testBlock.getLocation())) {
-                                    var distanceToTarget = testBlock.getLocation().distance(target);
-                                    if (distanceToTarget < testDistance
-                                            && blockPlace.isPlacable(testBlock.getLocation())) {
-                                        testDistance = distanceToTarget;
-                                        toMove = testBlock.getLocation().clone().add(0.5,0,0.5);
-                                    }
-                                }
-                            }
-                            for (Block testBlock : List.of(
-                                    b.getRelative(BlockFace.EAST),
-                                    b.getRelative(BlockFace.WEST),
-                                    b.getRelative(BlockFace.NORTH),
-                                    b.getRelative(BlockFace.SOUTH),
-                                    b.getRelative(BlockFace.EAST).getRelative(BlockFace.DOWN),
-                                    b.getRelative(BlockFace.WEST).getRelative(BlockFace.DOWN),
-                                    b.getRelative(BlockFace.NORTH).getRelative(BlockFace.DOWN),
-                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.DOWN),
-                                    b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
-                                    b.getRelative(BlockFace.UP).getRelative(BlockFace.UP))) {
-                                var distanceToTarget = testBlock.getLocation().distance(target);
-                                if (blockPlace.isBreakableBlock(testBlock)) {
-                                    if (distanceToTarget < testDistance
-                                            && blockPlace.isPlacable(testBlock.getLocation())) {
-                                        testDistance = distanceToTarget;
-                                        toBreak = testBlock;
-                                        toMove = null;
-                                    }
-                                }
-                            }
-                            
-                            if (toBreak != null) {
-                                blockPlace.breakBlock(toBreak);
-                            } else if(toMove!=null) {
-                                Player aiPlayer = (Player) npc.getEntity();
-                                teleport(aiPlayer, toMove);
-                            }
-                        }
-                    }
+                    unstuck(currentLocation);
                 }
             }
         }
+    }
+
+    public boolean unstuck(Location currentLocation) {
+        // Stuck
+        var target = npc.getNavigator().getTargetAsLocation();
+        var horizontal = target.clone();
+        horizontal.setY(currentLocation.getY());
+
+        if (target.getBlockY() > currentLocation.getBlockY()
+                && blockPlace.isJumpPlacable(currentLocation)) {
+            // Try building up
+            if (blockPlace.placeBlockIfPossible(currentLocation)) {
+                Player aiPlayer = (Player) npc.getEntity();
+                teleport(aiPlayer, currentLocation.toBlockLocation().add(0.5, 1, 0.5));
+                return true;
+            }
+        } else if (target.getBlockY() < currentLocation.getBlockY() - 2
+                && horizontal.distance(currentLocation) < 2) {
+            // Try building up
+
+            Block standingOn = currentLocation.getBlock().getRelative(BlockFace.DOWN);
+            Logger.trace("standingOn {}", standingOn);
+            if (blockPlace.isBreakableBlock(standingOn)) {
+                Player aiPlayer = (Player) npc.getEntity();
+                teleport(aiPlayer, standingOn.getLocation().toBlockLocation().add(0.5, 1, 0.5));
+                blockPlace.breakBlock(standingOn);
+                Logger.trace("starting breaking of {}", standingOn);
+                return false;
+            } else {
+                Player aiPlayer = (Player) npc.getEntity();
+                Location l = tryFindingJump(currentLocation, target);
+                teleport(aiPlayer, l);
+                return true;
+            }
+        } else {
+            Block b = currentLocation.getBlock().getRelative(BlockFace.DOWN);
+            Block toPlace = null;
+            double testDistance = Double.MAX_VALUE;
+            Location toMove = null;
+            for (Block testBlock : List.of(
+                    b.getRelative(BlockFace.EAST),
+                    b.getRelative(BlockFace.WEST),
+                    b.getRelative(BlockFace.NORTH),
+                    b.getRelative(BlockFace.SOUTH))) {
+                if (!isEmpty(testBlock.getRelative(BlockFace.DOWN)) && canMove(testBlock.getLocation())) {
+                    var distanceToTarget = testBlock.getLocation().distance(target);
+                    if (distanceToTarget < testDistance
+                            && blockPlace.isPlacable(testBlock.getLocation())) {
+                        testDistance = distanceToTarget;
+                        toMove = testBlock.getLocation().clone().add(0.5, 0, 0.5);
+                    }
+                }
+            }
+            for (Block testBlock : List.of(
+                    b.getRelative(BlockFace.EAST),
+                    b.getRelative(BlockFace.WEST),
+                    b.getRelative(BlockFace.NORTH),
+                    b.getRelative(BlockFace.SOUTH))) {
+                var distanceToTarget = testBlock.getLocation().distance(target);
+
+                if (canBuildUp(testBlock.getLocation())) {
+                    if (distanceToTarget < testDistance && blockPlace.isPlacable(testBlock.getLocation())) {
+                        testDistance = distanceToTarget;
+                        toMove = null;
+                        toPlace = testBlock;
+                    }
+                }
+            }
+            if (toMove != null) {
+                Player aiPlayer = (Player) npc.getEntity();
+                teleport(aiPlayer, toMove);
+                return true;
+            } else if (toPlace != null) {
+                if (blockPlace.placeBlockIfPossible(toPlace.getLocation())) {
+                    Player aiPlayer = (Player) npc.getEntity();
+                    teleport(aiPlayer, toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
+                    return true;
+                }
+            } else {
+
+                // Is the path blocked
+                b = currentLocation.getBlock();
+                testDistance = Double.MAX_VALUE;
+                Block toBreak = null;
+
+                for (Block testBlock : List.of(
+                        b.getRelative(BlockFace.EAST),
+                        b.getRelative(BlockFace.WEST),
+                        b.getRelative(BlockFace.NORTH),
+                        b.getRelative(BlockFace.SOUTH),
+                        b.getRelative(BlockFace.EAST).getRelative(BlockFace.DOWN),
+                        b.getRelative(BlockFace.WEST).getRelative(BlockFace.DOWN),
+                        b.getRelative(BlockFace.NORTH).getRelative(BlockFace.DOWN),
+                        b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.DOWN),
+                        b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getRelative(BlockFace.UP),
+                        b.getRelative(BlockFace.UP).getRelative(BlockFace.UP))) {
+                    var distanceToTarget = testBlock.getLocation().distance(target);
+                    if (blockPlace.isBreakableBlock(testBlock)) {
+                        if (distanceToTarget < testDistance
+                                && blockPlace.isPlacable(testBlock.getLocation())) {
+                            testDistance = distanceToTarget;
+                            toBreak = testBlock;
+                            toMove = null;
+                        }
+                    }
+                }
+
+                if (toBreak != null) {
+                    blockPlace.breakBlock(toBreak);
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 }

@@ -133,17 +133,6 @@ public class AIService implements Listener {
                       
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
                         npc.getNavigator().getLocalParameters().distanceMargin(1);
-                        npc.getNavigator().getLocalParameters().stuckAction(new StuckAction() {
-                                @Override
-                                public boolean run(NPC arg0, Navigator arg1) {
-                                        Logger.trace("NPC IS STUCK {}", arg0.getName());
-                                        if (arg0.getOrAddTrait(GameModeTrait.class)
-                                                        .getGameMode() == GameMode.SURVIVAL) {
-                                                die((Player) arg0.getEntity());
-                                        }
-                                        return false;
-                                }
-                        });
                         npc.getNavigator().getLocalParameters().attackRange(1.5f);
                         npc.addTrait(new BridgePillarTrait());
                         npc.addTrait(new BedwarsBlockPlace());

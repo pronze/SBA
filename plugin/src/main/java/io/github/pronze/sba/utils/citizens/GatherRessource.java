@@ -25,7 +25,7 @@ public class GatherRessource implements FakeDeathTrait.AiGoal {
         target = null;
         double distance = Double.MAX_VALUE;
 
-        var entities = this.fakeDeathTrait.getNearbyEntities(25);
+        var entities = this.fakeDeathTrait.getNearbyEntities(50);
         for (Entity entity : entities) {
             if (entity instanceof Item) {
                 Item possibleTarget = (Item) entity;
