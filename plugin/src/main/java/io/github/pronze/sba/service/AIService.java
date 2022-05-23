@@ -6,7 +6,6 @@ import io.github.pronze.sba.config.SBAConfig.AIConfig;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.utils.citizens.AIPlayer;
 import io.github.pronze.sba.utils.citizens.BedwarsBlockPlace;
 import io.github.pronze.sba.utils.citizens.BridgePillarTrait;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
@@ -109,9 +108,6 @@ public class AIService implements Listener {
         }
 
         public NPC getNPC(Entity e) {
-                if (e instanceof AIPlayer) {
-                        return ((AIPlayer) e).getNpc();
-                }
                 if (registry != null) {
                         return registry.getNPC(e);
                 }
@@ -155,9 +151,6 @@ public class AIService implements Listener {
         }
 
         public boolean isNPC(Player player) {
-                if (player instanceof AIPlayer) {
-                        return true;
-                }
                 return registry != null && registry.isNPC(player);
         }
 
