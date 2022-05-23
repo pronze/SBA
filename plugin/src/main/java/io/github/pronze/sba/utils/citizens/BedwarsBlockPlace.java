@@ -16,7 +16,9 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 
 import gnu.trove.impl.unmodifiable.TUnmodifiableShortByteMap;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.SpawnerProtection;
+import io.github.pronze.sba.utils.Logger;
 import lombok.Getter;
 import lombok.Setter;
 import net.citizensnpcs.api.npc.BlockBreaker;
@@ -26,8 +28,13 @@ import net.citizensnpcs.api.trait.Trait;
 public class BedwarsBlockPlace extends Trait {
     public BedwarsBlockPlace() {
         super("BedwarsBlockPlace");
+
+        useStores = SBAConfig.getInstance().ai().useStores();
+        fallback = Material.matchMaterial(SBAConfig.getInstance().ai().infiniteItem());
     }
 
+    boolean useStores;
+    Material fallback;
     int cooldown = 10;
     int timerRefresh = 10;
     int blockBreakerCooldown = 0;
@@ -147,15 +154,26 @@ public class BedwarsBlockPlace extends Trait {
     }
 
     public ItemStack getBlock(Inventory inv) {
+
         ItemStack is = null;
-        for (var item : inv.getContents()) {
-            if (item != null) {
-                if (item.getType().isBlock())
-                    is = item;
+        if (useStores)
+        {
+            for (var item : inv.getContents()) {
+                if (item != null) {
+                    if (item.getType().isBlock())
+                        is = item;
+                }
+            }
+            // return new ItemStack(Material.OAK_PLANKS);
+            isInNeedOfBlock = is == null;
+            if (is == null) {
+                Logger.trace("NPC {} needs blocks", getNPC().getName());
             }
         }
-        // return new ItemStack(Material.OAK_PLANKS);
-        isInNeedOfBlock = is == null;
+        else
+        {
+            return new ItemStack(Material.OAK_PLANKS);
+        }
         return is;
     }
 

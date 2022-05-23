@@ -26,7 +26,7 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
         this.fakeDeathTrait = fakeDeathTrait;
     }
 
-    Block targetBlock = null;
+    Block bedBlock = null;
     List<Block> blockToBuild = new ArrayList<>();
 
     public void floodFill(Block b, int depth) {
@@ -63,22 +63,22 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
             return false;
         if (this.fakeDeathTrait.blockPlace().isInNeedOfBlock())
             return false;
-        if (targetBlock == null) {
+        if (bedBlock == null) {
             Player aiPlayer = (Player) this.fakeDeathTrait.getNPC().getEntity();
             Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
             if (g != null) {
                 var team = g.getTeamOfPlayer(aiPlayer);
                 if (team != null) {
-                    targetBlock = team.getTargetBlock().getBlock();
+                    bedBlock = team.getTargetBlock().getBlock();
 
-                    floodFill(targetBlock, 0);
-                    if (targetBlock.getType().toString().toUpperCase().contains("BED")) {
-                        floodFill(findSecondBedBlock(targetBlock), 0);
+                    floodFill(bedBlock, 0);
+                    if (bedBlock.getType().toString().toUpperCase().contains("BED")) {
+                        floodFill(findSecondBedBlock(bedBlock), 0);
                     }
                 }
             }
         } else {
-            if (this.fakeDeathTrait.blockPlace().isEmpty(targetBlock)) {
+            if (this.fakeDeathTrait.blockPlace().isEmpty(bedBlock)) {
                 return false;
             }
 
@@ -103,13 +103,16 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
                 .findFirst().orElse(null);
 
         if (toPlace != null) {
-            this.fakeDeathTrait.getNPC().getNavigator().setTarget(toPlace.getLocation());
             if (toPlace.getLocation().distance(this.fakeDeathTrait.getNPC().getEntity().getLocation()) < 4) {
                 this.fakeDeathTrait.blockPlace().placeBlockIfPossible(toPlace.getLocation());
                 if (toPlace.getLocation().distance(this.fakeDeathTrait.getNPC().getEntity().getLocation()) < 2) {
                     this.fakeDeathTrait.getNPC().getEntity()
                             .teleport(toPlace.getLocation().toBlockLocation().add(0.5, 1, 0.5));
                 }
+            }
+            else
+            {
+                this.fakeDeathTrait.getNPC().getNavigator().setTarget(toPlace.getLocation());
             }
         }
     }

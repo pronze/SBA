@@ -53,7 +53,7 @@ public class AttackOtherGoal implements FakeDeathTrait.AiGoal {
                                 if (distanceToCheck < distance) {
                                     distance = distanceToCheck;
                                     targetBlock = otherTeam.getTargetBlock().getBlock();
-                                    Logger.trace("AI will target {} ", targetBlock);
+                                    Logger.trace("AttackOtherGoal::AI will target {} ", targetBlock);
                                 }
                             } 
                         }
@@ -75,7 +75,7 @@ public class AttackOtherGoal implements FakeDeathTrait.AiGoal {
                                 if (!p.isDead() && p.getGameMode() == GameMode.SURVIVAL && distanceToCheck < distance) {
                                     distance = distanceToCheck;
                                     targetPlayer = p;
-                                    Logger.trace("AI will target {} ", targetPlayer);
+                                    Logger.trace("AttackOtherGoal::AI will target {} ", targetPlayer);
                                 }
                             }
                         }
@@ -92,16 +92,18 @@ public class AttackOtherGoal implements FakeDeathTrait.AiGoal {
         if (targetBlock != null) {
             if(fakeDeathTrait.blockPlace().isEmpty(targetBlock))
             {
-                targetBlock=null;
+                targetBlock = null;
                 return;
             }
-            if (!fakeDeathTrait.getNPC().getNavigator().isNavigating() || !fakeDeathTrait.getNPC().getNavigator().getTargetAsLocation().equals(targetBlock.getLocation())) {
-                fakeDeathTrait.getNPC().getNavigator().setTarget(targetBlock.getLocation());
-            }
+            
             Player aiPlayer = fakeDeathTrait.getNpcEntity();
             var distance = targetBlock.getLocation().distance(aiPlayer.getLocation());
-            if (distance < 2) {
-                    fakeDeathTrait.blockPlace().breakBlock(targetBlock);
+            if (distance < 3) {
+                fakeDeathTrait.blockPlace().breakBlock(targetBlock);
+            }
+            else
+            {
+                fakeDeathTrait.getNPC().getNavigator().setTarget(targetBlock.getLocation());
             }
         } else if (targetPlayer != null) {
                 fakeDeathTrait.getNPC().getNavigator().setTarget(targetPlayer, true);

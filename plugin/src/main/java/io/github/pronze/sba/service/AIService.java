@@ -2,6 +2,7 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.config.SBAConfig.AIConfig;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.utils.Logger;
@@ -77,10 +78,10 @@ import java.util.stream.Collectors;
 public class AIService implements Listener {
 
         NPCRegistry registry;
-
+        @Getter
+        AIConfig settings;
         public static AIService getInstance() {
                 return ServiceManager.get(AIService.class);
-
         }
 
         @SneakyThrows
@@ -91,9 +92,10 @@ public class AIService implements Listener {
         @OnPostEnable
         public void onPostEnabled() {
                 SBA.getInstance().registerListener(this);
+                settings = SBAConfig.getInstance().ai();
                 if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
                                 && SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens")
-                                                .isEnabled()) {
+                                                .isEnabled() && SBAConfig.getInstance().ai().enabled()) {
                         if (registry == null)
                                 registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
                 }
@@ -124,7 +126,6 @@ public class AIService implements Listener {
                         AtomicInteger count = new AtomicInteger(1);
                         registry.forEach(npc -> count.incrementAndGet());
                         final NPC npc = registry.createNPC(EntityType.PLAYER, "AI_" + count.get());
-                        //npc.data().set("removefromtablist", false);
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
                         fdt.setStrategy(strategy);
 
@@ -136,12 +137,12 @@ public class AIService implements Listener {
                         npc.getNavigator().getLocalParameters().attackRange(1.5f);
                         npc.addTrait(new BridgePillarTrait());
                         npc.addTrait(new BedwarsBlockPlace());
-                        npc.getOrAddTrait(SkinTrait.class).setSkinName("robot");
+                        npc.getOrAddTrait(SkinTrait.class).setSkinName(settings.skin());
                         Tasker.build(() -> {
                                 Player ai = (Player) (npc.getEntity());
                                 ai.setCanPickupItems(true);
                                 CompletableFuture.complete(ai);
-                        }).delay(4, TaskerTime.SECONDS).start();
+                        }).delay(settings.delay(), TaskerTime.TICKS).start();
 
                 } else {
                         CompletableFuture.complete(null);

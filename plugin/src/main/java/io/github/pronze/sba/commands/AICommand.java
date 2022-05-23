@@ -61,8 +61,10 @@ public class AICommand implements Listener {
     public void onPostEnabled() {
         if (init)
             return;
-        CommandManager.getInstance().getAnnotationParser().parse(this);
-        SBA.getInstance().registerListener(this);
+        if (SBAConfig.getInstance().ai().enabled()) {
+            CommandManager.getInstance().getAnnotationParser().parse(this);
+            SBA.getInstance().registerListener(this);
+        }
         init = true;
     }
 
@@ -83,9 +85,9 @@ public class AICommand implements Listener {
 
         final var game = Main.getInstance().getGameOfPlayer(player);
 
-        Optional<Player> aiPlayer = game.getConnectedPlayers().stream().filter(pl->AIService.getInstance().isNPC(pl)).findFirst();
-        aiPlayer.ifPresent(pl->
-        {
+        Optional<Player> aiPlayer = game.getConnectedPlayers().stream().filter(pl -> AIService.getInstance().isNPC(pl))
+                .findFirst();
+        aiPlayer.ifPresent(pl -> {
             game.leaveFromGame(pl);
         });
     }
@@ -145,15 +147,16 @@ public class AICommand implements Listener {
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
-                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.AGRESSIVE).thenAccept(ai -> {
-                    Logger.info("{}", ai);
-                    int current_ = game.countConnectedPlayers();
-                    if (current_ < maxPlayer) {
-                        game.joinToGame(ai);
-                    } else {
-                        AIService.getInstance().getNPC(ai).destroy();
-                    }
-                });
+                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.AGRESSIVE)
+                        .thenAccept(ai -> {
+                            Logger.info("{}", ai);
+                            int current_ = game.countConnectedPlayers();
+                            if (current_ < maxPlayer) {
+                                game.joinToGame(ai);
+                            } else {
+                                AIService.getInstance().getNPC(ai).destroy();
+                            }
+                        });
             }
         }
     }
@@ -179,15 +182,16 @@ public class AICommand implements Listener {
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
-                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.DEFENSIVE).thenAccept(ai -> {
-                    Logger.info("{}", ai);
-                    int current_ = game.countConnectedPlayers();
-                    if (current_ < maxPlayer) {
-                        game.joinToGame(ai);
-                    } else {
-                        AIService.getInstance().getNPC(ai).destroy();
-                    }
-                });
+                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.DEFENSIVE)
+                        .thenAccept(ai -> {
+                            Logger.info("{}", ai);
+                            int current_ = game.countConnectedPlayers();
+                            if (current_ < maxPlayer) {
+                                game.joinToGame(ai);
+                            } else {
+                                AIService.getInstance().getNPC(ai).destroy();
+                            }
+                        });
             }
         }
     }
@@ -213,19 +217,18 @@ public class AICommand implements Listener {
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
-                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.BALANCED).thenAccept(ai -> {
-                    Logger.info("{}", ai);
-                    int current_ = game.countConnectedPlayers();
-                    if (current_ < maxPlayer) {
-                        game.joinToGame(ai);
-                    } else {
-                        AIService.getInstance().getNPC(ai).destroy();
-                    }
-                });
+                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.BALANCED)
+                        .thenAccept(ai -> {
+                            Logger.info("{}", ai);
+                            int current_ = game.countConnectedPlayers();
+                            if (current_ < maxPlayer) {
+                                game.joinToGame(ai);
+                            } else {
+                                AIService.getInstance().getNPC(ai).destroy();
+                            }
+                        });
             }
         }
     }
-
-    
 
 }

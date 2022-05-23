@@ -7,7 +7,9 @@ import io.github.pronze.sba.utils.Logger;
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
@@ -328,6 +330,13 @@ public class SBAConfig implements IConfigurator {
                     .section("update-checker")
                     .key("console").defValue(true)
                     .key("admins").defValue(true)
+                    .back()
+                    .section("ai")
+                    .key("enabled").defValue(false)
+                    .key("skins").defValue(List.of("robot", "artificial", "dream", "cloud", "zombie"))
+                    .key("delay-in-ticks").defValue(80)
+                    .key("use-stores").defValue(false)
+                    .key("infinite-material").defValue(Material.OAK_PLANKS.toString())
                     .back();
 
             generator.saveIfModified();
@@ -347,6 +356,36 @@ public class SBAConfig implements IConfigurator {
     public boolean replaceStoreWithCitizen()
     {
         return node("replace-stores-with-citizen").getBoolean(false);
+    }
+
+    public AIConfig ai()
+    {
+        return new AIConfig();
+    }
+
+    public class AIConfig
+    {
+        public boolean enabled()
+        {
+            return getBoolean("ai.enabled", false);
+        }
+        public String skin()
+        {
+            var lst = new ArrayList<>(getStringList("ai.skins"));
+            Collections.shuffle(lst);
+            return lst.get(0);
+        }
+        public long delay()
+        {
+            return getInt("ai.delay-in-ticks", 80);
+        }
+        public boolean useStores() {
+            return getBoolean("ai.use-stores", false);
+        }
+        public @NotNull String infiniteItem() {
+            return getString("ai.infinite-material",Material.OAK_PLANKS.toString());
+        }
+
     }
     public boolean shouldCheckUpdate()
     {

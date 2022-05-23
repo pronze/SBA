@@ -44,7 +44,6 @@ public class BridgePillarTrait extends Trait {
             new StuckAction() {
                 @Override
                 public boolean run(NPC arg0, Navigator arg1) {
-                        Logger.trace("NPC IS STUCK {}", arg0.getName());
                         return unstuck(arg0.getEntity().getLocation());
                 }
         }
@@ -149,6 +148,8 @@ public class BridgePillarTrait extends Trait {
     }
 
     public boolean unstuck(Location currentLocation) {
+        Logger.trace("NPC IS STUCK {}", getNPC().getName());
+
         // Stuck
         var target = npc.getNavigator().getTargetAsLocation();
         var horizontal = target.clone();

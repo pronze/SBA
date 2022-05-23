@@ -37,8 +37,7 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
     public boolean isAvailable() {
         // TODO Auto-generated method stub
 
-        if(fakeDeathTrait.blockPlace().isInNeedOfBlock())
-        {
+        if (fakeDeathTrait.blockPlace().isInNeedOfBlock()) {
             Player aiPlayer = (Player) this.fakeDeathTrait.getNPC().getEntity();
             Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
             if (gsTarget == null) {
@@ -62,13 +61,16 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
                                             gsTarget = store;
                                             distance = distanceToShop;
 
-                                            Logger.trace("NPC Can afford this trade {} for {}", tr.getIs(), tr.getP() );
+                                            Logger.trace("NPC {} Can afford this trade {} for {}",fakeDeathTrait.getNPC().getName(), tr.getIs(),
+                                                    tr.getP());
                                         }
                                     }
                                 }
                             });
                         }
                     }
+                    if (tr == null)
+                        Logger.trace("NPC {} Cannot afford the required blocks",fakeDeathTrait.getNPC().getName());
                 }
             }
         }
@@ -98,6 +100,8 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
         var distanceToShop = gsTarget.getStoreLocation().distance(aiPlayer.getLocation());
         if (distanceToShop > 3) {
             this.fakeDeathTrait.getNPC().getNavigator().setTarget(gsTarget.getStoreLocation());
+            Logger.trace("NPC {} moving towards store",fakeDeathTrait.getNPC().getName());
+
         } else {
             var potentialItemSpawnerType = Main.getSpawnerType(tr.getP().getCurrency());
             if (potentialItemSpawnerType != null) {
@@ -108,12 +112,11 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
 
                 fakeDeathTrait.blockPlace().setInNeedOfBlock(false);
 
-                Logger.trace("NPC doing trade {} for {}", tr.getIs(), tr.getP() );
+                Logger.trace("NPC {} doing trade {} for {}",fakeDeathTrait.getNPC().getName(), tr.getIs(), tr.getP());
             }
 
             gsTarget = null;
             tr = null;
-
 
         }
         // Target the shop
