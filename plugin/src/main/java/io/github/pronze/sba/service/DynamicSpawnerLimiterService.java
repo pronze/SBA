@@ -7,6 +7,7 @@ import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.RotatingGenerator;
 import io.github.pronze.sba.utils.Logger;
+import lombok.Getter;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -26,6 +27,7 @@ import java.util.Map;
 
 @Service
 public class DynamicSpawnerLimiterService implements Listener {
+    @Getter
     private final Map<String, Map<Integer, Integer>> limiters = new HashMap<>();
 
     public static DynamicSpawnerLimiterService getInstance() {
@@ -95,6 +97,16 @@ public class DynamicSpawnerLimiterService implements Listener {
         setAccordingly(event.getGame(), true);
     }
 
+    public int getStartingTier(Game game, ItemSpawner spawner)
+    {
+        var material = spawner.getItemSpawnerType().getName().toLowerCase();
+        if (limiters.containsKey(material)) {
+            var limiter = limiters.get(material);
+            if (limiter.containsKey(0))
+                return 0;
+        }
+        return 1;
+    }
     private int getTier(Game game, ItemSpawner spawner) {
         final var arena = ArenaManager
                 .getInstance()
@@ -111,7 +123,7 @@ public class DynamicSpawnerLimiterService implements Listener {
             return 1;
     }
 
-    private void setAccordingly(Game game, boolean isUpgraded) {
+    public void setAccordingly(Game game, boolean isUpgraded) {
         for (var spawner : game.getItemSpawners()) {
             var material = spawner.getItemSpawnerType().getName().toLowerCase();
             if (limiters.containsKey(material)) {

@@ -7,6 +7,7 @@ import io.github.pronze.sba.game.tasks.BaseGameTask;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.manager.ScoreboardManager;
+import io.github.pronze.sba.service.DynamicSpawnerLimiterService;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -31,6 +32,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
+import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
@@ -514,6 +516,11 @@ public class Arena implements IArena {
                 itemSpawner.getLocation());
         if (generator.getStack().getType() != Material.AIR)
             generator.spawn(game.getConnectedPlayers());
+
+        var dyn = DynamicSpawnerLimiterService.getInstance();
+        generator.setTierLevel(dyn.getStartingTier(game, itemSpawner));
+        dyn.setAccordingly(game, false);
+
         rotatingGenerators.add(generator);
     }
 
