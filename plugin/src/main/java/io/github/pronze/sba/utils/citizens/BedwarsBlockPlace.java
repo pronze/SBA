@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -66,7 +67,6 @@ public class BedwarsBlockPlace extends Trait {
         Player aiPlayer = (Player) npc.getEntity();
         ItemStack blockToPlace = getBlock(aiPlayer.getInventory());
 
-        
         if (blockToPlace != null) {
 
             var against = getAgainst(block);
@@ -91,6 +91,18 @@ public class BedwarsBlockPlace extends Trait {
         return false;
     }
 
+    public Block viewedBlock(Block b) {
+        Player aiPlayer = (Player) getNPC().getEntity();
+        if (aiPlayer == null)
+            return null;
+        World w = aiPlayer.getWorld();
+        var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
+                aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
+                10);
+
+        return rayTraceCheck.getHitBlock();
+    }
+
     public boolean isBreakableBlock(Block b) {
         if (isBreaking())
             return false;
@@ -98,19 +110,35 @@ public class BedwarsBlockPlace extends Trait {
         Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
         if (g == null)
             return false;
-        return g.isBlockAddedDuringGame(b.getLocation());
+        if (!g.isBlockAddedDuringGame(b.getLocation()))
+            return false;
+        return isBlockVisible(b);
+    }
+
+    public boolean isBlockVisible(Block b) {
+        Player aiPlayer = (Player) getNPC().getEntity();
+        if (aiPlayer == null)
+            return false;
+        World w = aiPlayer.getWorld();
+        var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
+                aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
+                10);
+
+        return rayTraceCheck.getHitBlock().equals(b);
     }
 
     public void breakBlock(Block b) {
-        Player aiPlayer = (Player) npc.getEntity();
-        var destroySpeed = b.getDestroySpeed(aiPlayer.getItemInHand());
+        if (b != null) {
+            Player aiPlayer = (Player) npc.getEntity();
+            var destroySpeed = b.getDestroySpeed(aiPlayer.getItemInHand());
 
-        blockBreakerCooldown = (int) (100 / destroySpeed);
-        blockBreakerTotal = (int) (100 / destroySpeed);
-        blockToBreak = b;
-        startBreak = aiPlayer.getLocation();
+            blockBreakerCooldown = (int) (100 / destroySpeed);
+            blockBreakerTotal = (int) (100 / destroySpeed);
+            blockToBreak = b;
+            startBreak = aiPlayer.getLocation();
 
-        npc.getNavigator().cancelNavigation();
+            npc.getNavigator().cancelNavigation();
+        }
     }
 
     public boolean isBreaking() {
@@ -158,8 +186,7 @@ public class BedwarsBlockPlace extends Trait {
     public ItemStack getBlock(Inventory inv) {
 
         ItemStack is = null;
-        if (useStores)
-        {
+        if (useStores) {
             for (var item : inv.getContents()) {
                 if (item != null) {
                     if (item.getType().isBlock())
@@ -171,9 +198,7 @@ public class BedwarsBlockPlace extends Trait {
             if (is == null) {
                 Logger.trace("NPC {} needs blocks", getNPC().getName());
             }
-        }
-        else
-        {
+        } else {
             return new ItemStack(Material.OAK_PLANKS);
         }
         return is;

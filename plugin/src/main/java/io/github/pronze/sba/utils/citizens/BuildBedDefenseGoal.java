@@ -61,6 +61,7 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
     public boolean isAvailable() {
         if (this.fakeDeathTrait.blockPlace() == null)
             return false;
+        this.fakeDeathTrait.blockPlace().getBlock(this.fakeDeathTrait.getNpcEntity().getInventory());
         if (this.fakeDeathTrait.blockPlace().isInNeedOfBlock())
             return false;
         if (bedBlock == null) {
@@ -109,9 +110,7 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
                     this.fakeDeathTrait.getNPC().getEntity()
                             .teleport(toPlace.getLocation().toBlockLocation().add(0.5, 1, 0.5));
                 }
-            }
-            else
-            {
+            } else {
                 this.fakeDeathTrait.getNPC().getNavigator().setTarget(toPlace.getLocation());
             }
         }

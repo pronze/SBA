@@ -99,7 +99,7 @@ public class AttackOtherGoal implements FakeDeathTrait.AiGoal {
             Player aiPlayer = fakeDeathTrait.getNpcEntity();
             var distance = targetBlock.getLocation().distance(aiPlayer.getLocation());
             if (distance < 3) {
-                fakeDeathTrait.blockPlace().breakBlock(targetBlock);
+                fakeDeathTrait.blockPlace().breakBlock(fakeDeathTrait.blockPlace().viewedBlock(targetBlock));
             }
             else
             {
