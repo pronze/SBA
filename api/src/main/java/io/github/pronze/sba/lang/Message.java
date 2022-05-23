@@ -68,7 +68,7 @@ public class Message {
                         .getConfigurator()
                         .getString("prefix", "[SBA]") + ": " + str;
             }
-            component.append(MiniMessage.get().parse(str));
+            component.append(MiniMessage.miniMessage().deserialize(str));
             if (original.indexOf(str) + 1 != original.size()) {
                 component.append(Component.text("\n"));
             }
@@ -85,7 +85,7 @@ public class Message {
                     .getConfigurator()
                     .getString("prefix", "[SBA]") + ": ";
         }
-        return AdventureHelper.toLegacy(MiniMessage.get().parse(string));
+        return AdventureHelper.toLegacy(MiniMessage.miniMessage().deserialize(string));
     }
 
     public List<String> toStringList() {
@@ -107,7 +107,7 @@ public class Message {
                     }
                     return str;
                 })
-                .map(MiniMessage.get()::parse)
+                .map(MiniMessage.miniMessage()::deserialize)
                 .collect(Collectors.toList());
     }
 
