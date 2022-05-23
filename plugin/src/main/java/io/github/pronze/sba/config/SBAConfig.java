@@ -336,7 +336,7 @@ public class SBAConfig implements IConfigurator {
                     .key("skins").defValue(List.of("robot", "artificial", "dream", "cloud", "zombie"))
                     .key("delay-in-ticks").defValue(80)
                     .key("use-stores").defValue(false)
-                    .key("infinite-material").defValue(Material.OAK_PLANKS.toString())
+                    .key("infinite-material").defValue("OAK_PLANKS")
                     .back();
 
             generator.saveIfModified();
