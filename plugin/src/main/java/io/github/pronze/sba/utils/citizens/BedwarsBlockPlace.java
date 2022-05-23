@@ -96,6 +96,8 @@ public class BedwarsBlockPlace extends Trait {
             return false;
         Player aiPlayer = (Player) npc.getEntity();
         Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
+        if (g == null)
+            return false;
         return g.isBlockAddedDuringGame(b.getLocation());
     }
 

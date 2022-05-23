@@ -132,9 +132,12 @@ public class AIService implements Listener {
                         npc.spawn(loc);
                         npc.setProtected(false);
                       
+                        npc.data().set(NPC.REMOVE_FROM_PLAYERLIST_METADATA, false);
+
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
                         npc.getNavigator().getLocalParameters().distanceMargin(1);
                         npc.getNavigator().getLocalParameters().attackRange(1.5f);
+                        npc.getNavigator().getLocalParameters().avoidWater(true);
                         npc.addTrait(new BridgePillarTrait());
                         npc.addTrait(new BedwarsBlockPlace());
                         npc.getOrAddTrait(SkinTrait.class).setSkinName(settings.skin());
