@@ -58,6 +58,7 @@ import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
 
 import java.lang.reflect.Field;
@@ -83,7 +84,7 @@ public class AIService implements Listener {
         public static AIService getInstance() {
                 return ServiceManager.get(AIService.class);
         }
-        
+
         public AIService() {
 
         }
@@ -185,16 +186,21 @@ public class AIService implements Listener {
                         if (entity.getHealth() < damageCount + 1) {
                                 if (event.getDamager() instanceof Player) {
                                         Player killer = (Player) event.getDamager();
-                                        try {
-                                                Object playerHandle = getHandle(entity);
-                                                Object killerHandle = killer == null ? null : getHandle(killer);
-                                                Field nmsPlayer = this.getPlayerKiller == null
-                                                                ? this.getPlayerKiller = playerHandle.getClass()
-                                                                                .getDeclaredField("killer")
-                                                                : this.getPlayerKiller;
-                                                nmsPlayer.set(playerHandle, killerHandle);
-                                        } catch (Exception e) {
-                                                e.printStackTrace();
+                                        if (Reflect.hasMethod(entity.getClass(), "setKiller", Player.class)) {
+                                                entity.setKiller(killer);
+                                        } else {
+
+                                                try {
+                                                        Object playerHandle = getHandle(entity);
+                                                        Object killerHandle = killer == null ? null : getHandle(killer);
+                                                        Field nmsPlayer = this.getPlayerKiller == null
+                                                                        ? this.getPlayerKiller = playerHandle.getClass()
+                                                                                        .getDeclaredField("killer")
+                                                                        : this.getPlayerKiller;
+                                                        nmsPlayer.set(playerHandle, killerHandle);
+                                                } catch (Exception e) {
+                                                        e.printStackTrace();
+                                                }
                                         }
                                 }
                         }
