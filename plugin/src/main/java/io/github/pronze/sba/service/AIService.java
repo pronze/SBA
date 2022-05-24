@@ -79,11 +79,11 @@ public class AIService implements Listener {
         NPCRegistry registry;
         @Getter
         AIConfig settings;
+
         public static AIService getInstance() {
                 return ServiceManager.get(AIService.class);
         }
-
-        @SneakyThrows
+        
         public AIService() {
 
         }
@@ -94,7 +94,8 @@ public class AIService implements Listener {
                 settings = SBAConfig.getInstance().ai();
                 if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
                                 && SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens")
-                                                .isEnabled() && SBAConfig.getInstance().ai().enabled()) {
+                                                .isEnabled()
+                                && SBAConfig.getInstance().ai().enabled()) {
                         if (registry == null)
                                 registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
                 }
@@ -113,9 +114,11 @@ public class AIService implements Listener {
                 }
                 return null;
         }
+
         public CompletableFuture<Player> spawnAI(Location loc) {
                 return spawnAI(loc, Strategy.ANY);
         }
+
         public CompletableFuture<Player> spawnAI(Location loc, FakeDeathTrait.Strategy strategy) {
                 CompletableFuture<Player> CompletableFuture = new CompletableFuture<Player>();
                 if (registry != null) {
@@ -127,7 +130,7 @@ public class AIService implements Listener {
 
                         npc.spawn(loc);
                         npc.setProtected(false);
-                      
+
                         npc.data().set(NPC.REMOVE_FROM_PLAYERLIST_METADATA, false);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
@@ -181,21 +184,17 @@ public class AIService implements Listener {
 
                         if (entity.getHealth() < damageCount + 1) {
                                 if (event.getDamager() instanceof Player) {
+                                        Player killer = (Player) event.getDamager();
                                         try {
-                                                entity.setKiller((Player) event.getDamager());
-                                        } catch (Throwable nsm) {
-                                                Player killer = (Player) event.getDamager();
-                                                try {
-                                                        Object playerHandle = getHandle(entity);
-                                                        Object killerHandle = killer == null ? null : getHandle(killer);
-                                                        Field nmsPlayer = this.getPlayerKiller == null
-                                                                        ? this.getPlayerKiller = playerHandle.getClass()
-                                                                                        .getDeclaredField("killer")
-                                                                        : this.getPlayerKiller;
-                                                        nmsPlayer.set(playerHandle, killerHandle);
-                                                } catch (Exception e) {
-                                                        e.printStackTrace();
-                                                }
+                                                Object playerHandle = getHandle(entity);
+                                                Object killerHandle = killer == null ? null : getHandle(killer);
+                                                Field nmsPlayer = this.getPlayerKiller == null
+                                                                ? this.getPlayerKiller = playerHandle.getClass()
+                                                                                .getDeclaredField("killer")
+                                                                : this.getPlayerKiller;
+                                                nmsPlayer.set(playerHandle, killerHandle);
+                                        } catch (Exception e) {
+                                                e.printStackTrace();
                                         }
                                 }
                         }

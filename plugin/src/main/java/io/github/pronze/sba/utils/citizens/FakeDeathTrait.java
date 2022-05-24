@@ -43,7 +43,6 @@ import lombok.experimental.Accessors;
 import net.citizensnpcs.api.trait.Trait;
 import net.kyori.adventure.text.Component;
 
-@Data()
 public class FakeDeathTrait extends Trait {
 
     // Objective priority

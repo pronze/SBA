@@ -107,8 +107,7 @@ public class BuildBedDefenseGoal implements FakeDeathTrait.AiGoal {
             if (toPlace.getLocation().distance(this.fakeDeathTrait.getNPC().getEntity().getLocation()) < 4) {
                 this.fakeDeathTrait.blockPlace().placeBlockIfPossible(toPlace.getLocation());
                 if (toPlace.getLocation().distance(this.fakeDeathTrait.getNPC().getEntity().getLocation()) < 2) {
-                    this.fakeDeathTrait.getNPC().getEntity()
-                            .teleport(toPlace.getLocation().toBlockLocation().add(0.5, 1, 0.5));
+                    this.fakeDeathTrait.blockPlace().teleport(fakeDeathTrait.getNpcEntity(), fakeDeathTrait.blockPlace().blockLocation(toPlace.getLocation()).add(0.5, 1, 0.5));
                 }
             } else {
                 this.fakeDeathTrait.getNPC().getNavigator().setTarget(toPlace.getLocation());

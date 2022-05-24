@@ -38,6 +38,8 @@ import org.screamingsandals.bedwars.game.GamePlayer;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+import org.screamingsandals.lib.utils.reflect.Reflect;
+
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 import java.util.ArrayList;
@@ -370,7 +372,8 @@ public class PlayerListener implements Listener {
             }
 
             try{
-                event.setReplacement(new ItemStack(Material.AIR));
+                Reflect.setField(event.getClass(), "replacement", event, new ItemStack(Material.AIR));
+                //event.setReplacement(new ItemStack(Material.AIR));
             }
             catch(Throwable t){
             }

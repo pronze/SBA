@@ -64,8 +64,7 @@ public class AttackNearbyPlayerGoal implements FakeDeathTrait.AiGoal {
             var team = g.getTeamOfPlayer(aiPlayer);
             if (team != null) {
                 Block targetBlock = team.getTargetBlock().getBlock();
-                targetBlock.getWorld().getNearbyLivingEntities(targetBlock.getLocation(), range);
-                for (Entity entity : entities) {
+                for (Entity entity : targetBlock.getWorld().getNearbyEntities(targetBlock.getLocation(), range,range,range)) {
                     if (entity instanceof Player && !entity.equals(this.fakeDeathTrait.getNPC().getEntity())) {
                         Player possibleTarget = (Player) entity;
                         if (possibleTarget.getGameMode() != GameMode.SURVIVAL)

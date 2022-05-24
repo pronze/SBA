@@ -1,5 +1,6 @@
 package io.github.pronze.sba.utils.citizens;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -15,6 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.lib.utils.reflect.Reflect;
 
 import gnu.trove.impl.unmodifiable.TUnmodifiableShortByteMap;
 import io.github.pronze.sba.config.SBAConfig;
@@ -127,10 +129,36 @@ public class BedwarsBlockPlace extends Trait {
         return rayTraceCheck.getHitBlock().equals(b);
     }
 
+    /*public float getDestroySpeed(ItemStack itemStack, boolean considerEnchants) {
+                net.minecraft.world.item.ItemStack nmsItemStack;
+                if (itemStack instanceof CraftItemStack) {
+                    nmsItemStack = ((CraftItemStack) itemStack).handle;
+                    if (nmsItemStack == null) {
+                        nmsItemStack = net.minecraft.world.item.ItemStack.EMPTY;
+                    }
+                } else {
+                    nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+                }
+                float speed = nmsItemStack.getDestroySpeed(this.getNMS().getBlock().defaultBlockState());
+                if (speed > 1.0F && considerEnchants) {
+                    int enchantLevel = net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY, nmsItemStack);
+                    if (enchantLevel > 0) {
+                        speed += enchantLevel * enchantLevel + 1;
+                    }
+                }
+                return speed;
+            }*/
+
     public void breakBlock(Block b) {
         if (b != null) {
             Player aiPlayer = (Player) npc.getEntity();
-            var destroySpeed = b.getDestroySpeed(aiPlayer.getItemInHand());
+            
+            float destroySpeed=1;
+            if(Reflect.hasMethod(b.getClass(), "getDestroySpeed", ItemStack.class, boolean.class))
+            {
+                var method = Reflect.getMethod(b.getClass(), "getDestroySpeed", ItemStack.class, boolean.class);
+                destroySpeed = (float)method.invokeInstance(b, aiPlayer.getItemInHand(),true);
+            }
 
             blockBreakerCooldown = (int) (100 / destroySpeed);
             blockBreakerTotal = (int) (100 / destroySpeed);
@@ -170,7 +198,7 @@ public class BedwarsBlockPlace extends Trait {
 
                     Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
                     g.getConnectedPlayers().forEach(otherPlayer -> {
-                        otherPlayer.sendBlockDamage(blockToBreak.getLocation().toBlockLocation(),
+                        otherPlayer.sendBlockDamage(blockLocation(blockToBreak.getLocation()),
                                 1 - ((float) blockBreakerCooldown / (float) blockBreakerTotal));
                     });
                 }
@@ -217,6 +245,23 @@ public class BedwarsBlockPlace extends Trait {
         return !SpawnerProtection.getInstance().isProtected(Main.getInstance().getGameOfPlayer(aiPlayer),
                 currentLocation)
                 && getAgainst(currentLocation.getBlock()) != null && isEmpty(currentLocation.getBlock());
+    }
+
+    public boolean teleport(Player aiPlayer, Location l) {
+        try {
+            if (isEmpty(l.getBlock()) && isEmpty(l.getBlock().getRelative(BlockFace.UP))) {
+                aiPlayer.teleport(l);
+                return true;
+            }
+        } catch (Throwable ignored) {
+
+        }
+        return false;
+    }
+
+    public Location blockLocation(Location l)
+    {
+        return new Location(l.getWorld(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
     }
 
 }

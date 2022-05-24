@@ -107,12 +107,8 @@ public class BridgePillarTrait extends Trait {
         return null;
     }
 
-    public void teleport(Player aiPlayer, Location l) {
-        try {
-            aiPlayer.teleport(l);
-        } catch (Throwable ignored) {
-
-        }
+    public boolean teleport(Player aiPlayer, Location l) {
+       return blockPlace.teleport(aiPlayer,l);
     }
 
     @Override
@@ -146,6 +142,10 @@ public class BridgePillarTrait extends Trait {
             }
         }
     }
+    public Location blockLocation(Location l)
+    {
+        return blockPlace.blockLocation(l);
+    }
 
     public boolean unstuck(Location currentLocation) {
         Logger.trace("NPC IS STUCK {}", getNPC().getName());
@@ -160,7 +160,7 @@ public class BridgePillarTrait extends Trait {
             // Try building up
             if (blockPlace.placeBlockIfPossible(currentLocation)) {
                 Player aiPlayer = (Player) npc.getEntity();
-                teleport(aiPlayer, currentLocation.toBlockLocation().add(0.5, 1, 0.5));
+                teleport(aiPlayer, blockLocation(currentLocation).add(0.5, 1, 0.5));
                 return true;
             }
         } else if (target.getBlockY() < currentLocation.getBlockY() - 2
@@ -171,7 +171,7 @@ public class BridgePillarTrait extends Trait {
             Logger.trace("standingOn {}", standingOn);
             if (blockPlace.isBreakableBlock(standingOn)) {
                 Player aiPlayer = (Player) npc.getEntity();
-                teleport(aiPlayer, standingOn.getLocation().toBlockLocation().add(0.5, 1, 0.5));
+                teleport(aiPlayer, blockLocation(standingOn.getLocation()).add(0.5, 1, 0.5));
                 blockPlace.breakBlock(standingOn);
                 Logger.trace("starting breaking of {}", standingOn);
                 return false;
@@ -222,7 +222,7 @@ public class BridgePillarTrait extends Trait {
             } else if (toPlace != null) {
                 if (blockPlace.placeBlockIfPossible(toPlace.getLocation())) {
                     Player aiPlayer = (Player) npc.getEntity();
-                    teleport(aiPlayer, toPlace.getLocation().toBlockLocation().clone().add(0.5, 1, 0.5));
+                    teleport(aiPlayer, blockLocation(toPlace.getLocation()).clone().add(0.5, 1, 0.5));
                     return true;
                 }
             } else {
