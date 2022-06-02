@@ -70,6 +70,10 @@ public class NPCStoreService implements Listener {
                 SBA.getInstance().registerListener(this);
                 EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
 
+                if (Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
+                        SBA.getInstance().registerListener(new CitizensListeners());
+                }
+
                 shopSkin = new NPCSkin(
                                 SBAConfig.getInstance().node("shop", "normal-shop", "skin", "value").getString(),
                                 SBAConfig.getInstance().node("shop", "normal-shop", "skin", "signature").getString());
@@ -79,57 +83,61 @@ public class NPCStoreService implements Listener {
                                 SBAConfig.getInstance().node("shop", "upgrade-shop", "skin", "signature").getString());
         }
 
-        @EventHandler
-        public void rclick(net.citizensnpcs.api.event.NPCRightClickEvent event) {
-                var npc = event.getNPC();
-                // Handle a click on a NPC. The event has a getNPC() method.
-                // Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on
-                // this NPC!
-                final var player = event.getClicker();
-                npcClick(npc, player);
-        }
-
-        private void npcClick(net.citizensnpcs.api.npc.NPC npc, final Player player) {
-                if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
-                        return;
+        private class CitizensListeners implements Listener {
+                @EventHandler
+                public void rclick(net.citizensnpcs.api.event.NPCRightClickEvent event) {
+                        var npc = event.getNPC();
+                        // Handle a click on a NPC. The event has a getNPC() method.
+                        // Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on
+                        // this NPC!
+                        final var player = event.getClicker();
+                        npcClick(npc, player);
                 }
-                if (!SBAConfig.getInstance().replaceStoreWithCitizen()) {
-                        return;
-                }
-                final var game = Main.getInstance().getGameOfPlayer(player);
-                ArenaManager
-                                .getInstance()
-                                .getArenaMap()
-                                .values()
-                                .stream()
-                                .filter(iArena -> iArena.getCitizensStores().values().contains(npc))
-                                .forEach(arena -> {
 
-                                        GameStore store = null;
-                                        for (var i : arena.getCitizensStores().entrySet()) {
-                                                if (i.getValue().equals(npc))
-                                                        store = (GameStore) i.getKey();
-                                        }
+                private void npcClick(net.citizensnpcs.api.npc.NPC npc, final Player player) {
+                        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
+                                return;
+                        }
+                        if (!SBAConfig.getInstance().replaceStoreWithCitizen()) {
+                                return;
+                        }
+                        final var game = Main.getInstance().getGameOfPlayer(player);
+                        ArenaManager
+                                        .getInstance()
+                                        .getArenaMap()
+                                        .values()
+                                        .stream()
+                                        .filter(iArena -> iArena.getCitizensStores().values().contains(npc))
+                                        .forEach(arena -> {
 
-                                        BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
-                                                        player, store, null);
-
-                                        new BukkitRunnable() {
-                                                public void run() {
-                                                        Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
+                                                GameStore store = null;
+                                                for (var i : arena.getCitizensStores().entrySet()) {
+                                                        if (i.getValue().equals(npc))
+                                                                store = (GameStore) i.getKey();
                                                 }
-                                        }.runTask(SBA.getPluginInstance());
-                                });
-        }
 
-        @EventHandler
-        public void lclick(net.citizensnpcs.api.event.NPCLeftClickEvent event) {
-                var npc = event.getNPC();
-                // Handle a click on a NPC. The event has a getNPC() method.
-                // Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on
-                // this NPC!
-                final var player = event.getClicker();
-                npcClick(npc, player);
+                                                BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                                                                player, store, null);
+
+                                                new BukkitRunnable() {
+                                                        public void run() {
+                                                                Bukkit.getServer().getPluginManager()
+                                                                                .callEvent(openShopEvent);
+                                                        }
+                                                }.runTask(SBA.getPluginInstance());
+                                        });
+                }
+
+                @EventHandler
+                public void lclick(net.citizensnpcs.api.event.NPCLeftClickEvent event) {
+                        var npc = event.getNPC();
+                        // Handle a click on a NPC. The event has a getNPC() method.
+                        // Be sure to check event.getNPC() == this.getNPC() so you only handle clicks on
+                        // this NPC!
+                        final var player = event.getClicker();
+                        npcClick(npc, player);
+                }
+
         }
 
         public void onNPCTouched(NPCInteractEvent event) {
