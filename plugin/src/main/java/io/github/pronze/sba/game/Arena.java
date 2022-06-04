@@ -16,7 +16,6 @@ import io.github.pronze.sba.utils.citizens.ReturnToStoreTrait;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.MemoryNPCDataStore;
-import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.trait.Gravity;
 import net.citizensnpcs.trait.LookClose;
 import net.citizensnpcs.trait.SkinTrait;
@@ -66,8 +65,8 @@ public class Arena implements IArena {
     private final GameScoreboardManager scoreboardManager;
     private final Game game;
     private final IGameStorage storage;
-    private NPCRegistry citizenRegistry;
-    private Map<org.screamingsandals.bedwars.api.game.GameStore, net.citizensnpcs.api.npc.NPC> citizensStores;
+
+    private CitizensWrapper citizens;
 
     public Arena(@NotNull Game game) {
         this.game = game;
@@ -257,8 +256,8 @@ public class Arena implements IArena {
             }
         } else if (SBAConfig.getInstance().replaceStoreWithCitizen()) {
             try {
-                citizensStores = new HashMap<>();
-                citizenRegistry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
+                citizens = new CitizensWrapper();
+
                 if (game.getGameStores().size() == 0) {
                     Logger.error(
                             "Game does not contain GameStore, is something preventing the spawning of the stores?");
@@ -273,7 +272,7 @@ public class Arena implements IArena {
                         if (villager != null) {
                             Main.unregisterGameEntity(villager);
                             
-                            npc = citizenRegistry.createNPC(villager.getType(), "Name");
+                            npc = citizens.getCitizenRegistry().createNPC(villager.getType(), "Name");
                             LookClose look = npc.getOrAddTrait(net.citizensnpcs.trait.LookClose.class);
                             look.lookClose(true);
                             Gravity gravity = npc.getOrAddTrait(net.citizensnpcs.trait.Gravity.class);
@@ -321,7 +320,7 @@ public class Arena implements IArena {
                             HologramTrait holo = npc.getOrAddTrait(HologramTrait.class);
                             holo.setLines(name);
 
-                            citizensStores.putIfAbsent(store, npc);
+                            citizens.getCitizensStores().putIfAbsent(store, npc);
                         }
                     } catch (Throwable t) {
                         Logger.error(
@@ -373,14 +372,12 @@ public class Arena implements IArena {
         stores.values().forEach(NPC::destroy);
         stores.clear();
 
-        if(citizensStores!=null)
+        if(citizens!=null)
         {
-            citizensStores.values().forEach(npc->npc.destroy());
-            citizensStores.clear();
+            citizens.getCitizensStores().values().forEach(npc->npc.destroy());
+            citizens.getCitizensStores().clear();
+            citizens.getCitizenRegistry().deregisterAll();
         }
-        if (citizenRegistry != null)
-            citizenRegistry.deregisterAll();
-        
 
         getInvisiblePlayers().forEach(this::removeHiddenPlayer);
 
@@ -555,6 +552,6 @@ public class Arena implements IArena {
 
     @Override
     public @NotNull Map<org.screamingsandals.bedwars.api.game.GameStore, net.citizensnpcs.api.npc.NPC> getCitizensStores() {
-        return Map.copyOf(citizensStores);
+        return Map.copyOf(citizens.getCitizensStores());
     }
 }

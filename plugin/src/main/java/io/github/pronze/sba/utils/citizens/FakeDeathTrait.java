@@ -208,13 +208,6 @@ public class FakeDeathTrait extends Trait {
         return space;
     }
 
-    public enum Strategy {
-        DEFENSIVE,
-        AGRESSIVE,
-        BALANCED,
-        ANY
-    }
-
     public interface AiGoal {
         boolean isAvailable();
 

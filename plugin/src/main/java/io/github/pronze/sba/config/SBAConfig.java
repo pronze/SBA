@@ -355,7 +355,7 @@ public class SBAConfig implements IConfigurator {
     }
     public boolean replaceStoreWithCitizen()
     {
-        return node("replace-stores-with-citizen").getBoolean(false);
+        return node("replace-stores-with-citizen").getBoolean(false) && Bukkit.getPluginManager().isPluginEnabled("Citizens");
     }
 
     public AIConfig ai()

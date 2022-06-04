@@ -8,7 +8,6 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait.AiGoal;
-import io.github.pronze.sba.utils.citizens.FakeDeathTrait.Strategy;
 
 public class AttackNearbyPlayerGoal implements FakeDeathTrait.AiGoal {
     /**

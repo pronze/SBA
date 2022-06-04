@@ -9,7 +9,7 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.citizens.BedwarsBlockPlace;
 import io.github.pronze.sba.utils.citizens.BridgePillarTrait;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
-import io.github.pronze.sba.utils.citizens.FakeDeathTrait.Strategy;
+import io.github.pronze.sba.utils.citizens.Strategy;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.citizensnpcs.api.CitizensAPI;
@@ -47,6 +47,7 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
@@ -77,7 +78,17 @@ import java.util.stream.Collectors;
 @Getter
 public class AIService implements Listener {
 
-        NPCRegistry registry;
+        @Getter
+        private class NPCRegistryWrapper {
+                public NPCRegistryWrapper() {
+                        registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
+                }
+
+                NPCRegistry registry;
+        }
+
+        NPCRegistryWrapper registry;
+
         @Getter
         AIConfig settings;
 
@@ -91,27 +102,30 @@ public class AIService implements Listener {
 
         @OnPostEnable
         public void onPostEnabled() {
-                SBA.getInstance().registerListener(this);
+
                 settings = SBAConfig.getInstance().ai();
                 if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
                                 && SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens")
                                                 .isEnabled()
                                 && SBAConfig.getInstance().ai().enabled()) {
-                        if (registry == null)
-                                registry = CitizensAPI.createAnonymousNPCRegistry(new MemoryNPCDataStore());
+                        if (registry == null) {
+                                registry = new NPCRegistryWrapper();
+                                SBA.getInstance().registerListener(this);
+                        }
+
                 }
         }
 
         @OnPreDisable
         public void onDisable() {
                 if (registry != null) {
-                        registry.deregisterAll();
+                        registry.getRegistry().deregisterAll();
                 }
         }
 
         public NPC getNPC(Entity e) {
                 if (registry != null) {
-                        return registry.getNPC(e);
+                        return registry.getRegistry().getNPC(e);
                 }
                 return null;
         }
@@ -120,12 +134,12 @@ public class AIService implements Listener {
                 return spawnAI(loc, Strategy.ANY);
         }
 
-        public CompletableFuture<Player> spawnAI(Location loc, FakeDeathTrait.Strategy strategy) {
+        public CompletableFuture<Player> spawnAI(Location loc, Strategy strategy) {
                 CompletableFuture<Player> CompletableFuture = new CompletableFuture<Player>();
                 if (registry != null) {
                         AtomicInteger count = new AtomicInteger(1);
-                        registry.forEach(npc -> count.incrementAndGet());
-                        final NPC npc = registry.createNPC(EntityType.PLAYER, "AI_" + count.get());
+                        registry.getRegistry().forEach(npc -> count.incrementAndGet());
+                        final NPC npc = registry.getRegistry().createNPC(EntityType.PLAYER, "AI_" + count.get());
                         FakeDeathTrait fdt = npc.getOrAddTrait(FakeDeathTrait.class);
                         fdt.setStrategy(strategy);
 
@@ -155,7 +169,7 @@ public class AIService implements Listener {
         }
 
         public boolean isNPC(Player player) {
-                return registry != null && registry.isNPC(player);
+                return registry != null && registry.getRegistry().isNPC(player);
         }
 
         Method getPlayerHandle = null;
@@ -216,6 +230,12 @@ public class AIService implements Listener {
                                 }
                         }
                 }
+        }
+
+        @EventHandler
+        public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
+                if (isNPC(e.getPlayer()))
+                        getNPC(e.getPlayer()).destroy();
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)

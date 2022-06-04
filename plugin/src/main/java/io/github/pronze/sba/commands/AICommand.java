@@ -10,8 +10,8 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
 import io.github.pronze.sba.utils.citizens.RespawnTrait;
+import io.github.pronze.sba.utils.citizens.Strategy;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.event.DespawnReason;
@@ -147,7 +147,7 @@ public class AICommand implements Listener {
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
-                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.AGRESSIVE)
+                AIService.getInstance().spawnAI(player.getLocation(), Strategy.AGRESSIVE)
                         .thenAccept(ai -> {
                             Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();
@@ -182,7 +182,7 @@ public class AICommand implements Listener {
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
-                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.DEFENSIVE)
+                AIService.getInstance().spawnAI(player.getLocation(), Strategy.DEFENSIVE)
                         .thenAccept(ai -> {
                             Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();
@@ -217,7 +217,7 @@ public class AICommand implements Listener {
             int maxPlayer = game.getMaxPlayers();
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
-                AIService.getInstance().spawnAI(player.getLocation(), FakeDeathTrait.Strategy.BALANCED)
+                AIService.getInstance().spawnAI(player.getLocation(), Strategy.BALANCED)
                         .thenAccept(ai -> {
                             Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();

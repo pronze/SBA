@@ -333,9 +333,6 @@ public class BedWarsListener implements Listener {
                 .fromCache(player.getUniqueId())
                 .ifPresent(Scoreboard::destroy);
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
-
-        if(AIService.getInstance().isNPC(player))
-            AIService.getInstance().getNPC(player).destroy();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
