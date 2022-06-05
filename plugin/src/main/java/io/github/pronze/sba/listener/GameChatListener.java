@@ -72,8 +72,7 @@ public class GameChatListener implements Listener {
 
                         var colorName = game.getTeamOfPlayer(player).getColor().name().toUpperCase();
                         var teamName = game.getTeamOfPlayer(player).getName();
-                        var color = TeamColor.fromApiColor(game.getTeamOfPlayer(player).getColor()).chatColor
-                                .toString();
+                        var color = TeamColor.fromApiColor(game.getTeamOfPlayer(player).getColor()).chatColor.toString();
                         format = format
                                 .replace("%color%", color)
                                 .replace("%color_name%", colorName)
@@ -109,8 +108,7 @@ public class GameChatListener implements Listener {
                     {
                         var teamName = game.getTeamOfPlayer(player).getName();
                         game.getConnectedPlayers().forEach(gamePlayer -> {
-                            if(teamName.equals(game.getTeamOfPlayer(gamePlayer).getName())||
-                                Main.getPlayerGameProfile(gamePlayer).isSpectator)
+                            if(Main.getPlayerGameProfile(gamePlayer).isSpectator||teamName.equals(game.getTeamOfPlayer(gamePlayer).getName()))
                                 gamePlayer.sendMessage(finalFormat);
                         });
                     }

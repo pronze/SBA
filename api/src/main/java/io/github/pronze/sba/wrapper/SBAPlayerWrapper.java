@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
@@ -41,8 +43,10 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
     }
 
     public void shout(Component message) {
+        System.out.println("Player shouting with cooldown "+shoutCooldown);
         if (shoutCooldown == 0) {
-            sendMessage(message);
+            //sendMessage(message);
+            Bukkit.getOnlinePlayers().forEach(receiver->PlayerMapper.wrapPlayer(receiver).sendMessage(message));
             if (getInstance().hasPermission(Permissions.SHOUT_BYPASS.getKey()) || getDefaultShoutCoolDownTime() == 0) {
                 return;
             }
