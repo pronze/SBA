@@ -12,7 +12,6 @@ import java.util.Optional;
 
 public class GameStorage implements IGameStorage {
     private final Map<RunningTeam, GameTeamData> teamDataMap = new HashMap<>();
-    private RunningTeam team;
 
     public GameStorage(Game game) {
         game.getRunningTeams().forEach(team -> teamDataMap.put(team, GameTeamData.of(team)));
@@ -20,6 +19,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public Optional<Location> getTargetBlockLocation(@NotNull RunningTeam team) {
+        if (team == null)
+            return Optional.empty();
         if (!teamDataMap.containsKey(team)) {
             teamDataMap.put(team, GameTeamData.of(team));
         }
@@ -28,6 +29,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public Optional<Integer> getSharpnessLevel(@NotNull RunningTeam team) {
+        if (team == null)
+            return Optional.empty();
         if (!teamDataMap.containsKey(team)) {
             teamDataMap.put(team, GameTeamData.of(team));
         }
@@ -36,6 +39,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public Optional<Integer> getProtectionLevel(@NotNull RunningTeam team) {
+        if (team == null)
+            return Optional.empty();
         if (!teamDataMap.containsKey(team)) {
             teamDataMap.put(team, GameTeamData.of(team));
         }
@@ -44,6 +49,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public Optional<Integer> getEfficiencyLevel(@NotNull RunningTeam team) {
+        if (team == null)
+            return Optional.empty();
         if (!teamDataMap.containsKey(team)) {
             teamDataMap.put(team, GameTeamData.of(team));
         }
@@ -52,6 +59,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setSharpnessLevel(@NotNull RunningTeam team, @NotNull Integer level) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -60,6 +69,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setProtectionLevel(@NotNull RunningTeam team, @NotNull Integer level) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -68,6 +79,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setEfficiencyLevel(@NotNull RunningTeam team, @NotNull Integer level) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -76,6 +89,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setPurchasedBlindTrap(@NotNull RunningTeam team, boolean isBlindTrapEnabled) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -84,6 +99,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setPurchasedMinerTrap(@NotNull RunningTeam team, boolean isMinerTrapEnabled) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -92,6 +109,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setPurchasedPool(@NotNull RunningTeam team, boolean isPoolEnabled) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -100,6 +119,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public void setPurchasedDragons(@NotNull RunningTeam team, boolean isDragonEnabled) {
+        if (team == null)
+            return;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -108,6 +129,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public boolean areBlindTrapEnabled(@NotNull RunningTeam team) {
+        if (team == null)
+            return false;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -116,6 +139,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public boolean areMinerTrapEnabled(@NotNull RunningTeam team) {
+        if (team == null)
+            return false;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -124,6 +149,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public boolean arePoolEnabled(@NotNull RunningTeam team) {
+        if (team == null)
+            return false;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
@@ -132,6 +159,8 @@ public class GameStorage implements IGameStorage {
 
     @Override
     public boolean areDragonsEnabled(@NotNull RunningTeam team) {
+        if (team == null)
+            return false;
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }

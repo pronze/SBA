@@ -108,8 +108,7 @@ public class GameChatListener implements Listener {
                     {
                         var teamName = game.getTeamOfPlayer(player).getName();
                         game.getConnectedPlayers().forEach(gamePlayer -> {
-                            if(teamName.equals(game.getTeamOfPlayer(gamePlayer).getName())||
-                                Main.getPlayerGameProfile(gamePlayer).isSpectator)
+                            if(Main.getPlayerGameProfile(gamePlayer).isSpectator||teamName.equals(game.getTeamOfPlayer(gamePlayer).getName()))
                                 gamePlayer.sendMessage(finalFormat);
                         });
                     }
