@@ -1,6 +1,7 @@
 package io.github.pronze.sba.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
+import io.github.pronze.sba.service.AntiCheatIntegration;
 import io.github.pronze.sba.utils.Logger;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Explosive;
@@ -37,6 +38,7 @@ public class ExplosionVelocityControlListener implements Listener {
                 if (explosionAffectedPlayers.contains(player)) {
                     event.setDamage(SBAConfig.getInstance().node("tnt-fireball-jumping", "fall-damage").getDouble(3.0D));
                     explosionAffectedPlayers.remove(player);
+                    AntiCheatIntegration.getInstance().endTntJump(player);
                 }
             }
         }
@@ -68,6 +70,7 @@ public class ExplosionVelocityControlListener implements Listener {
                                 return;
                             }
                             vector.add(new Vector(player.getEyeLocation().getDirection().getX(), 0, player.getEyeLocation().getDirection().getZ()));
+                            AntiCheatIntegration.getInstance().beginTntJump(player);
                             player.setVelocity(vector);
                             explosionAffectedPlayers.add(player);
                             return;

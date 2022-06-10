@@ -103,6 +103,7 @@ subprojects {
         maven {
             url = uri('https://repo.screamingsandals.org/snapshots')
         }
+        maven{ url= uri("https://moyskleytech.com/debian/m2/")}
     }
 
     dependencies {
