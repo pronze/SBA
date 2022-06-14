@@ -78,7 +78,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens" })
+}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens", "Vulcan" })
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -119,7 +119,8 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SpawnerProtection.class,
         SpawnerProtectionListener.class,
         SidebarManager.class,
-        AIService.class
+        AIService.class,
+        AntiCheatIntegration.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 
