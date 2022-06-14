@@ -106,6 +106,7 @@ subprojects {
         }
         maven{ url= uri("https://repo.citizensnpcs.co/")}
         maven{ url= uri("https://moyskleytech.com/debian/m2/")}
+        maven{ url= uri("https://nexus.sparky.ac/repository/Sparky/")}
     }
 
     dependencies {
