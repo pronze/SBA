@@ -16,6 +16,12 @@ data:
 
   - price: 4
     price-type: iron
+    properties: forge
+    add-levels: 0.2
+    max-level: 2
+    type:
+      - iron
+      - gold
     stack:
       ==: org.bukkit.inventory.ItemStack
       v: 1519
@@ -24,7 +30,7 @@ data:
       meta:
         ==: ItemMeta
         meta-type: UNSPECIFIC
-        display-name: "Forge Upgrade, Unconfigured"
+        display-name: "Forge Upgrade"
 
   - stack: "BEACON;1;§bHeal Pool;§7Triggers a pool around the base that heals you!"
     column: 5

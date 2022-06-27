@@ -1,5 +1,45 @@
 package io.github.pronze.sba.inventories;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.RunningTeam;
+import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
+import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.ItemSpawner;
+import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
+import org.screamingsandals.bedwars.api.upgrades.Upgrade;
+import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
+import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
+import org.screamingsandals.bedwars.game.GameStore;
+import org.screamingsandals.lib.item.Item;
+import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.utils.ConfigurateUtils;
+import org.screamingsandals.lib.utils.Controllable;
+import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
+import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
+import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
+import org.screamingsandals.simpleinventories.inventory.InventorySet;
+import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
+import org.spongepowered.configurate.serialize.SerializationException;
+
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
@@ -10,35 +50,7 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-
-import org.apache.commons.lang.StringUtils;
-import org.bukkit.ChatColor;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
-import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
-import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
-import org.screamingsandals.bedwars.game.GameStore;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.utils.ConfigurateUtils;
-import org.screamingsandals.lib.utils.Controllable;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.utils.annotations.Service;
-import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
-import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
-import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
-import org.screamingsandals.simpleinventories.inventory.InventorySet;
-import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
+import net.md_5.bungee.api.ChatColor;
 
 @Service(dependsOn = {
         SimpleInventoriesCore.class,
@@ -51,6 +63,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     }
 
     private final static List<String> upgradeProperties = List.of(
+            "forge",
             "sharpness",
             "protection",
             "efficiency",
@@ -278,7 +291,76 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         pl -> PlayerMapper.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
                             }
                             break;
+                        case "forge":
+                            var map = property.getPropertyData().childrenMap();
+                            if (map != null) {
 
+                                double addLevels = 0.2;
+                                double maxLevel = 2;
+                                List<String> types = List.of();
+
+                                if (map.containsKey("type")) {
+                                    try {
+                                        types = map.get("type").getList(String.class, List.of());
+                                    } catch (SerializationException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                                if (map.containsKey("add-levels")) {
+                                    addLevels = map.get("add-levels").getDouble(0.2);
+                                }
+                                if (map.containsKey("max-level")) {
+                                    maxLevel = map.get("max-level").getDouble(0.2);
+                                }
+
+                                Logger.info("forgeUpgrade :: {} :: {} :: {}", addLevels, maxLevel, types);
+
+                                boolean sendToAll = true;
+                                if (map.containsKey("notify-team")) {
+                                    sendToAll = map.get("notify-team").getBoolean(true);
+                                }
+
+                                List<ItemSpawner> spawnersToUpgrade = new ArrayList<>();
+
+                                for (var spawner : game.getItemSpawners()) {
+                                    var material = spawner.getItemSpawnerType().getName().toLowerCase();
+                                    if (types.contains(material)) {
+                                        if (spawner.getTeam().getName().equals(team.getName())) {
+                                            spawnersToUpgrade.add(spawner);
+                                        }
+                                    }
+                                }
+                                if(spawnersToUpgrade.isEmpty())
+                                {
+                                    types.forEach(spawnerType->{
+                                        double closestDistance= Double.MAX_VALUE;
+                                        ItemSpawner closestSpawner=null;
+                                        for (var spawner : game.getItemSpawners()) {
+                                            if(spawner.getItemSpawnerType().getName().toLowerCase().equals(spawnerType))
+                                            {
+                                                double distance = team.getTeamSpawn().distance(spawner.getLocation());
+                                                if(distance<closestDistance)
+                                                {
+                                                    closestDistance=distance;
+                                                    closestSpawner=spawner;
+                                                }
+                                            }
+                                        }
+                                        if(closestSpawner!=null)
+                                        {
+                                            spawnersToUpgrade.add(closestSpawner);
+                                        }
+                                    });
+                                }
+
+                                for(var spawner:spawnersToUpgrade){
+                                    double newLevel = spawner.getCurrentLevel() + addLevels;
+                                    if(newLevel > maxLevel)
+                                        newLevel = maxLevel;
+                                    spawner.setCurrentLevel(newLevel);
+                                }
+                            }
+                            break;
                         case "protection":
                             var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElseThrow();
                             var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection")
@@ -316,11 +398,15 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     shouldSellStack = false;
                             }
                             break;
+                        default:
+                            break;
                     }
                 }
                 var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
                 SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
                 newItem.set(applyEvent.getStack());
+
+            } else {
 
             }
         }
@@ -375,7 +461,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
         final var shopFile = event.getStore().getShopFile();
-        if ((shopFile != null && StringUtils.containsIgnoreCase(shopFile,"upgrade"))) {
+        if ((shopFile != null && StringUtils.containsIgnoreCase(shopFile, "upgrade"))) {
             if (SBAConfig.getInstance().node("shop", "upgrade-shop", "enabled").getBoolean()) {
                 event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
                 openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class),

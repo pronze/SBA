@@ -98,9 +98,12 @@ public class BedwarsBlockPlace extends Trait {
         if (aiPlayer == null)
             return null;
         World w = aiPlayer.getWorld();
+
         var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
                 aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
                 10);
+        if (rayTraceCheck == null)
+            return null;
 
         return rayTraceCheck.getHitBlock();
     }
@@ -125,39 +128,44 @@ public class BedwarsBlockPlace extends Trait {
         var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
                 aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
                 10);
-
+        if (rayTraceCheck == null)
+            return false;
         return rayTraceCheck.getHitBlock().equals(b);
     }
 
-    /*public float getDestroySpeed(ItemStack itemStack, boolean considerEnchants) {
-                net.minecraft.world.item.ItemStack nmsItemStack;
-                if (itemStack instanceof CraftItemStack) {
-                    nmsItemStack = ((CraftItemStack) itemStack).handle;
-                    if (nmsItemStack == null) {
-                        nmsItemStack = net.minecraft.world.item.ItemStack.EMPTY;
-                    }
-                } else {
-                    nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
-                }
-                float speed = nmsItemStack.getDestroySpeed(this.getNMS().getBlock().defaultBlockState());
-                if (speed > 1.0F && considerEnchants) {
-                    int enchantLevel = net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.BLOCK_EFFICIENCY, nmsItemStack);
-                    if (enchantLevel > 0) {
-                        speed += enchantLevel * enchantLevel + 1;
-                    }
-                }
-                return speed;
-            }*/
+    /*
+     * public float getDestroySpeed(ItemStack itemStack, boolean considerEnchants) {
+     * net.minecraft.world.item.ItemStack nmsItemStack;
+     * if (itemStack instanceof CraftItemStack) {
+     * nmsItemStack = ((CraftItemStack) itemStack).handle;
+     * if (nmsItemStack == null) {
+     * nmsItemStack = net.minecraft.world.item.ItemStack.EMPTY;
+     * }
+     * } else {
+     * nmsItemStack = CraftItemStack.asNMSCopy(itemStack);
+     * }
+     * float speed =
+     * nmsItemStack.getDestroySpeed(this.getNMS().getBlock().defaultBlockState());
+     * if (speed > 1.0F && considerEnchants) {
+     * int enchantLevel = net.minecraft.world.item.enchantment.EnchantmentHelper.
+     * getItemEnchantmentLevel(net.minecraft.world.item.enchantment.Enchantments.
+     * BLOCK_EFFICIENCY, nmsItemStack);
+     * if (enchantLevel > 0) {
+     * speed += enchantLevel * enchantLevel + 1;
+     * }
+     * }
+     * return speed;
+     * }
+     */
 
     public void breakBlock(Block b) {
         if (b != null) {
             Player aiPlayer = (Player) npc.getEntity();
-            
-            float destroySpeed=1;
-            if(Reflect.hasMethod(b.getClass(), "getDestroySpeed", ItemStack.class, boolean.class))
-            {
+
+            float destroySpeed = 1;
+            if (Reflect.hasMethod(b.getClass(), "getDestroySpeed", ItemStack.class, boolean.class)) {
                 var method = Reflect.getMethod(b.getClass(), "getDestroySpeed", ItemStack.class, boolean.class);
-                destroySpeed = (float)method.invokeInstance(b, aiPlayer.getItemInHand(),true);
+                destroySpeed = (float) method.invokeInstance(b, aiPlayer.getItemInHand(), true);
             }
 
             blockBreakerCooldown = (int) (100 / destroySpeed);
@@ -259,8 +267,7 @@ public class BedwarsBlockPlace extends Trait {
         return false;
     }
 
-    public Location blockLocation(Location l)
-    {
+    public Location blockLocation(Location l) {
         return new Location(l.getWorld(), l.getBlockX(), l.getBlockY(), l.getBlockZ());
     }
 
