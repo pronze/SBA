@@ -17,8 +17,8 @@ data:
   - price: 4
     price-type: iron
     properties: forge
-    add-levels: 0.2
-    max-level: 2
+    add-levels: 1
+    max-level: 20
     type:
       - iron
       - gold

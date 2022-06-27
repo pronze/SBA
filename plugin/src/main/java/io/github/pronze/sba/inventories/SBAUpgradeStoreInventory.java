@@ -313,8 +313,6 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     maxLevel = map.get("max-level").getDouble(0.2);
                                 }
 
-                                Logger.info("forgeUpgrade :: {} :: {} :: {}", addLevels, maxLevel, types);
-
                                 boolean sendToAll = true;
                                 if (map.containsKey("notify-team")) {
                                     sendToAll = map.get("notify-team").getBoolean(true);
@@ -325,7 +323,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                 for (var spawner : game.getItemSpawners()) {
                                     var material = spawner.getItemSpawnerType().getName().toLowerCase();
                                     if (types.contains(material)) {
-                                        if (spawner.getTeam().getName().equals(team.getName())) {
+                                        if (spawner.getTeam() != null &&spawner.getTeam().getName().equals(team.getName())) {
                                             spawnersToUpgrade.add(spawner);
                                         }
                                     }
