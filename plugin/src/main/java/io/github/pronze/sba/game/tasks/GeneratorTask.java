@@ -11,11 +11,9 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 
-import java.text.SimpleDateFormat;
 
 public class GeneratorTask extends BaseGameTask {
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
     private final String diamond;
     private final String emerald;
     private final double multiplier;
@@ -117,7 +115,7 @@ public class GeneratorTask extends BaseGameTask {
     }
 
     public String getTimeLeftForNextEvent() {
-        return dateFormat.format((nextEvent.getTime() - elapsedTime) * 1000);
+        return ((org.screamingsandals.bedwars.game.Game)game).getFormattedTimeLeft(nextEvent.getTime() - elapsedTime);
     }
 
     public String getNextTierName() {
