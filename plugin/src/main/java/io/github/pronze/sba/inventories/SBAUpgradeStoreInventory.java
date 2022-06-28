@@ -296,7 +296,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                             if (map != null) {
 
                                 double addLevels = 0.2;
-                                double maxLevel = 2;
+                                double maxLevel = 0;
                                 List<String> types = List.of();
 
                                 if (map.containsKey("type")) {
@@ -310,7 +310,7 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     addLevels = map.get("add-levels").getDouble(0.2);
                                 }
                                 if (map.containsKey("max-level")) {
-                                    maxLevel = map.get("max-level").getDouble(0.2);
+                                    maxLevel = map.get("max-level").getDouble(0);
                                 }
 
                                 boolean sendToAll = true;
@@ -318,45 +318,48 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                     sendToAll = map.get("notify-team").getBoolean(true);
                                 }
 
+                                Logger.trace("Forge upgrade {}/{}::{}", addLevels, maxLevel, types);
+
                                 List<ItemSpawner> spawnersToUpgrade = new ArrayList<>();
 
                                 for (var spawner : game.getItemSpawners()) {
                                     var material = spawner.getItemSpawnerType().getName().toLowerCase();
                                     if (types.contains(material)) {
-                                        if (spawner.getTeam() != null &&spawner.getTeam().getName().equals(team.getName())) {
+                                        if (spawner.getTeam() != null
+                                                && spawner.getTeam().getName().equals(team.getName())) {
                                             spawnersToUpgrade.add(spawner);
                                         }
                                     }
                                 }
-                                if(spawnersToUpgrade.isEmpty())
-                                {
-                                    types.forEach(spawnerType->{
-                                        double closestDistance= Double.MAX_VALUE;
-                                        ItemSpawner closestSpawner=null;
+                                if (spawnersToUpgrade.isEmpty()) {
+                                    types.forEach(spawnerType -> {
+                                        double closestDistance = Double.MAX_VALUE;
+                                        ItemSpawner closestSpawner = null;
                                         for (var spawner : game.getItemSpawners()) {
-                                            if(spawner.getItemSpawnerType().getName().toLowerCase().equals(spawnerType))
-                                            {
+                                            if (spawner.getItemSpawnerType().getName().toLowerCase()
+                                                    .equals(spawnerType)) {
                                                 double distance = team.getTeamSpawn().distance(spawner.getLocation());
-                                                if(distance<closestDistance)
-                                                {
-                                                    closestDistance=distance;
-                                                    closestSpawner=spawner;
+                                                if (distance < closestDistance) {
+                                                    closestDistance = distance;
+                                                    closestSpawner = spawner;
                                                 }
                                             }
                                         }
-                                        if(closestSpawner!=null)
-                                        {
+                                        if (closestSpawner != null) {
                                             spawnersToUpgrade.add(closestSpawner);
                                         }
                                     });
                                 }
 
-                                for(var spawner:spawnersToUpgrade){
+                                for (var spawner : spawnersToUpgrade) {
                                     double newLevel = spawner.getCurrentLevel() + addLevels;
-                                    if(newLevel > maxLevel)
+                                    if (newLevel > maxLevel && maxLevel > 0)
                                         newLevel = maxLevel;
                                     spawner.setCurrentLevel(newLevel);
                                 }
+
+                                if (spawnersToUpgrade.isEmpty())
+                                    shouldSellStack = false;
                             }
                             break;
                         case "protection":
