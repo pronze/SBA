@@ -14,14 +14,11 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.regex.Pattern;
 
 import javax.naming.NameNotFoundException;
 
 public class GeneratorTask extends BaseGameTask {
-
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("mm:ss");
     private final double multiplier;
     private final boolean timerUpgrades;
     private final boolean showUpgradeMessage;
@@ -113,7 +110,7 @@ public class GeneratorTask extends BaseGameTask {
     }
 
     public String getTimeLeftForNextEvent() {
-        return dateFormat.format((nextEvent.getTime() - elapsedTime) * 1000);
+        return ((org.screamingsandals.bedwars.game.Game)game).getFormattedTimeLeft(nextEvent.getTime() - elapsedTime);
     }
 
     public String getNextTierName() {
