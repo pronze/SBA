@@ -74,7 +74,10 @@ public class GameStorage implements IGameStorage {
         if (!teamDataMap.containsKey(team)) {
             teamDataMap.put(team, GameTeamData.of(team));
         }
-        return Optional.of(teamDataMap.get(team).get(propertyName));
+        Integer val = teamDataMap.get(team).get(propertyName);
+        if (val == null)
+            val = 0;
+        return Optional.of(val);
     }
 
     @Override
@@ -84,7 +87,7 @@ public class GameStorage implements IGameStorage {
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
-        teamDataMap.get(team).set(propertyName,level);
+        teamDataMap.get(team).set(propertyName, level);
     }
 
     @Override

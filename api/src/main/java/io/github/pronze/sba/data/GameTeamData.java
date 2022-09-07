@@ -25,7 +25,8 @@ public class GameTeamData {
 
     /**
      * Current level of protection for the team.
-     * Enchant applied is {@link org.bukkit.enchantments.Enchantment#PROTECTION_ENVIRONMENTAL}
+     * Enchant applied is
+     * {@link org.bukkit.enchantments.Enchantment#PROTECTION_ENVIRONMENTAL}
      */
     private int protection;
 
@@ -42,22 +43,26 @@ public class GameTeamData {
     private int knockback;
 
     /**
-     * A boolean representing whether the team has purchased the Heal Pool upgrade from the Upgrades store.
+     * A boolean representing whether the team has purchased the Heal Pool upgrade
+     * from the Upgrades store.
      */
     private boolean purchasedPool;
 
     /**
-     * A boolean representing whether the team has purchased the Blind Trap upgrade from the Upgrades store.
+     * A boolean representing whether the team has purchased the Blind Trap upgrade
+     * from the Upgrades store.
      */
     private boolean purchasedBlindTrap;
 
     /**
-     * A boolean representing whether the team has purchased the Miner Trap upgrade from the Upgrades store.
+     * A boolean representing whether the team has purchased the Miner Trap upgrade
+     * from the Upgrades store.
      */
     private boolean purchasedMinerTrap;
 
     /**
-     * A boolean representing whether the team has purchased the Dragon upgrade from the Upgrades store.
+     * A boolean representing whether the team has purchased the Dragon upgrade from
+     * the Upgrades store.
      */
     private boolean purchasedDragonUpgrade;
 
@@ -68,6 +73,7 @@ public class GameTeamData {
 
     /**
      * Constructs a new GameTeamData instance.
+     * 
      * @param team the team for construction of GameTeamData instance
      * @return a new GameTeamData instance
      */
@@ -75,12 +81,15 @@ public class GameTeamData {
         return new GameTeamData(team.getTargetBlock());
     }
 
-    private Map<String,Integer> enchantLevel = new HashMap<>();
+    private Map<String, Integer> enchantLevel = new HashMap<>();
+
     public Integer get(String propertyName) {
-        return enchantLevel.get(propertyName);
+        if (enchantLevel.containsKey(propertyName))
+            return enchantLevel.get(propertyName);
+        return 0;
     }
 
     public void set(String propertyName, @NotNull Integer level) {
-        enchantLevel.put(propertyName,level);
+        enchantLevel.put(propertyName, level);
     }
 }
