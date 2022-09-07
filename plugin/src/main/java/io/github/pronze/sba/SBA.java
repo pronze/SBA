@@ -119,7 +119,6 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SpawnerProtection.class,
         SpawnerProtectionListener.class,
         SidebarManager.class,
-        AIService.class,
         AntiCheatIntegration.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
@@ -181,14 +180,15 @@ public class SBA extends PluginContainer implements AddonAPI {
             return;
         } else {
             Logger.info("SBA initialized using Bedwars {}", BedwarsAPI.getInstance().getPluginVersion());
-            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23").stream()
-                    .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
-                Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.23. ");
+            if (!BedwarsAPI.getInstance().getPluginVersion().startsWith("0.2")) {
+                Logger.error("SBA only support Bedwars version 2");
+                Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+                return;
             }
-        }
-        if (Reflect.has("com.mohistmc.MohistMC")) {
-            Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
-            return;
+            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.26").stream()
+                    .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
+                Logger.warn("SBA hasn't been tested on this version of Bedwars, use version 0.2.20 to 0.2.26. ");
+            }
         }
         for (BaseFix fix : fixs) {
             fix.fix(SBAConfig.getInstance());
@@ -196,6 +196,7 @@ public class SBA extends PluginContainer implements AddonAPI {
                 fix.warn();
             if (fix.IsCritical()) {
                 Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+                return;
             }
         }
         InventoryListener.init(cachedPluginInstance);
@@ -215,6 +216,13 @@ public class SBA extends PluginContainer implements AddonAPI {
 
         if (getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
                 && getPluginInstance().getServer().getPluginManager().getPlugin("Citizens").isEnabled()) {
+            CitizensTraits.enableCitizensTraits();
+        }
+    }
+
+    private static class CitizensTraits {
+
+        private static void enableCitizensTraits() {
             net.citizensnpcs.api.CitizensAPI.getTraitFactory()
                     .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(HologramTrait.class)
                             .withName("SBAHologramTrait"));
@@ -227,7 +235,11 @@ public class SBA extends PluginContainer implements AddonAPI {
             net.citizensnpcs.api.CitizensAPI.getTraitFactory()
                     .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(FakeDeathTrait.class)
                             .withName("FakeDeathTrait"));
+
+            AIService aiService = new AIService();
+            aiService.onPostEnabled();
         }
+
     }
 
     public void registerListener(@NotNull Listener listener) {

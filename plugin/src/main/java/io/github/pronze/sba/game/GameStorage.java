@@ -58,6 +58,36 @@ public class GameStorage implements IGameStorage {
     }
 
     @Override
+    public Optional<Integer> getKnockbackLevel(@NotNull RunningTeam team) {
+        if (team == null)
+            return Optional.empty();
+        if (!teamDataMap.containsKey(team)) {
+            teamDataMap.put(team, GameTeamData.of(team));
+        }
+        return Optional.of(teamDataMap.get(team).getKnockback());
+    }
+
+    @Override
+    public Optional<Integer> getEnchantLevel(RunningTeam team, String propertyName) {
+        if (team == null)
+            return Optional.empty();
+        if (!teamDataMap.containsKey(team)) {
+            teamDataMap.put(team, GameTeamData.of(team));
+        }
+        return Optional.of(teamDataMap.get(team).get(propertyName));
+    }
+
+    @Override
+    public void setEnchantLevel(RunningTeam team, String propertyName, @NotNull Integer level) {
+        if (team == null)
+            return;
+        if (!teamDataMap.containsKey(team)) {
+            throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
+        }
+        teamDataMap.get(team).set(propertyName,level);
+    }
+
+    @Override
     public void setSharpnessLevel(@NotNull RunningTeam team, @NotNull Integer level) {
         if (team == null)
             return;
@@ -85,6 +115,16 @@ public class GameStorage implements IGameStorage {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
         teamDataMap.get(team).setEfficiency(level);
+    }
+
+    @Override
+    public void setKnockbackLevel(@NotNull RunningTeam team, @NotNull Integer level) {
+        if (team == null)
+            return;
+        if (!teamDataMap.containsKey(team)) {
+            throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
+        }
+        teamDataMap.get(team).setKnockback(level);
     }
 
     @Override
@@ -198,4 +238,5 @@ public class GameStorage implements IGameStorage {
                 .stream()
                 .anyMatch(GameTeamData::isPurchasedPool);
     }
+
 }

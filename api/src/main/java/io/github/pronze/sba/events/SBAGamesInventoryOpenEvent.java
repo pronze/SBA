@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 public class SBAGamesInventoryOpenEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
     private final Player player;
-    private final int mode;
+    private final String mode;
     private boolean isCancelled = false;
 
     @Override

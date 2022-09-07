@@ -3,6 +3,10 @@ package io.github.pronze.sba.data;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.api.Team;
@@ -30,6 +34,12 @@ public class GameTeamData {
      * Enchant applied is {@link org.bukkit.enchantments.Enchantment#DIG_SPEED}
      */
     private int efficiency;
+
+    /**
+     * Current level of efficiency for the team.
+     * Enchant applied is {@link org.bukkit.enchantments.Enchantment#KNOCKBACK}
+     */
+    private int knockback;
 
     /**
      * A boolean representing whether the team has purchased the Heal Pool upgrade from the Upgrades store.
@@ -63,5 +73,14 @@ public class GameTeamData {
      */
     public static GameTeamData of(@NotNull Team team) {
         return new GameTeamData(team.getTargetBlock());
+    }
+
+    private Map<String,Integer> enchantLevel = new HashMap<>();
+    public Integer get(String propertyName) {
+        return enchantLevel.get(propertyName);
+    }
+
+    public void set(String propertyName, @NotNull Integer level) {
+        enchantLevel.put(propertyName,level);
     }
 }

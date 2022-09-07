@@ -108,8 +108,8 @@ games-inventory:
   gui:
     solo-prefix: "Bed Wars Соло"
     double-prefix: "Bed Wars Дуо"
-    triple-prefix: "Bed Wars Трио"
-    squad-prefix: "Bed Wars Сквады"
+    triples-prefix: "Bed Wars Трио"
+    squads-prefix: "Bed Wars Сквады"
   npc:
     display-name:
       - "<aqua>Bed Wars</aqua> <gray>%mode%</gray>"

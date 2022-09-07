@@ -75,26 +75,8 @@ public class AntiCheatIntegration implements Listener {
         if (Bukkit.getPluginManager().isPluginEnabled("Vulcan")) {
             integrations.add(new VulcanIntegration());
         }
-        if (Bukkit.getPluginManager().isPluginEnabled("Spartan")) {
-            integrations.add(new SpartanIntegration());
-        }
 
         integrations.forEach(SBA.getInstance()::registerListener);
-    }
-
-    @NoArgsConstructor
-    private class SpartanIntegration implements Listener {
-        @EventHandler
-        public void onDetection(me.vagdedes.spartan.api.PlayerViolationEvent event) {
-            Logger.trace("Spartan detection, [{}]", event.getHackType());
-            var id = event.getPlayer().getUniqueId();
-            if (currentlyJumping.contains(id) || jumpingCooldown.containsKey(id)) {
-                Logger.trace("Spartan detection cancelled, [{}]", event.getHackType());
-                event.setCancelled(true);
-            }
-        }
-
-        
     }
 
     @NoArgsConstructor
@@ -112,7 +94,8 @@ public class AntiCheatIntegration implements Listener {
             Logger.trace("Vulcan detection, [{},{}]", event.getCheck().getDisplayName(),
                     event.getCheck().getDisplayType());
             var id = event.getPlayer().getUniqueId();
-            if (currentlyJumping.contains(id) || jumpingCooldown.containsKey(id)) {
+     
+            if (currentlyJumping.contains(id) || jumpingCooldown.containsKey(id) || event.getCheck().getDisplayName().equalsIgnoreCase("Jump")) {
                 Logger.trace("Vulcan detection cancelled, {},{},{}", event.getInfo(), event.getCheck().getComplexType(),
                         event.getCheck().getName());
                 event.setCancelled(true);

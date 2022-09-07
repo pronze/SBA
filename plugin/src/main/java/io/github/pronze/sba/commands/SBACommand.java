@@ -13,7 +13,7 @@ import io.leangen.geantyref.TypeToken;
 import io.papermc.lib.PaperLib;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
-
+import org.screamingsandals.bedwars.api.game.Game;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
@@ -22,6 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -45,8 +46,10 @@ import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,7 +66,7 @@ public class SBACommand {
             return;
         gamesInvEnabled = SBAConfig.getInstance().getBoolean("games-inventory.enabled", true);
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("gameMode",
-                (commandSenderCommandContext, s) -> allGameModes);
+                (commandSenderCommandContext, s) -> GamesInventory.getInstance().getGameModeNames());
         CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("maps",
                 (ctx, s) -> Main.getGameNames());
         CommandManager.getInstance().getAnnotationParser().parse(this);
@@ -335,10 +338,43 @@ public class SBACommand {
             PlayerMapper.wrapPlayer(player).sendMessage(disabled);
             return;
         }
-        final int mode = ShopUtil.getIntFromMode(gameMode);
         GamesInventory
                 .getInstance()
-                .openForPlayer(player, mode);
+                .openForPlayer(player, gameMode);
+    }
+
+    @CommandMethod("sba join random <gamemode>")
+    @CommandDescription("open GamesInventory for player")
+    private void commandJoinRandom(
+            final @NotNull Player player,
+            final @NotNull @Argument(value = "gamemode", suggestions = "gameMode") String gameMode) {
+        if (!gamesInvEnabled) {
+            final var disabled = LanguageService
+                    .getInstance()
+                    .get(MessageKeys.GAMES_INV_DISABLED)
+                    .toComponent();
+            PlayerMapper.wrapPlayer(player).sendMessage(disabled);
+            return;
+        }
+        var couldNotFindGameMessage = LanguageService
+                .getInstance()
+                .get(MessageKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
+        final var playerWrapper = PlayerMapper.wrapPlayer(player);
+        final var games = GamesInventory.getInstance().getGamesWithMode(gameMode);
+        if (games == null || games.isEmpty()) {
+            couldNotFindGameMessage.send(playerWrapper);
+            return;
+        }
+
+        Random r = new Random();
+        games.sort(Comparator.comparing(c -> ((Game) c).getConnectedPlayers().size())
+                .reversed().thenComparing(c -> r.nextInt()));
+
+        games.stream()
+                .filter(game -> game.getStatus() == GameStatus.WAITING)
+                .findAny()
+                .ifPresentOrElse(game -> game.joinToGame(player),
+                        () -> couldNotFindGameMessage.send(playerWrapper));
     }
 
     @CommandMethod("sba store open [shop]")
@@ -348,11 +384,10 @@ public class SBACommand {
             final @NotNull Player player,
             final @NotNull @Argument("shop") String gameMode) {
         final var game = Main.getInstance().getGameOfPlayer(player);
-        if(game!=null)
-        {
+        if (game != null) {
             GameStore store = null;
             for (var i : game.getGameStores()) {
-                if ((gameMode==null) || (i.getShopFile()!=null && i.getShopFile().equals(gameMode)))
+                if ((gameMode == null) || (i.getShopFile() != null && i.getShopFile().equals(gameMode)))
                     store = i;
             }
 

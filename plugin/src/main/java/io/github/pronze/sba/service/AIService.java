@@ -87,17 +87,19 @@ public class AIService implements Listener {
                 NPCRegistry registry;
         }
 
+        private static AIService instance;
+
         NPCRegistryWrapper registry;
 
         @Getter
         AIConfig settings;
 
         public static AIService getInstance() {
-                return ServiceManager.get(AIService.class);
+                return instance;
         }
 
         public AIService() {
-
+                instance=this;
         }
 
         @OnPostEnable

@@ -19,7 +19,6 @@ ScreamingLibBuilder()
 dependencies {
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
     compileOnly 'me.frap.vulcan:VulcanAPI:1.0.0'
-    compileOnly 'me.vagdedes:SpartanAPI:9.1'
 
     implementation project(':SBA-API')
 

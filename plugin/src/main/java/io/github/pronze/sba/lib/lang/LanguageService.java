@@ -124,7 +124,8 @@ public class LanguageService implements ILanguageService {
             }
         } catch (SerializationException | UnsupportedOperationException e) {
             if (fallback) {
-                e.printStackTrace();
+                Logger.error("Missing translation key for {}", Arrays.toString(arguments));
+                //e.printStackTrace();
             }
         }
 

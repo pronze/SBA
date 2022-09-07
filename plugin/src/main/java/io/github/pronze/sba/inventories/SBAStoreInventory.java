@@ -83,13 +83,10 @@ public class SBAStoreInventory extends AbstractStoreInventory {
         /**
          * Apply enchants to item here according to TeamUpgrades.
          */
+        ShopUtil.applyTeamEnchants(player, newItem.get());
         switch (afterUnderscore.toLowerCase()) {
             case "sword":
                 final var sharpness = gameStorage.getSharpnessLevel(team).orElseThrow();
-                if (sharpness > 0 && sharpness < 5) {
-                    newItem.get().addEnchantment(Enchantment.DAMAGE_ALL, sharpness);
-                }
-
                 if (SBAConfig.getInstance().node("replace-sword-on-upgrade").getBoolean(true)) {
                     Arrays.stream(player.getInventory().getContents().clone())
                             .filter(Objects::nonNull)
@@ -103,12 +100,6 @@ public class SBAStoreInventory extends AbstractStoreInventory {
             case "helmet":
             case "leggings":
                 return Map.entry(ShopUtil.buyArmor(player, newItem.get().getType(), gameStorage, game), false);
-            case "pickaxe":
-                final var efficiency = gameStorage.getEfficiencyLevel(team).orElseThrow();
-                if (efficiency > 0 && efficiency < 5) {
-                    newItem.get().addEnchantment(Enchantment.DIG_SPEED, efficiency);
-                }
-                break;
         }
 
         return Map.entry(true, true);

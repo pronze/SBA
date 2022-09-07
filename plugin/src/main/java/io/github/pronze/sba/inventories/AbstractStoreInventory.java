@@ -70,9 +70,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         return Optional.ofNullable(shopMap.get(key));
     }
 
-
-    public InventorySet iterate(@NotNull GameStore store)
-    {
+    public InventorySet iterate(@NotNull GameStore store) {
         try {
             var parent = true;
             parent = store.getUseParent();
@@ -93,6 +91,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
         return null;
     }
+
     @Override
     public void openForPlayer(@NotNull SBAPlayerWrapper player, @NotNull GameStore store) {
         try {

@@ -127,22 +127,76 @@ public class ShopUtil {
         final var boots = new ItemStack(mat_boots);
         final var leggings = new ItemStack(Material.valueOf(matName + "_LEGGINGS"));
         final var chestplate = new ItemStack(Material.valueOf(matName + "_CHESTPLATE"));
+        final var helmet = new ItemStack(Material.valueOf(matName + "_HELMET"));
 
-        final var level = gameStorage.getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow();
-        if (level != 0) {
-            boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
-            leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
-        }
+        applyTeamEnchants(player, boots);
+        applyTeamEnchants(player, leggings);
+        applyTeamEnchants(player, chestplate);
+        applyTeamEnchants(player, helmet);
 
         playerInventory.setLeggings(null);
         playerInventory.setBoots(null);
-        // if (SBAConfig.getInstance().node("upgrade-item","boots").getBoolean(true))
-        playerInventory.setBoots(boots);
-        if (SBAConfig.getInstance().node("upgrade-item", "leggings").getBoolean(true))
+
+        if (SBAConfig.getInstance().upgrades().boots())
+            playerInventory.setBoots(boots);
+        if (SBAConfig.getInstance().upgrades().leggings())
             playerInventory.setLeggings(leggings);
-        if (SBAConfig.getInstance().node("upgrade-item", "chestplate").getBoolean(true))
+        if (SBAConfig.getInstance().upgrades().chestplate())
             playerInventory.setChestplate(chestplate);
+        if (SBAConfig.getInstance().upgrades().helmet())
+            playerInventory.setHelmet(helmet);
         return true;
+    }
+
+    public static ItemStack applyTeamEnchants(Player player, ItemStack newItem) {
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        var gameStorage = SBA
+                .getInstance()
+                .getGameStorage(game)
+                .orElseThrow();
+
+        final var typeName = newItem.getType().name();
+        final var team = game.getTeamOfPlayer(player);
+
+        int sharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
+        if (sharpnessLevel > 0 && canApply("sharpness", newItem))
+            newItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpnessLevel);
+        int knockbackLebel = gameStorage.getKnockbackLevel(team).orElse(0);
+        if (knockbackLebel > 0 && canApply("knockback", newItem))
+            newItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, knockbackLebel);
+        int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (protectionLevel > 0 && canApply("protection", newItem))
+            newItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, protectionLevel);
+        int efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
+        if (efficiencyLevel > 0 && canApply("efficiency", newItem))
+            newItem.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, efficiencyLevel);
+        List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
+        SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
+            Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
+                    .filter(x -> x.getName().equalsIgnoreCase(ench) || x.getKey().asString().equalsIgnoreCase(ench))
+                    .findFirst();
+            if (ignoredKeys.contains(ench))
+                return;
+            if (!ec.isPresent()) {
+                Logger.error("SBA doesn't know how to apply enchant {}, it is not a valid enchant, check https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html for a list of enchant on your version of minecraft", ench);
+                return;
+            }
+            Enchantment ech = ec.get();
+            int level = gameStorage.getEnchantLevel(team, ench).orElse(0);
+            if (level > 0)
+                newItem.addUnsafeEnchantment(ech, level);
+        });
+        return newItem;
+    }
+
+    private static boolean canApply(String string, ItemStack newItem) {
+        if (SBAConfig.getInstance().upgrades().enchants().of(string) == null) {
+            Logger.error("SBA doesn't know how to apply enchant {}, add it in the upgrade-item.enchants.ENCHANT_HERE",
+                    string);
+            return false;
+        }
+        return SBAConfig.getInstance().upgrades().enchants().of(string).stream()
+                .anyMatch(x -> newItem.getType().toString().contains(x.toUpperCase()));
     }
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {

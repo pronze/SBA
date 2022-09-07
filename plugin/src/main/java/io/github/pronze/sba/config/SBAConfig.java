@@ -1,5 +1,6 @@
 package io.github.pronze.sba.config;
 
+import io.github.pronze.sba.AddonAPI;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.fix.BungeecordNPC;
 import io.github.pronze.sba.utils.FirstStartConfigReplacer;
@@ -8,6 +9,7 @@ import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
@@ -142,8 +144,7 @@ public class SBAConfig implements IConfigurator {
                     .back()
                     .key("enabled").defValue(true)
                     .key("height").defValue(2.5)
-                    .back()
-                    ;
+                    .back();
             generator.saveIfModified();
 
             if (!configurationNode.hasChild("upgrades"))
@@ -314,8 +315,17 @@ public class SBAConfig implements IConfigurator {
                     .key("allowed-materials").defValue(List.of("GOLD_INGOT", "IRON_INGOT"))
                     .back()
                     .section("upgrade-item")
+                    .key("boots").defValue(true)
                     .key("leggings").defValue(true)
                     .key("chestplate").defValue(false)
+                    .key("helmet").defValue(false)
+                    .section("enchants")
+                    .key("sharpness").defValue(List.of("SWORD"))
+                    .key("efficiency").defValue(List.of("PICK"))
+                    .key("knockback").defValue(List.of("SWORD"))
+                    .key("protection").defValue(List.of("HELMET","BOOT","CHESTPLATE","LEGGINGS"))
+                    .key("THORNS").defValue(List.of("HELMET","BOOT","CHESTPLATE","LEGGINGS"))
+                    .back()
                     .back()
                     .section("automatic-protection")
                     .key("spawner-diameter").defValue(5)
@@ -349,57 +359,117 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
-    public boolean replaceStoreWithNpc()
-    {
+    public boolean replaceStoreWithNpc() {
         return node("replace-stores-with-npc").getBoolean(true);
     }
-    public boolean replaceStoreWithCitizen()
-    {
-        return node("replace-stores-with-citizen").getBoolean(false) && Bukkit.getPluginManager().isPluginEnabled("Citizens");
+
+    public boolean replaceStoreWithCitizen() {
+        return node("replace-stores-with-citizen").getBoolean(false)
+                && Bukkit.getPluginManager().isPluginEnabled("Citizens");
     }
 
-    public AIConfig ai()
-    {
+    public UpgradeConfig upgrades() {
+        return new UpgradeConfig();
+    }
+
+    public class UpgradeConfig {
+        /*
+         * .section("upgrade-item")
+         * .key("leggings").defValue(true)
+         * .key("chestplate").defValue(false)
+         */
+        public boolean boots() {
+            return getBoolean("upgrade-item.boots", true);
+        }
+
+        public boolean leggings() {
+            return getBoolean("upgrade-item.leggings", true);
+        }
+
+        public boolean chestplate() {
+            return getBoolean("upgrade-item.chestplate", false);
+        }
+
+        public boolean helmet() {
+            return getBoolean("upgrade-item.helmet", false);
+        }
+
+        public EnchantApplyConfig enchants() {
+            return new EnchantApplyConfig();
+        }
+
+        public class EnchantApplyConfig {
+            public List<String> keys()
+            {
+                var keys = AddonAPI
+                .getInstance()
+                .getConfigurator().getSubKeys("upgrade-item.enchants");
+                return keys;
+            }
+            public List<String> sharpness()
+            {
+                return getStringList("upgrade-item.enchants.sharpness");
+            }
+            public List<String> knockback()
+            {
+                return getStringList("upgrade-item.enchants.knockback");
+            }
+            public List<String> protection()
+            {
+                return getStringList("upgrade-item.enchants.protection");
+            }
+            public List<String> efficiency()
+            {
+                return getStringList("upgrade-item.enchants.efficiency");
+            }
+            public List<String> of(String s)
+            {
+                return getStringList("upgrade-item.enchants."+s);
+            }
+        }
+    }
+
+    public AIConfig ai() {
         return new AIConfig();
     }
 
-    public class AIConfig
-    {
-        public boolean enabled()
-        {
+    public class AIConfig {
+        public boolean enabled() {
             return getBoolean("ai.enabled", false);
         }
-        public String skin()
-        {
+
+        public String skin() {
             var lst = new ArrayList<>(getStringList("ai.skins"));
             Collections.shuffle(lst);
             return lst.get(0);
         }
-        public long delay()
-        {
+
+        public long delay() {
             return getInt("ai.delay-in-ticks", 80);
         }
+
         public boolean useStores() {
             return getBoolean("ai.use-stores", false);
         }
+
         public @NotNull String infiniteItem() {
-            return getString("ai.infinite-material",Material.OAK_PLANKS.toString());
+            return getString("ai.infinite-material", Material.OAK_PLANKS.toString());
         }
 
     }
-    public boolean shouldCheckUpdate()
-    {
+
+    public boolean shouldCheckUpdate() {
         return shouldWarnConsoleAboutUpdate() || shouldWarnPlayerAboutUpdate();
     }
 
-    public boolean shouldWarnConsoleAboutUpdate()
-    {
+    public boolean shouldWarnConsoleAboutUpdate() {
         return getBoolean("update-checker.console", true);
     }
-    public boolean shouldWarnPlayerAboutUpdate()
-    {
+
+    public boolean shouldWarnPlayerAboutUpdate() {
         return getBoolean("update-checker.admins", true);
     }
+
     private void moveFileIfNeeded(String path) {
         var path1 = Bukkit.getPluginManager().getPlugin("SBA").getDataFolder().toPath().resolve("shops/" + path);
         var path2 = SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(path);
@@ -450,7 +520,7 @@ public class SBAConfig implements IConfigurator {
     public void saveShop(String fileName, boolean force) {
 
         var path2 = SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(fileName);
-        System.out.println("Saving shop '" + fileName + "' at '"+path2+"'");
+        System.out.println("Saving shop '" + fileName + "' at '" + path2 + "'");
         if (!path2.toFile().exists() || force)
             try (var input = SBAConfig.class.getResourceAsStream("/shops/" + fileName)) {
                 try (var output = new FileOutputStream(path2.toFile())) {
@@ -577,5 +647,4 @@ public class SBAConfig implements IConfigurator {
         return ItemFactory.build(def).orElse(ItemFactory.getAir());
     }
 
-   
 }
