@@ -539,11 +539,11 @@ public class SBAConfig implements IConfigurator {
             node("version").set(plugin.getDescription().getVersion());
             saveConfig();
 
-            saveShop("shop.yml", true);
-            saveShop("upgradeShop.yml", true);
-
             moveFileIfNeeded("shop.yml");
             moveFileIfNeeded("upgradeShop.yml");
+
+            saveShop("shop.yml", true);
+            saveShop("upgradeShop.yml", true);
 
             final var langFiles = langFolder.listFiles();
             if (langFiles != null)
