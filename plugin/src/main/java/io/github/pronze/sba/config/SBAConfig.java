@@ -120,7 +120,7 @@ public class SBAConfig implements IConfigurator {
                     .key("permanent-items").defValue(false)
                     .section("tnt-fireball-jumping")
                     .key("source-damage").defValue(1)
-                    .key("acceleration-y").defValue(0.8)
+                    .key("acceleration-y").defValue(0.1)
                     .key("reduce-y").defValue(2.0)
                     .key("launch-multiplier").defValue(3.4)
                     .key("detection-distance").defValue(8.0D)

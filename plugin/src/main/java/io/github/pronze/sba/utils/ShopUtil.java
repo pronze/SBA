@@ -398,7 +398,7 @@ public class ShopUtil {
     public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
         for (var item : player.getInventory().getArmorContents()) {
             if (item != null) {
-                item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel);
+                applyTeamEnchants(player, item);
             }
         }
     }
@@ -541,16 +541,7 @@ public class ShopUtil {
         Arrays.stream(player.getInventory().getContents())
                 .filter(Objects::nonNull)
                 .forEach(item -> {
-                    if (finalTeamSharpnessLevel > 0)
-                        if (item.getType().name().endsWith("SWORD")) {
-                            item.addEnchantment(Enchantment.DAMAGE_ALL,
-                                    finalTeamSharpnessLevel);
-                        }
-                    if (finalTeamEfficiencyLevel > 0)
-                        if (item.getType().name().endsWith("PICKAXE")) {
-                            item.addEnchantment(Enchantment.DIG_SPEED,
-                                    finalTeamEfficiencyLevel);
-                        }
+                    applyTeamEnchants(player, item);
                 });
     }
 
