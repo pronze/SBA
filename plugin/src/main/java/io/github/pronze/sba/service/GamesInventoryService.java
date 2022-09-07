@@ -52,7 +52,7 @@ public class GamesInventoryService implements Listener {
         public Location location;
         public String skin;
         public String skin_signature;
-        public int mode;
+        public String mode;
         public NPC npc;
     }
 
@@ -85,10 +85,10 @@ public class GamesInventoryService implements Listener {
 
             NPCs.clear();
 
-            checkAndAdd(config, GameMode.SOLOS, new ArrayList<>());
-            checkAndAdd(config, GameMode.DOUBLES, new ArrayList<>());
-            checkAndAdd(config, GameMode.TRIPLES, new ArrayList<>());
-            checkAndAdd(config, GameMode.SQUADS, new ArrayList<>());
+            checkAndAdd(config, "SOLO", new ArrayList<>());
+            checkAndAdd(config, "DOUBLES", new ArrayList<>());
+            checkAndAdd(config, "TRIPLES", new ArrayList<>());
+            checkAndAdd(config, "SQUADS", new ArrayList<>());
             Logger.trace("Loaded old config files into {}", NPCs);
             config.getList("npcs").forEach(element -> {
                 try {
@@ -100,7 +100,10 @@ public class GamesInventoryService implements Listener {
                         cfg.skin_signature = (String) obj.get("signature");
                     }
                     cfg.location = (Location) npc_config.get("location");
-                    cfg.mode = (Integer) npc_config.get("mode");
+                    if (npc_config.get("mode") instanceof Integer)
+                        cfg.mode = String.valueOf(((Integer) npc_config.get("mode")).intValue());
+                    else
+                        cfg.mode = (String) npc_config.get("mode");
                     NPCs.add(cfg);
                 } catch (Exception e) {
                     Logger.error("Could not read {}", e);
@@ -110,7 +113,7 @@ public class GamesInventoryService implements Listener {
             NPCs.forEach(npc -> {
                 try {
                     Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
-                    NPC n = createNpc(GameMode.fromInt(npc.mode), npc.location);
+                    NPC n = createNpc(npc.mode, npc.location);
                     if (npc.skin != null) {
                         n.skin(new NPCSkin(
                                 npc.skin,
@@ -129,8 +132,8 @@ public class GamesInventoryService implements Listener {
     }
 
     @SuppressWarnings("unchecked")
-    private void checkAndAdd(YamlConfiguration config, GameMode mode, List<Location> locations) {
-        final var node = config.get(mode.name().toLowerCase());
+    private void checkAndAdd(YamlConfiguration config, String mode, List<Location> locations) {
+        final var node = config.get(mode.toLowerCase());
         if (node != null) {
             locations.clear();
             locations.addAll((List<Location>) node);
@@ -139,7 +142,7 @@ public class GamesInventoryService implements Listener {
 
                 NPCConfig cfg = new NPCConfig();
                 cfg.location = (Location) location;
-                cfg.mode = mode.intVal();
+                cfg.mode = mode;
                 NPCs.add(cfg);
             });
             locations.clear();
@@ -147,24 +150,24 @@ public class GamesInventoryService implements Listener {
         Logger.trace("Loaded gamemode {} into {}", mode, locations);
     }
 
-    private NPC createNpc(GameMode mode, Location location) {
+    private NPC createNpc(String mode, Location location) {
         return NPC.of(LocationMapper.wrapLocation(location))
                 .lookAtPlayer(true)
                 .displayName(LanguageService
                         .getInstance()
                         .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
-                        .replace("%mode%", mode.strVal())
+                        .replace("%mode%", mode)
                         .toComponentList())
                 .show();
     }
 
-    public void addNPC(@NotNull GameMode mode, @NotNull Location location) {
+    public void addNPC(@NotNull String mode, @NotNull Location location) {
 
         NPC npc = createNpc(mode, location);
 
         NPCConfig cfg = new NPCConfig();
         cfg.location = (Location) location;
-        cfg.mode = mode.intVal();
+        cfg.mode = mode;
         cfg.npc = npc;
         NPCs.add(cfg);
 

@@ -88,16 +88,16 @@ public class SBAConfig implements IConfigurator {
 
             saveFile("games-inventory/solo.yml");
             saveFile("games-inventory/double.yml");
-            saveFile("games-inventory/triple.yml");
-            saveFile("games-inventory/squad.yml");
+            saveFile("games-inventory/triples.yml");
+            saveFile("games-inventory/squads.yml");
 
             saveFile("shops/moved-to-bedwars.txt");
 
-            saveShop("shop.yml", false);
-            saveShop("upgradeShop.yml", false);
-
             moveFileIfNeeded("shop.yml");
             moveFileIfNeeded("upgradeShop.yml");
+
+            saveShop("shop.yml", false);
+            saveShop("upgradeShop.yml", false);
 
             loader = YamlConfigurationLoader
                     .builder()
@@ -323,8 +323,8 @@ public class SBAConfig implements IConfigurator {
                     .key("sharpness").defValue(List.of("SWORD"))
                     .key("efficiency").defValue(List.of("PICK"))
                     .key("knockback").defValue(List.of("SWORD"))
-                    .key("protection").defValue(List.of("HELMET","BOOT","CHESTPLATE","LEGGINGS"))
-                    .key("THORNS").defValue(List.of("HELMET","BOOT","CHESTPLATE","LEGGINGS"))
+                    .key("protection").defValue(List.of("HELMET", "BOOT", "CHESTPLATE", "LEGGINGS"))
+                    .key("THORNS").defValue(List.of("HELMET", "BOOT", "CHESTPLATE", "LEGGINGS"))
                     .back()
                     .back()
                     .section("automatic-protection")
@@ -399,32 +399,31 @@ public class SBAConfig implements IConfigurator {
         }
 
         public class EnchantApplyConfig {
-            public List<String> keys()
-            {
+            public List<String> keys() {
                 var keys = AddonAPI
-                .getInstance()
-                .getConfigurator().getSubKeys("upgrade-item.enchants");
+                        .getInstance()
+                        .getConfigurator().getSubKeys("upgrade-item.enchants");
                 return keys;
             }
-            public List<String> sharpness()
-            {
+
+            public List<String> sharpness() {
                 return getStringList("upgrade-item.enchants.sharpness");
             }
-            public List<String> knockback()
-            {
+
+            public List<String> knockback() {
                 return getStringList("upgrade-item.enchants.knockback");
             }
-            public List<String> protection()
-            {
+
+            public List<String> protection() {
                 return getStringList("upgrade-item.enchants.protection");
             }
-            public List<String> efficiency()
-            {
+
+            public List<String> efficiency() {
                 return getStringList("upgrade-item.enchants.efficiency");
             }
-            public List<String> of(String s)
-            {
-                return getStringList("upgrade-item.enchants."+s);
+
+            public List<String> of(String s) {
+                return getStringList("upgrade-item.enchants." + s);
             }
         }
     }
@@ -520,9 +519,10 @@ public class SBAConfig implements IConfigurator {
     public void saveShop(String fileName, boolean force) {
 
         var path2 = SBA.getBedwarsPlugin().getDataFolder().toPath().resolve(fileName);
-        System.out.println("Saving shop '" + fileName + "' at '" + path2 + "'");
+
         if (!path2.toFile().exists() || force)
             try (var input = SBAConfig.class.getResourceAsStream("/shops/" + fileName)) {
+                System.out.println("Saving shop '" + fileName + "' at '" + path2 + "'");
                 try (var output = new FileOutputStream(path2.toFile())) {
                     if (input != null)
                         input.transferTo(output);

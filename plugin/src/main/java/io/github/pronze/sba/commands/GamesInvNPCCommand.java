@@ -31,7 +31,7 @@ public class GamesInvNPCCommand {
     @CommandMethod("sba gamesinv spawnnpc <mode>")
     @CommandPermission("sba.spawnnpc")
     private void commandSpawn(final @NotNull Player player,
-                              final @NotNull @Argument("mode") GameMode mode) {
+                              final @NotNull @Argument(value="mode", suggestions = "gameMode") String mode) {
         /*if (GamesInventoryService.getInstance().isNPCAtLocation(LocationMapper.wrapLocation(player.getLocation()))) {
             LanguageService
                     .getInstance()
