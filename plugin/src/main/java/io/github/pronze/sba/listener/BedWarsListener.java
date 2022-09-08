@@ -19,6 +19,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.screamingsandals.bedwars.Main;
@@ -268,7 +270,7 @@ public class BedWarsListener implements Listener {
                                 String time = game.getFormattedTimeLeft();
                                 if (!time.contains("0-1")) {
                                     String[] units = time.split(":");
-                                    int seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0])*60;
+                                    int seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0]) * 60;
                                     if (buffer == seconds)
                                         return;
                                     buffer = seconds;
@@ -276,7 +278,9 @@ public class BedWarsListener implements Listener {
                                         var message = LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.GAME_STARTS_IN_MESSAGE)
-                                                .replace("%seconds%", seconds<=60? String.valueOf(seconds):game.getFormattedTimeLeft() )
+                                                .replace("%seconds%",
+                                                        seconds <= 60 ? String.valueOf(seconds)
+                                                                : game.getFormattedTimeLeft())
                                                 .toString();
 
                                         message = seconds == 1 ? message
@@ -367,11 +371,70 @@ public class BedWarsListener implements Listener {
         if (e.getNewGameMode() != GameMode.SURVIVAL) {
             return;
         }
+        if (SBAConfig.getInstance().experimental().fakeSpectator()) {
+            player.setFlying(false);
+            player.setAllowFlight(false);
+            player.removePotionEffect(PotionEffectType.INVISIBILITY);
+            final var game = Main.getInstance().getGameOfPlayer(player);
+            final var arena = ArenaManager
+                    .getInstance().get(game.getName());
+            arena.ifPresent(arena_ -> {
+                arena_.removeHiddenPlayer(player);
+            });
+        }
         Tasker.build(() -> {
             final var game = Main.getInstance().getGameOfPlayer(player);
             ShopUtil.applyTeamUpgrades(player, game);
         }).delay(2, TaskerTime.TICKS).start();
 
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onBedwarsPlayerSpectate(PlayerGameModeChangeEvent e) {
+        final var player = e.getPlayer();
+
+        if (!Main.isPlayerInGame(player)) {
+            return;
+        }
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
+        if (e.getNewGameMode() != GameMode.SPECTATOR) {
+            return;
+        }
+        if (!SBAConfig.getInstance().experimental().fakeSpectator())
+            return;
+            
+        Tasker.build(() -> {
+            player.setGameMode(GameMode.ADVENTURE);
+        }).delay(1, TaskerTime.TICKS).start();
+    }
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onBedwarsPlayerFakeSpectate(PlayerGameModeChangeEvent e) {
+        final var player = e.getPlayer();
+
+        if (!Main.isPlayerInGame(player)) {
+            return;
+        }
+        if (player.getGameMode() == GameMode.ADVENTURE) {
+            return;
+        }
+        if (e.getNewGameMode() != GameMode.ADVENTURE) {
+            return;
+        }
+        if (!SBAConfig.getInstance().experimental().fakeSpectator())
+            return;
+        Tasker.build(() -> {
+            player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 360000, 0));
+            player.setAllowFlight(true);
+            player.setFlying(true);
+            final var game = Main.getInstance().getGameOfPlayer(player);
+            final var arena = ArenaManager
+                    .getInstance().get(game.getName());
+            arena.ifPresent(arena_ -> {
+                arena_.addHiddenPlayer(player);
+            });
+        }).delay(1, TaskerTime.TICKS).start();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -418,19 +481,19 @@ public class BedWarsListener implements Listener {
                             .ifPresent(victimData -> victimData.setDeaths(victimData.getDeaths() + 1));
 
                     final var killer = victim.getKiller();
-                    Logger.trace("Killer: {}",killer);
+                    Logger.trace("Killer: {}", killer);
                     // killer is present
                     if (killer != null) {
                         // get victim game profile
                         final var gVictim = Main.getPlayerGameProfile(victim);
-                        Logger.trace("gVictim: {}",gVictim);
+                        Logger.trace("gVictim: {}", gVictim);
 
                         if (gVictim == null)
                             return;
 
                         // get victim team to check if it was a final kill or not
                         final var victimTeam = game.getTeamOfPlayer(victim);
-                        Logger.trace("victimTeam: {}",victimTeam);
+                        Logger.trace("victimTeam: {}", victimTeam);
 
                         if (victimTeam != null) {
                             arena.getPlayerData(killer.getUniqueId())

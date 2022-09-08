@@ -63,7 +63,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
     private boolean isElligble() {
         return arena.getGame().getStatus() == GameStatus.RUNNING
-                && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE)
+                && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE|| hiddenPlayer.getGameMode() == GameMode.ADVENTURE)
                 && hiddenPlayer.isOnline()
                 && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
                 && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
@@ -110,7 +110,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         arena.getGame()
                 .getConnectedPlayers()
                 .stream()
-                .filter(pl -> !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
+                .filter(pl -> hiddenPlayerTeam==null || !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
                 .forEach(pl -> {
                     getEquipPacket(airStack, airStack, airStack, airStack,
                             convert(hiddenPlayer.getInventory().getItemInMainHand()))

@@ -226,7 +226,7 @@ public class SBAConfig implements IConfigurator {
                     .key("progress-format").defValue("§b%progress%§7/§a%total%")
                     .back()
                     .section("experimental")
-                    .key("reset-item-meta-on-purchase").defValue(false)
+                    .key("fake-spectator").defValue(false)
                     .back()
                     .back()
                     .section("party")
@@ -367,7 +367,16 @@ public class SBAConfig implements IConfigurator {
         return node("replace-stores-with-citizen").getBoolean(false)
                 && Bukkit.getPluginManager().isPluginEnabled("Citizens");
     }
-
+    public ExperimentalConfig experimental()
+    {
+        return new ExperimentalConfig();
+    }
+    //"fake-spectator"
+    public class ExperimentalConfig{
+        public boolean fakeSpectator() {
+            return getBoolean("experimental.fake-spectator", false);
+        }
+    }
     public UpgradeConfig upgrades() {
         return new UpgradeConfig();
     }

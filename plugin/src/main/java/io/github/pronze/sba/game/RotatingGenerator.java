@@ -62,7 +62,7 @@ public class RotatingGenerator implements IRotatingGenerator {
 
     @Override
     public void spawn(@NotNull List<Player> viewers) {
-        Logger.trace("RotatingGenerator::spawn ({},{})", this,viewers);
+        Logger.trace("RotatingGenerator::spawn ({},{})", this, viewers);
 
         final var holoHeight = SBAConfig.getInstance()
                 .node("floating-generator", "height").getDouble(2.0);
@@ -80,7 +80,8 @@ public class RotatingGenerator implements IRotatingGenerator {
 
     @Override
     public void addViewer(@NotNull Player player) {
-        hologram.addViewer(PlayerMapper.wrapPlayer(player));
+        if (hologram != null)
+            hologram.addViewer(PlayerMapper.wrapPlayer(player));
     }
 
     @Override
@@ -97,7 +98,7 @@ public class RotatingGenerator implements IRotatingGenerator {
             @Override
             public void run() {
                 hologram.show();
-                //Logger.trace("RotatingGenerator::hologramTask ({},{})", this,hologramTask);
+                // Logger.trace("RotatingGenerator::hologramTask ({},{})", this,hologramTask);
 
                 boolean full = itemSpawner.getMaxSpawnedResources() <= spawnedItems.size();
                 if (!full) {
@@ -109,17 +110,17 @@ public class RotatingGenerator implements IRotatingGenerator {
                         .toStringList() :
 
                         LanguageService
-                        .getInstance()
-                        .get(MessageKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT)
-                        .toStringList();
+                                .getInstance()
+                                .get(MessageKeys.ROTATING_GENERATOR_FULL_TEXT_FORMAT)
+                                .toStringList();
 
                 final var newLines = new ArrayList<String>();
-                final var matName = itemSpawner.getItemSpawnerType().getMaterial() ==
-                        Material.EMERALD ? "§a" + LanguageService
-                        .getInstance()
-                        .get(MessageKeys.EMERALD)
-                        .toString() :
-                        "§b" + LanguageService
+                final var matName = itemSpawner.getItemSpawnerType().getMaterial() == Material.EMERALD
+                        ? "§a" + LanguageService
+                                .getInstance()
+                                .get(MessageKeys.EMERALD)
+                                .toString()
+                        : "§b" + LanguageService
                                 .getInstance()
                                 .get(MessageKeys.DIAMOND)
                                 .toString();
