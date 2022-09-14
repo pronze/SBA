@@ -1,9 +1,11 @@
 package io.github.pronze.sba.utils;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.GameTierEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.service.DynamicSpawnerLimiterService;
 import io.github.pronze.sba.service.GamesInventoryService;
 import io.github.pronze.sba.service.NPCStoreService;
@@ -12,6 +14,7 @@ import lombok.NonNull;
 import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -103,27 +106,31 @@ public class SBAUtil {
                     + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
         }
 
-        /*try {
-            // Bukkit.getServicesManager().unregisterAll(plugin);
-        } catch (Throwable ex) {
-            Bukkit.getLogger().log(Level.SEVERE,
-                    "Error occurred (in the plugin loader) while unregistering services for "
-                            + plugin.getDescription().getFullName() + " (Is it up to date?)",
-                    ex);
-        }*/
+        /*
+         * try {
+         * // Bukkit.getServicesManager().unregisterAll(plugin);
+         * } catch (Throwable ex) {
+         * Bukkit.getLogger().log(Level.SEVERE,
+         * "Error occurred (in the plugin loader) while unregistering services for "
+         * + plugin.getDescription().getFullName() + " (Is it up to date?)",
+         * ex);
+         * }
+         */
 
         try {
-            var handlers = HandlerList.getRegisteredListeners(plugin);
-            Logger.trace("-----------------------{}-----------------", handlers.size());
-            for (var handler : handlers) {
-                String id = handler.getListener().toString();
-                if (!id.contains("BukkitAudiencesImpl") && !id.contains("CloudBukkitListener")
-                        && !id.contains("CommodoreImpl$ServerReloadListener")) {
-                    HandlerList.unregisterAll(handler.getListener());
-                }
-                Logger.trace("handler {}", handler.getListener().toString());
-            }
-            Logger.trace("-----------------------{}-----------------", handlers.size());
+            // var handlers = HandlerList.getRegisteredListeners(plugin);
+            HandlerList.unregisterAll(plugin);
+            // Logger.trace("-----------------------{}-----------------", handlers.size());
+            // for (var handler : handlers) {
+            // String id = handler.getListener().toString();
+            // if (!id.contains("BukkitAudiencesImpl") &&
+            // !id.contains("CloudBukkitListener")
+            // && !id.contains("CommodoreImpl$ServerReloadListener")) {
+            // HandlerList.unregisterAll(handler.getListener());
+            // }
+            // Logger.trace("handler {}", handler.getListener().toString());
+            // }
+            // Logger.trace("-----------------------{}-----------------", handlers.size());
 
             // HandlerList.unregisterAll(plugin);
         } catch (Throwable ex) {
@@ -153,7 +160,7 @@ public class SBAUtil {
         }
     }
 
-    public static void reloadPlugin(@NonNull JavaPlugin plugin) {
+    public static void reloadPlugin(@NonNull JavaPlugin plugin, CommandSender sender) {
         disablePlugin(plugin);
         Bukkit.getServer().getPluginManager().enablePlugin(plugin);
         if (plugin == SBA.getPluginInstance()) {
@@ -161,8 +168,12 @@ public class SBAUtil {
             GameTierEvent.forceReload();
             DynamicSpawnerLimiterService.getInstance().reload();
             LanguageService.getInstance().load(plugin);
+            CommandManager.reload();
+            AIService.reload();
         }
         Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
+        if (sender != null)
+            sender.sendMessage("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
     public static void sendTitle(PlayerWrapper player, String title, String subtitle, int fadeIn, int stay,

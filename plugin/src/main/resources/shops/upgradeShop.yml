@@ -14,8 +14,7 @@ data:
     column: 3
     properties: efficiency
 
-  - price: 4
-    price-type: iron
+  - price: 4 of iron
     properties: 
       name: forge
       add-levels: 0.2
@@ -24,14 +23,9 @@ data:
         - iron
         - gold
     stack:
-      ==: org.bukkit.inventory.ItemStack
-      v: 1519
       type: FURNACE
       amount: 1
-      meta:
-        ==: ItemMeta
-        meta-type: UNSPECIFIC
-        display-name: "Forge Upgrade"
+      display-name: "Forge Upgrade"
 
   - stack: "BEACON;1;§bHeal Pool;§7Triggers a pool around the base that heals you!"
     column: 5

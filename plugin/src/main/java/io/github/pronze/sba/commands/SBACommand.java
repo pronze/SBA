@@ -78,7 +78,7 @@ public class SBACommand {
     @CommandPermission("sba.reload")
     private void commandReload(
             final @NotNull CommandSender sender) {
-        SBAUtil.reloadPlugin(SBA.getPluginInstance());
+        SBAUtil.reloadPlugin(SBA.getPluginInstance(),sender);
     }
 
     @CommandMethod("sba dump")

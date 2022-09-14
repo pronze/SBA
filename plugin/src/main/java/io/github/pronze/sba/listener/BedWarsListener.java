@@ -19,6 +19,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -27,6 +28,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
+import org.screamingsandals.bedwars.lib.lang.I;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.bedwars.utils.MiscUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -49,11 +51,15 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
 
 @Service
 public class BedWarsListener implements Listener {
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
+    private final Map<UUID, ItemStack[]> inventoryContent = new HashMap<>();
 
     @OnPostEnable
     public void registerListener() {
@@ -336,6 +342,7 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .fromCache(player.getUniqueId())
                 .ifPresent(Scoreboard::destroy);
+                
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
@@ -383,6 +390,11 @@ public class BedWarsListener implements Listener {
             });
         }
         Tasker.build(() -> {
+            if (inventoryContent.containsKey(player.getUniqueId())) {
+                player.getInventory().setContents(inventoryContent.get(player.getUniqueId()));
+                inventoryContent.remove(player.getUniqueId());
+            }
+
             final var game = Main.getInstance().getGameOfPlayer(player);
             ShopUtil.applyTeamUpgrades(player, game);
         }).delay(2, TaskerTime.TICKS).start();
@@ -404,11 +416,24 @@ public class BedWarsListener implements Listener {
         }
         if (!SBAConfig.getInstance().experimental().fakeSpectator())
             return;
-            
+        if (Main.getInstance().getGameOfPlayer(player).getOriginalOrInheritedKeepInventory()
+                && !inventoryContent.containsKey(player.getUniqueId())) {
+            inventoryContent.put(player.getUniqueId(),
+                    Arrays.asList(player.getInventory().getContents()).stream().map(i -> i != null ? i.clone() : i)
+                            .collect(Collectors.toList()).toArray(new ItemStack[0]).clone());
+            System.out.println("[" +
+                    String.join(",", Arrays.stream(inventoryContent.get(player.getUniqueId()))
+                            .map(x -> x != null ? x.toString() : "null").collect(Collectors.toList()))
+                    + "]");
+        }
         Tasker.build(() -> {
+
+            player.getInventory().clear();
+
             player.setGameMode(GameMode.ADVENTURE);
         }).delay(1, TaskerTime.TICKS).start();
     }
+
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBedwarsPlayerFakeSpectate(PlayerGameModeChangeEvent e) {
         final var player = e.getPlayer();

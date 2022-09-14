@@ -223,21 +223,23 @@ public class SBA extends PluginContainer implements AddonAPI {
     private static class CitizensTraits {
 
         private static void enableCitizensTraits() {
-            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
-                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(HologramTrait.class)
-                            .withName("SBAHologramTrait"));
-            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
-                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(ReturnToStoreTrait.class)
-                            .withName("ReturnToStoreTrait"));
-            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
-                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(RespawnTrait.class)
-                            .withName("RespawnTrait"));
-            net.citizensnpcs.api.CitizensAPI.getTraitFactory()
-                    .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(FakeDeathTrait.class)
-                            .withName("FakeDeathTrait"));
+            if (net.citizensnpcs.api.CitizensAPI.getTraitFactory().getTrait("SBAHologramTrait") == null) {
+                net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                        .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(HologramTrait.class)
+                                .withName("SBAHologramTrait"));
+                net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                        .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(ReturnToStoreTrait.class)
+                                .withName("ReturnToStoreTrait"));
+                net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                        .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(RespawnTrait.class)
+                                .withName("RespawnTrait"));
+                net.citizensnpcs.api.CitizensAPI.getTraitFactory()
+                        .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(FakeDeathTrait.class)
+                                .withName("FakeDeathTrait"));
 
-            AIService aiService = new AIService();
-            aiService.onPostEnabled();
+                AIService aiService = new AIService();
+                aiService.onPostEnabled();
+            }
         }
 
     }

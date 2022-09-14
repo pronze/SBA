@@ -52,18 +52,17 @@ public class MainLobbyVisualsManager implements Listener {
         load();
     }
 
-    public void reload()
-    {
+    public void reload() {
         disable();
         load();
     }
-    public void load()
-    {
+
+    public void load() {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
-            enabled=false;
+            enabled = false;
             return;
         }
-        enabled=true;
+        enabled = true;
         SBAUtil.readLocationFromConfig("main-lobby").ifPresentOrElse(location -> {
             MainLobbyVisualsManager.location = location;
             Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> Bukkit
@@ -86,12 +85,12 @@ public class MainLobbyVisualsManager implements Listener {
         return player.getScoreboard().getObjective(MAIN_LOBBY_OBJECTIVE) != null;
     }
 
-  
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         if (!enabled)
             return;
-        if (!SBAConfig.getInstance().node("main-lobby","custom-chat").getBoolean(true)) return;
+        if (!SBAConfig.getInstance().node("main-lobby", "custom-chat").getBoolean(true))
+            return;
         final var player = e.getPlayer();
         final var db = SBA.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
@@ -117,10 +116,10 @@ public class MainLobbyVisualsManager implements Listener {
                 Bukkit.getServer().getOnlinePlayers().forEach(p -> {
                     p.sendMessage(msgToSend);
                 });
-            
-                //e.getRecipients().clear();
+
+                // e.getRecipients().clear();
                 e.setCancelled(true);
-                //e.setFormat(format);
+                // e.setFormat(format);
             }
         }
     }
@@ -130,7 +129,7 @@ public class MainLobbyVisualsManager implements Listener {
         Set.copyOf(scoreboardMap.keySet()).forEach(this::remove);
         scoreboardMap.clear();
         enabled = false;
-        //HandlerList.unregisterAll(this);
+        // HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -142,7 +141,8 @@ public class MainLobbyVisualsManager implements Listener {
 
         Bukkit.getServer().getScheduler()
                 .runTaskLater(SBA.getPluginInstance(), () -> {
-                    if (hasMainLobbyObjective(player)) return;
+                    if (hasMainLobbyObjective(player))
+                        return;
                     if (isInWorld(player.getLocation()) && !Main.isPlayerInGame(player) && player.isOnline()) {
                         create(player);
                     }
@@ -169,6 +169,8 @@ public class MainLobbyVisualsManager implements Listener {
 
     public void create(Player player) {
         if (!enabled)
+            return;
+        if (!isInWorld(player.getLocation()))
             return;
 
         final var playerData = SBA
@@ -213,7 +215,7 @@ public class MainLobbyVisualsManager implements Listener {
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
                     final var progress = playerData.getProgress();
-                    final var playerStatistic  = Main
+                    final var playerStatistic = Main
                             .getPlayerStatisticsManager()
                             .getStatistic(player);
 
@@ -234,7 +236,8 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void remove(Player player) {
-        if (player == null) return;
+        if (player == null)
+            return;
         final var scoreboard = scoreboardMap.get(player);
         if (scoreboard != null) {
             scoreboard.destroy();

@@ -560,7 +560,7 @@ public class SBAConfig implements IConfigurator {
 
             saveFile("languages/language_en.yml");
             ServiceManager.get(FirstStartConfigReplacer.class).updateBedWarsConfig();
-            SBAUtil.reloadPlugin(Main.getInstance());
+            SBAUtil.reloadPlugin(Main.getInstance(),null);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

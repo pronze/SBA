@@ -13,6 +13,7 @@ import cloud.commandframework.execution.CommandExecutionCoordinator;
 import cloud.commandframework.meta.CommandMeta;
 import cloud.commandframework.minecraft.extras.MinecraftHelp;
 import cloud.commandframework.paper.PaperCommandManager;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.commands.party.PartyCommand;
 import lombok.Getter;
 import lombok.NonNull;
@@ -20,6 +21,7 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
@@ -46,7 +48,19 @@ public class CommandManager {
     private PaperCommandManager<CommandSender> manager;
     private AnnotationParser<CommandSender> annotationParser;
     private MinecraftHelp<CommandSender> minecraftHelp;
+    private @NotNull BukkitAudiences bukkitAudiences;
 
+    public static void reload() {
+        CommandManager ths = getInstance();
+        if(ths!=null)
+        {
+            ths.bukkitAudiences = BukkitAudiences.create(SBA.getPluginInstance());
+            ths.minecraftHelp = new MinecraftHelp<>(
+                    "/sba help",
+                    ths.bukkitAudiences::sender,
+                    ths.manager);
+        }
+    }
     @OnEnable
     public void onEnable(JavaPlugin plugin) {
         if (manager != null)
@@ -68,7 +82,7 @@ public class CommandManager {
             return;
         }
 
-        BukkitAudiences bukkitAudiences = BukkitAudiences.create(plugin);
+        bukkitAudiences = BukkitAudiences.create(plugin);
         minecraftHelp = new MinecraftHelp<>(
                 "/sba help",
                 bukkitAudiences::sender,
@@ -105,4 +119,6 @@ public class CommandManager {
         sender.sendMessage("commandHelp");
         minecraftHelp.queryCommands(query == null ? "" : query, sender);
     }
+
+  
 }

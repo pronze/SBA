@@ -118,10 +118,19 @@ public class AIService implements Listener {
                 }
         }
 
+        public static void reload()
+        {
+                if(AIService.getInstance()!=null)
+                {
+                        instance.onDisable();
+                        instance.onPostEnabled();
+                }
+        }
         @OnPreDisable
         public void onDisable() {
                 if (registry != null) {
                         registry.getRegistry().deregisterAll();
+                        registry=null;
                 }
         }
 

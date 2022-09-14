@@ -33,7 +33,7 @@ dependencies {
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION, {
         exclude group: 'net.kyori'
     }
-    compileOnly "net.citizensnpcs:citizens-main:2.0.29-SNAPSHOT"
+    compileOnly "net.citizensnpcs:citizens-main:2.0.30-SNAPSHOT"
 }
 test {
     useJUnitPlatform()

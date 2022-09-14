@@ -37,7 +37,7 @@ public class FirstStartConfigReplacer {
             if (doneChanges.get()) {
                 Bukkit.getLogger().info("[SBA]: Making legacy changes");
                 Main.getConfigurator().saveConfig();
-                SBAUtil.reloadPlugin(Main.getInstance());
+                SBAUtil.reloadPlugin(Main.getInstance(), null);
             }
         }
     }
