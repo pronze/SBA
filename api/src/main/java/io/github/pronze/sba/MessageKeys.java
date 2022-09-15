@@ -122,6 +122,8 @@ public class MessageKeys {
     public static final String[] UPGRADE_TEAM_PROTECTION = {"upgrade-team-protection"};
     public static final String[] UGPRADE_TEAM_SHARPNESS = {"upgrade-team-sharpness"};
     public static final String[] UPGRADE_TEAM_EFFICIENCY=  {"upgrade-team-sharpness"};
+    public static final String[] UPGRADE_TEAM_KNOCKBACK=  {"upgrade-team-knockback"};
+    public static final String[] UPGRADE_TEAM_ENCHANT=  {"upgrade-team-enchant"};
     public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard", "title"};
     public static final String[] CANNOT_BUY = {"shop", "buy_failed"};
     public static final String[] GAMES_INVENTORY_CANNOT_FIND_GAME = {"games-inventory", "could-not-find-game"};

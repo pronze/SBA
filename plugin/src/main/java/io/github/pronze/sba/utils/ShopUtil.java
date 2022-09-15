@@ -20,6 +20,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -38,6 +39,7 @@ import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -148,6 +150,13 @@ public class ShopUtil {
         return true;
     }
 
+    public static void increaseTeamEnchant(Player teamPlayer, @Nullable ItemStack item, Enchantment damageAll) {
+        if (!canApply(damageAll, item))
+            return;
+        int level = item.getEnchantmentLevel(damageAll);
+        item.addUnsafeEnchantment(damageAll, level + 1);
+    }
+
     public static ItemStack applyTeamEnchants(Player player, ItemStack newItem) {
         final var game = Main.getInstance().getGameOfPlayer(player);
         var gameStorage = SBA
@@ -165,10 +174,10 @@ public class ShopUtil {
         if (knockbackLebel > 0 && canApply("knockback", newItem))
             newItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, knockbackLebel);
         int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
-        if (protectionLevel > 0 && canApply("protection", newItem))
+        if (protectionLevel > 0 && canApply("efficiency", newItem))
             newItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, protectionLevel);
         int efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
-        if (efficiencyLevel > 0 && canApply("efficiency", newItem))
+        if (efficiencyLevel > 0 && canApply("protection", newItem))
             newItem.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, efficiencyLevel);
         List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
         SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
@@ -177,8 +186,12 @@ public class ShopUtil {
                     .findFirst();
             if (ignoredKeys.contains(ench))
                 return;
+            if (!canApply(ench, newItem))
+                return;
             if (!ec.isPresent()) {
-                Logger.error("SBA doesn't know how to apply enchant {}, it is not a valid enchant, check https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html for a list of enchant on your version of minecraft", ench);
+                Logger.error(
+                        "SBA doesn't know how to apply enchant {}, it is not a valid enchant, check https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html for a list of enchant on your version of minecraft",
+                        ench);
                 return;
             }
             Enchantment ech = ec.get();
@@ -197,6 +210,31 @@ public class ShopUtil {
         }
         return SBAConfig.getInstance().upgrades().enchants().of(string).stream()
                 .anyMatch(x -> newItem.getType().toString().contains(x.toUpperCase()));
+    }
+
+    private static boolean canApply(Enchantment string, ItemStack newItem) {
+        return canApply(getName(string), newItem);
+    }
+
+    private static String getName(Enchantment ech) {
+        if (ech == Enchantment.DAMAGE_ALL)
+            return ("sharpness");
+        if (ech == Enchantment.KNOCKBACK)
+            return ("sharpness");
+        if (ech == Enchantment.DIG_SPEED)
+            return ("efficiency");
+        if (ech == Enchantment.PROTECTION_ENVIRONMENTAL)
+            return ("protection");
+        AtomicReference<String> str = new AtomicReference<>();
+        SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
+            Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
+                    .filter(x -> x.getName().equalsIgnoreCase(ench) || x.getKey().asString().equalsIgnoreCase(ench))
+                    .findFirst();
+            if(ec.isPresent() && ec.get().equals(ech))
+                str.set(ench);
+        });
+        return str.get();
+
     }
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
