@@ -126,7 +126,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
 
         final var totalKills = String.valueOf(statistic.getKills());
         final var currentKills = String.valueOf(playerData.getKills());
-        final var finalKills = String.valueOf(statistic.getKills());
+        final var finalKills = String.valueOf(playerData.getFinalKills());
         final var currentDeaths = String.valueOf(playerData.getDeaths());
         final var currentBedDestroys = String.valueOf(playerData.getBedDestroys());
         final var teamName = playerTeam == null ? "" : playerTeam.getName();
@@ -168,6 +168,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%game%", game.getName())
                             .replace("%date%", DateUtils.getFormattedDate())
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus)
+                            .replace("%tier_task%",generatorTask.getNextTierName())
+                            .replace("%tier_time%",generatorTask.getTimeLeftForNextEvent())
                             .replace("%tier%", generatorTask.getNextTierName()
                                     .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
 

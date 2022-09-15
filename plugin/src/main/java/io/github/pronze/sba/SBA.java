@@ -7,6 +7,7 @@ import io.github.pronze.sba.fix.BaseFix;
 import io.github.pronze.sba.fix.BungeecordNPC;
 import io.github.pronze.sba.fix.MagmaFix;
 import io.github.pronze.sba.fix.MohistFix;
+import io.github.pronze.sba.fix.PerWorldPluginFix;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
@@ -78,7 +79,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens", "Vulcan" })
+}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens", "Vulcan" ,"PerWorldPlugins"})
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -159,6 +160,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         fixs.add(BungeecordNPC.getInstance());
         fixs.add(new MohistFix());
         fixs.add(new MagmaFix());
+        fixs.add(new PerWorldPluginFix());
 
         for (BaseFix fix : fixs) {
             fix.detect();
