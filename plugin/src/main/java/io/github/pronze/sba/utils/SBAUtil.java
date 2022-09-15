@@ -169,9 +169,13 @@ public class SBAUtil {
             DynamicSpawnerLimiterService.getInstance().reload();
             LanguageService.getInstance().load(plugin);
             CommandManager.reload();
-            AIService.reload();
+            try {
+                AIService.reload();
+            } catch (Throwable t) {
+
+            }
         }
-        Bukkit.getLogger().info("Plugin reloaded! Keep in mind that restarting the server is safer!");
+        Logger.warn("Plugin reloaded! Keep in mind that restarting the server is safer!");
         if (sender != null)
             sender.sendMessage("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
