@@ -4,5 +4,6 @@ public enum Strategy {
     DEFENSIVE,
     AGRESSIVE,
     BALANCED,
+    NONE,
     ANY
 }

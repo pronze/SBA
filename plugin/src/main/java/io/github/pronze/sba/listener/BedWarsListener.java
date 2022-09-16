@@ -421,10 +421,6 @@ public class BedWarsListener implements Listener {
             inventoryContent.put(player.getUniqueId(),
                     Arrays.asList(player.getInventory().getContents()).stream().map(i -> i != null ? i.clone() : i)
                             .collect(Collectors.toList()).toArray(new ItemStack[0]).clone());
-            System.out.println("[" +
-                    String.join(",", Arrays.stream(inventoryContent.get(player.getUniqueId()))
-                            .map(x -> x != null ? x.toString() : "null").collect(Collectors.toList()))
-                    + "]");
         }
         Tasker.build(() -> {
 

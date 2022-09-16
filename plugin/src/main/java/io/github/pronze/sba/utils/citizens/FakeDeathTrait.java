@@ -73,10 +73,10 @@ public class FakeDeathTrait extends Trait {
         return blockPlace_;
     }
 
-    public Player getNpcEntity()
-    {
+    public Player getNpcEntity() {
         return (Player) npc.getEntity();
     }
+
     // Run code when the NPC is spawned. Note that npc.getEntity() will be null
     // until this method is called.
     // This is called AFTER onAttach and AFTER Load when the server is started.
@@ -89,23 +89,24 @@ public class FakeDeathTrait extends Trait {
         Logger.trace("Initializing AI in mode{}", strategy);
         Random r = new Random();
         if (strategy == Strategy.ANY) {
-            var possibilities = List.of(Strategy.AGRESSIVE, Strategy.DEFENSIVE);
+            var possibilities = List.of(Strategy.AGRESSIVE, Strategy.DEFENSIVE, Strategy.BALANCED);
             strategy = possibilities.get(r.nextInt(possibilities.size()));
         }
 
         goals.clear();
-        goals.add(new DontCancelBlockBreak(this));
-        goals.add(new GatherBlocks(this));
-        goals.add(new AttackNearbyPlayerGoal(this));
-        if (strategy == Strategy.DEFENSIVE)
-            goals.add(new BuildBedDefenseGoal(this));
-        else if (strategy == Strategy.AGRESSIVE)
-            goals.add(new AttackOtherGoal(this));
-        else if (strategy == Strategy.BALANCED)
-            goals.add(new BalancedGoal(this));
-        goals.add(new GatherRessource(this));
-        goals.add(new CancelNavigation(this));
-
+        if (strategy != Strategy.NONE) {
+            goals.add(new DontCancelBlockBreak(this));
+            goals.add(new GatherBlocks(this));
+            goals.add(new AttackNearbyPlayerGoal(this));
+            if (strategy == Strategy.DEFENSIVE)
+                goals.add(new BuildBedDefenseGoal(this));
+            else if (strategy == Strategy.AGRESSIVE)
+                goals.add(new AttackOtherGoal(this));
+            else if (strategy == Strategy.BALANCED)
+                goals.add(new BalancedGoal(this));
+            goals.add(new GatherRessource(this));
+            goals.add(new CancelNavigation(this));
+        }
     }
 
     @Override

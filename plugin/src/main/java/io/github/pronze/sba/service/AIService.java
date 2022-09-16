@@ -99,7 +99,7 @@ public class AIService implements Listener {
         }
 
         public AIService() {
-                instance=this;
+                instance = this;
         }
 
         @OnPostEnable
@@ -118,19 +118,18 @@ public class AIService implements Listener {
                 }
         }
 
-        public static void reload()
-        {
-                if(AIService.getInstance()!=null)
-                {
+        public static void reload() {
+                if (AIService.getInstance() != null) {
                         instance.onDisable();
                         instance.onPostEnabled();
                 }
         }
+
         @OnPreDisable
         public void onDisable() {
                 if (registry != null) {
                         registry.getRegistry().deregisterAll();
-                        registry=null;
+                        registry = null;
                 }
         }
 
@@ -197,6 +196,25 @@ public class AIService implements Listener {
                         e.printStackTrace();
                         return null;
                 }
+        }
+
+        @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+        public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
+                var game = event.getGame();
+                Tasker.build(() -> {
+                        boolean allAI = true;
+                        for (Player p : game.getConnectedPlayers()) {
+                                if (!isNPC(p)) {
+                                        allAI = false;
+                                        break;
+                                }
+                        }
+                        if (allAI) {
+                                for (Player p : new ArrayList<>(game.getConnectedPlayers())) {
+                                        game.leaveFromGame(p);
+                                }
+                        }
+                }).afterOneTick().start();
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)

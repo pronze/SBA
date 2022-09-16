@@ -196,6 +196,41 @@ public class AICommand implements Listener {
         }
     }
 
+    @CommandMethod("sba ai join noai")
+    @CommandPermission("sba.ai")
+    @CommandDescription("sba ai join noai")
+    private void commandAIJoinNoAI(
+            final @NotNull Player player) {
+        final var wrapper = SBA.getInstance().getPlayerWrapper(player);
+
+        if (!Main.getInstance().isPlayerPlayingAnyGame(player)) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MESSAGE_NOT_IN_GAME)
+                    .send(wrapper);
+            return;
+        }
+        final var game = Main.getInstance().getGameOfPlayer(player);
+
+        if (game.getStatus() == GameStatus.WAITING) {
+
+            int maxPlayer = game.getMaxPlayers();
+            int current = game.countConnectedPlayers();
+            if (current < maxPlayer) {
+                AIService.getInstance().spawnAI(player.getLocation(), Strategy.NONE)
+                        .thenAccept(ai -> {
+                            Logger.info("{}", ai);
+                            int current_ = game.countConnectedPlayers();
+                            if (current_ < maxPlayer) {
+                                game.joinToGame(ai);
+                            } else {
+                                AIService.getInstance().getNPC(ai).destroy();
+                            }
+                        });
+            }
+        }
+    }
+
     @CommandMethod("sba ai join balanced")
     @CommandPermission("sba.ai")
     @CommandDescription("sba ai join balanced")
