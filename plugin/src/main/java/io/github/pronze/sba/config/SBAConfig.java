@@ -359,6 +359,42 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
+    public TeamStatusConfig teamStatus() {
+        return new TeamStatusConfig();
+    }
+
+    public class TeamStatusConfig {
+        /*
+         * .section("team-status")
+         * .key("target-destroyed").defValue("§c\u2717")
+         * .key("target-exists").defValue("§a\u2713")
+         * .key("alive").defValue("%color% %team% §a\u2713 §8%you%")
+         * .key("destroyed").defValue("%color% %team% §a§f%players%§8 %you%")
+         * .key("eliminated").defValue("%color% %team% §c\u2718 %you%")
+         * .back()
+         */
+
+        public String targetDestroyed() {
+            return getString("team-status.target-destroyed", "§c\u2717");
+        }
+
+        public String targetExists() {
+            return getString("team-status.target-exists", "§a\u2713");
+        }
+
+        public String alive() {
+            return getString("team-status.alive", "%color% %team% §a\u2713 §8%you%");
+        }
+
+        public String destroyed() {
+            return getString("team-status.destroyed", "%color% %team% §a§f%players%§8 %you%");
+        }
+
+        public String eliminated() {
+            return getString("team-status.eliminated", "%color% %team% §c\u2718 %you%");
+        }
+    }
+
     public boolean replaceStoreWithNpc() {
         return node("replace-stores-with-npc").getBoolean(true);
     }
@@ -367,16 +403,18 @@ public class SBAConfig implements IConfigurator {
         return node("replace-stores-with-citizen").getBoolean(false)
                 && Bukkit.getPluginManager().isPluginEnabled("Citizens");
     }
-    public ExperimentalConfig experimental()
-    {
+
+    public ExperimentalConfig experimental() {
         return new ExperimentalConfig();
     }
-    //"fake-spectator"
-    public class ExperimentalConfig{
+
+    // "fake-spectator"
+    public class ExperimentalConfig {
         public boolean fakeSpectator() {
             return getBoolean("experimental.fake-spectator", false);
         }
     }
+
     public UpgradeConfig upgrades() {
         return new UpgradeConfig();
     }
@@ -560,7 +598,7 @@ public class SBAConfig implements IConfigurator {
 
             saveFile("languages/language_en.yml");
             ServiceManager.get(FirstStartConfigReplacer.class).updateBedWarsConfig();
-            SBAUtil.reloadPlugin(Main.getInstance(),null);
+            SBAUtil.reloadPlugin(Main.getInstance(), null);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

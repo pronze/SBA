@@ -50,7 +50,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
                     .toStringList());
         }
-        if(SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
+        if (SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
             game.getConnectedPlayers().forEach(this::createScoreboard);
     }
 
@@ -97,7 +97,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
         scoreboardMap.values().forEach(Scoreboard::destroy);
         scoreboardMap.clear();
         if (updateTask != null) {
-            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
+            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId())
+                    || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
                 updateTask.cancel();
             }
         }
@@ -168,8 +169,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%game%", game.getName())
                             .replace("%date%", DateUtils.getFormattedDate())
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus)
-                            .replace("%tier_task%",generatorTask.getNextTierName())
-                            .replace("%tier_time%",generatorTask.getTimeLeftForNextEvent())
+                            .replace("%tier_task%", generatorTask.getNextTierName())
+                            .replace("%tier_time%", generatorTask.getTimeLeftForNextEvent())
                             .replace("%tier%", generatorTask.getNextTierName()
                                     .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
 
@@ -179,35 +180,33 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     }
 
     private String getTeamBedStatus(RunningTeam team) {
-        return team.isDead() ?
-                SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717") :
-                SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
+        return team.isDead() ? SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717")
+                : SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
     }
 
     private String getTeamStatusFormat(RunningTeam team) {
-        String alive = SBAConfig
-                .getInstance()
-                .node("team-status", "alive")
-                .getString("%color% %team% §a\u2713 §8%you%");
+        String alive = SBAConfig.getInstance().teamStatus().alive();
 
-        String destroyed = SBAConfig
-                .getInstance()
-                .node("team-status", "destroyed")
-                .getString("%color% %team% §a§f%players%§8 %you%");
+        String destroyed = SBAConfig.getInstance().teamStatus().destroyed();
 
-        String status = team.isTargetBlockExists() ? alive : destroyed;
+        String eliminated = SBAConfig.getInstance().teamStatus().eliminated();
+
+        String status = team.isTargetBlockExists() ? alive
+                : (team.getConnectedPlayers().size() > 0) ? destroyed : eliminated;
 
         String formattedTeam = TeamColor
-                .valueOf(team.getColor().name())
-                .chatColor
+                .valueOf(team.getColor().name()).chatColor
                 .toString()
                 + team.getName().charAt(0);
 
-        return status
+        status = status
                 .replace("%bed_status%", getTeamBedStatus(team))
                 .replace("%color%", formattedTeam)
-                .replace("%team%", ChatColor.WHITE + team.getName() + ":")
-                .replace("%players%", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
+                .replace("%team%", ChatColor.WHITE + team.getName() + ":");
+        int teamSize = team.getConnectedPlayers().size();
+        status = status.replace("%players%", ChatColor.GREEN.toString() + teamSize);
+
+        return status;
     }
 
     private String getTeamStatusFormat(Team team) {
