@@ -481,7 +481,8 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
                                         .forEach(item -> {
-                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.PROTECTION_ENVIRONMENTAL);
+                                            ShopUtil.increaseTeamEnchant(teamPlayer, item,
+                                                    Enchantment.PROTECTION_ENVIRONMENTAL);
                                         });
                             });
                             break;
@@ -513,10 +514,15 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                         .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                         .toComponent();
 
-                                final var finalTeamProtectionLevel = teamProtectionLevel;
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
-                                    ShopUtil.addEnchantsToPlayerArmor(teamPlayer, finalTeamProtectionLevel);
+                                    // ShopUtil.addEnchantsToPlayerArmor(teamPlayer, finalTeamProtectionLevel);
+                                    Arrays.stream(teamPlayer.getInventory().getContents())
+                                            .filter(Objects::nonNull)
+                                            .forEach(item -> {
+                                                ShopUtil.applyTeamEnchants(teamPlayer, item);
+                                            });
                                     PlayerMapper.wrapPlayer(teamPlayer).sendMessage(upgradeMessage);
+
                                 });
                             } else
                                 shouldSellStack = false;
@@ -536,8 +542,9 @@ public class SBAUpgradeStoreInventory extends AbstractStoreInventory {
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                             .send(PlayerMapper.wrapPlayer(teamPlayer));
                                     Optional<Enchantment> ech = Arrays.stream(Enchantment.values())
-                                    .filter(x -> x.getName().equalsIgnoreCase(propertyName)
-                                            || x.getKey().asString().equalsIgnoreCase(propertyName)).findAny();
+                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName)
+                                                    || x.getKey().asString().equalsIgnoreCase(propertyName))
+                                            .findAny();
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
                                             .filter(Objects::nonNull)

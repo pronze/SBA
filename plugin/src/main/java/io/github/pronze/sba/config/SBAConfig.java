@@ -10,6 +10,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
@@ -225,8 +226,11 @@ public class SBAConfig implements IConfigurator {
                     .key("tablist-modifications").defValue(true)
                     .key("progress-format").defValue("§b%progress%§7/§a%total%")
                     .back()
-                    .section("experimental")
-                    .key("fake-spectator").defValue(false)
+                    .section("spectator")
+                    .key("adventure-mode").defValue(false)
+                    .section("compass")
+                    .key("enabled").defValue(true)
+                    .key("name").defValue("§cP§6l§ea§ay§9e§br§5s")
                     .back()
                     .back()
                     .section("party")
@@ -404,15 +408,47 @@ public class SBAConfig implements IConfigurator {
                 && Bukkit.getPluginManager().isPluginEnabled("Citizens");
     }
 
-    public ExperimentalConfig experimental() {
-        return new ExperimentalConfig();
+    public SpectatorConfig spectator() {
+        return new SpectatorConfig();
     }
 
     // "fake-spectator"
-    public class ExperimentalConfig {
-        public boolean fakeSpectator() {
-            return getBoolean("experimental.fake-spectator", false);
+    public class SpectatorConfig {
+        public boolean adventure() {
+            return getBoolean("spectator.adventure-mode", false);
         }
+
+        public CompassConfig compass() {
+            return new CompassConfig();
+        }
+
+        public class CompassConfig {
+            public boolean enabled() {
+                return getBoolean("spectator.compass.enabled", false);
+            }
+
+            public String name() {
+                return getString("spectator.compass.name", "§cP§6l§ea§ay§9e§br§5s");
+            }
+
+            public ItemStack get() {
+                ItemStack compass = new ItemStack(Material.COMPASS);
+                var meta = compass.getItemMeta();
+                meta.setDisplayName(name());
+                compass.setItemMeta(meta);
+                return compass;
+            }
+        }
+
+        public boolean compassWhileSpectator() {
+            return getBoolean("spectator.compass-spectator", true);
+        }
+        /*
+         * .section("compass")
+         * .key("enabled").defValue(true)
+         * .key("name").defValue("Players")
+         * .back()
+         */
     }
 
     public UpgradeConfig upgrades() {

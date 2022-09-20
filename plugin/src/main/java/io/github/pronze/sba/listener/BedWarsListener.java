@@ -9,14 +9,17 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
@@ -342,7 +345,7 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .fromCache(player.getUniqueId())
                 .ifPresent(Scoreboard::destroy);
-                
+
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
     }
 
@@ -378,7 +381,7 @@ public class BedWarsListener implements Listener {
         if (e.getNewGameMode() != GameMode.SURVIVAL) {
             return;
         }
-        if (SBAConfig.getInstance().experimental().fakeSpectator()) {
+        if (SBAConfig.getInstance().spectator().adventure()) {
             player.setFlying(false);
             player.setAllowFlight(false);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -414,7 +417,7 @@ public class BedWarsListener implements Listener {
         if (e.getNewGameMode() != GameMode.SPECTATOR) {
             return;
         }
-        if (!SBAConfig.getInstance().experimental().fakeSpectator())
+        if (!SBAConfig.getInstance().spectator().adventure())
             return;
         if (Main.getInstance().getGameOfPlayer(player).getOriginalOrInheritedKeepInventory()
                 && !inventoryContent.containsKey(player.getUniqueId())) {
@@ -426,8 +429,28 @@ public class BedWarsListener implements Listener {
 
             player.getInventory().clear();
 
+            if (SBAConfig.getInstance().spectator().compass().enabled()) {
+                ItemStack compass = SBAConfig.getInstance().spectator().compass().get();
+                var game = Main.getInstance().getGameOfPlayer(player);
+                var team = game.getTeamOfPlayer(player);
+                if (team != null)
+                    player.setCompassTarget(team.getTargetBlock());
+                player.getInventory().addItem(compass);
+            }
             player.setGameMode(GameMode.ADVENTURE);
         }).delay(1, TaskerTime.TICKS).start();
+    }
+
+    @EventHandler
+    public void onCompassClick(PlayerInteractEvent event) {
+        var player = event.getPlayer();
+        if ((event.getAction() != Action.RIGHT_CLICK_AIR) && (event.getAction() != Action.RIGHT_CLICK_BLOCK))
+            return;
+        ItemStack compass = SBAConfig.getInstance().spectator().compass().get();
+        if (!compass.isSimilar(player.getInventory().getItemInHand()))
+            return;
+
+        Logger.info("{} clicked on players compass", player);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -443,7 +466,7 @@ public class BedWarsListener implements Listener {
         if (e.getNewGameMode() != GameMode.ADVENTURE) {
             return;
         }
-        if (!SBAConfig.getInstance().experimental().fakeSpectator())
+        if (!SBAConfig.getInstance().spectator().adventure())
             return;
         Tasker.build(() -> {
             player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 360000, 0));

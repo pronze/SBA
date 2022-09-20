@@ -168,17 +168,17 @@ public class ShopUtil {
         final var team = game.getTeamOfPlayer(player);
 
         int sharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
-        if (sharpnessLevel > 0 && canApply("sharpness", newItem))
+        if (sharpnessLevel > 0 && canApply(Enchantment.DAMAGE_ALL, newItem))
             newItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpnessLevel);
         int knockbackLebel = gameStorage.getKnockbackLevel(team).orElse(0);
-        if (knockbackLebel > 0 && canApply("knockback", newItem))
+        if (knockbackLebel > 0 && canApply(Enchantment.KNOCKBACK, newItem))
             newItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, knockbackLebel);
-        int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
-        if (protectionLevel > 0 && canApply("efficiency", newItem))
-            newItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, protectionLevel);
         int efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
-        if (efficiencyLevel > 0 && canApply("protection", newItem))
-            newItem.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, efficiencyLevel);
+        if (efficiencyLevel > 0 && canApply(Enchantment.DIG_SPEED, newItem))
+            newItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiencyLevel);
+        int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (protectionLevel > 0 && canApply(Enchantment.PROTECTION_ENVIRONMENTAL, newItem))
+            newItem.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
         List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
         SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
