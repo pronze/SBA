@@ -150,11 +150,11 @@ public class ShopUtil {
         return true;
     }
 
-    public static void increaseTeamEnchant(Player teamPlayer, @Nullable ItemStack item, Enchantment damageAll) {
+    public static void increaseTeamEnchant(Player teamPlayer, @Nullable ItemStack item, Enchantment damageAll, int levelToAdd) {
         if (!canApply(damageAll, item))
             return;
         int level = item.getEnchantmentLevel(damageAll);
-        item.addUnsafeEnchantment(damageAll, level + 1);
+        item.addUnsafeEnchantment(damageAll, level + levelToAdd);
     }
 
     public static ItemStack applyTeamEnchants(Player player, ItemStack newItem) {

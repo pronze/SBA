@@ -26,6 +26,8 @@ import org.screamingsandals.lib.utils.AdventureHelper;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
+import clib.net.kyori.adventure.text.TextComponent;
+
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -180,11 +182,11 @@ public class SBAUtil {
             sender.sendMessage("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, String title, String subtitle, int fadeIn, int stay,
+    public static void sendTitle(PlayerWrapper player, net.kyori.adventure.text.Component title, net.kyori.adventure.text.Component subtitle, int fadeIn, int stay,
             int fadeOut) {
         var titleComponent = net.kyori.adventure.title.Title.title(
-                AdventureHelper.toComponent(title),
-                AdventureHelper.toComponent(subtitle),
+                title,
+                subtitle,
                 Title.Times.of(
                         Duration.ofMillis(fadeIn * 50L),
                         Duration.ofMillis(stay * 50L),

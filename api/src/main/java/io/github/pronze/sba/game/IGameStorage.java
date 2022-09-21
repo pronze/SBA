@@ -155,5 +155,9 @@ public interface IGameStorage {
      */
     boolean areDragonsEnabled(@NotNull RunningTeam team);
 
+    void setPurchasedTrap(RunningTeam team, boolean b, String trap_identifier);
+
+    boolean areTrapEnabled(RunningTeam team, String trap_identifier);
+
    
 }

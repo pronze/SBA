@@ -118,6 +118,7 @@ public class MessageKeys {
     public static final String[] WAIT_FOR_TRAP = {"wait-trap"};
     public static final String[] BLINDNESS_TRAP_PURCHASED_TITLE = {"blindness-trap-purchased-title"};
     public static final String[] MINER_TRAP_PURCHASED_TITLE = {"miner-trap-purchased-title"};
+    public static final String[] CUSTOM_TRAP_PURCHASED_TITLE = {"custom-trap-purchased-title"};
     public static final String[] PURCHASED_HEAL_POOL_MESSAGE = {"purchase-heal-pool"};
     public static final String[] UPGRADE_TEAM_PROTECTION = {"upgrade-team-protection"};
     public static final String[] UGPRADE_TEAM_SHARPNESS = {"upgrade-team-sharpness"};

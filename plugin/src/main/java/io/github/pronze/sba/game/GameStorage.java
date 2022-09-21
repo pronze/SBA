@@ -201,6 +201,26 @@ public class GameStorage implements IGameStorage {
     }
 
     @Override
+    public void setPurchasedTrap(RunningTeam team, boolean b, String trap_identifier) {
+        if (team == null)
+            return;
+        if (!teamDataMap.containsKey(team)) {
+            throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
+        }
+        teamDataMap.get(team).setPurchased(b, trap_identifier);
+    }
+
+    @Override
+    public boolean areTrapEnabled(RunningTeam team, String trap_identifier) {
+        if (team == null)
+            return false;
+        if (!teamDataMap.containsKey(team)) {
+            throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
+        }
+        return teamDataMap.get(team).isPuchased(trap_identifier);
+    }
+
+    @Override
     public boolean areDragonsEnabled(@NotNull RunningTeam team) {
         if (team == null)
             return false;

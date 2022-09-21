@@ -344,11 +344,11 @@ public class Arena implements IArena {
         final var title = LanguageService
                 .getInstance()
                 .get(MessageKeys.BED_DESTROYED_TITLE)
-                .toString();
+                .toComponent();
         final var subtitle = LanguageService
                 .getInstance()
                 .get(MessageKeys.BED_DESTROYED_SUBTITLE)
-                .toString();
+                .toComponent();
 
         team.getConnectedPlayers()
                 .forEach(player -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), title, subtitle, 0, 40, 20));
@@ -468,13 +468,13 @@ public class Arena implements IArena {
             var victoryTitle = LanguageService
                     .getInstance()
                     .get(MessageKeys.VICTORY_TITLE)
-                    .toString();
+                    .toComponent();
 
             final var WinTeamPlayers = new ArrayList<String>();
             winner.getConnectedPlayers()
                     .forEach(player -> WinTeamPlayers.add(player.getDisplayName() + ChatColor.RESET));
             winner.getConnectedPlayers()
-                    .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, "", 0, 90, 0));
+                    .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, net.kyori.adventure.text.Component.empty(), 0, 90, 0));
 
             LanguageService
                     .getInstance()

@@ -63,12 +63,12 @@ public class MinerTrapTask extends BaseGameTask {
                                 var title = LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_MINER_TRAP_TRIGGERED_TITLE)
-                                        .toString();
+                                        .toComponent();
 
                                 var subTitle = LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_MINER_TRAP_TRIGGERED_SUBTITLE)
-                                        .toString();
+                                        .toComponent();
 
                                 team.getConnectedPlayers().forEach(pl -> {
                                     String sound = SBAConfig.getInstance().getString("sounds.on_trap_triggered",

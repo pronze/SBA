@@ -62,12 +62,12 @@ public class TrapTask extends BaseGameTask {
                                 var title = LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_TITLE)
-                                        .toString();
+                                        .toComponent();
 
                                 var subTitle = LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_SUBTITLE)
-                                        .toString();
+                                        .toComponent();
 
                                 team.getConnectedPlayers().forEach(pl -> {
                                     String sound = SBAConfig.getInstance().getString("sounds.on_trap_triggered",

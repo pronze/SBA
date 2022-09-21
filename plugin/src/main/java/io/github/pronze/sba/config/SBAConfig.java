@@ -272,6 +272,8 @@ public class SBAConfig implements IConfigurator {
                     .key("render-footer-start").defValue(600)
                     .key("items-on-row").defValue(9)
                     .key("show-page-numbers").defValue(false)
+                    .key("trap-title").defValue(true)
+                    .key("trap-message").defValue(true)
                     .section("normal-shop")
                     .key("entity-name").defValue(List.of("§bITEM SHOP", "§e§lRIGHT CLICK"))
                     .section("skin")
@@ -353,6 +355,14 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
+    public boolean trapTitleEnabled()
+    {
+        return getBoolean("shop.trap-title",true);
+    }
+    public boolean trapMessageEnabled()
+    {
+        return getBoolean("shop.trap-message",true);
+    }
     public TeamStatusConfig teamStatus() {
         return new TeamStatusConfig();
     }

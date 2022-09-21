@@ -134,7 +134,7 @@ public class PlayerListener implements Listener {
         final var gVictim = Main.getPlayerGameProfile(player);
         final var victimTeam = game.getTeamOfPlayer(player);
 
-        if(victimTeam ==null)
+        if (victimTeam == null)
             return;
         if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
                 victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
@@ -143,14 +143,11 @@ public class PlayerListener implements Listener {
             new BukkitRunnable() {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
-                final String respawnTitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
-                        .toString();
-                final String respawnSubtitle = LanguageService
+
+                final net.kyori.adventure.text.Component respawnSubtitle = LanguageService
                         .getInstance()
                         .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
-                        .toString();
+                        .toComponent();
                 final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
                 int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
                 byte buffer = 2;
@@ -161,11 +158,15 @@ public class PlayerListener implements Listener {
                         this.cancel();
                         return;
                     }
-
+                    final net.kyori.adventure.text.Component respawnTitle = LanguageService
+                            .getInstance()
+                            .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
+                            .replace("%time%", String.valueOf(livingTime))
+                            .toComponent();
                     // send custom title because we disabled BedWars from showing any title
                     if (livingTime > 0) {
                         SBAUtil.sendTitle(wrappedPlayer, respawnTitle,
-                                respawnSubtitle.replace("%time%", String.valueOf(livingTime)),
+                                respawnSubtitle,
                                 0, 20, 0);
 
                         LanguageService
@@ -188,9 +189,9 @@ public class PlayerListener implements Listener {
                             var respawnedTitle = LanguageService
                                     .getInstance()
                                     .get(MessageKeys.RESPAWNED_TITLE)
-                                    .toString();
+                                    .toComponent();
 
-                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
+                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, net.kyori.adventure.text.Component.empty(),
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
                                     Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player)
@@ -304,7 +305,8 @@ public class PlayerListener implements Listener {
                                     LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                            .replace("%player%", member.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                            .replace("%player%",
+                                                    member.as(Player.class).getDisplayName() + ChatColor.RESET)
                                             .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                 }, () -> SBA.getInstance().getPartyManager()
@@ -371,11 +373,10 @@ public class PlayerListener implements Listener {
                         .ifPresent(arena -> arena.addHiddenPlayer(player));
             }
 
-            try{
+            try {
                 Reflect.setField(event.getClass(), "replacement", event, new ItemStack(Material.AIR));
-                //event.setReplacement(new ItemStack(Material.AIR));
-            }
-            catch(Throwable t){
+                // event.setReplacement(new ItemStack(Material.AIR));
+            } catch (Throwable t) {
             }
         }
     }
@@ -404,7 +405,7 @@ public class PlayerListener implements Listener {
         SBA.getInstance().getPlayerWrapperService().register(player);
 
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
-            if (SBA.getInstance().isPendingUpgrade() ) {
+            if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
                     player.sendMessage(
                             "§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
@@ -416,7 +417,7 @@ public class PlayerListener implements Listener {
         if (player.hasPermission(Permissions.UPDATE.getKey())) {
             {
                 if (SBA.getInstance().isPendingUpdate() && SBAConfig.getInstance().shouldWarnPlayerAboutUpdate()) {
-                    
+
                     Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
                         UpdateChecker.getInstance().sendToUser(player);
                     }, 40L);

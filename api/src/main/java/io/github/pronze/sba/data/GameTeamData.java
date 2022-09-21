@@ -71,6 +71,8 @@ public class GameTeamData {
      */
     private final Location targetBlockLoc;
 
+    private Map<String,Boolean> isPurchased=new HashMap<>();
+
     /**
      * Constructs a new GameTeamData instance.
      * 
@@ -91,5 +93,13 @@ public class GameTeamData {
 
     public void set(String propertyName, @NotNull Integer level) {
         enchantLevel.put(propertyName, level);
+    }
+
+    public void setPurchased(boolean b, String trap_identifier) {
+        isPurchased.put(trap_identifier, b);
+    }
+
+    public boolean isPuchased(String trap_identifier) {
+        return isPurchased.get(trap_identifier)!=null && isPurchased.get(trap_identifier).booleanValue();
     }
 }

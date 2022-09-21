@@ -187,8 +187,32 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                 if (isAdd) {
                     levelToAdd = property.getPropertyData().childrenMap().get("add-levels").getDouble(1);
                 }
+                final int levelToAddInt = (int) levelToAdd;
                 // if (upgradeProperties.contains(propertyName)) {
                 switch (propertyName) {
+                    case "trap":
+                        String trap_identifier = property.getPropertyData().childrenMap().get("identifier").getString();
+                        if (gameStorage.areTrapEnabled(team, trap_identifier)) {
+                            shouldSellStack = false;
+                            LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.WAIT_FOR_TRAP)
+                                    .send(wrappedPlayer);
+                        } else {
+                            final var blindnessTrapTitle = LanguageService
+                                    .getInstance()
+                                    .get(MessageKeys.CUSTOM_TRAP_PURCHASED_TITLE)
+                                    .replace("%identifier%", trap_identifier)
+                                    .toComponent();
+
+                            gameStorage.setPurchasedTrap(team, true, trap_identifier);
+                            if (SBAConfig.getInstance().trapTitleEnabled())
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
+                                        blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                            if(SBAConfig.getInstance().trapMessageEnabled())
+                                team.getConnectedPlayers().forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
+                        }
+                        break;
                     case "sharpness":
                         if (isAdd) {
                             team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -201,7 +225,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
                                         .forEach(item -> {
-                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.DAMAGE_ALL);
+                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.DAMAGE_ALL,
+                                                    levelToAddInt);
                                         });
                             });
                             break;
@@ -256,7 +281,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
                                         .forEach(item -> {
-                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.KNOCKBACK);
+                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.KNOCKBACK,
+                                                    levelToAddInt);
                                         });
                             });
                             break;
@@ -312,7 +338,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
                                         .forEach(item -> {
-                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.DIG_SPEED);
+                                            ShopUtil.increaseTeamEnchant(teamPlayer, item, Enchantment.DIG_SPEED,
+                                                    levelToAddInt);
                                         });
                             });
                             break;
@@ -365,11 +392,12 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             final var blindnessTrapTitle = LanguageService
                                     .getInstance()
                                     .get(MessageKeys.BLINDNESS_TRAP_PURCHASED_TITLE)
-                                    .toString();
+                                    .toComponent();
 
                             gameStorage.setPurchasedBlindTrap(team, true);
-                            team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                    blindnessTrapTitle, "", 20, 40, 20));
+                            if (SBAConfig.getInstance().trapTitleEnabled())
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
+                                        blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
                         }
                         break;
 
@@ -384,11 +412,12 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             final var minerTrapTitle = LanguageService
                                     .getInstance()
                                     .get(MessageKeys.MINER_TRAP_PURCHASED_TITLE)
-                                    .toString();
+                                    .toComponent();
 
                             gameStorage.setPurchasedMinerTrap(team, true);
-                            team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                    minerTrapTitle, "", 20, 40, 20));
+                            if (SBAConfig.getInstance().trapTitleEnabled())
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
+                                        minerTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
                         }
                         break;
 
@@ -496,7 +525,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .filter(Objects::nonNull)
                                         .forEach(item -> {
                                             ShopUtil.increaseTeamEnchant(teamPlayer, item,
-                                                    Enchantment.PROTECTION_ENVIRONMENTAL);
+                                                    Enchantment.PROTECTION_ENVIRONMENTAL, levelToAddInt);
                                         });
                             });
                             break;
@@ -563,7 +592,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     Arrays.stream(teamPlayer.getInventory().getContents())
                                             .filter(Objects::nonNull)
                                             .forEach(item -> {
-                                                ShopUtil.increaseTeamEnchant(teamPlayer, item, ech.get());
+                                                ShopUtil.increaseTeamEnchant(teamPlayer, item, ech.get(),
+                                                        levelToAddInt);
                                             });
                                 });
                                 break;
