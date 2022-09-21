@@ -122,7 +122,7 @@ public class MessageKeys {
     public static final String[] PURCHASED_HEAL_POOL_MESSAGE = {"purchase-heal-pool"};
     public static final String[] UPGRADE_TEAM_PROTECTION = {"upgrade-team-protection"};
     public static final String[] UGPRADE_TEAM_SHARPNESS = {"upgrade-team-sharpness"};
-    public static final String[] UPGRADE_TEAM_EFFICIENCY=  {"upgrade-team-sharpness"};
+    public static final String[] UPGRADE_TEAM_EFFICIENCY=  {"upgrade-team-efficiency"};
     public static final String[] UPGRADE_TEAM_KNOCKBACK=  {"upgrade-team-knockback"};
     public static final String[] UPGRADE_TEAM_ENCHANT=  {"upgrade-team-enchant"};
     public static final String[] ANIMATED_BEDWARS_TITLE = {"scoreboard", "title"};

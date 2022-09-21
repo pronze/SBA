@@ -144,10 +144,6 @@ public class PlayerListener implements Listener {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
 
-                final net.kyori.adventure.text.Component respawnSubtitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
-                        .toComponent();
                 final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
                 int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
                 byte buffer = 2;
@@ -161,6 +157,11 @@ public class PlayerListener implements Listener {
                     final net.kyori.adventure.text.Component respawnTitle = LanguageService
                             .getInstance()
                             .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
+                            .replace("%time%", String.valueOf(livingTime))
+                            .toComponent();
+                    final net.kyori.adventure.text.Component respawnSubtitle = LanguageService
+                            .getInstance()
+                            .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
                             .replace("%time%", String.valueOf(livingTime))
                             .toComponent();
                     // send custom title because we disabled BedWars from showing any title

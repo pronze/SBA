@@ -364,8 +364,9 @@ public class ShopUtil {
             if (isSharp) {
                 final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player))
                         .orElseThrow() + 1;
-                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
-                if (currentLevel <= limit) {
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
+                limit = Math.min(limit, SBAStoreInventoryV2.sharpnessPrices.size());
+                if (currentLevel < limit) {
                     price = String.valueOf(SBAStoreInventoryV2.sharpnessPrices
                             .get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
@@ -374,8 +375,9 @@ public class ShopUtil {
             if (isProt) {
                 final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player))
                         .orElseThrow() + 1;
-                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
-                if (currentLevel <= limit) {
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
+                limit = Math.min(limit, SBAStoreInventoryV2.protectionPrices.size());
+                if (currentLevel < limit) {
                     price = String.valueOf(SBAStoreInventoryV2.protectionPrices.get(
                             arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
@@ -384,8 +386,9 @@ public class ShopUtil {
             if (isEfficiency) {
                 final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player))
                         .orElseThrow() + 1;
-                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
-                if (currentLevel <= limit) {
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
+                limit = Math.min(limit, SBAStoreInventoryV2.efficiencyPrices.size());
+                if (currentLevel < limit) {
                     price = String.valueOf(SBAStoreInventoryV2.efficiencyPrices.get(
                             arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }

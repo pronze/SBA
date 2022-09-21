@@ -228,7 +228,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                                     effectItem.childrenMap().get("level").getInt());
                                             trap.getEffects().add(pe);
                                         } catch (Throwable t) {
-                                            Logger.error("Cannot parse potion effect, verify your custom trap configuration");
+                                            Logger.error(
+                                                    "Cannot parse potion effect, verify your custom trap configuration");
                                         }
                                     });
                             CustomTrapTask.registerTrap(trap);
@@ -263,6 +264,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var teamSharpnessLevel = gameStorage.getSharpnessLevel(team).orElseThrow();
                         var maxSharpnessLevel = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness")
                                 .getInt(1);
+                        maxSharpnessLevel = Math.min(maxSharpnessLevel, sharpnessPrices.size() - 1);
 
                         if (teamSharpnessLevel >= maxSharpnessLevel) {
                             shouldSellStack = false;
@@ -363,7 +365,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .get(MessageKeys.UPGRADE_TEAM_EFFICIENCY)
                                         .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                         .send(PlayerMapper.wrapPlayer(teamPlayer));
-
+                                Logger.trace("efficiency level add");
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
                                         .forEach(item -> {
@@ -376,7 +378,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElseThrow();
                         var maxEfficiencyLevel = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency")
                                 .getInt(2);
-
+                        maxEfficiencyLevel = Math.min(maxEfficiencyLevel, efficiencyPrices.size() - 1);
                         if (efficiencyLevel >= maxEfficiencyLevel) {
                             shouldSellStack = false;
                             LanguageService
@@ -392,7 +394,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
                                     materialItem.get().getAmount())) {
                                 gameStorage.setEfficiencyLevel(team, efficiencyLevel);
-                                Integer finalTeamEfficiencyLevel = efficiencyLevel;
+                                Logger.trace("efficiency {}", efficiencyLevel);
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
                                     LanguageService
                                             .getInstance()
@@ -569,6 +571,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElseThrow();
                         var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection")
                                 .getInt(4);
+                        maxProtectionLevel = Math.min(maxProtectionLevel, protectionPrices.size() - 1);
 
                         if (teamProtectionLevel >= maxProtectionLevel) {
                             shouldSellStack = false;
@@ -608,7 +611,6 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         }
                         break;
                     default:
-
                         if (Arrays.stream(Enchantment.values())
                                 .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName)
                                         || x.getKey().asString().equalsIgnoreCase(propertyName))) {
@@ -637,6 +639,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             var teamOtherLevel = gameStorage.getEnchantLevel(team, propertyName).orElseThrow();
                             var maxOtherLevel = SBAConfig.getInstance().node("upgrades", "limit", propertyName)
                                     .getInt(1);
+                            maxOtherLevel = Math.min(maxOtherLevel, otherPrices.get(propertyName).size() - 1);
 
                             if (teamOtherLevel >= maxOtherLevel) {
                                 shouldSellStack = false;
@@ -653,7 +656,6 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                 if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
                                         materialItem.get().getAmount())) {
                                     gameStorage.setEnchantLevel(team, propertyName, teamOtherLevel);
-                                    Integer finalTeamSharpnessLevel = teamOtherLevel;
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
                                         LanguageService
                                                 .getInstance()
@@ -670,6 +672,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                 } else
                                     shouldSellStack = false;
                             }
+                        } else {
+                            return Map.entry(true, true);
                         }
                         break;
                 }
