@@ -71,10 +71,9 @@ data:
               level: 2
         stack:
           type: STRING
-          display-name: "§bMining Fatigue trap"
+          display-name: "§bCustom trap"
           lore:
-            - "§7Get informed when an enemy enters a 7 block radius of your base"
-            - "§7Slow Down their mining and gain an advantage!"
+            - "§7Add jump and speed to your team when an enemy enters a 7 block radius of your base"
 
   - stack: "GRAY_STAINED_GLASS_PANE;1;*****"
     row: 2

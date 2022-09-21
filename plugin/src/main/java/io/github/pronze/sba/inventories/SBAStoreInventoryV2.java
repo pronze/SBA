@@ -209,8 +209,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
                                         blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
-                            if(SBAConfig.getInstance().trapMessageEnabled())
-                                team.getConnectedPlayers().forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
+                            if (SBAConfig.getInstance().trapMessageEnabled())
+                                team.getConnectedPlayers()
+                                        .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
                         }
                         break;
                     case "sharpness":
@@ -398,6 +399,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
                                         blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                            if (SBAConfig.getInstance().trapMessageEnabled())
+                                team.getConnectedPlayers()
+                                        .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
                         }
                         break;
 
@@ -418,7 +422,11 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
                                         minerTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                            if (SBAConfig.getInstance().trapMessageEnabled())
+                                team.getConnectedPlayers()
+                                        .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(minerTrapTitle));
                         }
+
                         break;
 
                     case "healpool":
