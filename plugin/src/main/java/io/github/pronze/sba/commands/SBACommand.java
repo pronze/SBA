@@ -78,7 +78,7 @@ public class SBACommand {
     @CommandPermission("sba.reload")
     private void commandReload(
             final @NotNull CommandSender sender) {
-        SBAUtil.reloadPlugin(SBA.getPluginInstance(),sender);
+        SBAUtil.reloadPlugin(SBA.getPluginInstance(), sender);
     }
 
     @CommandMethod("sba dump")
@@ -382,22 +382,23 @@ public class SBACommand {
     @CommandPermission("sba.openshop")
     private void sbaGameStoreOpen(
             final @NotNull Player player,
-            final @NotNull @Argument("shop") String gameMode) {
+            final @NotNull @Argument("shop") String storeName) {
         final var game = Main.getInstance().getGameOfPlayer(player);
         if (game != null) {
             GameStore store = null;
-            for (var i : game.getGameStores()) {
-                if ((gameMode == null) || (i.getShopFile() != null && i.getShopFile().equals(gameMode)))
-                    store = i;
+            for (var storeToCompare : game.getGameStores()) {
+                if ((storeName == null) || (storeToCompare.getShopFile() != null && storeToCompare.getShopFile().equals(storeName)))
+                    store = storeToCompare;
             }
-
-            BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
-                    player, store, null);
-            new BukkitRunnable() {
-                public void run() {
-                    Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
-                }
-            }.runTask(SBA.getPluginInstance());
+            if (store != null) {
+                BedwarsOpenShopEvent openShopEvent = new BedwarsOpenShopEvent(game,
+                        player, store, null);
+                new BukkitRunnable() {
+                    public void run() {
+                        Bukkit.getServer().getPluginManager().callEvent(openShopEvent);
+                    }
+                }.runTask(SBA.getPluginInstance());
+            }
         }
     }
 

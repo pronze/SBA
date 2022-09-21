@@ -7,7 +7,7 @@ import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
-import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
+import io.github.pronze.sba.inventories.SBAStoreInventoryV2;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -366,7 +366,7 @@ public class ShopUtil {
                         .orElseThrow() + 1;
                 final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices
+                    price = String.valueOf(SBAStoreInventoryV2.sharpnessPrices
                             .get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
             }
@@ -376,7 +376,7 @@ public class ShopUtil {
                         .orElseThrow() + 1;
                 final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(
+                    price = String.valueOf(SBAStoreInventoryV2.protectionPrices.get(
                             arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
             }
@@ -386,7 +386,7 @@ public class ShopUtil {
                         .orElseThrow() + 1;
                 final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(
+                    price = String.valueOf(SBAStoreInventoryV2.efficiencyPrices.get(
                             arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
                 }
             }

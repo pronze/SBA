@@ -12,7 +12,7 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.simpleinventories.inventory.Price;
 
-import io.github.pronze.sba.inventories.SBAStoreInventory;
+import io.github.pronze.sba.inventories.SBAStoreInventoryV2;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait.AiGoal;
 import lombok.Data;
@@ -126,7 +126,7 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
     public void iterateShop(Player aiPlayer, GameStore gs,
             BiConsumer<Price, org.screamingsandals.lib.item.Item> consumer) {
         if (gs.getShopFile() == null || !StringUtils.containsIgnoreCase(gs.getShopFile(), "upgrade")) {
-            var storeInv = SBAStoreInventory.getInstance().iterate(gs);
+            var storeInv = SBAStoreInventoryV2.getInstance().iterate(gs);
             if (storeInv != null) {
                 // storeInv.openInventory(SBA.getInstance().getPlayerWrapper(aiPlayer));
                 /*

@@ -57,10 +57,11 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     @OnPostEnable
     public void onPostEnable() {
-        Arrays.stream(shopPaths.split(","))
-                .forEach(path -> {
-                    SBAConfig.getInstance().saveShop(path, false);
-                });
+        if (shopPaths.length() > 0)
+            Arrays.stream(shopPaths.split(","))
+                    .forEach(path -> {
+                        SBAConfig.getInstance().saveShop(path, false);
+                    });
 
         SBA.getInstance().registerListener(this);
         loadNewShop("default", null, true);
@@ -123,7 +124,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 .animationsEnabled(true)
                 .call(categoryBuilder -> {
                     var pathStr = SBA.getBedwarsPlugin().getDataFolder().getAbsolutePath();
-                    pathStr = pathStr + "/" + (file != null ? file.getName() : shopPaths.split(",")[0]);
+                    pathStr = pathStr + "/" + (file != null ? file.getName() : "shop.yml");
                     categoryBuilder.include(Include.of(Paths.get(pathStr)));
                 })
                 .preClick(this::onPreAction)

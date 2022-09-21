@@ -33,11 +33,7 @@ data:
     properties: healpool
     price: 8 of diamond
 
-  - stack: "DRAGON_EGG;1;Ender Dragon;Get A Bonus Dragon when Dragons get summoned!"
-    column: 6
-    row: 1
-
-  - stack: "LEATHER;1;TRAPS;TRAP YOUR ENEMY"
+  - stack: "LEATHER;1;Traps;Trap your enemy"
     column: 7
     items:
       - price: 2 of diamond
@@ -53,6 +49,26 @@ data:
       - price: 2 of diamond
         skip: 1
         properties: minertrap
+        stack:
+          type: STRING
+          display-name: "§bMining Fatigue trap"
+          lore:
+            - "§7Get informed when an enemy enters a 7 block radius of your base"
+            - "§7Slow Down their mining and gain an advantage!"
+
+      - price: 2 of diamond
+        skip: 1
+        properties:
+          name: trap
+          identifier: custom_trap_1
+          target: team
+          effects:
+            - type: JUMP
+              duration: 600
+              level: 2
+            - type: REGEN
+              duration: 600
+              level: 2
         stack:
           type: STRING
           display-name: "§bMining Fatigue trap"
