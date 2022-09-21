@@ -65,8 +65,8 @@ data:
           effects:
             - type: JUMP
               duration: 600
-              level: 2
-            - type: REGEN
+              level: 6
+            - type: REGENERATION
               duration: 600
               level: 2
         stack:

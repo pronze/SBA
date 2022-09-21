@@ -43,8 +43,13 @@ miner-trap-triggered:
   message: "<yellow>You have been slowed by %team% team!"
   title: "<red>Trap Triggered!"
   sub-title: "<yellow>Someone has entered your base!"
+custom-trap-triggered:
+  message: "<yellow>You have affected by %trap% from %team% team!"
+  title: "<red>%trap% Triggered!"
+  sub-title: "<yellow>Someone has entered your base and fired %trap%!"
 blindness-trap-purchased-title: "<gold>Blindness Trap has been purchased!"
 miner-trap-purchased-title: "<gold>Mining Fatigue Trap has been purchased!"
+custom-trap-purchased-title: "<gold>%trap% has been purchased!"
 purchase-heal-pool: "<aqua>Heal Pool has been purchased by: %player%"
 respawn-title: "<red>YOU DIED!"
 respawn-message: "<yellow>You will respawn in <red>%time% <yellow>seconds"

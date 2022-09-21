@@ -206,7 +206,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             final var blindnessTrapTitle = LanguageService
                                     .getInstance()
                                     .get(MessageKeys.CUSTOM_TRAP_PURCHASED_TITLE)
-                                    .replace("%identifier%", trap_identifier)
+                                    .replace("%trap%", trap_identifier)
                                     .toComponent();
 
                             CustomTrap trap = new CustomTrap();

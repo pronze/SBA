@@ -107,6 +107,9 @@ public class MessageKeys {
     public static final String[] TEAM_MINER_TRAP_TRIGGERED_MESSAGE = {"miner-trap-triggered", "message"};
     public static final String[] TEAM_MINER_TRAP_TRIGGERED_TITLE = {"miner-trap-triggered", "title"};
     public static final String[] TEAM_MINER_TRAP_TRIGGERED_SUBTITLE = {"miner-trap-triggered", "sub-title"};
+    public static final String[] TEAM_CUSTOM_TRAP_TRIGGERED_MESSAGE = {"custom-trap-triggered", "message"};
+    public static final String[] TEAM_CUSTOM_TRAP_TRIGGERED_TITLE = {"custom-trap-triggered", "title"};
+    public static final String[] TEAM_CUSTOM_TRAP_TRIGGERED_SUBTITLE = {"custom-trap-triggered", "sub-title"};
     public static final String[] GENERATOR_UPGRADE_MESSAGE = {"generator-upgrade"};
     public static final String[] RESPAWN_COUNTDOWN_TITLE = {"respawn-title"};
     public static final String[] RESPAWN_COUNTDOWN_SUBTITLE = {"respawn-subtitle"};
