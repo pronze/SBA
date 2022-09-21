@@ -5,6 +5,8 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.StoreType;
+import io.github.pronze.sba.game.tasks.CustomTrap;
+import io.github.pronze.sba.game.tasks.CustomTrapTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
@@ -18,6 +20,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
@@ -204,6 +208,30 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .get(MessageKeys.CUSTOM_TRAP_PURCHASED_TITLE)
                                     .replace("%identifier%", trap_identifier)
                                     .toComponent();
+
+                            CustomTrap trap = new CustomTrap();
+                            trap.setIdentifier(trap_identifier);
+                            trap.setTarget(property.getPropertyData().childrenMap().get("target").getString("enemy"));
+                            trap.setEffects(new ArrayList<>());
+                            property.getPropertyData().childrenMap().get("effects").childrenList()
+                                    .forEach(effectItem -> {
+                                        try {
+                                            String effectType = effectItem.childrenMap().get("type").getString();
+                                            PotionEffectType type_ = PotionEffectType.getByName(effectType);
+                                            if (type_ == null) {
+                                                Logger.error("{} is not a recognized Potion effect", effectType);
+                                                return;
+                                            }
+                                            // PotionEffectType type, int duration, int amplifier
+                                            PotionEffect pe = new PotionEffect(type_,
+                                                    effectItem.childrenMap().get("duration").getInt(),
+                                                    effectItem.childrenMap().get("level").getInt());
+                                            trap.getEffects().add(pe);
+                                        } catch (Throwable t) {
+                                            Logger.error("Cannot parse potion effect, verify your custom trap configuration");
+                                        }
+                                    });
+                            CustomTrapTask.registerTrap(trap);
 
                             gameStorage.setPurchasedTrap(team, true, trap_identifier);
                             if (SBAConfig.getInstance().trapTitleEnabled())

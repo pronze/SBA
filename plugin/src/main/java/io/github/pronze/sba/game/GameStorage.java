@@ -219,6 +219,11 @@ public class GameStorage implements IGameStorage {
         }
         return teamDataMap.get(team).isPuchased(trap_identifier);
     }
+    @Override
+    public Iterable<String> enabledTraps(RunningTeam team)
+    {
+        return teamDataMap.get(team).getEnabledTraps();
+    }
 
     @Override
     public boolean areDragonsEnabled(@NotNull RunningTeam team) {

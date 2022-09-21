@@ -159,5 +159,7 @@ public interface IGameStorage {
 
     boolean areTrapEnabled(RunningTeam team, String trap_identifier);
 
+    Iterable<String> enabledTraps(RunningTeam team);
+
    
 }

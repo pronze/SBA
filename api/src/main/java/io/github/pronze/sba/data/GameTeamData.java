@@ -5,10 +5,13 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.Team;
 
 /**
@@ -101,5 +104,10 @@ public class GameTeamData {
 
     public boolean isPuchased(String trap_identifier) {
         return isPurchased.get(trap_identifier)!=null && isPurchased.get(trap_identifier).booleanValue();
+    }
+
+    public Iterable<String> getEnabledTraps() {
+        List<String> ret= isPurchased.entrySet().stream().filter(x->x.getValue().booleanValue()).map(x->x.getKey()).collect(Collectors.toList());
+        return ret;
     }
 }

@@ -24,6 +24,7 @@ public class GameTaskManager implements IGameTaskManager {
         l.add(new HealPoolTask());
         l.add(new TrapTask());
         l.add(new MinerTrapTask());
+        l.add(new CustomTrapTask());
 
         return l.stream()
                 .map(task -> task.start(arena))
