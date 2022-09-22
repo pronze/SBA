@@ -41,6 +41,7 @@ import org.screamingsandals.simpleinventories.events.PreClickEvent;
 import org.screamingsandals.simpleinventories.inventory.Include;
 import org.screamingsandals.simpleinventories.inventory.InventorySet;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
+import org.screamingsandals.simpleinventories.inventory.Price;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -180,6 +181,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     private boolean tmp_in_quickbuy_mode = false;
     protected PlayerItemInfo quickBuyItem = null;
     protected ItemStack quickBuyItemTrade = null;
+    protected List<Price> quickBuyPrice = null;
 
     public void handlePrePurchase(OnTradeEvent event) {
         var player = event.getPlayer().as(Player.class);
@@ -188,6 +190,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         var clickType = event.getClickType();
         var itemInfo = event.getItem();
         var newItem = event.getStack().as(ItemStack.class);
+        var price = event.getPrices().get(0);
 
         var isQuickBuy = itemInfo.getProperties().stream()
                 .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
@@ -200,6 +203,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         if (tmp_in_quickbuy_mode) {
             quickBuyItem = itemInfo;
             quickBuyItemTrade = newItem;
+            quickBuyPrice=event.getPrices();
             event.setCancelled(true);
             Logger.trace("Exiting quickbuy edit mode");
             tmp_in_quickbuy_mode = false;
@@ -212,9 +216,10 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
             itemInfo = quickBuyItem;
             newItem = quickBuyItemTrade;
+            price=quickBuyPrice.get(0);
         }
 
-        var price = event.getPrices().get(0);
+        
         ItemSpawnerType type = Main.getSpawnerType(price.getCurrency().toLowerCase());
 
         var amount = newItem.getAmount();
