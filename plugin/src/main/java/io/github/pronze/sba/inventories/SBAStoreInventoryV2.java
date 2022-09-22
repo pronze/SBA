@@ -140,7 +140,6 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                 .get(game.getName())
                 .orElseThrow()
                 .getStorage();
-
         final var team = game.getTeamOfPlayer(player);
         final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
         if (itemInfo.getProperties().size() == 0) {

@@ -434,33 +434,75 @@ data:
     price: 3 of emerald
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 1
     row: 5
     column: 1
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 2
     row: 5
     column: 2
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 3
     row: 5
     column: 3
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 4
     row: 5
     column: 4
 
   - stack: RED_STAINED_GLASS_PANE;1
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 5
     row: 5
     column: 5
 
   - stack: RED_STAINED_GLASS_PANE;1
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 6
     row: 5
     column: 6
 
   - stack: RED_STAINED_GLASS_PANE;1
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 7
     row: 5
     column: 7
 
   - stack: GREEN_STAINED_GLASS_PANE;1
     row: 2
-    column: 0
+    column: 0m

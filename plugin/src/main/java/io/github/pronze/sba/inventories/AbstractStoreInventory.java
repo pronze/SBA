@@ -10,11 +10,14 @@ import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import net.md_5.bungee.api.ChatColor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.bedwars.Main;
@@ -174,17 +177,45 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
     }
 
+    private boolean tmp_in_quickbuy_mode = false;
+    protected PlayerItemInfo quickBuyItem = null;
+    protected ItemStack quickBuyItemTrade = null;
+
     public void handlePrePurchase(OnTradeEvent event) {
         var player = event.getPlayer().as(Player.class);
         var game = Main.getInstance().getGameOfPlayer(player);
 
         var clickType = event.getClickType();
         var itemInfo = event.getItem();
+        var newItem = event.getStack().as(ItemStack.class);
+
+        var isQuickBuy = itemInfo.getProperties().stream()
+                .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
+        if (isQuickBuy && clickType.isRightClick()) {
+            event.setCancelled(true);
+            Logger.trace("Entering quickbuy edit mode");
+            tmp_in_quickbuy_mode = true;
+            return;
+        }
+        if (tmp_in_quickbuy_mode) {
+            quickBuyItem = itemInfo;
+            quickBuyItemTrade = newItem;
+            event.setCancelled(true);
+            Logger.trace("Exiting quickbuy edit mode");
+            tmp_in_quickbuy_mode = false;
+            return;
+        }
+        if (isQuickBuy && !clickType.isRightClick()) {
+            if (quickBuyItem == null) {
+                event.setCancelled(true);
+                return;
+            }
+            itemInfo = quickBuyItem;
+            newItem = quickBuyItemTrade;
+        }
 
         var price = event.getPrices().get(0);
         ItemSpawnerType type = Main.getSpawnerType(price.getCurrency().toLowerCase());
-
-        var newItem = event.getStack().as(ItemStack.class);
 
         var amount = newItem.getAmount();
         var priceAmount = price.getAmount();
@@ -271,6 +302,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         AtomicReference<ItemStack> newItemRef = new AtomicReference<ItemStack>(newItem);
         AtomicReference<Item> newMaterialItemRef = new AtomicReference<Item>(materialItem);
         final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type);
+
+        attemptLoreRemoval(newItem);
+
         newItem = newItemRef.get();
         materialItem = newMaterialItemRef.get();
         final var shouldSellStack = result.getKey();
@@ -310,6 +344,31 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
     }
 
+    private void attemptLoreRemoval(ItemStack newItem) {
+        if (newItem.getItemMeta() != null) {
+            ItemMeta meta = newItem.getItemMeta();
+            if (!meta.hasLore()) {
+                meta.setLore(null);
+            }
+            if (meta.hasLore() && meta.getLore().size() == 0) {
+                meta.setLore(null);
+            }
+            if (meta.hasLore() && meta.getLore().size() == 1 && meta.getLore().get(0).trim().length() == 0) {
+                meta.setLore(null);
+            }
+            if (meta.hasLore() && meta.getLore().size() == 1
+                    && ChatColor.stripColor(meta.getLore().get(0)).trim().length() == 0) {
+                meta.setLore(null);
+            }
+            if (meta.hasLore() && meta.getLore().size() > 0) {
+                meta.getLore().forEach(loreLine -> {
+                    Logger.trace("ITEM LORE {}", loreLine);
+                });
+            }
+            newItem.setItemMeta(meta);
+        }
+    }
+
     private void buyStack(ItemStack newItem, Player player) {
         final HashMap<Integer, ItemStack> noFit = player.getInventory().addItem(newItem);
         if (!noFit.isEmpty()) {
@@ -321,6 +380,16 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         onPreGenerateItem(event);
 
         var itemInfo = event.getItem();
+
+        var isQuickBuy = itemInfo.getProperties().stream()
+                .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
+        if (isQuickBuy && quickBuyItem != null) {
+            itemInfo = quickBuyItem;
+            var item = itemInfo.getStack();
+            event.setStack(item);
+            onPostGenerateItem(event);
+            return;
+        }
         var item = itemInfo.getStack();
         var player = event.getPlayer().as(Player.class);
         var game = Main.getInstance().getGameOfPlayer(player);
