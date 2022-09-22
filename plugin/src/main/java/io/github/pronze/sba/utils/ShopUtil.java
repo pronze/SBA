@@ -182,7 +182,7 @@ public class ShopUtil {
         List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
         SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
-                    .filter(x -> x.getName().equalsIgnoreCase(ench) || x.getKey().asString().equalsIgnoreCase(ench))
+                    .filter(x -> x.getName().equalsIgnoreCase(ench))
                     .findFirst();
             if (ignoredKeys.contains(ench))
                 return;
@@ -228,7 +228,7 @@ public class ShopUtil {
         AtomicReference<String> str = new AtomicReference<>();
         SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
-                    .filter(x -> x.getName().equalsIgnoreCase(ench) || x.getKey().asString().equalsIgnoreCase(ench))
+                    .filter(x -> x.getName().equalsIgnoreCase(ench))
                     .findFirst();
             if(ec.isPresent() && ec.get().equals(ech))
                 str.set(ench);

@@ -611,8 +611,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         break;
                     default:
                         if (Arrays.stream(Enchantment.values())
-                                .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName)
-                                        || x.getKey().asString().equalsIgnoreCase(propertyName))) {
+                                .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName))) {
 
                             if (isAdd) {
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -622,8 +621,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                             .send(PlayerMapper.wrapPlayer(teamPlayer));
                                     Optional<Enchantment> ech = Arrays.stream(Enchantment.values())
-                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName)
-                                                    || x.getKey().asString().equalsIgnoreCase(propertyName))
+                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName))
                                             .findAny();
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
