@@ -38,10 +38,12 @@ import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
 import org.screamingsandals.simpleinventories.events.OnTradeEvent;
 import org.screamingsandals.simpleinventories.events.PreClickEvent;
+import org.screamingsandals.simpleinventories.inventory.GenericItemInfo;
 import org.screamingsandals.simpleinventories.inventory.Include;
 import org.screamingsandals.simpleinventories.inventory.InventorySet;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
 import org.screamingsandals.simpleinventories.inventory.Price;
+import org.screamingsandals.simpleinventories.inventory.SubInventory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -52,6 +54,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 @RequiredArgsConstructor
 public abstract class AbstractStoreInventory implements IStoreInventory, Listener {
@@ -110,6 +114,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 if (!shopMap.containsKey(name)) {
                     loadNewShop(name, file, parent);
                 }
+                iterateShop(shopMap.get(name),is->Logger.trace("IterateShop{OpenForPlayer}"),null);
                 player.openInventory(shopMap.get(name));
             } else {
                 player.openInventory(shopMap.get("default"));
@@ -203,7 +208,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         if (tmp_in_quickbuy_mode) {
             quickBuyItem = itemInfo;
             quickBuyItemTrade = newItem;
-            quickBuyPrice=event.getPrices();
+            quickBuyPrice = event.getPrices();
             event.setCancelled(true);
             Logger.trace("Exiting quickbuy edit mode");
             tmp_in_quickbuy_mode = false;
@@ -216,10 +221,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
             itemInfo = quickBuyItem;
             newItem = quickBuyItemTrade;
-            price=quickBuyPrice.get(0);
+            price = quickBuyPrice.get(0);
         }
 
-        
         ItemSpawnerType type = Main.getSpawnerType(price.getCurrency().toLowerCase());
 
         var amount = newItem.getAmount();
@@ -381,6 +385,25 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
     }
 
+    private void iterateShop(InventorySet is, Consumer<InventorySet> consumer,
+            BiConsumer<Price, GenericItemInfo> itemConsumer) {
+
+        var subInventory = is.getMainSubInventory();
+        if (consumer != null)
+            consumer.accept(is);
+        if (subInventory != null) {
+            //iterateShop(subInventory.getInventorySet(), consumer, itemConsumer);
+
+            for (var inventoryParent : subInventory.getContents()) {
+                for (var price : inventoryParent.getPrices()) {
+                    if (itemConsumer != null)
+                        itemConsumer.accept(price, inventoryParent);
+                }
+            }
+        }
+
+    }
+
     private void onGeneratingItem(ItemRenderEvent event) {
         onPreGenerateItem(event);
 
@@ -390,6 +413,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
         if (isQuickBuy && quickBuyItem != null) {
             itemInfo = quickBuyItem;
+            iterateShop(event.getFormat(),is->Logger.trace("IterateShop{onGeneratingItem}"),null);
+
             var item = itemInfo.getStack();
             event.setStack(item);
             onPostGenerateItem(event);
