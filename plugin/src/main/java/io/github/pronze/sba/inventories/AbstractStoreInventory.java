@@ -32,6 +32,7 @@ import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
@@ -114,7 +115,6 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 if (!shopMap.containsKey(name)) {
                     loadNewShop(name, file, parent);
                 }
-                iterateShop(shopMap.get(name),is->Logger.trace("IterateShop{OpenForPlayer}"),null);
                 player.openInventory(shopMap.get(name));
             } else {
                 player.openInventory(shopMap.get("default"));
@@ -184,9 +184,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     }
 
     private boolean tmp_in_quickbuy_mode = false;
-    protected PlayerItemInfo quickBuyItem = null;
-    protected ItemStack quickBuyItemTrade = null;
-    protected List<Price> quickBuyPrice = null;
+    protected Material quickBuyItem = null;
+    protected Price quickBuyPrice = null;
 
     public void handlePrePurchase(OnTradeEvent event) {
         var player = event.getPlayer().as(Player.class);
@@ -206,9 +205,10 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             return;
         }
         if (tmp_in_quickbuy_mode) {
-            quickBuyItem = itemInfo;
-            quickBuyItemTrade = newItem;
-            quickBuyPrice = event.getPrices();
+            Logger.trace("Setting up quick item as{} {}", price, newItem.getType());
+
+            quickBuyItem = itemInfo.getOriginal().getItem().as(ItemStack.class).getType();
+            quickBuyPrice = price;
             event.setCancelled(true);
             Logger.trace("Exiting quickbuy edit mode");
             tmp_in_quickbuy_mode = false;
@@ -219,9 +219,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 event.setCancelled(true);
                 return;
             }
-            itemInfo = quickBuyItem;
-            newItem = quickBuyItemTrade;
-            price = quickBuyPrice.get(0);
+            itemInfo = new PlayerItemInfo(event.getPlayer(),findInfo(quickBuyItem, quickBuyPrice));
+            newItem = itemInfo.getOriginal().getItem().clone().as(ItemStack.class);
+            price = quickBuyPrice;
         }
 
         ItemSpawnerType type = Main.getSpawnerType(price.getCurrency().toLowerCase());
@@ -385,23 +385,54 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
     }
 
-    private void iterateShop(InventorySet is, Consumer<InventorySet> consumer,
+    private void iterateShops(Consumer<SubInventory> consumer,
             BiConsumer<Price, GenericItemInfo> itemConsumer) {
+        shopMap.forEach((key, value) -> {
+            iterateShop(value, consumer, itemConsumer);
+        });
+    }
 
-        var subInventory = is.getMainSubInventory();
-        if (consumer != null)
-            consumer.accept(is);
-        if (subInventory != null) {
-            //iterateShop(subInventory.getInventorySet(), consumer, itemConsumer);
+    private void iterateShop(@NotNull InventorySet is, @Nullable Consumer<SubInventory> consumer,
+            @Nullable BiConsumer<Price, GenericItemInfo> itemConsumer) {
+        iterateShop(is.getMainSubInventory(), consumer, itemConsumer, new ArrayList<>());
+    }
 
-            for (var inventoryParent : subInventory.getContents()) {
-                for (var price : inventoryParent.getPrices()) {
-                    if (itemConsumer != null)
-                        itemConsumer.accept(price, inventoryParent);
-                }
-            }
+    private void iterateShop(@NotNull SubInventory inv, @Nullable Consumer<SubInventory> consumer,
+            @Nullable BiConsumer<Price, GenericItemInfo> itemConsumer, @NotNull List<SubInventory> visited) {
+        if (visited.contains(inv)) {
+            return; // prevent infinite loop
+        }
+        visited.add(inv);
+
+        if (consumer != null) {
+            consumer.accept(inv);
         }
 
+        for (var item : inv.getContents()) {
+            for (var price : item.getPrices()) {
+                if (itemConsumer != null) {
+                    itemConsumer.accept(price, item);
+                }
+            }
+            var childInventory = item.getChildInventory();
+            if (childInventory != null) {
+                iterateShop(childInventory, consumer, itemConsumer, visited);
+            }
+        }
+    }
+
+    private GenericItemInfo findInfo(Material m, Price p) {
+        AtomicReference<GenericItemInfo> ref = new AtomicReference<>();
+        iterateShops(null, (pr, gii) -> {
+            if (pr.getAmount() == p.getAmount() && pr.getCurrency().equals(p.getCurrency())) {
+                if (gii.getItem().as(ItemStack.class).getType() == m) {
+                    var clone = gii.clone();
+                    clone.setItem(clone.getItem().clone());
+                    ref.set(clone);
+                }
+            }
+        });
+        return ref.get();
     }
 
     private void onGeneratingItem(ItemRenderEvent event) {
@@ -412,12 +443,11 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         var isQuickBuy = itemInfo.getProperties().stream()
                 .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
         if (isQuickBuy && quickBuyItem != null) {
-            itemInfo = quickBuyItem;
-            iterateShop(event.getFormat(),is->Logger.trace("IterateShop{onGeneratingItem}"),null);
+            GenericItemInfo info = findInfo(quickBuyItem, quickBuyPrice);
+            if (info != null)
+                itemInfo = new PlayerItemInfo(event.getPlayer(), info);
 
-            var item = itemInfo.getStack();
-            event.setStack(item);
-            onPostGenerateItem(event);
+            event.setStack(itemInfo.getStack());
             return;
         }
         var item = itemInfo.getStack();
