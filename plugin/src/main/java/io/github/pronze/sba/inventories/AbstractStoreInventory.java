@@ -2,6 +2,7 @@ package io.github.pronze.sba.inventories;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.QuickBuyConfig;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.IStoreInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
@@ -183,9 +184,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
     }
 
-    private boolean tmp_in_quickbuy_mode = false;
-    protected Material quickBuyItem = null;
-    protected Price quickBuyPrice = null;
+    private Map<UUID, String> userInQuickBuy = new HashMap<>();
 
     public void handlePrePurchase(OnTradeEvent event) {
         var player = event.getPlayer().as(Player.class);
@@ -201,25 +200,40 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         if (isQuickBuy && clickType.isRightClick()) {
             event.setCancelled(true);
             Logger.trace("Entering quickbuy edit mode");
-            tmp_in_quickbuy_mode = true;
+            var quickBuyId = itemInfo.getProperties().stream()
+                    .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
+                    .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
+            userInQuickBuy.put(player.getUniqueId(), quickBuyId);
             return;
         }
-        if (tmp_in_quickbuy_mode) {
+        if (userInQuickBuy.containsKey(player.getUniqueId())) {
             Logger.trace("Setting up quick item as{} {}", price, newItem.getType());
-
-            quickBuyItem = itemInfo.getOriginal().getItem().as(ItemStack.class).getType();
-            quickBuyPrice = price;
+            var quickBuyId = userInQuickBuy.get(player.getUniqueId());
+            QuickBuyConfig.getInstance().of(player).set(quickBuyId,
+                    itemInfo.getOriginal().getItem().as(ItemStack.class).getType(),
+                    price).save();
             event.setCancelled(true);
             Logger.trace("Exiting quickbuy edit mode");
-            tmp_in_quickbuy_mode = false;
+            userInQuickBuy.remove(player.getUniqueId());
             return;
         }
         if (isQuickBuy && !clickType.isRightClick()) {
+            var quickBuyId = itemInfo.getProperties().stream()
+                    .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
+                    .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
+
+            var quickBuyItem = QuickBuyConfig.getInstance().of(player).of(quickBuyId);
             if (quickBuyItem == null) {
                 event.setCancelled(true);
                 return;
             }
-            itemInfo = new PlayerItemInfo(event.getPlayer(),findInfo(quickBuyItem, quickBuyPrice));
+            var quickBuyPrice = Price.of(quickBuyItem.amount(), quickBuyItem.resource());
+            GenericItemInfo gii = findInfo(quickBuyItem.material(), quickBuyPrice);
+            if (gii == null) {
+                event.setCancelled(true);
+                return;
+            }
+            itemInfo = new PlayerItemInfo(event.getPlayer(), findInfo(quickBuyItem.material(), quickBuyPrice));
             newItem = itemInfo.getOriginal().getItem().clone().as(ItemStack.class);
             price = quickBuyPrice;
         }
@@ -442,13 +456,25 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
         var isQuickBuy = itemInfo.getProperties().stream()
                 .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
-        if (isQuickBuy && quickBuyItem != null) {
-            GenericItemInfo info = findInfo(quickBuyItem, quickBuyPrice);
-            if (info != null)
-                itemInfo = new PlayerItemInfo(event.getPlayer(), info);
 
-            event.setStack(itemInfo.getStack());
-            return;
+        if (isQuickBuy) {
+            var quickBuyId = itemInfo.getProperties().stream()
+                    .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
+                    .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
+
+            var quickBuyItem = QuickBuyConfig.getInstance().of(event.getPlayer().as(Player.class)).of(quickBuyId);
+
+            if (quickBuyItem != null) {
+                var quickBuyPrice = Price.of(quickBuyItem.amount(), quickBuyItem.resource());
+                GenericItemInfo info = findInfo(quickBuyItem.material(), quickBuyPrice);
+                if (info != null) {
+                    if (info != null)
+                        itemInfo = new PlayerItemInfo(event.getPlayer(), info);
+
+                    event.setStack(itemInfo.getStack());
+                    return;
+                }
+            }
         }
         var item = itemInfo.getStack();
         var player = event.getPlayer().as(Player.class);

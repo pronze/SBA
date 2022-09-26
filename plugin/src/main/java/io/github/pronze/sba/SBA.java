@@ -2,6 +2,7 @@ package io.github.pronze.sba;
 
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.IConfigurator;
+import io.github.pronze.sba.config.QuickBuyConfig;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.fix.BaseFix;
 import io.github.pronze.sba.fix.BungeecordNPC;
@@ -118,7 +119,8 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         SpawnerProtection.class,
         SpawnerProtectionListener.class,
         SidebarManager.class,
-        AntiCheatIntegration.class
+        AntiCheatIntegration.class,
+        QuickBuyConfig.class
 })
 public class SBA extends PluginContainer implements AddonAPI {
 
