@@ -274,11 +274,11 @@ public class SBACommand {
                                     .forEach(game -> {
                                         if (game.getFirst() != null) {
                                             col.set(col.get() + 1);
-                                            if (col.get() >= 6) {
+                                            if (col.get() > 6) {
                                                 row.set(row.get() + 1);
                                                 col.set(2);
                                             }
-                                            if (row.get() >= 3)
+                                            if (row.get() > 3)
                                                 return;
 
                                             add(Map.of("stack",
