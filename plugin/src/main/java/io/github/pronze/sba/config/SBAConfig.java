@@ -173,6 +173,11 @@ public class SBAConfig implements IConfigurator {
                         .back();
             generator.saveIfModified();
 
+            Material repeater = Material.matchMaterial("REPEATER");
+            if (repeater == null)
+                repeater = Material.matchMaterial("REDSTONE_WIRE");
+            if (repeater == null)
+                repeater = Material.matchMaterial("CAKE");
             generator.start()
                     .section("upgrades")
                     .key("timer-upgrades-enabled").defValue(true)
@@ -234,7 +239,7 @@ public class SBAConfig implements IConfigurator {
                     .section("teleporter")
                     .key("enabled").defValue(true)
                     .key("name").defValue("§cP§6l§ea§ay§9e§br§5s")
-                    .key("material").defValue("REPEATER")
+                    .key("material").defValue(repeater.toString())
                     .key("slot").defValue(0)
                     .back()
                     .section("tracker")
@@ -443,11 +448,13 @@ public class SBAConfig implements IConfigurator {
             }
 
             public String material() {
-                return getString("spectator.teleporter.material", "REPEATER");
+                return getString("spectator.teleporter.material", "CAKE");
             }
+
             public int slot() {
                 return getInt("spectator.teleporter.slot", 0);
             }
+
             public ItemStack get() {
                 ItemStack compass = new ItemStack(Material.matchMaterial(material()));
                 var meta = compass.getItemMeta();
@@ -492,6 +499,7 @@ public class SBAConfig implements IConfigurator {
         public LeaveItem leave() {
             return new LeaveItem();
         }
+
         public class LeaveItem {
             public int position() {
                 return Main.getConfigurator().config.getInt("hotbar.leave", 8);

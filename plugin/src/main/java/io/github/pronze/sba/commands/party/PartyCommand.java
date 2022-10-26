@@ -6,7 +6,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.commands.CommandManager;
 
 @Service(initAnother = {
-                PartyAcceptCommand.class,
+               /* PartyAcceptCommand.class,
                 PartyChatCommand.class,
                 PartyDebugCommand.class,
                 PartyDeclineCommand.class,
@@ -19,7 +19,7 @@ import io.github.pronze.sba.commands.CommandManager;
                 PartyLeaveCommand.class,
                 PartyPromoteCommand.class,
                 PartySettingsCommand.class,
-                PartyWarpCommand.class
+                PartyWarpCommand.class*/
 })
 public class PartyCommand {
         @OnPostEnable
