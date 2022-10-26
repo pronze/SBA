@@ -20,11 +20,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent.Reason;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -45,6 +48,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
+import io.github.pronze.sba.inventories.PlayerTrackerInventory;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
@@ -125,6 +129,17 @@ public class BedWarsListener implements Listener {
         ArenaManager
                 .getInstance()
                 .removeArena(game);
+    }
+
+    @EventHandler
+    public void onGameTick(BedwarsGameTickEvent e) {
+        Logger.trace("SBA onPostRebuildingEvent{}", e);
+
+        final var game = e.getGame();
+        ArenaManager
+                .getInstance()
+                .get(game.getName())
+                .ifPresent(arena -> ((Arena) arena).onGameTick(e));
     }
 
     @EventHandler
@@ -261,7 +276,7 @@ public class BedWarsListener implements Listener {
 
             maybeParty.ifPresent(party -> {
                 final var leaderLocation = party.getPartyLeader().getInstance().getLocation();
-                //PlayerUtils.teleportPlayer(player, leaderLocation);
+                // PlayerUtils.teleportPlayer(player, leaderLocation);
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
@@ -353,18 +368,16 @@ public class BedWarsListener implements Listener {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
         var maybeParty = PartyManager.getInstance().getPartyOf(SBA.getInstance().getPlayerWrapper(e.getPlayer()));
-        maybeParty.ifPresent(party->{
-            if(party.getPartyLeader().getInstance() == e.getPlayer())
-            {
-                party.getMembers().forEach(member->{
+        maybeParty.ifPresent(party -> {
+            if (party.getPartyLeader().getInstance() == e.getPlayer()) {
+                party.getMembers().forEach(member -> {
                     var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
-                    if(memberGame!=null)
-                    {
+                    if (memberGame != null) {
                         memberGame.leaveFromGame(member.getInstance());
                     }
                 });
             }
-        }); 
+        });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -399,7 +412,12 @@ public class BedWarsListener implements Listener {
         if (e.getNewGameMode() != GameMode.SURVIVAL) {
             return;
         }
+        if (player.getGameMode() == GameMode.ADVENTURE) {
+            player.getInventory().remove(SBAConfig.getInstance().spectator().teleporter().get());
+            player.getInventory().remove(SBAConfig.getInstance().spectator().leave().get());
+        }
         if (SBAConfig.getInstance().spectator().adventure()) {
+            player.closeInventory();
             player.setFlying(false);
             player.setAllowFlight(false);
             player.removePotionEffect(PotionEffectType.INVISIBILITY);
@@ -412,6 +430,7 @@ public class BedWarsListener implements Listener {
         }
         Tasker.build(() -> {
             if (inventoryContent.containsKey(player.getUniqueId())) {
+                player.getInventory().clear();
                 player.getInventory().setContents(inventoryContent.get(player.getUniqueId()));
                 inventoryContent.remove(player.getUniqueId());
             }
@@ -447,13 +466,26 @@ public class BedWarsListener implements Listener {
 
             player.getInventory().clear();
 
-            if (SBAConfig.getInstance().spectator().compass().enabled()) {
-                ItemStack compass = SBAConfig.getInstance().spectator().compass().get();
+            if (SBAConfig.getInstance().spectator().teleporter().enabled()) {
+                ItemStack compass = SBAConfig.getInstance().spectator().teleporter().get();
+                int compassPosition = SBAConfig.getInstance().spectator().teleporter().slot();
+                player.getInventory().setItem(compassPosition, compass);
+            }
+
+            if (SBAConfig.getInstance().spectator().tracker().enabled()) {
+                ItemStack compass = SBAConfig.getInstance().spectator().tracker().get();
+                int compassPosition = SBAConfig.getInstance().spectator().tracker().slot();
+
                 var game = Main.getInstance().getGameOfPlayer(player);
                 var team = game.getTeamOfPlayer(player);
                 if (team != null)
                     player.setCompassTarget(team.getTargetBlock());
-                player.getInventory().addItem(compass);
+                player.getInventory().setItem(compassPosition, compass);
+            }
+
+            int leavePosition = SBAConfig.getInstance().spectator().leave().position();
+            if (leavePosition >= 0 && leavePosition <= 8) {
+                player.getInventory().setItem(leavePosition, SBAConfig.getInstance().spectator().leave().get());
             }
             player.setGameMode(GameMode.ADVENTURE);
         }).delay(1, TaskerTime.TICKS).start();
@@ -464,11 +496,56 @@ public class BedWarsListener implements Listener {
         var player = event.getPlayer();
         if ((event.getAction() != Action.RIGHT_CLICK_AIR) && (event.getAction() != Action.RIGHT_CLICK_BLOCK))
             return;
-        ItemStack compass = SBAConfig.getInstance().spectator().compass().get();
+        ItemStack compass = SBAConfig.getInstance().spectator().teleporter().get();
         if (!compass.isSimilar(player.getInventory().getItemInHand()))
             return;
 
-        Logger.info("{} clicked on players compass", player);
+        Logger.info("{} clicked on players teleporter", player);
+
+        PlayerTrackerInventory playerTrackerInventory = new PlayerTrackerInventory(
+                Main.getInstance().getGameOfPlayer(player),
+
+                SBAConfig.getInstance().spectator().teleporter().name(),
+
+                (target) -> {
+                    player.teleport(target);
+                }).openForPlayer(player);
+
+    }
+
+    @EventHandler
+    public void onTrackerClick(PlayerInteractEvent event) {
+        var player = event.getPlayer();
+        if ((event.getAction() != Action.RIGHT_CLICK_AIR) && (event.getAction() != Action.RIGHT_CLICK_BLOCK))
+            return;
+        ItemStack compass = SBAConfig.getInstance().spectator().tracker().get();
+        if (!compass.isSimilar(player.getInventory().getItemInHand()))
+            return;
+
+        Logger.info("{} clicked on players tracker", player);
+
+        PlayerTrackerInventory playerTrackerInventory = new PlayerTrackerInventory(
+                Main.getInstance().getGameOfPlayer(player),
+                SBAConfig.getInstance().spectator().teleporter().name(),
+                (target) -> {
+                    final var game =Main.getInstance().getGameOfPlayer(player);
+                    ArenaManager
+                            .getInstance()
+                            .get(game.getName())
+                            .ifPresent(arena -> ((Arena) arena).track(player,target));
+                }).openForPlayer(player);
+
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent ice) {
+        if (ice.getClickedInventory() == null)
+            return;
+        if (ice.getClickedInventory().getHolder() instanceof PlayerTrackerInventory) {
+            PlayerTrackerInventory playerTrackerInventory = (PlayerTrackerInventory) ice.getClickedInventory()
+                    .getHolder();
+            playerTrackerInventory.onInventoryClick(ice);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

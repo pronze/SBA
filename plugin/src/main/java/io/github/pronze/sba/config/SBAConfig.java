@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
@@ -37,6 +38,8 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
 
 @Service
 public class SBAConfig implements IConfigurator {
@@ -228,9 +231,17 @@ public class SBAConfig implements IConfigurator {
                     .back()
                     .section("spectator")
                     .key("adventure-mode").defValue(false)
-                    .section("compass")
+                    .section("teleporter")
                     .key("enabled").defValue(true)
                     .key("name").defValue("§cP§6l§ea§ay§9e§br§5s")
+                    .key("material").defValue("REPEATER")
+                    .key("slot").defValue(0)
+                    .back()
+                    .section("tracker")
+                    .key("enabled").defValue(true)
+                    .key("name").defValue("§cP§6l§ea§ay§9e§br§5s")
+                    .key("material").defValue("COMPASS")
+                    .key("slot").defValue(4)
                     .back()
                     .back()
                     .section("party")
@@ -355,14 +366,14 @@ public class SBAConfig implements IConfigurator {
         }
     }
 
-    public boolean trapTitleEnabled()
-    {
-        return getBoolean("shop.trap-title",true);
+    public boolean trapTitleEnabled() {
+        return getBoolean("shop.trap-title", true);
     }
-    public boolean trapMessageEnabled()
-    {
-        return getBoolean("shop.trap-message",true);
+
+    public boolean trapMessageEnabled() {
+        return getBoolean("shop.trap-message", true);
     }
+
     public TeamStatusConfig teamStatus() {
         return new TeamStatusConfig();
     }
@@ -418,25 +429,80 @@ public class SBAConfig implements IConfigurator {
             return getBoolean("spectator.adventure-mode", false);
         }
 
-        public CompassConfig compass() {
-            return new CompassConfig();
+        public TeleporterConfig teleporter() {
+            return new TeleporterConfig();
         }
 
-        public class CompassConfig {
+        public class TeleporterConfig {
             public boolean enabled() {
-                return getBoolean("spectator.compass.enabled", false);
+                return getBoolean("spectator.teleporter.enabled", false);
             }
 
             public String name() {
-                return getString("spectator.compass.name", "§cP§6l§ea§ay§9e§br§5s");
+                return getString("spectator.teleporter.name", "§cP§6l§ea§ay§9e§br§5s");
             }
 
+            public String material() {
+                return getString("spectator.teleporter.material", "REPEATER");
+            }
+            public int slot() {
+                return getInt("spectator.teleporter.slot", 0);
+            }
             public ItemStack get() {
-                ItemStack compass = new ItemStack(Material.COMPASS);
+                ItemStack compass = new ItemStack(Material.matchMaterial(material()));
                 var meta = compass.getItemMeta();
                 meta.setDisplayName(name());
                 compass.setItemMeta(meta);
                 return compass;
+            }
+
+        }
+
+        public TrackerConfig tracker() {
+            return new TrackerConfig();
+        }
+
+        public class TrackerConfig {
+            public boolean enabled() {
+                return getBoolean("spectator.tracker.enabled", false);
+            }
+
+            public String name() {
+                return getString("spectator.tracker.name", "§cP§6l§ea§ay§9e§br§5s");
+            }
+
+            public String material() {
+                return getString("spectator.tracker.material", "COMPASS");
+            }
+
+            public int slot() {
+                return getInt("spectator.tracker.slot", 4);
+            }
+
+            public ItemStack get() {
+                ItemStack compass = new ItemStack(Material.matchMaterial(material()));
+                var meta = compass.getItemMeta();
+                meta.setDisplayName(name());
+                compass.setItemMeta(meta);
+                return compass;
+            }
+
+        }
+
+        public LeaveItem leave() {
+            return new LeaveItem();
+        }
+        public class LeaveItem {
+            public int position() {
+                return Main.getConfigurator().config.getInt("hotbar.leave", 8);
+            }
+
+            public ItemStack get() {
+                ItemStack leave = Main.getConfigurator().readDefinedItem("leavegame", "SLIME_BALL");
+                ItemMeta leaveMeta = leave.getItemMeta();
+                leaveMeta.setDisplayName(i18nonly("leave_from_game_item", "Leave game"));
+                leave.setItemMeta(leaveMeta);
+                return leave;
             }
         }
 

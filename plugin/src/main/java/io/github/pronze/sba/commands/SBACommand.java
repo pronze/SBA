@@ -6,6 +6,7 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.inventories.GamesInventory;
+import io.github.pronze.sba.inventories.PlayerTrackerInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.GamesInventoryService;
 import io.github.pronze.sba.utils.Logger;
@@ -109,6 +110,18 @@ public class SBACommand {
         else
             Logger.setMode(Level.WARNING);
 
+    }
+
+    @CommandMethod("sba test compass")
+    @CommandDescription("debug compass command")
+    @CommandPermission("sba.debug")
+    private void commandTestCompass(
+            final @NotNull Player player) {
+        PlayerTrackerInventory playerTrackerInventory = new PlayerTrackerInventory(null,
+        SBAConfig.getInstance().spectator().teleporter().name(),
+                (target) -> {
+                    player.teleport(target);
+                }).openForPlayer(player);
     }
 
     @CommandMethod("sba test npc")
@@ -387,7 +400,8 @@ public class SBACommand {
         if (game != null) {
             GameStore store = null;
             for (var storeToCompare : game.getGameStores()) {
-                if ((storeName == null) || (storeToCompare.getShopFile() != null && storeToCompare.getShopFile().equals(storeName)))
+                if ((storeName == null)
+                        || (storeToCompare.getShopFile() != null && storeToCompare.getShopFile().equals(storeName)))
                     store = storeToCompare;
             }
             if (store != null) {

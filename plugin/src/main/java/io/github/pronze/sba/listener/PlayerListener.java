@@ -145,7 +145,7 @@ public class PlayerListener implements Listener {
                 final Player player = gamePlayer.player;
 
                 final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
-                int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
+                int livingTime = Main.getInstance().getConfig().getInt("respawn-cooldown.time", 5);
                 byte buffer = 2;
 
                 @Override

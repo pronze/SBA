@@ -34,7 +34,9 @@ import org.bukkit.util.StringUtil;
 import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsGameTickEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPostRebuildingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsTargetBlockDestroyedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
@@ -116,6 +118,8 @@ public class Arena implements IArena {
 
     @Override
     public void removeHiddenPlayer(@NotNull Player player) {
+        if (player == null)
+            return;
         final var invisiblePlayer = invisiblePlayers.get(player.getUniqueId());
         if (invisiblePlayer != null) {
             invisiblePlayer.setHidden(false);
@@ -271,15 +275,14 @@ public class Arena implements IArena {
                         final var villager = nonAPIStore.kill();
                         if (villager != null) {
                             Main.unregisterGameEntity(villager);
-                            
+
                             npc = citizens.getCitizenRegistry().createNPC(villager.getType(), "Name");
                             LookClose look = npc.getOrAddTrait(net.citizensnpcs.trait.LookClose.class);
                             look.lookClose(true);
                             Gravity gravity = npc.getOrAddTrait(net.citizensnpcs.trait.Gravity.class);
                             gravity.gravitate(true);
                             gravity.setEnabled(true);
-                            if (nonAPIStore.getEntityType() == EntityType.PLAYER)
-                            {
+                            if (nonAPIStore.getEntityType() == EntityType.PLAYER) {
                                 SkinTrait trait = npc.getOrAddTrait(SkinTrait.class);
                                 trait.setSkinName(nonAPIStore.getSkinName());
                             }
@@ -372,9 +375,8 @@ public class Arena implements IArena {
         stores.values().forEach(NPC::destroy);
         stores.clear();
 
-        if(citizens!=null)
-        {
-            citizens.getCitizensStores().values().forEach(npc->npc.destroy());
+        if (citizens != null) {
+            citizens.getCitizensStores().values().forEach(npc -> npc.destroy());
             citizens.getCitizensStores().clear();
             citizens.getCitizenRegistry().deregisterAll();
         }
@@ -474,7 +476,8 @@ public class Arena implements IArena {
             winner.getConnectedPlayers()
                     .forEach(player -> WinTeamPlayers.add(player.getDisplayName() + ChatColor.RESET));
             winner.getConnectedPlayers()
-                    .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle, net.kyori.adventure.text.Component.empty(), 0, 90, 0));
+                    .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle,
+                            net.kyori.adventure.text.Component.empty(), 0, 90, 0));
 
             LanguageService
                     .getInstance()
@@ -553,5 +556,34 @@ public class Arena implements IArena {
     @Override
     public @NotNull Map<org.screamingsandals.bedwars.api.game.GameStore, net.citizensnpcs.api.npc.NPC> getCitizensStores() {
         return Map.copyOf(citizens.getCitizensStores());
+    }
+
+    Map<Player, Player> tracking = new HashMap<>();
+
+    public void track(Player source, Player target)
+    {
+        if(!game.isPlayerInAnyTeam(source))return;
+        if(!game.isPlayerInAnyTeam(target))return;
+        tracking.put(source, target);
+    }
+    public void onGameTick(BedwarsGameTickEvent e) {
+        Game game = e.getGame();
+        for (var p : game.getConnectedPlayers()) {
+            Player target = tracking.get(p);
+            if (target != null) {
+                if (game.getConnectedPlayers().contains(target)) {
+                    p.setCompassTarget(target.getLocation());
+                } else
+                    tracking.remove(p);
+            } else {
+                RunningTeam rt = game.getTeamOfPlayer(p);
+                if (rt != null) {
+                    if (rt.isTargetBlockExists())
+                        p.setCompassTarget(rt.getTargetBlock());
+                    else
+                        p.setCompassTarget(rt.getTeamSpawn());
+                }
+            }
+        }
     }
 }
