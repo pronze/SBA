@@ -29,7 +29,8 @@ public class PartyInviteCommand {
         public void onPostEnabled() {
                 if (init)
                         return;
-                CommandManager.getInstance().getAnnotationParser().parse(this);
+                if (SBAConfig.getInstance().party().enabled())
+                        CommandManager.getInstance().getAnnotationParser().parse(this);
                 init = true;
         }
 
@@ -108,13 +109,17 @@ public class PartyInviteCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_INVITE_SENT)
-                                                        .replace("%player%", invitedPlayer.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                                        .replace("%player%",
+                                                                        invitedPlayer.as(Player.class).getDisplayName()
+                                                                                        + ChatColor.RESET)
                                                         .send(player);
 
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_INVITE_RECEIVED)
-                                                        .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                                        .replace("%player%",
+                                                                        player.as(Player.class).getDisplayName()
+                                                                                        + ChatColor.RESET)
                                                         .send(invitedPlayer);
                                 });
         }

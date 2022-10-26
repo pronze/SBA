@@ -18,18 +18,21 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
 public class PartyJoinCommand {
 
         static boolean init = false;
+
         @OnPostEnable
         public void onPostEnabled() {
-            if (init)
-                return;
-            CommandManager.getInstance().getAnnotationParser().parse(this);
-            init = true;
+                if (init)
+                        return;
+                if (SBAConfig.getInstance().party().enabled())
+                        CommandManager.getInstance().getAnnotationParser().parse(this);
+                init = true;
         }
 
         @CommandMethod("party|p join <user>")
@@ -52,8 +55,7 @@ public class PartyJoinCommand {
                 var optionalParty = PartyManager
                                 .getInstance()
                                 .getPartyOf(user);
-                if(optionalParty.isEmpty() || (optionalParty.get().getSettings().getInvite() == Invite.ALL))
-                {
+                if (optionalParty.isEmpty() || (optionalParty.get().getSettings().getInvite() == Invite.ALL)) {
                         optionalParty = PartyManager
                                         .getInstance()
                                         .getInvitedPartyOf(player);

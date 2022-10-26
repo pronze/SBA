@@ -17,6 +17,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyPromoteEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 import java.util.List;
@@ -46,7 +47,8 @@ public class PartyPromoteCommand {
                                                         .map(SBAPlayerWrapper::getName)
                                                         .collect(Collectors.toList());
                                 });
-                CommandManager.getInstance().getAnnotationParser().parse(this);
+                if (SBAConfig.getInstance().party().enabled())
+                        CommandManager.getInstance().getAnnotationParser().parse(this);
                 init = true;
         }
 
@@ -94,7 +96,9 @@ public class PartyPromoteCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                                        .replace("%player%", args.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                                        .replace("%player%",
+                                                                        args.as(Player.class).getDisplayName()
+                                                                                        + ChatColor.RESET)
                                                         .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                 }, () -> LanguageService

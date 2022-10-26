@@ -16,25 +16,27 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyInviteDeclineEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
 public class PartyDeclineCommand {
 
-        static boolean init = false;
-        @OnPostEnable
-        public void onPostEnabled() {
-            if (init)
-                return;
+    static boolean init = false;
+
+    @OnPostEnable
+    public void onPostEnabled() {
+        if (init)
+            return;
+        if (SBAConfig.getInstance().party().enabled())
             CommandManager.getInstance().getAnnotationParser().parse(this);
-            init = true;
-        }
+        init = true;
+    }
 
     @CommandMethod("party|p decline")
     @CommandPermission("sba.party")
     private void commandDecline(
-            final @NotNull Player playerArg
-    ) {
+            final @NotNull Player playerArg) {
         final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (!player.getSettings().isToggled(PlayerSetting.INVITED_TO_PARTY)) {

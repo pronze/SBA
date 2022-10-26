@@ -17,6 +17,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyKickEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 import java.util.List;
@@ -52,7 +53,8 @@ public class PartyKickCommand {
                                                         .filter(name -> !player.getName().equalsIgnoreCase(name))
                                                         .collect(Collectors.toList());
                                 });
-                CommandManager.getInstance().getAnnotationParser().parse(this);
+                if (SBAConfig.getInstance().party().enabled())
+                        CommandManager.getInstance().getAnnotationParser().parse(this);
                 init = true;
         }
 
@@ -98,7 +100,9 @@ public class PartyKickCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_KICKED)
-                                                        .replace("%player%", args.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                                        .replace("%player%",
+                                                                        args.as(Player.class).getDisplayName()
+                                                                                        + ChatColor.RESET)
                                                         .send(party.getMembers().toArray(SBAPlayerWrapper[]::new));
 
                                         LanguageService

@@ -16,6 +16,7 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
@@ -27,7 +28,8 @@ public class PartyWarpCommand {
     public void onPostEnabled() {
         if (init)
             return;
-        CommandManager.getInstance().getAnnotationParser().parse(this);
+        if (SBAConfig.getInstance().party().enabled())
+            CommandManager.getInstance().getAnnotationParser().parse(this);
         init = true;
     }
 

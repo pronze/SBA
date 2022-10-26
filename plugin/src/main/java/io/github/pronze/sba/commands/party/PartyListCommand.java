@@ -14,6 +14,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -32,7 +33,8 @@ public class PartyListCommand {
     public void onPostEnabled() {
         if (init)
             return;
-        CommandManager.getInstance().getAnnotationParser().parse(this);
+        if (SBAConfig.getInstance().party().enabled())
+            CommandManager.getInstance().getAnnotationParser().parse(this);
         init = true;
     }
 
@@ -55,7 +57,7 @@ public class PartyListCommand {
             Component leader = (party.getPartyLeader().getDisplayName());
             List<Component> members = new ArrayList<>();
             party.getMembers().forEach(member -> {
-                if(member!= party.getPartyLeader())
+                if (member != party.getPartyLeader())
                     members.add(member.getDisplayName());
             });
 
@@ -66,7 +68,7 @@ public class PartyListCommand {
                     .getInstance()
                     .get(MessageKeys.PARTY_LIST)
                     .replace("%count%", String.valueOf(party.getMembers().size()))
-                    .replace("%leader%",  serializer.serialize(leader))
+                    .replace("%leader%", serializer.serialize(leader))
                     .replace("%members%", serializer.serialize(membersComponent))
                     .send(PlayerMapper.wrapPlayer(sender));
         });

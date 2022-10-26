@@ -424,6 +424,27 @@ public class SBAConfig implements IConfigurator {
                 && Bukkit.getPluginManager().isPluginEnabled("Citizens");
     }
 
+    public PartyConfig party()
+    {
+        return new PartyConfig();
+    }
+    public class PartyConfig
+    {
+        public boolean enabled() {
+            return getBoolean("party.enabled", false);
+        }
+        public boolean autojoin() {
+            return getBoolean("party.leader-autojoin-autoleave", false);
+        }
+        public int expirationTime() {
+            return getInt("party.invite-expiration-time", 60);
+        }
+        /*.section("party")
+                    .key("enabled").defValue(true)
+                    .key("leader-autojoin-autoleave").defValue(true)
+                    .key("invite-expiration-time").defValue(60)
+                    .back() */
+    }
     public SpectatorConfig spectator() {
         return new SpectatorConfig();
     }

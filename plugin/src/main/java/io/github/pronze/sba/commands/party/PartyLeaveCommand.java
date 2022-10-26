@@ -15,6 +15,7 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.events.SBAPlayerPartyLeaveEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
@@ -26,7 +27,8 @@ public class PartyLeaveCommand {
         public void onPostEnabled() {
                 if (init)
                         return;
-                CommandManager.getInstance().getAnnotationParser().parse(this);
+                if (SBAConfig.getInstance().party().enabled())
+                        CommandManager.getInstance().getAnnotationParser().parse(this);
                 init = true;
         }
 
@@ -63,7 +65,9 @@ public class PartyLeaveCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_OFFLINE_QUIT)
-                                                        .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                                        .replace("%player%",
+                                                                        player.as(Player.class).getDisplayName()
+                                                                                        + ChatColor.RESET)
                                                         .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                         LanguageService
@@ -88,8 +92,10 @@ public class PartyLeaveCommand {
                                                                         LanguageService
                                                                                         .getInstance()
                                                                                         .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                                                                        .replace("%player%", member.as(Player.class)
-                                                                                                        .getDisplayName() + ChatColor.RESET)
+                                                                                        .replace("%player%", member.as(
+                                                                                                        Player.class)
+                                                                                                        .getDisplayName()
+                                                                                                        + ChatColor.RESET)
                                                                                         .send(player);
                                                                 }, () -> SBA
                                                                                 .getInstance()
@@ -99,7 +105,9 @@ public class PartyLeaveCommand {
                                         LanguageService
                                                         .getInstance()
                                                         .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
-                                                        .replace("%player%", player.as(Player.class).getDisplayName() + ChatColor.RESET)
+                                                        .replace("%player%",
+                                                                        player.as(Player.class).getDisplayName()
+                                                                                        + ChatColor.RESET)
                                                         .send(party.getMembers().stream()
                                                                         .filter(member -> !player.equals(member))
                                                                         .toArray(SBAPlayerWrapper[]::new));

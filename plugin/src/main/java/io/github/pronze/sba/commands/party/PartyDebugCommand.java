@@ -13,16 +13,19 @@ import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 
 @Service
 public class PartyDebugCommand {
 
     static boolean init = false;
+
     @OnPostEnable
     public void onPostEnabled() {
         if (init)
             return;
-        CommandManager.getInstance().getAnnotationParser().parse(this);
+        if (SBAConfig.getInstance().party().enabled())
+            CommandManager.getInstance().getAnnotationParser().parse(this);
         init = true;
     }
 
@@ -30,14 +33,13 @@ public class PartyDebugCommand {
     @CommandPermission("sba.party")
     private void commandDebug(
             final @NotNull CommandSender sender,
-            final @NotNull @Argument("player") Player playerArg
-    ) {
+            final @NotNull @Argument("player") Player playerArg) {
         final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         PartyManager
                 .getInstance()
                 .getPartyOf(player)
-                .ifPresentOrElse(party -> sender.sendMessage(party.toString()), () ->
-                        sender.sendMessage("This user is not in a party!"));
+                .ifPresentOrElse(party -> sender.sendMessage(party.toString()),
+                        () -> sender.sendMessage("This user is not in a party!"));
     }
 }

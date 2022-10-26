@@ -180,11 +180,13 @@ public class BedWarsListener implements Listener {
                 .getInstance()
                 .getPartyManager()
                 .getPartyOf(wrappedPlayer);
+
         maybeParty
                 .ifPresentOrElse(party -> {
                     // Party of the player that joined
                     Logger.trace("Player {} has a party ", player);
-                    if (party.getSettings().getGamemode() == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
+                    if (party.getSettings()
+                            .getGamemode() == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
                         Logger.trace("Player {} party is private ", player);
                         game.getConnectedPlayers().forEach(connectedPlayer -> {
                             if (connectedPlayer == player)
@@ -241,7 +243,8 @@ public class BedWarsListener implements Listener {
                             .send(wrappedPlayer);
                 }, () -> {
                     game.getConnectedPlayers().forEach(connectedPlayer -> {
-                        if (gamemodeOf(connectedPlayer) == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
+                        if (gamemodeOf(
+                                connectedPlayer) == io.github.pronze.sba.party.PartySetting.GameMode.PRIVATE) {
                             Logger.trace("Preventing join due as a private party is in the lobby");
                             isCancelled.set(true);
                             LanguageService
@@ -254,29 +257,29 @@ public class BedWarsListener implements Listener {
                     });
                 });
         if (!isCancelled.get()) {
-            maybeParty.ifPresent(party -> party.getMembers()
-                    .stream().filter(member -> !wrappedPlayer.equals(member))
-                    .forEach(member -> {
-                        final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
+            if (SBAConfig.getInstance().party().autojoin())
 
-                        Bukkit.getScheduler().runTask(SBA.getPluginInstance(), () -> {
-                            if (game != memberGame) {
-                                if (memberGame != null)
-                                    memberGame.leaveFromGame(member.getInstance());
-                                game.joinToGame(member.getInstance());
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.PARTY_MESSAGE_WARP)
-                                        .send(member);
-                            }
-                        });
-                    }));
+                maybeParty.ifPresent(party -> party.getMembers()
+                        .stream().filter(member -> !wrappedPlayer.equals(member))
+                        .forEach(member -> {
+                            final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
+
+                            Bukkit.getScheduler().runTask(SBA.getPluginInstance(), () -> {
+                                if (game != memberGame) {
+                                    if (memberGame != null)
+                                        memberGame.leaveFromGame(member.getInstance());
+                                    game.joinToGame(member.getInstance());
+                                    LanguageService
+                                            .getInstance()
+                                            .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                            .send(member);
+                                }
+                            });
+                        }));
         } else {
             game.leaveFromGame(player);
 
             maybeParty.ifPresent(party -> {
-                final var leaderLocation = party.getPartyLeader().getInstance().getLocation();
-                // PlayerUtils.teleportPlayer(player, leaderLocation);
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.PARTY_MESSAGE_ACCESS_DENIED)
@@ -368,16 +371,21 @@ public class BedWarsListener implements Listener {
         player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 
         var maybeParty = PartyManager.getInstance().getPartyOf(SBA.getInstance().getPlayerWrapper(e.getPlayer()));
-        maybeParty.ifPresent(party -> {
-            if (party.getPartyLeader().getInstance() == e.getPlayer()) {
-                party.getMembers().forEach(member -> {
-                    var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
-                    if (memberGame != null) {
-                        memberGame.leaveFromGame(member.getInstance());
-                    }
-                });
-            }
-        });
+        if (SBAConfig.getInstance().party().autojoin())
+            maybeParty.ifPresent(party -> {
+                if (party.getPartyLeader().getInstance() == e.getPlayer()) {
+                    party.getMembers().forEach(member -> {
+                        if (member != e.getPlayer()) {
+                            Tasker.build(() -> {
+                                var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
+                                if (memberGame != null) {
+                                    memberGame.leaveFromGame(member.getInstance());
+                                }
+                            }).afterOneTick().start();
+                        }
+                    });
+                }
+            });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -528,11 +536,11 @@ public class BedWarsListener implements Listener {
                 Main.getInstance().getGameOfPlayer(player),
                 SBAConfig.getInstance().spectator().teleporter().name(),
                 (target) -> {
-                    final var game =Main.getInstance().getGameOfPlayer(player);
+                    final var game = Main.getInstance().getGameOfPlayer(player);
                     ArenaManager
                             .getInstance()
                             .get(game.getName())
-                            .ifPresent(arena -> ((Arena) arena).track(player,target));
+                            .ifPresent(arena -> ((Arena) arena).track(player, target));
                 }).openForPlayer(player);
 
     }

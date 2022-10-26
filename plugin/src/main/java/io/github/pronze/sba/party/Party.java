@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.data.PartyInviteData;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -135,10 +136,8 @@ public class Party implements IParty {
                 }
             }
         }.runTaskLater(SBA.getPluginInstance(),
-                20L * SBA
-                        .getInstance()
-                        .getConfigurator()
-                        .getInt("party.invite-expiration-time", 60));
+                20L * SBAConfig
+                        .getInstance().party().expirationTime());
 
         final var inviteData = PartyInviteData.of(invitee, player, inviteTask);
         inviteDataMap.put(invitee.getInstance().getUniqueId(), inviteData);
