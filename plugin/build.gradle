@@ -19,7 +19,7 @@ ScreamingLibBuilder()
 dependencies {
     compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
     compileOnly 'me.frap.vulcan:VulcanAPI:1.0.0'
-
+    implementation "net.kyori:adventure-platform-bukkit:4.1.2"
     implementation project(':SBA-API')
 
     implementation 'me.lucko:commodore:' + COMMODORE_VERSION, {

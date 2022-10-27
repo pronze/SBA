@@ -80,15 +80,16 @@ public class PartyWarpCommand {
                                     final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
 
                                     Bukkit.getScheduler().runTask(SBA.getPluginInstance(), () -> {
-                                        if (game != memberGame) {
-                                            if (memberGame != null)
-                                                memberGame.leaveFromGame(member.getInstance());
-                                            game.joinToGame(member.getInstance());
-                                            LanguageService
-                                                    .getInstance()
-                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
-                                                    .send(member);
-                                        }
+                                        if (player.getInstance() != member.getInstance())
+                                            if (game != memberGame) {
+                                                if (memberGame != null)
+                                                    memberGame.leaveFromGame(member.getInstance());
+                                                game.joinToGame(member.getInstance());
+                                                LanguageService
+                                                        .getInstance()
+                                                        .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                        .send(member);
+                                            }
                                     });
                                 });
                     } else {

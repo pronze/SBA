@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
+import org.bukkit.ChatColor;
 import org.screamingsandals.lib.sender.CommandSenderWrapper;
 import org.screamingsandals.lib.utils.AdventureHelper;
 import java.util.ArrayList;
@@ -19,6 +22,56 @@ public class Message {
     private List<String> original = new ArrayList<>();
     private boolean prefix;
 
+
+    private static String toMiniMessage(String legacyString)
+    {
+        String workingString = ChatColor.translateAlternateColorCodes('&', legacyString);
+
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"0", "<black>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"1", "<dark_blue>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"2", "<dark_green>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"3", "<dark_aqua>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"4", "<dark_red>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"5", "<dark_purple>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"6", "<gold>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"7", "<gray>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"8", "<dark_gray>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"9", "<blue>");
+
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"a", "<green>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"A", "<green>");
+
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"b", "<aqua>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"B", "<aqua>");
+
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"c", "<red>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"C", "<red>");
+
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"d", "<light_purple>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"D", "<light_purple>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"e", "<yellow>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"E", "<yellow>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"f", "<white>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"F", "<white>");
+
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"k", "<obfuscated>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"K", "<obfuscated>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"l", "<bold>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"L", "<bold>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"m", "<strikethrough>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"M", "<strikethrough>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"n", "<underlined>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"N", "<underlined>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"o", "<italic>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"O", "<italic>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"r", "<reset>");
+        workingString = workingString.replaceAll(ChatColor.COLOR_CHAR+"R", "<reset>");
+
+        workingString = workingString.replaceAll("#([0-9a-fA-F]{6})", "<#$1>");
+
+        workingString=ChatColor.stripColor(workingString);
+        return workingString;
+    }
     public static Message of(List<String> text) {
         return new Message(text);
     }
@@ -68,7 +121,7 @@ public class Message {
                         .getConfigurator()
                         .getString("prefix", "[SBA]") + ": " + str;
             }
-            component.append(MiniMessage.miniMessage().deserialize(str));
+            component.append(MiniMessage.miniMessage().deserialize(toMiniMessage(str)));
             if (original.indexOf(str) + 1 != original.size()) {
                 component.append(Component.text("\n"));
             }
@@ -85,7 +138,7 @@ public class Message {
                     .getConfigurator()
                     .getString("prefix", "[SBA]") + ": ";
         }
-        return AdventureHelper.toLegacy(MiniMessage.miniMessage().deserialize(string));
+        return AdventureHelper.toLegacy(MiniMessage.miniMessage().deserialize(toMiniMessage(string)));
     }
 
     public List<String> toStringList() {
@@ -105,7 +158,7 @@ public class Message {
                                 .getConfigurator()
                                 .getString("prefix", "[SBA]") + ": " + str;
                     }
-                    return str;
+                    return toMiniMessage(str);
                 })
                 .map(MiniMessage.miniMessage()::deserialize)
                 .collect(Collectors.toList());
