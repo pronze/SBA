@@ -150,7 +150,8 @@ public class ShopUtil {
         return true;
     }
 
-    public static void increaseTeamEnchant(Player teamPlayer, @Nullable ItemStack item, Enchantment damageAll, int levelToAdd) {
+    public static void increaseTeamEnchant(Player teamPlayer, @Nullable ItemStack item, Enchantment damageAll,
+            int levelToAdd) {
         if (!canApply(damageAll, item))
             return;
         int level = item.getEnchantmentLevel(damageAll);
@@ -230,7 +231,7 @@ public class ShopUtil {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
                     .filter(x -> x.getName().equalsIgnoreCase(ench))
                     .findFirst();
-            if(ec.isPresent() && ec.get().equals(ech))
+            if (ec.isPresent() && ec.get().equals(ech))
                 str.set(ench);
         });
         return str.get();
@@ -564,10 +565,12 @@ public class ShopUtil {
 
     public static void applyTeamUpgrades(@NotNull Player player, Game game) {
         final var team = game.getTeamOfPlayer(player);
-        final var gameStorage = ArenaManager
+        var maybeGameStorage = ArenaManager
                 .getInstance()
-                .get(game.getName())
-                .orElseThrow()
+                .get(game.getName());
+        if (!maybeGameStorage.isPresent())
+            return;
+        final var gameStorage = maybeGameStorage.get()
                 .getStorage();
         final var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
         if (teamProtectionLevel > 0)
