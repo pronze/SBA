@@ -1,7 +1,7 @@
-name: Pre-Builds 1.5.7
+name: Pre-Builds dev versions
 on:
   push:
-    branches: [ 1.5.7 ]
+    branches: [ dev ]
 concurrency: sba_v157
 jobs:
   build:
@@ -47,7 +47,7 @@ jobs:
         with:
           tag_name: ${{ steps.read_property.outputs.value }}.${{ steps.vars.outputs.sha_short }}"
           release_name: Release ${{ steps.read_property.outputs.value }}
-          body: Pre-release of 1.5.7
+          body: Pre-release of dev version
           draft: false
           prerelease: true
       - name: Upload Release Asset
