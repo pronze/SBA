@@ -164,9 +164,6 @@ subprojects {
         relocate 'org.screamingsandals.lib.world', 'sba.sl.w'
         relocate 'org.screamingsandals.lib', 'sba.sl'
         relocate 'org.screamingsandals.simpleinventories', 'sba.si'
-        relocate 'io.github.pronze', 'i.g.p'
-        relocate 'com.typesave', 'c.t'
-        relocate 'com.google', 'c.g'
     }
 
     tasks.withType(JavaCompile) {
