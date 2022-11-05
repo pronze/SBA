@@ -279,7 +279,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setSharpnessLevel(team, teamSharpnessLevel);
                                 Integer finalTeamSharpnessLevel = teamSharpnessLevel;
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -335,7 +335,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setSharpnessLevel(team, teamKnockbackLevel);
                                 Integer finalTeamSharpnessLevel = teamKnockbackLevel;
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -391,7 +391,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setEfficiencyLevel(team, efficiencyLevel);
                                 Logger.trace("efficiency {}", efficiencyLevel);
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -579,13 +579,16 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .get(MessageKeys.GREATEST_ENCHANTMENT)
                                     .send(wrappedPlayer);
                         } else {
+                            Logger.trace("protectionPrices:{}", protectionPrices);
                             var ePrice = protectionPrices.get(teamProtectionLevel);
+                            Logger.trace("ePrice:{}", ePrice);
                             teamProtectionLevel = teamProtectionLevel + 1;
+                            Logger.trace("teamProtectionLevel:{}", teamProtectionLevel);
                             materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setProtectionLevel(team, teamProtectionLevel);
                                 ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
 
@@ -651,7 +654,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                 materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                                  // type.getStack(ePrice)));
                                 if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                        materialItem.get().getAmount())) {
+                                        ePrice)) {
                                     gameStorage.setEnchantLevel(team, propertyName, teamOtherLevel);
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
                                         LanguageService
