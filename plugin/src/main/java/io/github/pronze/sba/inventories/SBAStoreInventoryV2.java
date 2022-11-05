@@ -272,8 +272,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .get(MessageKeys.GREATEST_ENCHANTMENT)
                                     .send(wrappedPlayer);
                         } else {
-                            teamSharpnessLevel = teamSharpnessLevel + 1;
                             var ePrice = sharpnessPrices.get(teamSharpnessLevel);
+                            teamSharpnessLevel = teamSharpnessLevel + 1;
 
                             materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
@@ -328,8 +328,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .get(MessageKeys.GREATEST_ENCHANTMENT)
                                     .send(wrappedPlayer);
                         } else {
-                            teamKnockbackLevel = teamKnockbackLevel + 1;
                             var ePrice = knockbackPrices.get(teamKnockbackLevel);
+                            teamKnockbackLevel = teamKnockbackLevel + 1;
 
                             materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
@@ -385,8 +385,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .get(MessageKeys.GREATEST_ENCHANTMENT)
                                     .send(wrappedPlayer);
                         } else {
-                            efficiencyLevel = efficiencyLevel + 1;
                             var ePrice = efficiencyPrices.get(efficiencyLevel);
+                            efficiencyLevel = efficiencyLevel + 1;
                             materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
@@ -579,8 +579,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .get(MessageKeys.GREATEST_ENCHANTMENT)
                                     .send(wrappedPlayer);
                         } else {
-                            teamProtectionLevel = teamProtectionLevel + 1;
                             var ePrice = protectionPrices.get(teamProtectionLevel);
+                            teamProtectionLevel = teamProtectionLevel + 1;
                             materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
@@ -645,8 +645,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .get(MessageKeys.GREATEST_ENCHANTMENT)
                                         .send(wrappedPlayer);
                             } else {
-                                teamOtherLevel = teamOtherLevel + 1;
                                 var ePrice = otherPrices.get(propertyName).get(teamOtherLevel);
+                                teamOtherLevel = teamOtherLevel + 1;
 
                                 materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
                                                                                                  // type.getStack(ePrice)));
