@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 @Service
 public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+    private boolean enabled = false;
 
     public static LobbyScoreboardManager getInstance() {
         return ServiceManager.get(LobbyScoreboardManager.class);
@@ -42,7 +43,7 @@ public class LobbyScoreboardManager implements Listener {
 
     @OnPostEnable
     public void registerListener() {
-        if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
+        if (!(enabled = SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true))) {
             return;
         }
         SBA.getInstance().registerListener(this);
@@ -51,13 +52,15 @@ public class LobbyScoreboardManager implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        if(e.getGame().getConnectedPlayers().contains(player))
+        if (e.getGame().getConnectedPlayers().contains(player))
             if (e.getGame().getStatus() == GameStatus.WAITING) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> createBoard(player, e.getGame()), 3L);
             }
     }
 
     private void createBoard(Player player, Game game) {
+        if (!enabled)
+            return;
         final var scoreboardOptional = ScoreboardManager.getInstance()
                 .fromCache(player.getUniqueId());
         scoreboardOptional.ifPresent(Scoreboard::destroy);
@@ -120,20 +123,17 @@ public class LobbyScoreboardManager implements Listener {
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_SOLO_PREFIX)
                     .toString();
-        }
-        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 2)) {
+        } else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 2)) {
             mode = LanguageService
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX)
                     .toString();
-        }
-        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 3)) {
+        } else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 3)) {
             mode = LanguageService
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX)
                     .toString();
-        }
-        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 4)) {
+        } else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 4)) {
             mode = LanguageService
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX)
@@ -151,11 +151,12 @@ public class LobbyScoreboardManager implements Listener {
             final var time = gameImpl.getFormattedTimeLeft();
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
-                var seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0])*60;
+                var seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0]) * 60;
                 state = LanguageService
                         .getInstance()
                         .get(MessageKeys.LOBBY_SCOREBOARD_STATE)
-                        .replace("%countdown%", seconds<=60? String.valueOf(seconds):gameImpl.getFormattedTimeLeft())
+                        .replace("%countdown%",
+                                seconds <= 60 ? String.valueOf(seconds) : gameImpl.getFormattedTimeLeft())
                         .toString();
             }
         }

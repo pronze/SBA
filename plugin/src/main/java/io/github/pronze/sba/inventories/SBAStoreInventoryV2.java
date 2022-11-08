@@ -123,7 +123,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
     @Override
     public void onPostGenerateItem(ItemRenderEvent event) {
-        event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.NORMAL));
+        //event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.NORMAL));
+        event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.UPGRADES));
     }
 
     @Override
@@ -263,7 +264,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var teamSharpnessLevel = gameStorage.getSharpnessLevel(team).orElseThrow();
                         var maxSharpnessLevel = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness")
                                 .getInt(1);
-                        maxSharpnessLevel = Math.min(maxSharpnessLevel, sharpnessPrices.size() - 1);
+                        maxSharpnessLevel = Math.min(maxSharpnessLevel, sharpnessPrices.size());
 
                         if (teamSharpnessLevel >= maxSharpnessLevel) {
                             shouldSellStack = false;
@@ -377,7 +378,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElseThrow();
                         var maxEfficiencyLevel = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency")
                                 .getInt(2);
-                        maxEfficiencyLevel = Math.min(maxEfficiencyLevel, efficiencyPrices.size() - 1);
+                        maxEfficiencyLevel = Math.min(maxEfficiencyLevel, efficiencyPrices.size());
                         if (efficiencyLevel >= maxEfficiencyLevel) {
                             shouldSellStack = false;
                             LanguageService
@@ -570,7 +571,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElseThrow();
                         var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection")
                                 .getInt(4);
-                        maxProtectionLevel = Math.min(maxProtectionLevel, protectionPrices.size() - 1);
+                        maxProtectionLevel = Math.min(maxProtectionLevel, protectionPrices.size());
 
                         if (teamProtectionLevel >= maxProtectionLevel) {
                             shouldSellStack = false;
@@ -639,7 +640,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             var teamOtherLevel = gameStorage.getEnchantLevel(team, propertyName).orElseThrow();
                             var maxOtherLevel = SBAConfig.getInstance().node("upgrades", "limit", propertyName)
                                     .getInt(1);
-                            maxOtherLevel = Math.min(maxOtherLevel, otherPrices.get(propertyName).size() - 1);
+                            maxOtherLevel = Math.min(maxOtherLevel, otherPrices.get(propertyName).size());
 
                             if (teamOtherLevel >= maxOtherLevel) {
                                 shouldSellStack = false;

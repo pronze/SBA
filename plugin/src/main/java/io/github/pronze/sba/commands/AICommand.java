@@ -114,7 +114,6 @@ public class AICommand implements Listener {
             int current = game.countConnectedPlayers();
             if (current < maxPlayer) {
                 AIService.getInstance().spawnAI(player.getLocation()).thenAccept(ai -> {
-                    Logger.info("{}", ai);
                     int current_ = game.countConnectedPlayers();
                     if (current_ < maxPlayer) {
                         game.joinToGame(ai);
@@ -149,7 +148,6 @@ public class AICommand implements Listener {
             if (current < maxPlayer) {
                 AIService.getInstance().spawnAI(player.getLocation(), Strategy.AGRESSIVE)
                         .thenAccept(ai -> {
-                            Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();
                             if (current_ < maxPlayer) {
                                 game.joinToGame(ai);
@@ -184,7 +182,6 @@ public class AICommand implements Listener {
             if (current < maxPlayer) {
                 AIService.getInstance().spawnAI(player.getLocation(), Strategy.DEFENSIVE)
                         .thenAccept(ai -> {
-                            Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();
                             if (current_ < maxPlayer) {
                                 game.joinToGame(ai);
@@ -219,7 +216,6 @@ public class AICommand implements Listener {
             if (current < maxPlayer) {
                 AIService.getInstance().spawnAI(player.getLocation(), Strategy.NONE)
                         .thenAccept(ai -> {
-                            Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();
                             if (current_ < maxPlayer) {
                                 game.joinToGame(ai);
@@ -254,7 +250,6 @@ public class AICommand implements Listener {
             if (current < maxPlayer) {
                 AIService.getInstance().spawnAI(player.getLocation(), Strategy.BALANCED)
                         .thenAccept(ai -> {
-                            Logger.info("{}", ai);
                             int current_ = game.countConnectedPlayers();
                             if (current_ < maxPlayer) {
                                 game.joinToGame(ai);

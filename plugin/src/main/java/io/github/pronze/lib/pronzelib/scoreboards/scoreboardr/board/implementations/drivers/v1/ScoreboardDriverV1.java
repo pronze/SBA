@@ -72,12 +72,17 @@ public class ScoreboardDriverV1 implements IBoard {
     }
 
     private String[] split(String line) {
-        if (line.length() < LineLimits.getLineLimit()) {
+        int cutPoint = LineLimits.getLineLimit();
+        if(line.length()<=32)
+        {
+            cutPoint = line.length()/2;
+        };
+        if (line.length() <= cutPoint || line.length()==0) {
             return new String[] { line, "" };
         }
-
-        String prefix = line.substring(0, LineLimits.getLineLimit());
-        String suffix = line.substring(LineLimits.getLineLimit());
+       
+        String prefix = line.substring(0, cutPoint);
+        String suffix = line.substring(cutPoint);
 
         if (prefix.endsWith("§")) { // Check if we accidentally cut off a color
             prefix = ScoreboardStrings.removeLastCharacter(prefix);

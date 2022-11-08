@@ -35,6 +35,7 @@ import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
+import org.screamingsandals.simpleinventories.inventory.Property;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.File;
@@ -203,6 +204,64 @@ public class ShopUtil {
         return newItem;
     }
 
+    public static Item applyTeamEnchants(Player player, Item newItem, StoreType type, List<Property> list) {
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        var gameStorage = SBA
+                .getInstance()
+                .getGameStorage(game)
+                .orElseThrow();
+
+        final var team = game.getTeamOfPlayer(player);
+
+        int sharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("sharpness")))
+            if (sharpnessLevel > 0 && canApply(Enchantment.DAMAGE_ALL, newItem))
+                newItem = clampOrApplyEnchants(newItem, sharpnessLevel, Enchantment.DAMAGE_ALL, type,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
+        int knockbackLebel = gameStorage.getKnockbackLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("knockback")))
+            if (knockbackLebel > 0 && canApply(Enchantment.KNOCKBACK, newItem))
+                newItem = clampOrApplyEnchants(newItem, knockbackLebel, Enchantment.KNOCKBACK, type,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Knockback").getInt(1));
+        int efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("Efficiency")))
+            if (efficiencyLevel > 0 && canApply(Enchantment.DIG_SPEED, newItem))
+                newItem = clampOrApplyEnchants(newItem, efficiencyLevel, Enchantment.DIG_SPEED, type,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(1));
+        int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("Protection")))
+            if (protectionLevel > 0 && canApply(Enchantment.PROTECTION_ENVIRONMENTAL, newItem))
+                newItem = clampOrApplyEnchants(newItem, protectionLevel, Enchantment.PROTECTION_ENVIRONMENTAL,
+                        StoreType.UPGRADES,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(1));
+        List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
+        for (String ench : SBAConfig.getInstance().upgrades().enchants().keys()) {
+            Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
+                    .filter(x -> x.getName().equalsIgnoreCase(ench))
+                    .findFirst();
+            if (ignoredKeys.contains(ench))
+                continue;
+            if (!canApply(ench, newItem))
+                continue;
+            if (!list.stream()
+                    .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase(ench)))
+                continue;
+            if (!ec.isPresent()) {
+                Logger.error(
+                        "SBA doesn't know how to apply enchant {}, it is not a valid enchant, check https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html for a list of enchant on your version of minecraft",
+                        ench);
+                continue;
+            }
+            Enchantment ech = ec.get();
+            int level = gameStorage.getEnchantLevel(team, ench).orElse(0);
+            if (level > 0)
+                newItem = clampOrApplyEnchants(newItem, sharpnessLevel, ech,
+                        type,
+                        SBAConfig.getInstance().node("upgrades", "limit", ench).getInt(1));
+        }
+        return newItem;
+    }
+
     private static boolean canApply(String string, ItemStack newItem) {
         if (SBAConfig.getInstance().upgrades().enchants().of(string) == null) {
             Logger.error("SBA doesn't know how to apply enchant {}, add it in the upgrade-item.enchants.ENCHANT_HERE",
@@ -213,7 +272,21 @@ public class ShopUtil {
                 .anyMatch(x -> newItem.getType().toString().contains(x.toUpperCase()));
     }
 
+    private static boolean canApply(String string, Item newItem) {
+        if (SBAConfig.getInstance().upgrades().enchants().of(string) == null) {
+            Logger.error("SBA doesn't know how to apply enchant {}, add it in the upgrade-item.enchants.ENCHANT_HERE",
+                    string);
+            return false;
+        }
+        return SBAConfig.getInstance().upgrades().enchants().of(string).stream()
+                .anyMatch(x -> newItem.getMaterial().platformName().contains(x.toUpperCase()));
+    }
+
     private static boolean canApply(Enchantment string, ItemStack newItem) {
+        return canApply(getName(string), newItem);
+    }
+
+    private static boolean canApply(Enchantment string, Item newItem) {
         return canApply(getName(string), newItem);
     }
 
@@ -355,6 +428,7 @@ public class ShopUtil {
             final var isSharp = itemInfo.getFirstPropertyByName("sharpness").isPresent();
             final var isProt = itemInfo.getFirstPropertyByName("protection").isPresent();
             final var isEfficiency = itemInfo.getFirstPropertyByName("efficiency").isPresent();
+            final var isKnockback = itemInfo.getFirstPropertyByName("knockback").isPresent();
 
             final var game = Main.getInstance().getGameOfPlayer(player);
             final var arena = ArenaManager
@@ -366,10 +440,10 @@ public class ShopUtil {
                 final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player))
                         .orElseThrow() + 1;
                 var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
-                limit = Math.min(limit, SBAStoreInventoryV2.sharpnessPrices.size()-1);
+                limit = Math.min(limit, SBAStoreInventoryV2.sharpnessPrices.size());
                 if (currentLevel <= limit) {
                     price = String.valueOf(SBAStoreInventoryV2.sharpnessPrices
-                            .get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() ));
+                            .get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
 
@@ -377,10 +451,10 @@ public class ShopUtil {
                 final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player))
                         .orElseThrow() + 1;
                 var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
-                limit = Math.min(limit, SBAStoreInventoryV2.protectionPrices.size()-1);
+                limit = Math.min(limit, SBAStoreInventoryV2.protectionPrices.size());
                 if (currentLevel <= limit) {
                     price = String.valueOf(SBAStoreInventoryV2.protectionPrices.get(
-                            arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() ));
+                            arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
 
@@ -388,10 +462,21 @@ public class ShopUtil {
                 final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player))
                         .orElseThrow() + 1;
                 var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
-                limit = Math.min(limit, SBAStoreInventoryV2.efficiencyPrices.size()-1);
+                limit = Math.min(limit, SBAStoreInventoryV2.efficiencyPrices.size());
                 if (currentLevel <= limit) {
                     price = String.valueOf(SBAStoreInventoryV2.efficiencyPrices.get(
-                            arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() ));
+                            arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow()));
+                }
+            }
+
+            if (isKnockback) {
+                final var currentLevel = arena.getStorage().getKnockbackLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Knockback").getInt(4);
+                limit = Math.min(limit, SBAStoreInventoryV2.knockbackPrices.size());
+                if (currentLevel <= limit) {
+                    price = String.valueOf(SBAStoreInventoryV2.knockbackPrices.get(
+                            arena.getStorage().getKnockbackLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
 
@@ -447,6 +532,8 @@ public class ShopUtil {
 
     public static Item clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type,
             int maxLevel) {
+        Logger.trace("--- {} ENCHANT IS lvl {}/{}", enchantment, level, maxLevel);
+
         if (type == StoreType.UPGRADES) {
             level = level + 1;
         }
@@ -497,27 +584,10 @@ public class ShopUtil {
                 .getGameStorage(game);
         if (maybeStorage.isPresent()) {
             var gameStorage = maybeStorage.get();
-            final var afterUnderscore = typeName
-                    .substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
-            switch (afterUnderscore.toLowerCase()) {
-                case "sword":
-                    int sharpness = gameStorage.getSharpnessLevel(runningTeam).orElseThrow();
-                    item = clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type,
-                            SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
-                    break;
-                case "chestplate":
-                case "boots":
-                    int protection = gameStorage.getProtectionLevel(runningTeam).orElseThrow();
-                    item = clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type,
-                            SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4));
-                    break;
-                case "pickaxe":
-                    final int efficiency = gameStorage.getEfficiencyLevel(runningTeam).orElseThrow();
-                    item = clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type,
-                            SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2));
-                    break;
-            }
+            final var afterUnderscore = typeName;
+            // .substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
 
+            item = ShopUtil.applyTeamEnchants(player, item, type, event.getOriginalInfo().getProperties());
         }
         return item;
     }

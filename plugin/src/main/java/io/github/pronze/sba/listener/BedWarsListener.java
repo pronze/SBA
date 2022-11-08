@@ -108,7 +108,6 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onTargetBlockDestroyed(BedwarsTargetBlockDestroyedEvent e) {
-        Logger.trace("SBA onTargetBlockDestroyed{}", e);
 
         final var game = e.getGame();
         ArenaManager
@@ -119,7 +118,6 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onPostRebuildingEvent(BedwarsPostRebuildingEvent e) {
-        Logger.trace("SBA onPostRebuildingEvent{}", e);
 
         final var game = e.getGame();
         ArenaManager
@@ -133,8 +131,6 @@ public class BedWarsListener implements Listener {
 
     @EventHandler
     public void onGameTick(BedwarsGameTickEvent e) {
-        Logger.trace("SBA onPostRebuildingEvent{}", e);
-
         final var game = e.getGame();
         ArenaManager
                 .getInstance()
