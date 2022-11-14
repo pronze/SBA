@@ -114,7 +114,9 @@ public class MainLobbyVisualsManager implements Listener {
                 }
                 final var msgToSend = format;
                 Bukkit.getServer().getOnlinePlayers().forEach(p -> {
-                    p.sendMessage(msgToSend);
+                    if (MainLobbyVisualsManager.isInWorld(p.getLocation())
+                            && Main.getInstance().getGameOfPlayer(p) == null)
+                        p.sendMessage(msgToSend);
                 });
 
                 // e.getRecipients().clear();
