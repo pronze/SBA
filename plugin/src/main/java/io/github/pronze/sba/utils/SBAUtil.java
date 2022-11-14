@@ -26,8 +26,6 @@ import org.screamingsandals.lib.utils.AdventureHelper;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
-import clib.net.kyori.adventure.text.TextComponent;
-
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;

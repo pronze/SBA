@@ -35,6 +35,7 @@ buildscript {
         maven {
             url = uri("https://plugins.gradle.org/m2/")
         }
+      
     }
     dependencies {
         classpath 'org.screamingsandals.gradle:builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
@@ -113,6 +114,12 @@ subprojects {
         }
         maven{ url= uri("https://repo.citizensnpcs.co/")}
         maven{ url= uri("https://moyskleytech.com/debian/m2/")}
+          maven {
+            url=uri("https://repo.alessiodp.com/releases/")
+        }
+         maven {
+            url=uri("https://repo.alessiodp.com/snapshots/")
+        }
     }
 
     dependencies {

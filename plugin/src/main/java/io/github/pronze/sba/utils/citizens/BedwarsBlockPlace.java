@@ -18,7 +18,6 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
-import gnu.trove.impl.unmodifiable.TUnmodifiableShortByteMap;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.SpawnerProtection;
 import io.github.pronze.sba.utils.Logger;
