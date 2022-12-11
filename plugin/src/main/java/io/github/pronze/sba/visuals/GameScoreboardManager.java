@@ -6,7 +6,6 @@ import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
 import io.github.pronze.sba.utils.Logger;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

@@ -4,7 +4,7 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -195,8 +195,7 @@ public class MainLobbyVisualsManager implements Listener {
                     .get(MessageKeys.MAIN_LOBBY_TABLIST_FOOTER)
                     .replace("%sba_version%", SBA.getInstance().getVersion())
                     .toComponent();
-
-            playerData.sendPlayerListHeaderAndFooter(header, footer);
+            playerData.sendPlayerListHeaderFooter(header, footer);
         }
 
         var title = LanguageService
@@ -251,7 +250,7 @@ public class MainLobbyVisualsManager implements Listener {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
         if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
-            PlayerMapper.wrapPlayer(player).sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
+            PlayerMapper.wrapPlayer(player).sendPlayerListHeaderFooter(Component.empty(), Component.empty());
         }
     }
 

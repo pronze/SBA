@@ -6,8 +6,9 @@ import io.github.pronze.sba.game.IArena;
 import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
 import io.github.pronze.sba.game.ArenaManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+
+import org.screamingsandals.lib.spectator.Color;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -97,7 +98,7 @@ public class HealthIndicatorService implements Listener {
     public void onGameStart(BedwarsGameStartedEvent event) {
         final Game game = event.getGame();
         final var healthIndicator = HealthIndicator2.of()
-                .symbol(Component.text("\u2665", NamedTextColor.RED))
+                .symbol(Component.text("\u2665", Color.RED))
                 .showHealthInTabList(tabEnabled)
                 .show()
                 .startUpdateTask(2, TaskerTime.TICKS);

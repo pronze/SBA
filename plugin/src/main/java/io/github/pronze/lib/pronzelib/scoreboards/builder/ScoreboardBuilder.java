@@ -10,7 +10,7 @@ import java.util.Objects;
 import io.github.pronze.lib.pronzelib.scoreboards.api.UpdateCallback;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.ConfigBoard;
 import io.github.pronze.sba.utils.Logger;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import io.github.pronze.lib.pronzelib.scoreboards.api.PlaceholderFunction;
 import java.util.List;
 import org.bukkit.entity.Player;

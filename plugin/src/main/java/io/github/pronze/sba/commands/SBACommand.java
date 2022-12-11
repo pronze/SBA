@@ -11,9 +11,8 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.GamesInventoryService;
 import io.github.pronze.sba.utils.Logger;
 import io.leangen.geantyref.TypeToken;
-import io.papermc.lib.PaperLib;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import org.screamingsandals.lib.spectator.Component;
+import org.screamingsandals.lib.spectator.Color;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -135,7 +134,7 @@ public class SBACommand {
                 .addViewer(player)
                 .lookAtPlayer(true)
                 .displayName(List.of(
-                        Component.text("Test NPC, will despawn after 10 seconds").color(TextColor.color(139, 69, 19))))
+                        Component.text("Test NPC, will despawn after 10 seconds").withColor((Color.rgb(139, 69, 19)))))
                 .show();
         Tasker.build(() -> {
             npc.destroy();

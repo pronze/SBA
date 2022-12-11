@@ -18,11 +18,7 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentBuilder;
-import net.kyori.adventure.text.JoinConfiguration;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.screamingsandals.lib.spectator.Component;
 
 @Service
 public class PartyListCommand {
@@ -61,15 +57,14 @@ public class PartyListCommand {
                     members.add(member.getDisplayName());
             });
 
-            Component membersComponent = Component.join(JoinConfiguration.separator(Component.text(",")), members);
+            Component membersComponent = Component.join((Component.text(",")), members);
 
-            var serializer = LegacyComponentSerializer.legacyAmpersand();
             LanguageService
                     .getInstance()
                     .get(MessageKeys.PARTY_LIST)
                     .replace("%count%", String.valueOf(party.getMembers().size()))
-                    .replace("%leader%", serializer.serialize(leader))
-                    .replace("%members%", serializer.serialize(membersComponent))
+                    .replace("%leader%", (leader.toLegacy()))
+                    .replace("%members%", (membersComponent.toLegacy()))
                     .send(PlayerMapper.wrapPlayer(sender));
         });
 

@@ -42,8 +42,7 @@ import org.screamingsandals.lib.utils.visual.TextEntry;
 
 import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent.Builder;
+import org.screamingsandals.lib.spectator.Component;
 
 public class Scoreboard {
     private ConfigBoard holder;

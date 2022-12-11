@@ -3,7 +3,7 @@ package io.github.pronze.sba.game;
 import io.github.pronze.sba.utils.ShopUtil;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Item;

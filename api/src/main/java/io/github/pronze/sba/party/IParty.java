@@ -1,7 +1,7 @@
 package io.github.pronze.sba.party;
 
 import io.github.pronze.sba.data.PartyInviteData;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.jetbrains.annotations.NotNull;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 

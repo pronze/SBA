@@ -11,7 +11,6 @@ import io.github.pronze.sba.service.GamesInventoryService;
 import io.github.pronze.sba.service.NPCStoreService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import lombok.NonNull;
-import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
@@ -22,7 +21,8 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.nms.accessors.DirectionAccessor;
 import org.screamingsandals.lib.player.PlayerWrapper;
-import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.spectator.title.TimesProvider;
+import org.screamingsandals.lib.spectator.title.Title;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
@@ -180,12 +180,12 @@ public class SBAUtil {
             sender.sendMessage("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, net.kyori.adventure.text.Component title, net.kyori.adventure.text.Component subtitle, int fadeIn, int stay,
+    public static void sendTitle(PlayerWrapper player, org.screamingsandals.lib.spectator.Component title, org.screamingsandals.lib.spectator.Component subtitle, int fadeIn, int stay,
             int fadeOut) {
-        var titleComponent = net.kyori.adventure.title.Title.title(
+        var titleComponent = Title.title(
                 title,
                 subtitle,
-                Title.Times.of(
+                TimesProvider.times(
                         Duration.ofMillis(fadeIn * 50L),
                         Duration.ofMillis(stay * 50L),
                         Duration.ofMillis(fadeOut * 50L)));

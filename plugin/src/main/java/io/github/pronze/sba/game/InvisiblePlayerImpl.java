@@ -5,8 +5,6 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
 import lombok.Data;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;

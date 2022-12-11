@@ -11,7 +11,7 @@ import io.github.pronze.sba.inventories.SBAStoreInventoryV2;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,7 +31,6 @@ import org.screamingsandals.bedwars.api.utils.ColorChanger;
 import org.screamingsandals.lib.item.Item;
 import org.screamingsandals.lib.item.meta.EnchantmentMapping;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
@@ -479,7 +478,7 @@ public class ShopUtil {
                             arena.getStorage().getKnockbackLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
-
+            
             String finalPrice = price;
             final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
                     .map(property -> property.getPropertyData().childrenList().stream()
@@ -490,7 +489,7 @@ public class ShopUtil {
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
                     .map(s -> ChatColor.translateAlternateColorCodes('&', s))
-                    .map(AdventureHelper::toComponent)
+                    .map(Component::fromLegacy)
                     .collect(Collectors.toCollection((Supplier<ArrayList<Component>>) ArrayList::new));
             newList.addAll(originalList);
 
@@ -502,7 +501,7 @@ public class ShopUtil {
     public static String getNameOrCustomNameOfItem(Item item) {
         try {
             if (item.getDisplayName() != null) {
-                return AdventureHelper.toLegacy(item.getDisplayName());
+                return (item.getDisplayName().toLegacy());
             }
             /*
              * if (item.getLocalizedName() != null) {

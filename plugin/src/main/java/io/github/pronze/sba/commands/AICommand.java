@@ -22,7 +22,7 @@ import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.trait.CurrentLocation;
 import net.citizensnpcs.trait.Gravity;
 import net.citizensnpcs.trait.SkinTrait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

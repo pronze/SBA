@@ -16,7 +16,7 @@ import org.screamingsandals.lib.world.LocationMapper;
 
 import io.github.pronze.sba.utils.Logger;
 import net.citizensnpcs.api.trait.Trait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 public class HologramTrait extends Trait {
 

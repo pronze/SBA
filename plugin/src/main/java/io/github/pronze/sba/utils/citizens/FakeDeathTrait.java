@@ -41,7 +41,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.citizensnpcs.api.trait.Trait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 public class FakeDeathTrait extends Trait {
 

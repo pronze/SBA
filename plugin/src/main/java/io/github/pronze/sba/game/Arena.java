@@ -19,7 +19,7 @@ import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.trait.Gravity;
 import net.citizensnpcs.trait.LookClose;
 import net.citizensnpcs.trait.SkinTrait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -48,7 +48,6 @@ import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
-import net.kyori.adventure.text.TextComponent;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
 
 import java.util.*;
@@ -477,7 +476,7 @@ public class Arena implements IArena {
                     .forEach(player -> WinTeamPlayers.add(player.getDisplayName() + ChatColor.RESET));
             winner.getConnectedPlayers()
                     .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle,
-                            net.kyori.adventure.text.Component.empty(), 0, 90, 0));
+                            org.screamingsandals.lib.spectator.Component.empty(), 0, 90, 0));
 
             LanguageService
                     .getInstance()

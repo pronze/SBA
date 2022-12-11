@@ -9,7 +9,7 @@ buildConfig {
 
 ScreamingLibBuilder()
         .platforms('bukkit')
-        .modules('core', 'hologram', 'healthindicator', 'npc', 'sidebar', 'packets', 'command')
+        .modules('core', 'hologram', 'healthindicator', 'npc', 'sidebar', 'packets', 'cloud')
         .universalModules('lang')
         .version(SCREAMINGLIB_VERSION)
         .simpleInventories(SIMPLEINVENTORIES_VERSION)

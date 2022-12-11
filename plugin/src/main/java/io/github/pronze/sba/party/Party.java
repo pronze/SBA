@@ -1,13 +1,12 @@
 package io.github.pronze.sba.party;
 import io.github.pronze.sba.wrapper.PlayerSetting;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.MessageKeys;
@@ -54,14 +53,14 @@ public class Party implements IParty {
     public void sendMessage(@NotNull Component message, @NotNull SBAPlayerWrapper sender) {
         Logger.trace(
                 "Sending message: {} to party: {}",
-                AdventureHelper.toLegacy(message),
+                (message.toLegacy()),
                 debugInfo()
         );
         final var formattedMessage = LanguageService
                 .getInstance()
                 .get(MessageKeys.PARTY_CHAT_FORMAT)
                 .replace("%name%", sender.as(Player.class).getDisplayName() + ChatColor.RESET)
-                .replace("%message%", AdventureHelper.toLegacy(message))
+                .replace("%message%", (message.toLegacy()))
                 .toComponent();
         members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
     }

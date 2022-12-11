@@ -237,7 +237,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedTrap(team, true, trap_identifier);
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
                                         .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
@@ -428,7 +428,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedBlindTrap(team, true);
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
                                         .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
@@ -451,7 +451,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedMinerTrap(team, true);
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        minerTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                                        minerTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
                                         .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(minerTrapTitle));

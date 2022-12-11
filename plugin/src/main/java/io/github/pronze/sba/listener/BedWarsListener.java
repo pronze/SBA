@@ -40,9 +40,9 @@ import org.screamingsandals.bedwars.lib.lang.I;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.bedwars.utils.MiscUtils;
 import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.spectator.Component;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
@@ -313,8 +313,8 @@ public class BedWarsListener implements Listener {
                                                 .replace("seconds", "second") : message;
                                         player.sendMessage(message);
                                         SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player),
-                                                AdventureHelper.toComponent(ShopUtil.translateColors("&c" + seconds)),
-                                                net.kyori.adventure.text.Component.empty(), 0, 20, 0);
+                                                Component.fromLegacy(ShopUtil.translateColors("&c" + seconds)),
+                                                org.screamingsandals.lib.spectator.Component.empty(), 0, 20, 0);
                                     }
                                 }
                             }

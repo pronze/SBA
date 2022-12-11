@@ -27,9 +27,8 @@ import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.lib.world.LocationMapper;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import org.screamingsandals.lib.spectator.Color;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.GameCreator;
@@ -189,7 +188,7 @@ public class GameModeListener implements Listener {
             NPC npc = NPC.of(LocationMapper.wrapLocation(l))
                     .lookAtPlayer(true)
                     .displayName(List.of(Component.text(name)
-                            .color(TextColor.color(139, 69, 19))))
+                            .withColor(Color.rgb(139, 69, 19))))
                     .collisionRule(CollisionRule.NEVER)
                     .show();
             for (Player p : Bukkit.getOnlinePlayers()) {
