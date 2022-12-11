@@ -178,7 +178,7 @@ public class PlayerListener implements Listener {
                         livingTime--;
                     }
 
-                    if (livingTime == 0) {
+                    if (livingTime <= 0) {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {

@@ -91,12 +91,14 @@ public class MainLobbyVisualsManager implements Listener {
             return;
         if (!SBAConfig.getInstance().node("main-lobby", "custom-chat").getBoolean(true))
             return;
+
         final var player = e.getPlayer();
         final var db = SBA.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
         if (SBAConfig.getInstance().node("main-lobby", "enabled").getBoolean(false)
                 && MainLobbyVisualsManager.isInWorld(e.getPlayer().getLocation())) {
-
+            if (Main.isPlayerInGame(player))
+                return;
             var chatFormat = LanguageService
                     .getInstance()
                     .get(MessageKeys.MAIN_LOBBY_CHAT_FORMAT)
