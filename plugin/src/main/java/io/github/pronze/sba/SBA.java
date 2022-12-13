@@ -9,6 +9,7 @@ import io.github.pronze.sba.fix.BungeecordNPC;
 import io.github.pronze.sba.fix.MagmaFix;
 import io.github.pronze.sba.fix.MohistFix;
 import io.github.pronze.sba.fix.PerWorldPluginFix;
+import io.github.pronze.sba.fix.ViaVersionFix;
 import io.github.pronze.sba.fix.v1_19_3_fix;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
@@ -161,6 +162,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         fixs.add(BungeecordNPC.getInstance());
         fixs.add(new MohistFix());
         fixs.add(new v1_19_3_fix());
+        fixs.add(new ViaVersionFix());
         fixs.add(new MagmaFix());
         fixs.add(new PerWorldPluginFix());
 
