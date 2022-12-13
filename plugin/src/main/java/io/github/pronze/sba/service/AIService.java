@@ -103,6 +103,7 @@ public class AIService implements Listener {
 
         @OnPostEnable
         public void onPostEnabled() {
+                if(SBA.isBroken())return;
 
                 settings = SBAConfig.getInstance().ai();
                 if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null

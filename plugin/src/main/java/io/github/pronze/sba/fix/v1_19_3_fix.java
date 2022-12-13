@@ -2,6 +2,7 @@ package io.github.pronze.sba.fix;
 
 import org.bukkit.Bukkit;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.lib.bukkit.utils.nms.Version;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
 import io.github.pronze.sba.config.SBAConfig;
@@ -16,7 +17,8 @@ public class v1_19_3_fix extends BaseFix {
         String a = Bukkit.getServer().getClass().getPackage().getName();
         String version = a.substring(a.lastIndexOf('.') + 1);
         
-        isProblematic= version.equals("v1_19_R2");
+        
+        isProblematic= Version.isVersion(1, 19, 3);
     }
 
     @Override

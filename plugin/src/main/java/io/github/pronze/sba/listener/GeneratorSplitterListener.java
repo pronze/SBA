@@ -38,6 +38,7 @@ public class GeneratorSplitterListener implements Listener {
     @SneakyThrows
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         if (Version.isVersion(1, 12)) {
             SBA.getInstance().registerListener(new GeneratorSplitterListener112());
         } else {

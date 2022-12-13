@@ -30,6 +30,7 @@ public class PartyPromoteCommand {
 
         @OnPostEnable
         public void onPostEnable() {
+                if(SBA.isBroken())return;
                 if (init)
                         return;
                 CommandManager.getInstance().getManager().getParserRegistry().registerSuggestionProvider("promote",

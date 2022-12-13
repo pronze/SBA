@@ -49,6 +49,7 @@ public class HealthIndicatorService implements Listener {
 
     @OnPostEnable
     public void postEnabled() {
+        if(SBA.isBroken())return;
         this.tabEnabled = SBAConfig
                 .getInstance()
                 .node("show-health-in-tablist")

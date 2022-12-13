@@ -26,6 +26,7 @@ public class ShoutCommand {
     static boolean init = false;
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (init)
             return;
         CommandManager.getInstance().getAnnotationParser().parse(this);

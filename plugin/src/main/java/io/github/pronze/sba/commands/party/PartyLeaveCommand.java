@@ -25,6 +25,7 @@ public class PartyLeaveCommand {
 
         @OnPostEnable
         public void onPostEnabled() {
+                if(SBA.isBroken())return;
                 if (init)
                         return;
                 if (SBAConfig.getInstance().party().enabled())

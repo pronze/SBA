@@ -1,4 +1,5 @@
 package io.github.pronze.sba.utils;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.Bukkit;
 import org.screamingsandals.bedwars.Main;
@@ -112,6 +113,7 @@ public class FirstStartConfigReplacer {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         enableLegacySupport();
         if (SBAConfig.getInstance().node("first_start").getBoolean(false)) {
             Bukkit.getLogger().info("§aDetected first start");

@@ -17,6 +17,7 @@ public class SpawnerProtection {
     private double storeProtectionSize = 0;
     @OnPostEnable
     public void registerProtection() {
+        if(SBA.isBroken())return;
         instance = this;
 
         spawnerProtectionSize=SBAConfig.getInstance().getDouble("automatic-protection.spawner-diameter", 0);

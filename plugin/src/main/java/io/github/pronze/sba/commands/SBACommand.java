@@ -62,6 +62,7 @@ public class SBACommand {
 
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (init)
             return;
         gamesInvEnabled = SBAConfig.getInstance().getBoolean("games-inventory.enabled", true);

@@ -31,6 +31,7 @@ public class BridgeEggListener implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
     }
 

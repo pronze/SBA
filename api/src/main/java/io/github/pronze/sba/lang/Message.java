@@ -3,6 +3,8 @@ package io.github.pronze.sba.lang;
 import io.github.pronze.sba.AddonAPI;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+
 import org.screamingsandals.lib.spectator.Component;
 
 import org.bukkit.ChatColor;
@@ -67,6 +69,10 @@ public class Message {
         workingString = workingString.replaceAll("#([0-9a-fA-F]{6})", "<#$1>");
 
         workingString=ChatColor.stripColor(workingString);
+
+        var mini = MiniMessage.miniMessage().deserialize(workingString);
+        workingString=net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(mini);
+
         return workingString;
     }
     public static Message of(List<String> text) {
@@ -118,7 +124,7 @@ public class Message {
                         .getConfigurator()
                         .getString("prefix", "[SBA]") + ": " + str;
             }
-            component.append(Component.fromMiniMessage(toMiniMessage(str)));
+            component.append(Component.fromLegacy(toMiniMessage(str)));
             if (original.indexOf(str) + 1 != original.size()) {
                 component.append(Component.text("\n"));
             }
@@ -135,7 +141,7 @@ public class Message {
                     .getConfigurator()
                     .getString("prefix", "[SBA]") + ": ";
         }
-        return Component.fromMiniMessage(toMiniMessage(string)).toLegacy();
+        return Component.fromLegacy(toMiniMessage(string)).toLegacy();
 //        return AdventureHelper.toLegacy(MiniMessage.miniMessage().deserialize());
     }
 
@@ -158,7 +164,7 @@ public class Message {
                     }
                     return toMiniMessage(str);
                 })
-                .map(Component::fromMiniMessage)
+                .map(Component::fromLegacy)
                 .collect(Collectors.toList());
     }
 

@@ -66,6 +66,7 @@ public class NPCStoreService implements Listener {
 
         @OnPostEnable
         public void onPostEnabled() {
+                if(SBA.isBroken())return;
                 SBA.getInstance().registerListener(this);
                 EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
 

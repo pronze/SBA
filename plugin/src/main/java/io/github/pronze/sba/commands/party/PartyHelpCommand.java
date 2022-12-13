@@ -3,6 +3,8 @@ package io.github.pronze.sba.commands.party;
 import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
+
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.player.PlayerMapper;
@@ -19,6 +21,7 @@ public class PartyHelpCommand {
 
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (init)
             return;
         if (SBAConfig.getInstance().party().enabled())

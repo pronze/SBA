@@ -64,8 +64,10 @@ public class CommandManager {
     }
     @OnEnable
     public void onEnable(JavaPlugin plugin) {
+        if(SBA.isBroken())return;
         if (manager != null)
             return;
+        if(SBA.isBroken())return;
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction = CommandExecutionCoordinator
                 .simpleCoordinator();
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();

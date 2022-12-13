@@ -80,7 +80,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
         "boiscljo" }, loadTime = Plugin.LoadTime.POSTWORLD, version = VersionInfo.VERSION)
 @PluginDependencies(platform = PlatformType.BUKKIT, dependencies = {
         "BedWars"
-}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens", "Vulcan" ,"PerWorldPlugins"})
+}, softDependencies = { "PlaceholderAPI", "ViaVersion", "Citizens", "Vulcan", "PerWorldPlugins" })
 @Init(services = {
         Logger.class,
         PacketMapper.class,
@@ -166,6 +166,8 @@ public class SBA extends PluginContainer implements AddonAPI {
 
         for (BaseFix fix : fixs) {
             fix.detect();
+            if (fix.IsCritical())
+                broken = true;
         }
 
         ScoreboardManager.init(cachedPluginInstance);
@@ -191,7 +193,8 @@ public class SBA extends PluginContainer implements AddonAPI {
             }
             if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.26").stream()
                     .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
-                Logger.warn("SBA hasn't been tested on this version of Bedwars. If you encounter bugs, use version 0.2.20 to 0.2.26. ");
+                Logger.warn(
+                        "SBA hasn't been tested on this version of Bedwars. If you encounter bugs, use version 0.2.20 to 0.2.26. ");
             }
         }
         for (BaseFix fix : fixs) {
@@ -199,6 +202,7 @@ public class SBA extends PluginContainer implements AddonAPI {
             if (fix.IsProblematic())
                 fix.warn();
             if (fix.IsCritical()) {
+                broken=true;
                 Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
                 return;
             }
@@ -354,5 +358,11 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     public void update(@NotNull CommandSender sender) {
         UpdateChecker.getInstance().update(sender);
+    }
+
+    private static boolean broken = false;
+
+    public static boolean isBroken() {
+        return broken;
     }
 }

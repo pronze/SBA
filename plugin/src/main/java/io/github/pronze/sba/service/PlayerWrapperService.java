@@ -33,6 +33,7 @@ public class PlayerWrapperService implements WrapperService<Player, SBAPlayerWra
     private static boolean init = false;
     @OnPostEnable
     public void registerMapping() {
+        if(SBA.isBroken())return;
         if(!init)
             PlayerMapper.UNSAFE_getPlayerConverter()
                     .registerW2P(SBAPlayerWrapper.class, wrapper -> {

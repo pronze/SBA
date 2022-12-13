@@ -184,7 +184,7 @@ scoreboard:
     default:
       - "<gray>%date%"
       - ""
-      - "%tier%"
+      - "%tier_task% in %tier_time%"
       - ""
       - "%team_status%"
       - ""
@@ -195,7 +195,7 @@ scoreboard:
     five:
       - "<gray>%date%"
       - ""
-      - "%tier%"
+      - "%tier_task% in %tier_time%"
       - ""
       - "%team_status%"
       - ""

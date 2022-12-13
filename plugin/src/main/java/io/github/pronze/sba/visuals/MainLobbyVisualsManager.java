@@ -47,6 +47,7 @@ public class MainLobbyVisualsManager implements Listener {
 
     @OnPostEnable
     public void registerListener() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
 
         load();

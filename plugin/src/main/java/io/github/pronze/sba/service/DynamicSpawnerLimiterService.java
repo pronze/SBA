@@ -59,6 +59,7 @@ public class DynamicSpawnerLimiterService implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
         load();
     }

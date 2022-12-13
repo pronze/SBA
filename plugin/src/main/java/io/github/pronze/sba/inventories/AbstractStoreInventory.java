@@ -67,6 +67,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         if (shopPaths.length() > 0)
             Arrays.stream(shopPaths.split(","))
                     .forEach(path -> {

@@ -73,7 +73,8 @@ public class GamesInventoryService implements Listener {
     @SneakyThrows
     @OnPostEnable
     public void loadGamesInv() {
-        SBA.getInstance().registerListener(this);
+                if(SBA.isBroken())return;
+                SBA.getInstance().registerListener(this);
         final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(), "npc.yml");
         if (file.exists()) {
             YamlConfiguration config = new YamlConfiguration();

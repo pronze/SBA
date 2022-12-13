@@ -74,6 +74,7 @@ public class BedWarsListener implements Listener {
 
     @OnPostEnable
     public void registerListener() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
     }
 

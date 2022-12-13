@@ -59,7 +59,8 @@ public class AICommand implements Listener {
 
     @OnPostEnable
     public void onPostEnabled() {
-        if (init)
+                if(SBA.isBroken())return;
+                if (init)
             return;
         if (SBAConfig.getInstance().ai().enabled()) {
             CommandManager.getInstance().getAnnotationParser().parse(this);

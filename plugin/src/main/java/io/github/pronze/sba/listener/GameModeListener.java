@@ -53,6 +53,7 @@ public class GameModeListener implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
 
         for (var cmd : Main.getCommands().values()) {

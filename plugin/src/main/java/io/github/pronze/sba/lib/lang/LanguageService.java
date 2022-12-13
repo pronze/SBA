@@ -69,6 +69,7 @@ public class LanguageService implements ILanguageService {
 
     @OnPostEnable
     public void postEnable() {
+        if(SBA.isBroken())return;
         try {
             var fallbackFile = new File(SBA.getPluginInstance().getDataFolder() + "/languages", "language_fallback.yml");
             if (fallbackFile.exists()) {
