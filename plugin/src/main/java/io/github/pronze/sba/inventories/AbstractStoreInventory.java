@@ -207,7 +207,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             userInQuickBuy.put(player.getUniqueId(), quickBuyId);
             return;
         }
-        if (userInQuickBuy.containsKey(player.getUniqueId())) {
+        if (!isQuickBuy && userInQuickBuy.containsKey(player.getUniqueId())) {
             Logger.trace("Setting up quick item as{} {}", price, newItem.getType());
             var quickBuyId = userInQuickBuy.get(player.getUniqueId());
             QuickBuyConfig.getInstance().of(player).set(quickBuyId,

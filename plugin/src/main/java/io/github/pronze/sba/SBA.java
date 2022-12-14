@@ -204,16 +204,17 @@ public class SBA extends PluginContainer implements AddonAPI {
             if (fix.IsProblematic())
                 fix.warn();
             if (fix.IsCritical()) {
-                broken=true;
+                broken = true;
                 Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
-                return;
             }
         }
-        InventoryListener.init(cachedPluginInstance);
+        if (!broken) {
+            InventoryListener.init(cachedPluginInstance);
 
-        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            Logger.trace("Registering SBAExpansion...");
-            new SBAExpansion().register();
+            if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+                Logger.trace("Registering SBAExpansion...");
+                new SBAExpansion().register();
+            }
         }
 
         Logger.info("Plugin has finished loading!");
@@ -223,10 +224,11 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.trace("API has been registered!");
 
         Logger.setMode(Level.WARNING);
-
-        if (getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
-                && getPluginInstance().getServer().getPluginManager().getPlugin("Citizens").isEnabled()) {
-            CitizensTraits.enableCitizensTraits();
+        if (!broken) {
+            if (getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
+                    && getPluginInstance().getServer().getPluginManager().getPlugin("Citizens").isEnabled()) {
+                CitizensTraits.enableCitizensTraits();
+            }
         }
     }
 

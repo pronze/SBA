@@ -52,6 +52,7 @@ public class CommandManager {
     private @NotNull BukkitAudiences bukkitAudiences;
 
     public static void reload() {
+        if(SBA.isBroken())return;
         CommandManager ths = getInstance();
         if(ths!=null)
         {

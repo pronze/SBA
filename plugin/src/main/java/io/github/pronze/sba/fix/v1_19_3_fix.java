@@ -10,15 +10,11 @@ import io.github.pronze.sba.utils.Logger;
 
 public class v1_19_3_fix extends BaseFix {
 
-    private boolean isProblematic;
+    private boolean isProblematic=false;
     @Override
     public void detect() {
-        //v1_19_R2
-        String a = Bukkit.getServer().getClass().getPackage().getName();
-        String version = a.substring(a.lastIndexOf('.') + 1);
         
-        
-        isProblematic= Version.isVersion(1, 19, 3);
+        //isProblematic= Version.isVersion(1, 19, 3);
     }
 
     @Override
