@@ -16,7 +16,7 @@ public class ViaVersionFix extends BaseFix {
         boolean isViaEnabled = Bukkit.getPluginManager().isPluginEnabled("ViaVersion");
         if(isViaEnabled){
             var viaVersion = Bukkit.getPluginManager().getPlugin("ViaVersion");
-            isProblematic=!viaVersion.getDescription().getVersion().contains("4.4");
+            isProblematic=viaVersion.getDescription().getVersion().contains("4.4");
         }
     }
 
@@ -27,7 +27,7 @@ public class ViaVersionFix extends BaseFix {
 
     @Override
     public void warn() {
-        Logger.error("Only ViaVersion 4.4 is currently supported as 4.5 changed the API which broke this plugin");
+        Logger.error("Only ViaVersion 4.5 is currently supported as 4.5 changed the API which broke this plugin for 4.4 and below");
     }
 
     @Override
