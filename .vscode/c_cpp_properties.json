@@ -1,0 +1,36 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/boiscljo/ros2/install/zed_components/include/**",
+        "/home/boiscljo/ros2/install/zed_interfaces/include/**",
+        "/home/boiscljo/ros2/install/septentrio_gnss_driver/include/**",
+        "/home/boiscljo/ros2/install/rslidar_msg/include/**",
+        "/home/boiscljo/ros2/install/ros2socketcan_bridge/include/**",
+        "/home/boiscljo/ros2/install/radar_conti_ars408/include/**",
+        "/home/boiscljo/ros2/install/radar_conti_ars408_msgs/include/**",
+        "/home/boiscljo/ros2/install/imu_viz/include/**",
+        "/home/boiscljo/ros2/install/imu_tf/include/**",
+        "/home/boiscljo/ros2/install/imu_fusion_madgwick/include/**",
+        "/home/boiscljo/ros2/install/imu_filter_madgwick/include/**",
+        "/home/boiscljo/ros2/install/carla_waypoint_types/include/**",
+        "/home/boiscljo/ros2/install/carla_ros_scenario_runner_types/include/**",
+        "/home/boiscljo/ros2/install/carla_ackermann_msgs/include/**",
+        "/home/boiscljo/ros2/install/carla_msgs/include/**",
+        "/home/boiscljo/ros2uqtr/install/apollo_msgs/include/**",
+        "/opt/ros/foxy/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

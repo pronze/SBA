@@ -244,6 +244,7 @@ public class SBAConfig implements IConfigurator {
                     .back()
                     .section("tracker")
                     .key("enabled").defValue(true)
+                    .key("keep-on-start").defValue(true)
                     .key("name").defValue("§cP§6l§ea§ay§9e§br§5s")
                     .key("material").defValue("COMPASS")
                     .key("slot").defValue(4)
@@ -493,6 +494,9 @@ public class SBAConfig implements IConfigurator {
         public class TrackerConfig {
             public boolean enabled() {
                 return getBoolean("spectator.tracker.enabled", false);
+            }
+            public boolean keepOnStart() {
+                return getBoolean("spectator.tracker.keep-on-start", true);
             }
 
             public String name() {

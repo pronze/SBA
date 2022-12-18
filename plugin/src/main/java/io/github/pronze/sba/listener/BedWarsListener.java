@@ -420,6 +420,10 @@ public class BedWarsListener implements Listener {
         if (player.getGameMode() == GameMode.ADVENTURE) {
             player.getInventory().remove(SBAConfig.getInstance().spectator().teleporter().get());
             player.getInventory().remove(SBAConfig.getInstance().spectator().leave().get());
+            if(!SBAConfig.getInstance().spectator().tracker().keepOnStart())
+            {
+                player.getInventory().remove(SBAConfig.getInstance().spectator().tracker().get());
+            }
         }
         if (SBAConfig.getInstance().spectator().adventure()) {
             player.closeInventory();
