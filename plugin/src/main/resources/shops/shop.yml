@@ -25,7 +25,7 @@ data:
       - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 1
-      - stack: WOOL;16;Wool;§7Great for bridging across;§7islands.
+      - stack: WHITE_WOOL;16;Wool;§7Great for bridging across;§7islands.
         price: 4 of iron
         properties: applycolorbyteam
         row: 3
@@ -349,7 +349,7 @@ data:
   - locate: '$utility'
     stack: TNT;1;§aUtility;§eClick to view!
 
-  - stack: WOOL;16
+  - stack: WHITE_WOOL;16
     properties: applycolorbyteam
     price: 4 of iron
     row: 3
