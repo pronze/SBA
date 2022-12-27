@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -28,6 +29,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.bukkit.utils.nms.Version;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
@@ -35,6 +37,7 @@ import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.world.LocationMapper;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.utils.Logger;
 import lombok.Data;
 import lombok.Getter;
@@ -55,6 +58,8 @@ public class FakeDeathTrait extends Trait {
     @Getter
     @Setter
     private Strategy strategy = Strategy.ANY;
+
+    private Player oldPlayerObject = null;
 
     public FakeDeathTrait() {
         super("FakeDeathTrait");
@@ -84,6 +89,17 @@ public class FakeDeathTrait extends Trait {
     public void onSpawn() {
 
         Player npcEntity = (Player) npc.getEntity();
+        if (oldPlayerObject != null && npcEntity != oldPlayerObject) {
+            if (game != null) {
+                game.getRunningTeams().forEach(
+                        team -> {
+                            if (team.isPlayerInTeam(oldPlayerObject)) {
+                                game.leaveFromGame(oldPlayerObject);
+                            }
+                        });
+            }
+        }
+        oldPlayerObject = npcEntity;
         npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
 
         Logger.trace("Initializing AI in mode{}", strategy);
@@ -114,8 +130,13 @@ public class FakeDeathTrait extends Trait {
 
     }
 
+    public Player getPlayerObject() {
+        return oldPlayerObject;
+    }
+
     int timer = 0;
     int timerPickup = 5;
+    private Game game;
 
     List<Entity> getNearbyEntities(int range) {
         return npc.getEntity().getNearbyEntities(range, range, range);
@@ -123,6 +144,14 @@ public class FakeDeathTrait extends Trait {
 
     @Override
     public void run() {
+        if (game != null) {
+            if (!game.isLocationInArena(getPlayerObject().getLocation())
+                    && getPlayerObject().getGameMode() == GameMode.SURVIVAL) {
+                AIService.getInstance().die(getPlayerObject());
+            }
+        } else
+            return;
+
         if (timer-- <= 0) {
             timer = 5;
             for (AiGoal goal : goals) {
@@ -213,5 +242,9 @@ public class FakeDeathTrait extends Trait {
         boolean isAvailable();
 
         void doGoal();
+    }
+
+    public void joinBedwarsGame(Game game) {
+        this.game = game;
     }
 }

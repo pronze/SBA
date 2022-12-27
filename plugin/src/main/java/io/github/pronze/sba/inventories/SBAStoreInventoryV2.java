@@ -123,7 +123,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
     @Override
     public void onPostGenerateItem(ItemRenderEvent event) {
-        //event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.NORMAL));
+        // event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(),
+        // event, StoreType.NORMAL));
         event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.UPGRADES));
     }
 
@@ -237,7 +238,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedTrap(team, true, trap_identifier);
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40, 20));
+                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20,
+                                        40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
                                         .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
@@ -428,7 +430,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedBlindTrap(team, true);
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40, 20));
+                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20,
+                                        40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
                                         .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
@@ -451,7 +454,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedMinerTrap(team, true);
                             if (SBAConfig.getInstance().trapTitleEnabled())
                                 team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        minerTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40, 20));
+                                        minerTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40,
+                                        20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
                                         .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(minerTrapTitle));
@@ -733,6 +737,20 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
         event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
+        if (!Main.getInstance().isPlayerPlayingAnyGame(event.getPlayer())) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MESSAGE_NOT_IN_GAME)
+                    .send(PlayerMapper.wrapPlayer(event.getPlayer()));
+            return;
+        }
+        if (Main.getInstance().getGameOfPlayer(event.getPlayer()).getTeamOfPlayer(event.getPlayer())==null) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MESSAGE_NOT_IN_GAME)
+                    .send(PlayerMapper.wrapPlayer(event.getPlayer()));
+            return;
+        }
         openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class),
                 (GameStore) event.getStore());
     }

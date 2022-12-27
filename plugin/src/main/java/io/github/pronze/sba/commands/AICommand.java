@@ -10,7 +10,6 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.utils.citizens.RespawnTrait;
 import io.github.pronze.sba.utils.citizens.Strategy;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import net.citizensnpcs.api.CitizensAPI;

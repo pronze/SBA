@@ -16,6 +16,7 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
+import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
@@ -47,7 +48,9 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
@@ -103,7 +106,8 @@ public class AIService implements Listener {
 
         @OnPostEnable
         public void onPostEnabled() {
-                if(SBA.isBroken())return;
+                if (SBA.isBroken())
+                        return;
 
                 settings = SBAConfig.getInstance().ai();
                 if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
@@ -157,6 +161,10 @@ public class AIService implements Listener {
                         npc.setProtected(false);
 
                         npc.data().set(NPC.REMOVE_FROM_PLAYERLIST_METADATA, false);
+                        npc.data().set(NPC.KEEP_CHUNK_LOADED_METADATA, true);
+                        npc.data().set(NPC.SHOULD_SAVE_METADATA, false);
+                        npc.data().set(NPC.COLLIDABLE_METADATA, true);
+                        npc.data().set(NPC.DISABLE_DEFAULT_STUCK_ACTION_METADATA, true);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
                         npc.getNavigator().getLocalParameters().distanceMargin(1);
@@ -262,9 +270,37 @@ public class AIService implements Listener {
         }
 
         @EventHandler
+        public void npcDespawn(net.citizensnpcs.api.event.NPCDespawnEvent event) {
+                var npc = event.getNPC();
+                if (npc.getEntity() instanceof Player) {
+                        Player player = npc.getOrAddTrait(FakeDeathTrait.class).getPlayerObject();
+                        if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
+                                if (event.getReason() == DespawnReason.DEATH) {
+                                        Logger.trace("NPC HAD DEATH, leaving game to prevent issues");
+
+                                        Game g = Main.getInstance().getGameOfPlayer(player);
+                                        g.leaveFromGame(player);
+
+                                } else {
+                                        event.setCancelled(true);
+                                }
+                        }
+                }
+        }
+
+        @EventHandler
         public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
                 if (isNPC(e.getPlayer()))
                         getNPC(e.getPlayer()).destroy();
+        }
+
+        @EventHandler
+        public void onBedWarsPlayerJoin(BedwarsPlayerJoinEvent e) {
+                if (isNPC(e.getPlayer())) {
+                        FakeDeathTrait fdt = getNPC(e.getPlayer()).getTraitNullable(FakeDeathTrait.class);
+                        fdt.joinBedwarsGame(e.getGame());
+                }
+
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -278,13 +314,13 @@ public class AIService implements Listener {
                         if (entity.getHealth() < damageCount + 1 || event.getCause() == DamageCause.VOID) {
                                 Logger.trace("NPC WOULD HAVE DIED");
                                 event.setCancelled(true);
-
                                 die(entity);
                         }
                 }
         }
 
-        private void die(Player entity) {
+        @SuppressWarnings("deprecation")
+        public void die(Player entity) {
                 PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
                 PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
                 entity.setHealth(entity.getMaxHealth());

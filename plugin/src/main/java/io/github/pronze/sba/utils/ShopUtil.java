@@ -478,7 +478,7 @@ public class ShopUtil {
                             arena.getStorage().getKnockbackLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
-            
+
             String finalPrice = price;
             final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
                     .map(property -> property.getPropertyData().childrenList().stream()
@@ -563,8 +563,12 @@ public class ShopUtil {
     public static Item applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreType type) {
         final var player = event.getPlayer().as(Player.class);
         final var game = Main.getInstance().getGameOfPlayer(player);
+        if (game == null)
+            return item;
         final var typeName = item.getMaterial().platformName();
         final var runningTeam = game.getTeamOfPlayer(player);
+        if (runningTeam == null)
+            return item;
 
         var prices = event.getInfo().getOriginal().getPrices();
         if (!prices.isEmpty()) {
@@ -633,7 +637,11 @@ public class ShopUtil {
     }
 
     public static void applyTeamUpgrades(@NotNull Player player, Game game) {
+        if (game == null)
+            return;
         final var team = game.getTeamOfPlayer(player);
+        if (team == null)
+            return;
         var maybeGameStorage = ArenaManager
                 .getInstance()
                 .get(game.getName());

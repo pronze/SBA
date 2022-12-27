@@ -67,7 +67,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     @OnPostEnable
     public void onPostEnable() {
-        if(SBA.isBroken())return;
+        if (SBA.isBroken())
+            return;
         if (shopPaths.length() > 0)
             Arrays.stream(shopPaths.split(","))
                     .forEach(path -> {
@@ -452,73 +453,76 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     private void onGeneratingItem(ItemRenderEvent event) {
         onPreGenerateItem(event);
+        try {
+            var itemInfo = event.getItem();
 
-        var itemInfo = event.getItem();
+            var isQuickBuy = itemInfo.getProperties().stream()
+                    .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
 
-        var isQuickBuy = itemInfo.getProperties().stream()
-                .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
+            if (isQuickBuy) {
+                var quickBuyId = itemInfo.getProperties().stream()
+                        .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
+                        .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
 
-        if (isQuickBuy) {
-            var quickBuyId = itemInfo.getProperties().stream()
-                    .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
-                    .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
+                var quickBuyItem = QuickBuyConfig.getInstance().of(event.getPlayer().as(Player.class)).of(quickBuyId);
 
-            var quickBuyItem = QuickBuyConfig.getInstance().of(event.getPlayer().as(Player.class)).of(quickBuyId);
+                if (quickBuyItem != null) {
+                    var quickBuyPrice = Price.of(quickBuyItem.amount(), quickBuyItem.resource());
+                    GenericItemInfo info = findInfo(quickBuyItem.material(), quickBuyPrice);
+                    if (info != null) {
+                        if (info != null)
+                            itemInfo = new PlayerItemInfo(event.getPlayer(), info);
 
-            if (quickBuyItem != null) {
-                var quickBuyPrice = Price.of(quickBuyItem.amount(), quickBuyItem.resource());
-                GenericItemInfo info = findInfo(quickBuyItem.material(), quickBuyPrice);
-                if (info != null) {
-                    if (info != null)
-                        itemInfo = new PlayerItemInfo(event.getPlayer(), info);
+                        event.setStack(itemInfo.getStack());
+                        return;
+                    }
+                }
+            }
+            var item = itemInfo.getStack();
+            var player = event.getPlayer().as(Player.class);
+            var game = Main.getInstance().getGameOfPlayer(player);
 
-                    event.setStack(itemInfo.getStack());
+            if (itemInfo.getStack().getMaterial().is(Material.POTION)) {
+                var itemB = item.as(ItemStack.class);
+                Logger.trace("{}", itemB);
+            }
+            var prices = itemInfo.getOriginal().getPrices();
+            if (!prices.isEmpty()) {
+                var priceObject = prices.get(0);
+                var price = priceObject.getAmount();
+                var type = Main.getSpawnerType(priceObject.getCurrency().toLowerCase());
+                if (type == null) {
                     return;
                 }
+                event.setStack(item = ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
             }
-        }
-        var item = itemInfo.getStack();
-        var player = event.getPlayer().as(Player.class);
-        var game = Main.getInstance().getGameOfPlayer(player);
+            event.setStack(item);
 
-        if (itemInfo.getStack().getMaterial().is(Material.POTION)) {
-            var itemB = item.as(ItemStack.class);
-            Logger.trace("{}", itemB);
-        }
-        var prices = itemInfo.getOriginal().getPrices();
-        if (!prices.isEmpty()) {
-            var priceObject = prices.get(0);
-            var price = priceObject.getAmount();
-            var type = Main.getSpawnerType(priceObject.getCurrency().toLowerCase());
-            if (type == null) {
-                return;
-            }
-            event.setStack(item = ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
-        }
-        event.setStack(item);
+            itemInfo.getProperties().forEach(property -> {
+                if (property.hasName()) {
+                    var converted = ConfigurateUtils.raw(property.getPropertyData());
+                    if (!(converted instanceof Map)) {
+                        converted = ShopUtil.nullValuesAllowingMap("value", converted);
+                    }
 
-        itemInfo.getProperties().forEach(property -> {
-            if (property.hasName()) {
-                var converted = ConfigurateUtils.raw(property.getPropertyData());
-                if (!(converted instanceof Map)) {
-                    converted = ShopUtil.nullValuesAllowingMap("value", converted);
+                    // noinspection unchecked
+                    var propertyData = (Map<String, Object>) converted;
+
+                    // temporary fix
+                    propertyData.putIfAbsent("name", property.getPropertyName());
+
+                    var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
+                            player, event.getStack().as(ItemStack.class), propertyData);
+                    Bukkit.getServer().getPluginManager().callEvent(applyEvent);
+
+                    event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(event.getStack()));
                 }
+            });
 
-                // noinspection unchecked
-                var propertyData = (Map<String, Object>) converted;
-
-                // temporary fix
-                propertyData.putIfAbsent("name", property.getPropertyName());
-
-                var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
-                        player, event.getStack().as(ItemStack.class), propertyData);
-                Bukkit.getServer().getPluginManager().callEvent(applyEvent);
-
-                event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(event.getStack()));
-            }
-        });
-
-        onPostGenerateItem(event);
+            onPostGenerateItem(event);
+        } catch (Throwable t) {
+            Logger.trace("{}", t.getMessage());
+        }
     }
 
     public abstract void onPostGenerateItem(ItemRenderEvent event);

@@ -33,7 +33,6 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.Logger.Level;
 import io.github.pronze.sba.utils.citizens.FakeDeathTrait;
 import io.github.pronze.sba.utils.citizens.HologramTrait;
-import io.github.pronze.sba.utils.citizens.RespawnTrait;
 import io.github.pronze.sba.utils.citizens.ReturnToStoreTrait;
 import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
@@ -242,9 +241,6 @@ public class SBA extends PluginContainer implements AddonAPI {
                 net.citizensnpcs.api.CitizensAPI.getTraitFactory()
                         .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(ReturnToStoreTrait.class)
                                 .withName("ReturnToStoreTrait"));
-                net.citizensnpcs.api.CitizensAPI.getTraitFactory()
-                        .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(RespawnTrait.class)
-                                .withName("RespawnTrait"));
                 net.citizensnpcs.api.CitizensAPI.getTraitFactory()
                         .registerTrait(net.citizensnpcs.api.trait.TraitInfo.create(FakeDeathTrait.class)
                                 .withName("FakeDeathTrait"));
