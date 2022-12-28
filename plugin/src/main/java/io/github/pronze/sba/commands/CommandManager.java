@@ -92,13 +92,13 @@ public class CommandManager {
                 bukkitAudiences::sender,
                 manager);
 
-        if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
+        /*if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
             try {
                 manager.registerBrigadier();
             } catch (Exception e) {
                 Logger.error("Could not register Brigadier\r{}", e);
             }
-        }
+        }*/
 
         if (manager.queryCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
             manager.registerAsynchronousCompletions();

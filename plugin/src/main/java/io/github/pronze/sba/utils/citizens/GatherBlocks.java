@@ -36,7 +36,7 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
     @Override
     public boolean isAvailable() {
         // TODO Auto-generated method stub
-
+        if(fakeDeathTrait.blockPlace()==null) return false;
         if (fakeDeathTrait.blockPlace().isInNeedOfBlock()) {
             Player aiPlayer = (Player) this.fakeDeathTrait.getNPC().getEntity();
             Game g = Main.getInstance().getGameOfPlayer(aiPlayer);

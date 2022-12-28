@@ -10,7 +10,7 @@ public class MagmaFix extends BaseFix {
     private boolean isProblematic;
     @Override
     public void detect() {
-        isProblematic= (Reflect.has("org.magmafoundation.magma.MagmaStart"));
+        //isProblematic= (Reflect.has("org.magmafoundation.magma.MagmaStart"));
     }
 
     @Override

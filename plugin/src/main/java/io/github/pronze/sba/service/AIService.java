@@ -173,6 +173,7 @@ public class AIService implements Listener {
                         npc.addTrait(new BridgePillarTrait());
                         npc.addTrait(new BedwarsBlockPlace());
                         npc.getOrAddTrait(SkinTrait.class).setSkinName(settings.skin());
+
                         Tasker.build(() -> {
                                 Player ai = (Player) (npc.getEntity());
                                 ai.setCanPickupItems(true);
@@ -206,6 +207,21 @@ public class AIService implements Listener {
                 }
         }
 
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onNPCRespawn(PlayerGameModeChangeEvent event) {
+                /*if (!isNPC(event.getPlayer()))
+                        return;
+                if (event.getNewGameMode() != GameMode.SPECTATOR) {
+                        try {
+                                Object handle = Reflect.fastInvoke(event.getPlayer(), "getHandle");
+                                Reflect.setField(handle, "noPhysics", false);
+                                Reflect.setField(handle, "onGround", true);
+                        } catch (Throwable t) {
+                                t.printStackTrace();
+                        }
+                }*/
+        }
+
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
                 var game = event.getGame();
@@ -220,6 +236,7 @@ public class AIService implements Listener {
                         if (allAI) {
                                 for (Player p : new ArrayList<>(game.getConnectedPlayers())) {
                                         game.leaveFromGame(p);
+                                        getNPC(p).destroy();
                                 }
                         }
                 }).afterOneTick().start();
@@ -280,6 +297,14 @@ public class AIService implements Listener {
 
                                         Game g = Main.getInstance().getGameOfPlayer(player);
                                         g.leaveFromGame(player);
+                                        try {
+                                                npc.destroy();
+                                        } catch (Exception e) {
+                                                
+                                        }
+
+                                } else if (event.getReason() == DespawnReason.REMOVAL
+                                                || event.getReason() == DespawnReason.PLUGIN) {
 
                                 } else {
                                         event.setCancelled(true);

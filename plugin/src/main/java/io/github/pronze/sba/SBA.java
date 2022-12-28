@@ -10,7 +10,6 @@ import io.github.pronze.sba.fix.MagmaFix;
 import io.github.pronze.sba.fix.MohistFix;
 import io.github.pronze.sba.fix.PerWorldPluginFix;
 import io.github.pronze.sba.fix.ViaVersionFix;
-import io.github.pronze.sba.fix.v1_19_3_fix;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
@@ -45,6 +44,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import io.github.pronze.sba.VersionInfo;
@@ -160,7 +160,6 @@ public class SBA extends PluginContainer implements AddonAPI {
         fixs = new ArrayList<>();
         fixs.add(BungeecordNPC.getInstance());
         fixs.add(new MohistFix());
-        fixs.add(new v1_19_3_fix());
         fixs.add(new ViaVersionFix());
         fixs.add(new MagmaFix());
         fixs.add(new PerWorldPluginFix());
@@ -192,10 +191,10 @@ public class SBA extends PluginContainer implements AddonAPI {
                 Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
                 return;
             }
-            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.26").stream()
+            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.26", "0.2.27", "0.2.27.1", "0.2.28").stream()
                     .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
                 Logger.warn(
-                        "SBA hasn't been tested on this version of Bedwars. If you encounter bugs, use version 0.2.20 to 0.2.26. ");
+                        "SBA hasn't been tested on this version of Bedwars. If you encounter bugs, use version 0.2.20 to 0.2.28. ");
             }
         }
         for (BaseFix fix : fixs) {
@@ -204,7 +203,6 @@ public class SBA extends PluginContainer implements AddonAPI {
                 fix.warn();
             if (fix.IsCritical()) {
                 broken = true;
-                Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
             }
         }
         if (!broken) {
@@ -228,6 +226,15 @@ public class SBA extends PluginContainer implements AddonAPI {
                     && getPluginInstance().getServer().getPluginManager().getPlugin("Citizens").isEnabled()) {
                 CitizensTraits.enableCitizensTraits();
             }
+        }
+
+        if(broken)
+        {
+            new BukkitRunnable(){
+                public void run(){
+                    Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+                }
+            }.runTaskLater(getJavaPlugin(),20);
         }
     }
 

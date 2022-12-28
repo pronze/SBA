@@ -25,7 +25,8 @@ public class PerWorldPluginFix extends BaseFix {
 
     @Override
     public void warn() {
-        Logger.warn("PerWorldPlugin breaks custom plugin events required by Bedwars and SBA");
+        Logger.error("SBA FATAL ERROR::PerWorldPlugin breaks custom plugin events required by Bedwars and SBA");
+        Logger.error("SBA Will shutdown due to incompatible plugin(s)");
     }
 
     @Override

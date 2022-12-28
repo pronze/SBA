@@ -71,6 +71,7 @@ import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
 public class BedWarsListener implements Listener {
     private final Map<UUID, BukkitTask> runnableCache = new HashMap<>();
     private final Map<UUID, ItemStack[]> inventoryContent = new HashMap<>();
+    private final Map<UUID, Boolean> collidableValue = new HashMap<>();
 
     @OnPostEnable
     public void registerListener() {
@@ -443,6 +444,9 @@ public class BedWarsListener implements Listener {
                 player.getInventory().setContents(inventoryContent.get(player.getUniqueId()));
                 inventoryContent.remove(player.getUniqueId());
             }
+            if (collidableValue.containsKey(player.getUniqueId())) {
+                player.setCollidable(collidableValue.get(player.getUniqueId()));
+            }
 
             final var game = Main.getInstance().getGameOfPlayer(player);
             ShopUtil.applyTeamUpgrades(player, game);
@@ -471,6 +475,8 @@ public class BedWarsListener implements Listener {
                     Arrays.asList(player.getInventory().getContents()).stream().map(i -> i != null ? i.clone() : i)
                             .collect(Collectors.toList()).toArray(new ItemStack[0]).clone());
         }
+        if(!collidableValue.containsKey(player.getUniqueId()))
+            collidableValue.put(player.getUniqueId(), player.isCollidable());
         Tasker.build(() -> {
 
             player.getInventory().clear();
@@ -576,6 +582,7 @@ public class BedWarsListener implements Listener {
             player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 360000, 0));
             player.setAllowFlight(true);
             player.setFlying(true);
+            player.setCollidable(false);
             final var game = Main.getInstance().getGameOfPlayer(player);
             final var arena = ArenaManager
                     .getInstance().get(game.getName());

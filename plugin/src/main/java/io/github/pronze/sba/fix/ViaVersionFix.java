@@ -28,6 +28,7 @@ public class ViaVersionFix extends BaseFix {
     @Override
     public void warn() {
         Logger.error("Only ViaVersion 4.5 is currently supported as 4.5 changed the API which broke this plugin for 4.4 and below");
+        Logger.error("SBA Will shutdown due to incompatible plugin(s)");
     }
 
     @Override

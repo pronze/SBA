@@ -24,6 +24,7 @@ public class MohistFix extends BaseFix {
     @Override
     public void warn() {
         Logger.error("MohistMC isn't a supported server by BedWars or SBA, it introduce bugs in the Bukkit API making it unfit for BedWars or SBA");
+        Logger.error("SBA Will shutdown due to incompatible server");
     }
 
     @Override
