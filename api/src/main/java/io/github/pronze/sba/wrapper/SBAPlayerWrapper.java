@@ -112,7 +112,7 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
     }
 
     public int getIntegerProgress() {
-        return ((getXP() - ((getLevel() - 1) * getTotalXPToLevelUp())) / getTotalXPToLevelUp()) * 100;
+        return (int)(((getXP() - ((getLevel() - 1) * getTotalXPToLevelUp())) / (double)getTotalXPToLevelUp()) * 100);
     }
 
     public String getCompletedBoxes() {
@@ -121,8 +121,8 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
             progress = 1;
 
         int numberOfBoxesFilled = progress / 10;
-        return "§7[§b" + Strings.repeat("■", numberOfBoxesFilled)
-                + "§7" + Strings.repeat("■", 10 - numberOfBoxesFilled) + "]";
+        return "&7[&b" + Strings.repeat("■", numberOfBoxesFilled)
+                + "§7" + Strings.repeat("■", 10 - numberOfBoxesFilled) + "&7]";
     }
 
     protected static String round(double toRound) {

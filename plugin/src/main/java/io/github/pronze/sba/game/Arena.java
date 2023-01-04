@@ -290,7 +290,7 @@ public class Arena implements IArena {
                             npc.getOrAddTrait(ReturnToStoreTrait.class);
                             LivingEntity entity = (LivingEntity) npc.getEntity();
                             entity.setCustomNameVisible(false);
-                            npc.data().setPersistent(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA, false);
+                            npc.data().setPersistent(net.citizensnpcs.api.npc.NPC.Metadata.NAMEPLATE_VISIBLE, false);
 
                             npc.getNavigator().setTarget(nonAPIStore.getStoreLocation());
 

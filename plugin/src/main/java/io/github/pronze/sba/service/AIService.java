@@ -160,11 +160,11 @@ public class AIService implements Listener {
                         npc.spawn(loc);
                         npc.setProtected(false);
 
-                        npc.data().set(NPC.REMOVE_FROM_PLAYERLIST_METADATA, false);
-                        npc.data().set(NPC.KEEP_CHUNK_LOADED_METADATA, true);
-                        npc.data().set(NPC.SHOULD_SAVE_METADATA, false);
-                        npc.data().set(NPC.COLLIDABLE_METADATA, true);
-                        npc.data().set(NPC.DISABLE_DEFAULT_STUCK_ACTION_METADATA, true);
+                        npc.data().set(NPC.Metadata.REMOVE_FROM_PLAYERLIST, false);
+                        npc.data().set(NPC.Metadata.KEEP_CHUNK_LOADED, true);
+                        npc.data().set(NPC.Metadata.SHOULD_SAVE, false);
+                        npc.data().set(NPC.Metadata.COLLIDABLE, true);
+                        npc.data().set(NPC.Metadata.DISABLE_DEFAULT_STUCK_ACTION, true);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
                         npc.getNavigator().getLocalParameters().distanceMargin(1);
