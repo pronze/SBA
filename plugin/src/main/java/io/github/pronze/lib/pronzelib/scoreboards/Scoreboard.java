@@ -167,9 +167,9 @@ public class Scoreboard {
                 || (this.occupyMaxWidth && !from.contains(stringBuilder.toString()) && stringBuilder.length() < 40)) {
             stringBuilder.append(" ");
         }
-        if (stringBuilder.length() > 40) {
-            return stringBuilder.substring(0, 40);
-        }
+        //if (stringBuilder.length() > 40) {
+        //    return stringBuilder.substring(0, 40);
+        //}
         return stringBuilder.toString();
     }
 
