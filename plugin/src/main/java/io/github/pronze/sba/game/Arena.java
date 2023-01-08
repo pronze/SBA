@@ -418,6 +418,7 @@ public class Arena implements IArena {
                     .toString();
 
             String firstKillerName = nullStr;
+            String firstKillerUsername = nullStr;
             int firstKillerScore = 0;
             UUID firstKillerUUID = null;
 
@@ -432,6 +433,7 @@ public class Arena implements IArena {
             }
 
             String secondKillerName = nullStr;
+            String secondKillerUsername = nullStr;
             int secondKillerScore = 0;
             UUID secondKillerUUID = null;
 
@@ -448,6 +450,7 @@ public class Arena implements IArena {
             }
 
             String thirdKillerName = nullStr;
+            String thirdKillerUsername = nullStr;
             int thirdKillerScore = 0;
             UUID thirdKillerUUID = null;
 
@@ -462,6 +465,11 @@ public class Arena implements IArena {
                     thirdKillerUUID = entry.getKey();
                 }
             }
+            firstKillerUsername  = firstKillerName;
+            secondKillerUsername  = secondKillerName;
+            thirdKillerUsername  = thirdKillerName;
+
+
             firstKillerName = replaceNameWithDisplayName(nullStr, firstKillerName, firstKillerUUID);
             secondKillerName = replaceNameWithDisplayName(nullStr, secondKillerName, secondKillerUUID);
             thirdKillerName = replaceNameWithDisplayName(nullStr, thirdKillerName, thirdKillerUUID);
@@ -487,11 +495,15 @@ public class Arena implements IArena {
                     .replace("%win_team%", winner.getName())
                     .replace("%winners%", WinTeamPlayers.toString())
                     .replace("%first_killer_name%", firstKillerName)
+                    .replace("%first_killer_username%", firstKillerUsername)
                     .replace("%second_killer_name%", secondKillerName)
+                    .replace("%second_killer_username%", secondKillerUsername)
                     .replace("%third_killer_name%", thirdKillerName)
+                    .replace("%third_killer_username%", thirdKillerUsername)
                     .replace("%first_killer_score%", String.valueOf(firstKillerScore))
                     .replace("%second_killer_score%", String.valueOf(secondKillerScore))
                     .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
+                    
                     .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer)
                             .toArray(PlayerWrapper[]::new));
         }

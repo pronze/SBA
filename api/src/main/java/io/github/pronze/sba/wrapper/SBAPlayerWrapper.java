@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 
 @Getter
 @Setter
@@ -46,7 +47,10 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
         System.out.println("Player shouting with cooldown "+shoutCooldown);
         if (shoutCooldown == 0) {
             //sendMessage(message);
-            Bukkit.getOnlinePlayers().forEach(receiver->PlayerMapper.wrapPlayer(receiver).sendMessage(message));
+            Collection<? extends Player> receivers = Bukkit.getOnlinePlayers();
+            if(Main.isPlayerInGame(as(Player.class)))
+                receivers=Main.getInstance().getGameOfPlayer(as(Player.class)).getConnectedPlayers();
+            receivers.forEach(receiver->PlayerMapper.wrapPlayer(receiver).sendMessage(message));
             if (getInstance().hasPermission(Permissions.SHOUT_BYPASS.getKey()) || getDefaultShoutCoolDownTime() == 0) {
                 return;
             }

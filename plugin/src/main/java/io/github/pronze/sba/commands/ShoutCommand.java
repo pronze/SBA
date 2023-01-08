@@ -103,6 +103,7 @@ public class ShoutCommand {
                 .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                 .replace("%message%", strBuilder.toString())
                 .replace("%team%", team == null ? "" : team.getName())
+                .placeholderFor(player)
                 .toComponent();
 
         wrapper.as(SBAPlayerWrapper.class).shout(shoutMessage);
