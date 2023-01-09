@@ -41,10 +41,41 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         if (team == null) {
             return;
         }
-        
+
         if (isHidden) {
             return;
         }
+
+        final var invisTeamName = "i-" + team.getName();
+
+        // hide nametag
+        arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
+            final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
+            final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
+            if (maybeHolder.isEmpty()) {
+                return;
+            }
+
+            final var holder = maybeHolder.get().getHolder().of(connectedPlayers);
+            if (holder != null) {
+                if (!holder.hasTeamEntry(invisTeamName)) {
+                    holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
+                    holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam
+                            .setNameTagVisibility(NameTagVisibility.NEVER));
+                }
+                final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
+                invisibleScoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+                holder.getTeamEntry(team.getName()).ifPresent(entry -> {
+                    if (entry.hasEntry(hiddenPlayer.getName())) {
+                        entry.removeEntry(hiddenPlayer.getName());
+                    }
+                });
+                if (!invisibleScoreboardTeam.hasEntry(hiddenPlayer.getName())) {
+                    invisibleScoreboardTeam.addEntry(hiddenPlayer.getName());
+                }
+            }
+        });
+
         isHidden = true;
         hideArmor();
         armorHider = new BukkitRunnable() {
@@ -61,7 +92,8 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
 
     private boolean isElligble() {
         return arena.getGame().getStatus() == GameStatus.RUNNING
-                && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE|| hiddenPlayer.getGameMode() == GameMode.ADVENTURE)
+                && (hiddenPlayer.getGameMode() == GameMode.SURVIVAL || hiddenPlayer.getGameMode() == GameMode.CREATIVE
+                        || hiddenPlayer.getGameMode() == GameMode.ADVENTURE)
                 && hiddenPlayer.isOnline()
                 && hiddenPlayer.hasPotionEffect(PotionEffectType.INVISIBILITY)
                 && arena.getGame().getConnectedPlayers().contains(hiddenPlayer);
@@ -96,7 +128,7 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 .forEach(pl -> {
                     getEquipPacket(airStack, airStack, airStack, airStack,
                             convert(hiddenPlayer.getInventory().getItemInMainHand()))
-                                    .sendPacket(PlayerMapper.wrapPlayer(pl));
+                            .sendPacket(PlayerMapper.wrapPlayer(pl));
                 });
     }
 
@@ -104,16 +136,16 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         // TODO Auto-generated method stub
         final var airStack = ItemFactory.getAir();
         var hiddenPlayerTeam = arena.getGame().getTeamOfPlayer(hiddenPlayer);
-        Tasker.build(()->{
-        arena.getGame()
-                .getConnectedPlayers()
-                .stream()
-                .filter(pl -> hiddenPlayerTeam==null || !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
-                .forEach(pl -> {
-                    getEquipPacket(airStack, airStack, airStack, airStack,
-                            convert(hiddenPlayer.getInventory().getItemInMainHand()))
-                                    .sendPacket(PlayerMapper.wrapPlayer(pl));
-                });
+        Tasker.build(() -> {
+            arena.getGame()
+                    .getConnectedPlayers()
+                    .stream()
+                    .filter(pl -> hiddenPlayerTeam == null || !hiddenPlayerTeam.getConnectedPlayers().contains(pl))
+                    .forEach(pl -> {
+                        getEquipPacket(airStack, airStack, airStack, airStack,
+                                convert(hiddenPlayer.getInventory().getItemInMainHand()))
+                                .sendPacket(PlayerMapper.wrapPlayer(pl));
+                    });
         }).afterOneTick().start();
 
     }
@@ -142,7 +174,35 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
         if (team == null) {
             return;
         }
-       
+        final var invisTeamName = "i-" + team.getName();
+        // show nametag
+        arena.getGame().getConnectedPlayers().forEach(connectedPlayers -> {
+            final var gameScoreboardManager = (GameScoreboardManager) arena.getScoreboardManager();
+            final var maybeHolder = gameScoreboardManager.getScoreboard(connectedPlayers.getUniqueId());
+            if (maybeHolder.isEmpty()) {
+                return;
+            }
+
+            final var holder = maybeHolder.get().getHolder().of(connectedPlayers);
+            if (holder != null) {
+                if (!holder.hasTeamEntry(invisTeamName)) {
+                    holder.addTeam(invisTeamName, TeamColor.fromApiColor(team.getColor()).chatColor);
+                    holder.getTeamEntry(invisTeamName).ifPresent(invisibleScoreboardTeam -> invisibleScoreboardTeam
+                            .setNameTagVisibility(NameTagVisibility.NEVER));
+                }
+                final var invisibleScoreboardTeam = holder.getTeamOrRegister(invisTeamName);
+                invisibleScoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+
+                if (invisibleScoreboardTeam.hasEntry(hiddenPlayer.getName())) {
+                    invisibleScoreboardTeam.removeEntry(hiddenPlayer.getName());
+                }
+                holder.getTeamEntry(team.getName()).ifPresent(entry -> {
+                    if (!entry.hasEntry(hiddenPlayer.getName())) {
+                        entry.addEntry(hiddenPlayer.getName());
+                    }
+                });
+            }
+        });
         SBAUtil.cancelTask(armorHider);
         showArmor();
         isHidden = false;

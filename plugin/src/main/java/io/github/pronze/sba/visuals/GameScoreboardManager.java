@@ -11,6 +11,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -79,6 +81,24 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 })
                 .build();
 
+        final var holder = scoreboard.getHolder().of(player);
+        if (holder != null) {
+            Tasker.build(() -> game.getRunningTeams().forEach(team -> {
+                if (!holder.hasTeamEntry(team.getName())) {
+                    holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+                }
+
+                final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+                scoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+
+                team.getConnectedPlayers()
+                        .forEach(teamPlayer -> {
+                            if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
+                                scoreboardTeam.addEntry(teamPlayer.getName());
+                            }
+                        });
+            })).afterOneTick().start();
+        }
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 

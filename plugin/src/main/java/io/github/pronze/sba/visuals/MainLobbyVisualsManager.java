@@ -36,7 +36,7 @@ import java.util.*;
 
 @Service
 public class MainLobbyVisualsManager implements Listener {
-    private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
+    private final static String MAIN_LOBBY_OBJECTIVE = "sbascoreboard";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
     private boolean enabled;

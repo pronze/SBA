@@ -30,7 +30,7 @@ public class ScoreboardBuilder
     private long interval;
     private long animationInterval;
     private String title;
-    private String objectiveName;
+    private String objectiveName ="";
     private List<String> lines;
     private List<String> animatedTitle;
     private PlaceholderFunction papiFunction;
@@ -125,6 +125,7 @@ public class ScoreboardBuilder
         final Map<String, String> placeholders = this.placeholders;
         final Scoreboard scoreboard = this.scoreboard;
         Objects.requireNonNull(scoreboard);
+        scoreboard.setObjective(objectiveName);
         placeholders.forEach(scoreboard::addInternalPlaceholder);
         return this.scoreboard;
     }

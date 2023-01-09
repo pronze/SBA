@@ -15,6 +15,7 @@ import io.github.pronze.sba.utils.Logger;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 
 public class ScoreboardDriverV1 implements IBoard {
 
@@ -23,6 +24,7 @@ public class ScoreboardDriverV1 implements IBoard {
     private Objective objective;
     private int lines;
     private HashMap<Integer, String> cache = new HashMap<>();
+    private String objectiveName = "sbascoreboard";
 
     @Override
     public void setPlayer(Player player) {
@@ -30,7 +32,7 @@ public class ScoreboardDriverV1 implements IBoard {
 
         this.board = Objects.requireNonNull(Session.getSession().plugin.getServer().getScoreboardManager())
                 .getNewScoreboard();
-        this.objective = this.board.registerNewObjective("sb1", "sb2");
+        this.objective = this.board.registerNewObjective(objectiveName, "dummy");
         this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
         this.objective.setDisplayName("");
 
@@ -73,14 +75,14 @@ public class ScoreboardDriverV1 implements IBoard {
 
     private String[] split(String line) {
         int cutPoint = LineLimits.getLineLimit();
-        if(line.length()<=32)
-        {
-            cutPoint = line.length()/2;
-        };
-        if (line.length() <= cutPoint || line.length()==0) {
+        if (line.length() <= 32) {
+            cutPoint = line.length() / 2;
+        }
+        ;
+        if (line.length() <= cutPoint || line.length() == 0) {
             return new String[] { line, "" };
         }
-       
+
         String prefix = line.substring(0, cutPoint);
         String suffix = line.substring(cutPoint);
 
@@ -127,8 +129,7 @@ public class ScoreboardDriverV1 implements IBoard {
     }
 
     private void createTeams() {
-        if(board!=null)
-        {
+        if (board != null) {
             int score = this.lines;
 
             for (int i = 0; i < this.lines; i++) {
@@ -140,7 +141,7 @@ public class ScoreboardDriverV1 implements IBoard {
                     score--;
                 }
             }
-            for (int i = board.getTeams().size() - 1; i >= this.lines; i++) {
+            for (int i = board.getTeams().size() - 1; i >= this.lines; i--) {
                 Team team = board.getTeam(i + "");
                 if (team != null)
                     team.unregister();
@@ -151,4 +152,45 @@ public class ScoreboardDriverV1 implements IBoard {
     private void setBoard() {
         this.player.setScoreboard(this.board);
     }
+
+    @Override
+    public void setObjective(String objectiveName) {
+        if (objectiveName == null)
+            objectiveName = "sbascoreboard";
+        /*if (this.board != null)
+        {
+            this.objective = this.board.registerNewObjective(objectiveName, "dummy");
+            this.objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+            this.objective.setDisplayName("");
+        }
+        else
+            this.objectiveName = objectiveName;*/
+    }
+
+    public boolean hasTeamEntry(String invisTeamName) {
+        return this.board.getTeam(invisTeamName) != null;
+    }
+
+    public Team addTeam(String invisTeamName, ChatColor chatColor) {
+        Team t = this.board.registerNewTeam(invisTeamName);
+        // t.setColor(chatColor);
+        return t;
+    }
+
+    public Optional<Team> getTeamEntry(String invisTeamName) {
+        return Optional.ofNullable(this.board.getTeam(invisTeamName));
+    }
+
+    public Team getTeamOrRegister(String invisTeamName) {
+        Team t = this.board.getTeam(invisTeamName);
+        if (t == null)
+            try {
+                t = addTeam(invisTeamName, ChatColor.GRAY);
+            } catch (Throwable t_) {
+                t_.printStackTrace();
+                return null;
+            }
+        return t;
+    }
+
 }

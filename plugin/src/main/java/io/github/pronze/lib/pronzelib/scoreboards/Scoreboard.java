@@ -193,6 +193,9 @@ public class Scoreboard {
         this.cancelTasks();
         ScoreboardManager.getInstance().removeFromCache(this.player.getUniqueId());
     }
+    public void setObjective(String objectiveName) {
+        holder.setObjective(objectiveName);
+    }
 
     public void setPlaceholderHook(final PlaceholderFunction papiFunction) {
         this.papiFunction = (papiFunction);
@@ -254,4 +257,6 @@ public class Scoreboard {
     public PlayerWrapper getPlayer() {
         return player;
     }
+
+  
 }

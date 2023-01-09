@@ -12,6 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
@@ -42,7 +44,8 @@ public class LobbyScoreboardManager implements Listener {
 
     @OnPostEnable
     public void registerListener() {
-        if(SBA.isBroken())return;
+        if (SBA.isBroken())
+            return;
         if (!(enabled = SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true))) {
             return;
         }
@@ -184,6 +187,34 @@ public class LobbyScoreboardManager implements Listener {
                 line = PlaceholderAPI.setPlaceholders(player, line);
             lines.add(line);
         });
+        final var holder = scoreboard.getHolder().of(player);
+        if (holder != null) {
+            game.getRunningTeams().forEach(team -> {
+                if (!holder.hasTeamEntry(team.getName())) {
+                    holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+                }
+                final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+                scoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+                
+                new HashSet<>(scoreboardTeam.getEntries())
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(Bukkit::getPlayerExact)
+                        .filter(Objects::nonNull)
+                        .forEach(teamPlayer -> {
+                            if (!team.getConnectedPlayers().contains(teamPlayer)) {
+                                scoreboardTeam.removeEntry(teamPlayer.getName());
+                            }
+                        });
+
+                team.getConnectedPlayers()
+                        .stream()
+                        .map(Player::getName)
+                        .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
+                        .forEach(scoreboardTeam::addEntry);
+            });
+        }
+
         return lines;
     }
 }

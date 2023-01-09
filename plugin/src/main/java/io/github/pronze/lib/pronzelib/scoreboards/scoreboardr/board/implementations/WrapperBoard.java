@@ -1,7 +1,11 @@
 package io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.implementations;
 //https://github.com/RienBijl/Scoreboard-revision/blob/master/src/main/java/rien/bijl/Scoreboard/r/Board/Implementations/WrapperBoard.java
 
+import java.util.Optional;
+
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Team;
 
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.implementations.drivers.v1.ScoreboardDriverV1;
 
@@ -48,4 +52,23 @@ public class WrapperBoard implements IBoard {
         return child.getPlayer();
     }
 
+    public void setObjective(String objectiveName) {
+        child.setObjective(objectiveName);
+    }
+
+    public boolean hasTeamEntry(String invisTeamName) {
+        return child.hasTeamEntry(invisTeamName);
+    }
+
+    public Team addTeam(String invisTeamName, ChatColor chatColor) {
+        return child.addTeam(invisTeamName,chatColor);
+    }
+
+    public Optional<Team> getTeamEntry(String invisTeamName) {
+        return child.getTeamEntry(invisTeamName);
+    }
+
+    public Team getTeamOrRegister(String invisTeamName) {
+        return child.getTeamOrRegister(invisTeamName);
+    }
 }
