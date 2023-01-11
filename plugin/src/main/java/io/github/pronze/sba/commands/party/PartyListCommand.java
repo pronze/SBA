@@ -64,8 +64,8 @@ public class PartyListCommand {
                     .getInstance()
                     .get(MessageKeys.PARTY_LIST)
                     .replace("%count%", String.valueOf(party.getMembers().size()))
-                    .replace("%leader%", (leader.toLegacy()))
-                    .replace("%members%", (membersComponent.toLegacy()))
+                    .replace("%leader%", (leader))
+                    .replace("%members%", (membersComponent))
                     .send(PlayerMapper.wrapPlayer(sender));
         });
 

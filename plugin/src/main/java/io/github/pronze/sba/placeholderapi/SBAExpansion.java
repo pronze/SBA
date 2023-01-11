@@ -27,6 +27,11 @@ public class SBAExpansion extends PlaceholderExpansion {
     }
 
     @Override
+    public boolean persist() {
+        return true;
+    }
+
+    @Override
     public @NotNull String getVersion() {
         return SBA.getInstance().getVersion();
     }

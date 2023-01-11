@@ -51,16 +51,11 @@ public class Party implements IParty {
 
     @Override
     public void sendMessage(@NotNull Component message, @NotNull SBAPlayerWrapper sender) {
-        Logger.trace(
-                "Sending message: {} to party: {}",
-                (message.toLegacy()),
-                debugInfo()
-        );
         final var formattedMessage = LanguageService
                 .getInstance()
                 .get(MessageKeys.PARTY_CHAT_FORMAT)
                 .replace("%name%", sender.as(Player.class).getDisplayName() + ChatColor.RESET)
-                .replace("%message%", (message.toLegacy()))
+                .replace("%message%", (message))
                 .toComponent();
         members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
     }

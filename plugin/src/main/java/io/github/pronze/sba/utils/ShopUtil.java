@@ -8,6 +8,7 @@ import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
 import io.github.pronze.sba.inventories.SBAStoreInventoryV2;
+import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -498,10 +499,10 @@ public class ShopUtil {
         return item;
     }
 
-    public static String getNameOrCustomNameOfItem(Item item) {
+    public static Component getNameOrCustomNameOfItem(Item item) {
         try {
             if (item.getDisplayName() != null) {
-                return (item.getDisplayName().toLegacy());
+                return (item.getDisplayName());
             }
             /*
              * if (item.getLocalizedName() != null) {
@@ -518,7 +519,7 @@ public class ShopUtil {
         for (var s : sArray) {
             stringBuilder.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
         }
-        return stringBuilder.toString().trim();
+        return Message.of(List.of(stringBuilder.toString().trim())).toComponent();
     }
 
     public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
