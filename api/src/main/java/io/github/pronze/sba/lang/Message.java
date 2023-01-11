@@ -33,9 +33,12 @@ public class Message implements Cloneable{
         newMessage.prefix = prefix;
         return newMessage;
     }
-    private static String toMiniMessage(String legacyString) {
+    private static Component toMiniMessage(String legacyString) {
         String workingString = ChatColor.translateAlternateColorCodes('&', legacyString);
 
+        workingString = workingString.replaceAll("[§&]x[§&]([0-9a-z])[§&]([0-9a-z])[§&]([0-9a-z])[§&]([0-9a-z])[§&]([0-9a-z])[§&]([0-9a-z])", "<#$1$2$3$4$5$6>");
+        workingString = workingString.replaceAll("[§&]#([0-9a-fA-F]{6})", "<#$1>");
+        
         workingString = workingString.replaceAll(ChatColor.COLOR_CHAR + "0", "<black>");
         workingString = workingString.replaceAll(ChatColor.COLOR_CHAR + "1", "<dark_blue>");
         workingString = workingString.replaceAll(ChatColor.COLOR_CHAR + "2", "<dark_green>");
@@ -76,15 +79,16 @@ public class Message implements Cloneable{
         workingString = workingString.replaceAll(ChatColor.COLOR_CHAR + "r", "<reset>");
         workingString = workingString.replaceAll(ChatColor.COLOR_CHAR + "R", "<reset>");
 
-        workingString = workingString.replaceAll("#([0-9a-fA-F]{6})", "<#$1>");
+       
 
         workingString = ChatColor.stripColor(workingString);
 
-        var mini = MiniMessage.miniMessage().deserialize(workingString);
-        workingString = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection()
-                .serialize(mini);
+        return Component.fromMiniMessage(workingString);
+        // var mini = MiniMessage.miniMessage().deserialize(workingString);
+        // workingString = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection()
+        //         .serialize(mini);
 
-        return workingString;
+        // return workingString;
     }
 
     public static Message of(List<String> text) {
@@ -160,7 +164,7 @@ public class Message implements Cloneable{
                         .getConfigurator()
                         .getString("prefix", "[SBA]") + ": " + str;
             }
-            component.append(Component.fromLegacy(toMiniMessage(str)));
+            component.append(toMiniMessage(str));
             if (original.indexOf(str) + 1 != original.size()) {
                 component.append(Component.text("\n"));
             }
@@ -177,7 +181,7 @@ public class Message implements Cloneable{
                     .getConfigurator()
                     .getString("prefix", "[SBA]") + ": ";
         }
-        return Component.fromLegacy(toMiniMessage(string)).toLegacy();
+        return toMiniMessage(string).toLegacy();
         // return AdventureHelper.toLegacy(MiniMessage.miniMessage().deserialize());
     }
 
@@ -200,7 +204,6 @@ public class Message implements Cloneable{
                     }
                     return toMiniMessage(str);
                 })
-                .map(Component::fromLegacy)
                 .collect(Collectors.toList());
     }
 
