@@ -110,10 +110,7 @@ public class AIService implements Listener {
                         return;
 
                 settings = SBAConfig.getInstance().ai();
-                if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
-                                && SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens")
-                                                .isEnabled()
-                                && SBAConfig.getInstance().ai().enabled()) {
+                if (SBA.getInstance().citizensFix.canEnable() && SBAConfig.getInstance().ai().enabled()) {
                         if (registry == null) {
                                 registry = new NPCRegistryWrapper();
                                 SBA.getInstance().registerListener(this);

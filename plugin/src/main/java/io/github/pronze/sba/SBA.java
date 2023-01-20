@@ -6,6 +6,7 @@ import io.github.pronze.sba.config.QuickBuyConfig;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.fix.BaseFix;
 import io.github.pronze.sba.fix.BungeecordNPC;
+import io.github.pronze.sba.fix.CitizensFix;
 import io.github.pronze.sba.fix.MagmaFix;
 import io.github.pronze.sba.fix.MohistFix;
 import io.github.pronze.sba.fix.PerWorldPluginFix;
@@ -127,6 +128,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     private static SBA instance;
     private List<BaseFix> fixs;
+    public CitizensFix citizensFix ;
 
     public static SBA getInstance() {
         return instance;
@@ -163,6 +165,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         fixs.add(new ViaVersionFix());
         fixs.add(new MagmaFix());
         fixs.add(new PerWorldPluginFix());
+        fixs.add(citizensFix=new CitizensFix());
 
         for (BaseFix fix : fixs) {
             fix.detect();
@@ -222,8 +225,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
         Logger.setMode(Level.WARNING);
         if (!broken) {
-            if (getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
-                    && getPluginInstance().getServer().getPluginManager().getPlugin("Citizens").isEnabled()) {
+            if (citizensFix.canEnable()) {
                 CitizensTraits.enableCitizensTraits();
             }
         }

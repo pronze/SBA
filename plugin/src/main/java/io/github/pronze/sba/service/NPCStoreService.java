@@ -70,7 +70,7 @@ public class NPCStoreService implements Listener {
                 SBA.getInstance().registerListener(this);
                 EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
 
-                if (Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
+                if (SBA.getInstance().citizensFix.canEnable()) {
                         SBA.getInstance().registerListener(new CitizensListeners());
                 }
 

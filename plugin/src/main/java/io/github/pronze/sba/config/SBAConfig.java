@@ -422,30 +422,34 @@ public class SBAConfig implements IConfigurator {
 
     public boolean replaceStoreWithCitizen() {
         return node("replace-stores-with-citizen").getBoolean(false)
-                && Bukkit.getPluginManager().isPluginEnabled("Citizens");
+                && SBA.getInstance().citizensFix.canEnable();
     }
 
-    public PartyConfig party()
-    {
+    public PartyConfig party() {
         return new PartyConfig();
     }
-    public class PartyConfig
-    {
+
+    public class PartyConfig {
         public boolean enabled() {
             return getBoolean("party.enabled", false);
         }
+
         public boolean autojoin() {
             return getBoolean("party.leader-autojoin-autoleave", false);
         }
+
         public int expirationTime() {
             return getInt("party.invite-expiration-time", 60);
         }
-        /*.section("party")
-                    .key("enabled").defValue(true)
-                    .key("leader-autojoin-autoleave").defValue(true)
-                    .key("invite-expiration-time").defValue(60)
-                    .back() */
+        /*
+         * .section("party")
+         * .key("enabled").defValue(true)
+         * .key("leader-autojoin-autoleave").defValue(true)
+         * .key("invite-expiration-time").defValue(60)
+         * .back()
+         */
     }
+
     public SpectatorConfig spectator() {
         return new SpectatorConfig();
     }
@@ -495,6 +499,7 @@ public class SBAConfig implements IConfigurator {
             public boolean enabled() {
                 return getBoolean("spectator.tracker.enabled", false);
             }
+
             public boolean keepOnStart() {
                 return getBoolean("spectator.tracker.keep-on-start", true);
             }
@@ -614,9 +619,12 @@ public class SBAConfig implements IConfigurator {
         return new AIConfig();
     }
 
+    private boolean aiDisabled = false;
+
     public class AIConfig {
+
         public boolean enabled() {
-            return getBoolean("ai.enabled", false);
+            return !aiDisabled && getBoolean("ai.enabled", false);
         }
 
         public String skin() {
@@ -634,7 +642,14 @@ public class SBAConfig implements IConfigurator {
         }
 
         public @NotNull String infiniteItem() {
-            return getString("ai.infinite-material", Material.OAK_PLANKS.toString());
+            String defaultMaterial = "STONE";
+            if (Material.getMaterial("OAK_PLANKS") != null)
+                defaultMaterial = "OAK_PLANKS";
+            return getString("ai.infinite-material", defaultMaterial);
+        }
+
+        public void disable() {
+            aiDisabled = true;
         }
 
     }

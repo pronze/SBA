@@ -406,10 +406,10 @@ shop:
     - "Maximum Enchant"
     - "Your team already has maximum Enchant."
 death-messages:
-  final-kill: "<aqua><bold>FINAL KILL!</bold></aqua>"
-  void-death: "%player% <gray>fell into the void</gray>"
-  void-kill: "%player% <gray>was knocked into the void by %killer%.</gray>"
-  generic: "%player% <gray>died.</gray>"
+  final-kill: "<aqua><bold>FINAL KILL!<reset>"
+  void-death: "%player% <gray>fell into the void<reset>"
+  void-kill: "%player% <gray>was knocked into the void by %killer%.<reset>"
+  generic: "%player% <gray>died.<reset>"
   pvp-regular:
     - "%player% <gray>was killed by %killer%."
     - "%player% <gray>got rekt by %killer%."
