@@ -523,6 +523,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     }
                                 }
                             }
+                            double maxLevelF = maxLevel;
                             if (spawnersToUpgrade.isEmpty()) {
                                 types.forEach(spawnerType -> {
                                     double closestDistance = Double.MAX_VALUE;
@@ -535,14 +536,18 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                                 closestDistance = distance;
                                                 closestSpawner = spawner;
                                             }
+
+
                                         }
                                     }
                                     if (closestSpawner != null) {
-                                        spawnersToUpgrade.add(closestSpawner);
+                                        double newLevel = closestSpawner.getCurrentLevel();
+                                        if (newLevel < maxLevelF)
+                                            spawnersToUpgrade.add(closestSpawner);
                                     }
                                 });
                             }
-
+                            
                             for (var spawner : spawnersToUpgrade) {
                                 double newLevel = spawner.getCurrentLevel() + addLevels;
                                 if (newLevel > maxLevel && maxLevel > 0)

@@ -228,13 +228,12 @@ public class BedwarsBlockPlace extends Trait {
                         is = item;
                 }
             }
-            // return new ItemStack(Material.OAK_PLANKS);
             isInNeedOfBlock = is == null;
             if (is == null) {
                 Logger.trace("NPC {} needs blocks", getNPC().getName());
             }
         } else {
-            return new ItemStack(Material.OAK_PLANKS);
+            return new ItemStack(Material.getMaterial(SBAConfig.getInstance().ai().infiniteItem()));
         }
         return is;
     }

@@ -645,7 +645,12 @@ public class SBAConfig implements IConfigurator {
             String defaultMaterial = "STONE";
             if (Material.getMaterial("OAK_PLANKS") != null)
                 defaultMaterial = "OAK_PLANKS";
-            return getString("ai.infinite-material", defaultMaterial);
+            String returnValue =getString("ai.infinite-material", defaultMaterial);
+            if(Material.getMaterial(returnValue)==null)
+            {
+                return defaultMaterial;
+            }
+            return returnValue;
         }
 
         public void disable() {
