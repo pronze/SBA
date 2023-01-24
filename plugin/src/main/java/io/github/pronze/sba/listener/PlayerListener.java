@@ -8,24 +8,33 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
@@ -44,6 +53,7 @@ import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,7 +64,8 @@ public class PlayerListener implements Listener {
 
     @OnPostEnable
     public void registerListener() {
-        if(SBA.isBroken())return;
+        if (SBA.isBroken())
+            return;
         SBA.getInstance().registerListener(this);
         allowedDropItems.clear();
         generatorDropItems.clear();
@@ -193,7 +204,8 @@ public class PlayerListener implements Listener {
                                     .get(MessageKeys.RESPAWNED_TITLE)
                                     .toComponent();
 
-                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, org.screamingsandals.lib.spectator.Component.empty(),
+                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle,
+                                    org.screamingsandals.lib.spectator.Component.empty(),
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
                                     Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player)
@@ -399,6 +411,77 @@ public class PlayerListener implements Listener {
                         arena.updateHiddenPlayer(player);
                     }
                 });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteractPlace(PlayerInteractEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer()))
+            return;
+        if (event.isCancelled())
+            return;
+        if (!event.isBlockInHand())
+            return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+        if (!event.hasBlock())
+            return;
+
+        BlockFace face = event.getBlockFace();
+        Location loc = event.getClickedBlock().getRelative(face).getLocation();
+
+        Collection<Entity> players = loc.getNearbyEntitiesByType(Player.class, 1.5, 1.5, 1.5, null);
+        for (Entity playerEntity : players) {
+            Player player = (Player) playerEntity;
+            if (player.getGameMode() != GameMode.SURVIVAL) {
+                player.teleport(player.getLocation().add(0, 1.5, 0), TeleportCause.SPECTATE);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteractPlaceOnEntity(PlayerInteractEntityEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer()))
+            return;
+        Logger.trace("onInteractPlaceOnEntity");
+        if (event.isCancelled()) {
+            Logger.trace("onInteractPlaceOnEntity.isCancelled");
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.getItemInHand() == null || !player.getItemInHand().getType().isBlock()) {
+            Logger.trace("onInteractPlaceOnEntity.getItemInHand");
+            return;
+        }
+        if (event.getRightClicked() instanceof Player) {
+            Player target = (Player) event.getRightClicked();
+            if (target.getGameMode() == GameMode.SURVIVAL) {
+                Logger.trace("onInteractPlaceOnEntity.target-is-not-spectator");
+                return;
+            }
+            Block replaced = target.getLocation().getBlock();
+            BlockState state = replaced.getState();
+            byte rawData = state.getRawData();
+
+            BlockState newState = replaced.getState();
+
+            newState.setType(player.getItemInHand().getType());
+            // replaced.setType(player.getItemInHand().getType());
+            Logger.trace("onInteractPlaceOnEntity {}", player.getItemInHand().getType());
+
+            BlockPlaceEvent event_ = new BlockPlaceEvent(replaced, state, replaced, event.getPlayer().getItemInHand(),
+                    player, true);
+
+            Bukkit.getServer().getPluginManager().callEvent(event_);
+            Logger.trace("onInteractPlaceOnEntity {} {}", event, event.isCancelled());
+
+            if (event.isCancelled()) {
+                Logger.trace("event.isCancelled");
+                newState.setType(state.getType());
+                newState.setRawData(rawData);
+            }
+            // replaced.getState().setType(player.getItemInHand().getType());
+            newState.update(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
