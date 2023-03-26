@@ -326,7 +326,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
         AtomicReference<ItemStack> newItemRef = new AtomicReference<ItemStack>(newItem);
         AtomicReference<Item> newMaterialItemRef = new AtomicReference<Item>(materialItem);
-        final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type);
+        AtomicReference<String[]> messageOnFail = new AtomicReference<>(MessageKeys.CANNOT_BUY);
+        final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type,messageOnFail);
 
         attemptLoreRemoval(newItem);
 
@@ -338,11 +339,12 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         // purchase failed, player does not have enough resources to purchase
         if (!shouldBuyStack && !shouldSellStack) {
             if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.CANNOT_BUY)
-                        .replace("%material%", type.getItemName())
-                        .send(event.getPlayer());
+                if (messageOnFail.get()!=null)
+                    LanguageService
+                            .getInstance()
+                            .get(messageOnFail.get())
+                            .replace("%material%", type.getItemName())
+                            .send(event.getPlayer());
             }
             return;
         }
@@ -530,7 +532,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     public abstract void onPreGenerateItem(ItemRenderEvent event);
 
     public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
-            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
+            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type, AtomicReference<String[]> messageOnFail);
 
     @NotNull
     public abstract InventorySetBuilder getInventorySetBuilder();

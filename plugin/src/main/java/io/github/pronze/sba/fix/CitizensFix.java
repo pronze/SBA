@@ -18,7 +18,7 @@ public class CitizensFix extends BaseFix {
         if(isViaEnabled){
             var viaVersion = Bukkit.getPluginManager().getPlugin("Citizens");
             isCritical=viaVersion.getDescription().getVersion().contains("2.0.2");
-            isProblematic=!viaVersion.getDescription().getVersion().contains("2.0.30");
+            isProblematic=(!viaVersion.getDescription().getVersion().contains("2.0.30"))&& viaVersion.getDescription().getVersion().contains("2.0.31");
         }
     }
     public boolean canEnable()
@@ -37,7 +37,7 @@ public class CitizensFix extends BaseFix {
 
     @Override
     public void warn() {
-        Logger.error("Only Citizens 2.0.30 is currently supported as Citizens API change frequently. 2.0.31+ might or might not work.");
+        Logger.warn("Only Citizens 2.0.30/31 is currently supported as Citizens API change frequently. 2.0.32+ might or might not work.");
         if(isCritical)
         {
             Logger.error("SBA Will totally disable AI");

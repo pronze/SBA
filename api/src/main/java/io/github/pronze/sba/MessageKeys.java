@@ -118,6 +118,7 @@ public class MessageKeys {
     public static final String[] RESPAWNED_TITLE = {"respawned-title"};
     public static final String[] CANNOT_PUT_ITEM_IN_CHEST = {"cannot-put-item-on-chest"};
     public static final String[] GREATEST_ENCHANTMENT = {"greatest-enchantment"};
+    public static final String[] GREATEST_SPAWNER = {"spawner-already-maxed"};
     public static final String[] WAIT_FOR_TRAP = {"wait-trap"};
     public static final String[] BLINDNESS_TRAP_PURCHASED_TITLE = {"blindness-trap-purchased-title"};
     public static final String[] MINER_TRAP_PURCHASED_TITLE = {"miner-trap-purchased-title"};

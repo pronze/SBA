@@ -15,6 +15,7 @@ import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -26,6 +27,7 @@ import org.screamingsandals.lib.spectator.title.Title;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -85,6 +87,33 @@ public class SBAUtil {
     public static Optional<Player> getPlayer(UUID uuid) {
         return Optional.ofNullable(Bukkit.getPlayer(uuid));
     }
+    public static void unregisterListener(@NotNull Listener listener) {
+        Logger.warn("Attempting to unregister, it's safer to restart server: {}", listener.getClass().getSimpleName());
+
+        try {
+            HandlerList.unregisterAll(listener);
+            Class<? extends Listener> cl = listener.getClass();
+            List<Method> b = new ArrayList<>(Arrays.asList(cl.getDeclaredMethods()));
+            b.addAll(Arrays.asList(cl.getMethods()));
+            for (Method m : b) {
+                for (Class<?> paramType : m.getParameterTypes()) {
+                    try {
+                        HandlerList hl = (HandlerList) paramType.getMethod("getHandlerList").invoke(null);
+                        ;
+                        hl.unregister(listener);
+                    } catch (NoSuchMethodException | NoClassDefFoundError nsm) {
+                        // Do nothing
+                    }
+
+                }
+            }
+        } catch (java.lang.NoClassDefFoundError nclass) {
+            // Do nothing, a dependancy isn't present
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
 
     public static void disablePlugin(@NotNull JavaPlugin plugin) {
         // thank you Misat for this :)
@@ -118,10 +147,11 @@ public class SBAUtil {
          */
 
         try {
-            // var handlers = HandlerList.getRegisteredListeners(plugin);
-            HandlerList.unregisterAll(plugin);
+            var handlers = HandlerList.getRegisteredListeners(plugin);
+            //HandlerList.unregisterAll(plugin);
             // Logger.trace("-----------------------{}-----------------", handlers.size());
-            // for (var handler : handlers) {
+            for (var handler : handlers) {
+                unregisterListener(handler.getListener());
             // String id = handler.getListener().toString();
             // if (!id.contains("BukkitAudiencesImpl") &&
             // !id.contains("CloudBukkitListener")
@@ -129,7 +159,7 @@ public class SBAUtil {
             // HandlerList.unregisterAll(handler.getListener());
             // }
             // Logger.trace("handler {}", handler.getListener().toString());
-            // }
+            }
             // Logger.trace("-----------------------{}-----------------", handlers.size());
 
             // HandlerList.unregisterAll(plugin);

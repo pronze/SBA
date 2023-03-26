@@ -33,6 +33,7 @@ upgrade-team-knockback: "<red>%player%<yellow> has upgraded team knockback"
 upgrade-team-enchant: "<red>%player%<yellow> has upgraded team enchant"
 error-occured: "<red><bold>AN ERROR HAS OCCURRED</bold>"
 greatest-enchantment: "<red><bold>You Already have the greatest enchantment</bold>"
+spawner-already-maxed: "<red><bold>All spawners are already upgraded</bold>"
 generator-upgrade: "%MatName%<yellow> generator has been upgraded to <red>%tier%"
 shout-format: "<gold>[SHOUT] %color%[%team%]<reset> %player%<gray>: <reset>%message%"
 blind-trap-triggered:
@@ -93,7 +94,9 @@ floating-generator:
 lobby-scoreboard:
   solo-prefix: "Solo"
   doubles-prefix: "Doubles"
+  triple-prefix: "Triples" #For backward compatibility
   triples-prefix: "Triples"
+  squad-prefix: "Squads" #For backward compatibility
   squads-prefix: "Squads"
   lines:
     - "<gray>%date%"

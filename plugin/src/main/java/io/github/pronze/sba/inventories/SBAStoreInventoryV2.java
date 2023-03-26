@@ -134,7 +134,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
     }
 
     public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
-            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
+            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type, AtomicReference<String[]> messageOnFail) {
         boolean shouldSellStack = true;
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var gameStorage = ArenaManager
@@ -198,11 +198,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                     case "trap":
                         String trap_identifier = property.getPropertyData().childrenMap().get("identifier").getString();
                         if (gameStorage.areTrapEnabled(team, trap_identifier)) {
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
                         } else {
                             final var blindnessTrapTitle = LanguageService
                                     .getInstance()
@@ -269,11 +266,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         maxSharpnessLevel = Math.min(maxSharpnessLevel, sharpnessPrices.size());
 
                         if (teamSharpnessLevel >= maxSharpnessLevel) {
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
+
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
                         } else {
                             var ePrice = sharpnessPrices.get(teamSharpnessLevel);
                             teamSharpnessLevel = teamSharpnessLevel + 1;
@@ -326,10 +321,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                         if (teamKnockbackLevel >= maxKnockbackLevel) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
                         } else {
                             var ePrice = knockbackPrices.get(teamKnockbackLevel);
                             teamKnockbackLevel = teamKnockbackLevel + 1;
@@ -383,10 +375,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         maxEfficiencyLevel = Math.min(maxEfficiencyLevel, efficiencyPrices.size());
                         if (efficiencyLevel >= maxEfficiencyLevel) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
+
                         } else {
                             var ePrice = efficiencyPrices.get(efficiencyLevel);
                             efficiencyLevel = efficiencyLevel + 1;
@@ -417,10 +407,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                     case "blindtrap":
                         if (gameStorage.areBlindTrapEnabled(team)) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
+
                         } else {
                             final var blindnessTrapTitle = LanguageService
                                     .getInstance()
@@ -441,10 +429,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                     case "minertrap":
                         if (gameStorage.areMinerTrapEnabled(team)) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
+
                         } else {
                             final var minerTrapTitle = LanguageService
                                     .getInstance()
@@ -465,11 +451,10 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                     case "healpool":
                         shouldSellStack = false;
+                        messageOnFail.set(null);
+
                         if (gameStorage.arePoolEnabled(team)) {
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
                         } else {
                             var purchaseHealPoolMessage = LanguageService
                                     .getInstance()
@@ -556,6 +541,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             }
 
                             if (spawnersToUpgrade.isEmpty())
+                                messageOnFail.set(MessageKeys.GREATEST_SPAWNER);
                                 shouldSellStack = false;
                         }
                         break;
@@ -584,10 +570,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                         if (teamProtectionLevel >= maxProtectionLevel) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
+
                         } else {
                             Logger.trace("protectionPrices:{}", protectionPrices);
                             var ePrice = protectionPrices.get(teamProtectionLevel);
@@ -653,10 +637,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                             if (teamOtherLevel >= maxOtherLevel) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                        .send(wrappedPlayer);
+                                messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
+
                             } else {
                                 var ePrice = otherPrices.get(propertyName).get(teamOtherLevel);
                                 teamOtherLevel = teamOtherLevel + 1;
