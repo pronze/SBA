@@ -165,6 +165,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         fixs.add(new ViaVersionFix());
         fixs.add(new MagmaFix());
         fixs.add(new PerWorldPluginFix());
+        fixs.add(new WoolFix());
         fixs.add(citizensFix=new CitizensFix());
 
         for (BaseFix fix : fixs) {
