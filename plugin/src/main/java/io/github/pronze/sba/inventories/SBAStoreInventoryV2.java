@@ -541,8 +541,10 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             }
 
                             if (spawnersToUpgrade.isEmpty())
+                            {
                                 messageOnFail.set(MessageKeys.GREATEST_SPAWNER);
                                 shouldSellStack = false;
+                            }
                         }
                         break;
                     case "protection":
