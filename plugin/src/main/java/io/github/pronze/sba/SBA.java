@@ -11,6 +11,7 @@ import io.github.pronze.sba.fix.MagmaFix;
 import io.github.pronze.sba.fix.MohistFix;
 import io.github.pronze.sba.fix.PerWorldPluginFix;
 import io.github.pronze.sba.fix.ViaVersionFix;
+import io.github.pronze.sba.fix.WoolFix;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
