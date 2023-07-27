@@ -87,41 +87,46 @@ public class FakeDeathTrait extends Trait {
     // This is called AFTER onAttach and AFTER Load when the server is started.
     @Override
     public void onSpawn() {
-
-        Player npcEntity = (Player) npc.getEntity();
-        if (oldPlayerObject != null && npcEntity != oldPlayerObject) {
-            if (game != null) {
-                game.getRunningTeams().forEach(
-                        team -> {
-                            if (team.isPlayerInTeam(oldPlayerObject)) {
-                                game.leaveFromGame(oldPlayerObject);
-                            }
-                        });
+        if (!(npc.getEntity() instanceof Player))
+            return;
+        try {
+            Player npcEntity = (Player) npc.getEntity();
+            if (oldPlayerObject != null && npcEntity != oldPlayerObject) {
+                if (game != null) {
+                    game.getRunningTeams().forEach(
+                            team -> {
+                                if (team.isPlayerInTeam(oldPlayerObject)) {
+                                    game.leaveFromGame(oldPlayerObject);
+                                }
+                            });
+                }
             }
-        }
-        oldPlayerObject = npcEntity;
-        npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
+            oldPlayerObject = npcEntity;
+            npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
 
-        Logger.trace("Initializing AI in mode{}", strategy);
-        Random r = new Random();
-        if (strategy == Strategy.ANY) {
-            var possibilities = List.of(Strategy.AGRESSIVE, Strategy.DEFENSIVE, Strategy.BALANCED);
-            strategy = possibilities.get(r.nextInt(possibilities.size()));
-        }
+            Logger.trace("Initializing AI in mode{}", strategy);
+            Random r = new Random();
+            if (strategy == Strategy.ANY) {
+                var possibilities = List.of(Strategy.AGRESSIVE, Strategy.DEFENSIVE, Strategy.BALANCED);
+                strategy = possibilities.get(r.nextInt(possibilities.size()));
+            }
 
-        goals.clear();
-        if (strategy != Strategy.NONE) {
-            goals.add(new DontCancelBlockBreak(this));
-            goals.add(new GatherBlocks(this));
-            goals.add(new AttackNearbyPlayerGoal(this));
-            if (strategy == Strategy.DEFENSIVE)
-                goals.add(new BuildBedDefenseGoal(this));
-            else if (strategy == Strategy.AGRESSIVE)
-                goals.add(new AttackOtherGoal(this));
-            else if (strategy == Strategy.BALANCED)
-                goals.add(new BalancedGoal(this));
-            goals.add(new GatherRessource(this));
-            goals.add(new CancelNavigation(this));
+            goals.clear();
+            if (strategy != Strategy.NONE) {
+                goals.add(new DontCancelBlockBreak(this));
+                goals.add(new GatherBlocks(this));
+                goals.add(new AttackNearbyPlayerGoal(this));
+                if (strategy == Strategy.DEFENSIVE)
+                    goals.add(new BuildBedDefenseGoal(this));
+                else if (strategy == Strategy.AGRESSIVE)
+                    goals.add(new AttackOtherGoal(this));
+                else if (strategy == Strategy.BALANCED)
+                    goals.add(new BalancedGoal(this));
+                goals.add(new GatherRessource(this));
+                goals.add(new CancelNavigation(this));
+            }
+        } catch (ClassCastException cc) {
+            npc.removeTrait(FakeDeathTrait.class);
         }
     }
 
