@@ -56,7 +56,8 @@ public class TrapTask extends BaseGameTask {
 
                                 LanguageService
                                         .getInstance()
-                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE).replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
+                                        .get(MessageKeys.TEAM_BLIND_TRAP_TRIGGERED_MESSAGE)
+                                        .replace("%team%", team.getName())
                                         .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
 
                                 var title = LanguageService
