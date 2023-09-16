@@ -108,7 +108,11 @@ public class GeneratorTask extends BaseGameTask {
     }
 
     public String getTimeLeftForNextEvent() {
-        return ((org.screamingsandals.bedwars.game.Game)game).getFormattedTimeLeft(nextEvent.getTime() - elapsedTime);
+        if (nextEvent == GameTierEvent.GAME_END) {
+            return ((org.screamingsandals.bedwars.game.Game) game).getFormattedTimeLeft();
+        } else {
+            return ((org.screamingsandals.bedwars.game.Game) game).getFormattedTimeLeft(nextEvent.getTime() - elapsedTime);
+        }
     }
 
     public String getNextTierName() {

@@ -123,6 +123,7 @@ import static io.github.pronze.sba.utils.MessageUtils.showErrorMessage;
 public class SBA extends PluginContainer implements AddonAPI {
 
     private static SBA instance;
+    public static boolean sbw_0_2_30;
     private List<BaseFix> fixs;
     public CitizensFix citizensFix ;
 
@@ -191,11 +192,12 @@ public class SBA extends PluginContainer implements AddonAPI {
                 Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
                 return;
             }
-            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.26", "0.2.27", "0.2.27.1", "0.2.28").stream()
+            if (!List.of("0.2.20", "0.2.21", "0.2.22", "0.2.23", "0.2.24", "0.2.25", "0.2.26", "0.2.27", "0.2.27.1", "0.2.28", "0.2.29", "0.2.30").stream()
                     .anyMatch(BedwarsAPI.getInstance().getPluginVersion()::equals)) {
                 Logger.warn(
-                        "SBA hasn't been tested on this version of Bedwars. If you encounter bugs, use version 0.2.20 to 0.2.28. ");
+                        "SBA hasn't been tested on this version of Bedwars. If you encounter bugs, use version 0.2.20 to 0.2.30. ");
             }
+            sbw_0_2_30 = Integer.parseInt(BedwarsAPI.getInstance().getPluginVersion().split("[.-]")[2]) >= 30;
         }
         for (BaseFix fix : fixs) {
             fix.fix(SBAConfig.getInstance());
