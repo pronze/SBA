@@ -17,14 +17,16 @@ import org.bukkit.scoreboard.Team.Option;
 import org.bukkit.scoreboard.Team.OptionStatus;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.slot.EquipmentSlotHolder;
-import org.screamingsandals.lib.slot.EquipmentSlotMapping;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
+import org.screamingsandals.lib.packet.ClientboundSetEquipmentPacket;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.slot.EquipmentSlot;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
-import org.screamingsandals.lib.packet.SClientboundSetEquipmentPacket;
-import org.screamingsandals.lib.packet.SClientboundSetPlayerTeamPacket.TagVisibility;
-import org.screamingsandals.lib.player.PlayerMapper;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @Data
 public class InvisiblePlayerImpl implements InvisiblePlayer {
@@ -111,16 +113,16 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                         convert(helmet),
                         convert(chestplate),
                         convert(leggings),
-                        convert(boots), convert(currentHand)).sendPacket(PlayerMapper.wrapPlayer(pl)));
+                        convert(boots), convert(currentHand)).sendPacket(Players.wrapPlayer(pl)));
     }
 
-    public Item convert(ItemStack itemStack) {
-        return ItemFactory.build(itemStack).orElse(ItemFactory.getAir());
+    public org.screamingsandals.lib.item.ItemStack convert(ItemStack itemStack) {
+        return Objects.requireNonNullElse(ItemStackFactory.build(itemStack), ItemStackFactory.getAir());
     }
 
     private void hideArmor() {
         var hiddenPlayerTeam = arena.getGame().getTeamOfPlayer(hiddenPlayer);
-        final var airStack = ItemFactory.getAir();
+        final var airStack = ItemStackFactory.getAir();
         arena.getGame()
                 .getConnectedPlayers()
                 .stream()
@@ -128,15 +130,15 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                 .forEach(pl -> {
                     getEquipPacket(airStack, airStack, airStack, airStack,
                             convert(hiddenPlayer.getInventory().getItemInMainHand()))
-                            .sendPacket(PlayerMapper.wrapPlayer(pl));
+                            .sendPacket(Players.wrapPlayer(pl));
                 });
     }
 
     public void refresh() {
         // TODO Auto-generated method stub
-        final var airStack = ItemFactory.getAir();
+        final var airStack = ItemStackFactory.getAir();
         var hiddenPlayerTeam = arena.getGame().getTeamOfPlayer(hiddenPlayer);
-        Tasker.build(() -> {
+        Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> {
             arena.getGame()
                     .getConnectedPlayers()
                     .stream()
@@ -144,28 +146,30 @@ public class InvisiblePlayerImpl implements InvisiblePlayer {
                     .forEach(pl -> {
                         getEquipPacket(airStack, airStack, airStack, airStack,
                                 convert(hiddenPlayer.getInventory().getItemInMainHand()))
-                                .sendPacket(PlayerMapper.wrapPlayer(pl));
+                                .sendPacket(Players.wrapPlayer(pl));
                     });
-        }).afterOneTick().start();
+        });
 
     }
 
-    private SClientboundSetEquipmentPacket getEquipPacket(Item helmet, Item chestPlate, Item leggings, Item boots,
-            Item hand) {
-        final var packet = new SClientboundSetEquipmentPacket();
+    private ClientboundSetEquipmentPacket getEquipPacket(org.screamingsandals.lib.item.ItemStack helmet, org.screamingsandals.lib.item.ItemStack chestPlate,
+                                                         org.screamingsandals.lib.item.ItemStack leggings, org.screamingsandals.lib.item.ItemStack boots,
+                                                         org.screamingsandals.lib.item.ItemStack hand) {
+        final var packet = ClientboundSetEquipmentPacket.builder();
         packet.entityId(hiddenPlayer.getEntityId());
-        final var slots = packet.slots();
+        final var slots = new HashMap<EquipmentSlot, org.screamingsandals.lib.item.ItemStack>();
         if (hand != null)
-            slots.put(EquipmentSlotMapping.resolve("HAND").orElseThrow(), hand);
+            slots.put(EquipmentSlot.of("HAND"), hand);
         if (helmet != null)
-            slots.put(EquipmentSlotMapping.resolve("HEAD").orElseThrow(), helmet);
+            slots.put(EquipmentSlot.of("HEAD"), helmet);
         if (chestPlate != null)
-            slots.put(EquipmentSlotMapping.resolve("CHEST").orElseThrow(), chestPlate);
+            slots.put(EquipmentSlot.of("CHEST"), chestPlate);
         if (leggings != null)
-            slots.put(EquipmentSlotMapping.resolve("LEGS").orElseThrow(), leggings);
+            slots.put(EquipmentSlot.of("LEGS"), leggings);
         if (boots != null)
-            slots.put(EquipmentSlotMapping.resolve("FEET").orElseThrow(), boots);
-        return packet;
+            slots.put(EquipmentSlot.of("FEET"), boots);
+        packet.slots(slots);
+        return packet.build();
     }
 
     @Override

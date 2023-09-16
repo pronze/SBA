@@ -15,11 +15,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsBedDestroyedMessageSendEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerDeathMessageSendEvent;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
-import java.util.List;
 import java.util.Random;
 
 @Service
@@ -48,7 +47,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     .getInstance()
                     .get(MessageKeys.TEAM_ELIMINATED_MESSAGE)
                     .replace("%team%", teamColorStr + playerTeam.getName())
-                    .send(PlayerMapper.wrapPlayer(gPlayer)));
+                    .send(Players.wrapPlayer(gPlayer)));
         }
     }
 
@@ -71,7 +70,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
 
         final var randomlyChosen = messages.get(RANDOM.nextInt(messages.size()));
         event.getVictim().sendMessage(" ");
-        PlayerMapper.wrapPlayer(event.getVictim()).sendMessage(randomlyChosen);
+        Players.wrapPlayer(event.getVictim()).sendMessage(randomlyChosen);
         event.getVictim().sendMessage(" ");
     }
 

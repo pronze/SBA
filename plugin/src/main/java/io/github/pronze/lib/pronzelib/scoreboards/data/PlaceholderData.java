@@ -5,22 +5,21 @@
 package io.github.pronze.lib.pronzelib.scoreboards.data;
 
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
-import org.bukkit.entity.Player;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.player.Player;
 
 public class PlaceholderData
 {
-    private final PlayerWrapper player;
+    private final Player player;
     private final Scoreboard holder;
     private final String line;
     
-    public PlaceholderData(final PlayerWrapper player, final Scoreboard holder, final String line) {
+    public PlaceholderData(final Player player, final Scoreboard holder, final String line) {
         this.player = player;
         this.holder = holder;
         this.line = line;
     }
     
-    public PlayerWrapper getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
     

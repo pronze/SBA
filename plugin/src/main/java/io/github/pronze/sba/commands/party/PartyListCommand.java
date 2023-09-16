@@ -10,7 +10,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.commands.CommandManager;
@@ -66,7 +66,7 @@ public class PartyListCommand {
                     .replace("%count%", String.valueOf(party.getMembers().size()))
                     .replace("%leader%", (leader))
                     .replace("%members%", (membersComponent))
-                    .send(PlayerMapper.wrapPlayer(sender));
+                    .send(Players.wrapPlayer(sender));
         });
 
     }

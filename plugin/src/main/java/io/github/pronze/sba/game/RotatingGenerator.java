@@ -3,6 +3,8 @@ package io.github.pronze.sba.game;
 import io.github.pronze.sba.utils.ShopUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,15 +23,13 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.Pair;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-import org.screamingsandals.lib.world.LocationMapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class RotatingGenerator implements IRotatingGenerator {
     private Location location;
@@ -67,26 +67,26 @@ public class RotatingGenerator implements IRotatingGenerator {
         final var holoHeight = SBAConfig.getInstance()
                 .node("floating-generator", "height").getDouble(2.0);
 
-        hologram = HologramManager.hologram(LocationMapper.wrapLocation(location.clone().add(0, holoHeight, 0)));
-        hologram.item(ItemFactory.build(stack).orElseThrow())
+        hologram = HologramManager.hologram(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(location.clone().add(0, holoHeight, 0))));
+        hologram.item(ItemStackFactory.build(stack))
                 .itemPosition(Hologram.ItemPosition.BELOW)
                 .rotationMode(Hologram.RotationMode.Y)
                 .rotationTime(Pair.of(1, TaskerTime.TICKS));
 
         hologram.show();
-        viewers.forEach(player -> hologram.addViewer(PlayerMapper.wrapPlayer(player)));
+        viewers.forEach(player -> hologram.addViewer(Players.wrapPlayer(player)));
         scheduleTasks();
     }
 
     @Override
     public void addViewer(@NotNull Player player) {
         if (hologram != null)
-            hologram.addViewer(PlayerMapper.wrapPlayer(player));
+            hologram.addViewer(Players.wrapPlayer(player));
     }
 
     @Override
     public void removeViewer(@NotNull Player player) {
-        hologram.removeViewer(PlayerMapper.wrapPlayer(player));
+        hologram.removeViewer(Players.wrapPlayer(player));
     }
 
     @SuppressWarnings("unchecked")

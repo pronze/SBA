@@ -2,11 +2,13 @@ package io.github.pronze.sba.utils;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import io.github.pronze.sba.config.SBAConfig;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         SBAConfig.class
 })
 public class DateUtils {

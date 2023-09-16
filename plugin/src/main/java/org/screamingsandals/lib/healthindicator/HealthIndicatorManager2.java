@@ -19,9 +19,10 @@ package org.screamingsandals.lib.healthindicator;
 import org.jetbrains.annotations.ApiStatus;
 import org.screamingsandals.lib.Core;
 import org.screamingsandals.lib.event.OnEvent;
+import org.screamingsandals.lib.event.player.PlayerLeaveEvent;
 import org.screamingsandals.lib.packet.PacketMapper;
-import org.screamingsandals.lib.event.player.SPlayerLeaveEvent;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.visuals.Visual;
 
@@ -30,7 +31,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         Core.class,
         PacketMapper.class
 })
@@ -105,7 +107,7 @@ public class HealthIndicatorManager2 {
     }
 
     @OnEvent
-    public void onLeave(SPlayerLeaveEvent event) {
+    public void onLeave(PlayerLeaveEvent event) {
         if (activeIndicators.isEmpty()) {
             return;
         }
