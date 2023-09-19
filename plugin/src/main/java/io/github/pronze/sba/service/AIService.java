@@ -56,9 +56,11 @@ import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -74,7 +76,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
                 NPCManager.class
 })
 @Getter
@@ -171,11 +174,11 @@ public class AIService implements Listener {
                         npc.addTrait(new BedwarsBlockPlace());
                         npc.getOrAddTrait(SkinTrait.class).setSkinName(settings.skin());
 
-                        Tasker.build(() -> {
+                        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
                                 Player ai = (Player) (npc.getEntity());
                                 ai.setCanPickupItems(true);
                                 CompletableFuture.complete(ai);
-                        }).delay(settings.delay(), TaskerTime.TICKS).start();
+                        }, settings.delay(), TaskerTime.TICKS);
 
                 } else {
                         CompletableFuture.complete(null);
@@ -222,7 +225,7 @@ public class AIService implements Listener {
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
                 var game = event.getGame();
-                Tasker.build(() -> {
+                Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> {
                         boolean allAI = true;
                         for (Player p : game.getConnectedPlayers()) {
                                 if (!isNPC(p)) {
@@ -236,7 +239,7 @@ public class AIService implements Listener {
                                         getNPC(p).destroy();
                                 }
                         }
-                }).afterOneTick().start();
+                });
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)

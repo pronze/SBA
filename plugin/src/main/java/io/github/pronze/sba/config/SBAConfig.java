@@ -15,8 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -840,13 +839,13 @@ public class SBAConfig implements IConfigurator {
         return str;
     }
 
-    public Item readDefinedItem(ConfigurationNode node, String def) {
+    public org.screamingsandals.lib.item.ItemStack readDefinedItem(ConfigurationNode node, String def) {
         if (!node.empty()) {
             var obj = node.raw();
-            return ItemFactory.build(obj).orElse(ItemFactory.getAir());
+            return Objects.requireNonNullElse(ItemStackFactory.build(obj), ItemStackFactory.getAir());
         }
 
-        return ItemFactory.build(def).orElse(ItemFactory.getAir());
+        return Objects.requireNonNullElse(ItemStackFactory.build(def), ItemStackFactory.getAir());
     }
 
 }

@@ -5,7 +5,6 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,7 +21,7 @@ import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
 
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
@@ -83,7 +82,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
 
         final var holder = scoreboard.getHolder().of(player);
         if (holder != null) {
-            Tasker.build(() -> game.getRunningTeams().forEach(team -> {
+            Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> game.getRunningTeams().forEach(team -> {
                 if (!holder.hasTeamEntry(team.getName())) {
                     holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
                 }
@@ -97,7 +96,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                                 scoreboardTeam.addEntry(teamPlayer.getName());
                             }
                         });
-            })).afterOneTick().start();
+            }));
         }
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }

@@ -1,12 +1,12 @@
 package io.github.pronze.sba.party;
 import io.github.pronze.sba.wrapper.PlayerSetting;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Component;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.MessageKeys;
@@ -57,7 +57,7 @@ public class Party implements IParty {
                 .replace("%name%", sender.as(Player.class).getDisplayName() + ChatColor.RESET)
                 .replace("%message%", (message))
                 .toComponent();
-        members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
+        members.forEach(player -> Players.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
     }
 
     @Override

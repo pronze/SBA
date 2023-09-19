@@ -5,17 +5,14 @@ import cloud.commandframework.annotations.CommandMethod;
 import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.GamesInventoryService;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.screamingsandals.lib.world.LocationMapper;
 
 @Service
 public class GamesInvNPCCommand {
@@ -52,7 +49,7 @@ public class GamesInvNPCCommand {
         LanguageService
                 .getInstance()
                 .get(MessageKeys.ADDED_NPC)
-                .send(PlayerMapper.wrapPlayer(player));
+                .send(Players.wrapPlayer(player));
     }
 
     @CommandMethod("sba gamesinv removenpc")
@@ -61,8 +58,8 @@ public class GamesInvNPCCommand {
         LanguageService
                 .getInstance()
                 .get(MessageKeys.REMOVABLE_NPC_TOGGLE)
-                .send(PlayerMapper.wrapPlayer(player));
-        GamesInventoryService.getInstance().addEditable(PlayerMapper.wrapPlayer(player),
+                .send(Players.wrapPlayer(player));
+        GamesInventoryService.getInstance().addEditable(Players.wrapPlayer(player),
                 GamesInventoryService.Action.Remove, null);
     }
 
@@ -72,8 +69,8 @@ public class GamesInvNPCCommand {
         LanguageService
                 .getInstance()
                 .get(MessageKeys.SKIN_NPC_TOGGLE)
-                .send(PlayerMapper.wrapPlayer(player));
-        GamesInventoryService.getInstance().addEditable(PlayerMapper.wrapPlayer(player),
+                .send(Players.wrapPlayer(player));
+        GamesInventoryService.getInstance().addEditable(Players.wrapPlayer(player),
                 GamesInventoryService.Action.Skin, skin);
     }
 }

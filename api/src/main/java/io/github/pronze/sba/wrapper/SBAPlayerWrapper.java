@@ -8,7 +8,7 @@ import io.github.pronze.sba.data.ToggleableSetting;
 import lombok.Getter;
 import lombok.Setter;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,12 +19,12 @@ import java.util.Collection;
 
 @Getter
 @Setter
-public class SBAPlayerWrapper extends org.screamingsandals.lib.player.ExtendablePlayerWrapper {
+public class SBAPlayerWrapper extends org.screamingsandals.lib.player.ExtendablePlayer {
     private int shoutCooldown;
     private final ToggleableSetting<PlayerSetting> settings;
 
     public SBAPlayerWrapper(Player player) {
-        super(org.screamingsandals.lib.player.PlayerMapper.wrapPlayer(player));
+        super(Players.wrapPlayer(player));
 
         this.shoutCooldown = 0;
         this.settings = ToggleableSetting.of(PlayerSetting.class);
@@ -50,7 +50,7 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.Extendable
             Collection<? extends Player> receivers = Bukkit.getOnlinePlayers();
             if(Main.isPlayerInGame(as(Player.class)))
                 receivers=Main.getInstance().getGameOfPlayer(as(Player.class)).getConnectedPlayers();
-            receivers.forEach(receiver->PlayerMapper.wrapPlayer(receiver).sendMessage(message));
+            receivers.forEach(receiver->Players.wrapPlayer(receiver).sendMessage(message));
             if (getInstance().hasPermission(Permissions.SHOUT_BYPASS.getKey()) || getDefaultShoutCoolDownTime() == 0) {
                 return;
             }

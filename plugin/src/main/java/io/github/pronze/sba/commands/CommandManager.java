@@ -25,6 +25,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
 
 import io.github.pronze.sba.utils.Logger;
@@ -32,7 +33,8 @@ import io.github.pronze.sba.utils.SBAUtil;
 
 import java.util.function.Function;
 
-@Service(initAnother = {
+@Service
+@ServiceDependencies(initAnother = {
         SBACommand.class,
         GamesInvNPCCommand.class,
         ShoutCommand.class,

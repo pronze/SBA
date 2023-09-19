@@ -1,9 +1,6 @@
 package io.github.pronze.sba.fix;
 
 import org.bukkit.Bukkit;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.lib.bukkit.utils.nms.Version;
-import org.screamingsandals.lib.utils.reflect.Reflect;
 
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.Logger;

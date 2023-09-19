@@ -15,6 +15,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -62,7 +63,7 @@ public class PopupTower {
         placeAnimated(BlockFace.WEST, BlockFace.SOUTH);
         placeAnimated(BlockFace.EAST, BlockFace.SOUTH);
 
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             // second platform
             final Block secondPlatform = centerPoint.getBlock().getRelative(BlockFace.UP, 5);
             placeBlock(secondPlatform.getLocation(), material);
@@ -112,7 +113,7 @@ public class PopupTower {
 
             final Location firstLadderBlock = centerPoint.getBlock().getRelative(placementFace).getLocation();
             placeLadderRow(5, firstLadderBlock, BlockFace.UP, placementFace.getOppositeFace());
-        }).delay(40L, TaskerTime.TICKS).start();
+        }, 40L, TaskerTime.TICKS);
     }
 
     public void placeAnimated(BlockFace direction, BlockFace start) {
@@ -125,7 +126,7 @@ public class PopupTower {
         for (int i = 0; i < length; i++) {
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             Location finalLastLoc = lastLoc;
-            Tasker.build(() -> placeBlock(finalLastLoc, material)).delay((delay += 1), TaskerTime.TICKS).start();
+            Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> placeBlock(finalLastLoc, material), (delay += 1), TaskerTime.TICKS);
         }
     }
 

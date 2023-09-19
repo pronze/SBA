@@ -7,10 +7,11 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.SenderWrapper;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.player.Sender;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
 
@@ -19,8 +20,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Service(dependsOn = {
-        PlayerMapper.class,
+@Service
+@ServiceDependencies(dependsOn = {
         Logger.class
 })
 public class PlayerWrapperService implements WrapperService<Player, SBAPlayerWrapper> {
@@ -35,9 +36,9 @@ public class PlayerWrapperService implements WrapperService<Player, SBAPlayerWra
     public void registerMapping() {
         if(SBA.isBroken())return;
         if(!init)
-            PlayerMapper.UNSAFE_getPlayerConverter()
+            Players.UNSAFE_getPlayerConverter()
                     .registerW2P(SBAPlayerWrapper.class, wrapper -> {
-                        if (wrapper.getType() == SenderWrapper.Type.PLAYER) {
+                        if (wrapper.getType() == Sender.Type.PLAYER) {
                             if(!playerData.containsKey(wrapper.getUuid())){
                                 var player = wrapper.as(Player.class);// Bukkit.getServer().getPlayer(wrapper.getUuid());
                                 register(player);

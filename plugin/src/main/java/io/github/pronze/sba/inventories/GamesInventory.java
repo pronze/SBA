@@ -7,9 +7,10 @@ import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import org.screamingsandals.simpleinventories.events.PostClickEvent;
@@ -27,15 +28,14 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         SBAConfig.class,
         SimpleInventoriesCore.class
 })
@@ -115,7 +115,7 @@ public class GamesInventory implements Listener {
         }
         final var format = inventoryMap.get(labels.get(mode));
         if (format != null) {
-            PlayerMapper.wrapPlayer(player).openInventory(format);
+            Players.wrapPlayer(player).openInventory(format);
         }
     }
 
@@ -127,7 +127,7 @@ public class GamesInventory implements Listener {
         }
         final var format = inventoryMap.get(mode);
         if (format != null) {
-            PlayerMapper.wrapPlayer(player).openInventory(format);
+            Players.wrapPlayer(player).openInventory(format);
         }
     }
 
@@ -190,7 +190,7 @@ public class GamesInventory implements Listener {
                 var couldNotFindGameMessage = LanguageService
                         .getInstance()
                         .get(MessageKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
-                final var playerWrapper = PlayerMapper.wrapPlayer(player);
+                final var playerWrapper = Players.wrapPlayer(player);
 
                 player.closeInventory();
                 properties.stream()

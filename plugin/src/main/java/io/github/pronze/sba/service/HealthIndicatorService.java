@@ -3,10 +3,10 @@ package io.github.pronze.sba.service;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.IArena;
-import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
 import io.github.pronze.sba.game.ArenaManager;
 
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Color;
 import org.screamingsandals.lib.spectator.Component;
 
@@ -19,24 +19,21 @@ import org.screamingsandals.bedwars.api.events.BedwarsGameEndingEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.lib.healthindicator.HealthIndicator;
 import org.screamingsandals.lib.healthindicator.HealthIndicator2;
 import org.screamingsandals.lib.healthindicator.HealthIndicatorImpl2;
 import org.screamingsandals.lib.healthindicator.HealthIndicatorManager2;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.visuals.Visual;
 
-import java.beans.DefaultPersistenceDelegate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         HealthIndicatorManager2.class
 })
 public class HealthIndicatorService implements Listener {
@@ -73,7 +70,7 @@ public class HealthIndicatorService implements Listener {
         SBA.getInstance().registerListener(this);
     }
 
-    private String placeholderProvider(PlayerWrapper p) {
+    private String placeholderProvider(org.screamingsandals.lib.player.Player p) {
         if (defaultPlaceholderProvider.equals(placeholderProvider)) {
             return p.getName();
         }
@@ -106,12 +103,12 @@ public class HealthIndicatorService implements Listener {
 
         game.getConnectedPlayers()
                 .stream()
-                .map(PlayerMapper::wrapPlayer)
+                .map(Players::wrapPlayer)
                 .forEach(healthIndicator::addViewer);
 
         game.getConnectedPlayers()
                 .stream()
-                .map(PlayerMapper::wrapPlayer)
+                .map(Players::wrapPlayer)
                 .forEach(healthIndicator::addTrackedPlayer);
 
         healthIndicatorMap.put(ArenaManager.getInstance().get(game.getName()).orElseThrow(), healthIndicator);
@@ -119,7 +116,7 @@ public class HealthIndicatorService implements Listener {
 
     @EventHandler
     public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
-        final var playerWrapper = PlayerMapper.wrapPlayer(event.getPlayer());
+        final var playerWrapper = Players.wrapPlayer(event.getPlayer());
         final var healthIndicator = healthIndicatorMap
                 .get(ArenaManager.getInstance().get(event.getGame().getName()).orElse(null));
         if (healthIndicator != null) {

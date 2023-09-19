@@ -7,9 +7,6 @@ import io.github.pronze.sba.game.GameTierEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.service.DynamicSpawnerLimiterService;
-import io.github.pronze.sba.service.GamesInventoryService;
-import io.github.pronze.sba.service.NPCStoreService;
-import io.github.pronze.sba.service.PlayerWrapperService;
 import lombok.NonNull;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
@@ -20,8 +17,6 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.nms.accessors.DirectionAccessor;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.spectator.title.TimesProvider;
 import org.screamingsandals.lib.spectator.title.Title;
 import org.bukkit.entity.Player;
@@ -210,8 +205,8 @@ public class SBAUtil {
             sender.sendMessage("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, org.screamingsandals.lib.spectator.Component title, org.screamingsandals.lib.spectator.Component subtitle, int fadeIn, int stay,
-            int fadeOut) {
+    public static void sendTitle(org.screamingsandals.lib.player.Player player, org.screamingsandals.lib.spectator.Component title, org.screamingsandals.lib.spectator.Component subtitle, int fadeIn, int stay,
+                                 int fadeOut) {
         var titleComponent = Title.title(
                 title,
                 subtitle,

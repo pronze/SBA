@@ -6,13 +6,9 @@ import io.github.pronze.sba.events.SBAFinalKillEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.party.IParty;
 import io.github.pronze.sba.party.PartyManager;
-import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,13 +17,11 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent.Reason;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,11 +30,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.*;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.Game;
-import org.screamingsandals.bedwars.lib.lang.I;
-import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
 import org.screamingsandals.bedwars.utils.MiscUtils;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Component;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -57,12 +50,10 @@ import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import static org.screamingsandals.bedwars.lib.lang.I18n.i18nonly;
@@ -314,7 +305,7 @@ public class BedWarsListener implements Listener {
                                         message = seconds == 1 ? message
                                                 .replace("seconds", "second") : message;
                                         player.sendMessage(message);
-                                        SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player),
+                                        SBAUtil.sendTitle(Players.wrapPlayer(player),
                                                 Component.fromLegacy(ShopUtil.translateColors("&c" + seconds)),
                                                 org.screamingsandals.lib.spectator.Component.empty(), 0, 20, 0);
                                     }
@@ -374,12 +365,12 @@ public class BedWarsListener implements Listener {
                 if (party.getPartyLeader().getInstance() == e.getPlayer()) {
                     party.getMembers().forEach(member -> {
                         if (member != e.getPlayer()) {
-                            Tasker.build(() -> {
+                            Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> {
                                 var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
                                 if (memberGame != null) {
                                     memberGame.leaveFromGame(member.getInstance());
                                 }
-                            }).afterOneTick().start();
+                            });
                         }
                     });
                 }
@@ -395,14 +386,14 @@ public class BedWarsListener implements Listener {
         }
         final var game = Main.getInstance().getGameOfPlayer(victim);
         // query arena instance for access to Victim/Killer data
-        Tasker.build(() -> {
+        Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> {
             ArenaManager
                     .getInstance()
                     .get(game.getName())
                     .ifPresent(arena -> {
                         arena.addVisualsForPlayer(victim);
                     });
-        }).afterOneTick().start();
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -438,7 +429,7 @@ public class BedWarsListener implements Listener {
                 arena_.removeHiddenPlayer(player);
             });
         }
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             if (inventoryContent.containsKey(player.getUniqueId())) {
                 player.getInventory().clear();
                 player.getInventory().setContents(inventoryContent.get(player.getUniqueId()));
@@ -450,7 +441,7 @@ public class BedWarsListener implements Listener {
 
             final var game = Main.getInstance().getGameOfPlayer(player);
             ShopUtil.applyTeamUpgrades(player, game);
-        }).delay(2, TaskerTime.TICKS).start();
+        }, 2, TaskerTime.TICKS);
 
     }
 
@@ -477,7 +468,7 @@ public class BedWarsListener implements Listener {
         }
         if(!collidableValue.containsKey(player.getUniqueId()))
             collidableValue.put(player.getUniqueId(), player.isCollidable());
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
 
             player.getInventory().clear();
 
@@ -503,7 +494,7 @@ public class BedWarsListener implements Listener {
                 player.getInventory().setItem(leavePosition, SBAConfig.getInstance().spectator().leave().get());
             }
             player.setGameMode(GameMode.ADVENTURE);
-        }).delay(1, TaskerTime.TICKS).start();
+        }, 1, TaskerTime.TICKS);
     }
 
     @EventHandler
@@ -578,7 +569,7 @@ public class BedWarsListener implements Listener {
         }
         if (!SBAConfig.getInstance().spectator().adventure())
             return;
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 360000, 0));
             player.setAllowFlight(true);
             player.setFlying(true);
@@ -589,7 +580,7 @@ public class BedWarsListener implements Listener {
             arena.ifPresent(arena_ -> {
                 arena_.addHiddenPlayer(player);
             });
-        }).delay(1, TaskerTime.TICKS).start();
+        }, 1, TaskerTime.TICKS);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
