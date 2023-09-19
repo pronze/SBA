@@ -428,13 +428,16 @@ public class PlayerListener implements Listener {
 
         BlockFace face = event.getBlockFace();
         Location loc = event.getClickedBlock().getRelative(face).getLocation();
-
-        Collection<Entity> players = loc.getNearbyEntitiesByType(Player.class, 1.5, 1.5, 1.5, null);
-        for (Entity playerEntity : players) {
-            Player player = (Player) playerEntity;
-            if (player.getGameMode() != GameMode.SURVIVAL) {
-                player.teleport(player.getLocation().add(0, 1.5, 0), TeleportCause.SPECTATE);
+        try {
+            Collection<Entity> players = loc.getNearbyEntitiesByType(Player.class, 1.5, 1.5, 1.5, null);
+            for (Entity playerEntity : players) {
+                Player player = (Player) playerEntity;
+                if (player.getGameMode() != GameMode.SURVIVAL) {
+                    player.teleport(player.getLocation().add(0, 1.5, 0), TeleportCause.SPECTATE);
+                }
             }
+        } catch (Throwable t) {
+            //Does not work on spigot
         }
     }
 
