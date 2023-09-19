@@ -24,16 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
-import org.screamingsandals.bedwars.api.upgrades.Upgrade;
-import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
-import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
@@ -48,12 +42,8 @@ import org.screamingsandals.simpleinventories.inventory.Price;
 import org.screamingsandals.simpleinventories.inventory.SubInventory;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -288,9 +278,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
         }
 
-        var materialItem = ItemFactory
-                .build(type.getStack(priceAmount))
-                .orElseThrow();
+        var materialItem = Objects.requireNonNull(ItemStackFactory.build(type.getStack(priceAmount)));
 
         // purchase failed, player does not have enough resources to purchase
         if (!event.hasPlayerInInventory(materialItem)) {
@@ -325,7 +313,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
 
         AtomicReference<ItemStack> newItemRef = new AtomicReference<ItemStack>(newItem);
-        AtomicReference<Item> newMaterialItemRef = new AtomicReference<Item>(materialItem);
+        AtomicReference<org.screamingsandals.lib.item.ItemStack> newMaterialItemRef = new AtomicReference<>(materialItem);
         AtomicReference<String[]> messageOnFail = new AtomicReference<>(MessageKeys.CANNOT_BUY);
         final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type,messageOnFail);
 
@@ -360,7 +348,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(ItemFactory.build(newItem).orElseThrow()))
+                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(Objects.requireNonNull(ItemStackFactory.build(newItem))))
                         .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
@@ -517,7 +505,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                             player, event.getStack().as(ItemStack.class), propertyData);
                     Bukkit.getServer().getPluginManager().callEvent(applyEvent);
 
-                    event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(event.getStack()));
+                    event.setStack(Objects.requireNonNullElse(ItemStackFactory.build(applyEvent.getStack()), event.getStack()));
                 }
             });
 
@@ -532,7 +520,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     public abstract void onPreGenerateItem(ItemRenderEvent event);
 
     public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
-            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type, AtomicReference<String[]> messageOnFail);
+            AtomicReference<org.screamingsandals.lib.item.ItemStack> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type, AtomicReference<String[]> messageOnFail);
 
     @NotNull
     public abstract InventorySetBuilder getInventorySetBuilder();

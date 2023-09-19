@@ -34,6 +34,7 @@ dependencies {
     implementation "cloud.commandframework:cloud-annotations:" + CLOUD_COMMANDS_VERSION, {
         exclude group: 'net.kyori'
     }
+    implementation 'org.spongepowered:configurate-yaml:4.1.2'
     compileOnly "net.citizensnpcs:citizens-main:2.0.31-SNAPSHOT"
 }
 test {

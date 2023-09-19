@@ -1,12 +1,14 @@
 package io.github.pronze.sba.commands.party;
 
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.commands.CommandManager;
 
-@Service(initAnother = {
+@Service
+@ServiceDependencies(initAnother = {
                 PartyAcceptCommand.class,
                 PartyChatCommand.class,
                 PartyDebugCommand.class,

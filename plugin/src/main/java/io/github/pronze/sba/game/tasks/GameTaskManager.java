@@ -6,12 +6,15 @@ import io.github.pronze.sba.manager.IGameTaskManager;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service(dependsOn = SBAConfig.class)
+@Service
+@ServiceDependencies(dependsOn = SBAConfig.class)
 public class GameTaskManager implements IGameTaskManager {
 
     public static GameTaskManager getInstance() {

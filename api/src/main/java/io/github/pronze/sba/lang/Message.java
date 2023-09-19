@@ -3,25 +3,21 @@ package io.github.pronze.sba.lang;
 import io.github.pronze.sba.AddonAPI;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.sender.CommandSenderWrapper;
-import org.screamingsandals.lib.sender.CommandSenderWrapper.Type;
+import org.screamingsandals.lib.sender.CommandSender;
+import org.screamingsandals.lib.sender.CommandSender.Type;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.libs.kyori.adventure.text.ComponentLike;
 
 @RequiredArgsConstructor(staticName = "of", access = AccessLevel.PRIVATE)
 public class Message implements Cloneable {
@@ -237,7 +233,7 @@ public class Message implements Cloneable {
                 .collect(Collectors.toList());
     }
 
-    public void send(CommandSenderWrapper... wrapper) {
+    public void send(CommandSender... wrapper) {
         // var message = toComponentList();
         // for (var sender : wrapper) {
         // message.forEach(sender::sendMessage);
@@ -252,7 +248,7 @@ public class Message implements Cloneable {
         }
     }
 
-    public void send(List<CommandSenderWrapper> wrapperList) {
+    public void send(List<CommandSender> wrapperList) {
 
         wrapperList.forEach(receiver -> {
             Player target = null;

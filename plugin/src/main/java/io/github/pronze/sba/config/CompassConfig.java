@@ -1,27 +1,27 @@
 package io.github.pronze.sba.config;
 
-import io.github.pronze.sba.config.ConfigGenerator.ConfigSection;
-import io.github.pronze.sba.utils.FirstStartConfigReplacer;
-import io.github.pronze.sba.utils.Logger;
-import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.Material;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.utils.annotations.Service;
-import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.yaml.NodeStyle;
-import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
-import io.github.pronze.sba.utils.SBAUtil;
-import java.io.File;
-import java.util.*;
-import java.util.List;
+//import io.github.pronze.sba.config.ConfigGenerator.ConfigSection;
+//import io.github.pronze.sba.utils.FirstStartConfigReplacer;
+//import io.github.pronze.sba.utils.Logger;
+//import net.md_5.bungee.api.ChatColor;
+//
+//import org.bukkit.Material;
+//import org.bukkit.plugin.java.JavaPlugin;
+//import org.screamingsandals.bedwars.Main;
+//import org.screamingsandals.lib.item.Item;
+//import org.screamingsandals.lib.item.builder.ItemFactory;
+//import org.screamingsandals.lib.plugin.ServiceManager;
+//import org.screamingsandals.lib.utils.annotations.Service;
+//import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
+//import org.spongepowered.configurate.ConfigurateException;
+//import org.spongepowered.configurate.ConfigurationNode;
+//import org.spongepowered.configurate.serialize.SerializationException;
+//import org.spongepowered.configurate.yaml.NodeStyle;
+//import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
+//import io.github.pronze.sba.utils.SBAUtil;
+//import java.io.File;
+//import java.util.*;
+//import java.util.List;
 /*
 @Service
 public class CompassConfig implements IConfigurator {

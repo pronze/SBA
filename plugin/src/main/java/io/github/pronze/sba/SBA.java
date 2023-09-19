@@ -43,13 +43,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
-import io.github.pronze.sba.VersionInfo;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.lib.bstats.bukkit.Metrics;
@@ -59,20 +57,17 @@ import org.screamingsandals.lib.healthindicator.HealthIndicatorManager2;
 import org.screamingsandals.lib.hologram.HologramManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.packet.PacketMapper;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.plugin.PluginContainer;
 import org.screamingsandals.lib.sidebar.SidebarManager;
-import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.PlatformType;
 import org.screamingsandals.lib.utils.annotations.Init;
 import org.screamingsandals.lib.utils.annotations.Plugin;
 import org.screamingsandals.lib.utils.annotations.PluginDependencies;
-import org.screamingsandals.lib.utils.reflect.Reflect;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -308,7 +303,7 @@ public class SBA extends PluginContainer implements AddonAPI {
     @Override
     public SBAPlayerWrapper getPlayerWrapper(Player player) {
         return PlayerWrapperService.getInstance().get(player)
-                .orElseGet(() -> PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
+                .orElseGet(() -> Players.wrapPlayer(player).as(SBAPlayerWrapper.class));
     }
 
     @Override
@@ -323,7 +318,7 @@ public class SBA extends PluginContainer implements AddonAPI {
 
     @Override
     public String getVersion() {
-        return getPluginDescription().getVersion();
+        return getPluginDescription().version();
     }
 
     @Override

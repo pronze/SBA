@@ -14,11 +14,10 @@ import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.citizens.HologramTrait;
 import io.github.pronze.sba.utils.citizens.ReturnToStoreTrait;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.trait.Gravity;
 import net.citizensnpcs.trait.LookClose;
 import net.citizensnpcs.trait.SkinTrait;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Component;
 
 import org.apache.commons.lang.StringUtils;
@@ -30,8 +29,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.StringUtil;
-import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -43,12 +40,11 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-import org.screamingsandals.lib.world.LocationMapper;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
+import org.screamingsandals.lib.world.Location;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -105,9 +101,7 @@ public class Arena implements IArena {
         final var invisiblePlayer = new InvisiblePlayerImpl(player, this);
         invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
 
-        Tasker.build(() -> {
-            invisiblePlayer.vanish();
-        }).afterOneTick().start();
+        Tasker.run(DefaultThreads.GLOBAL_THREAD, invisiblePlayer::vanish);
 
     }
 
@@ -173,7 +167,7 @@ public class Arena implements IArena {
         LanguageService
                 .getInstance()
                 .get(MessageKeys.GAME_START_MESSAGE)
-                .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
+                .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer).toArray(org.screamingsandals.lib.player.Player[]::new));
 
         // spawn rotating generators
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
@@ -240,7 +234,7 @@ public class Arena implements IArena {
                         t.printStackTrace();
                     }
 
-                    final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+                    final var npc = NPC.of(Objects.requireNonNull(Location.fromPlatform(store.getStoreLocation())))
                             .displayName(name)
                             .lookAtPlayer(true)
                             .skin(skin)
@@ -250,7 +244,7 @@ public class Arena implements IArena {
 
                     game.getConnectedPlayers()
                             .stream()
-                            .map(PlayerMapper::wrapPlayer)
+                            .map(Players::wrapPlayer)
                             .forEach(npc::addViewer);
                     npc.show();
                 });
@@ -353,7 +347,7 @@ public class Arena implements IArena {
                 .toComponent();
 
         team.getConnectedPlayers()
-                .forEach(player -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), title, subtitle, 0, 40, 20));
+                .forEach(player -> SBAUtil.sendTitle(Players.wrapPlayer(player), title, subtitle, 0, 40, 20));
 
         final var destroyer = e.getPlayer();
         if (destroyer != null) {
@@ -389,7 +383,7 @@ public class Arena implements IArena {
             if (((RotatingGenerator) gen).getStack().getType() != Material.AIR)
                 gen.removeViewer(player);
         });
-        stores.values().forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
+        stores.values().forEach(npc -> npc.removeViewer(Players.wrapPlayer(player)));
     }
 
     public void addVisualsForPlayer(Player player) {
@@ -397,7 +391,7 @@ public class Arena implements IArena {
             if (((RotatingGenerator) gen).getStack().getType() != Material.AIR)
                 gen.addViewer(player);
         });
-        stores.values().forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
+        stores.values().forEach(npc -> npc.addViewer(Players.wrapPlayer(player)));
     }
 
     public void removePlayerFromGame(Player player) {
@@ -483,7 +477,7 @@ public class Arena implements IArena {
             winner.getConnectedPlayers()
                     .forEach(player -> WinTeamPlayers.add(player.getDisplayName() + ChatColor.RESET));
             winner.getConnectedPlayers()
-                    .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle,
+                    .forEach(pl -> SBAUtil.sendTitle(Players.wrapPlayer(pl), victoryTitle,
                             org.screamingsandals.lib.spectator.Component.empty(), 0, 90, 0));
 
             LanguageService
@@ -504,8 +498,8 @@ public class Arena implements IArena {
                     .replace("%second_killer_score%", String.valueOf(secondKillerScore))
                     .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
                     
-                    .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer)
-                            .toArray(PlayerWrapper[]::new));
+                    .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer)
+                            .toArray(org.screamingsandals.lib.player.Player[]::new));
         }
     }
 
