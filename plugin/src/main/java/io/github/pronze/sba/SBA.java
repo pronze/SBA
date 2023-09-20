@@ -152,9 +152,9 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.init(cachedPluginInstance);
 
         if (Main.getVersionNumber() < 109) {
-            showErrorMessage("Minecraft server is running versions below 1.9.4, please upgrade!");
-            Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
-            return;
+            //showErrorMessage("Minecraft server is running versions below 1.9.4, please upgrade!");
+            //Bukkit.getServer().getPluginManager().disablePlugin(getPluginInstance());
+            //return;
         }
         fixs = new ArrayList<>();
         fixs.add(BungeecordNPC.getInstance());

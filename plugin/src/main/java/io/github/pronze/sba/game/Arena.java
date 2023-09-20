@@ -167,7 +167,8 @@ public class Arena implements IArena {
         LanguageService
                 .getInstance()
                 .get(MessageKeys.GAME_START_MESSAGE)
-                .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer).toArray(org.screamingsandals.lib.player.Player[]::new));
+                .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer)
+                        .toArray(org.screamingsandals.lib.player.Player[]::new));
 
         // spawn rotating generators
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
@@ -207,7 +208,11 @@ public class Arena implements IArena {
                             // find a better version independent way to mock entities lol
                             mockEntity = (Bat) game.getGameWorld()
                                     .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                            mockEntity.setAI(false);
+                            try {
+                                mockEntity.setAI(false);
+                            } catch (Throwable t) {
+                                // 1.8.8 doesn't have that
+                            }
                         }
 
                         // set fake entity to avoid bw listener npe
@@ -459,10 +464,9 @@ public class Arena implements IArena {
                     thirdKillerUUID = entry.getKey();
                 }
             }
-            firstKillerUsername  = firstKillerName;
-            secondKillerUsername  = secondKillerName;
-            thirdKillerUsername  = thirdKillerName;
-
+            firstKillerUsername = firstKillerName;
+            secondKillerUsername = secondKillerName;
+            thirdKillerUsername = thirdKillerName;
 
             firstKillerName = replaceNameWithDisplayName(nullStr, firstKillerName, firstKillerUUID);
             secondKillerName = replaceNameWithDisplayName(nullStr, secondKillerName, secondKillerUUID);
@@ -497,7 +501,7 @@ public class Arena implements IArena {
                     .replace("%first_killer_score%", String.valueOf(firstKillerScore))
                     .replace("%second_killer_score%", String.valueOf(secondKillerScore))
                     .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
-                    
+
                     .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer)
                             .toArray(org.screamingsandals.lib.player.Player[]::new));
         }
@@ -565,12 +569,14 @@ public class Arena implements IArena {
 
     Map<Player, Player> tracking = new HashMap<>();
 
-    public void track(Player source, Player target)
-    {
-        if(!game.isPlayerInAnyTeam(source))return;
-        if(!game.isPlayerInAnyTeam(target))return;
+    public void track(Player source, Player target) {
+        if (!game.isPlayerInAnyTeam(source))
+            return;
+        if (!game.isPlayerInAnyTeam(target))
+            return;
         tracking.put(source, target);
     }
+
     public void onGameTick(BedwarsGameTickEvent e) {
         Game game = e.getGame();
         for (var p : game.getConnectedPlayers()) {

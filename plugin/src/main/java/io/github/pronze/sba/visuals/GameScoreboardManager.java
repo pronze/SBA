@@ -88,7 +88,13 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 }
 
                 final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+                try{
                 scoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+                }
+                catch(Throwable t)
+                {
+                    //1.8.8
+                }
 
                 team.getConnectedPlayers()
                         .forEach(teamPlayer -> {
