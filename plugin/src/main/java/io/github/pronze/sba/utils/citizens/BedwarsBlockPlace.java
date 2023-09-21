@@ -120,16 +120,21 @@ public class BedwarsBlockPlace extends Trait {
     }
 
     public boolean isBlockVisible(Block b) {
-        Player aiPlayer = (Player) getNPC().getEntity();
-        if (aiPlayer == null)
-            return false;
-        World w = aiPlayer.getWorld();
-        var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
-                aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
-                10);
-        if (rayTraceCheck == null)
-            return false;
-        return rayTraceCheck.getHitBlock().equals(b);
+        try {
+            Player aiPlayer = (Player) getNPC().getEntity();
+            if (aiPlayer == null)
+                return false;
+            World w = aiPlayer.getWorld();
+            var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
+                    aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
+                    10);
+            if (rayTraceCheck == null)
+                return false;
+            return rayTraceCheck.getHitBlock().equals(b);
+        } catch (Throwable t) {
+            // 1.8.8
+            return true;
+        }
     }
 
     /*

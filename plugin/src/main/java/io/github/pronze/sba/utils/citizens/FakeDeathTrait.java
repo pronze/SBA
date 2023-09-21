@@ -34,6 +34,48 @@ public class FakeDeathTrait extends Trait {
     // 3.Getting blocks from shops
     // 4.Collect ressource
 
+    class Pickup18 {
+        public void pick(Item itemEntity, ItemStack is, int space) {
+            PlayerPickupItemEvent pickupEvent = new PlayerPickupItemEvent(
+                    (Player) npc.getEntity(),
+                    itemEntity,
+                    Math.max(0, is.getAmount() - space));
+
+            Bukkit.getPluginManager().callEvent(pickupEvent);
+
+            if (!pickupEvent.isCancelled()) {
+                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
+                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
+                blockPlace().getBlock(getNpcEntity().getInventory());
+                if (pickupEvent.getRemaining() > 0) {
+                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
+                } else {
+                    itemEntity.remove();
+                }
+            }
+        }
+    }
+
+    class Pickup112 {
+        public void pick(Item itemEntity, ItemStack is, int space) {
+            EntityPickupItemEvent pickupEvent = new EntityPickupItemEvent(
+                    (LivingEntity) npc.getEntity(),
+                    itemEntity,
+                    Math.max(0, is.getAmount() - space));
+            Bukkit.getPluginManager().callEvent(pickupEvent);
+            if (!pickupEvent.isCancelled()) {
+                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
+                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
+                blockPlace().getBlock(getNpcEntity().getInventory());
+                if (pickupEvent.getRemaining() > 0) {
+                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
+                } else {
+                    itemEntity.remove();
+                }
+            }
+        }
+    }
+
     private List<AiGoal> goals = new ArrayList<>();
     @Getter
     @Setter
@@ -157,39 +199,9 @@ public class FakeDeathTrait extends Trait {
                     int space = getAmountOfSpaceFor(is, getNpcEntity().getInventory());
                     if (space > 0) {
                         if (Version.isVersion(1, 12)) {
-                            EntityPickupItemEvent pickupEvent = new EntityPickupItemEvent(
-                                    (LivingEntity) npc.getEntity(),
-                                    itemEntity,
-                                    Math.max(0, is.getAmount() - space));
-                            Bukkit.getPluginManager().callEvent(pickupEvent);
-                            if (!pickupEvent.isCancelled()) {
-                                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
-                                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
-                                blockPlace().getBlock(getNpcEntity().getInventory());
-                                if (pickupEvent.getRemaining() > 0) {
-                                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
-                                } else {
-                                    itemEntity.remove();
-                                }
-                            }
+                            new Pickup112().pick(itemEntity, is, space);
                         } else {
-                            PlayerPickupItemEvent pickupEvent = new PlayerPickupItemEvent(
-                                    (Player) npc.getEntity(),
-                                    itemEntity,
-                                    Math.max(0, is.getAmount() - space));
-
-                            Bukkit.getPluginManager().callEvent(pickupEvent);
-
-                            if (!pickupEvent.isCancelled()) {
-                                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
-                                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
-                                blockPlace().getBlock(getNpcEntity().getInventory());
-                                if (pickupEvent.getRemaining() > 0) {
-                                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
-                                } else {
-                                    itemEntity.remove();
-                                }
-                            }
+                            new Pickup18().pick(itemEntity, is, space);
                         }
                     }
                 }
@@ -202,8 +214,12 @@ public class FakeDeathTrait extends Trait {
         m.setAmount(1);
         var oneStack = new ItemStack(m).getMaxStackSize();
         int space = 0;
-
-        var inventoryContent = inv.getStorageContents();
+        ItemStack[] inventoryContent = null;
+        try {
+            inventoryContent = inv.getStorageContents();
+        } catch (Throwable t) {
+            inventoryContent = inv.getContents();
+        }
 
         for (int index = 0; index < inventoryContent.length; index++) {
             var itemStack = inventoryContent[index];
