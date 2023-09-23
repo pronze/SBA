@@ -51,7 +51,8 @@ public class SLib203Fix extends BaseFix {
         shopReplace("FIREWORK;", "FIREWORK_ROCKET;");
         shopReplace("KNOCKBACK:", "knockback:");
         shopReplace("ARROW_DAMAGE:", "power:");
-        shopReplace("ARROW_KNOCKBACK:", "punch:");
+        shopReplace("ARROW_KNOCKBACK:", "punch:");        
+        shopReplace("ARROW_knockback:", "punch:");
         shopReplace(": JUMP", ": jump_boost");
         shopReplace(": REGENERATION", ": regeneration");
         shopReplace(": SLOW", ": slowness");
