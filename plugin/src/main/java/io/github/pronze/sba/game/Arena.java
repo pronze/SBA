@@ -1,6 +1,7 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.tasks.BaseGameTask;
@@ -204,19 +205,21 @@ public class Arena implements IArena {
                             Main.unregisterGameEntity(villager);
                         }
 
-                        if (mockEntity == null) {
-                            // find a better version independent way to mock entities lol
-                            mockEntity = (Bat) game.getGameWorld()
-                                    .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                            try {
-                                mockEntity.setAI(false);
-                            } catch (Throwable t) {
-                                // 1.8.8 doesn't have that
+                        if (!SBA.sbw_0_2_30) {
+                            if (mockEntity == null){
+                                // find a better version independent way to mock entities lol
+                                mockEntity = (Bat) game.getGameWorld()
+                                        .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                                try {
+                                    mockEntity.setAI(false);
+                                } catch (Throwable t) {
+                                    // 1.8.8 doesn't have that
+                                }
                             }
-                        }
 
-                        // set fake entity to avoid bw listener npe
-                        Reflect.setField(nonAPIStore, "entity", mockEntity);
+                            // set fake entity to avoid bw listener npe
+                            Reflect.setField(nonAPIStore, "entity", mockEntity);
+                        }
                     } catch (Throwable t) {
                         Logger.error(
                                 "SBA cannot unspawn the store, is something preventing the spawning of the stores?");
@@ -293,14 +296,20 @@ public class Arena implements IArena {
 
                             npc.getNavigator().setTarget(nonAPIStore.getStoreLocation());
 
-                            if (mockEntity == null) {
-                                // find a better version independent way to mock entities lol
-                                mockEntity = (Bat) game.getGameWorld()
-                                        .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                                mockEntity.setAI(false);
+                            if (!SBA.sbw_0_2_30) {
+                                if (mockEntity == null) {
+                                    // find a better version independent way to mock entities lol
+                                    mockEntity = (Bat) game.getGameWorld()
+                                            .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                                    try {
+                                        mockEntity.setAI(false);
+                                    } catch (Throwable t) {
+                                        // 1.8.8 doesn't have that
+                                    }
+                                }
+                                // set fake entity to avoid bw listener npe
+                                Reflect.setField(nonAPIStore, "entity", mockEntity);
                             }
-                            // set fake entity to avoid bw listener npe
-                            Reflect.setField(nonAPIStore, "entity", mockEntity);
 
                             final var file = store.getShopFile();
 

@@ -63,10 +63,10 @@ data:
           identifier: custom_trap_1
           target: team
           effects:
-            - type: JUMP
+            - type: jump_boost
               duration: 600
               level: 6
-            - type: REGENERATION
+            - type: regeneration
               duration: 600
               level: 2
         stack:

@@ -26,7 +26,7 @@ data:
     rows: 6
     render_actual_rows: 6
   items:
-   - stack: "FIREWORK;1;§7Random Map;§8Solo; ;§aClick to Play"
+   - stack: "FIREWORK_ROCKET;1;§7Random Map;§8Solo; ;§aClick to Play"
      row: 4
      column: 3
      properties:

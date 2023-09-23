@@ -216,7 +216,14 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .forEach(effectItem -> {
                                         try {
                                             String effectType = effectItem.childrenMap().get("type").getString();
-                                            PotionEffectType type_ = PotionEffectType.getByName(effectType);
+                                            var slibEffect = org.screamingsandals.lib.item.meta.PotionEffectType.ofNullable(effectType);
+
+                                            PotionEffectType type_;
+                                            if (slibEffect != null) {
+                                                type_ = slibEffect.as(PotionEffectType.class);
+                                            } else {
+                                                type_ = PotionEffectType.getByName(effectType);
+                                            }
                                             if (type_ == null) {
                                                 Logger.error("{} is not a recognized Potion effect", effectType);
                                                 return;
