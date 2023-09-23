@@ -12,6 +12,7 @@ import io.github.pronze.sba.fix.MohistFix;
 import io.github.pronze.sba.fix.PerWorldPluginFix;
 import io.github.pronze.sba.fix.ViaVersionFix;
 import io.github.pronze.sba.fix.WoolFix;
+import io.github.pronze.sba.fix.SLib203Fix;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.tasks.GameTaskManager;
@@ -163,6 +164,7 @@ public class SBA extends PluginContainer implements AddonAPI {
         fixs.add(new MagmaFix());
         fixs.add(new PerWorldPluginFix());
         fixs.add(new WoolFix());
+        fixs.add(new SLib203Fix());
         fixs.add(citizensFix=new CitizensFix());
 
         for (BaseFix fix : fixs) {
