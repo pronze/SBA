@@ -69,7 +69,7 @@ data:
         stack:
           type: STICK
           enchants:
-            KNOCKBACK: 1
+            knockback: 1
 
   - write: false
     stack: 'STONE'
@@ -163,13 +163,13 @@ data:
         stack:
           type: BOW
           enchants:
-            ARROW_DAMAGE: 1
+            power: 1
       - price: 6 of emerald
         stack:
           type: BOW
           enchants:
-            ARROW_KNOCKBACK: 1
-            ARROW_DAMAGE: 1
+            punch: 1
+            power: 1
       - price: 2 of gold
         stack:
             type: ARROW
