@@ -12,6 +12,8 @@ import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
+
+import org.screamingsandals.lib.item.meta.EnchantmentType;
 import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.spectator.Component;
 
@@ -181,7 +183,7 @@ public class ShopUtil {
         List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
         SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
-                    .filter(x -> x.getName().equalsIgnoreCase(ench))
+                    .filter(x -> x.getName().equalsIgnoreCase(ench)||EnchantmentType.of(x).location().path().equalsIgnoreCase(ench))
                     .findFirst();
             if (ignoredKeys.contains(ench))
                 return;
@@ -234,7 +236,7 @@ public class ShopUtil {
         List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
         for (String ench : SBAConfig.getInstance().upgrades().enchants().keys()) {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
-                    .filter(x -> x.getName().equalsIgnoreCase(ench))
+                    .filter(x -> x.getName().equalsIgnoreCase(ench)||EnchantmentType.of(x).location().path().equalsIgnoreCase(ench))
                     .findFirst();
             if (ignoredKeys.contains(ench))
                 continue;
@@ -299,7 +301,7 @@ public class ShopUtil {
         AtomicReference<String> str = new AtomicReference<>();
         SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
             Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
-                    .filter(x -> x.getName().equalsIgnoreCase(ench))
+                    .filter(x -> x.getName().equalsIgnoreCase(ench)||EnchantmentType.of(x).location().path().equalsIgnoreCase(ench))
                     .findFirst();
             if (ec.isPresent() && ec.get().equals(ech))
                 str.set(ench);

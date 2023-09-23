@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.FilenameFilter;
 
 import org.bukkit.enchantments.Enchantment;
+import org.screamingsandals.lib.item.meta.EnchantmentType;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
@@ -64,7 +65,7 @@ public class SLib203Fix extends BaseFix {
 
         try{
             for (Enchantment values : Enchantment.values()) {
-                shopReplace(values.getName()+":", values.getKey().getKey()+":");
+                shopReplace(values.getName()+":", EnchantmentType.of(values).location().path()+":");
             }
         }
         catch(Throwable t)

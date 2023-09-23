@@ -29,6 +29,7 @@ import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.item.builder.ItemStackFactory;
+import org.screamingsandals.lib.item.meta.EnchantmentType;
 import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
@@ -610,7 +611,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         break;
                     default:
                         if (Arrays.stream(Enchantment.values())
-                                .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName))) {
+                                .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName)
+                                ||EnchantmentType.of(x).location().path().equalsIgnoreCase(propertyName)
+                                )) {
 
                             if (isAdd) {
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -620,7 +623,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                                             .send(Players.wrapPlayer(teamPlayer));
                                     Optional<Enchantment> ech = Arrays.stream(Enchantment.values())
-                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName))
+                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName)||EnchantmentType.of(x).location().path().equalsIgnoreCase(propertyName))
                                             .findAny();
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
