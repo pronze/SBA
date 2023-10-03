@@ -224,6 +224,8 @@ public class SBA extends PluginContainer implements AddonAPI {
         Logger.info("SBA Commit is on par with {}", VersionInfo.COMMIT);
         Logger.trace("API has been registered!");
 
+        HologramManager.setPreferDisplayEntities(Main.getConfigurator().config.getBoolean("prefer-1-19-4-display-entities"));
+
         Logger.setMode(Level.WARNING);
         if (!broken) {
             if (citizensFix.canEnable()) {
