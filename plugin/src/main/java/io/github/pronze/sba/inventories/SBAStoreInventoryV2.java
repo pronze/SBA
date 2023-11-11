@@ -197,6 +197,13 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                 // if (upgradeProperties.contains(propertyName)) {
                 switch (propertyName) {
                     case "trap":
+                        if (!property.getPropertyData().hasChild("identifier") && property.getPropertyData().hasChild("data")) { // Fix support for SBW Trap special item
+                            var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
+                            SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
+                            newItem.set(applyEvent.getStack());
+                            return Map.entry(true, true);
+                        }
+
                         String trap_identifier = property.getPropertyData().childrenMap().get("identifier").getString();
                         if (gameStorage.areTrapEnabled(team, trap_identifier)) {
                             messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
