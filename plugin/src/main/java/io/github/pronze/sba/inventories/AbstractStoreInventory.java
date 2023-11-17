@@ -258,7 +258,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             double maxStackSize;
             int finalStackSize;
 
-            for (ItemStack itemStack : player.getInventory().getStorageContents()) {
+            for (ItemStack itemStack : player.getInventory().getContents()) {
                 if (itemStack != null && itemStack.isSimilar(type.getStack())) {
                     inInventory = inInventory + itemStack.getAmount();
                 }

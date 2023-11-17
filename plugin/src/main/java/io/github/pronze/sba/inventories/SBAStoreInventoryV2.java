@@ -23,7 +23,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
@@ -198,9 +197,6 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                 switch (propertyName) {
                     case "trap":
                         if (!property.getPropertyData().hasChild("identifier") && property.getPropertyData().hasChild("data")) { // Fix support for SBW Trap special item
-                            var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
-                            SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
-                            newItem.set(applyEvent.getStack());
                             return Map.entry(true, true);
                         }
 
@@ -689,9 +685,6 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         break;
                 }
                 // }
-                var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
-                SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
-                newItem.set(applyEvent.getStack());
 
             } else {
 

@@ -15,6 +15,7 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.bedwars.utils.Sounds;
 import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
@@ -40,6 +41,7 @@ public class PopupTower {
 
     private final Game game;
     private final Material material;
+    private final byte legacyData;
     private final Location centerPoint;
     private final BlockFace placementFace;
     private final List<Location> enterancelocation = new ArrayList<>();
@@ -66,41 +68,41 @@ public class PopupTower {
         Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             // second platform
             final Block secondPlatform = centerPoint.getBlock().getRelative(BlockFace.UP, 5);
-            placeBlock(secondPlatform.getLocation(), material);
-            pillarSides.forEach(blockFace -> placeBlock(secondPlatform.getRelative(blockFace).getLocation(), material));
+            placeBlock(secondPlatform.getLocation(), material, legacyData);
+            pillarSides.forEach(blockFace -> placeBlock(secondPlatform.getRelative(blockFace).getLocation(), material, legacyData));
 
-            placeBlock(secondPlatform.getRelative(BlockFace.NORTH_WEST).getLocation(), material);
-            placeBlock(secondPlatform.getRelative(BlockFace.NORTH_EAST).getLocation(), material);
-            placeBlock(secondPlatform.getRelative(BlockFace.SOUTH_WEST).getLocation(), material);
-            placeBlock(secondPlatform.getRelative(BlockFace.SOUTH_EAST).getLocation(), material);
+            placeBlock(secondPlatform.getRelative(BlockFace.NORTH_WEST).getLocation(), material, legacyData);
+            placeBlock(secondPlatform.getRelative(BlockFace.NORTH_EAST).getLocation(), material, legacyData);
+            placeBlock(secondPlatform.getRelative(BlockFace.SOUTH_WEST).getLocation(), material, legacyData);
+            placeBlock(secondPlatform.getRelative(BlockFace.SOUTH_EAST).getLocation(), material, legacyData);
 
             final var northWestCornerBlock = secondPlatform.getRelative(BlockFace.NORTH_WEST, 2).getRelative(BlockFace.UP);
-            placeBlock(northWestCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material);
-            placeBlock(northWestCornerBlock.getRelative(BlockFace.WEST).getLocation(), material);
-            placeBlock(northWestCornerBlock.getRelative(BlockFace.NORTH).getLocation(), material);
-            placeBlock(northWestCornerBlock.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getLocation(), material);
-            placeBlock(northWestCornerBlock.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getLocation(), material);
+            placeBlock(northWestCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material, legacyData);
+            placeBlock(northWestCornerBlock.getRelative(BlockFace.WEST).getLocation(), material, legacyData);
+            placeBlock(northWestCornerBlock.getRelative(BlockFace.NORTH).getLocation(), material, legacyData);
+            placeBlock(northWestCornerBlock.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getLocation(), material, legacyData);
+            placeBlock(northWestCornerBlock.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getLocation(), material, legacyData);
 
             final var northEastCornerBlock = secondPlatform.getRelative(BlockFace.NORTH_EAST, 2).getRelative(BlockFace.UP);
-            placeBlock(northEastCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material);
-            placeBlock(northEastCornerBlock.getRelative(BlockFace.EAST).getLocation(), material);
-            placeBlock(northEastCornerBlock.getRelative(BlockFace.NORTH).getLocation(), material);
-            placeBlock(northEastCornerBlock.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getLocation(), material);
-            placeBlock(northEastCornerBlock.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getLocation(), material);
+            placeBlock(northEastCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material, legacyData);
+            placeBlock(northEastCornerBlock.getRelative(BlockFace.EAST).getLocation(), material, legacyData);
+            placeBlock(northEastCornerBlock.getRelative(BlockFace.NORTH).getLocation(), material, legacyData);
+            placeBlock(northEastCornerBlock.getRelative(BlockFace.NORTH).getRelative(BlockFace.UP).getLocation(), material, legacyData);
+            placeBlock(northEastCornerBlock.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getLocation(), material, legacyData);
 
             final var southWestCornerBlock = secondPlatform.getRelative(BlockFace.SOUTH_WEST, 2).getRelative(BlockFace.UP);
-            placeBlock(southWestCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material);
-            placeBlock(southWestCornerBlock.getRelative(BlockFace.WEST).getLocation(), material);
-            placeBlock(southWestCornerBlock.getRelative(BlockFace.SOUTH).getLocation(), material);
-            placeBlock(southWestCornerBlock.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getLocation(), material);
-            placeBlock(southWestCornerBlock.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getLocation(), material);
+            placeBlock(southWestCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material, legacyData);
+            placeBlock(southWestCornerBlock.getRelative(BlockFace.WEST).getLocation(), material, legacyData);
+            placeBlock(southWestCornerBlock.getRelative(BlockFace.SOUTH).getLocation(), material, legacyData);
+            placeBlock(southWestCornerBlock.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getLocation(), material, legacyData);
+            placeBlock(southWestCornerBlock.getRelative(BlockFace.WEST).getRelative(BlockFace.UP).getLocation(), material, legacyData);
 
             final var southEastCornerBlock = secondPlatform.getRelative(BlockFace.SOUTH_EAST, 2).getRelative(BlockFace.UP);
-            placeBlock(southEastCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material);
-            placeBlock(southEastCornerBlock.getRelative(BlockFace.EAST).getLocation(), material);
-            placeBlock(southEastCornerBlock.getRelative(BlockFace.SOUTH).getLocation(), material);
-            placeBlock(southEastCornerBlock.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getLocation(), material);
-            placeBlock(southEastCornerBlock.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getLocation(), material);
+            placeBlock(southEastCornerBlock.getRelative(BlockFace.DOWN).getLocation(), material, legacyData);
+            placeBlock(southEastCornerBlock.getRelative(BlockFace.EAST).getLocation(), material, legacyData);
+            placeBlock(southEastCornerBlock.getRelative(BlockFace.SOUTH).getLocation(), material, legacyData);
+            placeBlock(southEastCornerBlock.getRelative(BlockFace.EAST).getRelative(BlockFace.UP).getLocation(), material, legacyData);
+            placeBlock(southEastCornerBlock.getRelative(BlockFace.SOUTH).getRelative(BlockFace.UP).getLocation(), material, legacyData);
 
             // connection blocks
             placeRowAnimated(3, northWestCornerBlock.getRelative(BlockFace.NORTH).getLocation(), BlockFace.EAST, 1);
@@ -108,8 +110,8 @@ public class PopupTower {
             placeRowAnimated(4, southWestCornerBlock.getRelative(BlockFace.SOUTH_WEST).getLocation(), BlockFace.NORTH, 1);
             placeRowAnimated(4, southEastCornerBlock.getRelative(BlockFace.EAST).getLocation(), BlockFace.NORTH, 1);
 
-            placeBlock(secondPlatform.getRelative(placementFace, 3).getRelative(BlockFace.UP, 2).getLocation(), material);
-            placeBlock(secondPlatform.getRelative(placementFace.getOppositeFace(), 3).getRelative(BlockFace.UP, 2).getLocation(), material);
+            placeBlock(secondPlatform.getRelative(placementFace, 3).getRelative(BlockFace.UP, 2).getLocation(), material, legacyData);
+            placeBlock(secondPlatform.getRelative(placementFace.getOppositeFace(), 3).getRelative(BlockFace.UP, 2).getLocation(), material, legacyData);
 
             final Location firstLadderBlock = centerPoint.getBlock().getRelative(placementFace).getLocation();
             placeLadderRow(5, firstLadderBlock, BlockFace.UP, placementFace.getOppositeFace());
@@ -126,7 +128,7 @@ public class PopupTower {
         for (int i = 0; i < length; i++) {
             lastLoc = lastLoc.getBlock().getRelative(face).getLocation();
             Location finalLastLoc = lastLoc;
-            Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> placeBlock(finalLastLoc, material), (delay += 1), TaskerTime.TICKS);
+            Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> placeBlock(finalLastLoc, material, legacyData), (delay += 1), TaskerTime.TICKS);
         }
     }
 
@@ -171,12 +173,12 @@ public class PopupTower {
             } else {
                 Reflect.getMethod(ladder, "setData", byte.class).invoke(faceToByte.get(ladderFace));
             }
-            Objects.requireNonNull(loc.getWorld()).playSound(loc, Sound.BLOCK_STONE_PLACE, 1, 1);
+            Sounds.playSound(loc, "BLOCK_STONE_PLACE", Sounds.BLOCK_STONE_BREAK, 1, 1);
         }
     }
 
-    public void placeBlock(Location loc, Material mat) {
-        if (!isLocationSafe(loc)) {
+    public void placeBlock(Location loc, Material mat, byte legacyData) {
+        if (!isLocationSafe(loc) || !game.isLocationInArena(loc)) {
             return;
         }
         if (game.getStatus() != GameStatus.RUNNING) {
@@ -184,8 +186,14 @@ public class PopupTower {
         }
         game.getRegion().removeBlockBuiltDuringGame(loc);
         loc.getBlock().setType(mat);
+
+        if (Main.isLegacy() && legacyData != 0) {
+            var block = loc.getBlock();
+            Reflect.getMethod(block, "setData", byte.class).invoke(legacyData);
+        }
+
         game.getRegion().addBuiltDuringGame(loc);
-        loc.getWorld().playSound(loc, Sound.BLOCK_STONE_PLACE, 1, 1);
+        Sounds.playSound(loc, "BLOCK_STONE_PLACE", Sounds.BLOCK_STONE_BREAK, 1, 1);
     }
 
     public boolean isLocationSafe(Location location) {
