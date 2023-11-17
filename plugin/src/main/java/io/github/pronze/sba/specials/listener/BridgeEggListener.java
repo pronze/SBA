@@ -3,6 +3,7 @@ package io.github.pronze.sba.specials.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.specials.runners.BridgeEggRunnable;
 import io.github.pronze.sba.utils.SBAUtil;
+import org.bukkit.Material;
 import org.bukkit.entity.Egg;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -58,7 +59,19 @@ public class BridgeEggListener implements Listener {
                 String unhidden = APIUtils.unhashFromInvisibleStringStartsWith(stack, BRIDGE_EGG_PREFIX);
                 if (unhidden != null) {
                     event.setCancelled(true);
-                    stack.setAmount(stack.getAmount() - 1);
+                    if (stack.getAmount() > 1) {
+                        stack.setAmount(stack.getAmount() - 1);
+                    } else {
+                        try {
+                            if (player.getInventory().getItemInOffHand().equals(stack)) {
+                                player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
+                            } else {
+                                player.getInventory().remove(stack);
+                            }
+                        } catch (Throwable e) {
+                            player.getInventory().remove(stack);
+                        }
+                    }
                     player.updateInventory();
                     final var egg = player.launchProjectile(Egg.class);
                     final var playerTeam = game.getTeamOfPlayer(player);
