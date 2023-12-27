@@ -3,5 +3,6 @@ dependencies {
     compileOnly "org.screamingsandals.lib:shared-core:" + SCREAMINGLIB_VERSION
     compileOnly "org.screamingsandals.lib:core-bukkit:" + SCREAMINGLIB_VERSION
     compileOnly "org.screamingsandals.lib:npc-common:" + SCREAMINGLIB_VERSION
+    compileOnly 'me.clip:placeholderapi:' + PAPI_VERSION
     compileOnly "net.citizensnpcs:citizensapi:2.0.30-SNAPSHOT"
 }

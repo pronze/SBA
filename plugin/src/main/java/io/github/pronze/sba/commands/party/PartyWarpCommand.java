@@ -10,11 +10,10 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
@@ -26,6 +25,7 @@ public class PartyWarpCommand {
 
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (init)
             return;
         if (SBAConfig.getInstance().party().enabled())
@@ -106,7 +106,7 @@ public class PartyWarpCommand {
                                     LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
-                                            .send(PlayerMapper.wrapPlayer(member.getInstance()));
+                                            .send(Players.wrapPlayer(member.getInstance()));
                                 });
                     }
                 }, () -> LanguageService

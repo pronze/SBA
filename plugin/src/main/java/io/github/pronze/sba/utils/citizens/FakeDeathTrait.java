@@ -5,43 +5,26 @@ import java.util.List;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageByBlockEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
-import org.screamingsandals.lib.bukkit.utils.nms.Version;
-import org.screamingsandals.lib.hologram.Hologram;
-import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.world.LocationMapper;
+import org.screamingsandals.bedwars.api.game.Game;
 
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.utils.Logger;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.experimental.Accessors;
 import net.citizensnpcs.api.trait.Trait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.impl.bukkit.utils.Version;
 
 public class FakeDeathTrait extends Trait {
 
@@ -51,10 +34,54 @@ public class FakeDeathTrait extends Trait {
     // 3.Getting blocks from shops
     // 4.Collect ressource
 
+    class Pickup18 {
+        public void pick(Item itemEntity, ItemStack is, int space) {
+            PlayerPickupItemEvent pickupEvent = new PlayerPickupItemEvent(
+                    (Player) npc.getEntity(),
+                    itemEntity,
+                    Math.max(0, is.getAmount() - space));
+
+            Bukkit.getPluginManager().callEvent(pickupEvent);
+
+            if (!pickupEvent.isCancelled()) {
+                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
+                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
+                blockPlace().getBlock(getNpcEntity().getInventory());
+                if (pickupEvent.getRemaining() > 0) {
+                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
+                } else {
+                    itemEntity.remove();
+                }
+            }
+        }
+    }
+
+    class Pickup112 {
+        public void pick(Item itemEntity, ItemStack is, int space) {
+            EntityPickupItemEvent pickupEvent = new EntityPickupItemEvent(
+                    (LivingEntity) npc.getEntity(),
+                    itemEntity,
+                    Math.max(0, is.getAmount() - space));
+            Bukkit.getPluginManager().callEvent(pickupEvent);
+            if (!pickupEvent.isCancelled()) {
+                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
+                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
+                blockPlace().getBlock(getNpcEntity().getInventory());
+                if (pickupEvent.getRemaining() > 0) {
+                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
+                } else {
+                    itemEntity.remove();
+                }
+            }
+        }
+    }
+
     private List<AiGoal> goals = new ArrayList<>();
     @Getter
     @Setter
     private Strategy strategy = Strategy.ANY;
+
+    private Player oldPlayerObject = null;
 
     public FakeDeathTrait() {
         super("FakeDeathTrait");
@@ -82,30 +109,46 @@ public class FakeDeathTrait extends Trait {
     // This is called AFTER onAttach and AFTER Load when the server is started.
     @Override
     public void onSpawn() {
+        if (!(npc.getEntity() instanceof Player))
+            return;
+        try {
+            Player npcEntity = (Player) npc.getEntity();
+            if (oldPlayerObject != null && npcEntity != oldPlayerObject) {
+                if (game != null) {
+                    game.getRunningTeams().forEach(
+                            team -> {
+                                if (team.isPlayerInTeam(oldPlayerObject)) {
+                                    game.leaveFromGame(oldPlayerObject);
+                                }
+                            });
+                }
+            }
+            oldPlayerObject = npcEntity;
+            npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
 
-        Player npcEntity = (Player) npc.getEntity();
-        npcEntity.setMetadata("FakeDeath", new FixedMetadataValue(SBA.getPluginInstance(), true));
+            Logger.trace("Initializing AI in mode{}", strategy);
+            Random r = new Random();
+            if (strategy == Strategy.ANY) {
+                var possibilities = List.of(Strategy.AGRESSIVE, Strategy.DEFENSIVE, Strategy.BALANCED);
+                strategy = possibilities.get(r.nextInt(possibilities.size()));
+            }
 
-        Logger.trace("Initializing AI in mode{}", strategy);
-        Random r = new Random();
-        if (strategy == Strategy.ANY) {
-            var possibilities = List.of(Strategy.AGRESSIVE, Strategy.DEFENSIVE, Strategy.BALANCED);
-            strategy = possibilities.get(r.nextInt(possibilities.size()));
-        }
-
-        goals.clear();
-        if (strategy != Strategy.NONE) {
-            goals.add(new DontCancelBlockBreak(this));
-            goals.add(new GatherBlocks(this));
-            goals.add(new AttackNearbyPlayerGoal(this));
-            if (strategy == Strategy.DEFENSIVE)
-                goals.add(new BuildBedDefenseGoal(this));
-            else if (strategy == Strategy.AGRESSIVE)
-                goals.add(new AttackOtherGoal(this));
-            else if (strategy == Strategy.BALANCED)
-                goals.add(new BalancedGoal(this));
-            goals.add(new GatherRessource(this));
-            goals.add(new CancelNavigation(this));
+            goals.clear();
+            if (strategy != Strategy.NONE) {
+                goals.add(new DontCancelBlockBreak(this));
+                goals.add(new GatherBlocks(this));
+                goals.add(new AttackNearbyPlayerGoal(this));
+                if (strategy == Strategy.DEFENSIVE)
+                    goals.add(new BuildBedDefenseGoal(this));
+                else if (strategy == Strategy.AGRESSIVE)
+                    goals.add(new AttackOtherGoal(this));
+                else if (strategy == Strategy.BALANCED)
+                    goals.add(new BalancedGoal(this));
+                goals.add(new GatherRessource(this));
+                goals.add(new CancelNavigation(this));
+            }
+        } catch (ClassCastException cc) {
+            npc.removeTrait(FakeDeathTrait.class);
         }
     }
 
@@ -114,8 +157,13 @@ public class FakeDeathTrait extends Trait {
 
     }
 
+    public Player getPlayerObject() {
+        return oldPlayerObject;
+    }
+
     int timer = 0;
     int timerPickup = 5;
+    private Game game;
 
     List<Entity> getNearbyEntities(int range) {
         return npc.getEntity().getNearbyEntities(range, range, range);
@@ -123,6 +171,14 @@ public class FakeDeathTrait extends Trait {
 
     @Override
     public void run() {
+        if (game != null) {
+            if (!game.isLocationInArena(getPlayerObject().getLocation())
+                    && getPlayerObject().getGameMode() == GameMode.SURVIVAL) {
+                AIService.getInstance().die(getPlayerObject());
+            }
+        } else
+            return;
+
         if (timer-- <= 0) {
             timer = 5;
             for (AiGoal goal : goals) {
@@ -143,39 +199,9 @@ public class FakeDeathTrait extends Trait {
                     int space = getAmountOfSpaceFor(is, getNpcEntity().getInventory());
                     if (space > 0) {
                         if (Version.isVersion(1, 12)) {
-                            EntityPickupItemEvent pickupEvent = new EntityPickupItemEvent(
-                                    (LivingEntity) npc.getEntity(),
-                                    itemEntity,
-                                    Math.max(0, is.getAmount() - space));
-                            Bukkit.getPluginManager().callEvent(pickupEvent);
-                            if (!pickupEvent.isCancelled()) {
-                                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
-                                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
-                                blockPlace().getBlock(getNpcEntity().getInventory());
-                                if (pickupEvent.getRemaining() > 0) {
-                                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
-                                } else {
-                                    itemEntity.remove();
-                                }
-                            }
+                            new Pickup112().pick(itemEntity, is, space);
                         } else {
-                            PlayerPickupItemEvent pickupEvent = new PlayerPickupItemEvent(
-                                    (Player) npc.getEntity(),
-                                    itemEntity,
-                                    Math.max(0, is.getAmount() - space));
-
-                            Bukkit.getPluginManager().callEvent(pickupEvent);
-
-                            if (!pickupEvent.isCancelled()) {
-                                Logger.trace("NPC Pickup {}", itemEntity.getItemStack());
-                                getNpcEntity().getInventory().addItem(pickupEvent.getItem().getItemStack());
-                                blockPlace().getBlock(getNpcEntity().getInventory());
-                                if (pickupEvent.getRemaining() > 0) {
-                                    itemEntity.getItemStack().setAmount(pickupEvent.getRemaining());
-                                } else {
-                                    itemEntity.remove();
-                                }
-                            }
+                            new Pickup18().pick(itemEntity, is, space);
                         }
                     }
                 }
@@ -188,8 +214,12 @@ public class FakeDeathTrait extends Trait {
         m.setAmount(1);
         var oneStack = new ItemStack(m).getMaxStackSize();
         int space = 0;
-
-        var inventoryContent = inv.getStorageContents();
+        ItemStack[] inventoryContent = null;
+        try {
+            inventoryContent = inv.getStorageContents();
+        } catch (Throwable t) {
+            inventoryContent = inv.getContents();
+        }
 
         for (int index = 0; index < inventoryContent.length; index++) {
             var itemStack = inventoryContent[index];
@@ -213,5 +243,9 @@ public class FakeDeathTrait extends Trait {
         boolean isAvailable();
 
         void doGoal();
+    }
+
+    public void joinBedwarsGame(Game game) {
+        this.game = game;
     }
 }

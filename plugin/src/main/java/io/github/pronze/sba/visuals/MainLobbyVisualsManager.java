@@ -2,16 +2,15 @@ package io.github.pronze.sba.visuals;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -20,8 +19,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -36,7 +35,7 @@ import java.util.*;
 
 @Service
 public class MainLobbyVisualsManager implements Listener {
-    private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
+    private final static String MAIN_LOBBY_OBJECTIVE = "sbascoreboard";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
     private boolean enabled;
@@ -47,6 +46,7 @@ public class MainLobbyVisualsManager implements Listener {
 
     @OnPostEnable
     public void registerListener() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
 
         load();
@@ -91,12 +91,14 @@ public class MainLobbyVisualsManager implements Listener {
             return;
         if (!SBAConfig.getInstance().node("main-lobby", "custom-chat").getBoolean(true))
             return;
+
         final var player = e.getPlayer();
         final var db = SBA.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
         if (SBAConfig.getInstance().node("main-lobby", "enabled").getBoolean(false)
                 && MainLobbyVisualsManager.isInWorld(e.getPlayer().getLocation())) {
-
+            if (Main.isPlayerInGame(player))
+                return;
             var chatFormat = LanguageService
                     .getInstance()
                     .get(MessageKeys.MAIN_LOBBY_CHAT_FORMAT)
@@ -114,7 +116,9 @@ public class MainLobbyVisualsManager implements Listener {
                 }
                 final var msgToSend = format;
                 Bukkit.getServer().getOnlinePlayers().forEach(p -> {
-                    p.sendMessage(msgToSend);
+                    if (MainLobbyVisualsManager.isInWorld(p.getLocation())
+                            && Main.getInstance().getGameOfPlayer(p) == null)
+                        p.sendMessage(msgToSend);
                 });
 
                 // e.getRecipients().clear();
@@ -191,8 +195,7 @@ public class MainLobbyVisualsManager implements Listener {
                     .get(MessageKeys.MAIN_LOBBY_TABLIST_FOOTER)
                     .replace("%sba_version%", SBA.getInstance().getVersion())
                     .toComponent();
-
-            playerData.sendPlayerListHeaderAndFooter(header, footer);
+            playerData.sendPlayerListHeaderFooter(header, footer);
         }
 
         var title = LanguageService
@@ -247,7 +250,7 @@ public class MainLobbyVisualsManager implements Listener {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
         if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
-            PlayerMapper.wrapPlayer(player).sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
+            Players.wrapPlayer(player).sendPlayerListHeaderFooter(Component.empty(), Component.empty());
         }
     }
 
@@ -262,10 +265,11 @@ public class MainLobbyVisualsManager implements Listener {
         final var player = e.getPlayer();
         if (!enabled)
             return;
-        Tasker.build(() -> {
-            if (isInWorld(player.getLocation()) && player.isOnline()) {
-                create(player);
-            }
-        }).delay(1L, TaskerTime.SECONDS);
+        // the Slib 2.0.2-SNAPSHOT version of the following code did not have the .start() call, therefore was never functional. Is it needed?
+//        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
+//            if (isInWorld(player.getLocation()) && player.isOnline()) {
+//                create(player);
+//            }
+//        }, 1L, TaskerTime.SECONDS);
     }
 }

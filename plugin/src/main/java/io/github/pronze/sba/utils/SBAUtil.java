@@ -7,27 +7,22 @@ import io.github.pronze.sba.game.GameTierEvent;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.AIService;
 import io.github.pronze.sba.service.DynamicSpawnerLimiterService;
-import io.github.pronze.sba.service.GamesInventoryService;
-import io.github.pronze.sba.service.NPCStoreService;
-import io.github.pronze.sba.service.PlayerWrapperService;
 import lombok.NonNull;
-import net.kyori.adventure.title.Title;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.nms.accessors.DirectionAccessor;
-import org.screamingsandals.lib.player.PlayerWrapper;
-import org.screamingsandals.lib.utils.AdventureHelper;
+import org.screamingsandals.lib.spectator.title.TimesProvider;
+import org.screamingsandals.lib.spectator.title.Title;
 import org.bukkit.entity.Player;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
-import clib.net.kyori.adventure.text.TextComponent;
-
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
@@ -87,6 +82,33 @@ public class SBAUtil {
     public static Optional<Player> getPlayer(UUID uuid) {
         return Optional.ofNullable(Bukkit.getPlayer(uuid));
     }
+    public static void unregisterListener(@NotNull Listener listener) {
+        Logger.warn("Attempting to unregister, it's safer to restart server: {}", listener.getClass().getSimpleName());
+
+        try {
+            HandlerList.unregisterAll(listener);
+            Class<? extends Listener> cl = listener.getClass();
+            List<Method> b = new ArrayList<>(Arrays.asList(cl.getDeclaredMethods()));
+            b.addAll(Arrays.asList(cl.getMethods()));
+            for (Method m : b) {
+                for (Class<?> paramType : m.getParameterTypes()) {
+                    try {
+                        HandlerList hl = (HandlerList) paramType.getMethod("getHandlerList").invoke(null);
+                        ;
+                        hl.unregister(listener);
+                    } catch (NoSuchMethodException | NoClassDefFoundError nsm) {
+                        // Do nothing
+                    }
+
+                }
+            }
+        } catch (java.lang.NoClassDefFoundError nclass) {
+            // Do nothing, a dependancy isn't present
+
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
 
     public static void disablePlugin(@NotNull JavaPlugin plugin) {
         // thank you Misat for this :)
@@ -120,10 +142,11 @@ public class SBAUtil {
          */
 
         try {
-            // var handlers = HandlerList.getRegisteredListeners(plugin);
-            HandlerList.unregisterAll(plugin);
+            var handlers = HandlerList.getRegisteredListeners(plugin);
+            //HandlerList.unregisterAll(plugin);
             // Logger.trace("-----------------------{}-----------------", handlers.size());
-            // for (var handler : handlers) {
+            for (var handler : handlers) {
+                unregisterListener(handler.getListener());
             // String id = handler.getListener().toString();
             // if (!id.contains("BukkitAudiencesImpl") &&
             // !id.contains("CloudBukkitListener")
@@ -131,7 +154,7 @@ public class SBAUtil {
             // HandlerList.unregisterAll(handler.getListener());
             // }
             // Logger.trace("handler {}", handler.getListener().toString());
-            // }
+            }
             // Logger.trace("-----------------------{}-----------------", handlers.size());
 
             // HandlerList.unregisterAll(plugin);
@@ -182,12 +205,12 @@ public class SBAUtil {
             sender.sendMessage("Plugin reloaded! Keep in mind that restarting the server is safer!");
     }
 
-    public static void sendTitle(PlayerWrapper player, net.kyori.adventure.text.Component title, net.kyori.adventure.text.Component subtitle, int fadeIn, int stay,
-            int fadeOut) {
-        var titleComponent = net.kyori.adventure.title.Title.title(
+    public static void sendTitle(org.screamingsandals.lib.player.Player player, org.screamingsandals.lib.spectator.Component title, org.screamingsandals.lib.spectator.Component subtitle, int fadeIn, int stay,
+                                 int fadeOut) {
+        var titleComponent = Title.title(
                 title,
                 subtitle,
-                Title.Times.of(
+                TimesProvider.times(
                         Duration.ofMillis(fadeIn * 50L),
                         Duration.ofMillis(stay * 50L),
                         Duration.ofMillis(fadeOut * 50L)));

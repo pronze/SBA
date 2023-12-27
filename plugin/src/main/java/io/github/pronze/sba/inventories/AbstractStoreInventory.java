@@ -24,16 +24,10 @@ import org.jetbrains.annotations.Nullable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToBoughtItem;
 import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToDisplayedItem;
-import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
-import org.screamingsandals.bedwars.api.upgrades.Upgrade;
-import org.screamingsandals.bedwars.api.upgrades.UpgradeRegistry;
-import org.screamingsandals.bedwars.api.upgrades.UpgradeStorage;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
@@ -48,12 +42,8 @@ import org.screamingsandals.simpleinventories.inventory.Price;
 import org.screamingsandals.simpleinventories.inventory.SubInventory;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
@@ -67,6 +57,8 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     @OnPostEnable
     public void onPostEnable() {
+        if (SBA.isBroken())
+            return;
         if (shopPaths.length() > 0)
             Arrays.stream(shopPaths.split(","))
                     .forEach(path -> {
@@ -206,7 +198,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             userInQuickBuy.put(player.getUniqueId(), quickBuyId);
             return;
         }
-        if (userInQuickBuy.containsKey(player.getUniqueId())) {
+        if (!isQuickBuy && userInQuickBuy.containsKey(player.getUniqueId())) {
             Logger.trace("Setting up quick item as{} {}", price, newItem.getType());
             var quickBuyId = userInQuickBuy.get(player.getUniqueId());
             QuickBuyConfig.getInstance().of(player).set(quickBuyId,
@@ -266,7 +258,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             double maxStackSize;
             int finalStackSize;
 
-            for (ItemStack itemStack : player.getInventory().getStorageContents()) {
+            for (ItemStack itemStack : player.getInventory().getContents()) {
                 if (itemStack != null && itemStack.isSimilar(type.getStack())) {
                     inInventory = inInventory + itemStack.getAmount();
                 }
@@ -286,9 +278,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
             }
         }
 
-        var materialItem = ItemFactory
-                .build(type.getStack(priceAmount))
-                .orElseThrow();
+        var materialItem = Objects.requireNonNull(ItemStackFactory.build(type.getStack(priceAmount)));
 
         // purchase failed, player does not have enough resources to purchase
         if (!event.hasPlayerInInventory(materialItem)) {
@@ -323,8 +313,9 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         }
 
         AtomicReference<ItemStack> newItemRef = new AtomicReference<ItemStack>(newItem);
-        AtomicReference<Item> newMaterialItemRef = new AtomicReference<Item>(materialItem);
-        final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type);
+        AtomicReference<org.screamingsandals.lib.item.ItemStack> newMaterialItemRef = new AtomicReference<>(materialItem);
+        AtomicReference<String[]> messageOnFail = new AtomicReference<>(MessageKeys.CANNOT_BUY);
+        final var result = handlePurchase(player, newItemRef, newMaterialItemRef, itemInfo, type,messageOnFail);
 
         attemptLoreRemoval(newItem);
 
@@ -336,11 +327,12 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
         // purchase failed, player does not have enough resources to purchase
         if (!shouldBuyStack && !shouldSellStack) {
             if (!SBAConfig.getInstance().node("shop", "removePurchaseMessages").getBoolean()) {
-                LanguageService
-                        .getInstance()
-                        .get(MessageKeys.CANNOT_BUY)
-                        .replace("%material%", type.getItemName())
-                        .send(event.getPlayer());
+                if (messageOnFail.get()!=null)
+                    LanguageService
+                            .getInstance()
+                            .get(messageOnFail.get())
+                            .replace("%material%", type.getItemName())
+                            .send(event.getPlayer());
             }
             return;
         }
@@ -356,7 +348,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.SHOP_PURCHASE_SUCCESS)
-                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(ItemFactory.build(newItem).orElseThrow()))
+                        .replace("%item%", ShopUtil.getNameOrCustomNameOfItem(Objects.requireNonNull(ItemStackFactory.build(newItem))))
                         .replace("%material%", type.getItemName())
                         .send(event.getPlayer());
             }
@@ -451,73 +443,76 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
 
     private void onGeneratingItem(ItemRenderEvent event) {
         onPreGenerateItem(event);
+        try {
+            var itemInfo = event.getItem();
 
-        var itemInfo = event.getItem();
+            var isQuickBuy = itemInfo.getProperties().stream()
+                    .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
 
-        var isQuickBuy = itemInfo.getProperties().stream()
-                .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy"));
+            if (isQuickBuy) {
+                var quickBuyId = itemInfo.getProperties().stream()
+                        .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
+                        .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
 
-        if (isQuickBuy) {
-            var quickBuyId = itemInfo.getProperties().stream()
-                    .filter(prop -> prop.hasName() && prop.getPropertyName().equals("quickbuy")).findAny()
-                    .map(x -> x.getPropertyData().childrenMap().get("id").getString()).orElse("");
+                var quickBuyItem = QuickBuyConfig.getInstance().of(event.getPlayer().as(Player.class)).of(quickBuyId);
 
-            var quickBuyItem = QuickBuyConfig.getInstance().of(event.getPlayer().as(Player.class)).of(quickBuyId);
+                if (quickBuyItem != null) {
+                    var quickBuyPrice = Price.of(quickBuyItem.amount(), quickBuyItem.resource());
+                    GenericItemInfo info = findInfo(quickBuyItem.material(), quickBuyPrice);
+                    if (info != null) {
+                        if (info != null)
+                            itemInfo = new PlayerItemInfo(event.getPlayer(), info);
 
-            if (quickBuyItem != null) {
-                var quickBuyPrice = Price.of(quickBuyItem.amount(), quickBuyItem.resource());
-                GenericItemInfo info = findInfo(quickBuyItem.material(), quickBuyPrice);
-                if (info != null) {
-                    if (info != null)
-                        itemInfo = new PlayerItemInfo(event.getPlayer(), info);
+                        event.setStack(itemInfo.getStack());
+                        return;
+                    }
+                }
+            }
+            var item = itemInfo.getStack();
+            var player = event.getPlayer().as(Player.class);
+            var game = Main.getInstance().getGameOfPlayer(player);
 
-                    event.setStack(itemInfo.getStack());
+            if (itemInfo.getStack().getMaterial().is(Material.POTION)) {
+                var itemB = item.as(ItemStack.class);
+                Logger.trace("{}", itemB);
+            }
+            var prices = itemInfo.getOriginal().getPrices();
+            if (!prices.isEmpty()) {
+                var priceObject = prices.get(0);
+                var price = priceObject.getAmount();
+                var type = Main.getSpawnerType(priceObject.getCurrency().toLowerCase());
+                if (type == null) {
                     return;
                 }
+                event.setStack(item = ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
             }
-        }
-        var item = itemInfo.getStack();
-        var player = event.getPlayer().as(Player.class);
-        var game = Main.getInstance().getGameOfPlayer(player);
+            event.setStack(item);
 
-        if (itemInfo.getStack().getMaterial().is(Material.POTION)) {
-            var itemB = item.as(ItemStack.class);
-            Logger.trace("{}", itemB);
-        }
-        var prices = itemInfo.getOriginal().getPrices();
-        if (!prices.isEmpty()) {
-            var priceObject = prices.get(0);
-            var price = priceObject.getAmount();
-            var type = Main.getSpawnerType(priceObject.getCurrency().toLowerCase());
-            if (type == null) {
-                return;
-            }
-            event.setStack(item = ShopUtil.setLore(item, itemInfo, String.valueOf(price), type, player));
-        }
-        event.setStack(item);
+            itemInfo.getProperties().forEach(property -> {
+                if (property.hasName()) {
+                    var converted = ConfigurateUtils.raw(property.getPropertyData());
+                    if (!(converted instanceof Map)) {
+                        converted = ShopUtil.nullValuesAllowingMap("value", converted);
+                    }
 
-        itemInfo.getProperties().forEach(property -> {
-            if (property.hasName()) {
-                var converted = ConfigurateUtils.raw(property.getPropertyData());
-                if (!(converted instanceof Map)) {
-                    converted = ShopUtil.nullValuesAllowingMap("value", converted);
+                    // noinspection unchecked
+                    var propertyData = (Map<String, Object>) converted;
+
+                    // temporary fix
+                    propertyData.putIfAbsent("name", property.getPropertyName());
+
+                    var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
+                            player, event.getStack().as(ItemStack.class), propertyData);
+                    Bukkit.getServer().getPluginManager().callEvent(applyEvent);
+
+                    event.setStack(Objects.requireNonNullElse(ItemStackFactory.build(applyEvent.getStack()), event.getStack()));
                 }
+            });
 
-                // noinspection unchecked
-                var propertyData = (Map<String, Object>) converted;
-
-                // temporary fix
-                propertyData.putIfAbsent("name", property.getPropertyName());
-
-                var applyEvent = new BedwarsApplyPropertyToDisplayedItem(game,
-                        player, event.getStack().as(ItemStack.class), propertyData);
-                Bukkit.getServer().getPluginManager().callEvent(applyEvent);
-
-                event.setStack(ItemFactory.build(applyEvent.getStack()).orElse(event.getStack()));
-            }
-        });
-
-        onPostGenerateItem(event);
+            onPostGenerateItem(event);
+        } catch (Throwable t) {
+            Logger.trace("{}", t.getMessage());
+        }
     }
 
     public abstract void onPostGenerateItem(ItemRenderEvent event);
@@ -525,7 +520,7 @@ public abstract class AbstractStoreInventory implements IStoreInventory, Listene
     public abstract void onPreGenerateItem(ItemRenderEvent event);
 
     public abstract Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
-            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type);
+            AtomicReference<org.screamingsandals.lib.item.ItemStack> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type, AtomicReference<String[]> messageOnFail);
 
     @NotNull
     public abstract InventorySetBuilder getInventorySetBuilder();

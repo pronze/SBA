@@ -40,6 +40,7 @@ public class Logger {
             return;
         }
         instance.logger.info(getMessage(message, params));
+        printStackTraces(params);
     }
     public static void trace(@NonNull String message, Object... params) {
         if (instance.testMode) {
@@ -48,6 +49,7 @@ public class Logger {
         }
         if (instance.level.getLevel() >= Level.TRACE.getLevel()) {
             instance.logger.info(getMessage(message, params));
+            printStackTraces(params);
         }
     }
 
@@ -58,6 +60,7 @@ public class Logger {
         }
         if (instance.level.getLevel() >= Level.WARNING.getLevel()) {
             instance.logger.warning(getMessage(message, params));
+            printStackTraces(params);
         }
     }
 
@@ -68,6 +71,7 @@ public class Logger {
         }
         if (instance.level.getLevel() >= Level.ERROR.getLevel()) {
             instance.logger.severe(getMessage(message, params));
+            printStackTraces(params);
         }
     }
 
@@ -82,6 +86,14 @@ public class Logger {
             message = message.replaceFirst(Pattern.quote("{}"), Matcher.quoteReplacement((String) param));
         }
         return message;
+    }
+
+    private static void printStackTraces(Object... params) {
+        for (var param : params) {
+            if (param instanceof Throwable) {
+                ((Throwable) param).printStackTrace();
+            }
+        }
     }
 
     public static void setMode(Level level) {

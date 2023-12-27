@@ -5,13 +5,13 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.Logger;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -21,7 +21,7 @@ import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
 
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
@@ -80,6 +80,30 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 })
                 .build();
 
+        final var holder = scoreboard.getHolder().of(player);
+        if (holder != null) {
+            Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> game.getRunningTeams().forEach(team -> {
+                if (!holder.hasTeamEntry(team.getName())) {
+                    holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+                }
+
+                final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+                try{
+                scoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+                }
+                catch(Throwable t)
+                {
+                    //1.8.8
+                }
+
+                team.getConnectedPlayers()
+                        .forEach(teamPlayer -> {
+                            if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
+                                scoreboardTeam.addEntry(teamPlayer.getName());
+                            }
+                        });
+            }));
+        }
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 

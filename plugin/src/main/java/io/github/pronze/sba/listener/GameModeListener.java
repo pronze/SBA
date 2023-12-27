@@ -3,6 +3,7 @@ package io.github.pronze.sba.listener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,29 +23,28 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
+import org.screamingsandals.lib.packet.ClientboundSetPlayerTeamPacket;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.utils.Pair;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-import org.screamingsandals.lib.world.LocationMapper;
-
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import org.screamingsandals.lib.spectator.Color;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.GameCreator;
 import org.screamingsandals.bedwars.commands.AdminCommand;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
-import org.screamingsandals.lib.packet.SClientboundSetPlayerTeamPacket.CollisionRule;
 
 @Service
 public class GameModeListener implements Listener {
@@ -54,6 +54,7 @@ public class GameModeListener implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
 
         for (var cmd : Main.getCommands().values()) {
@@ -160,41 +161,41 @@ public class GameModeListener implements Listener {
         }
 
         public void playerMoved(@NotNull Player player) {
-            npcs.values().forEach(n -> n.removeViewer(PlayerMapper.wrapPlayer(player)));
-            holograms.values().forEach(h -> h.removeViewer(PlayerMapper.wrapPlayer(player)));
+            npcs.values().forEach(n -> n.removeViewer(Players.wrapPlayer(player)));
+            holograms.values().forEach(h -> h.removeViewer(Players.wrapPlayer(player)));
 
-            Tasker.build(() -> {
+            Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> {
                 for (var npc : npcs.values()) {
                     if (npc.location().getWorld().getName().equals(player.getWorld().getName())) {
-                        npc.addViewer(PlayerMapper.wrapPlayer(player));
+                        npc.addViewer(Players.wrapPlayer(player));
                     }
                 }
                 for (var holo : holograms.values()) {
                     if (holo.location().getWorld().getName().equals(player.getWorld().getName())) {
-                        holo.addViewer(PlayerMapper.wrapPlayer(player));
+                        holo.addViewer(Players.wrapPlayer(player));
                     }
                 }
-            }).afterOneTick().start();
+            });
         }
 
         public void playerDisconnect(@NotNull Player player) {
-            holograms.values().forEach(h -> h.removeViewer(PlayerMapper.wrapPlayer(player)));
-            npcs.values().forEach(n -> n.removeViewer(PlayerMapper.wrapPlayer(player)));
+            holograms.values().forEach(h -> h.removeViewer(Players.wrapPlayer(player)));
+            npcs.values().forEach(n -> n.removeViewer(Players.wrapPlayer(player)));
         }
 
         private NPC addNpcAt(Location l, String name) {
             if (name == null)
                 name = "shop.yml";
 
-            NPC npc = NPC.of(LocationMapper.wrapLocation(l))
+            NPC npc = NPC.of(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(l)))
                     .lookAtPlayer(true)
                     .displayName(List.of(Component.text(name)
-                            .color(TextColor.color(139, 69, 19))))
-                    .collisionRule(CollisionRule.NEVER)
+                            .withColor(Color.rgb(139, 69, 19))))
+                    .collisionRule(ClientboundSetPlayerTeamPacket.CollisionRule.NEVER)
                     .show();
             for (Player p : Bukkit.getOnlinePlayers()) {
                 if (l.getWorld() == p.getWorld()) {
-                    npc.addViewer(PlayerMapper.wrapPlayer(p));
+                    npc.addViewer(Players.wrapPlayer(p));
                 }
             }
             return npc;
@@ -214,16 +215,16 @@ public class GameModeListener implements Listener {
             for (var spawners : game.getSpawners()) {
                 if (!holograms.containsKey(spawners)) {
                     var hologram = HologramManager
-                            .hologram(LocationMapper.wrapLocation(spawners.getLocation().clone()));
+                            .hologram(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(spawners.getLocation().clone())));
                     hologram.show();
 
                     for (Player p : Bukkit.getOnlinePlayers()) {
                         if (spawners.getLocation().getWorld() == p.getWorld()) {
-                            hologram.addViewer(PlayerMapper.wrapPlayer(p));
+                            hologram.addViewer(Players.wrapPlayer(p));
                         }
                     }
 
-                    hologram.item(ItemFactory.build(spawners.getItemSpawnerType().getStack()).orElseThrow())
+                    hologram.item(Objects.requireNonNull(ItemStackFactory.build(spawners.getItemSpawnerType().getStack())))
                             .itemPosition(Hologram.ItemPosition.BELOW)
                             .rotationMode(Hologram.RotationMode.Y)
                             .rotationTime(Pair.of(1, TaskerTime.TICKS))

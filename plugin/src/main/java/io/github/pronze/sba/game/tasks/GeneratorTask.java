@@ -10,9 +10,7 @@ import io.github.pronze.sba.utils.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.screamingsandals.bedwars.api.game.Game;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.player.Players;
 
 import java.util.regex.Pattern;
 
@@ -93,8 +91,8 @@ public class GeneratorTask extends BaseGameTask {
                                         .send(game
                                                 .getConnectedPlayers()
                                                 .stream()
-                                                .map(PlayerMapper::wrapPlayer)
-                                                .toArray(org.screamingsandals.lib.player.PlayerWrapper[]::new));
+                                                .map(Players::wrapPlayer)
+                                                .toArray(org.screamingsandals.lib.player.Player[]::new));
                             }
                         }
                     } catch (NameNotFoundException e) {
@@ -110,7 +108,11 @@ public class GeneratorTask extends BaseGameTask {
     }
 
     public String getTimeLeftForNextEvent() {
-        return ((org.screamingsandals.bedwars.game.Game)game).getFormattedTimeLeft(nextEvent.getTime() - elapsedTime);
+        if (nextEvent == GameTierEvent.GAME_END) {
+            return ((org.screamingsandals.bedwars.game.Game) game).getFormattedTimeLeft();
+        } else {
+            return ((org.screamingsandals.bedwars.game.Game) game).getFormattedTimeLeft(nextEvent.getTime() - elapsedTime);
+        }
     }
 
     public String getNextTierName() {

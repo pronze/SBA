@@ -4,19 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Location;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
-import org.screamingsandals.lib.hologram.Hologram;
-import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.world.LocationMapper;
 
-import io.github.pronze.sba.utils.Logger;
 import net.citizensnpcs.api.trait.Trait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 
 public class ReturnToStoreTrait extends Trait {
 

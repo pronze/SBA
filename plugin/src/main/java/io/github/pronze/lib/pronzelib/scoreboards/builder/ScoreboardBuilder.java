@@ -10,7 +10,7 @@ import java.util.Objects;
 import io.github.pronze.lib.pronzelib.scoreboards.api.UpdateCallback;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.ConfigBoard;
 import io.github.pronze.sba.utils.Logger;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import io.github.pronze.lib.pronzelib.scoreboards.api.PlaceholderFunction;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -30,7 +30,7 @@ public class ScoreboardBuilder
     private long interval;
     private long animationInterval;
     private String title;
-    private String objectiveName;
+    private String objectiveName ="";
     private List<String> lines;
     private List<String> animatedTitle;
     private PlaceholderFunction papiFunction;
@@ -125,6 +125,7 @@ public class ScoreboardBuilder
         final Map<String, String> placeholders = this.placeholders;
         final Scoreboard scoreboard = this.scoreboard;
         Objects.requireNonNull(scoreboard);
+        scoreboard.setObjective(objectiveName);
         placeholders.forEach(scoreboard::addInternalPlaceholder);
         return this.scoreboard;
     }

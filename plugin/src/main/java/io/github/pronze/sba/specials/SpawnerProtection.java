@@ -3,12 +3,14 @@ package io.github.pronze.sba.specials;
 import org.bukkit.Location;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 
-@Service(dependsOn = SBAConfig.class)
+@Service
+@ServiceDependencies(dependsOn = SBAConfig.class)
 public class SpawnerProtection {
 
     private static SpawnerProtection instance;
@@ -17,6 +19,7 @@ public class SpawnerProtection {
     private double storeProtectionSize = 0;
     @OnPostEnable
     public void registerProtection() {
+        if(SBA.isBroken())return;
         instance = this;
 
         spawnerProtectionSize=SBAConfig.getInstance().getDouble("automatic-protection.spawner-diameter", 0);

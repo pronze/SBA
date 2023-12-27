@@ -7,7 +7,7 @@ import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.utils.Logger;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,8 +20,8 @@ import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
 
@@ -30,7 +30,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
                 NPCManager.class
 })
 @Getter
@@ -53,7 +54,7 @@ public class NPCStoreService implements Listener {
                                 .requireNonNull(SBAConfig.getInstance().node("shop", "normal-shop", "entity-name")
                                                 .getList(String.class))
                                 .stream()
-                                .map(AdventureHelper::toComponent)
+                                .map(Component::fromLegacy)
                                 .collect(Collectors.toList()));
 
                 upgradeShopText.clear();
@@ -61,16 +62,17 @@ public class NPCStoreService implements Listener {
                                 .requireNonNull(SBAConfig.getInstance().node("shop", "upgrade-shop", "entity-name")
                                                 .getList(String.class))
                                 .stream()
-                                .map(AdventureHelper::toComponent)
+                                .map(Component::fromLegacy)
                                 .collect(Collectors.toList()));
         }
 
         @OnPostEnable
         public void onPostEnabled() {
+                if(SBA.isBroken())return;
                 SBA.getInstance().registerListener(this);
                 EventManager.getDefaultEventManager().register(NPCInteractEvent.class, this::onNPCTouched);
 
-                if (Bukkit.getPluginManager().isPluginEnabled("Citizens")) {
+                if (SBA.getInstance().citizensFix.canEnable()) {
                         SBA.getInstance().registerListener(new CitizensListeners());
                 }
 

@@ -1,8 +1,6 @@
 package io.github.pronze.sba.utils.citizens;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.entity.Player;
@@ -14,7 +12,6 @@ import org.screamingsandals.simpleinventories.inventory.Price;
 
 import io.github.pronze.sba.inventories.SBAStoreInventoryV2;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.utils.citizens.FakeDeathTrait.AiGoal;
 import lombok.Data;
 
 public class GatherBlocks implements FakeDeathTrait.AiGoal {
@@ -36,7 +33,7 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
     @Override
     public boolean isAvailable() {
         // TODO Auto-generated method stub
-
+        if(fakeDeathTrait.blockPlace()==null) return false;
         if (fakeDeathTrait.blockPlace().isInNeedOfBlock()) {
             Player aiPlayer = (Player) this.fakeDeathTrait.getNPC().getEntity();
             Game g = Main.getInstance().getGameOfPlayer(aiPlayer);
@@ -124,7 +121,7 @@ public class GatherBlocks implements FakeDeathTrait.AiGoal {
     }
 
     public void iterateShop(Player aiPlayer, GameStore gs,
-            BiConsumer<Price, org.screamingsandals.lib.item.Item> consumer) {
+            BiConsumer<Price, org.screamingsandals.lib.item.ItemStack> consumer) {
         if (gs.getShopFile() == null || !StringUtils.containsIgnoreCase(gs.getShopFile(), "upgrade")) {
             var storeInv = SBAStoreInventoryV2.getInstance().iterate(gs);
             if (storeInv != null) {

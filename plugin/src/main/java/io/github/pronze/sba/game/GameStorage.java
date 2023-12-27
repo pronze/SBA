@@ -147,7 +147,7 @@ public class GameStorage implements IGameStorage {
         if (!teamDataMap.containsKey(team)) {
             throw new UnsupportedOperationException("Team: " + team.getName() + " has not been registered yet!");
         }
-        teamDataMap.get(team).setPurchasedBlindTrap(isMinerTrapEnabled);
+        teamDataMap.get(team).setPurchasedMinerTrap(isMinerTrapEnabled);
     }
 
     @Override

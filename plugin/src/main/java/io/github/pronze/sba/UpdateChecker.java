@@ -6,11 +6,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.event.EventManager;
-import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
@@ -27,7 +25,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Scanner;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         SBAConfig.class
 })
 public class UpdateChecker {
@@ -47,7 +46,8 @@ public class UpdateChecker {
 
     @OnPostEnable
     public void checkForUpdates() {
-        if (SBA.getInstance().isSnapshot()) {
+                if(SBA.isBroken())return;
+                if (SBA.getInstance().isSnapshot()) {
              return;
         }
         if (SBAConfig.getInstance().shouldCheckUpdate())

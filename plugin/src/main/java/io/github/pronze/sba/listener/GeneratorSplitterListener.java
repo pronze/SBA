@@ -1,9 +1,7 @@
 package io.github.pronze.sba.listener;
 
-import com.google.gson.Gson;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
-import io.github.pronze.sba.utils.Logger;
 import lombok.SneakyThrows;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,14 +14,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.APIUtils;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
 import org.screamingsandals.bedwars.api.events.BedwarsResourceSpawnEvent;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.lib.bukkit.utils.nms.Version;
+import org.screamingsandals.lib.impl.bukkit.utils.Version;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
@@ -38,6 +35,7 @@ public class GeneratorSplitterListener implements Listener {
     @SneakyThrows
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         if (Version.isVersion(1, 12)) {
             SBA.getInstance().registerListener(new GeneratorSplitterListener112());
         } else {

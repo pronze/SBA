@@ -33,6 +33,7 @@ public class ExplosionVelocityControlListener implements Listener {
 
     @OnPostEnable
     public void postEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
     }
 

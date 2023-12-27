@@ -14,7 +14,6 @@ import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import lombok.SneakyThrows;
 
-import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -24,18 +23,18 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.bedwars.api.events.BedwarsApplyPropertyToItem;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.ItemSpawner;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.game.GameStore;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
+import org.screamingsandals.lib.item.meta.EnchantmentType;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.ConfigurateUtils;
 import org.screamingsandals.lib.utils.Controllable;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.simpleinventories.SimpleInventoriesCore;
 import org.screamingsandals.simpleinventories.builder.InventorySetBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
@@ -55,7 +54,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         SimpleInventoriesCore.class,
         SBAConfig.class
 })
@@ -123,7 +123,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
     @Override
     public void onPostGenerateItem(ItemRenderEvent event) {
-        event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.NORMAL));
+        // event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(),
+        // event, StoreType.NORMAL));
+        event.setStack(ShopUtil.applyTeamUpgradeEnchantsToItem(event.getStack(), event, StoreType.UPGRADES));
     }
 
     @Override
@@ -132,7 +134,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
     }
 
     public Map.Entry<Boolean, Boolean> handlePurchase(Player player, AtomicReference<ItemStack> newItem,
-            AtomicReference<Item> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type) {
+            AtomicReference<org.screamingsandals.lib.item.ItemStack> materialItem, PlayerItemInfo itemInfo, ItemSpawnerType type, AtomicReference<String[]> messageOnFail) {
         boolean shouldSellStack = true;
         final var game = Main.getInstance().getGameOfPlayer(player);
         final var gameStorage = ArenaManager
@@ -141,7 +143,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                 .orElseThrow()
                 .getStorage();
         final var team = game.getTeamOfPlayer(player);
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(player);
+        final var wrappedPlayer = Players.wrapPlayer(player);
         if (itemInfo.getProperties().size() == 0) {
             final var typeName = newItem.get().getType().name();
 
@@ -194,13 +196,14 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                 // if (upgradeProperties.contains(propertyName)) {
                 switch (propertyName) {
                     case "trap":
+                        if (!property.getPropertyData().hasChild("identifier") && property.getPropertyData().hasChild("data")) { // Fix support for SBW Trap special item
+                            return Map.entry(true, true);
+                        }
+
                         String trap_identifier = property.getPropertyData().childrenMap().get("identifier").getString();
                         if (gameStorage.areTrapEnabled(team, trap_identifier)) {
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
                         } else {
                             final var blindnessTrapTitle = LanguageService
                                     .getInstance()
@@ -216,7 +219,14 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     .forEach(effectItem -> {
                                         try {
                                             String effectType = effectItem.childrenMap().get("type").getString();
-                                            PotionEffectType type_ = PotionEffectType.getByName(effectType);
+                                            var slibEffect = org.screamingsandals.lib.item.meta.PotionEffectType.ofNullable(effectType);
+
+                                            PotionEffectType type_;
+                                            if (slibEffect != null) {
+                                                type_ = slibEffect.as(PotionEffectType.class);
+                                            } else {
+                                                type_ = PotionEffectType.getByName(effectType);
+                                            }
                                             if (type_ == null) {
                                                 Logger.error("{} is not a recognized Potion effect", effectType);
                                                 return;
@@ -235,11 +245,12 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                             gameStorage.setPurchasedTrap(team, true, trap_identifier);
                             if (SBAConfig.getInstance().trapTitleEnabled())
-                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(Players.wrapPlayer(pl),
+                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20,
+                                        40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
-                                        .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
+                                        .forEach(pl -> Players.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
                         }
                         break;
                     case "sharpness":
@@ -249,7 +260,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .getInstance()
                                         .get(MessageKeys.UGPRADE_TEAM_SHARPNESS)
                                         .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                        .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                        .send(Players.wrapPlayer(teamPlayer));
 
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
@@ -263,23 +274,21 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var teamSharpnessLevel = gameStorage.getSharpnessLevel(team).orElseThrow();
                         var maxSharpnessLevel = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness")
                                 .getInt(1);
-                        maxSharpnessLevel = Math.min(maxSharpnessLevel, sharpnessPrices.size() - 1);
+                        maxSharpnessLevel = Math.min(maxSharpnessLevel, sharpnessPrices.size());
 
                         if (teamSharpnessLevel >= maxSharpnessLevel) {
-                            shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
-                        } else {
-                            teamSharpnessLevel = teamSharpnessLevel + 1;
-                            var ePrice = sharpnessPrices.get(teamSharpnessLevel);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
 
-                            materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                            shouldSellStack = false;
+                        } else {
+                            var ePrice = sharpnessPrices.get(teamSharpnessLevel);
+                            teamSharpnessLevel = teamSharpnessLevel + 1;
+
+                            materialItem.set(ItemStackFactory.build(type.getStack(ePrice)));// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setSharpnessLevel(team, teamSharpnessLevel);
                                 Integer finalTeamSharpnessLevel = teamSharpnessLevel;
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -287,7 +296,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .getInstance()
                                             .get(MessageKeys.UGPRADE_TEAM_SHARPNESS)
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                            .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                            .send(Players.wrapPlayer(teamPlayer));
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
                                             .filter(Objects::nonNull)
@@ -306,7 +315,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .getInstance()
                                         .get(MessageKeys.UPGRADE_TEAM_KNOCKBACK)
                                         .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                        .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                        .send(Players.wrapPlayer(teamPlayer));
 
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
@@ -323,19 +332,16 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                         if (teamKnockbackLevel >= maxKnockbackLevel) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
                         } else {
-                            teamKnockbackLevel = teamKnockbackLevel + 1;
                             var ePrice = knockbackPrices.get(teamKnockbackLevel);
+                            teamKnockbackLevel = teamKnockbackLevel + 1;
 
-                            materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                            materialItem.set(ItemStackFactory.build(type.getStack(ePrice)));// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setSharpnessLevel(team, teamKnockbackLevel);
                                 Integer finalTeamSharpnessLevel = teamKnockbackLevel;
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -343,7 +349,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .getInstance()
                                             .get(MessageKeys.UPGRADE_TEAM_KNOCKBACK)
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                            .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                            .send(Players.wrapPlayer(teamPlayer));
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
                                             .filter(Objects::nonNull)
@@ -363,7 +369,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .getInstance()
                                         .get(MessageKeys.UPGRADE_TEAM_EFFICIENCY)
                                         .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                        .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                        .send(Players.wrapPlayer(teamPlayer));
                                 Logger.trace("efficiency level add");
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
@@ -377,21 +383,19 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElseThrow();
                         var maxEfficiencyLevel = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency")
                                 .getInt(2);
-                        maxEfficiencyLevel = Math.min(maxEfficiencyLevel, efficiencyPrices.size() - 1);
+                        maxEfficiencyLevel = Math.min(maxEfficiencyLevel, efficiencyPrices.size());
                         if (efficiencyLevel >= maxEfficiencyLevel) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
+
                         } else {
-                            efficiencyLevel = efficiencyLevel + 1;
                             var ePrice = efficiencyPrices.get(efficiencyLevel);
-                            materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                            efficiencyLevel = efficiencyLevel + 1;
+                            materialItem.set(ItemStackFactory.build(type.getStack(ePrice)));// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setEfficiencyLevel(team, efficiencyLevel);
                                 Logger.trace("efficiency {}", efficiencyLevel);
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -399,7 +403,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .getInstance()
                                             .get(MessageKeys.UPGRADE_TEAM_EFFICIENCY)
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                            .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                            .send(Players.wrapPlayer(teamPlayer));
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
                                             .filter(Objects::nonNull)
@@ -414,10 +418,8 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                     case "blindtrap":
                         if (gameStorage.areBlindTrapEnabled(team)) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
+
                         } else {
                             final var blindnessTrapTitle = LanguageService
                                     .getInstance()
@@ -426,21 +428,20 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                             gameStorage.setPurchasedBlindTrap(team, true);
                             if (SBAConfig.getInstance().trapTitleEnabled())
-                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        blindnessTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(Players.wrapPlayer(pl),
+                                        blindnessTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20,
+                                        40, 20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
-                                        .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
+                                        .forEach(pl -> Players.wrapPlayer(pl).sendMessage(blindnessTrapTitle));
                         }
                         break;
 
                     case "minertrap":
                         if (gameStorage.areMinerTrapEnabled(team)) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
+
                         } else {
                             final var minerTrapTitle = LanguageService
                                     .getInstance()
@@ -449,22 +450,22 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
 
                             gameStorage.setPurchasedMinerTrap(team, true);
                             if (SBAConfig.getInstance().trapTitleEnabled())
-                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl),
-                                        minerTrapTitle, net.kyori.adventure.text.Component.empty(), 20, 40, 20));
+                                team.getConnectedPlayers().forEach(pl -> SBAUtil.sendTitle(Players.wrapPlayer(pl),
+                                        minerTrapTitle, org.screamingsandals.lib.spectator.Component.empty(), 20, 40,
+                                        20));
                             if (SBAConfig.getInstance().trapMessageEnabled())
                                 team.getConnectedPlayers()
-                                        .forEach(pl -> PlayerMapper.wrapPlayer(pl).sendMessage(minerTrapTitle));
+                                        .forEach(pl -> Players.wrapPlayer(pl).sendMessage(minerTrapTitle));
                         }
 
                         break;
 
                     case "healpool":
                         shouldSellStack = false;
+                        messageOnFail.set(null);
+
                         if (gameStorage.arePoolEnabled(team)) {
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.WAIT_FOR_TRAP)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.WAIT_FOR_TRAP);
                         } else {
                             var purchaseHealPoolMessage = LanguageService
                                     .getInstance()
@@ -475,7 +476,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             gameStorage.setPurchasedPool(team, true);
                             shouldSellStack = true;
                             team.getConnectedPlayers().forEach(
-                                    pl -> PlayerMapper.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
+                                    pl -> Players.wrapPlayer(pl).sendMessage(purchaseHealPoolMessage));
                         }
                         break;
                     case "forge":
@@ -518,6 +519,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                     }
                                 }
                             }
+                            double maxLevelF = maxLevel;
                             if (spawnersToUpgrade.isEmpty()) {
                                 types.forEach(spawnerType -> {
                                     double closestDistance = Double.MAX_VALUE;
@@ -530,14 +532,18 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                                 closestDistance = distance;
                                                 closestSpawner = spawner;
                                             }
+
+
                                         }
                                     }
                                     if (closestSpawner != null) {
-                                        spawnersToUpgrade.add(closestSpawner);
+                                        double newLevel = closestSpawner.getCurrentLevel();
+                                        if (newLevel < maxLevelF)
+                                            spawnersToUpgrade.add(closestSpawner);
                                     }
                                 });
                             }
-
+                            
                             for (var spawner : spawnersToUpgrade) {
                                 double newLevel = spawner.getCurrentLevel() + addLevels;
                                 if (newLevel > maxLevel && maxLevel > 0)
@@ -546,7 +552,10 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             }
 
                             if (spawnersToUpgrade.isEmpty())
+                            {
+                                messageOnFail.set(MessageKeys.GREATEST_SPAWNER);
                                 shouldSellStack = false;
+                            }
                         }
                         break;
                     case "protection":
@@ -556,7 +565,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                         .getInstance()
                                         .get(MessageKeys.UPGRADE_TEAM_PROTECTION)
                                         .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                        .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                        .send(Players.wrapPlayer(teamPlayer));
 
                                 Arrays.stream(teamPlayer.getInventory().getContents())
                                         .filter(Objects::nonNull)
@@ -570,22 +579,23 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElseThrow();
                         var maxProtectionLevel = SBAConfig.getInstance().node("upgrades", "limit", "Protection")
                                 .getInt(4);
-                        maxProtectionLevel = Math.min(maxProtectionLevel, protectionPrices.size() - 1);
+                        maxProtectionLevel = Math.min(maxProtectionLevel, protectionPrices.size());
 
                         if (teamProtectionLevel >= maxProtectionLevel) {
                             shouldSellStack = false;
-                            LanguageService
-                                    .getInstance()
-                                    .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                    .send(wrappedPlayer);
+                            messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
+
                         } else {
-                            teamProtectionLevel = teamProtectionLevel + 1;
+                            Logger.trace("protectionPrices:{}", protectionPrices);
                             var ePrice = protectionPrices.get(teamProtectionLevel);
-                            materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                            Logger.trace("ePrice:{}", ePrice);
+                            teamProtectionLevel = teamProtectionLevel + 1;
+                            Logger.trace("teamProtectionLevel:{}", teamProtectionLevel);
+                            materialItem.set(ItemStackFactory.build(type.getStack(ePrice)));// . (ItemFactory. (
                                                                                              // type.getStack(ePrice)));
 
                             if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                    materialItem.get().getAmount())) {
+                                    ePrice)) {
                                 gameStorage.setProtectionLevel(team, teamProtectionLevel);
                                 ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
 
@@ -602,7 +612,7 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .forEach(item -> {
                                                 ShopUtil.applyTeamEnchants(teamPlayer, item);
                                             });
-                                    PlayerMapper.wrapPlayer(teamPlayer).sendMessage(upgradeMessage);
+                                    Players.wrapPlayer(teamPlayer).sendMessage(upgradeMessage);
 
                                 });
                             } else
@@ -611,7 +621,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         break;
                     default:
                         if (Arrays.stream(Enchantment.values())
-                                .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName))) {
+                                .anyMatch(x -> x.getName().equalsIgnoreCase(propertyName)
+                                ||EnchantmentType.of(x).location().path().equalsIgnoreCase(propertyName)
+                                )) {
 
                             if (isAdd) {
                                 team.getConnectedPlayers().forEach(teamPlayer -> {
@@ -619,9 +631,9 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                                             .getInstance()
                                             .get(MessageKeys.UPGRADE_TEAM_ENCHANT)
                                             .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                            .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                            .send(Players.wrapPlayer(teamPlayer));
                                     Optional<Enchantment> ech = Arrays.stream(Enchantment.values())
-                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName))
+                                            .filter(x -> x.getName().equalsIgnoreCase(propertyName)||EnchantmentType.of(x).location().path().equalsIgnoreCase(propertyName))
                                             .findAny();
 
                                     Arrays.stream(teamPlayer.getInventory().getContents())
@@ -636,29 +648,27 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                             var teamOtherLevel = gameStorage.getEnchantLevel(team, propertyName).orElseThrow();
                             var maxOtherLevel = SBAConfig.getInstance().node("upgrades", "limit", propertyName)
                                     .getInt(1);
-                            maxOtherLevel = Math.min(maxOtherLevel, otherPrices.get(propertyName).size() - 1);
+                            maxOtherLevel = Math.min(maxOtherLevel, otherPrices.get(propertyName).size());
 
                             if (teamOtherLevel >= maxOtherLevel) {
                                 shouldSellStack = false;
-                                LanguageService
-                                        .getInstance()
-                                        .get(MessageKeys.GREATEST_ENCHANTMENT)
-                                        .send(wrappedPlayer);
-                            } else {
-                                teamOtherLevel = teamOtherLevel + 1;
-                                var ePrice = otherPrices.get(propertyName).get(teamOtherLevel);
+                                messageOnFail.set(MessageKeys.GREATEST_ENCHANTMENT);
 
-                                materialItem.set(ItemFactory.build(type.getStack(ePrice)).get());// . (ItemFactory. (
+                            } else {
+                                var ePrice = otherPrices.get(propertyName).get(teamOtherLevel);
+                                teamOtherLevel = teamOtherLevel + 1;
+
+                                materialItem.set(ItemStackFactory.build(type.getStack(ePrice)));// . (ItemFactory. (
                                                                                                  // type.getStack(ePrice)));
                                 if (player.getInventory().containsAtLeast(materialItem.get().as(ItemStack.class),
-                                        materialItem.get().getAmount())) {
+                                        ePrice)) {
                                     gameStorage.setEnchantLevel(team, propertyName, teamOtherLevel);
                                     team.getConnectedPlayers().forEach(teamPlayer -> {
                                         LanguageService
                                                 .getInstance()
                                                 .get(MessageKeys.UPGRADE_TEAM_ENCHANT)
                                                 .replace("%player%", player.getDisplayName() + ChatColor.RESET)
-                                                .send(PlayerMapper.wrapPlayer(teamPlayer));
+                                                .send(Players.wrapPlayer(teamPlayer));
 
                                         Arrays.stream(teamPlayer.getInventory().getContents())
                                                 .filter(Objects::nonNull)
@@ -675,9 +685,6 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
                         break;
                 }
                 // }
-                var applyEvent = new BedwarsApplyPropertyToItem(game, player, newItem.get(), propertyData);
-                SBA.getPluginInstance().getServer().getPluginManager().callEvent(applyEvent);
-                newItem.set(applyEvent.getStack());
 
             } else {
 
@@ -729,7 +736,21 @@ public class SBAStoreInventoryV2 extends AbstractStoreInventory {
     @EventHandler
     public void onBedWarsOpenShop(BedwarsOpenShopEvent event) {
         event.setResult(BedwarsOpenShopEvent.Result.DISALLOW_UNKNOWN);
-        openForPlayer(PlayerMapper.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class),
+        if (!Main.getInstance().isPlayerPlayingAnyGame(event.getPlayer())) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MESSAGE_NOT_IN_GAME)
+                    .send(Players.wrapPlayer(event.getPlayer()));
+            return;
+        }
+        if (Main.getInstance().getGameOfPlayer(event.getPlayer()).getTeamOfPlayer(event.getPlayer())==null) {
+            LanguageService
+                    .getInstance()
+                    .get(MessageKeys.MESSAGE_NOT_IN_GAME)
+                    .send(Players.wrapPlayer(event.getPlayer()));
+            return;
+        }
+        openForPlayer(Players.wrapPlayer(event.getPlayer()).as(SBAPlayerWrapper.class),
                 (GameStore) event.getStore());
     }
 }

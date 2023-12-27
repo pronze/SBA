@@ -18,12 +18,14 @@ import io.github.pronze.sba.commands.party.PartyCommand;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnEnable;
 
 import io.github.pronze.sba.utils.Logger;
@@ -31,7 +33,8 @@ import io.github.pronze.sba.utils.SBAUtil;
 
 import java.util.function.Function;
 
-@Service(initAnother = {
+@Service
+@ServiceDependencies(initAnother = {
         SBACommand.class,
         GamesInvNPCCommand.class,
         ShoutCommand.class,
@@ -51,6 +54,7 @@ public class CommandManager {
     private @NotNull BukkitAudiences bukkitAudiences;
 
     public static void reload() {
+        if(SBA.isBroken())return;
         CommandManager ths = getInstance();
         if(ths!=null)
         {
@@ -63,8 +67,10 @@ public class CommandManager {
     }
     @OnEnable
     public void onEnable(JavaPlugin plugin) {
+        if(SBA.isBroken())return;
         if (manager != null)
             return;
+        if(SBA.isBroken())return;
         final Function<CommandTree<CommandSender>, CommandExecutionCoordinator<CommandSender>> executionCoordinatorFunction = CommandExecutionCoordinator
                 .simpleCoordinator();
         final Function<CommandSender, CommandSender> mapperFunction = Function.identity();
@@ -88,13 +94,13 @@ public class CommandManager {
                 bukkitAudiences::sender,
                 manager);
 
-        if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
+        /*if (manager.queryCapability(CloudBukkitCapabilities.BRIGADIER)) {
             try {
                 manager.registerBrigadier();
             } catch (Exception e) {
                 Logger.error("Could not register Brigadier\r{}", e);
             }
-        }
+        }*/
 
         if (manager.queryCapability(CloudBukkitCapabilities.ASYNCHRONOUS_COMPLETION)) {
             manager.registerAsynchronousCompletions();

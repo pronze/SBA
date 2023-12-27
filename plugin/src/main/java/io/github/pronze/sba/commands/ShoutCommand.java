@@ -7,13 +7,12 @@ import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.config.SBAConfig;
@@ -26,6 +25,7 @@ public class ShoutCommand {
     static boolean init = false;
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (init)
             return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
@@ -102,6 +102,7 @@ public class ShoutCommand {
                 .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                 .replace("%message%", strBuilder.toString())
                 .replace("%team%", team == null ? "" : team.getName())
+                .placeholderFor(player)
                 .toComponent();
 
         wrapper.as(SBAPlayerWrapper.class).shout(shoutMessage);

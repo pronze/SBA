@@ -3,9 +3,7 @@ package io.github.pronze.sba.visuals;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,14 +11,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.screamingsandals.bedwars.Main;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -35,6 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class LobbyScoreboardManager implements Listener {
     private final Map<UUID, Scoreboard> scoreboardMap = new HashMap<>();
+    private boolean enabled = false;
 
     public static LobbyScoreboardManager getInstance() {
         return ServiceManager.get(LobbyScoreboardManager.class);
@@ -42,7 +40,9 @@ public class LobbyScoreboardManager implements Listener {
 
     @OnPostEnable
     public void registerListener() {
-        if (!SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true)) {
+        if (SBA.isBroken())
+            return;
+        if (!(enabled = SBAConfig.getInstance().node("lobby-scoreboard", "enabled").getBoolean(true))) {
             return;
         }
         SBA.getInstance().registerListener(this);
@@ -51,13 +51,15 @@ public class LobbyScoreboardManager implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(BedwarsPlayerJoinedEvent e) {
         final var player = e.getPlayer();
-        if(e.getGame().getConnectedPlayers().contains(player))
+        if (e.getGame().getConnectedPlayers().contains(player))
             if (e.getGame().getStatus() == GameStatus.WAITING) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> createBoard(player, e.getGame()), 3L);
             }
     }
 
     private void createBoard(Player player, Game game) {
+        if (!enabled)
+            return;
         final var scoreboardOptional = ScoreboardManager.getInstance()
                 .fromCache(player.getUniqueId());
         scoreboardOptional.ifPresent(Scoreboard::destroy);
@@ -120,20 +122,17 @@ public class LobbyScoreboardManager implements Listener {
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_SOLO_PREFIX)
                     .toString();
-        }
-        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 2)) {
+        } else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 2)) {
             mode = LanguageService
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_DOUBLES_PREFIX)
                     .toString();
-        }
-        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 3)) {
+        } else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 3)) {
             mode = LanguageService
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_TRIPLES_PREFIX)
                     .toString();
-        }
-        else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 4)) {
+        } else if (game.getAvailableTeams().stream().allMatch(t -> t.getMaxPlayers() == 4)) {
             mode = LanguageService
                     .getInstance()
                     .get(MessageKeys.LOBBY_SCOREBOARD_SQUADS_PREFIX)
@@ -151,11 +150,12 @@ public class LobbyScoreboardManager implements Listener {
             final var time = gameImpl.getFormattedTimeLeft();
             if (!time.contains("0-1")) {
                 final var units = time.split(":");
-                var seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0])*60;
+                var seconds = Integer.parseInt(units[1]) + 1 + Integer.parseInt(units[0]) * 60;
                 state = LanguageService
                         .getInstance()
                         .get(MessageKeys.LOBBY_SCOREBOARD_STATE)
-                        .replace("%countdown%", seconds<=60? String.valueOf(seconds):gameImpl.getFormattedTimeLeft())
+                        .replace("%countdown%",
+                                seconds <= 60 ? String.valueOf(seconds) : gameImpl.getFormattedTimeLeft())
                         .toString();
             }
         }
@@ -183,6 +183,34 @@ public class LobbyScoreboardManager implements Listener {
                 line = PlaceholderAPI.setPlaceholders(player, line);
             lines.add(line);
         });
+        final var holder = scoreboard.getHolder().of(player);
+        if (holder != null) {
+            game.getRunningTeams().forEach(team -> {
+                if (!holder.hasTeamEntry(team.getName())) {
+                    holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+                }
+                final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+                scoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+                
+                new HashSet<>(scoreboardTeam.getEntries())
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(Bukkit::getPlayerExact)
+                        .filter(Objects::nonNull)
+                        .forEach(teamPlayer -> {
+                            if (!team.getConnectedPlayers().contains(teamPlayer)) {
+                                scoreboardTeam.removeEntry(teamPlayer.getName());
+                            }
+                        });
+
+                team.getConnectedPlayers()
+                        .stream()
+                        .map(Player::getName)
+                        .filter(playerName -> !scoreboardTeam.hasEntry(playerName))
+                        .forEach(scoreboardTeam::addEntry);
+            });
+        }
+
         return lines;
     }
 }

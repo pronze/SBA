@@ -19,17 +19,17 @@ package org.screamingsandals.lib.healthindicator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import org.screamingsandals.lib.entity.EntityHuman;
+import org.screamingsandals.lib.entity.HumanEntity;
+import org.screamingsandals.lib.packet.ClientboundSetDisplayObjectivePacket;
+import org.screamingsandals.lib.packet.ClientboundSetObjectivePacket;
+import org.screamingsandals.lib.packet.ClientboundSetScorePacket;
+import org.screamingsandals.lib.player.Player;
+import org.screamingsandals.lib.spectator.Component;
+import org.screamingsandals.lib.spectator.ComponentLike;
 import org.screamingsandals.lib.packet.AbstractPacket;
-import org.screamingsandals.lib.packet.SClientboundSetDisplayObjectivePacket;
-import org.screamingsandals.lib.packet.SClientboundSetObjectivePacket;
-import org.screamingsandals.lib.packet.SClientboundSetScorePacket;
-import org.screamingsandals.lib.player.PlayerWrapper;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
-import org.screamingsandals.lib.tasker.task.TaskerTask;
+import org.screamingsandals.lib.tasker.task.Task;
 import org.screamingsandals.lib.utils.data.DataContainer;
 import org.screamingsandals.lib.visuals.UpdateStrategy;
 import org.screamingsandals.lib.visuals.impl.AbstractVisual;
@@ -42,9 +42,9 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
     private final String underNameTagKey;
     private final String tabListKey;
     private final ConcurrentSkipListMap<String, Integer> values = new ConcurrentSkipListMap<>();
-    protected final List<PlayerWrapper> trackedPlayers = new LinkedList<>();
+    protected final List<Player> trackedPlayers = new LinkedList<>();
 
-    
+
     @Accessors(chain = true, fluent = true)
     @Getter
     @Setter
@@ -52,7 +52,7 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
     protected volatile boolean ready;
     protected volatile boolean healthInTabList;
     protected volatile Component symbol = Component.empty();
-    protected TaskerTask task;
+    protected Task task;
 
     public HealthIndicatorImpl2(UUID uuid) {
         super(uuid);
@@ -62,7 +62,7 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
    
 
     @Override
-    public HealthIndicator2 addTrackedPlayer(PlayerWrapper player) {
+    public HealthIndicator2 addTrackedPlayer(Player player) {
         if (!trackedPlayers.contains(player)) {
             trackedPlayers.add(player);
             if (visible && ready && task == null) {
@@ -73,7 +73,7 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
     }
 
     @Override
-    public HealthIndicator2 removeTrackedPlayer(PlayerWrapper player) {
+    public HealthIndicator2 removeTrackedPlayer(Player player) {
         if (trackedPlayers.contains(player)) {
             trackedPlayers.remove(player);
             if (visible && ready && task == null) {
@@ -112,17 +112,18 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
         return !data.isEmpty();
     }
 
-    private static Function<PlayerWrapper, String> nameProvider; 
-    public static void setNameProvider(Function<PlayerWrapper, String> nFunction)
+    private static Function<Player, String> nameProvider;
+    public static void setNameProvider(Function<Player, String> nFunction)
     {
         nameProvider = nFunction;
     }
-    private String getName(PlayerWrapper p)
+    private String getName(Player p)
     {
         if(nameProvider!=null)
             return nameProvider.apply(p);
         return p.getName();
     }
+
     @Override
     public HealthIndicator2 update(UpdateStrategy strategy) {
         if (ready) {
@@ -132,9 +133,9 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
 
             List.copyOf(values.keySet()).stream().filter(s -> trackedPlayers.stream().noneMatch(p -> getName(p).equals(s))).forEach(s -> {
                 values.remove(s);
-                packets.add(getDestroyScorePacket(s).objectiveKey(underNameTagKey));
+                packets.add(getDestroyScorePacket(s).objectiveKey(underNameTagKey).build());
                 if (healthInTabList) {
-                    packets.add(getDestroyScorePacket(s).objectiveKey(tabListKey));
+                    packets.add(getDestroyScorePacket(s).objectiveKey(tabListKey).build());
                 }
             });
 
@@ -144,13 +145,13 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
                     return;
                 }
 
-                var health = (int) Math.round(playerWrapper.as(EntityHuman.class).getHealth());
+                var health = (int) Math.round(playerWrapper.as(HumanEntity.class).getHealth());
                 var key = getName(playerWrapper);
                 if (!values.containsKey(key) || values.get(key) != health) {
                     values.put(key, health);
-                    packets.add(createScorePacket(key, health).objectiveKey(underNameTagKey));
+                    packets.add(createScorePacket(key, health).objectiveKey(underNameTagKey).build());
                     if (healthInTabList) {
-                        packets.add(createScorePacket(key, health).objectiveKey(tabListKey));
+                        packets.add(createScorePacket(key, health).objectiveKey(tabListKey).build());
                     }
                 }
             });
@@ -199,10 +200,7 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
             task.cancel();
         }
 
-        task = Tasker.build(() -> update())
-                .async()
-                .repeat(time, unit)
-                .start();
+        task = Tasker.runAsyncRepeatedly(() -> update(), time, unit);
 
         return this;
     }
@@ -211,92 +209,100 @@ public class HealthIndicatorImpl2 extends AbstractVisual<HealthIndicator2> imple
         if (visible) {
             getUpdateObjectivePacket()
                     .objectiveKey(underNameTagKey)
+                    .build()
                     .sendPacket(viewers);
 
             if (healthInTabList) {
                 getUpdateObjectivePacket()
                         .objectiveKey(tabListKey)
+                        .build()
                         .sendPacket(viewers);
             }
         }
     }
 
     @Override
-    public void onViewerAdded(PlayerWrapper player, boolean checkDistance) {
+    public void onViewerAdded(Player player, boolean checkDistance) {
         if (visible) {
             getCreateObjectivePacket()
                     .objectiveKey(underNameTagKey)
+                    .build()
                     .sendPacket(player);
 
-            new SClientboundSetDisplayObjectivePacket()
+            ClientboundSetDisplayObjectivePacket.builder()
                     .objectiveKey(underNameTagKey)
-                    .slot(SClientboundSetDisplayObjectivePacket.DisplaySlot.BELOW_NAME)
+                    .slot(ClientboundSetDisplayObjectivePacket.DisplaySlot.BELOW_NAME)
+                    .build()
                     .sendPacket(player);
 
-            values.forEach((s, integer) -> createScorePacket(s, integer).objectiveKey(underNameTagKey).sendPacket(player));
+            values.forEach((s, integer) -> createScorePacket(s, integer).objectiveKey(underNameTagKey).build().sendPacket(player));
 
             if (healthInTabList) {
                 getCreateObjectivePacket()
                         .objectiveKey(tabListKey)
+                        .build()
                         .sendPacket(player);
 
-                new SClientboundSetDisplayObjectivePacket()
+                ClientboundSetDisplayObjectivePacket.builder()
                         .objectiveKey(tabListKey)
-                        .slot(SClientboundSetDisplayObjectivePacket.DisplaySlot.PLAYER_LIST)
+                        .slot(ClientboundSetDisplayObjectivePacket.DisplaySlot.PLAYER_LIST)
+                        .build()
                         .sendPacket(player);
 
-                values.forEach((s, integer) -> createScorePacket(s, integer).objectiveKey(tabListKey).sendPacket(player));
+                values.forEach((s, integer) -> createScorePacket(s, integer).objectiveKey(tabListKey).build().sendPacket(player));
             }
         }
     }
 
     @Override
-    public void onViewerRemoved(PlayerWrapper player, boolean checkDistance) {
+    public void onViewerRemoved(Player player, boolean checkDistance) {
         getDestroyObjectivePacket()
                 .objectiveKey(underNameTagKey)
+                .build()
                 .sendPacket(player);
 
         if (healthInTabList) {
             getDestroyObjectivePacket()
                     .objectiveKey(tabListKey)
+                    .build()
                     .sendPacket(player);
         }
     }
 
-    private SClientboundSetObjectivePacket getNotFinalObjectivePacket() {
-        return new SClientboundSetObjectivePacket()
+    private ClientboundSetObjectivePacket.ClientboundSetObjectivePacketBuilder getNotFinalObjectivePacket() {
+        return ClientboundSetObjectivePacket.builder()
                 .title(symbol.asComponent())
-                .criteriaType(SClientboundSetObjectivePacket.Type.INTEGER);
+                .criteriaType(ClientboundSetObjectivePacket.Type.INTEGER);
     }
 
-    private SClientboundSetObjectivePacket getCreateObjectivePacket() {
+    private ClientboundSetObjectivePacket.ClientboundSetObjectivePacketBuilder getCreateObjectivePacket() {
         var packet = getNotFinalObjectivePacket();
-        packet.mode(SClientboundSetObjectivePacket.Mode.CREATE);
+        packet.mode(ClientboundSetObjectivePacket.Mode.CREATE);
         return packet;
     }
 
-    private SClientboundSetObjectivePacket getUpdateObjectivePacket() {
+    private ClientboundSetObjectivePacket.ClientboundSetObjectivePacketBuilder getUpdateObjectivePacket() {
         var packet = getNotFinalObjectivePacket();
-        packet.mode(SClientboundSetObjectivePacket.Mode.UPDATE);
+        packet.mode(ClientboundSetObjectivePacket.Mode.UPDATE);
         return packet;
     }
 
-    private SClientboundSetObjectivePacket getDestroyObjectivePacket() {
-        return new SClientboundSetObjectivePacket()
-                .mode(SClientboundSetObjectivePacket.Mode.DESTROY);
+    private ClientboundSetObjectivePacket.ClientboundSetObjectivePacketBuilder getDestroyObjectivePacket() {
+        return ClientboundSetObjectivePacket.builder()
+                .mode(ClientboundSetObjectivePacket.Mode.DESTROY);
     }
 
-    private SClientboundSetScorePacket createScorePacket(String key, int score) {
-        return new SClientboundSetScorePacket()
+    private ClientboundSetScorePacket.ClientboundSetScorePacketBuilder createScorePacket(String key, int score) {
+        return ClientboundSetScorePacket.builder()
                 .entityName(key)
                 .score(score)
-                .action(SClientboundSetScorePacket.ScoreboardAction.CHANGE);
+                .action(ClientboundSetScorePacket.ScoreboardAction.CHANGE);
     }
 
-    private SClientboundSetScorePacket getDestroyScorePacket(String key) {
-        return new SClientboundSetScorePacket()
+    private ClientboundSetScorePacket.ClientboundSetScorePacketBuilder getDestroyScorePacket(String key) {
+        return ClientboundSetScorePacket.builder()
                 .entityName(key)
-                .action(SClientboundSetScorePacket.ScoreboardAction.REMOVE);
+                .action(ClientboundSetScorePacket.ScoreboardAction.REMOVE);
     }
 
     private static String generateObjectiveKey() {

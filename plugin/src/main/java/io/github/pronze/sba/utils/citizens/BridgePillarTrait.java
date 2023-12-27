@@ -41,13 +41,12 @@ public class BridgePillarTrait extends Trait {
                 blockPlace = (BedwarsBlockPlace) t;
         });
         npc.getNavigator().getLocalParameters().stuckAction(
-            new StuckAction() {
-                @Override
-                public boolean run(NPC arg0, Navigator arg1) {
+                new StuckAction() {
+                    @Override
+                    public boolean run(NPC arg0, Navigator arg1) {
                         return unstuck(arg0.getEntity().getLocation());
-                }
-        }
-        );
+                    }
+                });
     }
 
     @Override
@@ -108,7 +107,7 @@ public class BridgePillarTrait extends Trait {
     }
 
     public boolean teleport(Player aiPlayer, Location l) {
-       return blockPlace.teleport(aiPlayer,l);
+        return blockPlace.teleport(aiPlayer, l);
     }
 
     @Override
@@ -142,14 +141,22 @@ public class BridgePillarTrait extends Trait {
             }
         }
     }
-    public Location blockLocation(Location l)
-    {
+
+    public Location blockLocation(Location l) {
         return blockPlace.blockLocation(l);
     }
 
     public boolean unstuck(Location currentLocation) {
         Logger.trace("NPC IS STUCK {}", getNPC().getName());
 
+        if (blockPlace == null) {
+            npc.getTraits().forEach(t -> {
+                if (t instanceof BedwarsBlockPlace)
+                    blockPlace = (BedwarsBlockPlace) t;
+            });
+            if (blockPlace == null)
+                return false;
+        }
         // Stuck
         var target = npc.getNavigator().getTargetAsLocation();
         var horizontal = target.clone();

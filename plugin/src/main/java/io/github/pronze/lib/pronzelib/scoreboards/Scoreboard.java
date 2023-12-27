@@ -9,16 +9,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import io.github.pronze.lib.pronzelib.scoreboards.api.PlaceholderFunction;
 import java.util.ArrayList;
 import org.bukkit.Bukkit;
-import io.github.pronze.lib.pronzelib.scoreboards.animations.ScoreboardAnimator;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.Objects;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.Iterator;
-import java.util.Collections;
 import java.util.HashMap;
 
 import io.github.pronze.lib.pronzelib.scoreboards.builder.ScoreboardBuilder;
@@ -26,7 +18,6 @@ import io.github.pronze.lib.pronzelib.scoreboards.data.PlaceholderData;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.BoardPlayer;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.ConfigBoard;
 
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +25,9 @@ import java.util.Map;
 import io.github.pronze.lib.pronzelib.scoreboards.api.UpdateCallback;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
-import org.screamingsandals.lib.sidebar.Sidebar;
-import org.screamingsandals.lib.sidebar.SidebarImpl;
-import org.screamingsandals.lib.utils.visual.TextEntry;
 
-import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent.Builder;
+import org.screamingsandals.lib.player.Players;
 
 public class Scoreboard {
     private ConfigBoard holder;
@@ -57,7 +41,7 @@ public class Scoreboard {
     private List<String> animatedTitle;
     private boolean updateTaskRunning;
     private boolean animationTaskRunning;
-    private PlayerWrapper player;
+    private org.screamingsandals.lib.player.Player player;
     private List<String> lines;
     private PlaceholderFunction papiFunction;
     private final HashMap<String, Object> persistentPlaceholders;
@@ -73,7 +57,7 @@ public class Scoreboard {
         if (ScoreboardManager.getPluginInstance() == null) {
             throw new NullPointerException("Plugin instance not set! call ScoreboardManager.install() first");
         }
-        this.player = PlayerMapper.wrapPlayer(player);
+        this.player = Players.wrapPlayer(player);
         this.holder = new ConfigBoard(player.getName());
         BoardPlayer.getBoardPlayer(player).attachConfigBoard(this.holder);
         this.holder.runTaskTimerAsynchronously(ScoreboardManager.getPluginInstance(), 1, 1);
@@ -168,9 +152,9 @@ public class Scoreboard {
                 || (this.occupyMaxWidth && !from.contains(stringBuilder.toString()) && stringBuilder.length() < 40)) {
             stringBuilder.append(" ");
         }
-        if (stringBuilder.length() > 40) {
-            return stringBuilder.substring(0, 40);
-        }
+        //if (stringBuilder.length() > 40) {
+        //    return stringBuilder.substring(0, 40);
+        //}
         return stringBuilder.toString();
     }
 
@@ -193,6 +177,9 @@ public class Scoreboard {
 
         this.cancelTasks();
         ScoreboardManager.getInstance().removeFromCache(this.player.getUniqueId());
+    }
+    public void setObjective(String objectiveName) {
+        holder.setObjective(objectiveName);
     }
 
     public void setPlaceholderHook(final PlaceholderFunction papiFunction) {
@@ -252,7 +239,9 @@ public class Scoreboard {
         this.occupyMaxWidth = occupyMaxWidth;
     }
 
-    public PlayerWrapper getPlayer() {
+    public org.screamingsandals.lib.player.Player getPlayer() {
         return player;
     }
+
+  
 }

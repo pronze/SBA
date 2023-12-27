@@ -2,16 +2,12 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.Logger;
-import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,20 +17,18 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.event.OnEvent;
-import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
-import org.screamingsandals.lib.world.LocationHolder;
-import org.screamingsandals.lib.world.LocationMapper;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,8 +37,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Service(dependsOn = {
-        PlayerMapper.class,
+@Service
+@ServiceDependencies(dependsOn = {
         PlayerWrapperService.class
 })
 public class GamesInventoryService implements Listener {
@@ -73,7 +67,8 @@ public class GamesInventoryService implements Listener {
     @SneakyThrows
     @OnPostEnable
     public void loadGamesInv() {
-        SBA.getInstance().registerListener(this);
+                if(SBA.isBroken())return;
+                SBA.getInstance().registerListener(this);
         final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(), "npc.yml");
         if (file.exists()) {
             YamlConfiguration config = new YamlConfiguration();
@@ -126,9 +121,9 @@ public class GamesInventoryService implements Listener {
             });
             update();
         }
-        Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> Bukkit.getOnlinePlayers().forEach(player -> {
             addViewer(player);
-        })).delay(1L, TaskerTime.SECONDS).start();
+        }), 1L, TaskerTime.SECONDS);
     }
 
     @SuppressWarnings("unchecked")
@@ -151,7 +146,7 @@ public class GamesInventoryService implements Listener {
     }
 
     private NPC createNpc(String mode, Location location) {
-        return NPC.of(LocationMapper.wrapLocation(location))
+        return NPC.of(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(location)))
                 .lookAtPlayer(true)
                 .displayName(LanguageService
                         .getInstance()
@@ -194,7 +189,7 @@ public class GamesInventoryService implements Listener {
         update();
     }
 
-    public void removeNPC(PlayerWrapper remover, @NotNull NPC npc) {
+    public void removeNPC(org.screamingsandals.lib.player.Player remover, @NotNull NPC npc) {
         NPCs.stream().filter(n -> n.npc == npc).findAny().ifPresent(c -> {
             LanguageService
                     .getInstance()
@@ -243,14 +238,14 @@ public class GamesInventoryService implements Listener {
             Logger.trace("npc::addViewer", player.getName());
             if (npc.location.getWorld().equals(player.getWorld()))
                 if (npc.npc != null)
-                    npc.npc.addViewer(PlayerMapper.wrapPlayer(player));
+                    npc.npc.addViewer(Players.wrapPlayer(player));
         });
     }
 
     public void removeViewer(@NotNull Player player) {
         NPCs.forEach(npc -> {
             if (npc.npc != null)
-                npc.npc.removeViewer(PlayerMapper.wrapPlayer(player));
+                npc.npc.removeViewer(Players.wrapPlayer(player));
         });
     }
 
@@ -267,21 +262,21 @@ public class GamesInventoryService implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             if (player.isOnline()) {
                 addViewer(player);
             }
-        }).delay(1L, TaskerTime.TICKS).start();
+        }, 1L, TaskerTime.TICKS);
     }
 
     @EventHandler
     public void onPlayerChangeWorld(PlayerChangedWorldEvent e) {
         final var player = e.getPlayer();
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             if (player.isOnline()) {
                 addViewer(player);
             }
-        }).delay(1L, TaskerTime.TICKS).start();
+        }, 1L, TaskerTime.TICKS);
     }
 
     @OnPreDisable
@@ -289,20 +284,19 @@ public class GamesInventoryService implements Listener {
         entityEditMap.clear();
     }
 
-    public void addEditable(PlayerWrapper player, Action mode, Object argument) {
+    public void addEditable(org.screamingsandals.lib.player.Player player, Action mode, Object argument) {
         if (entityEditMap.containsKey(player.as(Player.class).getEntityId())) {
             return;
         }
         entityEditMap.put(player.as(Player.class).getEntityId(), mode);
         entityEditMapArgument.put(player.as(Player.class).getEntityId(), argument);
-        Tasker.build(() -> {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
             entityEditMap.remove(Integer.valueOf(player.as(Player.class).getEntityId()));
             entityEditMapArgument.remove(Integer.valueOf(player.as(Player.class).getEntityId()));
-        })
-                .delay(5L, TaskerTime.SECONDS).start();
+        }, 5L, TaskerTime.SECONDS);
     }
 
-    private void setNpcSkin(PlayerWrapper player, NPC visual) {
+    private void setNpcSkin(org.screamingsandals.lib.player.Player player, NPC visual) {
         String argument = (String) entityEditMapArgument.get(player.as(Player.class).getEntityId());
         NPCSkin.retrieveSkin(argument).whenComplete((skin, exp) -> {
             if (skin != null) {

@@ -15,11 +15,10 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsBedDestroyedMessageSendEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerDeathMessageSendEvent;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 
-import java.util.List;
 import java.util.Random;
 
 @Service
@@ -28,6 +27,8 @@ public class BedwarsCustomMessageModifierListener implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
+        if (SBA.isBroken())
+            return;
         SBA.getInstance().registerListener(this);
     }
 
@@ -46,26 +47,30 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     .getInstance()
                     .get(MessageKeys.TEAM_ELIMINATED_MESSAGE)
                     .replace("%team%", teamColorStr + playerTeam.getName())
-                    .send(PlayerMapper.wrapPlayer(gPlayer)));
+                    .send(Players.wrapPlayer(gPlayer)));
         }
     }
 
     @EventHandler
     public void onBedWarsBedDestroyedMessageSendEvent(BedwarsBedDestroyedMessageSendEvent event) {
         event.setCancelled(true);
+
         final var teamColorStr = TeamColor.fromApiColor(event.getDestroyedTeam().getColor()).chatColor.toString();
-        final var destroyerTeamColorStr = TeamColor.fromApiColor(event.getGame().getTeamOfPlayer(event.getDestroyer()).getColor()).chatColor.toString();
+
+        var destroyerTeamColorStr = event.getDestroyer()!=null? TeamColor
+                .fromApiColor(event.getGame().getTeamOfPlayer(event.getDestroyer()).getColor()).chatColor.toString():"";
+        var destroyerName =event.getDestroyer()!=null? event.getDestroyer().getDisplayName():"--";
 
         final var messages = LanguageService
                 .getInstance()
                 .get(MessageKeys.BED_DESTROYED_MESSAGES)
                 .replace("%team%", teamColorStr + event.getDestroyedTeam().getName())
-                .replace("%destroyer%", destroyerTeamColorStr + event.getDestroyer().getDisplayName())
+                .replace("%destroyer%", destroyerTeamColorStr + destroyerName)
                 .toComponentList();
 
         final var randomlyChosen = messages.get(RANDOM.nextInt(messages.size()));
         event.getVictim().sendMessage(" ");
-        PlayerMapper.wrapPlayer(event.getVictim()).sendMessage(randomlyChosen);
+        Players.wrapPlayer(event.getVictim()).sendMessage(randomlyChosen);
         event.getVictim().sendMessage(" ");
     }
 
@@ -79,18 +84,16 @@ public class BedwarsCustomMessageModifierListener implements Listener {
         final var messages = LanguageService
                 .getInstance()
                 .get(MessageKeys.DEATH_MESSAGES_PVP_REGULAR)
-                .replace("%player%", victimTeamColorStr + event.getVictim().getDisplayName()+ChatColor.RESET);
-
+                .replace("%player%", victimTeamColorStr + event.getVictim().getDisplayName() + ChatColor.RESET);
 
         final var killer = victim.getKiller();
         if (killer != null) {
             final var killerTeam = event.getGame().getTeamOfPlayer(killer);
             final var killerTeamColorStr = TeamColor.fromApiColor(killerTeam.getColor()).chatColor.toString();
 
-            messages.replace("%killer%", killerTeamColorStr + killer.getDisplayName()+ChatColor.RESET);
+            messages.replace("%killer%", killerTeamColorStr + killer.getDisplayName() + ChatColor.RESET);
             final var list = messages.toStringList();
             event.setMessage(list.get(RANDOM.nextInt(list.size())));
-
 
             final var lastDamageCause = victim.getLastDamageCause();
             if (lastDamageCause != null) {
@@ -98,8 +101,8 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     message = LanguageService
                             .getInstance()
                             .get(MessageKeys.DEATH_MESSAGES_VOID_KILL)
-                            .replace("%player%", victimTeamColorStr + victim.getDisplayName()+ChatColor.RESET)
-                            .replace("%killer%", killerTeamColorStr + killer.getDisplayName()+ChatColor.RESET);
+                            .replace("%player%", victimTeamColorStr + victim.getDisplayName() + ChatColor.RESET)
+                            .replace("%killer%", killerTeamColorStr + killer.getDisplayName() + ChatColor.RESET);
                     event.setMessage(message.toString());
                 }
             }
@@ -108,9 +111,8 @@ public class BedwarsCustomMessageModifierListener implements Listener {
             message = LanguageService
                     .getInstance()
                     .get(MessageKeys.DEATH_MESSAGES_GENERIC)
-                    .replace("%player%", victimTeamColorStr + victim.getDisplayName()+ChatColor.RESET);
+                    .replace("%player%", victimTeamColorStr + victim.getDisplayName() + ChatColor.RESET);
 
-                    
             event.setMessage(message.toString());
 
             final var lastDamageCause = victim.getLastDamageCause();
@@ -119,7 +121,7 @@ public class BedwarsCustomMessageModifierListener implements Listener {
                     message = LanguageService
                             .getInstance()
                             .get(MessageKeys.DEATH_MESSAGES_VOID_DEATH)
-                            .replace("%player%", victimTeamColorStr + victim.getDisplayName()+ChatColor.RESET);
+                            .replace("%player%", victimTeamColorStr + victim.getDisplayName() + ChatColor.RESET);
                     event.setMessage(message.toString());
                 }
             }

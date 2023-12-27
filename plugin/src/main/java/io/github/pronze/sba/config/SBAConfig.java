@@ -15,8 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.builder.ItemFactory;
+import org.screamingsandals.lib.item.builder.ItemStackFactory;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -244,6 +243,7 @@ public class SBAConfig implements IConfigurator {
                     .back()
                     .section("tracker")
                     .key("enabled").defValue(true)
+                    .key("keep-on-start").defValue(true)
                     .key("name").defValue("§cP§6l§ea§ay§9e§br§5s")
                     .key("material").defValue("COMPASS")
                     .key("slot").defValue(4)
@@ -421,30 +421,34 @@ public class SBAConfig implements IConfigurator {
 
     public boolean replaceStoreWithCitizen() {
         return node("replace-stores-with-citizen").getBoolean(false)
-                && Bukkit.getPluginManager().isPluginEnabled("Citizens");
+                && SBA.getInstance().citizensFix.canEnable();
     }
 
-    public PartyConfig party()
-    {
+    public PartyConfig party() {
         return new PartyConfig();
     }
-    public class PartyConfig
-    {
+
+    public class PartyConfig {
         public boolean enabled() {
             return getBoolean("party.enabled", false);
         }
+
         public boolean autojoin() {
             return getBoolean("party.leader-autojoin-autoleave", false);
         }
+
         public int expirationTime() {
             return getInt("party.invite-expiration-time", 60);
         }
-        /*.section("party")
-                    .key("enabled").defValue(true)
-                    .key("leader-autojoin-autoleave").defValue(true)
-                    .key("invite-expiration-time").defValue(60)
-                    .back() */
+        /*
+         * .section("party")
+         * .key("enabled").defValue(true)
+         * .key("leader-autojoin-autoleave").defValue(true)
+         * .key("invite-expiration-time").defValue(60)
+         * .back()
+         */
     }
+
     public SpectatorConfig spectator() {
         return new SpectatorConfig();
     }
@@ -493,6 +497,10 @@ public class SBAConfig implements IConfigurator {
         public class TrackerConfig {
             public boolean enabled() {
                 return getBoolean("spectator.tracker.enabled", false);
+            }
+
+            public boolean keepOnStart() {
+                return getBoolean("spectator.tracker.keep-on-start", true);
             }
 
             public String name() {
@@ -610,9 +618,12 @@ public class SBAConfig implements IConfigurator {
         return new AIConfig();
     }
 
+    private boolean aiDisabled = false;
+
     public class AIConfig {
+
         public boolean enabled() {
-            return getBoolean("ai.enabled", false);
+            return !aiDisabled && getBoolean("ai.enabled", false);
         }
 
         public String skin() {
@@ -630,7 +641,19 @@ public class SBAConfig implements IConfigurator {
         }
 
         public @NotNull String infiniteItem() {
-            return getString("ai.infinite-material", Material.OAK_PLANKS.toString());
+            String defaultMaterial = "STONE";
+            if (Material.getMaterial("OAK_PLANKS") != null)
+                defaultMaterial = "OAK_PLANKS";
+            String returnValue =getString("ai.infinite-material", defaultMaterial);
+            if(Material.getMaterial(returnValue)==null)
+            {
+                return defaultMaterial;
+            }
+            return returnValue;
+        }
+
+        public void disable() {
+            aiDisabled = true;
         }
 
     }
@@ -816,13 +839,13 @@ public class SBAConfig implements IConfigurator {
         return str;
     }
 
-    public Item readDefinedItem(ConfigurationNode node, String def) {
+    public org.screamingsandals.lib.item.ItemStack readDefinedItem(ConfigurationNode node, String def) {
         if (!node.empty()) {
             var obj = node.raw();
-            return ItemFactory.build(obj).orElse(ItemFactory.getAir());
+            return Objects.requireNonNullElse(ItemStackFactory.build(obj), ItemStackFactory.getAir());
         }
 
-        return ItemFactory.build(def).orElse(ItemFactory.getAir());
+        return Objects.requireNonNullElse(ItemStackFactory.build(def), ItemStackFactory.getAir());
     }
 
 }

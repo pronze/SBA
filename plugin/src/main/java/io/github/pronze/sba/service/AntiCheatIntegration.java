@@ -72,6 +72,7 @@ public class AntiCheatIntegration implements Listener {
 
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (Bukkit.getPluginManager().isPluginEnabled("Vulcan")) {
             integrations.add(new VulcanIntegration());
         }

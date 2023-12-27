@@ -11,9 +11,9 @@ import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.GamesInventoryService;
 import io.github.pronze.sba.utils.Logger;
 import io.leangen.geantyref.TypeToken;
-import io.papermc.lib.PaperLib;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextColor;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
+import org.screamingsandals.lib.spectator.Color;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,20 +26,18 @@ import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.api.game.GameStore;
 import org.screamingsandals.lib.npc.NPC;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.Pair;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import org.screamingsandals.lib.world.LocationMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.utils.Logger.Level;
-import io.github.pronze.sba.visuals.LobbyScoreboardManager;
 import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
 
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
@@ -50,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -63,6 +62,7 @@ public class SBACommand {
 
     @OnPostEnable
     public void onPostEnabled() {
+        if(SBA.isBroken())return;
         if (init)
             return;
         gamesInvEnabled = SBAConfig.getInstance().getBoolean("games-inventory.enabled", true);
@@ -131,15 +131,13 @@ public class SBACommand {
             final @NotNull Player sender) {
 
         var player = SBA.getInstance().getPlayerWrapper(sender);
-        NPC npc = NPC.of(LocationMapper.wrapLocation(sender.getLocation()))
+        NPC npc = NPC.of(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(sender.getLocation())))
                 .addViewer(player)
                 .lookAtPlayer(true)
                 .displayName(List.of(
-                        Component.text("Test NPC, will despawn after 10 seconds").color(TextColor.color(139, 69, 19))))
+                        Component.text("Test NPC, will despawn after 10 seconds").withColor((Color.rgb(139, 69, 19)))))
                 .show();
-        Tasker.build(() -> {
-            npc.destroy();
-        }).delay(10, TaskerTime.SECONDS).start();
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, npc::destroy, 10, TaskerTime.SECONDS);
     }
 
     @CommandMethod("sba setlobby")
@@ -161,7 +159,7 @@ public class SBACommand {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.SUCCESSFULLY_SET_LOBBY)
-                    .send(PlayerMapper.wrapPlayer(player));
+                    .send(Players.wrapPlayer(player));
 
             MainLobbyVisualsManager.getInstance().reload();
 
@@ -180,14 +178,14 @@ public class SBACommand {
                 .get(MessageKeys.COMMAND_RESETTING)
                 .toComponent();
 
-        PlayerMapper.wrapSender(sender).sendMessage(component);
+        Players.wrapSender(sender).sendMessage(component);
         SBAConfig.getInstance().upgrade();
         final var c2 = LanguageService
                 .getInstance()
                 .get(MessageKeys.RESET_COMMAND_SUCCESS)
                 .toComponent();
 
-        PlayerMapper.wrapSender(sender).sendMessage(c2);
+        Players.wrapSender(sender).sendMessage(c2);
     }
 
     @CommandMethod("sba generate [gamemode] [maps]")
@@ -216,7 +214,7 @@ public class SBACommand {
                             .allMatch(t -> t.getMaxPlayers() == ShopUtil.getIntFromMode(gameMode)))
                     .collect(Collectors.toList());
 
-            PlayerMapper.wrapSender(sender).sendMessage(message);
+            Players.wrapSender(sender).sendMessage(message);
         }
         final var maps = mapsTmp != null ? mapsTmp : List.of(mapsArg);
         Logger.trace("Generating Games Inventory file for game mode: {}", gameMode);
@@ -307,7 +305,7 @@ public class SBACommand {
                                                     .get(MessageKeys.GAMESINV_NO_MAPS_WITH_NAME)
                                                     .replace("%name%", game.getSecond())
                                                     .toComponent();
-                                            PlayerMapper.wrapSender(sender).sendMessage(message);
+                                            Players.wrapSender(sender).sendMessage(message);
                                         }
                                     });
                         }
@@ -327,7 +325,7 @@ public class SBACommand {
                     .get(MessageKeys.GAMESINV_GENERATED)
                     .replace("%gamemode%", gameMode)
                     .toComponent();
-            PlayerMapper.wrapSender(sender).sendMessage(generated);
+            Players.wrapSender(sender).sendMessage(generated);
 
             GamesInventoryService.getInstance().destroy();
             GamesInventoryService.getInstance().loadGamesInv();
@@ -348,7 +346,7 @@ public class SBACommand {
                     .getInstance()
                     .get(MessageKeys.GAMES_INV_DISABLED)
                     .toComponent();
-            PlayerMapper.wrapPlayer(player).sendMessage(disabled);
+            Players.wrapPlayer(player).sendMessage(disabled);
             return;
         }
         GamesInventory
@@ -366,13 +364,13 @@ public class SBACommand {
                     .getInstance()
                     .get(MessageKeys.GAMES_INV_DISABLED)
                     .toComponent();
-            PlayerMapper.wrapPlayer(player).sendMessage(disabled);
+            Players.wrapPlayer(player).sendMessage(disabled);
             return;
         }
         var couldNotFindGameMessage = LanguageService
                 .getInstance()
                 .get(MessageKeys.GAMES_INVENTORY_CANNOT_FIND_GAME);
-        final var playerWrapper = PlayerMapper.wrapPlayer(player);
+        final var playerWrapper = Players.wrapPlayer(player);
         final var games = GamesInventory.getInstance().getGamesWithMode(gameMode);
         if (games == null || games.isEmpty()) {
             couldNotFindGameMessage.send(playerWrapper);
@@ -425,9 +423,9 @@ public class SBACommand {
             final var cannotExecute = LanguageService
                     .getInstance()
                     .get(MessageKeys.COMMAND_CANNOT_EXECUTE)
-                    .toString();
+                    .toComponent();
 
-            PlayerMapper.wrapSender(sender).sendMessage(cannotExecute);
+            Players.wrapSender(sender).sendMessage(cannotExecute);
             return;
         }
 
@@ -436,9 +434,9 @@ public class SBACommand {
         final var upgraded = LanguageService
                 .getInstance()
                 .get(MessageKeys.COMMAND_SUCCESSFULLY_UPGRADED)
-                .toString();
+                .toComponent();
 
-        PlayerMapper.wrapSender(sender).sendMessage(upgraded);
+        Players.wrapSender(sender).sendMessage(upgraded);
     }
 
     @CommandMethod("sba updateplugin")
@@ -451,9 +449,9 @@ public class SBACommand {
             final var cannotExecute = LanguageService
                     .getInstance()
                     .get(MessageKeys.COMMAND_CANNOT_EXECUTE)
-                    .toString();
+                    .toComponent();
 
-            PlayerMapper.wrapSender(sender).sendMessage(cannotExecute);
+            Players.wrapSender(sender).sendMessage(cannotExecute);
             return;
         }
 
@@ -470,9 +468,9 @@ public class SBACommand {
             final var m1 = LanguageService
                     .getInstance()
                     .get(MessageKeys.CANNOT_DO_COMMAND)
-                    .toString();
+                    .toComponent();
 
-            PlayerMapper.wrapSender(sender).sendMessage(m1);
+            Players.wrapSender(sender).sendMessage(m1);
             return;
         }
 
@@ -482,9 +480,9 @@ public class SBACommand {
             final var m2 = LanguageService
                     .getInstance()
                     .get(MessageKeys.COMMAND_CANCEL_UPGRADE)
-                    .toString();
+                    .toComponent();
 
-            PlayerMapper.wrapSender(sender).sendMessage(m2);
+            Players.wrapSender(sender).sendMessage(m2);
         } catch (SerializationException ex) {
             ex.printStackTrace();
         }

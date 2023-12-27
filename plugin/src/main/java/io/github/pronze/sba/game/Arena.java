@@ -1,6 +1,7 @@
 package io.github.pronze.sba.game;
 
 import io.github.pronze.sba.MessageKeys;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.GamePlayerData;
 import io.github.pronze.sba.game.tasks.BaseGameTask;
@@ -14,12 +15,11 @@ import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.citizens.HologramTrait;
 import io.github.pronze.sba.utils.citizens.ReturnToStoreTrait;
 import io.github.pronze.sba.visuals.GameScoreboardManager;
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.trait.Gravity;
 import net.citizensnpcs.trait.LookClose;
 import net.citizensnpcs.trait.SkinTrait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
@@ -30,8 +30,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.StringUtil;
-import org.checkerframework.checker.index.qual.GTENegativeOne;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -43,13 +41,11 @@ import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.bedwars.game.ItemSpawner;
 import org.screamingsandals.lib.npc.NPC;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.utils.reflect.Reflect;
-import org.screamingsandals.lib.world.LocationMapper;
-import net.kyori.adventure.text.TextComponent;
 import org.screamingsandals.lib.npc.skin.NPCSkin;
+import org.screamingsandals.lib.world.Location;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -106,9 +102,7 @@ public class Arena implements IArena {
         final var invisiblePlayer = new InvisiblePlayerImpl(player, this);
         invisiblePlayers.put(player.getUniqueId(), invisiblePlayer);
 
-        Tasker.build(() -> {
-            invisiblePlayer.vanish();
-        }).afterOneTick().start();
+        Tasker.run(DefaultThreads.GLOBAL_THREAD, invisiblePlayer::vanish);
 
     }
 
@@ -174,7 +168,8 @@ public class Arena implements IArena {
         LanguageService
                 .getInstance()
                 .get(MessageKeys.GAME_START_MESSAGE)
-                .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer).toArray(PlayerWrapper[]::new));
+                .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer)
+                        .toArray(org.screamingsandals.lib.player.Player[]::new));
 
         // spawn rotating generators
         if (SBAConfig.getInstance().node("floating-generator", "enabled").getBoolean()) {
@@ -210,15 +205,21 @@ public class Arena implements IArena {
                             Main.unregisterGameEntity(villager);
                         }
 
-                        if (mockEntity == null) {
-                            // find a better version independent way to mock entities lol
-                            mockEntity = (Bat) game.getGameWorld()
-                                    .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                            mockEntity.setAI(false);
-                        }
+                        if (!SBA.sbw_0_2_30) {
+                            if (mockEntity == null){
+                                // find a better version independent way to mock entities lol
+                                mockEntity = (Bat) game.getGameWorld()
+                                        .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                                try {
+                                    mockEntity.setAI(false);
+                                } catch (Throwable t) {
+                                    // 1.8.8 doesn't have that
+                                }
+                            }
 
-                        // set fake entity to avoid bw listener npe
-                        Reflect.setField(nonAPIStore, "entity", mockEntity);
+                            // set fake entity to avoid bw listener npe
+                            Reflect.setField(nonAPIStore, "entity", mockEntity);
+                        }
                     } catch (Throwable t) {
                         Logger.error(
                                 "SBA cannot unspawn the store, is something preventing the spawning of the stores?");
@@ -241,7 +242,7 @@ public class Arena implements IArena {
                         t.printStackTrace();
                     }
 
-                    final var npc = NPC.of(LocationMapper.wrapLocation(store.getStoreLocation()))
+                    final var npc = NPC.of(Objects.requireNonNull(Location.fromPlatform(store.getStoreLocation())))
                             .displayName(name)
                             .lookAtPlayer(true)
                             .skin(skin)
@@ -251,7 +252,7 @@ public class Arena implements IArena {
 
                     game.getConnectedPlayers()
                             .stream()
-                            .map(PlayerMapper::wrapPlayer)
+                            .map(Players::wrapPlayer)
                             .forEach(npc::addViewer);
                     npc.show();
                 });
@@ -291,18 +292,24 @@ public class Arena implements IArena {
                             npc.getOrAddTrait(ReturnToStoreTrait.class);
                             LivingEntity entity = (LivingEntity) npc.getEntity();
                             entity.setCustomNameVisible(false);
-                            npc.data().setPersistent(net.citizensnpcs.api.npc.NPC.NAMEPLATE_VISIBLE_METADATA, false);
+                            npc.data().setPersistent(net.citizensnpcs.api.npc.NPC.Metadata.NAMEPLATE_VISIBLE, false);
 
                             npc.getNavigator().setTarget(nonAPIStore.getStoreLocation());
 
-                            if (mockEntity == null) {
-                                // find a better version independent way to mock entities lol
-                                mockEntity = (Bat) game.getGameWorld()
-                                        .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
-                                mockEntity.setAI(false);
+                            if (!SBA.sbw_0_2_30) {
+                                if (mockEntity == null) {
+                                    // find a better version independent way to mock entities lol
+                                    mockEntity = (Bat) game.getGameWorld()
+                                            .spawnEntity(game.getSpectatorSpawn().clone().add(0, 300, 0), EntityType.BAT);
+                                    try {
+                                        mockEntity.setAI(false);
+                                    } catch (Throwable t) {
+                                        // 1.8.8 doesn't have that
+                                    }
+                                }
+                                // set fake entity to avoid bw listener npe
+                                Reflect.setField(nonAPIStore, "entity", mockEntity);
                             }
-                            // set fake entity to avoid bw listener npe
-                            Reflect.setField(nonAPIStore, "entity", mockEntity);
 
                             final var file = store.getShopFile();
 
@@ -354,7 +361,7 @@ public class Arena implements IArena {
                 .toComponent();
 
         team.getConnectedPlayers()
-                .forEach(player -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(player), title, subtitle, 0, 40, 20));
+                .forEach(player -> SBAUtil.sendTitle(Players.wrapPlayer(player), title, subtitle, 0, 40, 20));
 
         final var destroyer = e.getPlayer();
         if (destroyer != null) {
@@ -390,7 +397,7 @@ public class Arena implements IArena {
             if (((RotatingGenerator) gen).getStack().getType() != Material.AIR)
                 gen.removeViewer(player);
         });
-        stores.values().forEach(npc -> npc.removeViewer(PlayerMapper.wrapPlayer(player)));
+        stores.values().forEach(npc -> npc.removeViewer(Players.wrapPlayer(player)));
     }
 
     public void addVisualsForPlayer(Player player) {
@@ -398,7 +405,7 @@ public class Arena implements IArena {
             if (((RotatingGenerator) gen).getStack().getType() != Material.AIR)
                 gen.addViewer(player);
         });
-        stores.values().forEach(npc -> npc.addViewer(PlayerMapper.wrapPlayer(player)));
+        stores.values().forEach(npc -> npc.addViewer(Players.wrapPlayer(player)));
     }
 
     public void removePlayerFromGame(Player player) {
@@ -419,6 +426,7 @@ public class Arena implements IArena {
                     .toString();
 
             String firstKillerName = nullStr;
+            String firstKillerUsername = nullStr;
             int firstKillerScore = 0;
             UUID firstKillerUUID = null;
 
@@ -433,6 +441,7 @@ public class Arena implements IArena {
             }
 
             String secondKillerName = nullStr;
+            String secondKillerUsername = nullStr;
             int secondKillerScore = 0;
             UUID secondKillerUUID = null;
 
@@ -449,6 +458,7 @@ public class Arena implements IArena {
             }
 
             String thirdKillerName = nullStr;
+            String thirdKillerUsername = nullStr;
             int thirdKillerScore = 0;
             UUID thirdKillerUUID = null;
 
@@ -463,6 +473,10 @@ public class Arena implements IArena {
                     thirdKillerUUID = entry.getKey();
                 }
             }
+            firstKillerUsername = firstKillerName;
+            secondKillerUsername = secondKillerName;
+            thirdKillerUsername = thirdKillerName;
+
             firstKillerName = replaceNameWithDisplayName(nullStr, firstKillerName, firstKillerUUID);
             secondKillerName = replaceNameWithDisplayName(nullStr, secondKillerName, secondKillerUUID);
             thirdKillerName = replaceNameWithDisplayName(nullStr, thirdKillerName, thirdKillerUUID);
@@ -476,8 +490,8 @@ public class Arena implements IArena {
             winner.getConnectedPlayers()
                     .forEach(player -> WinTeamPlayers.add(player.getDisplayName() + ChatColor.RESET));
             winner.getConnectedPlayers()
-                    .forEach(pl -> SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), victoryTitle,
-                            net.kyori.adventure.text.Component.empty(), 0, 90, 0));
+                    .forEach(pl -> SBAUtil.sendTitle(Players.wrapPlayer(pl), victoryTitle,
+                            org.screamingsandals.lib.spectator.Component.empty(), 0, 90, 0));
 
             LanguageService
                     .getInstance()
@@ -488,13 +502,17 @@ public class Arena implements IArena {
                     .replace("%win_team%", winner.getName())
                     .replace("%winners%", WinTeamPlayers.toString())
                     .replace("%first_killer_name%", firstKillerName)
+                    .replace("%first_killer_username%", firstKillerUsername)
                     .replace("%second_killer_name%", secondKillerName)
+                    .replace("%second_killer_username%", secondKillerUsername)
                     .replace("%third_killer_name%", thirdKillerName)
+                    .replace("%third_killer_username%", thirdKillerUsername)
                     .replace("%first_killer_score%", String.valueOf(firstKillerScore))
                     .replace("%second_killer_score%", String.valueOf(secondKillerScore))
                     .replace("%third_killer_score%", String.valueOf(thirdKillerScore))
-                    .send(game.getConnectedPlayers().stream().map(PlayerMapper::wrapPlayer)
-                            .toArray(PlayerWrapper[]::new));
+
+                    .send(game.getConnectedPlayers().stream().map(Players::wrapPlayer)
+                            .toArray(org.screamingsandals.lib.player.Player[]::new));
         }
     }
 
@@ -560,12 +578,14 @@ public class Arena implements IArena {
 
     Map<Player, Player> tracking = new HashMap<>();
 
-    public void track(Player source, Player target)
-    {
-        if(!game.isPlayerInAnyTeam(source))return;
-        if(!game.isPlayerInAnyTeam(target))return;
+    public void track(Player source, Player target) {
+        if (!game.isPlayerInAnyTeam(source))
+            return;
+        if (!game.isPlayerInAnyTeam(target))
+            return;
         tracking.put(source, target);
     }
+
     public void onGameTick(BedwarsGameTickEvent e) {
         Game game = e.getGame();
         for (var p : game.getConnectedPlayers()) {

@@ -4,17 +4,14 @@ import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.events.SBATeamTrapTriggeredEvent;
-import io.github.pronze.sba.game.Arena;
-import io.github.pronze.sba.game.IArena;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.utils.Sounds;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 
 public class MinerTrapTask extends BaseGameTask {
     private final double radius;
@@ -57,8 +54,8 @@ public class MinerTrapTask extends BaseGameTask {
                                 LanguageService
                                         .getInstance()
                                         .get(MessageKeys.TEAM_MINER_TRAP_TRIGGERED_MESSAGE)
-                                        .replace("%team%", arena.getGame().getTeamOfPlayer(player).getName())
-                                        .send(PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class));
+                                        .replace("%team%", team.getName())
+                                        .send(Players.wrapPlayer(player).as(SBAPlayerWrapper.class));
 
                                 var title = LanguageService
                                         .getInstance()
@@ -78,7 +75,7 @@ public class MinerTrapTask extends BaseGameTask {
                                     Sounds.playSound(pl, pl.getLocation(),
                                             sound,
                                             Sounds.ENTITY_ENDERMAN_TELEPORT, 1, 1);
-                                    SBAUtil.sendTitle(PlayerMapper.wrapPlayer(pl), title, subTitle, 20, 60, 0);
+                                    SBAUtil.sendTitle(Players.wrapPlayer(pl), title, subTitle, 20, 60, 0);
                                 });
                             }
                         }));

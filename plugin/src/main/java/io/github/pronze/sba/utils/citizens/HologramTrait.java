@@ -2,6 +2,7 @@ package io.github.pronze.sba.utils.citizens;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
@@ -11,12 +12,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.screamingsandals.lib.hologram.Hologram;
 import org.screamingsandals.lib.hologram.HologramManager;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.world.LocationMapper;
 
-import io.github.pronze.sba.utils.Logger;
 import net.citizensnpcs.api.trait.Trait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
 
 public class HologramTrait extends Trait {
 
@@ -39,11 +38,11 @@ public class HologramTrait extends Trait {
                 holo.destroy();
 
                 holo = HologramManager
-                        .hologram(LocationMapper.wrapLocation(newLoc));
+                        .hologram(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(newLoc)));
                 holo.setLines(lines);
 
                 getNPC().getEntity().getLocation().getWorld().getPlayers()
-                        .forEach(player -> holo.addViewer(PlayerMapper.wrapPlayer(player)));
+                        .forEach(player -> holo.addViewer(Players.wrapPlayer(player)));
                 holo.spawn();
             }
         }
@@ -81,11 +80,11 @@ public class HologramTrait extends Trait {
         onDespawn();
         
         holo = HologramManager
-                .hologram(LocationMapper.wrapLocation(loc = getNPC().getEntity().getLocation().add(0.0D, 1.5D, 0.0D)));
+                .hologram(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(loc = getNPC().getEntity().getLocation().add(0.0D, 1.5D, 0.0D))));
         holo.setLines(lines);
 
         getNPC().getEntity().getLocation().getWorld().getPlayers()
-                .forEach(player -> holo.addViewer(PlayerMapper.wrapPlayer(player)));
+                .forEach(player -> holo.addViewer(Players.wrapPlayer(player)));
 
         holo.spawn();
     }
@@ -101,10 +100,10 @@ public class HologramTrait extends Trait {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerChangeWorld(PlayerChangedWorldEvent event) {
         if (holo != null) {
-            holo.removeViewer(PlayerMapper.wrapPlayer(event.getPlayer()));
+            holo.removeViewer(Players.wrapPlayer(event.getPlayer()));
             var player = event.getPlayer();
             if (holo.location().getWorld().getName().equals(player.getWorld().getName())) {
-                holo.addViewer(PlayerMapper.wrapPlayer(player));
+                holo.addViewer(Players.wrapPlayer(player));
             }
         }
     }
@@ -114,7 +113,7 @@ public class HologramTrait extends Trait {
         if (holo != null) {
             var player = event.getPlayer();
             if (holo.location().getWorld().getName().equals(player.getWorld().getName())) {
-                holo.addViewer(PlayerMapper.wrapPlayer(player));
+                holo.addViewer(Players.wrapPlayer(player));
             }
         }
     }
@@ -122,10 +121,10 @@ public class HologramTrait extends Trait {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
         if (holo != null) {
-            holo.removeViewer(PlayerMapper.wrapPlayer(event.getPlayer()));
+            holo.removeViewer(Players.wrapPlayer(event.getPlayer()));
             var player = event.getPlayer();
             if (holo.location().getWorld().getName().equals(player.getWorld().getName())) {
-                holo.addViewer(PlayerMapper.wrapPlayer(player));
+                holo.addViewer(Players.wrapPlayer(player));
             }
         }
     }
@@ -133,7 +132,7 @@ public class HologramTrait extends Trait {
     @EventHandler(ignoreCancelled = true)
     public void onPlayerLeave(PlayerQuitEvent event) {
         if (holo != null)
-            holo.removeViewer(PlayerMapper.wrapPlayer(event.getPlayer()));
+            holo.removeViewer(Players.wrapPlayer(event.getPlayer()));
     }
 
 }

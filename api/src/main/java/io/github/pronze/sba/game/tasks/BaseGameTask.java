@@ -4,9 +4,10 @@ import io.github.pronze.sba.game.IArena;
 import lombok.Data;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.GameStatus;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
-import org.screamingsandals.lib.tasker.task.TaskerTask;
+import org.screamingsandals.lib.tasker.task.Task;
 
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ public abstract class BaseGameTask {
     protected Game game;
     private long duration;
     private TaskerTime timeUnit;
-    private TaskerTask task;
+    private Task task;
     private boolean started;
 
     public BaseGameTask() {
@@ -32,7 +33,7 @@ public abstract class BaseGameTask {
         if (task != null) {
             task.cancel();
         }
-        task = Tasker.build(this::loopLogic).repeat(duration, timeUnit).start();
+        task = Tasker.runRepeatedly(DefaultThreads.GLOBAL_THREAD, this::loopLogic, duration, timeUnit);
         return this;
     }
 

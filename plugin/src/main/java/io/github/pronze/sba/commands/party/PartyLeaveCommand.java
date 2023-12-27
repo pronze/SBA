@@ -8,7 +8,6 @@ import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
@@ -25,6 +24,7 @@ public class PartyLeaveCommand {
 
         @OnPostEnable
         public void onPostEnabled() {
+                if(SBA.isBroken())return;
                 if (init)
                         return;
                 if (SBAConfig.getInstance().party().enabled())

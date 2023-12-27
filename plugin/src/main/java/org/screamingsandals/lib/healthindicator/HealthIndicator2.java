@@ -16,9 +16,9 @@
 
 package org.screamingsandals.lib.healthindicator;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentLike;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.player.Player;
+import org.screamingsandals.lib.spectator.Component;
+import org.screamingsandals.lib.spectator.ComponentLike;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.visuals.DatableVisual;
 
@@ -35,9 +35,9 @@ public interface HealthIndicator2 extends DatableVisual<HealthIndicator2> {
 
     HealthIndicator2 startUpdateTask(long time, TaskerTime unit);
 
-    HealthIndicator2 addTrackedPlayer(PlayerWrapper player);
+    HealthIndicator2 addTrackedPlayer(Player player);
 
-    HealthIndicator2 removeTrackedPlayer(PlayerWrapper player);
+    HealthIndicator2 removeTrackedPlayer(Player player);
 
     default HealthIndicator2 title(Component component) {
         return symbol(component);

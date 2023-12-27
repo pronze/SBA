@@ -8,34 +8,43 @@ import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.Server;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -44,8 +53,10 @@ import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class PlayerListener implements Listener {
@@ -54,6 +65,8 @@ public class PlayerListener implements Listener {
 
     @OnPostEnable
     public void registerListener() {
+        if (SBA.isBroken())
+            return;
         SBA.getInstance().registerListener(this);
         allowedDropItems.clear();
         generatorDropItems.clear();
@@ -83,11 +96,17 @@ public class PlayerListener implements Listener {
         final var sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD"))
                 : new ItemStack(Material.WOODEN_SWORD);
 
-        Arrays.stream(player
-                .getInventory()
-                .getContents()
-                .clone())
-                .filter(Objects::nonNull)
+        Stream<ItemStack> stream;
+        if (Server.isVersion(1, 9)) {
+            stream = Arrays.stream(player.getInventory().getContents());
+        } else {
+            // getContents() work as get storage contents in 1.8, we need to manually append armor slots
+            stream = Stream.concat(
+                    Arrays.stream(player.getInventory().getContents()),
+                    Arrays.stream(player.getInventory().getArmorContents())
+            );
+        }
+        stream.filter(Objects::nonNull)
                 .forEach(stack -> {
                     final String name = stack.getType().name();
                     var endStr = name.substring(name.contains("_") ? name.indexOf("_") + 1 : 0);
@@ -144,7 +163,7 @@ public class PlayerListener implements Listener {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
 
-                final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
+                final SBAPlayerWrapper wrappedPlayer = Players.wrapPlayer(player).as(SBAPlayerWrapper.class);
                 int livingTime = Main.getInstance().getConfig().getInt("respawn-cooldown.time", 5);
                 byte buffer = 2;
 
@@ -154,12 +173,12 @@ public class PlayerListener implements Listener {
                         this.cancel();
                         return;
                     }
-                    final net.kyori.adventure.text.Component respawnTitle = LanguageService
+                    final org.screamingsandals.lib.spectator.Component respawnTitle = LanguageService
                             .getInstance()
                             .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
                             .replace("%time%", String.valueOf(livingTime))
                             .toComponent();
-                    final net.kyori.adventure.text.Component respawnSubtitle = LanguageService
+                    final org.screamingsandals.lib.spectator.Component respawnSubtitle = LanguageService
                             .getInstance()
                             .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
                             .replace("%time%", String.valueOf(livingTime))
@@ -178,7 +197,7 @@ public class PlayerListener implements Listener {
                         livingTime--;
                     }
 
-                    if (livingTime == 0) {
+                    if (livingTime <= 0) {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {
@@ -192,7 +211,8 @@ public class PlayerListener implements Listener {
                                     .get(MessageKeys.RESPAWNED_TITLE)
                                     .toComponent();
 
-                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, net.kyori.adventure.text.Component.empty(),
+                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle,
+                                    org.screamingsandals.lib.spectator.Component.empty(),
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
                                     Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player)
@@ -240,7 +260,7 @@ public class PlayerListener implements Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.CANNOT_PUT_ITEM_IN_CHEST)
-                        .send(PlayerMapper.wrapPlayer(player));
+                        .send(Players.wrapPlayer(player));
             }
         }
     }
@@ -283,7 +303,7 @@ public class PlayerListener implements Listener {
                 .fromCache(uuid)
                 .ifPresent(Scoreboard::destroy);
 
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(player)
+        final var wrappedPlayer = Players.wrapPlayer(player)
                 .as(SBAPlayerWrapper.class);
         SBA.getInstance()
                 .getPartyManager()
@@ -398,6 +418,80 @@ public class PlayerListener implements Listener {
                         arena.updateHiddenPlayer(player);
                     }
                 });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteractPlace(PlayerInteractEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer()))
+            return;
+        if (event.isCancelled())
+            return;
+        if (!event.isBlockInHand())
+            return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+        if (!event.hasBlock())
+            return;
+
+        BlockFace face = event.getBlockFace();
+        Location loc = event.getClickedBlock().getRelative(face).getLocation();
+        try {
+            Collection<Entity> players = loc.getNearbyEntitiesByType(Player.class, 1.5, 1.5, 1.5, null);
+            for (Entity playerEntity : players) {
+                Player player = (Player) playerEntity;
+                if (player.getGameMode() != GameMode.SURVIVAL) {
+                    player.teleport(player.getLocation().add(0, 1.5, 0), TeleportCause.SPECTATE);
+                }
+            }
+        } catch (Throwable t) {
+            //Does not work on spigot
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteractPlaceOnEntity(PlayerInteractEntityEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer()))
+            return;
+        Logger.trace("onInteractPlaceOnEntity");
+        if (event.isCancelled()) {
+            Logger.trace("onInteractPlaceOnEntity.isCancelled");
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.getItemInHand() == null || !player.getItemInHand().getType().isBlock()) {
+            Logger.trace("onInteractPlaceOnEntity.getItemInHand");
+            return;
+        }
+        if (event.getRightClicked() instanceof Player) {
+            Player target = (Player) event.getRightClicked();
+            if (target.getGameMode() == GameMode.SURVIVAL) {
+                Logger.trace("onInteractPlaceOnEntity.target-is-not-spectator");
+                return;
+            }
+            Block replaced = target.getLocation().getBlock();
+            BlockState state = replaced.getState();
+            byte rawData = state.getRawData();
+
+            BlockState newState = replaced.getState();
+
+            newState.setType(player.getItemInHand().getType());
+            // replaced.setType(player.getItemInHand().getType());
+            Logger.trace("onInteractPlaceOnEntity {}", player.getItemInHand().getType());
+
+            BlockPlaceEvent event_ = new BlockPlaceEvent(replaced, state, replaced, event.getPlayer().getItemInHand(),
+                    player, true);
+
+            Bukkit.getServer().getPluginManager().callEvent(event_);
+            Logger.trace("onInteractPlaceOnEntity {} {}", event, event.isCancelled());
+
+            if (event.isCancelled()) {
+                Logger.trace("event.isCancelled");
+                newState.setType(state.getType());
+                newState.setRawData(rawData);
+            }
+            // replaced.getState().setType(player.getItemInHand().getType());
+            newState.update(true);
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

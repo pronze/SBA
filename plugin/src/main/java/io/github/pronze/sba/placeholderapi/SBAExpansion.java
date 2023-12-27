@@ -8,8 +8,6 @@ import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 
-import javax.lang.model.util.ElementScanner14;
-
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
@@ -24,6 +22,11 @@ public class SBAExpansion extends PlaceholderExpansion {
     @Override
     public @NotNull String getAuthor() {
         return "pronze";
+    }
+
+    @Override
+    public boolean persist() {
+        return true;
     }
 
     @Override

@@ -12,7 +12,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
@@ -23,13 +23,14 @@ public class GameChatListener implements Listener {
 
     @OnPostEnable
     public void registerListener() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         final var player = event.getPlayer();
-        final var playerWrapper = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
+        final var playerWrapper = Players.wrapPlayer(player).as(SBAPlayerWrapper.class);
 
         if (playerWrapper.getSettings().isToggled(PlayerSetting.IN_PARTY)
                 && playerWrapper.getSettings().isToggled(PlayerSetting.PARTY_CHAT_ENABLED)) {

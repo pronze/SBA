@@ -16,12 +16,13 @@ import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.ai.AttackStrategy;
 import net.citizensnpcs.api.ai.Navigator;
 import net.citizensnpcs.api.ai.StuckAction;
+import net.citizensnpcs.api.event.DespawnReason;
 import net.citizensnpcs.api.npc.MemoryNPCDataStore;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
 import net.citizensnpcs.trait.GameModeTrait;
 import net.citizensnpcs.trait.SkinTrait;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -47,16 +48,19 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsOpenShopEvent;
+import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
+import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.game.GameStore;
 import org.screamingsandals.lib.event.EventManager;
 import org.screamingsandals.lib.npc.NPCManager;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
@@ -72,7 +76,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
                 NPCManager.class
 })
 @Getter
@@ -104,12 +109,11 @@ public class AIService implements Listener {
 
         @OnPostEnable
         public void onPostEnabled() {
+                if (SBA.isBroken())
+                        return;
 
                 settings = SBAConfig.getInstance().ai();
-                if (SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens") != null
-                                && SBA.getPluginInstance().getServer().getPluginManager().getPlugin("Citizens")
-                                                .isEnabled()
-                                && SBAConfig.getInstance().ai().enabled()) {
+                if (SBA.getInstance().citizensFix.canEnable() && SBAConfig.getInstance().ai().enabled()) {
                         if (registry == null) {
                                 registry = new NPCRegistryWrapper();
                                 SBA.getInstance().registerListener(this);
@@ -156,7 +160,11 @@ public class AIService implements Listener {
                         npc.spawn(loc);
                         npc.setProtected(false);
 
-                        npc.data().set(NPC.REMOVE_FROM_PLAYERLIST_METADATA, false);
+                        npc.data().set(NPC.Metadata.REMOVE_FROM_PLAYERLIST, false);
+                        npc.data().set(NPC.Metadata.KEEP_CHUNK_LOADED, true);
+                        npc.data().set(NPC.Metadata.SHOULD_SAVE, false);
+                        npc.data().set(NPC.Metadata.COLLIDABLE, true);
+                        npc.data().set(NPC.Metadata.DISABLE_DEFAULT_STUCK_ACTION, true);
 
                         npc.getNavigator().getLocalParameters().attackDelayTicks(1).useNewPathfinder(true);
                         npc.getNavigator().getLocalParameters().distanceMargin(1);
@@ -165,11 +173,12 @@ public class AIService implements Listener {
                         npc.addTrait(new BridgePillarTrait());
                         npc.addTrait(new BedwarsBlockPlace());
                         npc.getOrAddTrait(SkinTrait.class).setSkinName(settings.skin());
-                        Tasker.build(() -> {
+
+                        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
                                 Player ai = (Player) (npc.getEntity());
                                 ai.setCanPickupItems(true);
                                 CompletableFuture.complete(ai);
-                        }).delay(settings.delay(), TaskerTime.TICKS).start();
+                        }, settings.delay(), TaskerTime.TICKS);
 
                 } else {
                         CompletableFuture.complete(null);
@@ -198,10 +207,25 @@ public class AIService implements Listener {
                 }
         }
 
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onNPCRespawn(PlayerGameModeChangeEvent event) {
+                /*if (!isNPC(event.getPlayer()))
+                        return;
+                if (event.getNewGameMode() != GameMode.SPECTATOR) {
+                        try {
+                                Object handle = Reflect.fastInvoke(event.getPlayer(), "getHandle");
+                                Reflect.setField(handle, "noPhysics", false);
+                                Reflect.setField(handle, "onGround", true);
+                        } catch (Throwable t) {
+                                t.printStackTrace();
+                        }
+                }*/
+        }
+
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
         public void onPlayerLeave(BedwarsPlayerLeaveEvent event) {
                 var game = event.getGame();
-                Tasker.build(() -> {
+                Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> {
                         boolean allAI = true;
                         for (Player p : game.getConnectedPlayers()) {
                                 if (!isNPC(p)) {
@@ -212,9 +236,10 @@ public class AIService implements Listener {
                         if (allAI) {
                                 for (Player p : new ArrayList<>(game.getConnectedPlayers())) {
                                         game.leaveFromGame(p);
+                                        getNPC(p).destroy();
                                 }
                         }
-                }).afterOneTick().start();
+                });
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -262,9 +287,45 @@ public class AIService implements Listener {
         }
 
         @EventHandler
+        public void npcDespawn(net.citizensnpcs.api.event.NPCDespawnEvent event) {
+                var npc = event.getNPC();
+                if (npc.getEntity() instanceof Player) {
+                        Player player = npc.getOrAddTrait(FakeDeathTrait.class).getPlayerObject();
+                        if (Main.getInstance().isPlayerPlayingAnyGame(player)) {
+                                if (event.getReason() == DespawnReason.DEATH) {
+                                        Logger.trace("NPC HAD DEATH, leaving game to prevent issues");
+
+                                        Game g = Main.getInstance().getGameOfPlayer(player);
+                                        g.leaveFromGame(player);
+                                        try {
+                                                npc.destroy();
+                                        } catch (Exception e) {
+                                                
+                                        }
+
+                                } else if (event.getReason() == DespawnReason.REMOVAL
+                                                || event.getReason() == DespawnReason.PLUGIN) {
+
+                                } else {
+                                        event.setCancelled(true);
+                                }
+                        }
+                }
+        }
+
+        @EventHandler
         public void onBedWarsPlayerLeave(BedwarsPlayerLeaveEvent e) {
                 if (isNPC(e.getPlayer()))
                         getNPC(e.getPlayer()).destroy();
+        }
+
+        @EventHandler
+        public void onBedWarsPlayerJoin(BedwarsPlayerJoinEvent e) {
+                if (isNPC(e.getPlayer())) {
+                        FakeDeathTrait fdt = getNPC(e.getPlayer()).getTraitNullable(FakeDeathTrait.class);
+                        fdt.joinBedwarsGame(e.getGame());
+                }
+
         }
 
         @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
@@ -278,13 +339,13 @@ public class AIService implements Listener {
                         if (entity.getHealth() < damageCount + 1 || event.getCause() == DamageCause.VOID) {
                                 Logger.trace("NPC WOULD HAVE DIED");
                                 event.setCancelled(true);
-
                                 die(entity);
                         }
                 }
         }
 
-        private void die(Player entity) {
+        @SuppressWarnings("deprecation")
+        public void die(Player entity) {
                 PlayerDeathEvent pde = new PlayerDeathEvent(entity, new ArrayList<>(), 0, "");
                 PlayerRespawnEvent pre = new PlayerRespawnEvent(entity, entity.getLocation(), false);
                 entity.setHealth(entity.getMaxHealth());

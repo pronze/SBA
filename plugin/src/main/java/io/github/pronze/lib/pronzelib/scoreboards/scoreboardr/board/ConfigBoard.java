@@ -1,10 +1,13 @@
 package io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board;
 //https://github.com/RienBijl/Scoreboard-revision/blob/master/src/main/java/rien/bijl/Scoreboard/r/Board/ConfigBoard.java
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.Team;
 
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.animations.Row;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.board.implementations.WrapperBoard;
 import io.github.pronze.lib.pronzelib.scoreboards.scoreboardr.plugin.ConfigControl;
@@ -15,10 +18,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class ConfigBoard extends BukkitRunnable {
 
     public String board;
+    private String objectiveName ="";
     private Row title;
     private ArrayList<Row> rows = new ArrayList<>();
     private ArrayList<Player> players = new ArrayList<>();
@@ -32,7 +39,10 @@ public class ConfigBoard extends BukkitRunnable {
         this.initTitle();
         this.initRows();
     }
-
+    public void setObjective(String objectiveName)
+    {
+        this.objectiveName = objectiveName;
+    }
     public void setTitle(List<String> animation,long interval)
     {
         this.title = new Row(ScoreboardStrings.makeColoredStringList(animation), (int)interval);
@@ -74,6 +84,7 @@ public class ConfigBoard extends BukkitRunnable {
 
         try {
             WrapperBoard wrapperBoard = new WrapperBoard("SCOREBOARD_DRIVER_V1");
+            wrapperBoard.setObjective(objectiveName);
             wrapperBoard.setLineCount(rows.size());
             wrapperBoard.setPlayer(player);
             playerToBoard.put(player, wrapperBoard);
@@ -118,5 +129,9 @@ public class ConfigBoard extends BukkitRunnable {
 
     public void disable() {
         this.enabled = false;
+    }
+    public @Nullable WrapperBoard of(Player p)
+    {
+        return playerToBoard.get(p);
     }
 }

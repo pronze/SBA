@@ -18,7 +18,6 @@ import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
-import gnu.trove.impl.unmodifiable.TUnmodifiableShortByteMap;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.SpawnerProtection;
 import io.github.pronze.sba.utils.Logger;
@@ -121,16 +120,21 @@ public class BedwarsBlockPlace extends Trait {
     }
 
     public boolean isBlockVisible(Block b) {
-        Player aiPlayer = (Player) getNPC().getEntity();
-        if (aiPlayer == null)
-            return false;
-        World w = aiPlayer.getWorld();
-        var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
-                aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
-                10);
-        if (rayTraceCheck == null)
-            return false;
-        return rayTraceCheck.getHitBlock().equals(b);
+        try {
+            Player aiPlayer = (Player) getNPC().getEntity();
+            if (aiPlayer == null)
+                return false;
+            World w = aiPlayer.getWorld();
+            var rayTraceCheck = w.rayTraceBlocks(aiPlayer.getEyeLocation(),
+                    aiPlayer.getEyeLocation().subtract(b.getLocation()).getDirection(),
+                    10);
+            if (rayTraceCheck == null)
+                return false;
+            return rayTraceCheck.getHitBlock().equals(b);
+        } catch (Throwable t) {
+            // 1.8.8
+            return true;
+        }
     }
 
     /*
@@ -229,13 +233,12 @@ public class BedwarsBlockPlace extends Trait {
                         is = item;
                 }
             }
-            // return new ItemStack(Material.OAK_PLANKS);
             isInNeedOfBlock = is == null;
             if (is == null) {
                 Logger.trace("NPC {} needs blocks", getNPC().getName());
             }
         } else {
-            return new ItemStack(Material.OAK_PLANKS);
+            return new ItemStack(Material.getMaterial(SBAConfig.getInstance().ai().infiniteItem()));
         }
         return is;
     }
