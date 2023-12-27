@@ -2,49 +2,63 @@ package io.github.pronze.sba.service;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.game.GameMode;
 import io.github.pronze.sba.inventories.GamesInventory;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.visuals.MainLobbyVisualsManager;
+import io.github.pronze.sba.utils.Logger;
 import lombok.SneakyThrows;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.event.OnEvent;
-import org.screamingsandals.lib.event.player.SPlayerJoinEvent;
 import org.screamingsandals.lib.npc.NPC;
 import org.screamingsandals.lib.npc.event.NPCInteractEvent;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.player.PlayerWrapper;
+import org.screamingsandals.lib.npc.skin.NPCSkin;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.annotations.methods.OnPreDisable;
-import org.screamingsandals.lib.world.LocationHolder;
-import org.screamingsandals.lib.world.LocationMapper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
-@Service(dependsOn = {
-        PlayerMapper.class,
+@Service
+@ServiceDependencies(dependsOn = {
         PlayerWrapperService.class
 })
 public class GamesInventoryService implements Listener {
+    private class NPCConfig {
+        public Location location;
+        public String skin;
+        public String skin_signature;
+        public String mode;
+        public NPC npc;
+    }
 
-    private final List<Location> soloNPCLocations = new ArrayList<>();
-    private final List<Location> doubleNPCLocations = new ArrayList<>();
-    private final List<Location> tripleNPCLocations = new ArrayList<>();
-    private final List<Location> squadsNPCLocations = new ArrayList<>();
-    private final List<NPC> npcs = new ArrayList<>();
-    private final List<Integer> entityEditMap = new ArrayList<>();
+    public static enum Action {
+        Remove,
+        Skin
+    };
+
+    private final Map<Integer, Action> entityEditMap = new LinkedHashMap<>();
+    private final Map<Integer, Object> entityEditMapArgument = new LinkedHashMap<>();
+
+    private final List<NPCConfig> NPCs = new ArrayList<>();
 
     public static GamesInventoryService getInstance() {
         return ServiceManager.get(GamesInventoryService.class);
@@ -53,132 +67,216 @@ public class GamesInventoryService implements Listener {
     @SneakyThrows
     @OnPostEnable
     public void loadGamesInv() {
-        SBA.getInstance().registerListener(this);
+                if(SBA.isBroken())return;
+                SBA.getInstance().registerListener(this);
         final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(), "npc.yml");
         if (file.exists()) {
             YamlConfiguration config = new YamlConfiguration();
             config.load(file);
-            checkAndAdd(config, GameMode.SOLOS, soloNPCLocations);
-            checkAndAdd(config, GameMode.DOUBLES, doubleNPCLocations);
-            checkAndAdd(config, GameMode.TRIPLES, tripleNPCLocations);
-            checkAndAdd(config, GameMode.SQUADS, squadsNPCLocations);
+            NPCs.stream().filter(npcc -> npcc.npc != null).forEach(npcc -> {
+                npcc.npc.destroy();
+                npcc.npc = null;
+            });
+
+            NPCs.clear();
+
+            checkAndAdd(config, "SOLO", new ArrayList<>());
+            checkAndAdd(config, "DOUBLES", new ArrayList<>());
+            checkAndAdd(config, "TRIPLES", new ArrayList<>());
+            checkAndAdd(config, "SQUADS", new ArrayList<>());
+            Logger.trace("Loaded old config files into {}", NPCs);
+            config.getList("npcs").forEach(element -> {
+                try {
+                    LinkedHashMap<String, Object> npc_config = (LinkedHashMap<String, Object>) element;
+                    NPCConfig cfg = new NPCConfig();
+                    LinkedHashMap<String, Object> obj = (LinkedHashMap<String, Object>) npc_config.get("skin");
+                    if (obj != null) {
+                        cfg.skin = (String) obj.get("value");
+                        cfg.skin_signature = (String) obj.get("signature");
+                    }
+                    cfg.location = (Location) npc_config.get("location");
+                    if (npc_config.get("mode") instanceof Integer)
+                        cfg.mode = String.valueOf(((Integer) npc_config.get("mode")).intValue());
+                    else
+                        cfg.mode = (String) npc_config.get("mode");
+                    NPCs.add(cfg);
+                } catch (Exception e) {
+                    Logger.error("Could not read {}", e);
+                }
+            });
+
+            NPCs.forEach(npc -> {
+                try {
+                    Logger.trace("NPC at {} for mode {}", npc.location, npc.mode);
+                    NPC n = createNpc(npc.mode, npc.location);
+                    if (npc.skin != null) {
+                        n.skin(new NPCSkin(
+                                npc.skin,
+                                npc.skin_signature));
+                    }
+                    npc.npc = n;
+                } catch (Throwable t) {
+                    Logger.error("{}", t);
+                }
+            });
+            update();
         }
-        Tasker.build(() -> Bukkit.getOnlinePlayers().forEach(player -> {
-            if (MainLobbyVisualsManager.isInWorld(player.getLocation())) {
-                addViewer(PlayerMapper.wrapPlayer(player));
-            }
-        })).delay(1L, TaskerTime.SECONDS).start();
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> Bukkit.getOnlinePlayers().forEach(player -> {
+            addViewer(player);
+        }), 1L, TaskerTime.SECONDS);
     }
 
     @SuppressWarnings("unchecked")
-    private void checkAndAdd(YamlConfiguration config, GameMode mode, List<Location> locations) {
-        final var node = config.get(mode.name().toLowerCase());
+    private void checkAndAdd(YamlConfiguration config, String mode, List<Location> locations) {
+        final var node = config.get(mode.toLowerCase());
         if (node != null) {
             locations.clear();
             locations.addAll((List<Location>) node);
-            locations.forEach(location -> npcs.add(NPC.of(LocationMapper.wrapLocation(location))
-                            .setDisplayName(LanguageService
-                            .getInstance()
-                            .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
-                            .replace("%mode%", mode.strVal())
-                            .toComponentList())
-                            .show()));
+            locations.forEach(location -> {
+                Logger.trace("Adding NPC at {} for mode {}", location, mode);
+
+                NPCConfig cfg = new NPCConfig();
+                cfg.location = (Location) location;
+                cfg.mode = mode;
+                NPCs.add(cfg);
+            });
+            locations.clear();
         }
+        Logger.trace("Loaded gamemode {} into {}", mode, locations);
     }
 
-    public void addNPC(@NotNull GameMode mode, @NotNull Location location) {
-        npcs.add(NPC.of(LocationMapper.wrapLocation(location))
-                .setDisplayName(LanguageService
+    private NPC createNpc(String mode, Location location) {
+        return NPC.of(Objects.requireNonNull(org.screamingsandals.lib.world.Location.fromPlatform(location)))
+                .lookAtPlayer(true)
+                .displayName(LanguageService
                         .getInstance()
                         .get(MessageKeys.GAMES_INV_DISPLAY_NAME)
-                        .replace("%mode%", mode.strVal())
+                        .replace("%mode%", mode)
                         .toComponentList())
-                .show());
+                .show();
+    }
 
-        switch (mode) {
-            case SOLOS:
-                soloNPCLocations.add(location);
-                break;
-            case DOUBLES:
-                doubleNPCLocations.add(location);
-                break;
-            case TRIPLES:
-                tripleNPCLocations.add(location);
-                break;
-            case SQUADS:
-                squadsNPCLocations.add(location);
-                break;
-        }
+    public void addNPC(@NotNull String mode, @NotNull Location location) {
+
+        NPC npc = createNpc(mode, location);
+
+        NPCConfig cfg = new NPCConfig();
+        cfg.location = (Location) location;
+        cfg.mode = mode;
+        cfg.npc = npc;
+        NPCs.add(cfg);
+
+        /*
+         * switch (mode) {
+         * case SOLOS:
+         * soloNPCLocations.add(location);
+         * soloNpcs.add((npc));
+         * break;
+         * case DOUBLES:
+         * doubleNPCLocations.add(location);
+         * doubleNpcs.add((npc));
+         * break;
+         * case TRIPLES:
+         * tripleNPCLocations.add(location);
+         * tripleNpcs.add(npc);
+         * break;
+         * case SQUADS:
+         * squadsNPCLocations.add(location);
+         * squadsNpcs.add(npc);
+         * break;
+         * }
+         */
         update();
     }
 
-    public void removeNPC(PlayerWrapper remover, @NotNull NPC npc) {
-        final var loc = Objects.requireNonNull(npc.getLocation()).as(Location.class);
-        if (soloNPCLocations.contains(loc) || doubleNPCLocations.contains(loc) || tripleNPCLocations.contains(loc) || squadsNPCLocations.contains(loc)) {
+    public void removeNPC(org.screamingsandals.lib.player.Player remover, @NotNull NPC npc) {
+        NPCs.stream().filter(n -> n.npc == npc).findAny().ifPresent(c -> {
             LanguageService
                     .getInstance()
                     .get(MessageKeys.NPC_REMOVED)
                     .send(remover);
-            soloNPCLocations.remove(loc);
-            doubleNPCLocations.remove(loc);
-            tripleNPCLocations.remove(loc);
-            squadsNPCLocations.remove(loc);
-            npc.destroy();
+            c.npc.destroy();
+            NPCs.remove(c);
             update();
-        }
+        });
     }
-
 
     public void update() {
         try {
-            final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(), "npc.yml");
+            final var file = new File(SBA.getInstance().getDataFolder().resolve("games-inventory").toString(),
+                    "npc.yml");
             YamlConfiguration config = new YamlConfiguration();
 
             if (!file.exists()) {
                 file.createNewFile();
             }
 
-            config.set("solos", soloNPCLocations);
-            config.set("doubles", doubleNPCLocations);
-            config.set("triples", tripleNPCLocations);
-            config.set("squads", squadsNPCLocations);
+            List<YamlConfiguration> npcYaml = new ArrayList<>();
+            NPCs.forEach(npc -> {
+                YamlConfiguration oneNpc = new YamlConfiguration();
+                oneNpc.set("location", npc.location);
+                var skin = oneNpc.createSection("skin");
+                skin.set("value", npc.skin);
+                skin.set("signature", npc.skin_signature);
+                oneNpc.set("mode", npc.mode);
+
+                npcYaml.add(oneNpc);
+            });
+
+            config.set("npcs", npcYaml);
+
             config.save(file);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    public void addViewer(@NotNull PlayerWrapper player) {
-        npcs.forEach(npc -> npc.addViewer(player));
+    public void addViewer(@NotNull Player player) {
+        Logger.trace("addViewer", player.getName());
+
+        NPCs.forEach(npc -> {
+            Logger.trace("npc::addViewer", player.getName());
+            if (npc.location.getWorld().equals(player.getWorld()))
+                if (npc.npc != null)
+                    npc.npc.addViewer(Players.wrapPlayer(player));
+        });
     }
 
-    public void removeViewer(@NotNull PlayerWrapper player) {
-        npcs.forEach(npc -> npc.removeViewer(player));
+    public void removeViewer(@NotNull Player player) {
+        NPCs.forEach(npc -> {
+            if (npc.npc != null)
+                npc.npc.removeViewer(Players.wrapPlayer(player));
+        });
     }
 
     @OnPreDisable
     public void destroy() {
-        npcs.forEach(NPC::destroy);
-        npcs.clear();
+        Logger.trace("Disabling Games inventory NPCs");
+        NPCs.forEach(npc -> {
+            npc.npc.destroy();
+            npc.npc = null;
+        });
         update();
     }
 
-    @OnEvent
-    public void onPlayerJoin(SPlayerJoinEvent e) {
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
-
-        Tasker.build(() -> {
-            if (MainLobbyVisualsManager.isInWorld(player.getLocation().as(Location.class)) && player.isOnline()) {
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
+            if (player.isOnline()) {
                 addViewer(player);
             }
-        }).delay(1L, TaskerTime.SECONDS).start();
+        }, 1L, TaskerTime.TICKS);
     }
 
-    public boolean isNPCAtLocation(@NotNull LocationHolder location) {
-        return npcs.stream()
-                .map(NPC::getLocation)
-                .filter(Objects::nonNull)
-                .anyMatch(npcLoc -> npcLoc.equals(location));
+    @EventHandler
+    public void onPlayerChangeWorld(PlayerChangedWorldEvent e) {
+        final var player = e.getPlayer();
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
+            if (player.isOnline()) {
+                addViewer(player);
+            }
+        }, 1L, TaskerTime.TICKS);
     }
 
     @OnPreDisable
@@ -186,40 +284,59 @@ public class GamesInventoryService implements Listener {
         entityEditMap.clear();
     }
 
-    public void addEditable(PlayerWrapper player) {
-        if (entityEditMap.contains(player.as(Player.class).getEntityId())) {
+    public void addEditable(org.screamingsandals.lib.player.Player player, Action mode, Object argument) {
+        if (entityEditMap.containsKey(player.as(Player.class).getEntityId())) {
             return;
         }
-        entityEditMap.add(player.as(Player.class).getEntityId());
-        Tasker.build(() -> entityEditMap.remove(Integer.valueOf(player.as(Player.class).getEntityId()))).delay(5L, TaskerTime.SECONDS).start();
+        entityEditMap.put(player.as(Player.class).getEntityId(), mode);
+        entityEditMapArgument.put(player.as(Player.class).getEntityId(), argument);
+        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
+            entityEditMap.remove(Integer.valueOf(player.as(Player.class).getEntityId()));
+            entityEditMapArgument.remove(Integer.valueOf(player.as(Player.class).getEntityId()));
+        }, 5L, TaskerTime.SECONDS);
+    }
+
+    private void setNpcSkin(org.screamingsandals.lib.player.Player player, NPC visual) {
+        String argument = (String) entityEditMapArgument.get(player.as(Player.class).getEntityId());
+        NPCSkin.retrieveSkin(argument).whenComplete((skin, exp) -> {
+            if (skin != null) {
+                NPCs.stream().filter(n -> n.npc == visual).findAny().ifPresent(c -> {
+                    visual.skin(skin);
+                    c.skin = skin.getValue();
+                    c.skin_signature = skin.getSignature();
+                    update();
+                });
+            } else {
+                Logger.error("Unable to retreive skin of {}: {}", argument, exp);
+            }
+        });
     }
 
     @OnEvent
     public void onNPCTouch(NPCInteractEvent event) {
-        if (event.getInteractType() == NPCInteractEvent.InteractType.RIGHT_CLICK) {
-            if (entityEditMap.contains(event.getPlayer().as(Player.class).getEntityId())) {
-                removeNPC(event.getPlayer(), event.getNpc());
+        if (event.interactType() == org.screamingsandals.lib.utils.InteractType.RIGHT_CLICK) {
+            if (entityEditMap.containsKey(event.player().as(Player.class).getEntityId())) {
+                Action a = entityEditMap.get(event.player().as(Player.class).getEntityId());
+                if (a == Action.Remove) {
+                    removeNPC(event.player(), event.visual());
+                } else if (a == Action.Skin) {
+                    setNpcSkin(event.player(), event.visual());
+                }
                 return;
             }
         }
 
-        final var npcLocation = Objects.requireNonNull(event.getNpc().getLocation()).as(Location.class);
-        final var isSolo = soloNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isDouble = doubleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isTriple = tripleNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        final var isSquad = squadsNPCLocations.stream().anyMatch(loc -> loc == npcLocation);
-        int mode = 1;
-        if (isDouble) {
-            mode = 2;
-        } else if (isTriple) {
-            mode = 3;
-        } else if (isSquad) {
-            mode = 4;
-        } else if (!isSolo) {
-            return;
-        }
-        GamesInventory
-                .getInstance()
-                .openForPlayer(event.getPlayer().as(Player.class), mode);
+        NPC clicked = event.visual();
+
+        NPCs.stream().filter(n -> n.npc == clicked).findAny().ifPresent(c -> {
+            new BukkitRunnable() {
+                public void run() {
+                    GamesInventory
+                            .getInstance()
+                            .openForPlayer(event.player().as(Player.class), c.mode);
+                }
+            }.runTask(SBA.getPluginInstance());
+        });
     }
+
 }

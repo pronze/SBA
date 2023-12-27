@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum Permissions {
     UPGRADE("sba.upgrade"),
+    UPDATE("sba.updateplugin"),
     SHOUT_BYPASS("sba.shout.unlimited"),
     GENERATE_GAMES_INV("sba.generate.gamesinv");
 

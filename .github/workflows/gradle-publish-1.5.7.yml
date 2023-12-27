@@ -1,0 +1,62 @@
+name: Pre-Builds dev versions
+on:
+  push:
+    branches: [ dev ]
+concurrency: sba_v157
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: 17
+          cache: 'gradle'
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Read value from Properties-file
+        id: read_property
+        uses: Reedyuk/read-properties@v1.0.1
+        with:
+          path: './gradle.properties'
+          property: 'SBA_VERSION'
+      - name: Declare some variables
+        id: vars
+        shell: bash
+        run: |
+            echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+            echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Build with Gradle
+        run: ./gradlew
+        env:
+          OPTIMIZE_FOR_CI_CD: "1"
+          BUILD_NUMBER: ${{ steps.calculated_build_number.outputs.build_n }}
+          GITHUB_ACTIONS_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          GITHUB_COMMIT_MESSAGE: "${{ github.event.head_commit.message }}"
+      - name: Upload the final artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: plugin/build/libs/SBA-${{ steps.read_property.outputs.value }}-all.jar
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ steps.read_property.outputs.value }}.${{ steps.vars.outputs.sha_short }}"
+          release_name: Release ${{ steps.read_property.outputs.value }}
+          body: Pre-release of dev version
+          draft: false
+          prerelease: true
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: plugin/build/libs/SBA-${{ steps.read_property.outputs.value }}-all.jar
+          asset_name: SBA-${{ steps.read_property.outputs.value }}-all.jar
+          asset_content_type: application/java-archive

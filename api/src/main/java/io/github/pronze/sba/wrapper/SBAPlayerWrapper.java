@@ -7,26 +7,29 @@ import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.data.ToggleableSetting;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.text.Component;
 import org.screamingsandals.bedwars.Main;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collection;
 
 @Getter
 @Setter
-public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrapper {
+public class SBAPlayerWrapper extends org.screamingsandals.lib.player.ExtendablePlayer {
     private int shoutCooldown;
     private final ToggleableSetting<PlayerSetting> settings;
 
     public SBAPlayerWrapper(Player player) {
-        super(player.getName(), player.getUniqueId());
+        super(Players.wrapPlayer(player));
 
-        // default values
         this.shoutCooldown = 0;
         this.settings = ToggleableSetting.of(PlayerSetting.class);
     }
+   
 
     public void sendMessage(String message) {
         getInstance().sendMessage(message);
@@ -41,8 +44,13 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
     }
 
     public void shout(Component message) {
+        System.out.println("Player shouting with cooldown "+shoutCooldown);
         if (shoutCooldown == 0) {
-            sendMessage(message);
+            //sendMessage(message);
+            Collection<? extends Player> receivers = Bukkit.getOnlinePlayers();
+            if(Main.isPlayerInGame(as(Player.class)))
+                receivers=Main.getInstance().getGameOfPlayer(as(Player.class)).getConnectedPlayers();
+            receivers.forEach(receiver->Players.wrapPlayer(receiver).sendMessage(message));
             if (getInstance().hasPermission(Permissions.SHOUT_BYPASS.getKey()) || getDefaultShoutCoolDownTime() == 0) {
                 return;
             }
@@ -108,7 +116,7 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
     }
 
     public int getIntegerProgress() {
-        return ((getXP() - ((getLevel() - 1) * getTotalXPToLevelUp())) / getTotalXPToLevelUp()) * 100;
+        return (int)(((getXP() - ((getLevel() - 1) * getTotalXPToLevelUp())) / (double)getTotalXPToLevelUp()) * 100);
     }
 
     public String getCompletedBoxes() {
@@ -117,8 +125,8 @@ public class SBAPlayerWrapper extends org.screamingsandals.lib.player.PlayerWrap
             progress = 1;
 
         int numberOfBoxesFilled = progress / 10;
-        return "§7[§b" + Strings.repeat("■", numberOfBoxesFilled)
-                + "§7" + Strings.repeat("■", 10 - numberOfBoxesFilled) + "]";
+        return "&7[&b" + Strings.repeat("■", numberOfBoxesFilled)
+                + "§7" + Strings.repeat("■", 10 - numberOfBoxesFilled) + "&7]";
     }
 
     protected static String round(double toRound) {

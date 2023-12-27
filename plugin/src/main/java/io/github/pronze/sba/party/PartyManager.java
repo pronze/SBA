@@ -3,7 +3,6 @@ package io.github.pronze.sba.party;
 import io.github.pronze.sba.manager.IPartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import io.github.pronze.sba.SBA;
@@ -11,13 +10,15 @@ import io.github.pronze.sba.events.SBAPlayerPartyCreatedEvent;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
+import org.screamingsandals.lib.utils.annotations.ServiceDependencies;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service(dependsOn = {
+@Service
+@ServiceDependencies(dependsOn = {
         Logger.class
 })
 public class PartyManager implements IPartyManager {
@@ -104,9 +105,7 @@ public class PartyManager implements IPartyManager {
         party.getMembers().forEach(member -> {
             member.getSettings().disable(PlayerSetting.IN_PARTY);
             party.removePlayer(member);
-            final var wrapperImpl = PlayerMapper
-                    .wrapPlayer(member.getInstance())
-                    .as(SBAPlayerWrapper.class);
+            final var wrapperImpl = SBA.getInstance().getPlayerWrapper((member.getInstance()));
             if (!wrapperImpl.isOnline()) {
                 return;
             }
@@ -115,11 +114,9 @@ public class PartyManager implements IPartyManager {
         });
 
         party.getInvitedPlayers().forEach(invitedPlayer -> {
-            invitedPlayer.getSettings().disable(PlayerSetting.IN_PARTY);
+            invitedPlayer.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
             party.removeInvitedPlayer(invitedPlayer);
-            final var wrapperImpl = PlayerMapper
-                    .wrapPlayer(invitedPlayer.getInstance())
-                    .as(SBAPlayerWrapper.class);
+            final var wrapperImpl = SBA.getInstance().getPlayerWrapper((invitedPlayer.getInstance()));
             if (!wrapperImpl.isOnline()) {
                 return;
             }

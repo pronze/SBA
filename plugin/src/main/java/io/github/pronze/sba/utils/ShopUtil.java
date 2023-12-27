@@ -7,17 +7,23 @@ import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.IGameStorage;
 import io.github.pronze.sba.game.StoreType;
-import io.github.pronze.sba.inventories.SBAUpgradeStoreInventory;
+import io.github.pronze.sba.inventories.SBAStoreInventoryV2;
+import io.github.pronze.sba.lang.Message;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.service.PlayerWrapperService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import net.kyori.adventure.text.Component;
+
+import org.screamingsandals.lib.item.meta.EnchantmentType;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.BedwarsAPI;
@@ -25,30 +31,30 @@ import org.screamingsandals.bedwars.api.TeamColor;
 import org.screamingsandals.bedwars.api.game.Game;
 import org.screamingsandals.bedwars.api.game.ItemSpawnerType;
 import org.screamingsandals.bedwars.api.utils.ColorChanger;
-import org.screamingsandals.lib.item.Item;
-import org.screamingsandals.lib.item.meta.EnchantmentMapping;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import org.screamingsandals.simpleinventories.builder.LocalOptionsBuilder;
 import org.screamingsandals.simpleinventories.events.ItemRenderEvent;
 import org.screamingsandals.simpleinventories.inventory.PlayerItemInfo;
+import org.screamingsandals.simpleinventories.inventory.Property;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class ShopUtil {
 
-    public static final List<String> romanNumerals = List.of("NONE", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X");
+    public static final List<String> romanNumerals = List.of("NONE", "I", "II", "III", "IV", "V", "VI", "VII", "VIII",
+            "IX", "X");
     public static final List<String> orderOfArmor = List.of("GOLDEN,GOLD", "CHAINMAIL", "IRON", "DIAMOND", "NETHERITE");
     public static final List<String> orderOfTools = List.of("WOODEN,WOOD", "STONE", "GOLDEN,GOLD", "IRON", "DIAMOND");
 
     @NotNull
     public static Integer getLevelFromMaterialName(@NotNull String name, final List<String> list) {
         name = name.substring(0, name.contains("_") ? name.lastIndexOf("_") : name.length());
-        @NotNull String finalName = name;
+        @NotNull
+        String finalName = name;
         return list.stream()
                 .filter(value -> Arrays.stream(value.split(",")).anyMatch(names -> names.equalsIgnoreCase(finalName)))
                 .map(list::indexOf)
@@ -105,7 +111,7 @@ public class ShopUtil {
                             .getInstance()
                             .get(MessageKeys.CANNOT_DOWNGRADE_ITEM)
                             .replace("%item%", "armor")
-                            .send(PlayerMapper.wrapPlayer(player));
+                            .send(Players.wrapPlayer(player));
                     return false;
                 }
             }
@@ -115,27 +121,194 @@ public class ShopUtil {
                         .getInstance()
                         .get(MessageKeys.ALREADY_PURCHASED)
                         .replace("%thing%", "armor")
-                        .send(PlayerMapper.wrapPlayer(player));
+                        .send(Players.wrapPlayer(player));
                 return false;
             }
         }
 
         final var boots = new ItemStack(mat_boots);
         final var leggings = new ItemStack(Material.valueOf(matName + "_LEGGINGS"));
+        final var chestplate = new ItemStack(Material.valueOf(matName + "_CHESTPLATE"));
+        final var helmet = new ItemStack(Material.valueOf(matName + "_HELMET"));
 
-        final var level = gameStorage.getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow();
-        if (level != 0) {
-            boots.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
-            leggings.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, level);
-        }
+        applyTeamEnchants(player, boots);
+        applyTeamEnchants(player, leggings);
+        applyTeamEnchants(player, chestplate);
+        applyTeamEnchants(player, helmet);
 
         playerInventory.setLeggings(null);
         playerInventory.setBoots(null);
-        playerInventory.setBoots(boots);
-        playerInventory.setLeggings(leggings);
+
+        if (SBAConfig.getInstance().upgrades().boots())
+            playerInventory.setBoots(boots);
+        if (SBAConfig.getInstance().upgrades().leggings())
+            playerInventory.setLeggings(leggings);
+        if (SBAConfig.getInstance().upgrades().chestplate())
+            playerInventory.setChestplate(chestplate);
+        if (SBAConfig.getInstance().upgrades().helmet())
+            playerInventory.setHelmet(helmet);
         return true;
     }
 
+    public static void increaseTeamEnchant(Player teamPlayer, @Nullable ItemStack item, Enchantment damageAll,
+            int levelToAdd) {
+        if (!canApply(damageAll, item))
+            return;
+        int level = item.getEnchantmentLevel(damageAll);
+        item.addUnsafeEnchantment(damageAll, level + levelToAdd);
+    }
+
+    public static ItemStack applyTeamEnchants(Player player, ItemStack newItem) {
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        var gameStorage = SBA
+                .getInstance()
+                .getGameStorage(game)
+                .orElseThrow();
+
+        final var typeName = newItem.getType().name();
+        final var team = game.getTeamOfPlayer(player);
+
+        int sharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
+        if (sharpnessLevel > 0 && canApply(Enchantment.DAMAGE_ALL, newItem))
+            newItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpnessLevel);
+        int knockbackLebel = gameStorage.getKnockbackLevel(team).orElse(0);
+        if (knockbackLebel > 0 && canApply(Enchantment.KNOCKBACK, newItem))
+            newItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, knockbackLebel);
+        int efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
+        if (efficiencyLevel > 0 && canApply(Enchantment.DIG_SPEED, newItem))
+            newItem.addUnsafeEnchantment(Enchantment.DIG_SPEED, efficiencyLevel);
+        int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (protectionLevel > 0 && canApply(Enchantment.PROTECTION_ENVIRONMENTAL, newItem))
+            newItem.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+        List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
+        SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
+            Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
+                    .filter(x -> x.getName().equalsIgnoreCase(ench)||EnchantmentType.of(x).location().path().equalsIgnoreCase(ench))
+                    .findFirst();
+            if (ignoredKeys.contains(ench))
+                return;
+            if (!canApply(ench, newItem))
+                return;
+            if (!ec.isPresent()) {
+                Logger.error(
+                        "SBA doesn't know how to apply enchant {}, it is not a valid enchant, check https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html for a list of enchant on your version of minecraft",
+                        ench);
+                return;
+            }
+            Enchantment ech = ec.get();
+            int level = gameStorage.getEnchantLevel(team, ench).orElse(0);
+            if (level > 0)
+                newItem.addUnsafeEnchantment(ech, level);
+        });
+        return newItem;
+    }
+
+    public static org.screamingsandals.lib.item.ItemStack applyTeamEnchants(Player player, org.screamingsandals.lib.item.ItemStack newItem, StoreType type, List<Property> list) {
+        final var game = Main.getInstance().getGameOfPlayer(player);
+        var gameStorage = SBA
+                .getInstance()
+                .getGameStorage(game)
+                .orElseThrow();
+
+        final var team = game.getTeamOfPlayer(player);
+
+        int sharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("sharpness")))
+            if (sharpnessLevel > 0 && canApply(Enchantment.DAMAGE_ALL, newItem))
+                newItem = clampOrApplyEnchants(newItem, sharpnessLevel, Enchantment.DAMAGE_ALL, type,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
+        int knockbackLebel = gameStorage.getKnockbackLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("knockback")))
+            if (knockbackLebel > 0 && canApply(Enchantment.KNOCKBACK, newItem))
+                newItem = clampOrApplyEnchants(newItem, knockbackLebel, Enchantment.KNOCKBACK, type,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Knockback").getInt(1));
+        int efficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("Efficiency")))
+            if (efficiencyLevel > 0 && canApply(Enchantment.DIG_SPEED, newItem))
+                newItem = clampOrApplyEnchants(newItem, efficiencyLevel, Enchantment.DIG_SPEED, type,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(1));
+        int protectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (list.stream().anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase("Protection")))
+            if (protectionLevel > 0 && canApply(Enchantment.PROTECTION_ENVIRONMENTAL, newItem))
+                newItem = clampOrApplyEnchants(newItem, protectionLevel, Enchantment.PROTECTION_ENVIRONMENTAL,
+                        StoreType.UPGRADES,
+                        SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(1));
+        List<String> ignoredKeys = List.of("sharpness", "knockback", "protection", "efficiency");
+        for (String ench : SBAConfig.getInstance().upgrades().enchants().keys()) {
+            Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
+                    .filter(x -> x.getName().equalsIgnoreCase(ench)||EnchantmentType.of(x).location().path().equalsIgnoreCase(ench))
+                    .findFirst();
+            if (ignoredKeys.contains(ench))
+                continue;
+            if (!canApply(ench, newItem))
+                continue;
+            if (!list.stream()
+                    .anyMatch(prop -> prop.hasName() && prop.getPropertyName().equalsIgnoreCase(ench)))
+                continue;
+            if (!ec.isPresent()) {
+                Logger.error(
+                        "SBA doesn't know how to apply enchant {}, it is not a valid enchant, check https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html for a list of enchant on your version of minecraft",
+                        ench);
+                continue;
+            }
+            Enchantment ech = ec.get();
+            int level = gameStorage.getEnchantLevel(team, ench).orElse(0);
+            if (level > 0)
+                newItem = clampOrApplyEnchants(newItem, sharpnessLevel, ech,
+                        type,
+                        SBAConfig.getInstance().node("upgrades", "limit", ench).getInt(1));
+        }
+        return newItem;
+    }
+
+    private static boolean canApply(String string, ItemStack newItem) {
+        if (SBAConfig.getInstance().upgrades().enchants().of(string) == null) {
+            Logger.error("SBA doesn't know how to apply enchant {}, add it in the upgrade-item.enchants.ENCHANT_HERE",
+                    string);
+            return false;
+        }
+        return SBAConfig.getInstance().upgrades().enchants().of(string).stream()
+                .anyMatch(x -> newItem.getType().toString().contains(x.toUpperCase()));
+    }
+
+    private static boolean canApply(String string, org.screamingsandals.lib.item.ItemStack newItem) {
+        if (SBAConfig.getInstance().upgrades().enchants().of(string) == null) {
+            Logger.error("SBA doesn't know how to apply enchant {}, add it in the upgrade-item.enchants.ENCHANT_HERE",
+                    string);
+            return false;
+        }
+        return SBAConfig.getInstance().upgrades().enchants().of(string).stream()
+                .anyMatch(x -> newItem.getMaterial().platformName().contains(x.toUpperCase()));
+    }
+
+    private static boolean canApply(Enchantment string, ItemStack newItem) {
+        return canApply(getName(string), newItem);
+    }
+
+    private static boolean canApply(Enchantment string, org.screamingsandals.lib.item.ItemStack newItem) {
+        return canApply(getName(string), newItem);
+    }
+
+    private static String getName(Enchantment ech) {
+        if (ech == Enchantment.DAMAGE_ALL)
+            return ("sharpness");
+        if (ech == Enchantment.KNOCKBACK)
+            return ("sharpness");
+        if (ech == Enchantment.DIG_SPEED)
+            return ("efficiency");
+        if (ech == Enchantment.PROTECTION_ENVIRONMENTAL)
+            return ("protection");
+        AtomicReference<String> str = new AtomicReference<>();
+        SBAConfig.getInstance().upgrades().enchants().keys().forEach(ench -> {
+            Optional<Enchantment> ec = Arrays.stream(Enchantment.values())
+                    .filter(x -> x.getName().equalsIgnoreCase(ench)||EnchantmentType.of(x).location().path().equalsIgnoreCase(ench))
+                    .findFirst();
+            if (ec.isPresent() && ec.get().equals(ech))
+                str.set(ench);
+        });
+        return str.get();
+
+    }
 
     static <K, V> List<K> getAllKeysForValue(Map<K, V> mapOfWords, V value) {
         return mapOfWords.entrySet()
@@ -144,22 +317,6 @@ public class ShopUtil {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
     }
-
-    public static List<Game> getGamesWithSize(int size) {
-        final List<String> maps = getAllKeysForValue(SBAConfig.game_size, size);
-        if (maps == null || maps.isEmpty())
-            return null;
-
-        final ArrayList<Game> gameList = new ArrayList<>();
-
-        maps.forEach(map -> {
-            if (Main.getGameNames().contains(map))
-                gameList.add(Main.getGame(map));
-        });
-
-        return gameList;
-    }
-
 
     public static <K, V> K getKey(Map<K, V> map, V value) {
         return map.keySet()
@@ -211,35 +368,38 @@ public class ShopUtil {
 
         final var newItemLevel = currentItemLevel - 1;
         final var newMaterialName = getMaterialFromLevel(newItemLevel, itemType);
-        final var newMaterial = Material.valueOf(newMaterialName + currentItem.getType().name().substring(currentItem.getType().name().lastIndexOf("_")).toUpperCase());
+        final var newMaterial = Material.valueOf(newMaterialName
+                + currentItem.getType().name().substring(currentItem.getType().name().lastIndexOf("_")).toUpperCase());
         final var newStack = new ItemStack(newMaterial);
         newStack.addEnchantments(currentItem.getEnchantments());
         return newStack;
     }
 
     public static int getIntFromMode(String mode) {
-        return mode.equalsIgnoreCase("Solo") ? 1 : mode.equalsIgnoreCase("Double") ? 2 : mode.equalsIgnoreCase("Triples") ? 3 : mode.equalsIgnoreCase("Squads") ? 4 : 0;
+        return mode.equalsIgnoreCase("Solo") ? 1
+                : mode.equalsIgnoreCase("Double") ? 2
+                        : mode.equalsIgnoreCase("Triples") ? 3 : mode.equalsIgnoreCase("Squads") ? 4 : 0;
     }
 
     public static String translateColors(String s) {
         return ChatColor.translateAlternateColorCodes('&', s);
     }
 
-
     public static void sendMessage(Player player, List<String> message) {
         message.forEach(st -> player.sendMessage(translateColors(st)));
     }
 
     public static File normalizeShopFile(String name) {
+        var dataFolder = SBA.getBedwarsPlugin().getDataFolder();
         if (name.split("\\.").length > 1) {
-            return SBA.getPluginInstance().getDataFolder().toPath().resolve(name).toFile();
+            return dataFolder.toPath().resolve(name).toFile();
         }
 
-        var fileg = SBA.getPluginInstance().getDataFolder().toPath().resolve(name + ".groovy").toFile();
+        var fileg = dataFolder.toPath().resolve(name + ".groovy").toFile();
         if (fileg.exists()) {
             return fileg;
         }
-        return SBA.getPluginInstance().getDataFolder().toPath().resolve(name + ".yml").toFile();
+        return dataFolder.toPath().resolve(name + ".yml").toFile();
     }
 
     public static Map<?, ?> nullValuesAllowingMap(Object... objects) {
@@ -256,7 +416,7 @@ public class ShopUtil {
         return map;
     }
 
-    public static void setLore(Item item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type, Player player) {
+    public static org.screamingsandals.lib.item.ItemStack setLore(org.screamingsandals.lib.item.ItemStack item, PlayerItemInfo itemInfo, String price, ItemSpawnerType type, Player player) {
         var enabled = itemInfo.getFirstPropertyByName("generateLore")
                 .map(property -> property.getPropertyData().getBoolean())
                 .orElseGet(() -> Main.getConfigurator().config.getBoolean("lore.generate-automatically", true));
@@ -267,6 +427,7 @@ public class ShopUtil {
             final var isSharp = itemInfo.getFirstPropertyByName("sharpness").isPresent();
             final var isProt = itemInfo.getFirstPropertyByName("protection").isPresent();
             final var isEfficiency = itemInfo.getFirstPropertyByName("efficiency").isPresent();
+            final var isKnockback = itemInfo.getFirstPropertyByName("knockback").isPresent();
 
             final var game = Main.getInstance().getGameOfPlayer(player);
             final var arena = ArenaManager
@@ -275,57 +436,80 @@ public class ShopUtil {
                     .orElseThrow();
 
             if (isSharp) {
-                final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
-                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
+                final var currentLevel = arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(2);
+                limit = Math.min(limit, SBAStoreInventoryV2.sharpnessPrices.size());
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.sharpnessPrices.get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                    price = String.valueOf(SBAStoreInventoryV2.sharpnessPrices
+                            .get(arena.getStorage().getSharpnessLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
 
             if (isProt) {
-                final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
-                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
+                final var currentLevel = arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4);
+                limit = Math.min(limit, SBAStoreInventoryV2.protectionPrices.size());
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.protectionPrices.get(arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                    price = String.valueOf(SBAStoreInventoryV2.protectionPrices.get(
+                            arena.getStorage().getProtectionLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
 
             if (isEfficiency) {
-                final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1;
-                final var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
+                final var currentLevel = arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(4);
+                limit = Math.min(limit, SBAStoreInventoryV2.efficiencyPrices.size());
                 if (currentLevel <= limit) {
-                    price = String.valueOf(SBAUpgradeStoreInventory.efficiencyPrices.get(arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow() + 1));
+                    price = String.valueOf(SBAStoreInventoryV2.efficiencyPrices.get(
+                            arena.getStorage().getEfficiencyLevel(game.getTeamOfPlayer(player)).orElseThrow()));
+                }
+            }
+
+            if (isKnockback) {
+                final var currentLevel = arena.getStorage().getKnockbackLevel(game.getTeamOfPlayer(player))
+                        .orElseThrow() + 1;
+                var limit = SBAConfig.getInstance().node("upgrades", "limit", "Knockback").getInt(4);
+                limit = Math.min(limit, SBAStoreInventoryV2.knockbackPrices.size());
+                if (currentLevel <= limit) {
+                    price = String.valueOf(SBAStoreInventoryV2.knockbackPrices.get(
+                            arena.getStorage().getKnockbackLevel(game.getTeamOfPlayer(player)).orElseThrow()));
                 }
             }
 
             String finalPrice = price;
             final var newList = itemInfo.getFirstPropertyByName("generatedLoreText")
-                    .map(property -> property.getPropertyData().childrenList().stream().map(ConfigurationNode::getString))
+                    .map(property -> property.getPropertyData().childrenList().stream()
+                            .map(ConfigurationNode::getString))
                     .orElseGet(() -> Main.getConfigurator().config.getStringList("lore.text").stream())
                     .map(s -> s
                             .replaceAll("%price%", finalPrice)
                             .replaceAll("%resource%", type.getItemName())
                             .replaceAll("%amount%", Integer.toString(itemInfo.getStack().getAmount())))
                     .map(s -> ChatColor.translateAlternateColorCodes('&', s))
-                    .map(AdventureHelper::toComponent).collect(Collectors.toCollection((Supplier<ArrayList<Component>>) ArrayList::new));
+                    .map(Component::fromLegacy)
+                    .collect(Collectors.toCollection((Supplier<ArrayList<Component>>) ArrayList::new));
             newList.addAll(originalList);
 
-            item.getLore().clear();
-            item.getLore().addAll(newList);
+            return item.withItemLore(newList);
         }
+        return item;
     }
 
-    public static String getNameOrCustomNameOfItem(Item item) {
+    public static Component getNameOrCustomNameOfItem(org.screamingsandals.lib.item.ItemStack item) {
         try {
             if (item.getDisplayName() != null) {
-                return AdventureHelper.toLegacy(item.getDisplayName());
+                return (item.getDisplayName());
             }
-            if (item.getLocalizedName() != null) {
-                return AdventureHelper.toLegacy(item.getLocalizedName());
-            }
+            /*
+             * if (item.getLocalizedName() != null) {
+             * return AdventureHelper.toLegacy(item.getLocalizedName());
+             * }
+             */
         } catch (Throwable ignored) {
         }
-
 
         var normalItemName = item.getMaterial().platformName().replace("_", " ").toLowerCase();
         var sArray = normalItemName.split(" ");
@@ -334,102 +518,107 @@ public class ShopUtil {
         for (var s : sArray) {
             stringBuilder.append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).append(" ");
         }
-        return stringBuilder.toString().trim();
+        return Message.of(List.of(stringBuilder.toString().trim())).toComponent();
     }
-
 
     public static void addEnchantsToPlayerArmor(Player player, int newLevel) {
         for (var item : player.getInventory().getArmorContents()) {
             if (item != null) {
-                item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, newLevel);
+                applyTeamEnchants(player, item);
             }
         }
     }
 
-    public static void clampOrApplyEnchants(Item item, int level, Enchantment enchantment, StoreType type, int maxLevel) {
+    public static org.screamingsandals.lib.item.ItemStack clampOrApplyEnchants(org.screamingsandals.lib.item.ItemStack item, int level, Enchantment enchantment, StoreType type,
+            int maxLevel) {
+        Logger.trace("--- {} ENCHANT IS lvl {}/{}", enchantment, level, maxLevel);
+
         if (type == StoreType.UPGRADES) {
             level = level + 1;
         }
         if (level > maxLevel) {
-            item.getLore().clear();
-            LanguageService
+
+            item = item.withItemLore(LanguageService
                     .getInstance()
                     .get(MessageKeys.SHOP_MAX_ENCHANT)
-                    .toComponentList()
-                    .forEach(item::addLore);
+                    .toComponentList());
+
             if (item.getEnchantments() != null) {
                 item.getEnchantments().clear();
             }
         } else if (level > 0) {
-            item.addEnchant(EnchantmentMapping.resolve(enchantment).orElseThrow().newLevel(level));
+            item = item.withEnchantment(org.screamingsandals.lib.item.meta.Enchantment.of(enchantment).withLevel(level));
         }
+        return item;
     }
-
 
     /**
      * Applies enchants to displayed items in SBA store inventory.
-     * Enchants are applied and are dependent on the team upgrades the player's team has.
+     * Enchants are applied and are dependent on the team upgrades the player's team
+     * has.
      *
      * @param item
      * @param event
      */
-    public static void applyTeamUpgradeEnchantsToItem(Item item, ItemRenderEvent event, StoreType type) {
+    public static org.screamingsandals.lib.item.ItemStack applyTeamUpgradeEnchantsToItem(org.screamingsandals.lib.item.ItemStack item, ItemRenderEvent event, StoreType type) {
         final var player = event.getPlayer().as(Player.class);
         final var game = Main.getInstance().getGameOfPlayer(player);
+        if (game == null)
+            return item;
         final var typeName = item.getMaterial().platformName();
         final var runningTeam = game.getTeamOfPlayer(player);
+        if (runningTeam == null)
+            return item;
 
         var prices = event.getInfo().getOriginal().getPrices();
         if (!prices.isEmpty()) {
-            item.addLore(LanguageService
-                    .getInstance()
-                    .get(MessageKeys.CLICK_TO_PURCHASE)
-                    .toComponent());
+
+            ArrayList<Component> lore = new ArrayList<>(item.getLore());
+
+            lore.add(
+                    (LanguageService
+                            .getInstance()
+                            .get(MessageKeys.CLICK_TO_PURCHASE)
+                            .toComponent()));
+            item = item.withItemLore(lore);
         }
 
-        SBA.getInstance()
-                .getGameStorage(game)
-                .ifPresent(gameStorage -> {
-                    final var afterUnderscore = typeName.substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
-                    switch (afterUnderscore.toLowerCase()) {
-                        case "sword":
-                            int sharpness = gameStorage.getSharpnessLevel(runningTeam).orElseThrow();
-                            clampOrApplyEnchants(item, sharpness, Enchantment.DAMAGE_ALL, type, SBAConfig.getInstance().node("upgrades", "limit", "Sharpness").getInt(1));
-                            break;
-                        case "chestplate":
-                        case "boots":
-                            int protection = gameStorage.getProtectionLevel(runningTeam).orElseThrow();
-                            clampOrApplyEnchants(item, protection, Enchantment.PROTECTION_ENVIRONMENTAL, type, SBAConfig.getInstance().node("upgrades", "limit", "Protection").getInt(4));
-                            break;
-                        case "pickaxe":
-                            final int efficiency = gameStorage.getEfficiencyLevel(runningTeam).orElseThrow();
-                            clampOrApplyEnchants(item, efficiency, Enchantment.DIG_SPEED, type, SBAConfig.getInstance().node("upgrades", "limit", "Efficiency").getInt(2));
-                            break;
-                    }
-                });
+        var maybeStorage = SBA.getInstance()
+                .getGameStorage(game);
+        if (maybeStorage.isPresent()) {
+            var gameStorage = maybeStorage.get();
+            final var afterUnderscore = typeName;
+            // .substring(typeName.contains("_") ? typeName.indexOf("_") + 1 : 0);
+
+            item = ShopUtil.applyTeamEnchants(player, item, type, event.getOriginalInfo().getProperties());
+        }
+        return item;
     }
 
-    //TODO:
+    // TODO:
     public static void generateOptions(LocalOptionsBuilder localOptionsBuilder) {
         final var backItem = Main.getConfigurator().readDefinedItem("shopback", "BARRIER");
         final var backItemMeta = backItem.getItemMeta();
 
-        //   backItemMeta.setDisplayName(Message.of());
-//
+        // backItemMeta.setDisplayName(Message.of());
+        //
         // backItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_SHOP_BACK).asComponent());
-        //localOptionsBuilder.backItem(backItem);
+        // localOptionsBuilder.backItem(backItem);
 
-        //final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback", "ARROW");
-        //pageBackItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_BACK).asComponent());
-        //localOptionsBuilder.pageBackItem(pageBackItem);
+        // final var pageBackItem = MainConfig.getInstance().readDefinedItem("pageback",
+        // "ARROW");
+        // pageBackItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_BACK).asComponent());
+        // localOptionsBuilder.pageBackItem(pageBackItem);
 
-        //final var pageForwardItem = MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
-        //pageForwardItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_FORWARD).asComponent());
-        //localOptionsBuilder.pageForwardItem(pageForwardItem);
+        // final var pageForwardItem =
+        // MainConfig.getInstance().readDefinedItem("pageforward", "ARROW");
+        // pageForwardItem.setDisplayName(Message.of(LangKeys.IN_GAME_SHOP_PAGE_FORWARD).asComponent());
+        // localOptionsBuilder.pageForwardItem(pageForwardItem);
 
-        //final var cosmeticItem = MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");
+        // final var cosmeticItem =
+        // MainConfig.getInstance().readDefinedItem("shopcosmetic", "AIR");
         localOptionsBuilder
-                //  .cosmeticItem(cosmeticItem)
+                // .cosmeticItem(cosmeticItem)
                 .renderHeaderStart(600)
                 .renderFooterStart(600)
                 .renderOffset(9)
@@ -447,5 +636,34 @@ public class ShopUtil {
         }
     }
 
+    public static void applyTeamUpgrades(@NotNull Player player, Game game) {
+        if (game == null)
+            return;
+        final var team = game.getTeamOfPlayer(player);
+        if (team == null)
+            return;
+        var maybeGameStorage = ArenaManager
+                .getInstance()
+                .get(game.getName());
+        if (!maybeGameStorage.isPresent())
+            return;
+        final var gameStorage = maybeGameStorage.get()
+                .getStorage();
+        final var teamProtectionLevel = gameStorage.getProtectionLevel(team).orElse(0);
+        if (teamProtectionLevel > 0)
+            ShopUtil.addEnchantsToPlayerArmor(player, teamProtectionLevel);
+        final var finalTeamSharpnessLevel = gameStorage.getSharpnessLevel(team).orElse(0);
+        final var finalTeamEfficiencyLevel = gameStorage.getEfficiencyLevel(team).orElse(0);
+
+        Logger.trace("Player teamProtectionLevel {}", teamProtectionLevel);
+        Logger.trace("Player finalTeamSharpnessLevel {}", finalTeamSharpnessLevel);
+        Logger.trace("Player finalTeamEfficiencyLevel {}", finalTeamEfficiencyLevel);
+
+        Arrays.stream(player.getInventory().getContents())
+                .filter(Objects::nonNull)
+                .forEach(item -> {
+                    applyTeamEnchants(player, item);
+                });
+    }
 
 }

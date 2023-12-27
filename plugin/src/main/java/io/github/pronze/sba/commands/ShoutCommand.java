@@ -4,15 +4,15 @@ import cloud.commandframework.annotations.CommandDescription;
 import cloud.commandframework.annotations.CommandMethod;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.game.TeamColor;
-import org.screamingsandals.lib.player.PlayerMapper;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.config.SBAConfig;
@@ -22,9 +22,14 @@ import java.util.List;
 @Service
 public class ShoutCommand {
 
+    static boolean init = false;
     @OnPostEnable
-    public void onPostEnable() {
+    public void onPostEnabled() {
+        if(SBA.isBroken())return;
+        if (init)
+            return;
         CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
     @CommandMethod("shout <args>")
@@ -35,8 +40,7 @@ public class ShoutCommand {
     ) {
         final var args = List.of(argsParam);
 
-        final var wrapper = PlayerMapper
-                .wrapPlayer(player);
+        final var wrapper = SBA.getInstance().getPlayerWrapper(player);
 
         if(!Main.getInstance().isPlayerPlayingAnyGame(player)){
             LanguageService
@@ -95,9 +99,10 @@ public class ShoutCommand {
                 .getInstance()
                 .get(MessageKeys.SHOUT_FORMAT)
                 .replace("%color%", color)
-                .replace("%player%", player.getName())
+                .replace("%player%", player.getDisplayName() + ChatColor.RESET)
                 .replace("%message%", strBuilder.toString())
                 .replace("%team%", team == null ? "" : team.getName())
+                .placeholderFor(player)
                 .toComponent();
 
         wrapper.as(SBAPlayerWrapper.class).shout(shoutMessage);

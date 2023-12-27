@@ -6,52 +6,91 @@ import io.github.pronze.sba.events.SBASpawnerTierUpgradeEvent;
 import io.github.pronze.sba.game.Arena;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.game.RotatingGenerator;
+import io.github.pronze.sba.utils.Logger;
+import lombok.Getter;
+
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.screamingsandals.bedwars.api.events.BedwarsGameStartedEvent;
 import org.screamingsandals.bedwars.api.game.Game;
+import org.screamingsandals.bedwars.api.game.ItemSpawner;
+import org.screamingsandals.lib.plugin.ServiceManager;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.screamingsandals.lib.utils.reflect.Reflect;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
 public class DynamicSpawnerLimiterService implements Listener {
-    private final Map<Integer, Integer> diamondLimiter = new HashMap<>();
-    private final Map<Integer, Integer> emeraldLimiter = new HashMap<>();
+    @Getter
+    private final Map<String, Map<Integer, Integer>> limiters = new HashMap<>();
+
+    public static DynamicSpawnerLimiterService getInstance() {
+        return ServiceManager.get(DynamicSpawnerLimiterService.class);
+    }
+
+    public static final int romanToInteger2(String s) {
+
+        Map<Character, Integer> values = new LinkedHashMap<>();
+        values.put('0', 0);
+        values.put('I', 1);
+        values.put('V', 5);
+        values.put('X', 10);
+        values.put('L', 50);
+        values.put('C', 100);
+        values.put('D', 500);
+        values.put('M', 1000);
+
+        int number = 0;
+        for (int i = 0; i < s.length(); i++) {
+            if (i + 1 == s.length() || values.get(s.charAt(i)) >= values.get(s.charAt(i + 1))) {
+                number += values.get(s.charAt(i));
+            } else {
+                number -= values.get(s.charAt(i));
+            }
+        }
+        return number;
+    }
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
+        load();
+    }
 
-        diamondLimiter.put(1, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-I").getInt(4));
-        diamondLimiter.put(2, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-II").getInt(6));
-        diamondLimiter.put(3, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-III").getInt(8));
-        diamondLimiter.put(4, SBAConfig.getInstance().node("upgrades", "limit", "Diamond-IV").getInt(12));
+    public void reload() {
+        limiters.clear();
+        load();
+    }
 
-        emeraldLimiter.put(1, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-I").getInt(4));
-        emeraldLimiter.put(2, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-II").getInt(6));
-        emeraldLimiter.put(3, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-III").getInt(8));
-        emeraldLimiter.put(4, SBAConfig.getInstance().node("upgrades", "limit", "Emerald-IV").getInt(12));
+    private void load() {
+        var subkeys = SBAConfig.getInstance().getSubKeys("upgrades.limit");
+        for (var key : subkeys) {
+            try {
+                var parts = key.split("-");
+                var item = parts[0].toLowerCase();
+                var number = romanToInteger2(parts.length > 1 ? parts[1] : "I");
+                if (!limiters.containsKey(item)) {
+                    limiters.put(item, new HashMap<>());
+                }
+                limiters.get(item).putIfAbsent(number,
+                        SBAConfig.getInstance().node("upgrades", "limit", key).getInt(1));
+            } catch (Throwable t) {
+                Logger.error("Key not in right format {};Expecting RESSOURCE-ROMAN_NUMERAL:TIME;{}", key, t);
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onGameStart(BedwarsGameStartedEvent event) {
         final var game = event.getGame();
         setAccordingly(game, false);
-        game.getItemSpawners().forEach(itemSpawner -> {
-            if (Material.IRON_INGOT == itemSpawner.getItemSpawnerType().getMaterial()) {
-                Reflect.setField(itemSpawner, "maxSpawnedResources", SBAConfig.getInstance().node("upgrades", "limit", "Iron").getInt(48));
-            }
-            if (Material.GOLD_INGOT == itemSpawner.getItemSpawnerType().getMaterial()) {
-                Reflect.setField(itemSpawner, "maxSpawnedResources", SBAConfig.getInstance().node("upgrades", "limit", "Gold").getInt(8));
-            }
-        });
     }
 
     @EventHandler
@@ -59,33 +98,41 @@ public class DynamicSpawnerLimiterService implements Listener {
         setAccordingly(event.getGame(), true);
     }
 
-    private void setAccordingly(Game game, boolean isUpgraded) {
+    public int getStartingTier(Game game, ItemSpawner spawner)
+    {
+        var material = spawner.getItemSpawnerType().getName().toLowerCase();
+        if (limiters.containsKey(material)) {
+            var limiter = limiters.get(material);
+            if (limiter.containsKey(0))
+                return 0;
+        }
+        return 1;
+    }
+    private int getTier(Game game, ItemSpawner spawner) {
         final var arena = ArenaManager
                 .getInstance()
                 .get(game.getName())
                 .orElseThrow();
 
-        ((Arena) arena).getRotatingGenerators().stream()
+        var rotating = ((Arena) arena).getRotatingGenerators().stream()
                 .map(iRotatingGenerator -> (RotatingGenerator) iRotatingGenerator)
-                .filter(rotatingGenerator -> List.of(Material.DIAMOND_BLOCK, Material.EMERALD_BLOCK).contains(rotatingGenerator.getStack().getType()))
-                .forEach(generator -> {
-                    int limit = 4;
+                .filter(generator -> generator.getItemSpawner() == spawner).findFirst();
 
-                    switch (generator.getStack().getType()) {
-                        case EMERALD_BLOCK:
-                            limit = emeraldLimiter.getOrDefault(generator.getTierLevel(), 4);
-                            break;
-                        case DIAMOND_BLOCK:
-                            limit = diamondLimiter.getOrDefault(generator.getTierLevel() , 4);
-                            break;
-                    }
-
-                    limit = isUpgraded ? limit + 1 : limit;
-
-                    final var spawner = generator.getItemSpawner();
-                    Reflect.setField(spawner, "maxSpawnedResources", limit);
-                });
+        if (rotating.isPresent())
+            return rotating.get().getTierLevel();
+        else
+            return 1;
     }
 
-
+    public void setAccordingly(Game game, boolean isUpgraded) {
+        for (var spawner : game.getItemSpawners()) {
+            var material = spawner.getItemSpawnerType().getName().toLowerCase();
+            if (limiters.containsKey(material)) {
+                var limiter = limiters.get(material);
+                var tier = getTier(game, spawner);
+                if (limiter.containsKey(tier))
+                    Reflect.setField(spawner, "maxSpawnedResources", limiter.get(tier));
+            }
+        }
+    }
 }

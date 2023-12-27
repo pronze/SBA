@@ -8,8 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.lib.plugin.ServiceManager;
-import org.screamingsandals.lib.tasker.Tasker;
-import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -69,6 +67,7 @@ public class LanguageService implements ILanguageService {
 
     @OnPostEnable
     public void postEnable() {
+        if(SBA.isBroken())return;
         try {
             var fallbackFile = new File(SBA.getPluginInstance().getDataFolder() + "/languages", "language_fallback.yml");
             if (fallbackFile.exists()) {
@@ -78,8 +77,10 @@ public class LanguageService implements ILanguageService {
             fallbackFile.createNewFile();
 
             try (var input = LanguageService.class.getResourceAsStream("/languages/language_en.yml")) {
+                if (input == null)
+                        throw new Exception("Input is null while setting up fallback message");
                 try (var output = new FileOutputStream(fallbackFile)) {
-                    assert input != null;
+                    
                     input.transferTo(output);
                 }
             }
@@ -122,7 +123,8 @@ public class LanguageService implements ILanguageService {
             }
         } catch (SerializationException | UnsupportedOperationException e) {
             if (fallback) {
-                e.printStackTrace();
+                Logger.error("Missing translation key for {}", Arrays.toString(arguments));
+                //e.printStackTrace();
             }
         }
 

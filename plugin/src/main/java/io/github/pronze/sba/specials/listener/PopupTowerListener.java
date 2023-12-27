@@ -3,7 +3,9 @@ package io.github.pronze.sba.specials.listener;
 import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.specials.PopupTower;
+import io.github.pronze.sba.specials.SpawnerProtection;
 import io.github.pronze.sba.utils.SBAUtil;
+import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,6 +28,7 @@ public class PopupTowerListener implements Listener {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         SBA.getInstance().registerListener(this);
     }
 
@@ -52,23 +55,39 @@ public class PopupTowerListener implements Listener {
                 String unhidden = APIUtils.unhashFromInvisibleStringStartsWith(stack, POPUP_TOWER_PREFIX);
                 if (unhidden != null) {
                     event.setCancelled(true);
-                    stack.setAmount(stack.getAmount() - 1);
+                    if (stack.getAmount() > 1) {
+                        stack.setAmount(stack.getAmount() - 1);
+                    } else {
+                        try {
+                            if (player.getInventory().getItemInOffHand().equals(stack)) {
+                                player.getInventory().setItemInOffHand(new ItemStack(Material.AIR));
+                            } else {
+                                player.getInventory().remove(stack);
+                            }
+                        } catch (Throwable e) {
+                            player.getInventory().remove(stack);
+                        }
+                    }
                     player.updateInventory();
                     final var team = game.getTeamOfPlayer(player);
                     final var playerFace = SBAUtil.yawToFace(player.getLocation().getYaw(), false);
+                    final var wool =  TeamColor.fromApiColor(team.getColor()).getWool();
                     PopupTower tower = new PopupTower(
                             game,
-                            TeamColor.fromApiColor(team.getColor()).getWool().getType(),
-                            player.getLocation().getBlock().getRelative(playerFace).getRelative(BlockFace.DOWN).getLocation(),
-                            playerFace
-                    );
-                    tower.createTower();
+                            wool.getType(),
+                            Main.isLegacy() ? wool.getData().getData() : 0,
+                            player.getLocation().getBlock().getRelative(playerFace).getRelative(BlockFace.DOWN)
+                                    .getLocation(),
+                            playerFace);
+                    if (!SpawnerProtection.getInstance().isProtected(game, player.getLocation().getBlock()
+                            .getRelative(playerFace).getRelative(BlockFace.DOWN).getLocation()))
+                        tower.createTower();
                 }
             }
         }
     }
 
-    //TODO: configurable properties
+    // TODO: configurable properties
     private String applyProperty(BedwarsApplyPropertyToBoughtItem event) {
         return POPUP_TOWER_PREFIX;
     }

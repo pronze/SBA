@@ -2,15 +2,15 @@ package io.github.pronze.sba.visuals;
 
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.lib.lang.LanguageService;
-import io.github.pronze.sba.utils.Logger;
 import me.clip.placeholderapi.PlaceholderAPI;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -19,7 +19,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerJoinedEvent;
 import org.screamingsandals.bedwars.api.events.BedwarsPlayerLeaveEvent;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.plugin.ServiceManager;
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
 import org.screamingsandals.lib.tasker.TaskerTime;
 import org.screamingsandals.lib.utils.annotations.Service;
@@ -29,21 +30,39 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
-import pronze.lib.scoreboards.Scoreboard;
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
 import java.util.*;
 
 @Service
 public class MainLobbyVisualsManager implements Listener {
-    private final static String MAIN_LOBBY_OBJECTIVE = "bwa-mainlobby";
+    private final static String MAIN_LOBBY_OBJECTIVE = "sbascoreboard";
     private static Location location;
     private final Map<Player, Scoreboard> scoreboardMap = new HashMap<>();
+    private boolean enabled;
+
+    public static MainLobbyVisualsManager getInstance() {
+        return ServiceManager.get(MainLobbyVisualsManager.class);
+    }
 
     @OnPostEnable
     public void registerListener() {
+        if(SBA.isBroken())return;
+        SBA.getInstance().registerListener(this);
+
+        load();
+    }
+
+    public void reload() {
+        disable();
+        load();
+    }
+
+    public void load() {
         if (!SBAConfig.getInstance().getBoolean("main-lobby.enabled", false)) {
+            enabled = false;
             return;
         }
-        SBA.getInstance().registerListener(this);
+        enabled = true;
         SBAUtil.readLocationFromConfig("main-lobby").ifPresentOrElse(location -> {
             MainLobbyVisualsManager.location = location;
             Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> Bukkit
@@ -68,13 +87,18 @@ public class MainLobbyVisualsManager implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-        if (!SBAConfig.getInstance().node("main-lobby","custom-chat").getBoolean(true)) return;
+        if (!enabled)
+            return;
+        if (!SBAConfig.getInstance().node("main-lobby", "custom-chat").getBoolean(true))
+            return;
+
         final var player = e.getPlayer();
         final var db = SBA.getInstance().getPlayerWrapperService().get(player).orElseThrow();
 
         if (SBAConfig.getInstance().node("main-lobby", "enabled").getBoolean(false)
                 && MainLobbyVisualsManager.isInWorld(e.getPlayer().getLocation())) {
-
+            if (Main.isPlayerInGame(player))
+                return;
             var chatFormat = LanguageService
                     .getInstance()
                     .get(MessageKeys.MAIN_LOBBY_CHAT_FORMAT)
@@ -83,14 +107,23 @@ public class MainLobbyVisualsManager implements Listener {
             if (chatFormat != null) {
                 var format = chatFormat
                         .replace("%level%", String.valueOf(db.getLevel()))
-                        .replace("%name%", e.getPlayer().getName())
+                        .replace("%name%", e.getPlayer().getDisplayName() + ChatColor.RESET)
                         .replace("%message%", e.getMessage())
                         .replace("%color%", ShopUtil.ChatColorChanger(e.getPlayer()));
 
                 if (SBA.getPluginInstance().getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
                     format = PlaceholderAPI.setPlaceholders(player, format);
                 }
-                e.setFormat(format);
+                final var msgToSend = format;
+                Bukkit.getServer().getOnlinePlayers().forEach(p -> {
+                    if (MainLobbyVisualsManager.isInWorld(p.getLocation())
+                            && Main.getInstance().getGameOfPlayer(p) == null)
+                        p.sendMessage(msgToSend);
+                });
+
+                // e.getRecipients().clear();
+                e.setCancelled(true);
+                // e.setFormat(format);
             }
         }
     }
@@ -99,16 +132,21 @@ public class MainLobbyVisualsManager implements Listener {
     public void disable() {
         Set.copyOf(scoreboardMap.keySet()).forEach(this::remove);
         scoreboardMap.clear();
-        HandlerList.unregisterAll(this);
+        enabled = false;
+        // HandlerList.unregisterAll(this);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
+        if (!enabled)
+            return;
+
         final var player = e.getPlayer();
 
         Bukkit.getServer().getScheduler()
                 .runTaskLater(SBA.getPluginInstance(), () -> {
-                    if (hasMainLobbyObjective(player)) return;
+                    if (hasMainLobbyObjective(player))
+                        return;
                     if (isInWorld(player.getLocation()) && !Main.isPlayerInGame(player) && player.isOnline()) {
                         create(player);
                     }
@@ -117,6 +155,9 @@ public class MainLobbyVisualsManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onWorldChange(PlayerChangedWorldEvent e) {
+        if (!enabled)
+            return;
+
         final var player = e.getPlayer();
         if (player.isOnline() && isInWorld(player.getLocation()) && !scoreboardMap.containsKey(player)) {
             create(player);
@@ -131,7 +172,11 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void create(Player player) {
-        Logger.trace("Creating scoreboard for player: {} in the main lobby", player.getName());
+        if (!enabled)
+            return;
+        if (!isInWorld(player.getLocation()))
+            return;
+
         final var playerData = SBA
                 .getInstance()
                 .getPlayerWrapperService()
@@ -150,8 +195,7 @@ public class MainLobbyVisualsManager implements Listener {
                     .get(MessageKeys.MAIN_LOBBY_TABLIST_FOOTER)
                     .replace("%sba_version%", SBA.getInstance().getVersion())
                     .toComponent();
-
-            playerData.sendPlayerListHeaderAndFooter(header, footer);
+            playerData.sendPlayerListHeaderFooter(header, footer);
         }
 
         var title = LanguageService
@@ -174,7 +218,7 @@ public class MainLobbyVisualsManager implements Listener {
                 .placeholderHook(hook -> {
                     final var bar = playerData.getCompletedBoxes();
                     final var progress = playerData.getProgress();
-                    final var playerStatistic  = Main
+                    final var playerStatistic = Main
                             .getPlayerStatisticsManager()
                             .getStatistic(player);
 
@@ -195,7 +239,8 @@ public class MainLobbyVisualsManager implements Listener {
     }
 
     public void remove(Player player) {
-        if (player == null) return;
+        if (player == null)
+            return;
         final var scoreboard = scoreboardMap.get(player);
         if (scoreboard != null) {
             scoreboard.destroy();
@@ -205,7 +250,7 @@ public class MainLobbyVisualsManager implements Listener {
             player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
         }
         if (SBAConfig.getInstance().node("main-lobby", "tablist-modifications").getBoolean()) {
-            PlayerMapper.wrapPlayer(player).sendPlayerListHeaderAndFooter(Component.empty(), Component.empty());
+            Players.wrapPlayer(player).sendPlayerListHeaderFooter(Component.empty(), Component.empty());
         }
     }
 
@@ -218,10 +263,13 @@ public class MainLobbyVisualsManager implements Listener {
     @EventHandler
     public void onBedWarsPlayerLeaveEvent(BedwarsPlayerLeaveEvent e) {
         final var player = e.getPlayer();
-        Tasker.build(() -> {
-            if (isInWorld(player.getLocation()) && player.isOnline()) {
-                create(player);
-            }
-        }).delay(1L, TaskerTime.SECONDS);
+        if (!enabled)
+            return;
+        // the Slib 2.0.2-SNAPSHOT version of the following code did not have the .start() call, therefore was never functional. Is it needed?
+//        Tasker.runDelayed(DefaultThreads.GLOBAL_THREAD, () -> {
+//            if (isInWorld(player.getLocation()) && player.isOnline()) {
+//                create(player);
+//            }
+//        }, 1L, TaskerTime.SECONDS);
     }
 }

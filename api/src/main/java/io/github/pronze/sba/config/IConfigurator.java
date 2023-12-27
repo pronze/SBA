@@ -38,6 +38,7 @@ public interface IConfigurator {
      */
     List<String> getStringList(String path);
 
+    List<String> getSubKeys(String string);
     /**
      *
      * @param path path of the integer to lookup.

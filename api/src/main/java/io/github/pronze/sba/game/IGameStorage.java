@@ -32,13 +32,21 @@ public interface IGameStorage {
      */
     Optional<Integer> getProtectionLevel(@NotNull RunningTeam team);
 
+     /**
+     * Gets the level of protection of the specified team.
+     * @param team the team instance to query
+     * @return an optional containing the protection level if the team has been registered, empty otherwise
+     */
+    Optional<Integer> getKnockbackLevel(@NotNull RunningTeam team);
+
     /**
      * Gets the level of efficiency of the specified team.
      * @param team the team instance to query
      * @return an optional containing the efficiency level if the team has been registered, empty otherwise
      */
     Optional<Integer> getEfficiencyLevel(@NotNull RunningTeam team);
-
+    Optional<Integer> getEnchantLevel(RunningTeam team, String propertyName);
+    void setEnchantLevel(RunningTeam team, String propertyName, @NotNull Integer level);
     /**
      *
      * @param team
@@ -59,6 +67,13 @@ public interface IGameStorage {
      * @param level the level to set
      */
     void setEfficiencyLevel(@NotNull RunningTeam team, @NotNull Integer level);
+ 
+    /**
+     * Sets the level of efficiency of the specified team.
+     * @param team the team instance to set
+     * @param level the level to set
+     */
+    void setKnockbackLevel(@NotNull RunningTeam team, @NotNull Integer level);
 
     /**
      * Sets whether the trap has been enabled for the specified team.
@@ -139,4 +154,12 @@ public interface IGameStorage {
      * @return true if dragons are enabled for the specified team, false otherwise
      */
     boolean areDragonsEnabled(@NotNull RunningTeam team);
+
+    void setPurchasedTrap(RunningTeam team, boolean b, String trap_identifier);
+
+    boolean areTrapEnabled(RunningTeam team, String trap_identifier);
+
+    Iterable<String> enabledTraps(RunningTeam team);
+
+   
 }

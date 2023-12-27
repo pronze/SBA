@@ -25,7 +25,7 @@ data:
       - stack: GREEN_STAINED_GLASS_PANE;1
         row: 2
         column: 1
-      - stack: WOOL;16;Wool;§7Great for bridging across;§7islands.
+      - stack: WHITE_WOOL;16;Wool;§7Great for bridging across;§7islands.
         price: 4 of iron
         properties: applycolorbyteam
         row: 3
@@ -69,7 +69,7 @@ data:
         stack:
           type: STICK
           enchants:
-            KNOCKBACK: 1
+            knockback: 1
 
   - write: false
     stack: 'STONE'
@@ -163,13 +163,13 @@ data:
         stack:
           type: BOW
           enchants:
-            ARROW_DAMAGE: 1
+            power: 1
       - price: 6 of emerald
         stack:
           type: BOW
           enchants:
-            ARROW_KNOCKBACK: 1
-            ARROW_DAMAGE: 1
+            punch: 1
+            power: 1
       - price: 2 of gold
         stack:
             type: ARROW
@@ -202,10 +202,7 @@ data:
         stack:
           type: POTION
           display-name: "§rPotion of Healing I"
-          meta:
-            ==: ItemMeta
-            meta-type: POTION
-            potion-type: healing
+          potion-type: healing
         price: 1 of emerald
 
       - row: 3
@@ -258,29 +255,26 @@ data:
             data:
               - sound: ENTITY_SHEEP_AMBIENT
               - effect:
-                  ==: org.bukkit.potion.PotionEffect
-                  effect: 15
+                  effect: blindness
                   amplifier: 2
                   duration: 100
                   ambient: true
-                  has-particles: true
-                  has-icon: true
+                  particles: true
+                  icon: true
               - effect:
-                  ==: org.bukkit.potion.PotionEffect
-                  effect: 18
+                  effect: weakness
                   amplifier: 2
                   duration: 100
                   ambient: true
-                  has-particles: true
-                  has-icon: true
+                  particles: true
+                  icon: true
               - effect:
-                  ==: org.bukkit.potion.PotionEffect
-                  effect: 2
+                  effect: slowness
                   amplifier: 2
                   duration: 100
                   ambient: true
-                  has-particles: true
-                  has-icon: true
+                  particles: true
+                  icon: true
         stack:
           type: STRING
           display-name: "Trap"
@@ -349,7 +343,7 @@ data:
   - locate: '$utility'
     stack: TNT;1;§aUtility;§eClick to view!
 
-  - stack: WOOL;16
+  - stack: WHITE_WOOL;16
     properties: applycolorbyteam
     price: 4 of iron
     row: 3
@@ -381,10 +375,7 @@ data:
     stack:
       type: POTION
       display-name: "§rPotion of Healing I"
-      meta:
-        ==: ItemMeta
-        meta-type: POTION
-        potion-type: healing
+      potion-type: healing
 
   - stack: TNT;1
     price: 4 of gold
@@ -434,30 +425,72 @@ data:
     price: 3 of emerald
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 1
     row: 5
     column: 1
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 2
     row: 5
     column: 2
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 3
     row: 5
     column: 3
 
   - stack: "RED_STAINED_GLASS_PANE;1"
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 4
     row: 5
     column: 4
 
   - stack: RED_STAINED_GLASS_PANE;1
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 5
     row: 5
     column: 5
 
   - stack: RED_STAINED_GLASS_PANE;1
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 6
     row: 5
     column: 6
 
   - stack: RED_STAINED_GLASS_PANE;1
+    price: 1 of iron
+    lore:
+      - "§7Right click to set"
+    properties: 
+      name: "quickbuy"
+      id: 7
     row: 5
     column: 7
 

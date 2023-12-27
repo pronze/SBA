@@ -1,5 +1,7 @@
 package io.github.pronze.sba.game;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Represents the different store types available.
  */
@@ -14,12 +16,8 @@ public enum StoreType {
     NORMAL;
 
     public static StoreType of(String storeFile) {
-        switch (storeFile) {
-            case "shop.yml":
-                return NORMAL;
-            case "upgradeShop.yml":
-                return UPGRADES;
-        }
+        if(StringUtils.containsIgnoreCase(storeFile,"upgrade"))
+            return UPGRADES;
         return NORMAL;
     }
 }

@@ -1,11 +1,14 @@
 package io.github.pronze.sba.party;
 import io.github.pronze.sba.wrapper.PlayerSetting;
-import net.kyori.adventure.text.Component;
+import org.screamingsandals.lib.player.Players;
+import org.screamingsandals.lib.spectator.Component;
+
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
-import org.screamingsandals.lib.player.PlayerMapper;
-import org.screamingsandals.lib.utils.AdventureHelper;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.data.PartyInviteData;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
@@ -34,7 +37,6 @@ public class Party implements IParty {
 
         leader.getSettings().enable(PlayerSetting.IN_PARTY);
         members.add(leader);
-        Logger.trace("Created party with leader: {}, party is: {}", leader.getName(), debugInfo());
     }
 
     @Override
@@ -49,31 +51,25 @@ public class Party implements IParty {
 
     @Override
     public void sendMessage(@NotNull Component message, @NotNull SBAPlayerWrapper sender) {
-        Logger.trace(
-                "Sending message: {} to party: {}",
-                AdventureHelper.toLegacy(message),
-                debugInfo()
-        );
         final var formattedMessage = LanguageService
                 .getInstance()
                 .get(MessageKeys.PARTY_CHAT_FORMAT)
-                .replace("%name%", sender.getName())
-                .replace("%message%", AdventureHelper.toLegacy(message))
+                .replace("%name%", sender.as(Player.class).getDisplayName() + ChatColor.RESET)
+                .replace("%message%", (message))
                 .toComponent();
-        members.forEach(player -> PlayerMapper.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
+        members.forEach(player -> Players.wrapPlayer(player.getInstance()).sendMessage(formattedMessage));
     }
 
     @Override
     public void addPlayer(@NotNull SBAPlayerWrapper player) {
-        Logger.trace("Adding player: {} to party: {}", player.getName(), debugInfo());
         invitedPlayers.remove(player);
         members.add(player);
-        leader.getSettings().disable(PlayerSetting.IN_PARTY);
+        //leader.getSettings().disable(PlayerSetting.IN_PARTY);
         if (inviteDataMap.containsKey(player.getInstance().getUniqueId())) {
             final var inviteData = inviteDataMap.get(player.getInstance().getUniqueId());
             if (inviteData != null) {
                 SBAUtil.cancelTask(inviteData.getInviteTask());
-                player.getSettings().disable(PlayerSetting.IN_PARTY);
+                player.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
                 inviteDataMap.remove(player.getInstance().getUniqueId());
             }
         }
@@ -81,7 +77,6 @@ public class Party implements IParty {
 
     @Override
     public void removePlayer(@NotNull SBAPlayerWrapper player) {
-        Logger.trace("Removing player: {} from party: {}", player.getName(), debugInfo());
         members.remove(player);
         player.getSettings().disable(PlayerSetting.IN_PARTY);
     }
@@ -97,10 +92,8 @@ public class Party implements IParty {
         if (player.equals(leader)) {
             return;
         }
-        Logger.trace("Replacing leader: {} with: {} in party of uuid: {}",
-                leader.getName(), player.getName(), debugInfo());
         leader = player;
-        leader.getSettings().disable(PlayerSetting.IN_PARTY);
+        //leader.getSettings().disable(PlayerSetting.IN_PARTY);
         if (!members.contains(leader)) {
             members.add(leader);
         }
@@ -115,16 +108,13 @@ public class Party implements IParty {
     public void invitePlayer(@NotNull SBAPlayerWrapper invitee,
                              @NotNull SBAPlayerWrapper player) {
         if (inviteDataMap.containsKey(invitee.getInstance().getUniqueId())) return;
-        Logger.trace("Player: {} has invited: {} to party: {}", player.getName(),
-                invitee.getName(), debugInfo());
         invitedPlayers.add(invitee);
-        invitee.getSettings().enable(PlayerSetting.IN_PARTY);
+        invitee.getSettings().enable(PlayerSetting.INVITED_TO_PARTY);
 
         final var inviteTask = new BukkitRunnable() {
             @Override
             public void run() {
-                Logger.trace("IParty invitation expired for: {} of party: {}", invitee.getName(), debugInfo());
-                invitee.getSettings().disable(PlayerSetting.IN_PARTY);
+                invitee.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
                 inviteDataMap.remove(invitee.getInstance().getUniqueId());
                 if (shouldDisband()) {
                     SBA.getInstance()
@@ -140,10 +130,8 @@ public class Party implements IParty {
                 }
             }
         }.runTaskLater(SBA.getPluginInstance(),
-                20L * SBA
-                        .getInstance()
-                        .getConfigurator()
-                        .getInt("party.invite-expiration-time", 60));
+                20L * SBAConfig
+                        .getInstance().party().expirationTime());
 
         final var inviteData = PartyInviteData.of(invitee, player, inviteTask);
         inviteDataMap.put(invitee.getInstance().getUniqueId(), inviteData);
@@ -166,7 +154,7 @@ public class Party implements IParty {
         }
 
         invitedPlayers.remove(invitee);
-        invitee.getSettings().disable(PlayerSetting.IN_PARTY);
+        invitee.getSettings().disable(PlayerSetting.INVITED_TO_PARTY);
     }
 
     @Override
@@ -178,14 +166,14 @@ public class Party implements IParty {
     public String toString() {
         return "Party{" +
                 "uuid=" + uuid +
-                ", leader=" + leader.getName() +
+                ", leader=" + leader.as(Player.class).getDisplayName() +
                 ", members=" + members.stream().map(SBAPlayerWrapper::getName).collect(Collectors.toList()).toString() +
                 ", invitedPlayers=" + invitedPlayers.stream().map(SBAPlayerWrapper::getName).collect(Collectors.toList()).toString() +
                 '}';
     }
 
     public String debugInfo() {
-        return "[leader=" + leader.getName() + ", uuid=" + uuid.toString() + "]";
+        return "[leader=" + leader.as(Player.class).getDisplayName() + ", uuid=" + uuid.toString() + "]";
     }
 
     @Override

@@ -1,4 +1,5 @@
 package io.github.pronze.sba.utils;
+import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.config.SBAConfig;
 import org.bukkit.Bukkit;
 import org.screamingsandals.bedwars.Main;
@@ -37,7 +38,7 @@ public class FirstStartConfigReplacer {
             if (doneChanges.get()) {
                 Bukkit.getLogger().info("[SBA]: Making legacy changes");
                 Main.getConfigurator().saveConfig();
-                SBAUtil.reloadPlugin(Main.getInstance());
+                SBAUtil.reloadPlugin(Main.getInstance(), null);
             }
         }
     }
@@ -61,12 +62,13 @@ public class FirstStartConfigReplacer {
         updateConfig("destroy-placed-blocks-by-explosion-except", "GLASS");
         updateConfig("allowed-commands", List.of("/shout", "/party"));
         updateConfig("scoreboard.enable", false);
+        updateConfig("scoreboard.enabled", false);
         updateConfig("lobby-scoreboard.enabled", false);
         updateConfig("chat.override", false);
         updateConfig("title.enabled", false);
         updateConfig("items.leavegame", "RED_BED");
         updateConfig("player-drops", false);
-        updateConfig("compass-enabled", false);
+        updateConfig("compass-enabled", true);
         updateConfig("add-wool-to-inventory-on-join", false);
         updateConfig("breakable.enabled", true);
         updateConfig("breakable.blocks", List.of(!Main.isLegacy() ? "GRASS" : "LONG_GRASS", "SNOW"));
@@ -111,6 +113,7 @@ public class FirstStartConfigReplacer {
 
     @OnPostEnable
     public void onPostEnable() {
+        if(SBA.isBroken())return;
         enableLegacySupport();
         if (SBAConfig.getInstance().node("first_start").getBoolean(false)) {
             Bukkit.getLogger().info("§aDetected first start");

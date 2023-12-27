@@ -13,18 +13,6 @@ import java.util.List;
 public interface IGameTaskManager {
 
     /**
-     * Adds a task to the task queue. This task will be run for each game.
-     * @param task the task to be queued <b>Note: The only constructor parameter this class should have is a Arena parameter.</b>
-     */
-    void addTask(@NotNull BaseGameTask task);
-
-    /**
-     * Removes a task from the task queue.
-     * @param task the task to remove
-     */
-    void removeTask(@NotNull BaseGameTask task);
-
-    /**
      * Starts the tasks for the given arena instance.
      * @param arena arena instance to construct the tasks
      * @return A list containing all the tasks initialized for the game

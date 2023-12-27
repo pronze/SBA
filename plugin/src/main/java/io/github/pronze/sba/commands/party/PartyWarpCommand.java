@@ -1,6 +1,7 @@
 package io.github.pronze.sba.commands.party;
 
 import cloud.commandframework.annotations.CommandMethod;
+import cloud.commandframework.annotations.CommandPermission;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.party.PartyManager;
 import io.github.pronze.sba.wrapper.PlayerSetting;
@@ -9,29 +10,34 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.lib.nms.entity.PlayerUtils;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
 import io.github.pronze.sba.SBA;
-import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import io.github.pronze.sba.commands.CommandManager;
+import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.lib.lang.LanguageService;
 
 @Service
 public class PartyWarpCommand {
 
+    static boolean init = false;
+
     @OnPostEnable
-    public void onPostEnable() {
-        CommandManager.getInstance().getAnnotationParser().parse(this);
+    public void onPostEnabled() {
+        if(SBA.isBroken())return;
+        if (init)
+            return;
+        if (SBAConfig.getInstance().party().enabled())
+            CommandManager.getInstance().getAnnotationParser().parse(this);
+        init = true;
     }
 
-    @CommandMethod("party warp")
+    @CommandMethod("party|p warp")
+    @CommandPermission("sba.party")
     private void commandWarp(
-            final @NotNull Player playerArg
-    ) {
-        final var player = PlayerMapper
-                .wrapPlayer(playerArg)
-                .as(SBAPlayerWrapper.class);
+            final @NotNull Player playerArg) {
+        final var player = SBA.getInstance().getPlayerWrapper((playerArg));
 
         if (!player.getSettings().isToggled(PlayerSetting.IN_PARTY)) {
             LanguageService
@@ -74,15 +80,16 @@ public class PartyWarpCommand {
                                     final var memberGame = Main.getInstance().getGameOfPlayer(member.getInstance());
 
                                     Bukkit.getScheduler().runTask(SBA.getPluginInstance(), () -> {
-                                        if (game != memberGame) {
-                                            if (memberGame != null)
-                                                memberGame.leaveFromGame(member.getInstance());
-                                            game.joinToGame(member.getInstance());
-                                            LanguageService
-                                                    .getInstance()
-                                                    .get(MessageKeys.PARTY_MESSAGE_WARP)
-                                                    .send(member);
-                                        }
+                                        if (player.getInstance() != member.getInstance())
+                                            if (game != memberGame) {
+                                                if (memberGame != null)
+                                                    memberGame.leaveFromGame(member.getInstance());
+                                                game.joinToGame(member.getInstance());
+                                                LanguageService
+                                                        .getInstance()
+                                                        .get(MessageKeys.PARTY_MESSAGE_WARP)
+                                                        .send(member);
+                                            }
                                     });
                                 });
                     } else {
@@ -92,13 +99,14 @@ public class PartyWarpCommand {
                                 .filter(member -> !member.equals(player))
                                 .forEach(member -> {
                                     if (Main.getInstance().isPlayerPlayingAnyGame(member.getInstance())) {
-                                        Main.getInstance().getGameOfPlayer(member.getInstance()).leaveFromGame(member.getInstance());
+                                        Main.getInstance().getGameOfPlayer(member.getInstance())
+                                                .leaveFromGame(member.getInstance());
                                     }
                                     PlayerUtils.teleportPlayer(member.getInstance(), leaderLocation);
                                     LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_LEADER_JOIN_LEAVE)
-                                            .send(PlayerMapper.wrapPlayer(member.getInstance()));
+                                            .send(Players.wrapPlayer(member.getInstance()));
                                 });
                     }
                 }, () -> LanguageService

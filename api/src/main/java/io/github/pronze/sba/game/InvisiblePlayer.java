@@ -15,4 +15,6 @@ public interface InvisiblePlayer {
     boolean isJustEquipped();
 
     void setJustEquipped(boolean justEquipped);
+
+    void refresh();
 }

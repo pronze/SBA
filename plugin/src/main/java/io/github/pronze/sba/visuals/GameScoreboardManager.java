@@ -5,11 +5,13 @@ import io.github.pronze.sba.SBA;
 import io.github.pronze.sba.game.tasks.GeneratorTask;
 import io.github.pronze.sba.lib.lang.LanguageService;
 import io.github.pronze.sba.utils.DateUtils;
-import io.github.pronze.sba.utils.Logger;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.scoreboard.Team.Option;
+import org.bukkit.scoreboard.Team.OptionStatus;
 import org.jetbrains.annotations.NotNull;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.RunningTeam;
@@ -18,9 +20,11 @@ import org.screamingsandals.bedwars.game.Game;
 import org.screamingsandals.bedwars.game.TeamColor;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.game.Arena;
+
+import org.screamingsandals.lib.tasker.DefaultThreads;
 import org.screamingsandals.lib.tasker.Tasker;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
+import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 
 import java.util.*;
 
@@ -46,7 +50,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                     .get(MessageKeys.SCOREBOARD_LINES_DEFAULT)
                     .toStringList());
         }
-        game.getConnectedPlayers().forEach(this::createScoreboard);
+        if (SBAConfig.getInstance().getBoolean("game-scoreboard.enabled", true))
+            game.getConnectedPlayers().forEach(this::createScoreboard);
     }
 
     public Optional<Scoreboard> getScoreboard(@NotNull UUID playerUUID) {
@@ -54,8 +59,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     }
 
     public void createScoreboard(@NotNull Player player) {
-        Logger.trace("Creating board for player: {}", player.getName());
-
         final var scoreboardOptional = ScoreboardManager.getInstance()
                 .fromCache(player.getUniqueId());
         scoreboardOptional.ifPresent(Scoreboard::destroy);
@@ -77,22 +80,30 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                 })
                 .build();
 
-        final var holder = scoreboard.getHolder();
-        Tasker.build(() -> game.getRunningTeams().forEach(team -> {
-            if (!holder.hasTeamEntry(team.getName())) {
-                holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
-            }
+        final var holder = scoreboard.getHolder().of(player);
+        if (holder != null) {
+            Tasker.run(DefaultThreads.GLOBAL_THREAD, () -> game.getRunningTeams().forEach(team -> {
+                if (!holder.hasTeamEntry(team.getName())) {
+                    holder.addTeam(team.getName(), TeamColor.fromApiColor(team.getColor()).chatColor);
+                }
 
-            final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
-            team.getConnectedPlayers()
-                    .forEach(teamPlayer -> {
-                        if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
-                            scoreboardTeam.addEntry(teamPlayer.getName());
-                        }
-                    });
-        })).afterOneTick().start();
+                final var scoreboardTeam = holder.getTeamOrRegister(team.getName());
+                try{
+                scoreboardTeam.setOption(Option.COLLISION_RULE, OptionStatus.NEVER);
+                }
+                catch(Throwable t)
+                {
+                    //1.8.8
+                }
 
-
+                team.getConnectedPlayers()
+                        .forEach(teamPlayer -> {
+                            if (!scoreboardTeam.hasEntry(teamPlayer.getName())) {
+                                scoreboardTeam.addEntry(teamPlayer.getName());
+                            }
+                        });
+            }));
+        }
         scoreboardMap.put(player.getUniqueId(), scoreboard);
     }
 
@@ -101,7 +112,6 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
             final var scoreboard = scoreboardMap.get(player.getUniqueId());
             if (scoreboard != null) {
                 scoreboard.destroy();
-                Logger.trace("Destroyed board of player: {}", player.getName());
             }
             scoreboardMap.remove(player.getUniqueId());
         }
@@ -110,9 +120,9 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     public void destroy() {
         scoreboardMap.values().forEach(Scoreboard::destroy);
         scoreboardMap.clear();
-        Logger.trace("Destroyed scoreboard for all players of arena: {}", arena.getGame().getName());
         if (updateTask != null) {
-            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId()) || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
+            if (Bukkit.getScheduler().isCurrentlyRunning(updateTask.getTaskId())
+                    || Bukkit.getScheduler().isQueued(updateTask.getTaskId())) {
                 updateTask.cancel();
             }
         }
@@ -141,7 +151,7 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
 
         final var totalKills = String.valueOf(statistic.getKills());
         final var currentKills = String.valueOf(playerData.getKills());
-        final var finalKills = String.valueOf(statistic.getKills());
+        final var finalKills = String.valueOf(playerData.getFinalKills());
         final var currentDeaths = String.valueOf(playerData.getDeaths());
         final var currentBedDestroys = String.valueOf(playerData.getBedDestroys());
         final var teamName = playerTeam == null ? "" : playerTeam.getName();
@@ -183,6 +193,8 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
                             .replace("%game%", game.getName())
                             .replace("%date%", DateUtils.getFormattedDate())
                             .replace("%team_bed_status%", teamStatus == null ? "" : teamStatus)
+                            .replace("%tier_task%", generatorTask.getNextTierName())
+                            .replace("%tier_time%", generatorTask.getTimeLeftForNextEvent())
                             .replace("%tier%", generatorTask.getNextTierName()
                                     .replace("-", " ") + " in §a" + generatorTask.getTimeLeftForNextEvent());
 
@@ -192,35 +204,33 @@ public class GameScoreboardManager implements io.github.pronze.sba.manager.Score
     }
 
     private String getTeamBedStatus(RunningTeam team) {
-        return team.isDead() ?
-                SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717") :
-                SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
+        return team.isDead() ? SBAConfig.getInstance().node("team-status", "target-destroyed").getString("§c\u2717")
+                : SBAConfig.getInstance().node("team-status", "target-exists").getString("§a\u2713");
     }
 
     private String getTeamStatusFormat(RunningTeam team) {
-        String alive = SBAConfig
-                .getInstance()
-                .node("team-status", "alive")
-                .getString("%color% %team% §a\u2713 §8%you%");
+        String alive = SBAConfig.getInstance().teamStatus().alive();
 
-        String destroyed = SBAConfig
-                .getInstance()
-                .node("team-status", "destroyed")
-                .getString("%color% %team% §a§f%players%§8 %you%");
+        String destroyed = SBAConfig.getInstance().teamStatus().destroyed();
 
-        String status = team.isTargetBlockExists() ? alive : destroyed;
+        String eliminated = SBAConfig.getInstance().teamStatus().eliminated();
+
+        String status = team.isTargetBlockExists() ? alive
+                : (team.getConnectedPlayers().size() > 0) ? destroyed : eliminated;
 
         String formattedTeam = TeamColor
-                .valueOf(team.getColor().name())
-                .chatColor
+                .valueOf(team.getColor().name()).chatColor
                 .toString()
                 + team.getName().charAt(0);
 
-        return status
+        status = status
                 .replace("%bed_status%", getTeamBedStatus(team))
                 .replace("%color%", formattedTeam)
-                .replace("%team%", ChatColor.WHITE + team.getName() + ":")
-                .replace("%players%", ChatColor.GREEN.toString() + team.getConnectedPlayers().size());
+                .replace("%team%", ChatColor.WHITE + team.getName() + ":");
+        int teamSize = team.getConnectedPlayers().size();
+        status = status.replace("%players%", ChatColor.GREEN.toString() + teamSize);
+
+        return status;
     }
 
     private String getTeamStatusFormat(Team team) {

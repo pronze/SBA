@@ -16,19 +16,21 @@ public class ToggleableSetting<T extends Enum<T>> {
 
     public ToggleableSetting<T> enable(@NotNull T setting) {
         settingSet.add(setting);
+     
         return this;
     }
 
     public ToggleableSetting<T> disable(@NotNull T setting) {
         settingSet.remove(setting);
+     
         return this;
     }
 
     public ToggleableSetting<T> toggle(@NotNull T setting) {
         if (settingSet.contains(setting)) {
-            settingSet.remove(setting);
+            disable(setting);
         } else {
-            settingSet.add(setting);
+            enable(setting);
         }
         return this;
     }

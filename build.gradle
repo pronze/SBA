@@ -1,24 +1,85 @@
 defaultTasks 'clean', 'screamCompile'
 
-allprojects {
-    group = 'io.pronze.hypixelify'
-    version = SBA_VERSION
-}
-
 buildscript {
     repositories {
+        mavenLocal()
+        mavenCentral()
         maven {
             url = 'https://repo.screamingsandals.org/public'
         }
+        maven {
+            url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
+        }
+        maven {
+            url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
+        }
+        maven {
+            url = uri('https://repo.screamingsandals.org/public')
+        }
+        maven {
+            url = uri('https://repo.screamingsandals.org/releases')
+        }
+        maven {
+            url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
+        }
+        maven {
+            url = uri('https://papermc.io/repo/repository/maven-public/')
+        }
+        maven {
+            url = uri('https://repo.maven.apache.org/maven2/')
+        }
+        
+        maven {
+            url = uri('https://repo.screamingsandals.org/snapshots')
+        }
+        maven {
+            url = uri("https://plugins.gradle.org/m2/")
+        }
+      maven { url 'https://libraries.minecraft.net/' }
     }
     dependencies {
-        classpath 'org.screamingsandals.gradle.builder:screaming-plugin-builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
+        classpath 'org.screamingsandals.gradle:builder:' + SCREAMING_PLUGIN_BUILDER_VERSION
     }
+    dependencies {
+        classpath "com.github.gmazzo:gradle-buildconfig-plugin:${BUILDCONFIG_VERSION}"
+    }
+    dependencies {
+        classpath "org.ajoberstar.grgit:org.ajoberstar.grgit.gradle.plugin:5.0.0"
+    }
+}
+
+ext {
+    try{
+        // Open the Git repository in the current directory.
+        revision = org.ajoberstar.grgit.Grgit.open(dir:file('.').getAbsolutePath()).head().abbreviatedId
+    } catch(Exception e) {
+        revision = "NON_GIT"
+        println("Exception: ${e}")
+    }
+    // Alternative is using abbreviatedId of head() method.
+    // revision = git.head().abbreviatedId
+}
+tasks.register("describe") {
+  doFirst {
+    try{
+        println org.ajoberstar.grgit.Grgit.open(dir:file('.').getAbsolutePath()).head().abbreviatedId
+    } catch(Exception e) {
+        revision = "NON_GIT"
+        println("Running outside of git")
+    }
+  }
+}
+
+allprojects {
+    group = 'io.pronze'
+    version = SBA_VERSION
 }
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'org.screamingsandals.gradle.builder'
+    apply plugin: 'org.screamingsandals.plugin-builder'
+    
+    //apply plugin: 'org.screamingsandals.gradle.builder'
 
     enableShadowPlugin()
 
@@ -31,46 +92,86 @@ subprojects {
         mavenLocal()
         mavenCentral()
         maven {
-            url = uri('https://gitlab.hoznet.dev/api/v4/projects/13/packages/maven')
-        }
-        maven {
             url = uri('https://repo.dmulloy2.net/nexus/repository/public/')
         }
         maven {
             url = uri('https://repo.screamingsandals.org/public')
         }
         maven {
-            url = uri('https://gitlab.hoznet.dev/api/v4/projects/9/packages/maven')
+            url = uri('https://repo.screamingsandals.org/releases')
         }
         maven {
             url = uri('https://repo.extendedclip.com/content/repositories/placeholderapi/')
         }
         maven {
-            url = uri('https://papermc.io/repo/repository/maven-public/')
+            url = uri('https://repo.papermc.io/repository/maven-public/')
         }
         maven {
             url = uri('https://repo.maven.apache.org/maven2/')
         }
         maven {
-            url = uri('https://repo.screamingsandals.org/')
+            url = uri('https://repo.screamingsandals.org/snapshots')
         }
+        maven{ url= uri("https://repo.citizensnpcs.co/")}
+        maven{ url= uri("https://moyskleytech.com/debian/m2/")}
+          maven {
+            url=uri("https://repo.alessiodp.com/releases/")
+        }
+         maven {
+            url=uri("https://repo.alessiodp.com/snapshots/")
+        }
+        maven { url 'https://libraries.minecraft.net/' }
     }
 
     dependencies {
+        //compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+        //compileOnly 'org.spigotmc:spigot-api:1.9.4-R0.1-SNAPSHOT'
         compileOnly paperLegacy(PAPER_LEGACY_VERSION)
         compileOnly 'org.screamingsandals.bedwars:BedWars:' + BEDWARS_VERSION
         compileOnly 'org.screamingsandals.bedwars:BedWars-API:' + BEDWARS_VERSION
     }
 
     shadowJar {
-        relocate 'org.spongepowered.configurate', 'io.github.pronze.lib.configurate'
-        relocate 'org.yaml.snakeyaml', 'io.github.pronze.lib.snakeyaml'
-        relocate 'net.kyori', 'io.github.pronze.lib.kyori'
-        relocate 'cloud.commandframework', 'io.github.pronze.lib.cloud'
-        relocate 'me.lucko.commodore', 'io.github.pronze.lib.commodore'
-        relocate 'pronze.lib', 'io.github.pronze.lib.pronzelib'
-        relocate 'org.screamingsandals.lib', 'io.github.pronze.lib.screaminglib'
-        relocate 'org.screamingsandals.simpleinventories', 'io.github.pronze.lib.simpleinventories'
+        minimize()
+        relocate 'org.spongepowered.configurate', 'sba.c'
+        relocate 'org.yaml.snakeyaml', 'sba.s'
+        relocate 'net.kyori.adventure.text', 'sba.k.a.t'
+        relocate 'net.kyori.adventure.platform', 'sba.k.a.p'
+        relocate 'net.kyori.adventure', 'sba.k.a'
+        relocate 'net.kyori.examination', 'sba.k.e'
+        relocate 'cloud.commandframework', 'sba.cl'
+        relocate 'me.lucko.commodore', 'sba.co'
+        relocate 'org.screamingsandals.lib.attribute', 'sba.sl.a'
+        relocate 'org.screamingsandals.lib.block', 'sba.sl.b'
+        relocate 'org.screamingsandals.lib.bukkit', 'sba.sl.bk'
+        relocate 'org.screamingsandals.lib.command', 'sba.sl.c'
+        relocate 'org.screamingsandals.lib.configurate', 'sba.sl.co'
+        relocate 'org.screamingsandals.lib.container', 'sba.sl.cn'
+        relocate 'org.screamingsandals.lib.entity', 'sba.sl.e'
+        relocate 'org.screamingsandals.lib.event', 'sba.sl.ev'
+        relocate 'org.screamingsandals.lib.firework', 'sba.sl.f'
+        relocate 'org.screamingsandals.lib.healthindicator', 'sba.sl.hi'
+        relocate 'org.screamingsandals.lib.hologram', 'sba.sl.h'
+        relocate 'org.screamingsandals.lib.item', 'sba.sl.i'
+        relocate 'org.screamingsandals.lib.lang', 'sba.sl.l'
+        relocate 'org.screamingsandals.lib.metadata', 'sba.sl.m'
+        relocate 'org.screamingsandals.lib.nms', 'sba.sl.n'
+        relocate 'org.screamingsandals.lib.nps', 'sba.sl.np'
+        relocate 'org.screamingsandals.lib.packet', 'sba.sl.p'
+        relocate 'org.screamingsandals.lib.particle', 'sba.sl.pa'
+        relocate 'org.screamingsandals.lib.placeholders', 'sba.sl.pl'
+        relocate 'org.screamingsandals.lib.player', 'sba.sl.pa'
+        relocate 'org.screamingsandals.lib.plugin', 'sba.sl.pu'
+        relocate 'org.screamingsandals.lib.sender', 'sba.sl.s'
+        relocate 'org.screamingsandals.lib.sidebar', 'sba.sl.si'
+        relocate 'org.screamingsandals.lib.slot', 'sba.sl.sl'
+        relocate 'org.screamingsandals.lib.tasker', 'sba.sl.t'
+        relocate 'org.screamingsandals.lib.utils', 'sba.sl.u'
+        relocate 'org.screamingsandals.lib.vanilla', 'sba.sl.v'
+        relocate 'org.screamingsandals.lib.visuals', 'sba.sl.vi'
+        relocate 'org.screamingsandals.lib.world', 'sba.sl.w'
+        relocate 'org.screamingsandals.lib', 'sba.sl'
+        relocate 'org.screamingsandals.simpleinventories', 'sba.si'
     }
 
     tasks.withType(JavaCompile) {

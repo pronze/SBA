@@ -3,27 +3,38 @@ package io.github.pronze.sba.listener;
 import io.github.pronze.sba.MessageKeys;
 import io.github.pronze.sba.Permissions;
 import io.github.pronze.sba.SBA;
+import io.github.pronze.sba.UpdateChecker;
 import io.github.pronze.sba.config.SBAConfig;
 import io.github.pronze.sba.data.DegradableItem;
 import io.github.pronze.sba.game.ArenaManager;
 import io.github.pronze.sba.lib.lang.LanguageService;
+import io.github.pronze.sba.utils.Logger;
 import io.github.pronze.sba.utils.SBAUtil;
 import io.github.pronze.sba.utils.ShopUtil;
 import io.github.pronze.sba.wrapper.SBAPlayerWrapper;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffectType;
@@ -32,15 +43,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
-import org.screamingsandals.lib.player.PlayerMapper;
+import org.screamingsandals.lib.Server;
+import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
-import pronze.lib.scoreboards.Scoreboard;
-import pronze.lib.scoreboards.ScoreboardManager;
+import org.screamingsandals.lib.utils.reflect.Reflect;
+
+import io.github.pronze.lib.pronzelib.scoreboards.Scoreboard;
+import io.github.pronze.lib.pronzelib.scoreboards.ScoreboardManager;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class PlayerListener implements Listener {
@@ -49,6 +65,8 @@ public class PlayerListener implements Listener {
 
     @OnPostEnable
     public void registerListener() {
+        if (SBA.isBroken())
+            return;
         SBA.getInstance().registerListener(this);
         allowedDropItems.clear();
         generatorDropItems.clear();
@@ -75,15 +93,20 @@ public class PlayerListener implements Listener {
                 .orElseThrow();
 
         final var itemArr = new ArrayList<ItemStack>();
-        final var sword = Main.isLegacy() ?
-                new ItemStack(Material.valueOf("WOOD_SWORD")) :
-                new ItemStack(Material.WOODEN_SWORD);
+        final var sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD"))
+                : new ItemStack(Material.WOODEN_SWORD);
 
-        Arrays.stream(player
-                .getInventory()
-                .getContents()
-                .clone())
-                .filter(Objects::nonNull)
+        Stream<ItemStack> stream;
+        if (Server.isVersion(1, 9)) {
+            stream = Arrays.stream(player.getInventory().getContents());
+        } else {
+            // getContents() work as get storage contents in 1.8, we need to manually append armor slots
+            stream = Stream.concat(
+                    Arrays.stream(player.getInventory().getContents()),
+                    Arrays.stream(player.getInventory().getArmorContents())
+            );
+        }
+        stream.filter(Objects::nonNull)
                 .forEach(stack -> {
                     final String name = stack.getType().name();
                     var endStr = name.substring(name.contains("_") ? name.indexOf("_") + 1 : 0);
@@ -113,12 +136,14 @@ public class PlayerListener implements Listener {
         if (SBAConfig.getInstance().getBoolean("give-killer-resources", true)) {
             final var killer = e.getEntity().getKiller();
 
-            if (killer != null && Main.getInstance().isPlayerPlayingAnyGame(killer) && killer.getGameMode() == GameMode.SURVIVAL) {
+            if (killer != null && Main.getInstance().isPlayerPlayingAnyGame(killer)
+                    && killer.getGameMode() == GameMode.SURVIVAL) {
                 Arrays.stream(player.getInventory().getContents())
                         .filter(Objects::nonNull)
                         .forEach(drop -> {
                             if (generatorDropItems.contains(drop.getType())) {
-                                killer.sendMessage("+" + drop.getAmount() + " " + drop.getType().name().toLowerCase().replace("_", " "));
+                                killer.sendMessage("+" + drop.getAmount() + " "
+                                        + drop.getType().name().toLowerCase().replace("_", " "));
                                 killer.getInventory().addItem(drop);
                             }
                         });
@@ -128,6 +153,8 @@ public class PlayerListener implements Listener {
         final var gVictim = Main.getPlayerGameProfile(player);
         final var victimTeam = game.getTeamOfPlayer(player);
 
+        if (victimTeam == null)
+            return;
         if (SBAConfig.getInstance().getBoolean("respawn-cooldown.enabled", true) &&
                 victimTeam.isAlive() && game.isPlayerInAnyTeam(player) &&
                 game.getTeamOfPlayer(player).isTargetBlockExists()) {
@@ -135,16 +162,9 @@ public class PlayerListener implements Listener {
             new BukkitRunnable() {
                 final GamePlayer gamePlayer = gVictim;
                 final Player player = gamePlayer.player;
-                final String respawnTitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
-                        .toString();
-                final String respawnSubtitle = LanguageService
-                        .getInstance()
-                        .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
-                        .toString();
-                final SBAPlayerWrapper wrappedPlayer = PlayerMapper.wrapPlayer(player).as(SBAPlayerWrapper.class);
-                int livingTime = SBAConfig.getInstance().getInt("respawn-cooldown.time", 5);
+
+                final SBAPlayerWrapper wrappedPlayer = Players.wrapPlayer(player).as(SBAPlayerWrapper.class);
+                int livingTime = Main.getInstance().getConfig().getInt("respawn-cooldown.time", 5);
                 byte buffer = 2;
 
                 @Override
@@ -153,11 +173,20 @@ public class PlayerListener implements Listener {
                         this.cancel();
                         return;
                     }
-
-                    //send custom title because we disabled BedWars from showing any title
+                    final org.screamingsandals.lib.spectator.Component respawnTitle = LanguageService
+                            .getInstance()
+                            .get(MessageKeys.RESPAWN_COUNTDOWN_TITLE)
+                            .replace("%time%", String.valueOf(livingTime))
+                            .toComponent();
+                    final org.screamingsandals.lib.spectator.Component respawnSubtitle = LanguageService
+                            .getInstance()
+                            .get(MessageKeys.RESPAWN_COUNTDOWN_SUBTITLE)
+                            .replace("%time%", String.valueOf(livingTime))
+                            .toComponent();
+                    // send custom title because we disabled BedWars from showing any title
                     if (livingTime > 0) {
                         SBAUtil.sendTitle(wrappedPlayer, respawnTitle,
-                                respawnSubtitle.replace("%time%", String.valueOf(livingTime)),
+                                respawnSubtitle,
                                 0, 20, 0);
 
                         LanguageService
@@ -168,8 +197,7 @@ public class PlayerListener implements Listener {
                         livingTime--;
                     }
 
-
-                    if (livingTime == 0) {
+                    if (livingTime <= 0) {
                         if (gVictim.isSpectator && buffer > 0) {
                             buffer--;
                         } else {
@@ -181,12 +209,15 @@ public class PlayerListener implements Listener {
                             var respawnedTitle = LanguageService
                                     .getInstance()
                                     .get(MessageKeys.RESPAWNED_TITLE)
-                                    .toString();
+                                    .toComponent();
 
-                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle, "",
+                            SBAUtil.sendTitle(wrappedPlayer, respawnedTitle,
+                                    org.screamingsandals.lib.spectator.Component.empty(),
                                     5, 40, 5);
                             ShopUtil.giveItemToPlayer(itemArr, player,
-                                    Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player).getColor());
+                                    Main.getInstance().getGameByName(game.getName()).getTeamOfPlayer(player)
+                                            .getColor());
+                            ShopUtil.applyTeamUpgrades(player, game);
                             this.cancel();
                         }
                     }
@@ -200,11 +231,13 @@ public class PlayerListener implements Listener {
         if (event.getCurrentItem() == null)
             return;
 
-        if (!(event.getWhoClicked() instanceof Player)) return;
+        if (!(event.getWhoClicked() instanceof Player))
+            return;
 
         final var player = (Player) event.getWhoClicked();
 
-        if (!Main.isPlayerInGame(player)) return;
+        if (!Main.isPlayerInGame(player))
+            return;
 
         if (SBAConfig.getInstance().getBoolean("disable-armor-inventory-movement", true) &&
                 event.getSlotType() == SlotType.ARMOR)
@@ -215,9 +248,11 @@ public class PlayerListener implements Listener {
         final var clickedInventory = event.getClickedInventory();
         final var typeName = event.getCurrentItem().getType().name();
 
-        if (clickedInventory == null) return;
+        if (clickedInventory == null)
+            return;
 
-        if (clickedInventory.equals(bottomSlot) && SBAConfig.getInstance().getBoolean("block-players-putting-certain-items-onto-chest", true)
+        if (clickedInventory.equals(bottomSlot)
+                && SBAConfig.getInstance().getBoolean("block-players-putting-certain-items-onto-chest", true)
                 && (topSlot.getType() == InventoryType.CHEST || topSlot.getType() == InventoryType.ENDER_CHEST)
                 && bottomSlot.getType() == InventoryType.PLAYER) {
             if (typeName.endsWith("AXE") || typeName.endsWith("SWORD")) {
@@ -225,18 +260,19 @@ public class PlayerListener implements Listener {
                 LanguageService
                         .getInstance()
                         .get(MessageKeys.CANNOT_PUT_ITEM_IN_CHEST)
-                        .send(PlayerMapper.wrapPlayer(player));
+                        .send(Players.wrapPlayer(player));
             }
         }
     }
-
 
     @EventHandler
     public void onItemDrop(PlayerDropItemEvent evt) {
         final var player = evt.getPlayer();
 
-        if (!Main.isPlayerInGame(player)) return;
-        if (!SBAConfig.getInstance().getBoolean("block-item-drops", true)) return;
+        if (!Main.isPlayerInGame(player))
+            return;
+        if (!SBAConfig.getInstance().getBoolean("block-item-drops", true))
+            return;
 
         final var ItemDrop = evt.getItemDrop().getItemStack();
         final var type = ItemDrop.getType();
@@ -246,7 +282,6 @@ public class PlayerListener implements Listener {
             player.getInventory().remove(ItemDrop);
         }
     }
-
 
     @EventHandler
     public void itemDamage(PlayerItemDamageEvent event) {
@@ -268,7 +303,7 @@ public class PlayerListener implements Listener {
                 .fromCache(uuid)
                 .ifPresent(Scoreboard::destroy);
 
-        final var wrappedPlayer = PlayerMapper.wrapPlayer(player)
+        final var wrappedPlayer = Players.wrapPlayer(player)
                 .as(SBAPlayerWrapper.class);
         SBA.getInstance()
                 .getPartyManager()
@@ -291,7 +326,8 @@ public class PlayerListener implements Listener {
                                     LanguageService
                                             .getInstance()
                                             .get(MessageKeys.PARTY_MESSAGE_PROMOTED_LEADER)
-                                            .replace("%player%", member.getName())
+                                            .replace("%player%",
+                                                    member.as(Player.class).getDisplayName() + ChatColor.RESET)
                                             .send(party.getMembers().toArray(new SBAPlayerWrapper[0]));
 
                                 }, () -> SBA.getInstance().getPartyManager()
@@ -300,8 +336,9 @@ public class PlayerListener implements Listener {
                     LanguageService
                             .getInstance()
                             .get(MessageKeys.PARTY_MESSAGE_OFFLINE_LEFT)
-                            .replace("%player%", player.getName())
-                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member)).toArray(SBAPlayerWrapper[]::new));
+                            .replace("%player%", player.getDisplayName() + ChatColor.RESET)
+                            .send(party.getMembers().stream().filter(member -> !wrappedPlayer.equals(member))
+                                    .toArray(SBAPlayerWrapper[]::new));
                 });
         SBA.getInstance().getPlayerWrapperService().unregister(player);
     }
@@ -331,7 +368,8 @@ public class PlayerListener implements Listener {
         final var item = event.getItem();
         final var player = event.getPlayer();
 
-        if (!Main.isPlayerInGame(player)) return;
+        if (!Main.isPlayerInGame(player))
+            return;
 
         if (item.getType() == Material.POTION) {
             final var potionMeta = (PotionMeta) item.getItemMeta();
@@ -343,7 +381,8 @@ public class PlayerListener implements Listener {
                     isInvis = potionMeta
                             .getCustomEffects()
                             .stream()
-                            .anyMatch(potionEffect -> potionEffect.getType().getName().equalsIgnoreCase(PotionEffectType.INVISIBILITY.getName()));
+                            .anyMatch(potionEffect -> potionEffect.getType().getName()
+                                    .equalsIgnoreCase(PotionEffectType.INVISIBILITY.getName()));
                 }
             }
 
@@ -354,6 +393,104 @@ public class PlayerListener implements Listener {
                         .get(playerGame.getName())
                         .ifPresent(arena -> arena.addHiddenPlayer(player));
             }
+
+            try {
+                Reflect.setField(event.getClass(), "replacement", event, new ItemStack(Material.AIR));
+                // event.setReplacement(new ItemStack(Material.AIR));
+            } catch (Throwable t) {
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onEquipt(PlayerItemHeldEvent event) {
+        final var player = event.getPlayer();
+
+        if (!Main.isPlayerInGame(player))
+            return;
+
+        final var playerGame = Main.getInstance().getGameOfPlayer(player);
+        ArenaManager
+                .getInstance()
+                .get(playerGame.getName())
+                .ifPresent(arena -> {
+                    if (arena.isPlayerHidden(player)) {
+                        arena.updateHiddenPlayer(player);
+                    }
+                });
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteractPlace(PlayerInteractEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer()))
+            return;
+        if (event.isCancelled())
+            return;
+        if (!event.isBlockInHand())
+            return;
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+            return;
+        if (!event.hasBlock())
+            return;
+
+        BlockFace face = event.getBlockFace();
+        Location loc = event.getClickedBlock().getRelative(face).getLocation();
+        try {
+            Collection<Entity> players = loc.getNearbyEntitiesByType(Player.class, 1.5, 1.5, 1.5, null);
+            for (Entity playerEntity : players) {
+                Player player = (Player) playerEntity;
+                if (player.getGameMode() != GameMode.SURVIVAL) {
+                    player.teleport(player.getLocation().add(0, 1.5, 0), TeleportCause.SPECTATE);
+                }
+            }
+        } catch (Throwable t) {
+            //Does not work on spigot
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onInteractPlaceOnEntity(PlayerInteractEntityEvent event) {
+        if (!Main.isPlayerInGame(event.getPlayer()))
+            return;
+        Logger.trace("onInteractPlaceOnEntity");
+        if (event.isCancelled()) {
+            Logger.trace("onInteractPlaceOnEntity.isCancelled");
+            return;
+        }
+        Player player = event.getPlayer();
+        if (player.getItemInHand() == null || !player.getItemInHand().getType().isBlock()) {
+            Logger.trace("onInteractPlaceOnEntity.getItemInHand");
+            return;
+        }
+        if (event.getRightClicked() instanceof Player) {
+            Player target = (Player) event.getRightClicked();
+            if (target.getGameMode() == GameMode.SURVIVAL) {
+                Logger.trace("onInteractPlaceOnEntity.target-is-not-spectator");
+                return;
+            }
+            Block replaced = target.getLocation().getBlock();
+            BlockState state = replaced.getState();
+            byte rawData = state.getRawData();
+
+            BlockState newState = replaced.getState();
+
+            newState.setType(player.getItemInHand().getType());
+            // replaced.setType(player.getItemInHand().getType());
+            Logger.trace("onInteractPlaceOnEntity {}", player.getItemInHand().getType());
+
+            BlockPlaceEvent event_ = new BlockPlaceEvent(replaced, state, replaced, event.getPlayer().getItemInHand(),
+                    player, true);
+
+            Bukkit.getServer().getPluginManager().callEvent(event_);
+            Logger.trace("onInteractPlaceOnEntity {} {}", event, event.isCancelled());
+
+            if (event.isCancelled()) {
+                Logger.trace("event.isCancelled");
+                newState.setType(state.getType());
+                newState.setRawData(rawData);
+            }
+            // replaced.getState().setType(player.getItemInHand().getType());
+            newState.update(true);
         }
     }
 
@@ -361,16 +498,26 @@ public class PlayerListener implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         final var player = e.getPlayer();
         SBA.getInstance().getPlayerWrapperService().register(player);
+
         if (player.hasPermission(Permissions.UPGRADE.getKey())) {
             if (SBA.getInstance().isPendingUpgrade()) {
                 Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
-                    player.sendMessage("§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
+                    player.sendMessage(
+                            "§6[SBA]: Plugin has detected a version change, do you want to upgrade internal files?");
                     player.sendMessage("Type /sba upgrade to upgrade file");
                     player.sendMessage("§cif you want to cancel the upgrade files do /sba cancel");
                 }, 40L);
             }
         }
+        if (player.hasPermission(Permissions.UPDATE.getKey())) {
+            {
+                if (SBA.getInstance().isPendingUpdate() && SBAConfig.getInstance().shouldWarnPlayerAboutUpdate()) {
+
+                    Bukkit.getScheduler().runTaskLater(SBA.getPluginInstance(), () -> {
+                        UpdateChecker.getInstance().sendToUser(player);
+                    }, 40L);
+                }
+            }
+        }
     }
-
-
 }

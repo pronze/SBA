@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Service
 public class Logger {
     private static Logger instance;
-    private Level level;
+    private Level level = Level.WARNING;
     private java.util.logging.Logger logger;
     private boolean testMode;
 
@@ -27,14 +27,21 @@ public class Logger {
 
     public static void init(JavaPlugin plugin) {
         instance = new Logger();
-        instance.level = Level.ALL;
+        instance.level = Level.WARNING;
         instance.logger = plugin.getLogger();
     }
 
     protected static void mockDebug(String message, Object... params) {
         System.out.println(getMessage(message, params));
     }
-
+    public static void info(@NonNull String message, Object... params) {
+        if (instance.testMode) {
+            mockDebug(message, params);
+            return;
+        }
+        instance.logger.info(getMessage(message, params));
+        printStackTraces(params);
+    }
     public static void trace(@NonNull String message, Object... params) {
         if (instance.testMode) {
             mockDebug(message, params);
@@ -42,6 +49,7 @@ public class Logger {
         }
         if (instance.level.getLevel() >= Level.TRACE.getLevel()) {
             instance.logger.info(getMessage(message, params));
+            printStackTraces(params);
         }
     }
 
@@ -52,6 +60,7 @@ public class Logger {
         }
         if (instance.level.getLevel() >= Level.WARNING.getLevel()) {
             instance.logger.warning(getMessage(message, params));
+            printStackTraces(params);
         }
     }
 
@@ -61,7 +70,8 @@ public class Logger {
             return;
         }
         if (instance.level.getLevel() >= Level.ERROR.getLevel()) {
-            instance.logger.warning(getMessage(message, params));
+            instance.logger.severe(getMessage(message, params));
+            printStackTraces(params);
         }
     }
 
@@ -78,15 +88,24 @@ public class Logger {
         return message;
     }
 
+    private static void printStackTraces(Object... params) {
+        for (var param : params) {
+            if (param instanceof Throwable) {
+                ((Throwable) param).printStackTrace();
+            }
+        }
+    }
+
     public static void setMode(Level level) {
-        instance.level = level;
+        if(instance != null)
+            instance.level = level;
     }
 
     public enum Level {
         DISABLED(0),
-        TRACE(1),
+        ERROR(1),
         WARNING(2),
-        ERROR(3),
+        TRACE(3),
         ALL(4);
 
         @Getter
