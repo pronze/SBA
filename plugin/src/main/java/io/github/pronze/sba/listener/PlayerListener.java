@@ -43,6 +43,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.screamingsandals.bedwars.Main;
 import org.screamingsandals.bedwars.api.game.GameStatus;
 import org.screamingsandals.bedwars.game.GamePlayer;
+import org.screamingsandals.lib.Server;
 import org.screamingsandals.lib.player.Players;
 import org.screamingsandals.lib.utils.annotations.Service;
 import org.screamingsandals.lib.utils.annotations.methods.OnPostEnable;
@@ -55,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 public class PlayerListener implements Listener {
@@ -94,11 +96,17 @@ public class PlayerListener implements Listener {
         final var sword = Main.isLegacy() ? new ItemStack(Material.valueOf("WOOD_SWORD"))
                 : new ItemStack(Material.WOODEN_SWORD);
 
-        Arrays.stream(player
-                .getInventory()
-                .getContents()
-                .clone())
-                .filter(Objects::nonNull)
+        Stream<ItemStack> stream;
+        if (Server.isVersion(1, 9)) {
+            stream = Arrays.stream(player.getInventory().getContents());
+        } else {
+            // getContents() work as get storage contents in 1.8, we need to manually append armor slots
+            stream = Stream.concat(
+                    Arrays.stream(player.getInventory().getContents()),
+                    Arrays.stream(player.getInventory().getArmorContents())
+            );
+        }
+        stream.filter(Objects::nonNull)
                 .forEach(stack -> {
                     final String name = stack.getType().name();
                     var endStr = name.substring(name.contains("_") ? name.indexOf("_") + 1 : 0);
